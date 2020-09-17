@@ -1,0 +1,864 @@
+{
+    "dashboardMetadata": {
+        "name": "Google Cloud SQL",
+        "shared": false,
+        "sharingDetails": {
+            "linkShared": true,
+            "published": false
+        },
+        "dashboardFilter": {
+            "timeframe": ""
+        }
+    },
+    "tiles": [{
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.up",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 0,
+            "width": 646,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Availability"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 0,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Servers up"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.up",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "PIE_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 0,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Servers up by Project"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 304,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Servers up by Region"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 304,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.up",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["region"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "PIE_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 722,
+            "left": 0,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Availability"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 304,
+            "width": 380,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.up",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 798,
+            "left": 0,
+            "width": 608,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.instance_state",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["state", "database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 760,
+            "left": 0,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Servers by Status"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 722,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.network.connections",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": [],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 722,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Connections by Database"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 1026,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.mysql.queries.count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 722,
+            "width": 342,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Queries count by Database"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 722,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.mysql.queries.count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 1368,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.cpu.utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 1368,
+            "width": 722,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "CPU usage by Database"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 1672,
+            "width": 418,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.cpu.utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 1368,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.memory.utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 1672,
+            "width": 418,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.memory.utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 1368,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Memory utilization % by Database"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 760,
+            "left": 1368,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 760,
+            "left": 1672,
+            "width": 418,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 722,
+            "left": 1368,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Disk utilization % by Database"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 722,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Usage"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 1368,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Performance"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 2128,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Failover"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1102,
+            "left": 1368,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.read_ops_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 1064,
+            "left": 1368,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Read OPS"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1102,
+            "left": 1672,
+            "width": 418,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.read_ops_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 1406,
+            "left": 1368,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Read OPS"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1444,
+            "left": 1368,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.read_ops_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1444,
+            "left": 1672,
+            "width": 418,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.read_ops_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 2128,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.cloudsql_googleapis_com.database.available_for_failover",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["database_id"],
+            "filterBy": []
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 2128,
+            "width": 722,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Servers Available for Failover"
+    }]
+}

@@ -1,0 +1,102 @@
+import base64
+import json
+import logging
+import os
+import time
+
+import jwt
+from aiohttp import ClientSession
+
+_METADATA_ROOT = "http://metadata.google.internal/computeMetadata/v1/"
+_METADATA_FLAVOR_HEADER = "metadata-flavor"
+_METADATA_FLAVOR_VALUE = "Google"
+_METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
+
+
+if "DYNATRACE_ACCESS_KEY_SECRET_NAME" in os.environ:
+    _DYNATRACE_ACCESS_KEY_SECRET_NAME = os.environ["DYNATRACE_ACCESS_KEY_SECRET_NAME"]
+else:
+    _DYNATRACE_ACCESS_KEY_SECRET_NAME = "DYNATRACE_ACCESS_KEY"
+
+
+if "DYNATRACE_URL_SECRET_NAME" in os.environ:
+    _DYNATRACE_URL_SECRET_NAME = os.environ["DYNATRACE_URL_SECRET_NAME"]
+else:
+    _DYNATRACE_URL_SECRET_NAME = "DYNATRACE_URL"
+
+
+async def fetch_dynatrace_api_key(session: ClientSession, project_id: str, token: str,):
+    return await fetch_secret(session, project_id, token, _DYNATRACE_ACCESS_KEY_SECRET_NAME)
+
+
+async def fetch_dynatrace_url(session: ClientSession, project_id: str, token: str,):
+    return await fetch_secret(session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
+
+
+async def fetch_secret(session: ClientSession, project_id: str, token: str, secret_name: str):
+    url = "https://secretmanager.googleapis.com/v1/projects/{project_id}/secrets/{secret_name}/versions/latest:access"\
+        .format(project_id=project_id, secret_name=secret_name)
+
+    headers = {"Authorization": "Bearer {token}".format(token=token)}
+    response = await session.get(url, headers=headers)
+    response_json = await response.json()
+
+    if response.status == 200:
+        return base64.b64decode(response_json['payload']['data']).decode('utf-8')
+    else:
+        raise Exception("Failed to fetch secret {name}, cause: {response_json}"
+                        .format(name=secret_name, response_json=response_json))
+
+
+async def create_default_service_account_token(session: ClientSession):
+    """
+    For reference check out https://github.com/googleapis/google-auth-library-python/tree/master/google/auth/compute_engine
+    :param session:
+    :return:
+    """
+    url = _METADATA_ROOT + "/instance/service-accounts/{0}/token".format("default")
+    response = await session.get(url, headers=_METADATA_HEADERS)
+    response_json = await response.json()
+    return response_json["access_token"]
+
+
+def get_project_id_from_environment():
+    return os.environ.get("GCP_PROJECT")
+
+
+async def create_token(session: ClientSession):
+    credentials_path = os.environ[
+        'GOOGLE_APPLICATION_CREDENTIALS'] if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ.keys() else ""
+
+    if credentials_path:
+        print(f"Using credentials from {credentials_path}")
+        with open(credentials_path) as key_file:
+            credentials_data = json.load(key_file)
+
+        return await get_token(
+            key=credentials_data['private_key'],
+            service=credentials_data['client_email'],
+            uri=credentials_data['token_uri'],
+            session=session
+        )
+    else:
+        print("Trying to use default service account")
+        return await create_default_service_account_token(session)
+
+
+async def get_token(key: str, service: str, uri: str, session: ClientSession):
+    now = int(time.time())
+
+    assertion = {
+        "iss": service,
+        "scope": "https://www.googleapis.com/auth/cloud-platform",
+        "aud": uri,
+        "exp": str(now + 60 * 60),
+        "iat": str(now)
+    }
+    assertion_signed = jwt.encode(assertion, key, 'RS256').decode('utf-8')
+    request = {'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer', 'assertion': assertion_signed}
+
+    async with session.post(uri, data=request) as resp:
+        response = await resp.json()
+        return response["access_token"]
