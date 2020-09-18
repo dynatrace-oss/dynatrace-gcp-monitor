@@ -4,7 +4,7 @@ readonly GCP_PUBSUB_TOPIC=dynatrace-gcp-service-invocation
 readonly GCP_FUNCTION_NAME=dynatrace-gcp-function
 readonly GCP_SCHEDULER_NAME=dynatrace-gcp-schedule
 readonly GCP_SCHEDULER_CRON="* * * * *"
-readonly FUNCTION_REPOSITORY=https://source.developers.google.com/projects/dynatrace-gcp-extension/repos/dynatrace-gcp-extension
+readonly FUNCTION_REPOSITORY=GITHUB_BUILD_ZIP
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring"
 echo -e "\033[0;37m"
 

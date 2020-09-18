@@ -1,0 +1,4653 @@
+id: gce_instance
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+technology:
+  name: Google Cloud VM Instance
+minDynatraceVersion: 1.199
+
+gcp:
+- service: gce_instance
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.instance_id
+    id: instance_id
+  - value: resource.labels.zone
+    id: zone
+  metrics:
+  - value: agent.googleapis.com/agent/api_request_count
+    id: cloud.gcp.agent_googleapis_com.agent.api_request_count
+    type: count,delta
+    name: Monitoring Agent API Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.state
+  - value: agent.googleapis.com/agent/log_entry_count
+    id: cloud.gcp.agent_googleapis_com.agent.log_entry_count
+    type: count,delta
+    name: Logging Agent Log Entry Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/agent/log_entry_retry_count
+    id: cloud.gcp.agent_googleapis_com.agent.log_entry_retry_count
+    type: count,delta
+    name: Logging Agent Retried Log Entry Writes Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/agent/memory_usage
+    id: cloud.gcp.agent_googleapis_com.agent.memory_usage
+    type: gauge
+    name: Monitoring Agent Memory Usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/agent/monitoring/point_count
+    id: cloud.gcp.agent_googleapis_com.agent.monitoring.point_count
+    type: count,delta
+    name: Monitoring Agent Metric Point Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+  - value: agent.googleapis.com/agent/request_count
+    id: cloud.gcp.agent_googleapis_com.agent.request_count
+    type: count,delta
+    name: Logging Agent API Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/agent/streamspace_size
+    id: cloud.gcp.agent_googleapis_com.agent.streamspace_size
+    type: gauge
+    name: Monitoring Agent Process Labels Size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/agent/streamspace_size_throttling
+    id: cloud.gcp.agent_googleapis_com.agent.streamspace_size_throttling
+    type: gauge
+    name: Monitoring Agent is Throttling Processes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/agent/uptime
+    id: cloud.gcp.agent_googleapis_com.agent.uptime
+    type: count,delta
+    name: Monitoring/Logging Agent Uptime
+    unit: s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.version
+  - value: agent.googleapis.com/apache/connections
+    id: cloud.gcp.agent_googleapis_com.apache.connections
+    type: gauge
+    name: Open connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/apache/idle_workers
+    id: cloud.gcp.agent_googleapis_com.apache.idle_workers
+    type: gauge
+    name: Idle workers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/apache/request_count
+    id: cloud.gcp.agent_googleapis_com.apache.request_count
+    type: count,delta
+    name: Requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/apache/scoreboard
+    id: cloud.gcp.agent_googleapis_com.apache.scoreboard
+    type: gauge
+    name: Scoreboard
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.state
+  - value: agent.googleapis.com/apache/traffic
+    id: cloud.gcp.agent_googleapis_com.apache.traffic
+    type: count,delta
+    name: Traffic
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/cassandra/cache/hits
+    id: cloud.gcp.agent_googleapis_com.cassandra.cache.hits
+    type: count,delta
+    name: Hit count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cache
+  - value: agent.googleapis.com/cassandra/client_request/latency/50p
+    id: cloud.gcp.agent_googleapis_com.cassandra.client_request.latency.50p
+    type: gauge
+    name: Read latency
+    unit: us
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/cassandra/client_request/latency/95p
+    id: cloud.gcp.agent_googleapis_com.cassandra.client_request.latency.95p
+    type: gauge
+    name: Read latency
+    unit: us
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/cassandra/client_request/latency/99p
+    id: cloud.gcp.agent_googleapis_com.cassandra.client_request.latency.99p
+    type: gauge
+    name: Read latency
+    unit: us
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/cassandra/client_request/latency/max
+    id: cloud.gcp.agent_googleapis_com.cassandra.client_request.latency.max
+    type: gauge
+    name: Read latency
+    unit: us
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/cassandra/column_family/compression_ratio
+    id: cloud.gcp.agent_googleapis_com.cassandra.column_family.compression_ratio
+    type: gauge
+    name: Compression ratio
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/cassandra/column_family/max_row_size
+    id: cloud.gcp.agent_googleapis_com.cassandra.column_family.max_row_size
+    type: gauge
+    name: Max row size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/cassandra/commitlog_total_size
+    id: cloud.gcp.agent_googleapis_com.cassandra.commitlog_total_size
+    type: gauge
+    name: Commit log size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/cassandra/completed_tasks
+    id: cloud.gcp.agent_googleapis_com.cassandra.completed_tasks
+    type: count,delta
+    name: Completed tasks
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.stage_name
+  - value: agent.googleapis.com/cassandra/current_tasks
+    id: cloud.gcp.agent_googleapis_com.cassandra.current_tasks
+    type: gauge
+    name: Tasks
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.stage_name
+    - value: metric.labels.task_status
+  - value: agent.googleapis.com/cassandra/dropped_message/dropped_count
+    id: cloud.gcp.agent_googleapis_com.cassandra.dropped_message.dropped_count
+    type: count,delta
+    name: Dropped messages
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/cassandra/storage_service_exception_count
+    id: cloud.gcp.agent_googleapis_com.cassandra.storage_service_exception_count
+    type: count,delta
+    name: Exceptions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/cassandra/storage_service_load
+    id: cloud.gcp.agent_googleapis_com.cassandra.storage_service_load
+    type: gauge
+    name: Storage load
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/couchdb/average_request_time
+    id: cloud.gcp.agent_googleapis_com.couchdb.average_request_time
+    type: gauge
+    name: Request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/couchdb/httpd/bulk_request_count
+    id: cloud.gcp.agent_googleapis_com.couchdb.httpd.bulk_request_count
+    type: count,delta
+    name: Bulk requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/couchdb/httpd/request_count
+    id: cloud.gcp.agent_googleapis_com.couchdb.httpd.request_count
+    type: count,delta
+    name: Requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/couchdb/httpd/request_method_count
+    id: cloud.gcp.agent_googleapis_com.couchdb.httpd.request_method_count
+    type: count,delta
+    name: Request methods
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.http_method
+  - value: agent.googleapis.com/couchdb/httpd/response_code_count
+    id: cloud.gcp.agent_googleapis_com.couchdb.httpd.response_code_count
+    type: count,delta
+    name: Response codes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/couchdb/httpd/temporary_view_read_count
+    id: cloud.gcp.agent_googleapis_com.couchdb.httpd.temporary_view_read_count
+    type: count,delta
+    name: Temp view reads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/couchdb/httpd/view_read_count
+    id: cloud.gcp.agent_googleapis_com.couchdb.httpd.view_read_count
+    type: count,delta
+    name: View reads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/couchdb/open_databases
+    id: cloud.gcp.agent_googleapis_com.couchdb.open_databases
+    type: gauge
+    name: Open databases
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/couchdb/open_files
+    id: cloud.gcp.agent_googleapis_com.couchdb.open_files
+    type: gauge
+    name: Open files
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/couchdb/read_count
+    id: cloud.gcp.agent_googleapis_com.couchdb.read_count
+    type: count,delta
+    name: Reads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/couchdb/write_count
+    id: cloud.gcp.agent_googleapis_com.couchdb.write_count
+    type: count,delta
+    name: Writes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/cpu/load_15m
+    id: cloud.gcp.agent_googleapis_com.cpu.load_15m
+    type: gauge
+    name: CPU load (15m)
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/cpu/load_1m
+    id: cloud.gcp.agent_googleapis_com.cpu.load_1m
+    type: gauge
+    name: CPU load (1m)
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/cpu/load_5m
+    id: cloud.gcp.agent_googleapis_com.cpu.load_5m
+    type: gauge
+    name: CPU load (5m)
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/cpu/usage_time
+    id: cloud.gcp.agent_googleapis_com.cpu.usage_time
+    type: count,delta
+    name: CPU usage
+    unit: s{CPU}
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cpu_number
+    - value: metric.labels.cpu_state
+  - value: agent.googleapis.com/cpu/utilization
+    id: cloud.gcp.agent_googleapis_com.cpu.utilization
+    type: gauge
+    name: CPU utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.cpu_number
+    - value: metric.labels.cpu_state
+  - value: agent.googleapis.com/disk/bytes_used
+    id: cloud.gcp.agent_googleapis_com.disk.bytes_used
+    type: gauge
+    name: Disk usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.state
+  - value: agent.googleapis.com/disk/io_time
+    id: cloud.gcp.agent_googleapis_com.disk.io_time
+    type: count,delta
+    name: Disk I/O time
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+  - value: agent.googleapis.com/disk/merged_operations
+    id: cloud.gcp.agent_googleapis_com.disk.merged_operations
+    type: count,delta
+    name: Disk merged operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/disk/operation_count
+    id: cloud.gcp.agent_googleapis_com.disk.operation_count
+    type: count,delta
+    name: Disk operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/disk/operation_time
+    id: cloud.gcp.agent_googleapis_com.disk.operation_time
+    type: count,delta
+    name: Disk operation time
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/disk/pending_operations
+    id: cloud.gcp.agent_googleapis_com.disk.pending_operations
+    type: gauge
+    name: Disk pending operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device
+  - value: agent.googleapis.com/disk/percent_used
+    id: cloud.gcp.agent_googleapis_com.disk.percent_used
+    type: gauge
+    name: Disk utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.state
+  - value: agent.googleapis.com/disk/read_bytes_count
+    id: cloud.gcp.agent_googleapis_com.disk.read_bytes_count
+    type: count,delta
+    name: Disk bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+  - value: agent.googleapis.com/disk/weighted_io_time
+    id: cloud.gcp.agent_googleapis_com.disk.weighted_io_time
+    type: count,delta
+    name: Disk weighted I/O time
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+  - value: agent.googleapis.com/disk/write_bytes_count
+    id: cloud.gcp.agent_googleapis_com.disk.write_bytes_count
+    type: count,delta
+    name: Disk bytes written
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+  - value: agent.googleapis.com/elasticsearch/cache_memory_usage
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.cache_memory_usage
+    type: gauge
+    name: Cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.cache_name
+  - value: agent.googleapis.com/elasticsearch/field_eviction_count
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.field_eviction_count
+    type: count,delta
+    name: Field evictions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/elasticsearch/filter_cache_eviction_count
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.filter_cache_eviction_count
+    type: count,delta
+    name: Filter evictions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/elasticsearch/gc_collection_count
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.gc_collection_count
+    type: count,delta
+    name: GC count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.type
+  - value: agent.googleapis.com/elasticsearch/memory_usage
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.memory_usage
+    type: gauge
+    name: Memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.memory_type
+  - value: agent.googleapis.com/elasticsearch/network
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.network
+    type: count,delta
+    name: Network traffic
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/elasticsearch/num_current_documents
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.num_current_documents
+    type: gauge
+    name: Documents
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.document_type
+  - value: agent.googleapis.com/elasticsearch/num_data_nodes
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.num_data_nodes
+    type: gauge
+    name: Data nodes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/elasticsearch/num_http_connections
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.num_http_connections
+    type: gauge
+    name: Open connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/elasticsearch/num_nodes
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.num_nodes
+    type: gauge
+    name: Nodes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/elasticsearch/num_open_files
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.num_open_files
+    type: gauge
+    name: Open files
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/elasticsearch/num_server_connections
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.num_server_connections
+    type: gauge
+    name: Open connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/elasticsearch/num_shards
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.num_shards
+    type: gauge
+    name: Shards
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.shard_type
+  - value: agent.googleapis.com/elasticsearch/operation_count
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.operation_count
+    type: count,delta
+    name: Completed operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/elasticsearch/operation_time
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.operation_time
+    type: count,delta
+    name: Operation time
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/elasticsearch/peak_threads
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.peak_threads
+    type: gauge
+    name: Max threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/elasticsearch/storage_size
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.storage_size
+    type: gauge
+    name: Storage size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/elasticsearch/threads
+    id: cloud.gcp.agent_googleapis_com.elasticsearch.threads
+    type: gauge
+    name: Threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/hbase/ipc/connections
+    id: cloud.gcp.agent_googleapis_com.hbase.ipc.connections
+    type: gauge
+    name: IPC connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/ipc/queue_length
+    id: cloud.gcp.agent_googleapis_com.hbase.ipc.queue_length
+    type: gauge
+    name: IPC queue size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/ipc/traffic_count
+    id: cloud.gcp.agent_googleapis_com.hbase.ipc.traffic_count
+    type: count,delta
+    name: IPC traffic
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/hbase/master/average_load
+    id: cloud.gcp.agent_googleapis_com.hbase.master.average_load
+    type: gauge
+    name: Load
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/master/dead_region_servers
+    id: cloud.gcp.agent_googleapis_com.hbase.master.dead_region_servers
+    type: gauge
+    name: Dead region servers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/master/live_region_servers
+    id: cloud.gcp.agent_googleapis_com.hbase.master.live_region_servers
+    type: gauge
+    name: Live region servers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/block_cache/access_count
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.block_cache.access_count
+    type: count,delta
+    name: Block cache accesses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.kind
+  - value: agent.googleapis.com/hbase/regionserver/block_cache/evicted_blocks_count
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.block_cache.evicted_blocks_count
+    type: count,delta
+    name: Evicted block count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/block_cache/hit_ratio_percent
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.block_cache.hit_ratio_percent
+    type: gauge
+    name: Block cache hit ratio
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/block_cache/memory
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.block_cache.memory
+    type: gauge
+    name: Block cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.usage_kind
+  - value: agent.googleapis.com/hbase/regionserver/block_cache/num_items
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.block_cache.num_items
+    type: gauge
+    name: Block count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/call_queue/length
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.call_queue.length
+    type: gauge
+    name: Call queue size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/compaction_queue/length
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.compaction_queue.length
+    type: gauge
+    name: Compaction queue size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/flush_queue/length
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.flush_queue.length
+    type: gauge
+    name: Flush queue size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/memory/heap_usage
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.memory.heap_usage
+    type: gauge
+    name: Heap usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/memstore/files
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.memstore.files
+    type: gauge
+    name: Memstore files
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/memstore/index_size
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.memstore.index_size
+    type: gauge
+    name: Memstore index size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/memstore/open_stores
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.memstore.open_stores
+    type: gauge
+    name: Memstore open stores
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/memstore/size
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.memstore.size
+    type: gauge
+    name: Memstore size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/online_regions
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.online_regions
+    type: gauge
+    name: Online regions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/hbase/regionserver/request_count
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.request_count
+    type: count,delta
+    name: Request count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_type
+  - value: agent.googleapis.com/hbase/regionserver/requests/total_rate
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.requests.total_rate
+    type: gauge
+    name: RPC request rate
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.type
+  - value: agent.googleapis.com/hbase/regionserver/slow_operation_count
+    id: cloud.gcp.agent_googleapis_com.hbase.regionserver.slow_operation_count
+    type: count,delta
+    name: Slow operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/hbase/thrift/batch_latency/average
+    id: cloud.gcp.agent_googleapis_com.hbase.thrift.batch_latency.average
+    type: gauge
+    name: Thrift average batch latency
+    unit: ns
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.operation
+    - value: metric.labels.thrift_id
+  - value: agent.googleapis.com/hbase/thrift/call_latency/average
+    id: cloud.gcp.agent_googleapis_com.hbase.thrift.call_latency.average
+    type: gauge
+    name: Thrift average call latency
+    unit: ns
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.thrift_id
+  - value: agent.googleapis.com/hbase/thrift/call_queue/length
+    id: cloud.gcp.agent_googleapis_com.hbase.thrift.call_queue.length
+    type: gauge
+    name: Thrift call queue size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.thrift_id
+  - value: agent.googleapis.com/hbase/thrift/slow_call_latency/average
+    id: cloud.gcp.agent_googleapis_com.hbase.thrift.slow_call_latency.average
+    type: gauge
+    name: Thrift average slow call latency
+    unit: ns
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.thrift_id
+  - value: agent.googleapis.com/hbase/thrift/time_in_queue/average
+    id: cloud.gcp.agent_googleapis_com.hbase.thrift.time_in_queue.average
+    type: gauge
+    name: Thrift average time in queue
+    unit: ns
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.thrift_id
+  - value: agent.googleapis.com/iis/current_connections
+    id: cloud.gcp.agent_googleapis_com.iis.current_connections
+    type: gauge
+    name: IIS open connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/iis/network/transferred_bytes_count
+    id: cloud.gcp.agent_googleapis_com.iis.network.transferred_bytes_count
+    type: count,delta
+    name: IIS transferred bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/iis/new_connection_count
+    id: cloud.gcp.agent_googleapis_com.iis.new_connection_count
+    type: count,delta
+    name: IIS connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/iis/request_count
+    id: cloud.gcp.agent_googleapis_com.iis.request_count
+    type: count,delta
+    name: IIS requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.http_method
+  - value: agent.googleapis.com/interface/errors
+    id: cloud.gcp.agent_googleapis_com.interface.errors
+    type: count,delta
+    name: Network errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/interface/packets
+    id: cloud.gcp.agent_googleapis_com.interface.packets
+    type: count,delta
+    name: Network packets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/interface/traffic
+    id: cloud.gcp.agent_googleapis_com.interface.traffic
+    type: count,delta
+    name: Network traffic
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/jvm/gc/count
+    id: cloud.gcp.agent_googleapis_com.jvm.gc.count
+    type: count,delta
+    name: GC count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.gc_name
+  - value: agent.googleapis.com/jvm/gc/time
+    id: cloud.gcp.agent_googleapis_com.jvm.gc.time
+    type: count,delta
+    name: GC time
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.gc_name
+  - value: agent.googleapis.com/jvm/memory/usage
+    id: cloud.gcp.agent_googleapis_com.jvm.memory.usage
+    type: gauge
+    name: Memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.memory_type
+    - value: metric.labels.usage_kind
+  - value: agent.googleapis.com/jvm/os/cpu_time
+    id: cloud.gcp.agent_googleapis_com.jvm.os.cpu_time
+    type: count,delta
+    name: CPU time
+    unit: ns
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/jvm/os/open_files
+    id: cloud.gcp.agent_googleapis_com.jvm.os.open_files
+    type: gauge
+    name: Open files
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/jvm/thread/num_daemon
+    id: cloud.gcp.agent_googleapis_com.jvm.thread.num_daemon
+    type: gauge
+    name: Daemon threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/jvm/thread/num_live
+    id: cloud.gcp.agent_googleapis_com.jvm.thread.num_live
+    type: gauge
+    name: Threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/jvm/thread/peak
+    id: cloud.gcp.agent_googleapis_com.jvm.thread.peak
+    type: gauge
+    name: Max threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/jvm/uptime
+    id: cloud.gcp.agent_googleapis_com.jvm.uptime
+    type: count,delta
+    name: Uptime
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/broker/topics/failed_request_count
+    id: cloud.gcp.agent_googleapis_com.kafka.broker.topics.failed_request_count
+    type: count,delta
+    name: Failed requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_type
+  - value: agent.googleapis.com/kafka/broker/topics/incoming_message_count
+    id: cloud.gcp.agent_googleapis_com.kafka.broker.topics.incoming_message_count
+    type: count,delta
+    name: Incoming messages
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/broker/topics/traffic
+    id: cloud.gcp.agent_googleapis_com.kafka.broker.topics.traffic
+    type: count,delta
+    name: Traffic
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/kafka/controller/kafka/active
+    id: cloud.gcp.agent_googleapis_com.kafka.controller.kafka.active
+    type: gauge
+    name: Active controllers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/controller/kafka/offline_partitions
+    id: cloud.gcp.agent_googleapis_com.kafka.controller.kafka.offline_partitions
+    type: gauge
+    name: Offline partitions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/controller/leader_elections/election_count
+    id: cloud.gcp.agent_googleapis_com.kafka.controller.leader_elections.election_count
+    type: count,delta
+    name: Leader elections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/controller/leader_elections/unclean_count
+    id: cloud.gcp.agent_googleapis_com.kafka.controller.leader_elections.unclean_count
+    type: count,delta
+    name: Stale leader elections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/log/flush_count
+    id: cloud.gcp.agent_googleapis_com.kafka.log.flush_count
+    type: count,delta
+    name: Flushes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/network/request_count
+    id: cloud.gcp.agent_googleapis_com.kafka.network.request_count
+    type: count,delta
+    name: Requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_type
+  - value: agent.googleapis.com/kafka/purgatory/num_delayed_requests
+    id: cloud.gcp.agent_googleapis_com.kafka.purgatory.num_delayed_requests
+    type: gauge
+    name: Delayed purgatory requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.request_type
+  - value: agent.googleapis.com/kafka/purgatory/size
+    id: cloud.gcp.agent_googleapis_com.kafka.purgatory.size
+    type: gauge
+    name: Purgatory requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.request_type
+  - value: agent.googleapis.com/kafka/replica_fetcher/max_lag
+    id: cloud.gcp.agent_googleapis_com.kafka.replica_fetcher.max_lag
+    type: gauge
+    name: Maximum lag
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/replica_fetcher/min_fetch_rate
+    id: cloud.gcp.agent_googleapis_com.kafka.replica_fetcher.min_fetch_rate
+    type: gauge
+    name: Minimum fetch rate
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/replica_manager/isr/expand_count
+    id: cloud.gcp.agent_googleapis_com.kafka.replica_manager.isr.expand_count
+    type: count,delta
+    name: Gaining replicas
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/replica_manager/isr/shrink_count
+    id: cloud.gcp.agent_googleapis_com.kafka.replica_manager.isr.shrink_count
+    type: count,delta
+    name: Lagging replicas
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/replica_manager/leaders
+    id: cloud.gcp.agent_googleapis_com.kafka.replica_manager.leaders
+    type: gauge
+    name: Leaders
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/replica_manager/partitions
+    id: cloud.gcp.agent_googleapis_com.kafka.replica_manager.partitions
+    type: gauge
+    name: Partitions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/kafka/replica_manager/under_replicated_partitions
+    id: cloud.gcp.agent_googleapis_com.kafka.replica_manager.under_replicated_partitions
+    type: gauge
+    name: Unreliable partitions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/memcached/command_count
+    id: cloud.gcp.agent_googleapis_com.memcached.command_count
+    type: count,delta
+    name: Commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cache_name
+    - value: metric.labels.command
+  - value: agent.googleapis.com/memcached/current_connections
+    id: cloud.gcp.agent_googleapis_com.memcached.current_connections
+    type: gauge
+    name: Connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.cache_name
+  - value: agent.googleapis.com/memcached/current_items
+    id: cloud.gcp.agent_googleapis_com.memcached.current_items
+    type: gauge
+    name: Items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.cache_name
+  - value: agent.googleapis.com/memcached/eviction_count
+    id: cloud.gcp.agent_googleapis_com.memcached.eviction_count
+    type: count,delta
+    name: Evictions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cache_name
+  - value: agent.googleapis.com/memcached/memory
+    id: cloud.gcp.agent_googleapis_com.memcached.memory
+    type: gauge
+    name: Memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.cache_name
+    - value: metric.labels.mem_category
+  - value: agent.googleapis.com/memcached/network
+    id: cloud.gcp.agent_googleapis_com.memcached.network
+    type: count,delta
+    name: Traffic
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cache_name
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/memcached/operation_count
+    id: cloud.gcp.agent_googleapis_com.memcached.operation_count
+    type: count,delta
+    name: Operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cache_name
+    - value: metric.labels.operation
+    - value: metric.labels.type
+  - value: agent.googleapis.com/memcached/operation_hitratio
+    id: cloud.gcp.agent_googleapis_com.memcached.operation_hitratio
+    type: gauge
+    name: Hit ratio
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.cache_name
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/memcached/rusage
+    id: cloud.gcp.agent_googleapis_com.memcached.rusage
+    type: count,delta
+    name: CPU time
+    unit: s{CPU}
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cache_name
+    - value: metric.labels.usage_type
+  - value: agent.googleapis.com/memcached/threads
+    id: cloud.gcp.agent_googleapis_com.memcached.threads
+    type: gauge
+    name: Threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.cache_name
+  - value: agent.googleapis.com/memory/bytes_used
+    id: cloud.gcp.agent_googleapis_com.memory.bytes_used
+    type: gauge
+    name: Memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.state
+  - value: agent.googleapis.com/memory/percent_used
+    id: cloud.gcp.agent_googleapis_com.memory.percent_used
+    type: gauge
+    name: Memory utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.state
+  - value: agent.googleapis.com/mongodb/cache/hits
+    id: cloud.gcp.agent_googleapis_com.mongodb.cache.hits
+    type: count,delta
+    name: Cache hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/mongodb/cache/misses
+    id: cloud.gcp.agent_googleapis_com.mongodb.cache.misses
+    type: count,delta
+    name: Cache misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/mongodb/collections
+    id: cloud.gcp.agent_googleapis_com.mongodb.collections
+    type: gauge
+    name: Collections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database_name
+  - value: agent.googleapis.com/mongodb/connections
+    id: cloud.gcp.agent_googleapis_com.mongodb.connections
+    type: gauge
+    name: Connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database_name
+  - value: agent.googleapis.com/mongodb/data_size
+    id: cloud.gcp.agent_googleapis_com.mongodb.data_size
+    type: gauge
+    name: Data size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database_name
+  - value: agent.googleapis.com/mongodb/extents
+    id: cloud.gcp.agent_googleapis_com.mongodb.extents
+    type: gauge
+    name: Extents
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database_name
+  - value: agent.googleapis.com/mongodb/global_lock_hold_time
+    id: cloud.gcp.agent_googleapis_com.mongodb.global_lock_hold_time
+    type: count,delta
+    name: Global lock time
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/mongodb/index_size
+    id: cloud.gcp.agent_googleapis_com.mongodb.index_size
+    type: gauge
+    name: Index size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database_name
+  - value: agent.googleapis.com/mongodb/indexes
+    id: cloud.gcp.agent_googleapis_com.mongodb.indexes
+    type: gauge
+    name: Indexes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database_name
+  - value: agent.googleapis.com/mongodb/memory_usage
+    id: cloud.gcp.agent_googleapis_com.mongodb.memory_usage
+    type: gauge
+    name: Memory usage
+    unit: MiBy
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database_name
+    - value: metric.labels.memory_type
+  - value: agent.googleapis.com/mongodb/objects
+    id: cloud.gcp.agent_googleapis_com.mongodb.objects
+    type: gauge
+    name: Objects
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database_name
+  - value: agent.googleapis.com/mongodb/operation_count
+    id: cloud.gcp.agent_googleapis_com.mongodb.operation_count
+    type: count,delta
+    name: Operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/mongodb/storage_size
+    id: cloud.gcp.agent_googleapis_com.mongodb.storage_size
+    type: gauge
+    name: Storage size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database_name
+  - value: agent.googleapis.com/mssql/connections/user
+    id: cloud.gcp.agent_googleapis_com.mssql.connections.user
+    type: gauge
+    name: SQL Server open connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/mssql/transaction_rate
+    id: cloud.gcp.agent_googleapis_com.mssql.transaction_rate
+    type: gauge
+    name: SQL Server transaction rate
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/mssql/write_transaction_rate
+    id: cloud.gcp.agent_googleapis_com.mssql.write_transaction_rate
+    type: gauge
+    name: SQL Server write transaction rate
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/mysql/buffer_pool/num_pages
+    id: cloud.gcp.agent_googleapis_com.mysql.buffer_pool.num_pages
+    type: gauge
+    name: Buffer pool pages
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.kind
+  - value: agent.googleapis.com/mysql/buffer_pool/operation_count
+    id: cloud.gcp.agent_googleapis_com.mysql.buffer_pool.operation_count
+    type: count,delta
+    name: Buffer pool operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/mysql/buffer_pool_size
+    id: cloud.gcp.agent_googleapis_com.mysql.buffer_pool_size
+    type: gauge
+    name: Buffer pool size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.kind
+  - value: agent.googleapis.com/mysql/command_count
+    id: cloud.gcp.agent_googleapis_com.mysql.command_count
+    type: count,delta
+    name: Commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.command
+  - value: agent.googleapis.com/mysql/handler_count
+    id: cloud.gcp.agent_googleapis_com.mysql.handler_count
+    type: count,delta
+    name: Handlers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.kind
+  - value: agent.googleapis.com/mysql/innodb/doublewrite_count
+    id: cloud.gcp.agent_googleapis_com.mysql.innodb.doublewrite_count
+    type: count,delta
+    name: InnoDB doublewrite buffers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.kind
+  - value: agent.googleapis.com/mysql/innodb/log_operation_count
+    id: cloud.gcp.agent_googleapis_com.mysql.innodb.log_operation_count
+    type: count,delta
+    name: InnoDB log operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/mysql/innodb/operation_count
+    id: cloud.gcp.agent_googleapis_com.mysql.innodb.operation_count
+    type: count,delta
+    name: InnoDB operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/mysql/innodb/page_operation_count
+    id: cloud.gcp.agent_googleapis_com.mysql.innodb.page_operation_count
+    type: count,delta
+    name: InnoDB page operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/mysql/innodb/row_lock_count
+    id: cloud.gcp.agent_googleapis_com.mysql.innodb.row_lock_count
+    type: count,delta
+    name: InnoDB locks
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.kind
+  - value: agent.googleapis.com/mysql/innodb/row_operation_count
+    id: cloud.gcp.agent_googleapis_com.mysql.innodb.row_operation_count
+    type: count,delta
+    name: InnoDB row operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/mysql/lock_count
+    id: cloud.gcp.agent_googleapis_com.mysql.lock_count
+    type: count,delta
+    name: Locks
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.kind
+  - value: agent.googleapis.com/mysql/qcache/operation_count
+    id: cloud.gcp.agent_googleapis_com.mysql.qcache.operation_count
+    type: count,delta
+    name: QCache operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/mysql/qcache/query_count
+    id: cloud.gcp.agent_googleapis_com.mysql.qcache.query_count
+    type: gauge
+    name: QCache queries
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database
+  - value: agent.googleapis.com/mysql/slave_replication_lag
+    id: cloud.gcp.agent_googleapis_com.mysql.slave_replication_lag
+    type: gauge
+    name: Replica lag
+    unit: s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database
+  - value: agent.googleapis.com/mysql/sort_count
+    id: cloud.gcp.agent_googleapis_com.mysql.sort_count
+    type: count,delta
+    name: Sorts
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.kind
+  - value: agent.googleapis.com/mysql/thread_count
+    id: cloud.gcp.agent_googleapis_com.mysql.thread_count
+    type: gauge
+    name: Threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.kind
+  - value: agent.googleapis.com/network/tcp_connections
+    id: cloud.gcp.agent_googleapis_com.network.tcp_connections
+    type: gauge
+    name: TCP connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.port
+    - value: metric.labels.tcp_state
+  - value: agent.googleapis.com/nginx/connections/accepted_count
+    id: cloud.gcp.agent_googleapis_com.nginx.connections.accepted_count
+    type: count,delta
+    name: Accepted connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/nginx/connections/current
+    id: cloud.gcp.agent_googleapis_com.nginx.connections.current
+    type: gauge
+    name: Active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.state
+  - value: agent.googleapis.com/nginx/connections/handled_count
+    id: cloud.gcp.agent_googleapis_com.nginx.connections.handled_count
+    type: count,delta
+    name: Handled connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/nginx/request_count
+    id: cloud.gcp.agent_googleapis_com.nginx.request_count
+    type: count,delta
+    name: Requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/pagefile/percent_used
+    id: cloud.gcp.agent_googleapis_com.pagefile.percent_used
+    type: gauge
+    name: Pagefile utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.state
+  - value: agent.googleapis.com/postgresql/blocks_read_count
+    id: cloud.gcp.agent_googleapis_com.postgresql.blocks_read_count
+    type: count,delta
+    name: Blocks read
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.source
+    - value: metric.labels.table
+  - value: agent.googleapis.com/postgresql/commit_count
+    id: cloud.gcp.agent_googleapis_com.postgresql.commit_count
+    type: count,delta
+    name: Commits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+  - value: agent.googleapis.com/postgresql/db_size
+    id: cloud.gcp.agent_googleapis_com.postgresql.db_size
+    type: gauge
+    name: DB size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database
+  - value: agent.googleapis.com/postgresql/num_backends
+    id: cloud.gcp.agent_googleapis_com.postgresql.num_backends
+    type: gauge
+    name: Backends
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database
+  - value: agent.googleapis.com/postgresql/num_tuples
+    id: cloud.gcp.agent_googleapis_com.postgresql.num_tuples
+    type: gauge
+    name: DB rows
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.state
+    - value: metric.labels.table
+  - value: agent.googleapis.com/postgresql/operation_count
+    id: cloud.gcp.agent_googleapis_com.postgresql.operation_count
+    type: count,delta
+    name: Operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+    - value: metric.labels.operation
+    - value: metric.labels.table
+  - value: agent.googleapis.com/postgresql/rollback_count
+    id: cloud.gcp.agent_googleapis_com.postgresql.rollback_count
+    type: count,delta
+    name: Rollbacks
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.database
+  - value: agent.googleapis.com/processes/count_by_state
+    id: cloud.gcp.agent_googleapis_com.processes.count_by_state
+    type: gauge
+    name: Processes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.state
+  - value: agent.googleapis.com/processes/cpu_time
+    id: cloud.gcp.agent_googleapis_com.processes.cpu_time
+    type: count,delta
+    name: Process CPU
+    unit: s{CPU}
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.process
+    - value: metric.labels.user_or_syst
+    - value: metric.labels.command
+    - value: metric.labels.command_line
+    - value: metric.labels.owner
+    - value: metric.labels.pid
+  - value: agent.googleapis.com/processes/disk/read_bytes_count
+    id: cloud.gcp.agent_googleapis_com.processes.disk.read_bytes_count
+    type: count,delta
+    name: Process disk read I/O
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.process
+    - value: metric.labels.command
+    - value: metric.labels.command_line
+    - value: metric.labels.owner
+    - value: metric.labels.pid
+  - value: agent.googleapis.com/processes/disk/write_bytes_count
+    id: cloud.gcp.agent_googleapis_com.processes.disk.write_bytes_count
+    type: count,delta
+    name: Process disk write I/O
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.process
+    - value: metric.labels.command
+    - value: metric.labels.command_line
+    - value: metric.labels.owner
+    - value: metric.labels.pid
+  - value: agent.googleapis.com/processes/fork_count
+    id: cloud.gcp.agent_googleapis_com.processes.fork_count
+    type: count,delta
+    name: Fork count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/processes/rss_usage
+    id: cloud.gcp.agent_googleapis_com.processes.rss_usage
+    type: gauge
+    name: Process resident memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.process
+    - value: metric.labels.command
+    - value: metric.labels.command_line
+    - value: metric.labels.owner
+    - value: metric.labels.pid
+  - value: agent.googleapis.com/processes/vm_usage
+    id: cloud.gcp.agent_googleapis_com.processes.vm_usage
+    type: gauge
+    name: Process virtual memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.process
+    - value: metric.labels.command
+    - value: metric.labels.command_line
+    - value: metric.labels.owner
+    - value: metric.labels.pid
+  - value: agent.googleapis.com/rabbitmq/consumers
+    id: cloud.gcp.agent_googleapis_com.rabbitmq.consumers
+    type: gauge
+    name: Consumers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.queue
+  - value: agent.googleapis.com/rabbitmq/delivery_rate
+    id: cloud.gcp.agent_googleapis_com.rabbitmq.delivery_rate
+    type: gauge
+    name: Delivery rate
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.queue
+  - value: agent.googleapis.com/rabbitmq/num_messages
+    id: cloud.gcp.agent_googleapis_com.rabbitmq.num_messages
+    type: gauge
+    name: Messages
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.queue
+    - value: metric.labels.state
+  - value: agent.googleapis.com/rabbitmq/publish_rate
+    id: cloud.gcp.agent_googleapis_com.rabbitmq.publish_rate
+    type: gauge
+    name: Publish rate
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.queue
+  - value: agent.googleapis.com/redis/changes_since_last_save
+    id: cloud.gcp.agent_googleapis_com.redis.changes_since_last_save
+    type: gauge
+    name: Unsaved changes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/clients/blocked
+    id: cloud.gcp.agent_googleapis_com.redis.clients.blocked
+    type: gauge
+    name: Blocked clients
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/clients/connected
+    id: cloud.gcp.agent_googleapis_com.redis.clients.connected
+    type: gauge
+    name: Connected clients
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/commands_processed
+    id: cloud.gcp.agent_googleapis_com.redis.commands_processed
+    type: count,delta
+    name: Commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/connections/slaves
+    id: cloud.gcp.agent_googleapis_com.redis.connections.slaves
+    type: gauge
+    name: Slave connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/connections/total
+    id: cloud.gcp.agent_googleapis_com.redis.connections.total
+    type: count,delta
+    name: Connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/expired_keys
+    id: cloud.gcp.agent_googleapis_com.redis.expired_keys
+    type: count,delta
+    name: Expired keys
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/memory/usage
+    id: cloud.gcp.agent_googleapis_com.redis.memory.usage
+    type: gauge
+    name: Memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/memory/usage_lua
+    id: cloud.gcp.agent_googleapis_com.redis.memory.usage_lua
+    type: gauge
+    name: Lua memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/pubsub/channels
+    id: cloud.gcp.agent_googleapis_com.redis.pubsub.channels
+    type: gauge
+    name: PubSub channels
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/pubsub/patterns
+    id: cloud.gcp.agent_googleapis_com.redis.pubsub.patterns
+    type: gauge
+    name: PubSub patterns
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/redis/uptime
+    id: cloud.gcp.agent_googleapis_com.redis.uptime
+    type: gauge
+    name: Uptime
+    unit: s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: agent.googleapis.com/riak/latency/95th_percentile
+    id: cloud.gcp.agent_googleapis_com.riak.latency.95th_percentile
+    type: gauge
+    name: 95% latency (1m)
+    unit: us
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.type
+  - value: agent.googleapis.com/riak/latency/average
+    id: cloud.gcp.agent_googleapis_com.riak.latency.average
+    type: gauge
+    name: Average latency (1m)
+    unit: us
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.type
+  - value: agent.googleapis.com/riak/latency/maximum
+    id: cloud.gcp.agent_googleapis_com.riak.latency.maximum
+    type: gauge
+    name: Maximum latency (1m)
+    unit: us
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.type
+  - value: agent.googleapis.com/riak/memory_usage
+    id: cloud.gcp.agent_googleapis_com.riak.memory_usage
+    type: gauge
+    name: Memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.memory_type
+  - value: agent.googleapis.com/riak/num_siblings/95th_percentile
+    id: cloud.gcp.agent_googleapis_com.riak.num_siblings.95th_percentile
+    type: gauge
+    name: 95% siblings (1m)
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/riak/num_siblings/average
+    id: cloud.gcp.agent_googleapis_com.riak.num_siblings.average
+    type: gauge
+    name: Average siblings (1m)
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/riak/num_siblings/maximum
+    id: cloud.gcp.agent_googleapis_com.riak.num_siblings.maximum
+    type: gauge
+    name: Maximum siblings (1m)
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/riak/object_size/95th_percentile
+    id: cloud.gcp.agent_googleapis_com.riak.object_size.95th_percentile
+    type: gauge
+    name: 95% object size (1m)
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/riak/object_size/average
+    id: cloud.gcp.agent_googleapis_com.riak.object_size.average
+    type: gauge
+    name: Average object size (1m)
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/riak/object_size/maximum
+    id: cloud.gcp.agent_googleapis_com.riak.object_size.maximum
+    type: gauge
+    name: Maximum object size (1m)
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.server_name
+  - value: agent.googleapis.com/riak/operation_count
+    id: cloud.gcp.agent_googleapis_com.riak.operation_count
+    type: count,delta
+    name: Operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.server_name
+    - value: metric.labels.operation
+  - value: agent.googleapis.com/swap/bytes_used
+    id: cloud.gcp.agent_googleapis_com.swap.bytes_used
+    type: gauge
+    name: Swap usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.state
+  - value: agent.googleapis.com/swap/io
+    id: cloud.gcp.agent_googleapis_com.swap.io
+    type: count,delta
+    name: Swap I/O operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/swap/percent_used
+    id: cloud.gcp.agent_googleapis_com.swap.percent_used
+    type: gauge
+    name: Swap utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device
+    - value: metric.labels.state
+  - value: agent.googleapis.com/tomcat/manager/sessions
+    id: cloud.gcp.agent_googleapis_com.tomcat.manager.sessions
+    type: gauge
+    name: Sessions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.url_prefix
+  - value: agent.googleapis.com/tomcat/request_processor/error_count
+    id: cloud.gcp.agent_googleapis_com.tomcat.request_processor.error_count
+    type: count,delta
+    name: Errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.proto_handler
+  - value: agent.googleapis.com/tomcat/request_processor/processing_time
+    id: cloud.gcp.agent_googleapis_com.tomcat.request_processor.processing_time
+    type: count,delta
+    name: Processing time
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.proto_handler
+  - value: agent.googleapis.com/tomcat/request_processor/request_count
+    id: cloud.gcp.agent_googleapis_com.tomcat.request_processor.request_count
+    type: count,delta
+    name: Requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.proto_handler
+  - value: agent.googleapis.com/tomcat/request_processor/traffic_count
+    id: cloud.gcp.agent_googleapis_com.tomcat.request_processor.traffic_count
+    type: count,delta
+    name: Traffic
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.proto_handler
+    - value: metric.labels.direction
+  - value: agent.googleapis.com/tomcat/threads/busy
+    id: cloud.gcp.agent_googleapis_com.tomcat.threads.busy
+    type: gauge
+    name: Busy threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.proto_handler
+  - value: agent.googleapis.com/tomcat/threads/current
+    id: cloud.gcp.agent_googleapis_com.tomcat.threads.current
+    type: gauge
+    name: Current threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.proto_handler
+  - value: agent.googleapis.com/varnish/backend_connection_count
+    id: cloud.gcp.agent_googleapis_com.varnish.backend_connection_count
+    type: count,delta
+    name: Backend connection successes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cache_name
+    - value: metric.labels.type
+    - value: metric.labels.category
+  - value: agent.googleapis.com/varnish/cache_operation_count
+    id: cloud.gcp.agent_googleapis_com.varnish.cache_operation_count
+    type: count,delta
+    name: Cache operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cache_name
+    - value: metric.labels.operation
+    - value: metric.labels.category
+  - value: agent.googleapis.com/varnish/client_connection_count
+    id: cloud.gcp.agent_googleapis_com.varnish.client_connection_count
+    type: count,delta
+    name: Client connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.cache_name
+    - value: metric.labels.category
+    - value: metric.labels.type
+  - value: agent.googleapis.com/zookeeper/connections_count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.connections_count
+    type: gauge
+    name: Open connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/data_size
+    id: cloud.gcp.agent_googleapis_com.zookeeper.data_size
+    type: gauge
+    name: Data size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/followers/count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.followers.count
+    type: gauge
+    name: Followers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/followers/synced_count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.followers.synced_count
+    type: gauge
+    name: Synced followers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/network/received_packets_count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.network.received_packets_count
+    type: count,delta
+    name: Packets received
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/network/sent_packets_count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.network.sent_packets_count
+    type: count,delta
+    name: Packets sent
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/nodes/count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.nodes.count
+    type: gauge
+    name: Nodes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/nodes/ephemeral_count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.nodes.ephemeral_count
+    type: gauge
+    name: Ephemeral nodes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/nodes/watches_count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.nodes.watches_count
+    type: gauge
+    name: Watches
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/requests/latency/average
+    id: cloud.gcp.agent_googleapis_com.zookeeper.requests.latency.average
+    type: gauge
+    name: Average request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/requests/latency/maximum
+    id: cloud.gcp.agent_googleapis_com.zookeeper.requests.latency.maximum
+    type: gauge
+    name: Maximum request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/requests/latency/minimum
+    id: cloud.gcp.agent_googleapis_com.zookeeper.requests.latency.minimum
+    type: gauge
+    name: Minimum request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/requests/outstanding_count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.requests.outstanding_count
+    type: gauge
+    name: Outstanding requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/zookeeper/sync_operations/pending_count
+    id: cloud.gcp.agent_googleapis_com.zookeeper.sync_operations.pending_count
+    type: gauge
+    name: Pending syncs
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: appengine.googleapis.com/flex/autoscaler/connections/current
+    id: cloud.gcp.appengine_googleapis_com.flex.autoscaler.connections.current
+    type: gauge
+    name: Writing and reading connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.service_id
+    - value: metric.labels.state
+    - value: metric.labels.version_id
+    - value: metric.labels.instance_name
+  - value: appengine.googleapis.com/flex/autoscaler/server/request_count
+    id: cloud.gcp.appengine_googleapis_com.flex.autoscaler.server.request_count
+    type: count,delta
+    name: Request counts
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.service_id
+    - value: metric.labels.version_id
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/firewall/dropped_bytes_count
+    id: cloud.gcp.compute_googleapis_com.firewall.dropped_bytes_count
+    type: count,delta
+    name: Dropped bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/firewall/dropped_packets_count
+    id: cloud.gcp.compute_googleapis_com.firewall.dropped_packets_count
+    type: count,delta
+    name: Dropped packets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/guest/cpu/runnable_task_count
+    id: cloud.gcp.compute_googleapis_com.guest.cpu.runnable_task_count
+    type: gauge
+    name: Runnable task count.
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/guest/cpu/usage_time
+    id: cloud.gcp.compute_googleapis_com.guest.cpu.usage_time
+    type: count,delta
+    name: CPU usage
+    unit: s{CPU}
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.state
+  - value: compute.googleapis.com/guest/disk/bytes_used
+    id: cloud.gcp.compute_googleapis_com.guest.disk.bytes_used
+    type: gauge
+    name: Disk usage in Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.state
+  - value: compute.googleapis.com/guest/disk/io_time
+    id: cloud.gcp.compute_googleapis_com.guest.disk.io_time
+    type: count,delta
+    name: IO Time
+    unit: ms
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+  - value: compute.googleapis.com/guest/disk/merged_operation_count
+    id: cloud.gcp.compute_googleapis_com.guest.disk.merged_operation_count
+    type: count,delta
+    name: Merged disk operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.direction
+  - value: compute.googleapis.com/guest/disk/operation_bytes_count
+    id: cloud.gcp.compute_googleapis_com.guest.disk.operation_bytes_count
+    type: count,delta
+    name: Disk bytes transferred
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.direction
+  - value: compute.googleapis.com/guest/disk/operation_count
+    id: cloud.gcp.compute_googleapis_com.guest.disk.operation_count
+    type: count,delta
+    name: Disk operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.direction
+  - value: compute.googleapis.com/guest/disk/operation_time
+    id: cloud.gcp.compute_googleapis_com.guest.disk.operation_time
+    type: count,delta
+    name: Disk operation time
+    unit: ms
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.direction
+  - value: compute.googleapis.com/guest/disk/queue_length
+    id: cloud.gcp.compute_googleapis_com.guest.disk.queue_length
+    type: gauge
+    name: Queue Length
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+  - value: compute.googleapis.com/guest/disk/weighted_io_time
+    id: cloud.gcp.compute_googleapis_com.guest.disk.weighted_io_time
+    type: count,delta
+    name: IO Time
+    unit: ms
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+  - value: compute.googleapis.com/guest/memory/anonymous_used
+    id: cloud.gcp.compute_googleapis_com.guest.memory.anonymous_used
+    type: gauge
+    name: Anonymous memory usage in Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.state
+  - value: compute.googleapis.com/guest/memory/bytes_used
+    id: cloud.gcp.compute_googleapis_com.guest.memory.bytes_used
+    type: gauge
+    name: Memory usage in Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.state
+  - value: compute.googleapis.com/guest/memory/dirty_used
+    id: cloud.gcp.compute_googleapis_com.guest.memory.dirty_used
+    type: gauge
+    name: Dirty pages usage in Bytes.
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.state
+  - value: compute.googleapis.com/guest/memory/page_cache_used
+    id: cloud.gcp.compute_googleapis_com.guest.memory.page_cache_used
+    type: gauge
+    name: Page cache memory usage in Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.state
+  - value: compute.googleapis.com/guest/memory/unevictable_used
+    id: cloud.gcp.compute_googleapis_com.guest.memory.unevictable_used
+    type: gauge
+    name: Unevictable memory usage in Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/guest/system/problem_count
+    id: cloud.gcp.compute_googleapis_com.guest.system.problem_count
+    type: count,delta
+    name: Problem Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.reason
+  - value: compute.googleapis.com/guest/system/problem_state
+    id: cloud.gcp.compute_googleapis_com.guest.system.problem_state
+    type: gauge
+    name: Problem State
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.reason
+    - value: metric.labels.type
+  - value: compute.googleapis.com/guest/system/uptime
+    id: cloud.gcp.compute_googleapis_com.guest.system.uptime
+    type: gauge
+    name: Uptime
+    unit: s
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.kernel_version
+    - value: metric.labels.os_version
+  - value: compute.googleapis.com/instance/cpu/reserved_cores
+    id: cloud.gcp.compute_googleapis_com.instance.cpu.reserved_cores
+    type: gauge
+    name: Reserved vCPUs
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/instance/cpu/scheduler_wait_time
+    id: cloud.gcp.compute_googleapis_com.instance.cpu.scheduler_wait_time
+    type: count,delta
+    name: Scheduler Wait Time
+    unit: s{idle}
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/instance/cpu/usage_time
+    id: cloud.gcp.compute_googleapis_com.instance.cpu.usage_time
+    type: count,delta
+    name: CPU usage
+    unit: s{CPU}
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/instance/cpu/utilization
+    id: cloud.gcp.compute_googleapis_com.instance.cpu.utilization
+    type: gauge
+    name: CPU utilization
+    unit: 10^2.%
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/instance/disk/max_read_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.max_read_bytes_count
+    type: gauge
+    name: Peak disk read bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+  - value: compute.googleapis.com/instance/disk/max_read_ops_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.max_read_ops_count
+    type: gauge
+    name: Peak disk read ops
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+  - value: compute.googleapis.com/instance/disk/max_write_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.max_write_bytes_count
+    type: gauge
+    name: Peak disk write bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+  - value: compute.googleapis.com/instance/disk/max_write_ops_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.max_write_ops_count
+    type: gauge
+    name: Peak disk write ops
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+  - value: compute.googleapis.com/instance/disk/read_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.read_bytes_count
+    type: count,delta
+    name: Disk read bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+  - value: compute.googleapis.com/instance/disk/read_ops_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.read_ops_count
+    type: count,delta
+    name: Disk read operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+  - value: compute.googleapis.com/instance/disk/throttled_read_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.throttled_read_bytes_count
+    type: count,delta
+    name: Throttled read bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+    - value: metric.labels.throttle_reason
+  - value: compute.googleapis.com/instance/disk/throttled_read_ops_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.throttled_read_ops_count
+    type: count,delta
+    name: Throttled read operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+    - value: metric.labels.throttle_reason
+  - value: compute.googleapis.com/instance/disk/throttled_write_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.throttled_write_bytes_count
+    type: count,delta
+    name: Throttled write bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+    - value: metric.labels.throttle_reason
+  - value: compute.googleapis.com/instance/disk/throttled_write_ops_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.throttled_write_ops_count
+    type: count,delta
+    name: Throttled write operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+    - value: metric.labels.throttle_reason
+  - value: compute.googleapis.com/instance/disk/write_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.write_bytes_count
+    type: count,delta
+    name: Disk write bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+  - value: compute.googleapis.com/instance/disk/write_ops_count
+    id: cloud.gcp.compute_googleapis_com.instance.disk.write_ops_count
+    type: count,delta
+    name: Disk write operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.device_name
+    - value: metric.labels.storage_type
+    - value: metric.labels.device_type
+  - value: compute.googleapis.com/instance/integrity/early_boot_validation_status
+    id: cloud.gcp.compute_googleapis_com.instance.integrity.early_boot_validation_status
+    type: gauge
+    name: Early Boot Validation
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.status
+  - value: compute.googleapis.com/instance/integrity/late_boot_validation_status
+    id: cloud.gcp.compute_googleapis_com.instance.integrity.late_boot_validation_status
+    type: gauge
+    name: Late Boot Validation
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.status
+  - value: compute.googleapis.com/instance/memory/balloon/ram_size
+    id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_size
+    type: gauge
+    name: VM Memory Total
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/instance/memory/balloon/ram_used
+    id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_used
+    type: gauge
+    name: VM Memory Used
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/instance/memory/balloon/swap_in_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_in_bytes_count
+    type: count,delta
+    name: VM Swap In
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/instance/memory/balloon/swap_out_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_out_bytes_count
+    type: count,delta
+    name: VM Swap Out
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/instance/network/received_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.network.received_bytes_count
+    type: count,delta
+    name: Received bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.loadbalanced
+  - value: compute.googleapis.com/instance/network/received_packets_count
+    id: cloud.gcp.compute_googleapis_com.instance.network.received_packets_count
+    type: count,delta
+    name: Received packets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.loadbalanced
+  - value: compute.googleapis.com/instance/network/sent_bytes_count
+    id: cloud.gcp.compute_googleapis_com.instance.network.sent_bytes_count
+    type: count,delta
+    name: Sent bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.loadbalanced
+  - value: compute.googleapis.com/instance/network/sent_packets_count
+    id: cloud.gcp.compute_googleapis_com.instance.network.sent_packets_count
+    type: count,delta
+    name: Sent packets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+    - value: metric.labels.loadbalanced
+  - value: compute.googleapis.com/instance/uptime
+    id: cloud.gcp.compute_googleapis_com.instance.uptime
+    type: count,delta
+    name: Uptime
+    unit: s{uptime}
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/instance/uptime_total
+    id: cloud.gcp.compute_googleapis_com.instance.uptime_total
+    type: gauge
+    name: Uptime Total
+    unit: s
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.instance_name
+  - value: compute.googleapis.com/mirroring/dropped_packets_count
+    id: cloud.gcp.compute_googleapis_com.mirroring.dropped_packets_count
+    type: count,delta
+    name: Dropped packets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.reason
+  - value: compute.googleapis.com/mirroring/mirrored_bytes_count
+    id: cloud.gcp.compute_googleapis_com.mirroring.mirrored_bytes_count
+    type: count,delta
+    name: Mirrored bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: compute.googleapis.com/mirroring/mirrored_packets_count
+    id: cloud.gcp.compute_googleapis_com.mirroring.mirrored_packets_count
+    type: count,delta
+    name: Mirrored packets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: compute.googleapis.com/nat/allocated_ports
+    id: cloud.gcp.compute_googleapis_com.nat.allocated_ports
+    type: gauge
+    name: Allocated ports
+    unit: '{port}'
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.nat_ip
+  - value: compute.googleapis.com/nat/closed_connections_count
+    id: cloud.gcp.compute_googleapis_com.nat.closed_connections_count
+    type: count,delta
+    name: Closed connections count
+    unit: '{connection}'
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+  - value: compute.googleapis.com/nat/dropped_received_packets_count
+    id: cloud.gcp.compute_googleapis_com.nat.dropped_received_packets_count
+    type: count,delta
+    name: Received packets dropped count
+    unit: '{packet}'
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+  - value: compute.googleapis.com/nat/dropped_sent_packets_count
+    id: cloud.gcp.compute_googleapis_com.nat.dropped_sent_packets_count
+    type: count,delta
+    name: Sent packets dropped count
+    unit: '{packet}'
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+    - value: metric.labels.reason
+  - value: compute.googleapis.com/nat/new_connections_count
+    id: cloud.gcp.compute_googleapis_com.nat.new_connections_count
+    type: count,delta
+    name: New connections count
+    unit: '{connection}'
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+  - value: compute.googleapis.com/nat/open_connections
+    id: cloud.gcp.compute_googleapis_com.nat.open_connections
+    type: gauge
+    name: Open connections
+    unit: '{connection}'
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+  - value: compute.googleapis.com/nat/port_usage
+    id: cloud.gcp.compute_googleapis_com.nat.port_usage
+    type: gauge
+    name: Port usage
+    unit: '{port}'
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+  - value: compute.googleapis.com/nat/received_bytes_count
+    id: cloud.gcp.compute_googleapis_com.nat.received_bytes_count
+    type: count,delta
+    name: Received bytes count
+    unit: By
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+  - value: compute.googleapis.com/nat/received_packets_count
+    id: cloud.gcp.compute_googleapis_com.nat.received_packets_count
+    type: count,delta
+    name: Received packets count
+    unit: '{packet}'
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+  - value: compute.googleapis.com/nat/sent_bytes_count
+    id: cloud.gcp.compute_googleapis_com.nat.sent_bytes_count
+    type: count,delta
+    name: Sent bytes count
+    unit: By
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+  - value: compute.googleapis.com/nat/sent_packets_count
+    id: cloud.gcp.compute_googleapis_com.nat.sent_packets_count
+    type: count,delta
+    name: Sent packets count
+    unit: '{packet}'
+    gcpOptions:
+      ingestDelay: 165s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.nat_project_number
+    - value: metric.labels.router_id
+    - value: metric.labels.nat_gateway_name
+    - value: metric.labels.ip_protocol
+  - value: firewallinsights.googleapis.com/vm/firewall_hit_count
+    id: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_hit_count
+    type: count,delta
+    name: VM Firewall Hit Counts
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 150s
+      samplePeriod: 600s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.firewall_project_id
+    - value: metric.labels.firewall_name
+  - value: firewallinsights.googleapis.com/vm/firewall_last_used_timestamp
+    id: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_last_used_timestamp
+    type: gauge
+    name: VM Firewall Last Used Timestamp
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 600s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.firewall_project_id
+    - value: metric.labels.firewall_name
+  - value: istio.io/service/client/connection_close_count
+    id: cloud.gcp.istio_io.service.client.connection_close_count
+    type: count,delta
+    name: Client Connection Close Count
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/client/connection_open_count
+    id: cloud.gcp.istio_io.service.client.connection_open_count
+    type: count,delta
+    name: Client Connection Open Count
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/client/received_bytes_count
+    id: cloud.gcp.istio_io.service.client.received_bytes_count
+    type: count,delta
+    name: Client Received Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/client/request_bytes
+    id: cloud.gcp.istio_io.service.client.request_bytes
+    type: gauge
+    name: Client Request Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/request_count
+    id: cloud.gcp.istio_io.service.client.request_count
+    type: count,delta
+    name: Client Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/response_bytes
+    id: cloud.gcp.istio_io.service.client.response_bytes
+    type: gauge
+    name: Client Response Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/roundtrip_latencies
+    id: cloud.gcp.istio_io.service.client.roundtrip_latencies
+    type: gauge
+    name: Client Roundtrip Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/sent_bytes_count
+    id: cloud.gcp.istio_io.service.client.sent_bytes_count
+    type: count,delta
+    name: Client Sent Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/server/connection_close_count
+    id: cloud.gcp.istio_io.service.server.connection_close_count
+    type: count,delta
+    name: Server Connection Close Count
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/server/connection_open_count
+    id: cloud.gcp.istio_io.service.server.connection_open_count
+    type: count,delta
+    name: Server Connection Open Count
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/server/received_bytes_count
+    id: cloud.gcp.istio_io.service.server.received_bytes_count
+    type: count,delta
+    name: Server Received Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/server/request_bytes
+    id: cloud.gcp.istio_io.service.server.request_bytes
+    type: gauge
+    name: Server Request Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/server/request_count
+    id: cloud.gcp.istio_io.service.server.request_count
+    type: count,delta
+    name: Server Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/server/response_bytes
+    id: cloud.gcp.istio_io.service.server.response_bytes
+    type: gauge
+    name: Server Response Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/server/response_latencies
+    id: cloud.gcp.istio_io.service.server.response_latencies
+    type: gauge
+    name: Server Response Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/server/sent_bytes_count
+    id: cloud.gcp.istio_io.service.server.sent_bytes_count
+    type: count,delta
+    name: Server Sent Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: monitoring.googleapis.com/uptime_check/check_passed
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.check_passed
+    type: gauge
+    name: Check passed
+    unit: ''
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/content_mismatch
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.content_mismatch
+    type: gauge
+    name: Content mismatch
+    unit: ''
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/error_code
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.error_code
+    type: gauge
+    name: Error code
+    unit: ''
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: STRING
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/http_status
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.http_status
+    type: gauge
+    name: HTTP status
+    unit: ''
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: STRING
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/request_latency
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.request_latency
+    type: gauge
+    name: Request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.time_until_ssl_cert_expires
+    type: gauge
+    name: Time until SSL certificate expires
+    unit: d
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: networking.googleapis.com/vm_flow/egress_bytes_count
+    id: cloud.gcp.networking_googleapis_com.vm_flow.egress_bytes_count
+    type: count,delta
+    name: Egress bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 150s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.local_network
+    - value: metric.labels.local_subnetwork
+    - value: metric.labels.local_network_interface
+    - value: metric.labels.remote_country
+    - value: metric.labels.remote_continent
+    - value: metric.labels.remote_zone
+    - value: metric.labels.remote_location_type
+    - value: metric.labels.remote_network
+    - value: metric.labels.remote_subnetwork
+    - value: metric.labels.protocol
+    - value: metric.labels.network_topology_remote_label
+    - value: metric.labels.remote_vpn_tunnel
+  - value: networking.googleapis.com/vm_flow/ingress_bytes_count
+    id: cloud.gcp.networking_googleapis_com.vm_flow.ingress_bytes_count
+    type: count,delta
+    name: Ingress bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 150s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.local_network
+    - value: metric.labels.local_subnetwork
+    - value: metric.labels.local_network_interface
+    - value: metric.labels.remote_country
+    - value: metric.labels.remote_continent
+    - value: metric.labels.remote_zone
+    - value: metric.labels.remote_location_type
+    - value: metric.labels.remote_network
+    - value: metric.labels.remote_subnetwork
+    - value: metric.labels.protocol
+    - value: metric.labels.network_topology_remote_label
+    - value: metric.labels.remote_vpn_tunnel
+  - value: networking.googleapis.com/vm_flow/rtt
+    id: cloud.gcp.networking_googleapis_com.vm_flow.rtt
+    type: gauge
+    name: RTT latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 150s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.local_network
+    - value: metric.labels.local_subnetwork
+    - value: metric.labels.local_network_interface
+    - value: metric.labels.remote_country
+    - value: metric.labels.remote_continent
+    - value: metric.labels.remote_zone
+    - value: metric.labels.remote_location_type
+    - value: metric.labels.remote_network
+    - value: metric.labels.remote_subnetwork
+    - value: metric.labels.protocol
+    - value: metric.labels.network_topology_remote_label
+    - value: metric.labels.remote_vpn_tunnel

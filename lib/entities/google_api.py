@@ -1,10 +1,24 @@
 """This module contains generic way of paging through GCP Apis."""
+#     Copyright 2020 Dynatrace LLC
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
 from typing import Any, Callable, Dict, List, Text
 
 from aiohttp import ClientSession
 
 from lib.context import Context
-from lib.custom_devices.model import CustomDevice
+from lib.entities.model import Entity
 
 
 async def fetch_zones(
@@ -35,8 +49,8 @@ async def generic_paging(
         url: Text,
         auth_token: Text,
         session: ClientSession,
-        mapper: Callable[[Dict[Any, Any]], List[CustomDevice]]
-) -> List[CustomDevice]:
+        mapper: Callable[[Dict[Any, Any]], List[Entity]]
+) -> List[Entity]:
     """Apply mapper function on any page returned by gcp api url."""
     headers = {
         "Accept": "application/json",
@@ -45,7 +59,7 @@ async def generic_paging(
 
     get_page = True
     params: Dict[Text, Text] = {}
-    custom_devices: List[CustomDevice] = []
+    entities: List[Entity] = []
     while get_page:
         try:
             resp = await session.request(
@@ -58,16 +72,16 @@ async def generic_paging(
             page = await resp.json()
         except Exception as ex:
             print("Failed to retrieve information from googleapis. {0}".format(ex))
-            return custom_devices
+            return entities
 
         try:
-            custom_devices.extend(mapper(page))
+            entities.extend(mapper(page))
         except Exception as ex:
             print("Failed to map response from googleapis. {0}".format(ex))
-            return custom_devices
+            return entities
 
         get_page = "nextPageToken" in page
         if get_page:
             params["pageToken"] = page.get("nextPageToken", None)
 
-    return custom_devices
+    return entities

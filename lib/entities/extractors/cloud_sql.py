@@ -1,13 +1,25 @@
-"""This module contains logic responsible for retrieving custom device info of GCP Cloud SQL. """
+#     Copyright 2020 Dynatrace LLC
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
 
 from functools import partial
 from typing import Any, Dict, Iterable, Text
 
 from lib.context import Context
-from lib.custom_devices.decorator import custom_device_extractor
-from lib.custom_devices.google_api import generic_paging
-from lib.custom_devices.ids import get_func_create_custom_device_id, LabelToApiRspMapping
-from lib.custom_devices.model import CdProperty, CustomDevice
+from lib.entities.decorator import entity_extractor
+from lib.entities.google_api import generic_paging
+from lib.entities.ids import get_func_create_entity_id, LabelToApiRspMapping
+from lib.entities.model import CdProperty, Entity
 from lib.metrics import GCPService
 
 
@@ -16,7 +28,7 @@ LabelToApiResponseMapping: LabelToApiRspMapping = {
     "resource.labels.region": lambda x: str(x["region"]),
     "resource.labels.database_id": lambda x: str(x["project"]) + ":" + str(x["name"])
 }
-create_custom_device_id = get_func_create_custom_device_id(LabelToApiResponseMapping)
+create_entity_id = get_func_create_entity_id(LabelToApiResponseMapping)
 
 
 def _get_properties(rsp: Dict[Text, Any]) -> Iterable[CdProperty]:
@@ -32,8 +44,8 @@ def _get_properties(rsp: Dict[Text, Any]) -> Iterable[CdProperty]:
 def _cloud_sql_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: GCPService):
     """ Create CustomDevice instanace from google api response."""
     return [
-        CustomDevice(
-            custom_device_id=create_custom_device_id(cd, svc_def),
+        Entity(
+            id=create_entity_id(cd, svc_def),
             display_name=cd.get("name", "N/A"),
             group=svc_def.technology_name,
             ip_addresses=frozenset(x["ipAddress"] for x in cd.get("ipAddresses", [])),
@@ -47,9 +59,9 @@ def _cloud_sql_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: GCPSer
     ]
 
 
-@custom_device_extractor("cloudsql_database")
-async def get_cloud_sql_custom_device(ctx: Context, svc_def: GCPService) -> Iterable[CustomDevice]:
-    """ Retrieve custom device info on GCP Cloud SQL from google api. """
+@entity_extractor("cloudsql_database")
+async def get_cloud_sql_entity(ctx: Context, svc_def: GCPService) -> Iterable[Entity]:
+    """ Retrieve entity info on GCP Cloud SQL from google api. """
     url = "https://sqladmin.googleapis.com/sql/v1beta4/projects/{project_id}/instances".format(
         project_id=ctx.project_id
     )

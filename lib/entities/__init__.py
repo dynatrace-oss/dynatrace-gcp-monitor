@@ -1,3 +1,5 @@
+""" This package contains logic responsible for retrieving entity information. """
+
 #     Copyright 2020 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +14,5 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-""" To be described. """
-
-
+from lib.entities.extractors import *
+from lib.entities.decorator import entities_extractors

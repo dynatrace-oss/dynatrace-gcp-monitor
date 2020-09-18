@@ -1,0 +1,208 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Google Cloud extension defintion",
+  "type": "object",
+  "required": [
+    ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the Extension",
+      "examples": ["gcp_pubsub"],
+      "pattern": "^[a-z0-9_]+$",
+      "minLength" : 3,
+      "maxLength": 50
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of the Extension",
+      "example" : "0.0.1",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "minLength" : 3,
+      "maxLength": 20
+    },
+    "minDynatraceVersion": {
+      "type": "string",
+      "description": "Minimum version of Dynatrace cluster to support Extension",
+      "examples": ["1.201"],
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "minLength" : 5,
+      "maxLength": 6
+    },
+    "technology": {
+      "type": "string",
+      "description": "Dynatrace Technology",
+      "$ref": "#/definitions/technology"
+    },
+    "metrics" : {
+        "type" : "array",
+        "description": "List of metrics mappings",
+        "items": {
+          "$ref": "#/definitions/metricDefinition"
+        }
+    }
+  },
+  "definitions": {
+    "technology" :
+    {
+      "type" : "object",
+      "required": ["name"],
+      "properties": {
+        "name" : {
+          "type" : "string",
+          "description": "Name",
+          "examples": ["Google Cloud Pub/Sub"],
+          "pattern": "^Google Cloud [A-Za-z0-9 \/]*$",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "gcp" : {
+      "type" : "array",
+      "description": "Data source - in case of GCP always GCP",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/service"
+      }
+    },
+    "service" : {
+      "type" : "object",
+      "description": "One or more GCP resources that will be monitored withing extension. (for example Cloud Load Balancer is a set of various LB rules with attached metrics)",
+      "required": ["service", "metrics"],
+      "properties": {
+        "service" : {
+          "type" : "string",
+          "description": "Service type corresponding to GCP monitored resource type",          
+          "examples": ["pubsub_snapshot"],
+          "pattern": "^[A-Za-z_]+$",
+          "minLength": 5,
+          "maxLength": 200
+        },
+        "metrics" : {
+          "type" : "array",
+          "description": "List of metrics to be pulled from GCP",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/metricDefinition"
+          }
+        }
+      }
+    },
+    "metricDefinition" : {
+      "type" : "object",
+      "description": "Mapping between Azure and Dynatrace metrics data model",
+      "required": ["metric", "type", "name", "metadata"],
+      "properties": {
+        "metric" : {
+          "type" : "string",
+          "description": "Metric key at source (GCP)",
+          "examples": ["pubsub.googleapis.com/snapshot/backlog_bytes_by_region"],
+          "pattern": "^[A-Za-z0-9._\/]*$",
+          "minLength": 1,
+          "maxLength": 200
+        },        
+        "type" : {
+          "type" : "string",
+          "desription" : "Metric type for MINT ingest",
+          "examples": ["gauge"],
+          "enum": [
+            "gauge",
+            "count",
+            "count,delta"
+          ]
+        },
+        "name" : {
+          "type" : "string",
+          "description": "Metric name in for MINT ingest",
+          "examples": ["backlog_bytes_by_region"],
+          "pattern": "^cloud\\.gcp\\.[A-Za-z0-9_]+\\.[A-Za-z0-9._\/]*$$",
+          "minLength": 2,
+          "maxLength": 250
+        },
+        "metadata" : {         
+          "description": "Metric metadata", 
+          "$ref": "#/definitions/metricMetadata"
+        }
+      }
+    },
+    "metricMetadata" :
+    {
+      "type" : "object",
+      "description": "Metric metadata to be registered",
+      "required": [],
+      "properties": {
+        "metricKind": {
+          "type": "string",
+          "desription": "Metric kind of GCP metric",
+          "examples": [
+            "gauge"
+          ],
+          "enum": [
+            "gauge",
+            "delta",
+            "cumulative"
+          ]
+        },
+          "ingestDelay"  :
+          {
+              "type": "string",
+              "description": "The delay of data points caused by ingestion. Data points older than this age are guaranteed to be ingested and available to be read, excluding data loss due to errors.",
+              "examples": ["240s"],
+              "pattern": "^[0-9]+s$",              
+              "minLength": 2,
+              "maxLength": 10
+          },
+          "samplePeriod" : {
+            "type": "string",
+            "description": "The sampling period of metric data points. For metrics which are written periodically, consecutive data points are stored at this time interval, excluding data loss due to errors. Metrics with a higher granularity have a smaller sampling period.",
+            "examples": ["60s"],
+            "pattern": "^[0-9]+s$",              
+            "minLength": 2,
+            "maxLength": 10
+          },          
+          "displayName" : {
+            "type": "string",
+            "description": "Display name in Dynatrace",
+            "examples": ["Execution times"],
+            "pattern": "^[A-Z%][A-Za-z0-9 \\-()%/.]*$",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "unit" : {
+            "type": "string",
+            "description": "Metric unit",
+            "examples": ["GiBy"],
+            "pattern": "^[A-Za-z1]+$",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "dimensions" : {
+              "type" : "array",
+              "description": "List of availabile dimensions",
+              "items": {
+                "$ref": "#/definitions/dimension"
+              }
+          }
+      }
+    },
+    "dimension" :
+    {
+      "type" : "object",
+      "description": "Dimension definition",
+      "required": [
+          "name", "displayName"
+        ],
+      "properties": {
+        "dimension" : {
+          "type" : "string",
+          "description": "Dimension name at source",
+          "examples": ["response_code"],
+          "pattern": "^[a-z0-9_\\-.:]+$",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    }
+  }
+}

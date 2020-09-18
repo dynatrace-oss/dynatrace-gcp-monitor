@@ -1,11 +1,25 @@
+#     Copyright 2020 Dynatrace LLC
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List
 
 from lib.context import Context, DynatraceConnectivity
-from lib.custom_devices.ids import _create_mmh3_hash
-from lib.custom_devices.model import CustomDevice
+from lib.entities.ids import _create_mmh3_hash
+from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
@@ -57,6 +71,21 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
     context.dynatrace_ingest_lines_ok_count += ingest_response_json.get("linesOk", 0)
     context.dynatrace_ingest_lines_invalid_count += ingest_response_json.get("linesInvalid", 0)
     print(f"Ingest response: {ingest_response_json}")
+    await log_invalid_lines(ingest_response_json, lines_batch)
+
+
+async def log_invalid_lines(ingest_response_json: Dict, lines_batch: List[IngestLine]):
+    error = ingest_response_json.get("error", None)
+    if error is None:
+        return
+
+    invalid_lines = error.get("invalidLines", [])
+    if invalid_lines:
+        for invalid_line_error_message in invalid_lines:
+            line_index = invalid_line_error_message.get("line", 0) - 1
+            if line_index > -1:
+                invalid_line_error_message = invalid_line_error_message.get("error", "")
+                print(f"INVALID LINE: '{lines_batch[line_index].to_string()}', reason: '{invalid_line_error_message}'")
 
 
 async def fetch_metric(
@@ -109,10 +138,10 @@ async def fetch_metric(
         for time_serie in page['timeSeries']:
             typed_value_key = extract_typed_value_key(time_serie)
             dimensions = create_dimensions(time_serie)
-            custom_device_id = create_custom_device_id(service, time_serie)
+            entity_id = create_entity_id(service, time_serie)
 
             for point in time_serie['points']:
-                line = convert_point_to_ingest_line(dimensions, metric, point, typed_value_key, custom_device_id)
+                line = convert_point_to_ingest_line(dimensions, metric, point, typed_value_key, entity_id)
                 if line:
                     lines.append(line)
 
@@ -159,26 +188,26 @@ def create_dimensions(time_serie: Dict) -> List[DimensionValue]:
 
 def flatten_and_enrich_metric_results(
         fetch_metric_results: List[List[IngestLine]],
-        custom_device_id_map: Dict[str, CustomDevice]
+        entity_id_map: Dict[str, Entity]
 ) -> List[IngestLine]:
     results = []
 
     entity_dimension_prefix = "entity."
     for ingest_lines in fetch_metric_results:
         for ingest_line in ingest_lines:
-            custom_device = custom_device_id_map.get(ingest_line.custom_device_id, None)
-            if custom_device:
-                for index, dns_name in enumerate(custom_device.dns_names):
+            entity = entity_id_map.get(ingest_line.entity_id, None)
+            if entity:
+                for index, dns_name in enumerate(entity.dns_names):
                     dim_name = "dns_name" if index == 0 else f"dns_name.{index}"
                     dimension_value = DimensionValue(name=entity_dimension_prefix + dim_name, value=dns_name)
                     ingest_line.dimension_values.append(dimension_value)
 
-                for index, ip_address in enumerate(custom_device.ip_addresses):
+                for index, ip_address in enumerate(entity.ip_addresses):
                     dim_name = "ip_address" if index == 0 else f"ip_address.{index}"
                     dimension_value = DimensionValue(name=entity_dimension_prefix + dim_name, value=ip_address)
                     ingest_line.dimension_values.append(dimension_value)
 
-                for cd_property in custom_device.properties:
+                for cd_property in entity.properties:
                     dimension_value = DimensionValue(
                         name=entity_dimension_prefix + cd_property.key.replace(" ", "_").lower(),
                         value=cd_property.value
@@ -190,7 +219,7 @@ def flatten_and_enrich_metric_results(
     return results
 
 
-def create_custom_device_id(service: GCPService, time_serie):
+def create_entity_id(service: GCPService, time_serie):
     resource = time_serie['resource']
     resource_labels = resource.get('labels', {})
     parts = [service.name]
@@ -199,8 +228,8 @@ def create_custom_device_id(service: GCPService, time_serie):
         dimension_value = resource_labels.get(key)
         if dimension_value:
             parts.append(dimension_value)
-    custom_device_id = _create_mmh3_hash(parts)
-    return custom_device_id
+    entity_id = _create_mmh3_hash(parts)
+    return entity_id
 
 
 def convert_point_to_ingest_line(
@@ -208,7 +237,7 @@ def convert_point_to_ingest_line(
         metric: Metric,
         point: Dict,
         typed_value_key: str,
-        custom_device_id: str
+        entity_id: str
 ) -> IngestLine:
     # Why endtime? see https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeInterval
     timestamp_iso = point['interval']['endTime']
@@ -224,7 +253,7 @@ def convert_point_to_ingest_line(
     line = None
     if value:
         line = IngestLine(
-            custom_device_id=custom_device_id,
+            entity_id=entity_id,
             metric_name=metric.dynatrace_name,
             metric_type=metric.dynatrace_metric_type,
             value=value,

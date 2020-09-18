@@ -1,3 +1,17 @@
+#     Copyright 2020 Dynatrace LLC
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
 import json
 from typing import Dict, List
 
@@ -5,6 +19,28 @@ from lib.context import Context
 from lib.metric_descriptor import SELF_MONITORING_METRIC_PREFIX, SELF_MONITORING_METRIC_MAP, \
     SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, SELF_MONITORING_INGEST_LINES_METRIC_TYPE, \
     SELF_MONITORING_REQUEST_COUNT_METRIC_TYPE, SELF_MONITORING_PHASE_EXECUTION_TIME_METRIC_TYPE
+
+
+async def push_self_monitoring_time_series(context: Context):
+    try:
+        print(f"Pushing self monitoring time series to GCP Monitor...")
+        await create_metric_descriptors_if_missing(context)
+
+        time_series = create_self_monitoring_time_series(context)
+        self_monitoring_response = await context.session.request(
+            "POST",
+            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id}/timeSeries",
+            data=json.dumps(time_series),
+            headers={"Authorization": "Bearer {token}".format(token=context.token)}
+        )
+        status = self_monitoring_response.status
+        if status != 200:
+            self_monitoring_response_json = await self_monitoring_response.json()
+            print(f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
+        else:
+            print(f"Finished pushing self monitoring time series to GCP Monitor")
+    except Exception as e:
+        print(f"Failed to push self monitoring time series, reason is {type(e).__name__} {e}")
 
 
 async def create_metric_descriptors_if_missing(context: Context):

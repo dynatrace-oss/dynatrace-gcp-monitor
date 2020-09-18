@@ -1,0 +1,48 @@
+""" This module contains data model definition dealing with entites. """
+
+#     Copyright 2020 Dynatrace LLC
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
+from dataclasses import dataclass
+from json import dumps
+from typing import Callable, FrozenSet, Iterable, NamedTuple, Text
+
+from lib.context import Context
+from lib.metrics import GCPService
+
+
+CdProperty = NamedTuple(
+    "CdProperty", [
+        ("key", Text),
+        ("value", Text)
+    ]
+)
+
+
+@dataclass(frozen=True)
+class Entity:  # pylint: disable=R0902
+    """ Represents information about single entity."""
+    id: Text
+    display_name: Text
+    group: Text
+    ip_addresses: FrozenSet[str]
+    listen_ports: FrozenSet[str]
+    favicon_url: Text
+    dtype: Text
+    properties: Iterable[CdProperty]
+    tags: FrozenSet[str]
+    dns_names: FrozenSet[str]
+
+
+ExtractEntitesFunc = Callable[[Context, GCPService], Iterable[Entity]]

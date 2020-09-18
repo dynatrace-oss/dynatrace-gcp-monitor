@@ -1,5 +1,18 @@
+#     Copyright 2020 Dynatrace LLC
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
 import asyncio
-import json
 import os
 import time
 import traceback
@@ -13,11 +26,11 @@ import yaml
 
 from lib.context import Context
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url
-from lib.custom_devices import custom_devices_extractors
-from lib.custom_devices.model import CustomDevice
+from lib.entities import entities_extractors
+from lib.entities.model import Entity
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric
-from lib.self_monitoring import create_metric_descriptors_if_missing, create_self_monitoring_time_series
+from lib.self_monitoring import push_self_monitoring_time_series
 
 
 def dynatrace_gcp_extension(event, context: Dict[Any, Any] = None, project_id: Optional[str] = None):
@@ -74,8 +87,8 @@ async def handle_event(event: Dict, context: Dict, project_id: Optional[str], se
         fetch_metric_tasks = []
         topology_tasks = []
         for service in services:
-            if service.name in custom_devices_extractors:
-                topology_task = custom_devices_extractors[service.name](context, service)
+            if service.name in entities_extractors:
+                topology_task = entities_extractors[service.name](context, service)
                 topology_tasks.append(topology_task)
             for metric in service.metrics:
                 fetch_metric_task = run_fetch_metric(
@@ -95,8 +108,8 @@ async def handle_event(event: Dict, context: Dict, project_id: Optional[str], se
         context.fetch_gcp_data_execution_time = time.time() - fetch_gcp_data_start_time
         print(f"Fetched GCP data in {context.fetch_gcp_data_execution_time} s")
 
-        custom_device_id_map = build_custom_device_id_map(fetch_topology_results)
-        flat_metric_results = flatten_and_enrich_metric_results(fetch_metric_results, custom_device_id_map)
+        entity_id_map = build_entity_id_map(fetch_topology_results)
+        flat_metric_results = flatten_and_enrich_metric_results(fetch_metric_results, entity_id_map)
 
         await push_ingest_lines(context, flat_metric_results)
 
@@ -105,33 +118,11 @@ async def handle_event(event: Dict, context: Dict, project_id: Optional[str], se
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
 
-async def push_self_monitoring_time_series(context: Context):
-    try:
-        print(f"Pushing self monitoring time series to GCP Monitor...")
-        await create_metric_descriptors_if_missing(context)
-
-        time_series = create_self_monitoring_time_series(context)
-        self_monitoring_response = await context.session.request(
-            "POST",
-            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id}/timeSeries",
-            data=json.dumps(time_series),
-            headers={"Authorization": "Bearer {token}".format(token=context.token)}
-        )
-        status = self_monitoring_response.status
-        if status != 200:
-            self_monitoring_response_json = await self_monitoring_response.json()
-            print(f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
-        else:
-            print(f"Finished pushing self monitoring time series to GCP Monitor")
-    except Exception as e:
-        print(f"Failed to push self monitoring time series, reason is {type(e).__name__} {e}")
-
-
-def build_custom_device_id_map(fetch_topology_results: List[List[CustomDevice]]) -> Dict[str, CustomDevice]:
+def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str, Entity]:
     result = {}
     for result_set in fetch_topology_results:
-        for custom_device in result_set:
-            result[custom_device.custom_device_id] = custom_device
+        for entity in result_set:
+            result[entity.id] = entity
     return result
 
 
