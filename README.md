@@ -29,7 +29,7 @@ In addition to metrics `Dynatrace Google Cloud Integration` is calling Service s
 You should deploy `Dynatrace Google Cloud Integration` into the project that will be monitored.
 
 
-#### Google Cloud Shell
+### Install with Google Cloud Shell
 
 Run the `Dynatrace Google Cloud Integration` installation script
 ```
@@ -45,7 +45,7 @@ Installation script will prompt for following parameters:
 
 
 
-#### Bash
+### Install with Bash
 Install [Google Cloud SDK](https://cloud.google.com/sdk/docs) following the instructions [Using the Google Cloud SDK installer](https://cloud.google.com/sdk/docs/downloads-interactive#linux)
 
 Initialize Google Cloud Shell following the instructions [Initializing Cloud SDK](https://cloud.google.com/sdk/docs/initializing)
@@ -62,11 +62,38 @@ Installation script will prompt for following parameters:
 | Dynatrace tenant URI | The URL to Your Dynatrace SaaS or Managed environemnt |
 | Dynatrace API token | Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `Ingest metrics using API V2` Token permission.
 
+### Monitoring GCP instances in Dynatrace
+
+Installation script deploy Dashboards for all of supported services within provided Dynatrace tenant. You can browse them in Dynatrace UI.
+
+Dashboads list:
+
+![Dashboards list](./img/gcp_dashboards_list.png)
+
+Sample dashboard for GCP API:
+
+![Sample dashboard](./img/gcp_api_dashboard.png)
+
+### Monitoring and troubleshooting `Dynatrace Google Cloud Integration`
+
+`Dynatrace Google Cloud Integration` reports self-monitoring metrics as Google Metrics. This allow to track eventual problems with communication between the function and Dynatrace cluster. 
+
+Self monitoring metrics:
+| Metrics | Description |
+| ------- | ----------- |
+| MINT lines ingested | Amount of lines of metrics (data points) ingested into Dynatrace Metric INTerface for given interval. |
+| Dynatrace connectivity | Status (1 -ok) indicating the connectivity between monitoring function and Dynatrace cluster. Connectivity can be broken due to wrong Dynatrace URL provided, wrong API token or network connectivity issues |
+| Dynatrace failed requests count | Amount of requests that were rejected by Dynatrace Metric INTerface. The reason for failure can be unexpected data point value or reaching request quota for metric ingest |
+| Dynatrace requests count | Amount of requests that were send to Dynatrace cluster.  |
+
+Installation script deploy `dynatrace-gcp-function Self Monitoring` dashboard upon installation process to help tracking health of the solution.
+
+![Self monitoring](./img/self_monitoring.png)
+
 
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for details on submitting changes.
-
 
 ## License
 

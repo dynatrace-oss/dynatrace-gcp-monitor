@@ -82,4 +82,7 @@ gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_exte
 echo "- schedule the runs"
 gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
 
+echo "- create self monitoring dashboard"
+gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
+
 #. ./setup_alerting.sh
