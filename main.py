@@ -35,22 +35,34 @@ from lib.self_monitoring import push_self_monitoring_time_series
 
 def dynatrace_gcp_extension(event, context: Dict[Any, Any] = None, project_id: Optional[str] = None):
     try:
-        selected_services = None
-        if "GCP_SERVICES" in os.environ:
-            selected_services_string = os.environ.get("GCP_SERVICES", "")
-            selected_services = selected_services_string.split(",") if selected_services_string else []
-
-        asyncio.run(handle_event(event, context, project_id, selected_services))
+        asyncio.run(handle_event(event, context, project_id))
     except Exception as e:
         traceback.print_exc()
         raise e
+
+
+async def async_dynatrace_gcp_extension():
+    timestamp_utc = datetime.utcnow()
+    timestamp_utc_iso = timestamp_utc.isoformat()
+    print(f"\nStarting execution [{timestamp_utc_iso}]")
+    context = {'timestamp': timestamp_utc_iso, 'event_id': timestamp_utc.timestamp(), 'event_type': 'test'}
+    data = {'data': '', 'publishTime': timestamp_utc_iso}
+
+    start_time = time.time()
+    await handle_event(data, context, "dynatrace-gcp-extension")
+    elapsed_time = time.time() - start_time
+    print(f"Execution [{timestamp_utc_iso}] took {elapsed_time}")
 
 
 def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, context: Dict, project_id: Optional[str], selected_services: List[str]):
+async def handle_event(event: Dict, context: Dict, project_id: Optional[str]):
+    selected_services = None
+    if "GCP_SERVICES" in os.environ:
+        selected_services_string = os.environ.get("GCP_SERVICES", "")
+        selected_services = selected_services_string.split(",") if selected_services_string else []
     services = load_supported_services(selected_services)
 
     async with aiohttp.ClientSession() as session:
@@ -112,8 +124,9 @@ async def handle_event(event: Dict, context: Dict, project_id: Optional[str], se
         flat_metric_results = flatten_and_enrich_metric_results(fetch_metric_results, entity_id_map)
 
         await push_ingest_lines(context, flat_metric_results)
-
         await push_self_monitoring_time_series(context)
+
+        await session.close()
 
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 

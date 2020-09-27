@@ -1,0 +1,68 @@
+# Debug properties for Dynatrace Cloud Function
+debug:  
+  # if true will print full MINT ingest input
+  printMetricIngestInput: false 
+googleCloud:
+  common:
+    # Name of Google Secret Manager Secret containing Dynatrace Access Key
+    dynatraceAccessKeySecretName: DYNATRACE_ACCESS_KEY 
+    # Name of Google Secret Manager Secret containing Dynatrace URL
+    dynatraceUrlSecretName: DYNATRACE_URL
+    # Name of the Service Account that should be created for Dynatrace Function to authenticate with Google Monitoring API 
+    serviceAccount: dynatrace-gcp-service
+    # Path to Google credentials file
+    # googleApplicationCredentialsPath: ''
+    cloudFunctionSize: s 
+  metrics:
+    # Name of the Pub/Sub topic for metric function
+    pubSubTopic: dynatrace-gcp-service-invocation
+    # Name of the metric forwarding function 
+    function: dynatrace-gcp-function
+    # Name of the metric forwarding Cloud Scheduler instance
+    scheduler: dynatrace-gcp-schedule
+    # Cron schedule for Cloud Scheduler instance
+    schedulerSchedule: "* * * * *" 
+  logs:
+    # Name of the log forwarding function
+    function: dynatrace-gcp-logs-function
+    # Prefix for Log Router Sink for log forwarding function
+    log-sink-prefix: dynatrace-log-sink_ 
+activation:
+  metrics:
+    # List of services to forward Google Monitoring Metrics to Dynatrace
+    services:
+    # Google Cloud APIs
+    - api
+    # Google Cloud Function
+    - cloud_function
+    # Google Cloud SQL
+    - cloudsql_database
+    # Google Cloud Datastore 
+    - datastore_request
+    # Google Cloud Filestore
+    - filestore_instance
+    # Google Cloud Storage
+    - gcs_bucket
+    # Google Cloud Load Balancing / HTTP(S) Load Balancing
+    - https_lb_rule
+    # Google Cloud Load Balancing / HTTP(S) Load Balancing / Internal
+    - internal_http_lb_rule
+    # Google Cloud Load Balancing / TCP Load Balancing / Internal
+    - internal_tcp_lb_rule
+    # Google Cloud Load Balancing / UDP Load Balancing / Internal 
+    - internal_udp_lb_rule
+     # Google Cloud Load Balancing / TCP Load Balancing 
+    - tcp_lb_rule
+    # Google Cloud Load Balancing / UDP Load Balancing 
+    - udp_lb_rule
+    # Google Cloud Pub/Sub / Snapshots
+    - pubsub_snapshot
+    # Google Cloud Pub/Sub / Subscriptions
+    - pubsub_subscription
+    # Google Cloud Pub/Sub / Topics
+    - pubsub_topic
+    # Google Cloud Pub/Sub / Lite Topics
+    - pubsublite_topic_partition
+#   logs:
+#     services: # List of services to forward Logs from Google Operations/Logging to Dynatrace, for those services Log Router Sinks and Pub/Sub topic will be created
+#     - cloudsql_database

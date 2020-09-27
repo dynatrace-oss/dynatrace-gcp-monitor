@@ -11,7 +11,6 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
@@ -23,18 +22,25 @@ from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
-METRIC_INGEST_BATCH_SIZE = 1000
-
 
 async def push_ingest_lines(context: Context, fetch_metric_results: List[IngestLine]):
+    lines_sent = 0
+    maximum_lines_threshold = context.maximum_metric_data_points_per_minute
     start_time = time.time()
     try:
         lines_batch = []
         for result in fetch_metric_results:
             lines_batch.append(result)
-            if len(lines_batch) >= METRIC_INGEST_BATCH_SIZE:
+            lines_sent += 1
+            if len(lines_batch) >= context.metric_ingest_batch_size:
                 await _push_to_dynatrace(context, lines_batch)
                 lines_batch = []
+            if lines_sent >= maximum_lines_threshold:
+                await _push_to_dynatrace(context, lines_batch)
+                lines_dropped_count = len(fetch_metric_results) - maximum_lines_threshold
+                context.dynatrace_ingest_lines_dropped_count = lines_dropped_count
+                print(f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
+                return
 
         await _push_to_dynatrace(context, lines_batch)
     except Exception as e:

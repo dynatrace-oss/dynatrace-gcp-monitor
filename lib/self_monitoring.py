@@ -39,6 +39,7 @@ async def push_self_monitoring_time_series(context: Context):
             print(f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
         else:
             print(f"Finished pushing self monitoring time series to GCP Monitor")
+        self_monitoring_response.close()
     except Exception as e:
         print(f"Failed to push self monitoring time series, reason is {type(e).__name__} {e}")
 
@@ -131,6 +132,18 @@ def create_self_monitoring_time_series(context: Context) -> Dict:
             [{
                 "interval": interval,
                 "value": {"int64Value": context.dynatrace_ingest_lines_invalid_count}
+            }]),
+        create_time_serie(
+            context,
+            SELF_MONITORING_INGEST_LINES_METRIC_TYPE,
+            {
+                "function_name": context.function_name,
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "status": "Dropped"
+            },
+            [{
+                "interval": interval,
+                "value": {"int64Value": context.dynatrace_ingest_lines_dropped_count}
             }]),
         create_time_serie(
             context,

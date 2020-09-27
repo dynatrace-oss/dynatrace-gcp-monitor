@@ -42,12 +42,17 @@ class Context:
         self.print_metric_ingest_input = print_metric_ingest_input
         self.function_name = os.environ.get("FUNCTION_NAME", "Local")
         self.location = os.environ.get("FUNCTION_REGION", "us-east1")
+        self.maximum_metric_data_points_per_minute = int(os.environ.get("MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE", "100000"))
+        self.metric_ingest_batch_size = int(os.environ.get("METRIC_INGEST_BATCH_SIZE", "1000"))
 
         # self monitoring data
         self.dynatrace_request_count = {}
         self.dynatrace_connectivity = DynatraceConnectivity.Ok
+
         self.dynatrace_ingest_lines_ok_count = 0
         self.dynatrace_ingest_lines_invalid_count = 0
+        self.dynatrace_ingest_lines_dropped_count = 0
+
         self.setup_execution_time = 0
         self.fetch_gcp_data_execution_time = 0
         self.push_to_dynatrace_execution_time = 0
