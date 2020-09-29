@@ -6,3 +6,4 @@ venv
 __pycache__
 DynatraceGCPExtension-567694bc8bb0.json
 *.swp
+build/dist/

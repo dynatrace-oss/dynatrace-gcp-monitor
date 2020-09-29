@@ -17,9 +17,9 @@
 from functools import wraps
 from typing import Dict, Iterable, Text
 
-from lib.context import Context
-from lib.entities.model import Entity, ExtractEntitesFunc
-from lib.metrics import GCPService
+from src.lib.context import Context
+from src.lib.entities.model import Entity, ExtractEntitesFunc
+from src.lib.metrics import GCPService
 
 entities_extractors: Dict[Text, ExtractEntitesFunc] = {}
 

@@ -15,11 +15,12 @@ import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List
+from urllib.parse import urljoin
 
-from lib.context import Context, DynatraceConnectivity
-from lib.entities.ids import _create_mmh3_hash
-from lib.entities.model import Entity
-from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
+from src.lib.context import Context, DynatraceConnectivity
+from src.lib.entities.ids import _create_mmh3_hash
+from src.lib.entities.model import Entity
+from src.lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
 
@@ -41,8 +42,8 @@ async def push_ingest_lines(context: Context, fetch_metric_results: List[IngestL
                 context.dynatrace_ingest_lines_dropped_count = lines_dropped_count
                 print(f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
                 return
-
-        await _push_to_dynatrace(context, lines_batch)
+        if lines_batch:
+            await _push_to_dynatrace(context, lines_batch)
     except Exception as e:
         if isinstance(e, InvalidURL):
             context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
@@ -57,8 +58,11 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
     if context.print_metric_ingest_input:
         print(ingest_input)
     ingest_response = await context.session.post(
-        url=f"{context.dynatrace_url}/api/v2/metrics/ingest",
-        headers={"Authorization": f"Api-Token {context.dynatrace_api_key}"},
+        url=urljoin(context.dynatrace_url, "/api/v2/metrics/ingest"),
+        headers={
+            "Authorization": f"Api-Token {context.dynatrace_api_key}",
+            "Content-Type": "text/plain; charset=utf-8"
+        },
         data=ingest_input
     )
 
@@ -68,7 +72,7 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
     elif ingest_response.status == 403:
         context.dynatrace_connectivity = DynatraceConnectivity.WrongToken
         raise Exception("Wrong token - missing 'Ingest metrics using API V2' permission")
-    elif ingest_response.status == 404:
+    elif ingest_response.status == 404 or ingest_response.status == 405:
         context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
         raise Exception("Wrong URL")
 

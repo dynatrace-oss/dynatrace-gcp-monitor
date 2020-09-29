@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, Iterable, List, Text
 
 import mmh3
 
-from lib.metrics import GCPService
+from src.lib.metrics import GCPService
 
 
 ExtractPropertyFunc = Callable[[Dict[Text, Any]], Text]

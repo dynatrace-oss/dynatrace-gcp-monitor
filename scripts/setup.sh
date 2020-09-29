@@ -177,3 +177,62 @@ if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORIN
 else
     gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
 fi
+
+
+# echo -e
+# echo "- creating Dynatrace dashboards"
+# for DASHBOARD in $DASHBOARDS_TO_ACTIVATE
+# do    
+#     DASHBOARD_PATH=$(curl https://raw.githubusercontent.com/pawelsiwek/dynatrace-gcp-function/master/config/$DASHBOARD.yaml?token=AGJQWE23DLTSQDWCQI54NLK7ODML4 | yq r -j - | jq -r ".dashboards[].dashboard")   
+#     #echo $DASHBOARD_PATH 
+#     exit
+# done
+
+
+# for FILEPATH in ./config/*.yaml ./config/*.yml
+# do 
+#   DASHBOARDS_NUMBER=$(yq r --length "$FILEPATH" dashboards)
+#   if [ "$DASHBOARDS_NUMBER" != "" ]; then
+#     MAX_INDEX=-1
+#     ((MAX_INDEX += DASHBOARDS_NUMBER))
+#     for INDEX in $(seq 0 "$MAX_INDEX");
+#     do
+#       DASHBOARD_PATH=$(yq r -j "$FILEPATH" dashboards[$INDEX].dashboard | tr -d '"')
+#       DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
+#       echo "- Create $DASHBOARD_PATH dashboard"
+#       curl -X POST "${DYNATRACE_URL}api/config/v1/dashboards" \
+#        -H "Accept: application/json; charset=utf-8" \
+#        -H "Content-Type: application/json; charset=utf-8" \
+#        -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
+#        -d "$DASHBOARD_JSON"
+#       echo ""
+#     done
+#   fi
+
+#   ALERTS_NUMBER=$(yq r --length "$FILEPATH" alerting)
+#   if [ "$ALERTS_NUMBER" != "" ]; then
+#     MAX_INDEX=-1
+#     ((MAX_INDEX += ALERTS_NUMBER))
+#     for INDEX in $(seq 0 "$MAX_INDEX");
+#     do
+#       PAYLOAD_JSON=$(yq r -j "$FILEPATH" alerting[$INDEX] | jq -r '{
+#         name: .name,
+#         metricId: .query,
+#         description: .description,
+#         aggregationType: .aggregationType,
+#         enabled: true,
+#         severity: "CUSTOM_ALERT",
+#         monitoringStrategy: .model,
+#         metricDimensions: [.metricDimensions]}')
+# #      echo "$PAYLOAD_JSON"
+
+#       echo "- Create $(yq r -j "$FILEPATH" alerting[$INDEX].name) alert "
+#       curl -X POST "${DYNATRACE_URL}api/config/v1/anomalyDetection/metricEvents" \
+#        -H "Accept: application/json; charset=utf-8" \
+#        -H "Content-Type: application/json; charset=utf-8" \
+#        -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
+#        -d "$PAYLOAD_JSON"
+#       echo ""
+#     done
+#   fi
+done

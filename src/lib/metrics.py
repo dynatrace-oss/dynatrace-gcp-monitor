@@ -134,10 +134,12 @@ class GCPService:
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'
 BOOL_VALUE_KEY = 'boolValue'
+DOUBLE_VALUE_KEY = 'doubleValue'
+INT_VALUE_KEY = 'int64Value'
 
 TYPED_VALUE_KEY_MAPPING = {
-    'INT64': 'int64Value',
-    'DOUBLE': 'doubleValue',
+    'INT64': INT_VALUE_KEY,
+    'DOUBLE': DOUBLE_VALUE_KEY,
     'BOOL': BOOL_VALUE_KEY,
     'DISTRIBUTION': DISTRIBUTION_VALUE_KEY
 }

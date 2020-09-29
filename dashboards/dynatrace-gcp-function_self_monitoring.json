@@ -101,7 +101,8 @@
                       "crossSeriesReducer": "REDUCE_SUM",
                       "groupByFields": [
                         "metric.label.\"status\"",
-                        "metric.label.\"function_name\""
+                        "metric.label.\"function_name\"",
+                        "metric.label.\"phase\""
                       ]
                     },
                     "secondaryAggregation": {}

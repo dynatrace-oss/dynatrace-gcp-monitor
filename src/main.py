@@ -24,13 +24,13 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import yaml
 
-from lib.context import Context
-from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url
-from lib.entities import entities_extractors
-from lib.entities.model import Entity
-from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
-from lib.metrics import GCPService, Metric
-from lib.self_monitoring import push_self_monitoring_time_series
+from src.lib.context import Context
+from src.lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url
+from src.lib.entities import entities_extractors
+from src.lib.entities.model import Entity
+from src.lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
+from src.lib.metrics import GCPService, Metric
+from src.lib.self_monitoring import push_self_monitoring_time_series
 
 
 def dynatrace_gcp_extension(event, context: Dict[Any, Any] = None, project_id: Optional[str] = None):
