@@ -18,8 +18,8 @@ from dataclasses import dataclass
 from json import dumps
 from typing import Callable, FrozenSet, Iterable, NamedTuple, Text
 
-from src.lib.context import Context
-from src.lib.metrics import GCPService
+from lib.context import Context
+from lib.metrics import GCPService
 
 
 CdProperty = NamedTuple(

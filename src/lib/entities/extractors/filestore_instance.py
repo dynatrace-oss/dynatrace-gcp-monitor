@@ -17,12 +17,12 @@ import re
 from functools import partial
 from typing import Any, Dict, Iterable, Text
 
-from src.lib.context import Context
-from src.lib.entities.decorator import entity_extractor
-from src.lib.entities.google_api import generic_paging
-from src.lib.entities.ids import get_func_create_entity_id, LabelToApiRspMapping
-from src.lib.entities.model import CdProperty, Entity
-from src.lib.metrics import GCPService
+from lib.context import Context
+from lib.entities.decorator import entity_extractor
+from lib.entities.google_api import generic_paging
+from lib.entities.ids import get_func_create_entity_id, LabelToApiRspMapping
+from lib.entities.model import CdProperty, Entity
+from lib.metrics import GCPService
 
 
 export_labels_regex = re.compile(

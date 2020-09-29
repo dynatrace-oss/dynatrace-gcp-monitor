@@ -17,10 +17,10 @@ from http.client import InvalidURL
 from typing import Dict, List
 from urllib.parse import urljoin
 
-from src.lib.context import Context, DynatraceConnectivity
-from src.lib.entities.ids import _create_mmh3_hash
-from src.lib.entities.model import Entity
-from src.lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
+from lib.context import Context, DynatraceConnectivity
+from lib.entities.ids import _create_mmh3_hash
+from lib.entities.model import Entity
+from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
 
