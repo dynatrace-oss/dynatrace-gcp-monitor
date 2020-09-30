@@ -18,8 +18,8 @@ readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring / uninstall script"
 echo -e "\033[0;37m"
 
-if [ ! -f $ACTIVATION_CONFIG ]; then
-    echo -e "INFO: Configuration file [$ACTIVATION_CONFIG] missing, downloading default"
+if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
+    echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
     wget -q $FUNCTION_RAW_REPOSITORY_URL/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
     echo
 fi

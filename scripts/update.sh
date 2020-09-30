@@ -22,23 +22,23 @@ readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring / update script"
 echo -e "\033[0;37m"
 
-if [ ! -f $ACTIVATION_CONFIG ]; then
-    echo -e "INFO: Configuration file [$ACTIVATION_CONFIG] missing, downloading default"
+if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
+    echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
     wget -q $FUNCTION_RAW_REPOSITORY_URL/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
     echo
 fi
 
-readonly GCP_SERVICE_ACCOUNT=$(yq r $ACTIVATION_CONFIG 'googleCloud.common.serviceAccount')
-readonly GCP_PUBSUB_TOPIC=$(yq r $ACTIVATION_CONFIG 'googleCloud.metrics.pubSubTopic')
-readonly GCP_FUNCTION_NAME=$(yq r $ACTIVATION_CONFIG 'googleCloud.metrics.function')
-readonly GCP_SCHEDULER_NAME=$(yq r $ACTIVATION_CONFIG 'googleCloud.metrics.scheduler')
-readonly GCP_SCHEDULER_CRON=$(yq r $ACTIVATION_CONFIG 'googleCloud.metrics.schedulerSchedule')
-readonly DYNATRACE_URL_SECRET_NAME=$(yq r $ACTIVATION_CONFIG 'googleCloud.common.dynatraceUrlSecretName')
-readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq r $ACTIVATION_CONFIG 'googleCloud.common.dynatraceAccessKeySecretName')
-readonly FUNCTION_GCP_SERVICES=$(yq r $ACTIVATION_CONFIG 'activation.metrics.services | join(",")') 
-readonly DASHBOARDS_TO_ACTIVATE=$(yq r -j -P $ACTIVATION_CONFIG 'activation.metrics.services' | jq -r .[]) 
-readonly PRINT_METRIC_INGEST_INPUT=$(yq r $ACTIVATION_CONFIG 'debug.printMetricIngestInput')
-readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r $ACTIVATION_CONFIG 'googleCloud.common.cloudFunctionSize')
+readonly GCP_SERVICE_ACCOUNT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.serviceAccount')
+readonly GCP_PUBSUB_TOPIC=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.pubSubTopic')
+readonly GCP_FUNCTION_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.function')
+readonly GCP_SCHEDULER_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.scheduler')
+readonly GCP_SCHEDULER_CRON=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.schedulerSchedule')
+readonly DYNATRACE_URL_SECRET_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.dynatraceUrlSecretName')
+readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.dynatraceAccessKeySecretName')
+readonly FUNCTION_GCP_SERVICES=$(yq r $FUNCTION_ACTIVATION_CONFIG 'activation.metrics.services | join(",")') 
+readonly DASHBOARDS_TO_ACTIVATE=$(yq r -j -P $FUNCTION_ACTIVATION_CONFIG 'activation.metrics.services' | jq -r .[]) 
+readonly PRINT_METRIC_INGEST_INPUT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'debug.printMetricIngestInput')
+readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.cloudFunctionSize')
 
 
 if ! command -v gcloud &> /dev/null
@@ -69,22 +69,20 @@ gcloud config set project $GCP_PROJECT
 
 echo -e
 echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL/$FUNCTION_ZIP_PACKAGE]"
-wget $FUNCTION_REPOSITORY_RELEASE_URL/$FUNCTION_ZIP_PACKAGE  -O $FUNCTION_ZIP_PACKAGE 
+wget -q $FUNCTION_REPOSITORY_RELEASE_URL/$FUNCTION_ZIP_PACKAGE  -O $FUNCTION_ZIP_PACKAGE 
 
 
 echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 mkdir -p $GCP_FUNCTION_NAME
 unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME
-echo "- deploy the function [$GCP_FUNCTION_NAME]"
 cd ./$GCP_FUNCTION_NAME
 
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
 gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only
 
-
 echo "- cleaning up"
-
 cd ..
+
 echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
 rm ./$FUNCTION_ZIP_PACKAGE
 
