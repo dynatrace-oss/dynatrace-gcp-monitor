@@ -17,8 +17,8 @@ from typing import Any, Callable, Dict, List, Text
 
 from aiohttp import ClientSession
 
-from src.lib.context import Context
-from src.lib.entities.model import Entity
+from lib.context import Context
+from lib.entities.model import Entity
 
 
 async def fetch_zones(

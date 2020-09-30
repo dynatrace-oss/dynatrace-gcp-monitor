@@ -14,5 +14,5 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-from src.lib.entities.extractors import *
-from src.lib.entities.decorator import entities_extractors
+from lib.entities.extractors import *
+from lib.entities.decorator import entities_extractors
