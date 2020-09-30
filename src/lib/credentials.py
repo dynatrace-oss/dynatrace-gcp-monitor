@@ -25,17 +25,8 @@ _METADATA_FLAVOR_HEADER = "metadata-flavor"
 _METADATA_FLAVOR_VALUE = "Google"
 _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 
-
-if "DYNATRACE_ACCESS_KEY_SECRET_NAME" in os.environ:
-    _DYNATRACE_ACCESS_KEY_SECRET_NAME = os.environ["DYNATRACE_ACCESS_KEY_SECRET_NAME"]
-else:
-    _DYNATRACE_ACCESS_KEY_SECRET_NAME = "DYNATRACE_ACCESS_KEY"
-
-
-if "DYNATRACE_URL_SECRET_NAME" in os.environ:
-    _DYNATRACE_URL_SECRET_NAME = os.environ["DYNATRACE_URL_SECRET_NAME"]
-else:
-    _DYNATRACE_URL_SECRET_NAME = "DYNATRACE_URL"
+_DYNATRACE_ACCESS_KEY_SECRET_NAME = os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_NAME", "DYNATRACE_ACCESS_KEY")
+_DYNATRACE_URL_SECRET_NAME = os.environ.get("DYNATRACE_URL_SECRET_NAME","DYNATRACE_URL")
 
 
 async def fetch_dynatrace_api_key(session: ClientSession, project_id: str, token: str,):
@@ -47,6 +38,10 @@ async def fetch_dynatrace_url(session: ClientSession, project_id: str, token: st
 
 
 async def fetch_secret(session: ClientSession, project_id: str, token: str, secret_name: str):
+    env_secret_value = os.environ.get(secret_name, None)
+    if env_secret_value:
+        return env_secret_value
+
     url = "https://secretmanager.googleapis.com/v1/projects/{project_id}/secrets/{secret_name}/versions/latest:access"\
         .format(project_id=project_id, secret_name=secret_name)
 

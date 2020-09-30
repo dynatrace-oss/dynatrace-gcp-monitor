@@ -13,20 +13,30 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-readonly GCP_SERVICE_ACCOUNT=$(yq r activation-config.yaml 'googleCloud.common.serviceAccount')
-readonly GCP_PUBSUB_TOPIC=$(yq r activation-config.yaml 'googleCloud.metrics.pubSubTopic')
-readonly GCP_FUNCTION_NAME=$(yq r activation-config.yaml 'googleCloud.metrics.function')
-readonly GCP_SCHEDULER_NAME=$(yq r activation-config.yaml 'googleCloud.metrics.scheduler')
-readonly GCP_SCHEDULER_CRON=$(yq r activation-config.yaml 'googleCloud.metrics.schedulerSchedule')
-readonly DYNATRACE_URL_SECRET_NAME=$(yq r activation-config.yaml 'googleCloud.common.dynatraceUrlSecretName')
-readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq r activation-config.yaml 'googleCloud.common.dynatraceAccessKeySecretName')
-readonly FUNCTION_REPOSITORY=GITHUB_RELEASES
-readonly FUNCTION_GCP_SERVICES=$(yq r activation-config.yaml 'activation.metrics.services | join(",")') 
-readonly DASHBOARDS_TO_ACTIVATE=$(yq r -j -P activation-config.yaml 'activation.metrics.services' | jq -r .[]) 
-readonly PRINT_METRIC_INGEST_INPUT=$(yq r activation-config.yaml 'debug.printMetricIngestInput')
-readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r activation-config.yaml 'googleCloud.common.cloudFunctionSize')
+readonly FUNCTION_REPOSITORY=https://azurelabbackendstorage.z13.web.core.windows.net
+readonly ACTIVATION_CONFIG=activation-config.yaml
+readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
+
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring"
 echo -e "\033[0;37m"
+
+if [ ! -f $ACTIVATION_CONFIG ]; then
+echo -e "INFO: Configuration file [$ACTIVATION_CONFIG] missing, downloading default"
+wget -q $FUNCTION_REPOSITORY/$ACTIVATION_CONFIG -O $ACTIVATION_CONFIG
+echo
+fi
+
+readonly GCP_SERVICE_ACCOUNT=$(yq r $ACTIVATION_CONFIG 'googleCloud.common.serviceAccount')
+readonly GCP_PUBSUB_TOPIC=$(yq r $ACTIVATION_CONFIG 'googleCloud.metrics.pubSubTopic')
+readonly GCP_FUNCTION_NAME=$(yq r $ACTIVATION_CONFIG 'googleCloud.metrics.function')
+readonly GCP_SCHEDULER_NAME=$(yq r $ACTIVATION_CONFIG 'googleCloud.metrics.scheduler')
+readonly GCP_SCHEDULER_CRON=$(yq r $ACTIVATION_CONFIG 'googleCloud.metrics.schedulerSchedule')
+readonly DYNATRACE_URL_SECRET_NAME=$(yq r $ACTIVATION_CONFIG 'googleCloud.common.dynatraceUrlSecretName')
+readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq r $ACTIVATION_CONFIG 'googleCloud.common.dynatraceAccessKeySecretName')
+readonly FUNCTION_GCP_SERVICES=$(yq r $ACTIVATION_CONFIG 'activation.metrics.services | join(",")') 
+readonly DASHBOARDS_TO_ACTIVATE=$(yq r -j -P $ACTIVATION_CONFIG 'activation.metrics.services' | jq -r .[]) 
+readonly PRINT_METRIC_INGEST_INPUT=$(yq r $ACTIVATION_CONFIG 'debug.printMetricIngestInput')
+readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r $ACTIVATION_CONFIG 'googleCloud.common.cloudFunctionSize')
 
 
 if ! command -v gcloud &> /dev/null
@@ -112,8 +122,8 @@ echo "- set current project to [$GCP_PROJECT]"
 gcloud config set project $GCP_PROJECT
 
 echo -e
-echo "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com]"
-gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com
+echo "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com]"
+gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com
 
 echo -e
 echo "- create the pubsub topic [$GCP_PUBSUB_TOPIC]"
@@ -158,8 +168,16 @@ else
 fi
 
 echo -e
+echo "- downloading functions source [$FUNCTION_REPOSITORY/$FUNCTION_ZIP_PACKAGE]"
+wget $FUNCTION_REPOSITORY/$FUNCTION_ZIP_PACKAGE  -O $FUNCTION_ZIP_PACKAGE 
+
+
+echo "- extracting archive[$FUNCTION_ZIP_PACKAGE]"
+mkdir -p $GCP_FUNCTION_NAME
+unzip ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
-gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --source=$FUNCTION_REPOSITORY --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME
+cd ./$GCP_FUNCTION_NAME
+gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME
 
 echo -e
 echo "- schedule the runs"
@@ -177,62 +195,4 @@ if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORIN
 else
     gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
 fi
-
-
-# echo -e
-# echo "- creating Dynatrace dashboards"
-# for DASHBOARD in $DASHBOARDS_TO_ACTIVATE
-# do    
-#     DASHBOARD_PATH=$(curl https://raw.githubusercontent.com/pawelsiwek/dynatrace-gcp-function/master/config/$DASHBOARD.yaml?token=AGJQWE23DLTSQDWCQI54NLK7ODML4 | yq r -j - | jq -r ".dashboards[].dashboard")   
-#     #echo $DASHBOARD_PATH 
-#     exit
-# done
-
-
-# for FILEPATH in ./config/*.yaml ./config/*.yml
-# do 
-#   DASHBOARDS_NUMBER=$(yq r --length "$FILEPATH" dashboards)
-#   if [ "$DASHBOARDS_NUMBER" != "" ]; then
-#     MAX_INDEX=-1
-#     ((MAX_INDEX += DASHBOARDS_NUMBER))
-#     for INDEX in $(seq 0 "$MAX_INDEX");
-#     do
-#       DASHBOARD_PATH=$(yq r -j "$FILEPATH" dashboards[$INDEX].dashboard | tr -d '"')
-#       DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
-#       echo "- Create $DASHBOARD_PATH dashboard"
-#       curl -X POST "${DYNATRACE_URL}api/config/v1/dashboards" \
-#        -H "Accept: application/json; charset=utf-8" \
-#        -H "Content-Type: application/json; charset=utf-8" \
-#        -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
-#        -d "$DASHBOARD_JSON"
-#       echo ""
-#     done
-#   fi
-
-#   ALERTS_NUMBER=$(yq r --length "$FILEPATH" alerting)
-#   if [ "$ALERTS_NUMBER" != "" ]; then
-#     MAX_INDEX=-1
-#     ((MAX_INDEX += ALERTS_NUMBER))
-#     for INDEX in $(seq 0 "$MAX_INDEX");
-#     do
-#       PAYLOAD_JSON=$(yq r -j "$FILEPATH" alerting[$INDEX] | jq -r '{
-#         name: .name,
-#         metricId: .query,
-#         description: .description,
-#         aggregationType: .aggregationType,
-#         enabled: true,
-#         severity: "CUSTOM_ALERT",
-#         monitoringStrategy: .model,
-#         metricDimensions: [.metricDimensions]}')
-# #      echo "$PAYLOAD_JSON"
-
-#       echo "- Create $(yq r -j "$FILEPATH" alerting[$INDEX].name) alert "
-#       curl -X POST "${DYNATRACE_URL}api/config/v1/anomalyDetection/metricEvents" \
-#        -H "Accept: application/json; charset=utf-8" \
-#        -H "Content-Type: application/json; charset=utf-8" \
-#        -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
-#        -d "$PAYLOAD_JSON"
-#       echo ""
-#     done
-#   fi
-done
+x

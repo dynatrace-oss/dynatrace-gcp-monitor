@@ -44,7 +44,7 @@ sudo wget https://github.com/mikefarah/yq/releases/download/3.4.0/yq_linux_amd64
 
 Run the `Dynatrace function for Google Cloud Platform monitoring"` installation script
 ```
-wget -O GITHUB_BUILD_URL ; chmod a+x setup.sh ; ./setup.sh
+wget GITHUB_BUILD_URL -O setup.sh ; chmod a+x setup.sh ; ./setup.sh
 ```
 
 Installation script will prompt for following parameters:
@@ -80,7 +80,7 @@ Initialize Google Cloud Shell following the instructions [Initializing Cloud SDK
 
 Run the `Dynatrace function for Google Cloud Platform monitoring"` installation script
 ```
-wget -O GITHUB_BUILD_URL ; chmod a+x setup.sh ; ./setup.sh
+wget GITHUB_BUILD_URL -O setup.sh ; chmod a+x setup.sh ; ./setup.sh
 ```
 
 Installation script will prompt for following parameters:
@@ -90,6 +90,7 @@ Installation script will prompt for following parameters:
 | Function size | Amount of memory that should be assigned to the function. Possible options</br> **[s]** - small, up to 500 instances, 256 MB memory allocated to function</br> **[m]** - medium, up to 1000 instances, 512 MB memory allocated to function </br>**[l]** - large, up to 5000 instances, 2048 MB memory allocated to function</br>Please note that You will be able to adjust amount of memory after installation. |
 | Dynatrace tenant URI | The URL to Your Dynatrace SaaS or Managed environemnt |
 | Dynatrace API token | Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `Ingest metrics using API V2` Token permission.
+
 
 ### Monitoring GCP instances in Dynatrace
 
