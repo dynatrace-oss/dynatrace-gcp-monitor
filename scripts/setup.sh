@@ -13,17 +13,18 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-readonly FUNCTION_REPOSITORY=https://azurelabbackendstorage.z13.web.core.windows.net
-readonly ACTIVATION_CONFIG=activation-config.yaml
+readonly FUNCTION_REPOSITORY_RELEASE_URL=https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/release-0.0.2
+readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
+readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring"
 echo -e "\033[0;37m"
 
 if [ ! -f $ACTIVATION_CONFIG ]; then
-echo -e "INFO: Configuration file [$ACTIVATION_CONFIG] missing, downloading default"
-wget -q $FUNCTION_REPOSITORY/$ACTIVATION_CONFIG -O $ACTIVATION_CONFIG
-echo
+    echo -e "INFO: Configuration file [$ACTIVATION_CONFIG] missing, downloading default"
+    wget -q $FUNCTION_RAW_REPOSITORY_URL/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
+    echo
 fi
 
 readonly GCP_SERVICE_ACCOUNT=$(yq r $ACTIVATION_CONFIG 'googleCloud.common.serviceAccount')
@@ -74,9 +75,13 @@ echo -e "You are now logged in as [$GCP_ACCOUNT]"
 echo
 DEFAULT_PROJECT=$(gcloud config get-value project)
 
-echo "Please provide the GCP project name where Dynatrace function should be deployed to. Default value: [$DEFAULT_PROJECT] (current project)"
+echo "Please provide the GCP project ID where Dynatrace function should be deployed to. Default value: [$DEFAULT_PROJECT] (current project)"
+echo 
+echo "Available projects:"
+gcloud projects list --format="value(project_id)"
+echo 
 while ! [[ "${GCP_PROJECT}" =~ ^[a-z]{1}[a-z0-9-]{5,29}$ ]]; do
-    read -p "Enter GCP project name: " -i $DEFAULT_PROJECT -e GCP_PROJECT
+    read -p "Enter GCP project ID: " -i $DEFAULT_PROJECT -e GCP_PROJECT
 done
 echo ""
 
@@ -168,13 +173,13 @@ else
 fi
 
 echo -e
-echo "- downloading functions source [$FUNCTION_REPOSITORY/$FUNCTION_ZIP_PACKAGE]"
-wget $FUNCTION_REPOSITORY/$FUNCTION_ZIP_PACKAGE  -O $FUNCTION_ZIP_PACKAGE 
+echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL/$FUNCTION_ZIP_PACKAGE]"
+wget $FUNCTION_REPOSITORY_RELEASE_URL/$FUNCTION_ZIP_PACKAGE  -O $FUNCTION_ZIP_PACKAGE 
 
 
-echo "- extracting archive[$FUNCTION_ZIP_PACKAGE]"
+echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 mkdir -p $GCP_FUNCTION_NAME
-unzip ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME
+unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
 cd ./$GCP_FUNCTION_NAME
 gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME
@@ -195,4 +200,20 @@ if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORIN
 else
     gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
 fi
-x
+
+if [ $? -ne 0 ]; then
+    echo -e "\e[93mWARNING: \e[37mSelf monitoring dashboard could not be created."
+    echo -e
+    echo -e "Please verify if project [$GCP_PROJECT] is assigned to Google Monitoring Workspace, in the console https://console.cloud.google.com/monitoring/dashboards "
+    echo -e "Documentation: https://cloud.google.com/monitoring/workspaces/create"
+    echo 
+fi
+
+echo "- cleaning up"
+
+cd ..
+echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
+rm ./$FUNCTION_ZIP_PACKAGE
+
+echo "- removing temporary directory [$FUNCTION_ZIP_PACKAGE]"
+rm -r ./$GCP_FUNCTION_NAME

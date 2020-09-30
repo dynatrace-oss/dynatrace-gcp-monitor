@@ -12,6 +12,18 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
+readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
+
+echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring / uninstall script"
+echo -e "\033[0;37m"
+
+if [ ! -f $ACTIVATION_CONFIG ]; then
+    echo -e "INFO: Configuration file [$ACTIVATION_CONFIG] missing, downloading default"
+    wget -q $FUNCTION_RAW_REPOSITORY_URL/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
+    echo
+fi
+
 
 readonly GCP_SERVICE_ACCOUNT=$(yq r activation-config.yaml 'googleCloud.common.serviceAccount')
 readonly GCP_PUBSUB_TOPIC=$(yq r activation-config.yaml 'googleCloud.metrics.pubSubTopic')
@@ -20,14 +32,10 @@ readonly GCP_SCHEDULER_NAME=$(yq r activation-config.yaml 'googleCloud.metrics.s
 readonly GCP_SCHEDULER_CRON=$(yq r activation-config.yaml 'googleCloud.metrics.schedulerSchedule')
 readonly DYNATRACE_URL_SECRET_NAME=$(yq r activation-config.yaml 'googleCloud.common.dynatraceUrlSecretName')
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq r activation-config.yaml 'googleCloud.common.dynatraceAccessKeySecretName')
-readonly FUNCTION_REPOSITORY=GITHUB_BUILD_ZIP
 readonly ACTIVATION_SERVICES=$(yq r activation-config.yaml 'activation.metrics.services | join(",")') 
 readonly PRINT_METRIC_INGEST_INPUT=$(yq r activation-config.yaml 'debug.printMetricIngestInput')
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r activation-config.yaml 'googleCloud.common.cloudFunctionSize')
-readonly SELF_MONITORING_DASHBOARD_NAME=$(cat dashboards/dynatrace-gcp-function_self_monitoring.json | jq .displayName)
-
-echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring - uninstaller"
-echo -e "\033[0;37m"
+readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-function Self monitoring"
 
 
 if ! command -v gcloud &> /dev/null
@@ -46,6 +54,15 @@ GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
 echo
 DEFAULT_PROJECT=$(gcloud config get-value project)
+
+echo "Please provide the GCP project, form which monitoring function should be removed. Default value: [$DEFAULT_PROJECT] (current project)"
+while ! [[ "${GCP_PROJECT}" =~ ^[a-z]{1}[a-z0-9-]{5,29}$ ]]; do
+    read -p "Enter GCP project ID: " -i $DEFAULT_PROJECT -e GCP_PROJECT
+done
+echo ""
+
+echo "- set current project to [$GCP_PROJECT]"
+gcloud config set project $GCP_PROJECT
 
 echo "Discovering instances to remove"    
 REMOVE_FUNCTION=$(gcloud functions list --filter=name:dynatrace-gcp-function --format="value(name)")
@@ -84,8 +101,8 @@ if [[ $REMOVE_DASHBOARD ]]; then
 fi
 
 if ! [[ $REMOVE_DASHBOARD ]] & ! [[ $REMOVE_JOB ]] & ! [[ $REMOVE_FUNCTION ]] & ! [[ $REMOVE_SECRET_URL ]] & ! [[ $REMOVE_SECRET_TOKEN ]] & ! [[ $REMOVE_SERVICE_ACCOUNT ]]; then
-echo -e "\e[93mWARNING: \e[37mNo resources found. Operation canceled."
-exit
+    echo -e "\e[93mWARNING: \e[37mNo resources found. Operation canceled."
+    exit
 fi
 
 
