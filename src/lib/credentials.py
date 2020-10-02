@@ -20,7 +20,7 @@ import time
 import jwt
 from aiohttp import ClientSession
 
-_METADATA_ROOT = "http://metadata.google.internal/computeMetadata/v1/"
+_METADATA_ROOT = "http://metadata.google.internal/computeMetadata/v1"
 _METADATA_FLAVOR_HEADER = "metadata-flavor"
 _METADATA_FLAVOR_VALUE = "Google"
 _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
