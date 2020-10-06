@@ -1,0 +1,29 @@
+id: instance_group
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Instance Group
+gcp:
+- service: instance_group
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.instance_group_id
+    id: instance_group_id
+  - value: resource.labels.instance_group_name
+    id: instance_group_name
+  metrics:
+  - value: compute.googleapis.com/instance_group/size
+    id: cloud.gcp.compute_googleapis_com.instance_group.size
+    type: gauge
+    name: Instance group size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []

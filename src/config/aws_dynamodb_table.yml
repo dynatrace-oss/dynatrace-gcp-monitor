@@ -1,0 +1,772 @@
+id: aws_alb_load_balancer
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology: Google Amazon DynamoDB Table
+gcp:
+- service: aws_dynamodb_table
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.table
+    id: table
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/DynamoDB/ConditionalCheckFailedRequests/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConditionalCheckFailedRequests.SampleCount
+    type: count,delta
+    name: Samples of failed conditional writes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/DynamoDB/ConditionalCheckFailedRequests/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConditionalCheckFailedRequests.Sum
+    type: count,delta
+    name: Failed conditional writes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/DynamoDB/ConsumedReadCapacityUnits/Average
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedReadCapacityUnits.Average
+    type: gauge
+    name: Average consumed read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ConsumedReadCapacityUnits/Maximum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedReadCapacityUnits.Maximum
+    type: gauge
+    name: Maximum consumed read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ConsumedReadCapacityUnits/Minimum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedReadCapacityUnits.Minimum
+    type: gauge
+    name: Minimum consumed read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ConsumedReadCapacityUnits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedReadCapacityUnits.SampleCount
+    type: count,delta
+    name: Samples of consumed read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ConsumedReadCapacityUnits/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedReadCapacityUnits.Sum
+    type: count,delta
+    name: Consumed read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ConsumedWriteCapacityUnits/Average
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedWriteCapacityUnits.Average
+    type: gauge
+    name: Average consumed write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ConsumedWriteCapacityUnits/Maximum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedWriteCapacityUnits.Maximum
+    type: gauge
+    name: Maximum consumed write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ConsumedWriteCapacityUnits/Minimum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedWriteCapacityUnits.Minimum
+    type: gauge
+    name: Minimum consumed write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ConsumedWriteCapacityUnits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedWriteCapacityUnits.SampleCount
+    type: count,delta
+    name: Samples of consumed write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ConsumedWriteCapacityUnits/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ConsumedWriteCapacityUnits.Sum
+    type: count,delta
+    name: Consumed write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexConsumedWriteCapacity/Average
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexConsumedWriteCapacity.Average
+    type: gauge
+    name: Average consumed secondary index write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexConsumedWriteCapacity/Maximum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexConsumedWriteCapacity.Maximum
+    type: gauge
+    name: Maximum consumed secondary index write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexConsumedWriteCapacity/Minimum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexConsumedWriteCapacity.Minimum
+    type: gauge
+    name: Minimum consumed secondary index write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexConsumedWriteCapacity/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexConsumedWriteCapacity.SampleCount
+    type: count,delta
+    name: Samples of consumed secondary index write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexConsumedWriteCapacity/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexConsumedWriteCapacity.Sum
+    type: count,delta
+    name: Consumed secondary index write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexPercentageProgress/Average
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexPercentageProgress.Average
+    type: gauge
+    name: Average secondary index progress
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexPercentageProgress/Maximum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexPercentageProgress.Maximum
+    type: gauge
+    name: Maximum secondary index progress
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexPercentageProgress/Minimum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexPercentageProgress.Minimum
+    type: gauge
+    name: Minimum secondary index progress
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexPercentageProgress/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexPercentageProgress.SampleCount
+    type: count,delta
+    name: Samples of secondary index progress
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexPercentageProgress/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexPercentageProgress.Sum
+    type: count,delta
+    name: Secondary index progress
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexThrottleEvents/Average
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexThrottleEvents.Average
+    type: gauge
+    name: Average secondary index writes throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexThrottleEvents/Maximum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexThrottleEvents.Maximum
+    type: gauge
+    name: Maximum secondary index writes throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexThrottleEvents/Minimum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexThrottleEvents.Minimum
+    type: gauge
+    name: Minimum secondary index writes throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexThrottleEvents/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexThrottleEvents.SampleCount
+    type: count,delta
+    name: Samples of secondary index writes throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/OnlineIndexThrottleEvents/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.OnlineIndexThrottleEvents.Sum
+    type: count,delta
+    name: Secondary index writes throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedReadCapacityUnits/Average
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedReadCapacityUnits.Average
+    type: gauge
+    name: Average read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedReadCapacityUnits/Maximum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedReadCapacityUnits.Maximum
+    type: gauge
+    name: Maximum read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedReadCapacityUnits/Minimum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedReadCapacityUnits.Minimum
+    type: gauge
+    name: Minimum read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedReadCapacityUnits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedReadCapacityUnits.SampleCount
+    type: count,delta
+    name: Samples of read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedReadCapacityUnits/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedReadCapacityUnits.Sum
+    type: count,delta
+    name: Read capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedWriteCapacityUnits/Average
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedWriteCapacityUnits.Average
+    type: gauge
+    name: Average write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedWriteCapacityUnits/Maximum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedWriteCapacityUnits.Maximum
+    type: gauge
+    name: Maximum write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedWriteCapacityUnits/Minimum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedWriteCapacityUnits.Minimum
+    type: gauge
+    name: Minimum write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedWriteCapacityUnits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedWriteCapacityUnits.SampleCount
+    type: count,delta
+    name: Samples of write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ProvisionedWriteCapacityUnits/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ProvisionedWriteCapacityUnits.Sum
+    type: count,delta
+    name: Write capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ReadThrottleEvents/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ReadThrottleEvents.SampleCount
+    type: count,delta
+    name: Samples of reads throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ReadThrottleEvents/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ReadThrottleEvents.Sum
+    type: count,delta
+    name: Reads throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/ReturnedItemCount/Average
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ReturnedItemCount.Average
+    type: gauge
+    name: Average records retrieved
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/ReturnedItemCount/Maximum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ReturnedItemCount.Maximum
+    type: gauge
+    name: Maximum records retrieved
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/ReturnedItemCount/Minimum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ReturnedItemCount.Minimum
+    type: gauge
+    name: Minimum records retrieved
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/ReturnedItemCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ReturnedItemCount.SampleCount
+    type: count,delta
+    name: Samples of records retrieved
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/ReturnedItemCount/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ReturnedItemCount.Sum
+    type: count,delta
+    name: Records retrieved
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/SuccessfulRequestLatency/Average
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.SuccessfulRequestLatency.Average
+    type: gauge
+    name: Average request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/SuccessfulRequestLatency/Maximum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.SuccessfulRequestLatency.Maximum
+    type: gauge
+    name: Maximum request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/SuccessfulRequestLatency/Minimum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.SuccessfulRequestLatency.Minimum
+    type: gauge
+    name: Minimum request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/SuccessfulRequestLatency/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.SuccessfulRequestLatency.SampleCount
+    type: count,delta
+    name: Samples of request latency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/SuccessfulRequestLatency/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.SuccessfulRequestLatency.Sum
+    type: count,delta
+    name: Request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/SystemErrors/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.SystemErrors.SampleCount
+    type: count,delta
+    name: Samples of 500 errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/SystemErrors/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.SystemErrors.Sum
+    type: count,delta
+    name: 500 errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/ThrottledRequests/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ThrottledRequests.SampleCount
+    type: count,delta
+    name: Samples of requests throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/ThrottledRequests/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.ThrottledRequests.Sum
+    type: count,delta
+    name: Requests throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/UserErrors/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.UserErrors.SampleCount
+    type: count,delta
+    name: Samples of 400 errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/UserErrors/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.UserErrors.Sum
+    type: count,delta
+    name: 400 errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+    - value: metric.labels.Operation
+  - value: aws.googleapis.com/DynamoDB/WriteThrottleEvents/SampleCount
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.WriteThrottleEvents.SampleCount
+    type: count,delta
+    name: Samples of writes throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: aws.googleapis.com/DynamoDB/WriteThrottleEvents/Sum
+    id: cloud.gcp.aws_googleapis_com.DynamoDB.WriteThrottleEvents.Sum
+    type: count,delta
+    name: Writes throttled
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.GlobalSecondaryIndexName
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

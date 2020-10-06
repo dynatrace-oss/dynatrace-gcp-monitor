@@ -1,0 +1,116 @@
+id: uptime_url
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Uptime Check URL
+gcp:
+- service: uptime_url
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.host
+    id: host
+  metrics:
+  - value: monitoring.googleapis.com/uptime_check/check_passed
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.check_passed
+    type: gauge
+    name: Check passed
+    unit: ''
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/content_mismatch
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.content_mismatch
+    type: gauge
+    name: Content mismatch
+    unit: ''
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/error_code
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.error_code
+    type: gauge
+    name: Error code
+    unit: ''
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: STRING
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/http_status
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.http_status
+    type: gauge
+    name: HTTP status
+    unit: ''
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: STRING
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/request_latency
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.request_latency
+    type: gauge
+    name: Request latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id
+  - value: monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires
+    id: cloud.gcp.monitoring_googleapis_com.uptime_check.time_until_ssl_cert_expires
+    type: gauge
+    name: Time until SSL certificate expires
+    unit: d
+    gcpOptions:
+      ingestDelay: 35s
+      samplePeriod: ''
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.check_id
+    - value: metric.labels.checker_location
+    - value: metric.labels.checker_project_id
+    - value: metric.labels.checker_network
+    - value: metric.labels.checker_zone
+    - value: metric.labels.checked_resource_id

@@ -1,0 +1,219 @@
+id: aws_sns_topic
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Amazon SNS Topic
+gcp:
+- service: aws_sns_topic
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.topic
+    id: topic
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/SNS/NumberOfMessagesPublished/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SNS.NumberOfMessagesPublished.SampleCount
+    type: count,delta
+    name: Samples of messages sent
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/NumberOfMessagesPublished/Sum
+    id: cloud.gcp.aws_googleapis_com.SNS.NumberOfMessagesPublished.Sum
+    type: count,delta
+    name: Messages sent
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/NumberOfNotificationsDelivered/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SNS.NumberOfNotificationsDelivered.SampleCount
+    type: count,delta
+    name: Samples of messages delivered
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/NumberOfNotificationsDelivered/Sum
+    id: cloud.gcp.aws_googleapis_com.SNS.NumberOfNotificationsDelivered.Sum
+    type: count,delta
+    name: Messages delivered
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/NumberOfNotificationsFailed/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SNS.NumberOfNotificationsFailed.SampleCount
+    type: count,delta
+    name: Samples of messages failed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/NumberOfNotificationsFailed/Sum
+    id: cloud.gcp.aws_googleapis_com.SNS.NumberOfNotificationsFailed.Sum
+    type: count,delta
+    name: Messages failed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/PublishSize/Average
+    id: cloud.gcp.aws_googleapis_com.SNS.PublishSize.Average
+    type: gauge
+    name: Average message size
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/PublishSize/Maximum
+    id: cloud.gcp.aws_googleapis_com.SNS.PublishSize.Maximum
+    type: gauge
+    name: Maximum message size
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/PublishSize/Minimum
+    id: cloud.gcp.aws_googleapis_com.SNS.PublishSize.Minimum
+    type: gauge
+    name: Minimum message size
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/PublishSize/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SNS.PublishSize.SampleCount
+    type: count,delta
+    name: Samples of message size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Platform
+  - value: aws.googleapis.com/SNS/PublishSize/Sum
+    id: cloud.gcp.aws_googleapis_com.SNS.PublishSize.Sum
+    type: count,delta
+    name: Message size
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Platform
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

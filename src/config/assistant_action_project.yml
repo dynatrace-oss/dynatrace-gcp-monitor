@@ -1,0 +1,86 @@
+id: assistant_action_project
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Assistant Action Project 
+gcp:
+- service: assistant_action_project
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  metrics:
+  - value: actions.googleapis.com/smarthome_action/num_active_users
+    id: cloud.gcp.actions_googleapis_com.smarthome_action.num_active_users
+    type: gauge
+    name: Daily active users
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device_type
+    - value: metric.labels.locale
+    - value: metric.labels.trait
+  - value: actions.googleapis.com/smarthome_action/request_count
+    id: cloud.gcp.actions_googleapis_com.smarthome_action.request_count
+    type: count,delta
+    name: Request count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.device_type
+    - value: metric.labels.status
+    - value: metric.labels.trait
+    - value: metric.labels.is_local
+    - value: metric.labels.execution_type
+  - value: actions.googleapis.com/smarthome_action/request_latencies
+    id: cloud.gcp.actions_googleapis_com.smarthome_action.request_latencies
+    type: gauge
+    name: Request latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.device_type
+    - value: metric.labels.status
+    - value: metric.labels.trait
+    - value: metric.labels.is_local
+    - value: metric.labels.execution_type
+  - value: actions.googleapis.com/smarthome_action/seven_day_active_users
+    id: cloud.gcp.actions_googleapis_com.smarthome_action.seven_day_active_users
+    type: gauge
+    name: 7 day active users
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device_type
+    - value: metric.labels.locale
+    - value: metric.labels.trait
+  - value: actions.googleapis.com/smarthome_action/twenty_eight_day_active_users
+    id: cloud.gcp.actions_googleapis_com.smarthome_action.twenty_eight_day_active_users
+    type: gauge
+    name: 28 day active users
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.device_type
+    - value: metric.labels.locale
+    - value: metric.labels.trait

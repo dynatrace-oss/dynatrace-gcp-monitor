@@ -1,0 +1,819 @@
+id: aws_redshift_cluster
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Amazon EC2 Instance (via GCP)
+gcp:
+- service: Google Amazon Redshift Cluster
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.cluster_identifier
+    id: cluster_identifier
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/Redshift/CPUUtilization/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.CPUUtilization.Average
+    type: gauge
+    name: Average CPU utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/CPUUtilization/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.CPUUtilization.Maximum
+    type: gauge
+    name: Maximum CPU utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/CPUUtilization/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.CPUUtilization.Minimum
+    type: gauge
+    name: Minimum CPU utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/CPUUtilization/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.CPUUtilization.SampleCount
+    type: count,delta
+    name: Samples of CPU utilization
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/CPUUtilization/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.CPUUtilization.Sum
+    type: count,delta
+    name: CPU utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/DatabaseConnections/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.DatabaseConnections.Average
+    type: gauge
+    name: Average database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/DatabaseConnections/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.DatabaseConnections.Maximum
+    type: gauge
+    name: Maximum database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/DatabaseConnections/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.DatabaseConnections.Minimum
+    type: gauge
+    name: Minimum database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/DatabaseConnections/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.DatabaseConnections.SampleCount
+    type: count,delta
+    name: Samples of database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/DatabaseConnections/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.DatabaseConnections.Sum
+    type: count,delta
+    name: Database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/HealthStatus/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.HealthStatus.Average
+    type: gauge
+    name: Average cluster health status
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/HealthStatus/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.HealthStatus.SampleCount
+    type: count,delta
+    name: Samples of cluster health status
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/HealthStatus/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.HealthStatus.Sum
+    type: count,delta
+    name: Cluster health status
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/MaintenanceMode/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.MaintenanceMode.Average
+    type: gauge
+    name: Average Cluster maintenance mode status
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/MaintenanceMode/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.MaintenanceMode.SampleCount
+    type: count,delta
+    name: Samples of cluster maintenance mode status
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/MaintenanceMode/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.MaintenanceMode.Sum
+    type: count,delta
+    name: Cluster maintenance mode status
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkReceiveThroughput/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkReceiveThroughput.Average
+    type: gauge
+    name: Average network receive throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkReceiveThroughput/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkReceiveThroughput.Maximum
+    type: gauge
+    name: Maximum network receive throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkReceiveThroughput/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkReceiveThroughput.Minimum
+    type: gauge
+    name: Minimum network receive throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkReceiveThroughput/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkReceiveThroughput.SampleCount
+    type: count,delta
+    name: Samples of network receive throughput
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkReceiveThroughput/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkReceiveThroughput.Sum
+    type: count,delta
+    name: Network receive throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkTransmitThroughput/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkTransmitThroughput.Average
+    type: gauge
+    name: Average network transmit throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkTransmitThroughput/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkTransmitThroughput.Maximum
+    type: gauge
+    name: Maximum network transmit throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkTransmitThroughput/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkTransmitThroughput.Minimum
+    type: gauge
+    name: Minimum network transmit throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkTransmitThroughput/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkTransmitThroughput.SampleCount
+    type: count,delta
+    name: Samples of network transmit throughput
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/NetworkTransmitThroughput/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.NetworkTransmitThroughput.Sum
+    type: count,delta
+    name: Network transmit throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/PercentageDiskSpaceUsed/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.PercentageDiskSpaceUsed.Average
+    type: gauge
+    name: Average disk utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/PercentageDiskSpaceUsed/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.PercentageDiskSpaceUsed.Maximum
+    type: gauge
+    name: Maximum disk utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/PercentageDiskSpaceUsed/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.PercentageDiskSpaceUsed.Minimum
+    type: gauge
+    name: Minimum disk utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/PercentageDiskSpaceUsed/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.PercentageDiskSpaceUsed.SampleCount
+    type: count,delta
+    name: Samples of disk utilization
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/PercentageDiskSpaceUsed/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.PercentageDiskSpaceUsed.Sum
+    type: count,delta
+    name: Disk utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadIOPS/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadIOPS.Average
+    type: gauge
+    name: Average read operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadIOPS/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadIOPS.Maximum
+    type: gauge
+    name: Maximum read operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadIOPS/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadIOPS.Minimum
+    type: gauge
+    name: Minimum read operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadIOPS/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadIOPS.SampleCount
+    type: count,delta
+    name: Samples of read operations per second
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadIOPS/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadIOPS.Sum
+    type: count,delta
+    name: Read operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadLatency/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadLatency.Average
+    type: gauge
+    name: Average read operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadLatency/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadLatency.Maximum
+    type: gauge
+    name: Maximum read operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadLatency/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadLatency.Minimum
+    type: gauge
+    name: Minimum read operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadLatency/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadLatency.SampleCount
+    type: count,delta
+    name: Samples of read operation latency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadLatency/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadLatency.Sum
+    type: count,delta
+    name: Read operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadThroughput/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadThroughput.Average
+    type: gauge
+    name: Average disk read throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadThroughput/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadThroughput.Maximum
+    type: gauge
+    name: Maximum disk read throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadThroughput/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadThroughput.Minimum
+    type: gauge
+    name: Minimum disk read throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadThroughput/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadThroughput.SampleCount
+    type: count,delta
+    name: Samples of disk read throughput
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/ReadThroughput/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.ReadThroughput.Sum
+    type: count,delta
+    name: Disk read throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteIOPS/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteIOPS.Average
+    type: gauge
+    name: Average write operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteIOPS/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteIOPS.Maximum
+    type: gauge
+    name: Maximum write operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteIOPS/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteIOPS.Minimum
+    type: gauge
+    name: Minimum write operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteIOPS/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteIOPS.SampleCount
+    type: count,delta
+    name: Samples of write operations per second
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteIOPS/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteIOPS.Sum
+    type: count,delta
+    name: Write operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteLatency/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteLatency.Average
+    type: gauge
+    name: Average write operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteLatency/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteLatency.Maximum
+    type: gauge
+    name: Maximum write operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteLatency/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteLatency.Minimum
+    type: gauge
+    name: Minimum write operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteLatency/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteLatency.SampleCount
+    type: count,delta
+    name: Samples of write operation latency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteLatency/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteLatency.Sum
+    type: count,delta
+    name: Write operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteThroughput/Average
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteThroughput.Average
+    type: gauge
+    name: Average disk write throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteThroughput/Maximum
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteThroughput.Maximum
+    type: gauge
+    name: Maximum disk write throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteThroughput/Minimum
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteThroughput.Minimum
+    type: gauge
+    name: Minimum disk write throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteThroughput/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteThroughput.SampleCount
+    type: count,delta
+    name: Samples of disk write throughput
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: aws.googleapis.com/Redshift/WriteThroughput/Sum
+    id: cloud.gcp.aws_googleapis_com.Redshift.WriteThroughput.Sum
+    type: count,delta
+    name: Disk write throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.NodeID
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

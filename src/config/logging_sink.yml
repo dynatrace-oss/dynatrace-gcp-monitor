@@ -1,0 +1,49 @@
+id: logging_sink
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud Logging export sink
+gcp:
+- service: logging_sink
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.name
+    id: name
+  - value: resource.labels.destination
+    id: destination
+  metrics:
+  - value: logging.googleapis.com/exports/byte_count
+    id: cloud.gcp.logging_googleapis_com.exports.byte_count
+    type: count,delta
+    name: Exported log bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 420s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: logging.googleapis.com/exports/error_count
+    id: cloud.gcp.logging_googleapis_com.exports.error_count
+    type: count,delta
+    name: Exported log entries failures
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 420s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: logging.googleapis.com/exports/log_entry_count
+    id: cloud.gcp.logging_googleapis_com.exports.log_entry_count
+    type: count,delta
+    name: Exported log entries
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 420s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []

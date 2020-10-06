@@ -1,9 +1,9 @@
-id: gcp_cloudsql
+id: cloudsql_database
+$schema: gcp_schema_v_1_0.json
 version: 0.0.1
-technology:
-  name: Google Cloud SQL
 minDynatraceVersion: 1.199
-
+technology:
+  name: Cloud SQL Database
 gcp:
 - service: cloudsql_database
   dimensions:

@@ -1,0 +1,108 @@
+id: tcp_ssl_proxy_rule
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud TCP/SSL Proxy Rule
+gcp:
+- service: tcp_ssl_proxy_rule
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.backend_target_name
+    id: backend_target_name
+  - value: resource.labels.backend_target_type
+    id: backend_target_type
+  - value: resource.labels.forwarding_rule_name
+    id: forwarding_rule_name
+  - value: resource.labels.target_proxy_name
+    id: target_proxy_name
+  - value: resource.labels.backend_name
+    id: backend_name
+  - value: resource.labels.backend_type
+    id: backend_type
+  - value: resource.labels.backend_scope
+    id: backend_scope
+  - value: resource.labels.backend_scope_type
+    id: backend_scope_type
+  metrics:
+  - value: loadbalancing.googleapis.com/tcp_ssl_proxy/closed_connections
+    id: cloud.gcp.loadbalancing_googleapis_com.tcp_ssl_proxy.closed_connections
+    type: count,delta
+    name: Closed connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.proxy_continent
+    - value: metric.labels.client_country
+  - value: loadbalancing.googleapis.com/tcp_ssl_proxy/egress_bytes_count
+    id: cloud.gcp.loadbalancing_googleapis_com.tcp_ssl_proxy.egress_bytes_count
+    type: count,delta
+    name: Egress bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.proxy_continent
+    - value: metric.labels.client_country
+  - value: loadbalancing.googleapis.com/tcp_ssl_proxy/frontend_tcp_rtt
+    id: cloud.gcp.loadbalancing_googleapis_com.tcp_ssl_proxy.frontend_tcp_rtt
+    type: gauge
+    name: Frontend RTT
+    unit: ms
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.proxy_continent
+    - value: metric.labels.client_country
+  - value: loadbalancing.googleapis.com/tcp_ssl_proxy/ingress_bytes_count
+    id: cloud.gcp.loadbalancing_googleapis_com.tcp_ssl_proxy.ingress_bytes_count
+    type: count,delta
+    name: Ingress bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.proxy_continent
+    - value: metric.labels.client_country
+  - value: loadbalancing.googleapis.com/tcp_ssl_proxy/new_connections
+    id: cloud.gcp.loadbalancing_googleapis_com.tcp_ssl_proxy.new_connections
+    type: count,delta
+    name: New connections opened
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.proxy_continent
+    - value: metric.labels.client_country
+  - value: loadbalancing.googleapis.com/tcp_ssl_proxy/open_connections
+    id: cloud.gcp.loadbalancing_googleapis_com.tcp_ssl_proxy.open_connections
+    type: gauge
+    name: Open Connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.proxy_continent
+    - value: metric.labels.client_country

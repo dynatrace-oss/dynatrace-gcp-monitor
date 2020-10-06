@@ -1,8 +1,9 @@
-id: gcp_gcs_bucket
+id: gcs_bucket
+$schema: gcp_schema_v_1_0.json
 version: 0.0.1
-technology:
-  name: Google Cloud Storage
 minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud Storage bucket
 gcp:
 - service: gcs_bucket
   dimensions:

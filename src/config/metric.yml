@@ -1,0 +1,60 @@
+id: metric
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud Metric Type
+gcp:
+- service: metric
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.name
+    id: name
+  metrics:
+  - value: logging.googleapis.com/metric_label_cardinality
+    id: cloud.gcp.logging_googleapis_com.metric_label_cardinality
+    type: gauge
+    name: Logs-based metric active cardinality count by label
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 270s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.label
+  - value: logging.googleapis.com/metric_label_throttled
+    id: cloud.gcp.logging_googleapis_com.metric_label_throttled
+    type: gauge
+    name: Logs-based metric label throttled status
+    unit: ''
+    gcpOptions:
+      ingestDelay: 270s
+      samplePeriod: 60s
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.label
+  - value: logging.googleapis.com/metric_throttled
+    id: cloud.gcp.logging_googleapis_com.metric_throttled
+    type: gauge
+    name: Logs-based metric throttled status
+    unit: ''
+    gcpOptions:
+      ingestDelay: 270s
+      samplePeriod: 60s
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions: []
+  - value: logging.googleapis.com/time_series_count
+    id: cloud.gcp.logging_googleapis_com.time_series_count
+    type: gauge
+    name: Logs-based metric active time series count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 270s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []

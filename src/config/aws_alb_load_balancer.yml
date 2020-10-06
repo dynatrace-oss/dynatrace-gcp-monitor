@@ -1,0 +1,663 @@
+id: aws_alb_load_balancer
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology: Google Amazon ALB Load Balancer
+gcp:
+- service: aws_alb_load_balancer
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.name
+    id: name
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/ALB/ActiveConnectionCount/Average
+    id: cloud.gcp.aws_googleapis_com.ALB.ActiveConnectionCount.Average
+    type: gauge
+    name: Average of active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/ALB/ActiveConnectionCount/Maximum
+    id: cloud.gcp.aws_googleapis_com.ALB.ActiveConnectionCount.Maximum
+    type: gauge
+    name: Maximum of active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/ALB/ActiveConnectionCount/Minimum
+    id: cloud.gcp.aws_googleapis_com.ALB.ActiveConnectionCount.Minimum
+    type: gauge
+    name: Minimum of active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/ALB/ActiveConnectionCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.ActiveConnectionCount.SampleCount
+    type: count,delta
+    name: Samples of active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/ActiveConnectionCount/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.ActiveConnectionCount.Sum
+    type: count,delta
+    name: Sum of active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/ClientTLSNegotiationErrorCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.ClientTLSNegotiationErrorCount.SampleCount
+    type: count,delta
+    name: Samples of TLS connection errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+  - value: aws.googleapis.com/ALB/ClientTLSNegotiationErrorCount/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.ClientTLSNegotiationErrorCount.Sum
+    type: count,delta
+    name: Sum of TLS connection errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+  - value: aws.googleapis.com/ALB/HTTPCode_ELB_4XX_Count/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_ELB_4XX_Count.SampleCount
+    type: count,delta
+    name: Samples of 4xx ELB errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+  - value: aws.googleapis.com/ALB/HTTPCode_ELB_4XX_Count/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_ELB_4XX_Count.Sum
+    type: count,delta
+    name: Sum of 4xx ELB errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+  - value: aws.googleapis.com/ALB/HTTPCode_ELB_5XX_Count/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_ELB_5XX_Count.SampleCount
+    type: count,delta
+    name: Samples of 5xx ELB errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+  - value: aws.googleapis.com/ALB/HTTPCode_ELB_5XX_Count/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_ELB_5XX_Count.Sum
+    type: count,delta
+    name: Sum of 5xx ELB errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+  - value: aws.googleapis.com/ALB/HTTPCode_Target_2XX_Count/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_Target_2XX_Count.SampleCount
+    type: count,delta
+    name: Samples of 2xx responses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HTTPCode_Target_2XX_Count/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_Target_2XX_Count.Sum
+    type: count,delta
+    name: Sum of 2xx responses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HTTPCode_Target_3XX_Count/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_Target_3XX_Count.SampleCount
+    type: count,delta
+    name: Samples of 3xx responses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HTTPCode_Target_3XX_Count/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_Target_3XX_Count.Sum
+    type: count,delta
+    name: Sum of 3xx responses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HTTPCode_Target_4XX_Count/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_Target_4XX_Count.SampleCount
+    type: count,delta
+    name: Samples of 4xx responses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HTTPCode_Target_4XX_Count/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_Target_4XX_Count.Sum
+    type: count,delta
+    name: Sum of 4xx responses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HTTPCode_Target_5XX_Count/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_Target_5XX_Count.SampleCount
+    type: count,delta
+    name: Samples of 5xx responses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HTTPCode_Target_5XX_Count/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.HTTPCode_Target_5XX_Count.Sum
+    type: count,delta
+    name: Sum of 5xx responses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HealthyHostCount/Average
+    id: cloud.gcp.aws_googleapis_com.ALB.HealthyHostCount.Average
+    type: gauge
+    name: Average of healthy hosts
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HealthyHostCount/Maximum
+    id: cloud.gcp.aws_googleapis_com.ALB.HealthyHostCount.Maximum
+    type: gauge
+    name: Maximum of healthy hosts
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HealthyHostCount/Minimum
+    id: cloud.gcp.aws_googleapis_com.ALB.HealthyHostCount.Minimum
+    type: gauge
+    name: Minimum of healthy hosts
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/HealthyHostCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.HealthyHostCount.SampleCount
+    type: count,delta
+    name: Samples of healthy hosts
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/IPv6ProcessedBytes/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.IPv6ProcessedBytes.SampleCount
+    type: count,delta
+    name: Samples of IPv6 processed bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/IPv6ProcessedBytes/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.IPv6ProcessedBytes.Sum
+    type: count,delta
+    name: Sum of IPv6 processed bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/IPv6RequestCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.IPv6RequestCount.SampleCount
+    type: count,delta
+    name: Samples of IPv6 requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/IPv6RequestCount/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.IPv6RequestCount.Sum
+    type: count,delta
+    name: Sum of IPv6 requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/NewConnectionCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.NewConnectionCount.SampleCount
+    type: count,delta
+    name: Samples of TCP connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/NewConnectionCount/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.NewConnectionCount.Sum
+    type: count,delta
+    name: Sum of TCP connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/ProcessedBytes/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.ProcessedBytes.SampleCount
+    type: count,delta
+    name: Samples of bytes processed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/ProcessedBytes/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.ProcessedBytes.Sum
+    type: count,delta
+    name: Sum of bytes processed
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/RejectedConnectionCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.RejectedConnectionCount.SampleCount
+    type: count,delta
+    name: Samples of rejected connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+  - value: aws.googleapis.com/ALB/RejectedConnectionCount/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.RejectedConnectionCount.Sum
+    type: count,delta
+    name: Sum of rejected connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+  - value: aws.googleapis.com/ALB/RequestCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.RequestCount.SampleCount
+    type: count,delta
+    name: Samples of received requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/RequestCount/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.RequestCount.Sum
+    type: count,delta
+    name: Sum of received requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/RuleEvaluations/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.RuleEvaluations.SampleCount
+    type: count,delta
+    name: Samples of rule evaluations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/RuleEvaluations/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.RuleEvaluations.Sum
+    type: count,delta
+    name: Sum of rule evaluations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/ALB/TargetConnectionErrorCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.TargetConnectionErrorCount.SampleCount
+    type: count,delta
+    name: Samples of connection errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/TargetConnectionErrorCount/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.TargetConnectionErrorCount.Sum
+    type: count,delta
+    name: Sum of connection errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/TargetResponseTime/Average
+    id: cloud.gcp.aws_googleapis_com.ALB.TargetResponseTime.Average
+    type: gauge
+    name: Average of target response time
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/TargetResponseTime/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.TargetResponseTime.SampleCount
+    type: count,delta
+    name: Samples of target response time
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/TargetTLSNegotiationErrorCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.TargetTLSNegotiationErrorCount.SampleCount
+    type: count,delta
+    name: Samples of targe TLS errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/TargetTLSNegotiationErrorCount/Sum
+    id: cloud.gcp.aws_googleapis_com.ALB.TargetTLSNegotiationErrorCount.Sum
+    type: count,delta
+    name: Sum of targe TLS errors
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/UnHealthyHostCount/Average
+    id: cloud.gcp.aws_googleapis_com.ALB.UnHealthyHostCount.Average
+    type: gauge
+    name: Average of unhealthy targets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/UnHealthyHostCount/Maximum
+    id: cloud.gcp.aws_googleapis_com.ALB.UnHealthyHostCount.Maximum
+    type: gauge
+    name: Maximum of unhealthy targets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/UnHealthyHostCount/Minimum
+    id: cloud.gcp.aws_googleapis_com.ALB.UnHealthyHostCount.Minimum
+    type: gauge
+    name: Minimum of unhealthy targets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: aws.googleapis.com/ALB/UnHealthyHostCount/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ALB.UnHealthyHostCount.SampleCount
+    type: count,delta
+    name: Samples of unhealthy targets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.AvailabilityZone
+    - value: metric.labels.TargetGroup
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

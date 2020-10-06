@@ -1,0 +1,76 @@
+id: bigquery_dataset
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud BigQuery Dataset
+gcp:
+- service: bigquery_dataset
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.dataset_id
+    id: dataset_id
+  metrics:
+  - value: bigquery.googleapis.com/storage/stored_bytes
+    id: cloud.gcp.bigquery_googleapis_com.storage.stored_bytes
+    type: gauge
+    name: Stored bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 10800s
+      samplePeriod: 1800s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.table
+  - value: bigquery.googleapis.com/storage/table_count
+    id: cloud.gcp.bigquery_googleapis_com.storage.table_count
+    type: gauge
+    name: Table count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 10800s
+      samplePeriod: 1800s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: bigquery.googleapis.com/storage/uploaded_bytes
+    id: cloud.gcp.bigquery_googleapis_com.storage.uploaded_bytes
+    type: count,delta
+    name: Uploaded bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 21720s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.api
+    - value: metric.labels.table
+  - value: bigquery.googleapis.com/storage/uploaded_bytes_billed
+    id: cloud.gcp.bigquery_googleapis_com.storage.uploaded_bytes_billed
+    type: count,delta
+    name: Uploaded bytes billed
+    unit: By
+    gcpOptions:
+      ingestDelay: 21720s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.api
+    - value: metric.labels.table
+  - value: bigquery.googleapis.com/storage/uploaded_row_count
+    id: cloud.gcp.bigquery_googleapis_com.storage.uploaded_row_count
+    type: count,delta
+    name: Uploaded rows
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 21720s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.api
+    - value: metric.labels.table

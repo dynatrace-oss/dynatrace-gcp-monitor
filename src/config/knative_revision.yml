@@ -1,0 +1,284 @@
+id: knative_revision
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud Run for Anthos Revision
+gcp:
+- service: knative_revision
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.service_name
+    id: service_name
+  - value: resource.labels.revision_name
+    id: revision_name
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.configuration_name
+    id: configuration_name
+  - value: resource.labels.cluster_name
+    id: cluster_name
+  - value: resource.labels.namespace_name
+    id: namespace_name
+  metrics:
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code
+  - value: knative.dev/internal/serving/activator/request_count
+    id: cloud.gcp.knative_dev.internal.serving.activator.request_count
+    type: count,delta
+    name: Write Only Activator Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.container_name
+    - value: metric.labels.pod_name
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+    - value: metric.labels.num_tries
+  - value: knative.dev/internal/serving/activator/request_latencies
+    id: cloud.gcp.knative_dev.internal.serving.activator.request_latencies
+    type: count,delta
+    name: Write Only Activator Request Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.container_name
+    - value: metric.labels.pod_name
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+  - value: knative.dev/internal/serving/revision/request_count
+    id: cloud.gcp.knative_dev.internal.serving.revision.request_count
+    type: count,delta
+    name: Write Only Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.container_name
+    - value: metric.labels.pod_name
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+  - value: knative.dev/internal/serving/revision/request_latencies
+    id: cloud.gcp.knative_dev.internal.serving.revision.request_latencies
+    type: count,delta
+    name: Write Only Request Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.container_name
+    - value: metric.labels.pod_name
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+  - value: knative.dev/serving/activator/request_count
+    id: cloud.gcp.knative_dev.serving.activator.request_count
+    type: count,delta
+    name: Activator Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+    - value: metric.labels.num_tries
+  - value: knative.dev/serving/activator/request_latencies
+    id: cloud.gcp.knative_dev.serving.activator.request_latencies
+    type: gauge
+    name: Activator Request Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+  - value: knative.dev/serving/autoscaler/actual_pods
+    id: cloud.gcp.knative_dev.serving.autoscaler.actual_pods
+    type: gauge
+    name: Actual Pod Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: knative.dev/serving/autoscaler/desired_pods
+    id: cloud.gcp.knative_dev.serving.autoscaler.desired_pods
+    type: gauge
+    name: Desired Pod Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: knative.dev/serving/autoscaler/panic_mode
+    id: cloud.gcp.knative_dev.serving.autoscaler.panic_mode
+    type: gauge
+    name: Panic Mode
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: knative.dev/serving/autoscaler/panic_request_concurrency
+    id: cloud.gcp.knative_dev.serving.autoscaler.panic_request_concurrency
+    type: gauge
+    name: Observed Panic Concurrency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: knative.dev/serving/autoscaler/requested_pods
+    id: cloud.gcp.knative_dev.serving.autoscaler.requested_pods
+    type: gauge
+    name: Requested Pod Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: knative.dev/serving/autoscaler/stable_request_concurrency
+    id: cloud.gcp.knative_dev.serving.autoscaler.stable_request_concurrency
+    type: gauge
+    name: Observed Stable Concurrency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: knative.dev/serving/autoscaler/target_concurrency_per_pod
+    id: cloud.gcp.knative_dev.serving.autoscaler.target_concurrency_per_pod
+    type: gauge
+    name: Target Concurrency Per Pod
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: knative.dev/serving/revision/request_count
+    id: cloud.gcp.knative_dev.serving.revision.request_count
+    type: count,delta
+    name: Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+  - value: knative.dev/serving/revision/request_latencies
+    id: cloud.gcp.knative_dev.serving.revision.request_latencies
+    type: gauge
+    name: Request Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code

@@ -1,0 +1,162 @@
+id: aws_ses
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Amazon SES Region
+gcp:
+- service: aws_ses
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/SES/Bounces
+    id: cloud.gcp.aws_googleapis_com.SES.Bounces
+    type: count,delta
+    name: Emails bounced
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SES/Complaints
+    id: cloud.gcp.aws_googleapis_com.SES.Complaints
+    type: count,delta
+    name: Email complaints
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SES/DeliveryAttempts
+    id: cloud.gcp.aws_googleapis_com.SES.DeliveryAttempts
+    type: count,delta
+    name: Emails sent
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SES/Max24HourSend
+    id: cloud.gcp.aws_googleapis_com.SES.Max24HourSend
+    type: gauge
+    name: Email maximum (24h)
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SES/MaxSendRate
+    id: cloud.gcp.aws_googleapis_com.SES.MaxSendRate
+    type: gauge
+    name: Email maximum rate
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SES/Rejects
+    id: cloud.gcp.aws_googleapis_com.SES.Rejects
+    type: count,delta
+    name: Emails rejected
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SES/SentLast24Hours
+    id: cloud.gcp.aws_googleapis_com.SES.SentLast24Hours
+    type: gauge
+    name: Email sent (24h)
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

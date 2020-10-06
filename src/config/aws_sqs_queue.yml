@@ -1,0 +1,450 @@
+id: aws_sqs_queue
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Amazon SQS Queue
+gcp:
+- service: aws_sqs_queue
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.queue
+    id: queue
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/SQS/ApproximateAgeOfOldestMessage/Average
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateAgeOfOldestMessage.Average
+    type: gauge
+    name: Average oldest message age
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateAgeOfOldestMessage/Maximum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateAgeOfOldestMessage.Maximum
+    type: gauge
+    name: Maximum oldest message age
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateAgeOfOldestMessage/Minimum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateAgeOfOldestMessage.Minimum
+    type: gauge
+    name: Minimum oldest message age
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateAgeOfOldestMessage/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateAgeOfOldestMessage.SampleCount
+    type: count,delta
+    name: Samples of oldest message age
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateAgeOfOldestMessage/Sum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateAgeOfOldestMessage.Sum
+    type: count,delta
+    name: Oldest message age
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesDelayed/Average
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesDelayed.Average
+    type: gauge
+    name: Average messages delayed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesDelayed/Maximum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesDelayed.Maximum
+    type: gauge
+    name: Maximum messages delayed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesDelayed/Minimum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesDelayed.Minimum
+    type: gauge
+    name: Minimum messages delayed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesDelayed/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesDelayed.SampleCount
+    type: count,delta
+    name: Samples of messages delayed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesDelayed/Sum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesDelayed.Sum
+    type: count,delta
+    name: Messages delayed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesNotVisible/Average
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesNotVisible.Average
+    type: gauge
+    name: Average messages not visible
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesNotVisible/Maximum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesNotVisible.Maximum
+    type: gauge
+    name: Maximum messages not visible
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesNotVisible/Minimum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesNotVisible.Minimum
+    type: gauge
+    name: Minimum messages not visible
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesNotVisible/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesNotVisible.SampleCount
+    type: count,delta
+    name: Samples of messages not visible
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesNotVisible/Sum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesNotVisible.Sum
+    type: count,delta
+    name: Messages not visible
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesVisible/Average
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesVisible.Average
+    type: gauge
+    name: Average messages available
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesVisible/Maximum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesVisible.Maximum
+    type: gauge
+    name: Maximum messages available
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesVisible/Minimum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesVisible.Minimum
+    type: gauge
+    name: Minimum messages available
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesVisible/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesVisible.SampleCount
+    type: count,delta
+    name: Samples of messages available
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/ApproximateNumberOfMessagesVisible/Sum
+    id: cloud.gcp.aws_googleapis_com.SQS.ApproximateNumberOfMessagesVisible.Sum
+    type: count,delta
+    name: Messages available
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/NumberOfEmptyReceives/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SQS.NumberOfEmptyReceives.SampleCount
+    type: count,delta
+    name: Samples of blank messages received
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/NumberOfEmptyReceives/Sum
+    id: cloud.gcp.aws_googleapis_com.SQS.NumberOfEmptyReceives.Sum
+    type: count,delta
+    name: Blank messages received
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/NumberOfMessagesDeleted/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SQS.NumberOfMessagesDeleted.SampleCount
+    type: count,delta
+    name: Samples of messages deleted
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/NumberOfMessagesDeleted/Sum
+    id: cloud.gcp.aws_googleapis_com.SQS.NumberOfMessagesDeleted.Sum
+    type: count,delta
+    name: Messages deleted
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/NumberOfMessagesReceived/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SQS.NumberOfMessagesReceived.SampleCount
+    type: count,delta
+    name: Samples of messages received
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/NumberOfMessagesReceived/Sum
+    id: cloud.gcp.aws_googleapis_com.SQS.NumberOfMessagesReceived.Sum
+    type: count,delta
+    name: Messages received
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/NumberOfMessagesSent/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SQS.NumberOfMessagesSent.SampleCount
+    type: count,delta
+    name: Messages sent
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/NumberOfMessagesSent/Sum
+    id: cloud.gcp.aws_googleapis_com.SQS.NumberOfMessagesSent.Sum
+    type: count,delta
+    name: Messages sent
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/SentMessageSize/Average
+    id: cloud.gcp.aws_googleapis_com.SQS.SentMessageSize.Average
+    type: gauge
+    name: Average message size
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/SentMessageSize/Maximum
+    id: cloud.gcp.aws_googleapis_com.SQS.SentMessageSize.Maximum
+    type: gauge
+    name: Maximum message size
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/SentMessageSize/Minimum
+    id: cloud.gcp.aws_googleapis_com.SQS.SentMessageSize.Minimum
+    type: gauge
+    name: Minimum message size
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/SQS/SentMessageSize/SampleCount
+    id: cloud.gcp.aws_googleapis_com.SQS.SentMessageSize.SampleCount
+    type: count,delta
+    name: Samples of message size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/SQS/SentMessageSize/Sum
+    id: cloud.gcp.aws_googleapis_com.SQS.SentMessageSize.Sum
+    type: count,delta
+    name: Message size
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

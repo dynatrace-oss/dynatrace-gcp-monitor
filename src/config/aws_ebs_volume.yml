@@ -1,0 +1,526 @@
+id: aws_alb_load_balancer
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology: Google Amazon EBS Volume
+gcp:
+- service: aws_ebs_volume 
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.volume_id
+    id: volume_id
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/EBS/VolumeConsumedReadWriteOps/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeConsumedReadWriteOps.SampleCount
+    type: count,delta
+    name: Samples of operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeConsumedReadWriteOps/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeConsumedReadWriteOps.Sum
+    type: count,delta
+    name: Operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeIdleTime/Average
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeIdleTime.Average
+    type: gauge
+    name: Average idle time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeIdleTime/Maximum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeIdleTime.Maximum
+    type: gauge
+    name: Maximum idle time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeIdleTime/Minimum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeIdleTime.Minimum
+    type: gauge
+    name: Minimum idle time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeIdleTime/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeIdleTime.SampleCount
+    type: count,delta
+    name: Samples of idle time
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeIdleTime/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeIdleTime.Sum
+    type: count,delta
+    name: Idle time
+    unit: s{idle}
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeQueueLength/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeQueueLength.SampleCount
+    type: count,delta
+    name: Samples of queue length
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeQueueLength/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeQueueLength.Sum
+    type: count,delta
+    name: Queue length
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeReadBytes/Average
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeReadBytes.Average
+    type: gauge
+    name: Average bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeReadBytes/Maximum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeReadBytes.Maximum
+    type: gauge
+    name: Maximum bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeReadBytes/Minimum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeReadBytes.Minimum
+    type: gauge
+    name: Minimum bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeReadBytes/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeReadBytes.SampleCount
+    type: count,delta
+    name: Samples of bytes read
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeReadBytes/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeReadBytes.Sum
+    type: count,delta
+    name: Bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeReadOps/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeReadOps.SampleCount
+    type: count,delta
+    name: Samples of read operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeReadOps/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeReadOps.Sum
+    type: count,delta
+    name: Read operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeSize/Average
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeSize.Average
+    type: gauge
+    name: Volume size
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeSize/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeSize.Sum
+    type: count,delta
+    name: Volume size
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeThroughputPercentage/Average
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeThroughputPercentage.Average
+    type: gauge
+    name: Average throughput
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeThroughputPercentage/Maximum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeThroughputPercentage.Maximum
+    type: gauge
+    name: Maximum throughput
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeThroughputPercentage/Minimum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeThroughputPercentage.Minimum
+    type: gauge
+    name: Minimum throughput
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeThroughputPercentage/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeThroughputPercentage.SampleCount
+    type: count,delta
+    name: Samples of throughput
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeThroughputPercentage/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeThroughputPercentage.Sum
+    type: count,delta
+    name: Throughput
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalReadTime/Average
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalReadTime.Average
+    type: gauge
+    name: Average read operation time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalReadTime/Maximum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalReadTime.Maximum
+    type: gauge
+    name: Maximum read operation time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalReadTime/Minimum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalReadTime.Minimum
+    type: gauge
+    name: Minimum read operation time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalReadTime/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalReadTime.SampleCount
+    type: count,delta
+    name: Samples of read operation time
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalReadTime/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalReadTime.Sum
+    type: count,delta
+    name: Read operation time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalWriteTime/Average
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalWriteTime.Average
+    type: gauge
+    name: Average write operation time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalWriteTime/Maximum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalWriteTime.Maximum
+    type: gauge
+    name: Maximum write operation time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalWriteTime/Minimum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalWriteTime.Minimum
+    type: gauge
+    name: Minimum write operation time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalWriteTime/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalWriteTime.SampleCount
+    type: count,delta
+    name: Samples of write operation time
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeTotalWriteTime/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeTotalWriteTime.Sum
+    type: count,delta
+    name: Write operation time
+    unit: s
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeWriteBytes/Average
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeWriteBytes.Average
+    type: gauge
+    name: Average bytes written
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeWriteBytes/Maximum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeWriteBytes.Maximum
+    type: gauge
+    name: Maximum bytes written
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeWriteBytes/Minimum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeWriteBytes.Minimum
+    type: gauge
+    name: Minimum bytes written
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeWriteBytes/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeWriteBytes.SampleCount
+    type: count,delta
+    name: Samples of bytes written
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeWriteBytes/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeWriteBytes.Sum
+    type: count,delta
+    name: Bytes written
+    unit: By
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeWriteOps/SampleCount
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeWriteOps.SampleCount
+    type: count,delta
+    name: Samples of write operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/EBS/VolumeWriteOps/Sum
+    id: cloud.gcp.aws_googleapis_com.EBS.VolumeWriteOps.Sum
+    type: count,delta
+    name: Write operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 3600s
+      samplePeriod: 300s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

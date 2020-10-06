@@ -1,0 +1,98 @@
+id: pubsub_snapshot
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud Pub/Sub Snapshot
+gcp:
+- service: pubsub_snapshot
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.snapshot_id
+    id: snapshot_id
+  metrics:
+  - value: pubsub.googleapis.com/snapshot/backlog_bytes
+    id: cloud.gcp.pubsub_googleapis_com.snapshot.backlog_bytes
+    type: gauge
+    name: Snapshot backlog bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: pubsub.googleapis.com/snapshot/backlog_bytes_by_region
+    id: cloud.gcp.pubsub_googleapis_com.snapshot.backlog_bytes_by_region
+    type: gauge
+    name: Snapshot backlog bytes by region
+    unit: By
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.region
+  - value: pubsub.googleapis.com/snapshot/config_updates_count
+    id: cloud.gcp.pubsub_googleapis_com.snapshot.config_updates_count
+    type: count,delta
+    name: Snapshot updates
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code
+    - value: metric.labels.operation_type
+  - value: pubsub.googleapis.com/snapshot/num_messages
+    id: cloud.gcp.pubsub_googleapis_com.snapshot.num_messages
+    type: gauge
+    name: Snapshot messages
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: pubsub.googleapis.com/snapshot/num_messages_by_region
+    id: cloud.gcp.pubsub_googleapis_com.snapshot.num_messages_by_region
+    type: gauge
+    name: Snapshot messages by region
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.region
+  - value: pubsub.googleapis.com/snapshot/oldest_message_age
+    id: cloud.gcp.pubsub_googleapis_com.snapshot.oldest_message_age
+    type: gauge
+    name: Oldest snapshot message age
+    unit: s
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: pubsub.googleapis.com/snapshot/oldest_message_age_by_region
+    id: cloud.gcp.pubsub_googleapis_com.snapshot.oldest_message_age_by_region
+    type: gauge
+    name: Oldest snapshot message age by region
+    unit: s
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.region
+dashboards:
+  - dashboard: "dashboards/pubsub.json"

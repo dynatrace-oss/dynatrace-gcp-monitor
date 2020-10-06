@@ -1,0 +1,161 @@
+id: cloudml_model_version
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud ML Model Version
+gcp:
+- service: cloudml_model_version
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.model_id
+    id: model_id
+  - value: resource.labels.version_id
+    id: version_id
+  - value: resource.labels.region
+    id: region
+  metrics:
+  - value: ml.googleapis.com/prediction/error_count
+    id: cloud.gcp.ml_googleapis_com.prediction.error_count
+    type: count,delta
+    name: Error count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.prediction_type
+  - value: ml.googleapis.com/prediction/latencies
+    id: cloud.gcp.ml_googleapis_com.prediction.latencies
+    type: gauge
+    name: Latency
+    unit: us
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.latency_type
+  - value: ml.googleapis.com/prediction/online/accelerator/duty_cycle
+    id: cloud.gcp.ml_googleapis_com.prediction.online.accelerator.duty_cycle
+    type: gauge
+    name: Accelerator duty cycle
+    unit: 10^2.%
+    gcpOptions:
+      ingestDelay: 360s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.replica_id
+  - value: ml.googleapis.com/prediction/online/accelerator/memory/bytes_used
+    id: cloud.gcp.ml_googleapis_com.prediction.online.accelerator.memory.bytes_used
+    type: gauge
+    name: Accelerator memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 360s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.replica_id
+  - value: ml.googleapis.com/prediction/online/cpu/utilization
+    id: cloud.gcp.ml_googleapis_com.prediction.online.cpu.utilization
+    type: gauge
+    name: CPU usage
+    unit: 10^2.%
+    gcpOptions:
+      ingestDelay: 360s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.replica_id
+  - value: ml.googleapis.com/prediction/online/memory/bytes_used
+    id: cloud.gcp.ml_googleapis_com.prediction.online.memory.bytes_used
+    type: gauge
+    name: Memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 360s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.replica_id
+  - value: ml.googleapis.com/prediction/online/network/bytes_received
+    id: cloud.gcp.ml_googleapis_com.prediction.online.network.bytes_received
+    type: count,delta
+    name: Network bytes received
+    unit: By
+    gcpOptions:
+      ingestDelay: 360s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.replica_id
+  - value: ml.googleapis.com/prediction/online/network/bytes_sent
+    id: cloud.gcp.ml_googleapis_com.prediction.online.network.bytes_sent
+    type: count,delta
+    name: Network bytes sent
+    unit: By
+    gcpOptions:
+      ingestDelay: 360s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.replica_id
+  - value: ml.googleapis.com/prediction/online/replicas
+    id: cloud.gcp.ml_googleapis_com.prediction.online.replicas
+    type: gauge
+    name: Replica count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: ml.googleapis.com/prediction/online/target_replicas
+    id: cloud.gcp.ml_googleapis_com.prediction.online.target_replicas
+    type: gauge
+    name: Replica target
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: ''
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: ml.googleapis.com/prediction/prediction_count
+    id: cloud.gcp.ml_googleapis_com.prediction.prediction_count
+    type: count,delta
+    name: Prediction count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.prediction_type
+  - value: ml.googleapis.com/prediction/response_count
+    id: cloud.gcp.ml_googleapis_com.prediction.response_count
+    type: count,delta
+    name: Response count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.prediction_type
+    - value: metric.labels.response_code

@@ -1,0 +1,1296 @@
+id: aws_rds_database
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Amazon RDS Database
+gcp:
+- service: aws_rds_database
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.name
+    id: name
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/RDS/AverageDiskUsage/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.AverageDiskUsage.Average
+    type: gauge
+    name: Average disk utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/AverageMemoryUsage/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.AverageMemoryUsage.Average
+    type: gauge
+    name: Average memory utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/BinLogDiskUsage/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.BinLogDiskUsage.Average
+    type: gauge
+    name: Average binary log bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/BinLogDiskUsage/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.BinLogDiskUsage.Maximum
+    type: gauge
+    name: Maximum binary log bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/BinLogDiskUsage/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.BinLogDiskUsage.Minimum
+    type: gauge
+    name: Minimum binary log bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/BinLogDiskUsage/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.BinLogDiskUsage.SampleCount
+    type: count,delta
+    name: Samples of binary log bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/BinLogDiskUsage/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.BinLogDiskUsage.Sum
+    type: count,delta
+    name: Binary log bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditBalance/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditBalance.Average
+    type: gauge
+    name: Average CPU credit balance
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditBalance/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditBalance.Maximum
+    type: gauge
+    name: Maximum CPU credit balance
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditBalance/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditBalance.Minimum
+    type: gauge
+    name: Minimum CPU credit balance
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditBalance/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditBalance.SampleCount
+    type: count,delta
+    name: Samples of CPU credit balance
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditBalance/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditBalance.Sum
+    type: count,delta
+    name: CPU credit balance
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditUsage/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditUsage.Average
+    type: gauge
+    name: Average CPU credit usage
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditUsage/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditUsage.Maximum
+    type: gauge
+    name: Maximum CPU credit usage
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditUsage/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditUsage.Minimum
+    type: gauge
+    name: Minimum CPU credit usage
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditUsage/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditUsage.SampleCount
+    type: count,delta
+    name: Samples of CPU credit usage
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUCreditUsage/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUCreditUsage.Sum
+    type: count,delta
+    name: CPU credit usage
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUUtilization/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUUtilization.Average
+    type: gauge
+    name: Average CPU utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUUtilization/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUUtilization.Maximum
+    type: gauge
+    name: Maximum CPU utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUUtilization/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUUtilization.Minimum
+    type: gauge
+    name: Minimum CPU utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUUtilization/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUUtilization.SampleCount
+    type: count,delta
+    name: Samples of CPU utilization
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/CPUUtilization/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.CPUUtilization.Sum
+    type: count,delta
+    name: CPU utilization
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DatabaseConnections/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.DatabaseConnections.Average
+    type: gauge
+    name: Average database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DatabaseConnections/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.DatabaseConnections.Maximum
+    type: gauge
+    name: Maximum database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DatabaseConnections/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.DatabaseConnections.Minimum
+    type: gauge
+    name: Minimum database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DatabaseConnections/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.DatabaseConnections.SampleCount
+    type: count,delta
+    name: Samples of database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DatabaseConnections/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.DatabaseConnections.Sum
+    type: count,delta
+    name: Database connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DiskQueueDepth/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.DiskQueueDepth.Average
+    type: gauge
+    name: Average disk queue depth
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DiskQueueDepth/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.DiskQueueDepth.Maximum
+    type: gauge
+    name: Maximum disk queue depth
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DiskQueueDepth/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.DiskQueueDepth.Minimum
+    type: gauge
+    name: Minimum disk queue depth
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DiskQueueDepth/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.DiskQueueDepth.SampleCount
+    type: count,delta
+    name: Samples of disk queue depth
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/DiskQueueDepth/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.DiskQueueDepth.Sum
+    type: count,delta
+    name: Disk queue depth
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeStorageSpace/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeStorageSpace.Average
+    type: gauge
+    name: Average available storage
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeStorageSpace/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeStorageSpace.Maximum
+    type: gauge
+    name: Maximum available storage
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeStorageSpace/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeStorageSpace.Minimum
+    type: gauge
+    name: Minimum available storage
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeStorageSpace/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeStorageSpace.SampleCount
+    type: count,delta
+    name: Samples of available storage
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeStorageSpace/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeStorageSpace.Sum
+    type: count,delta
+    name: Available storage
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeableMemory/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeableMemory.Average
+    type: gauge
+    name: Average available memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeableMemory/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeableMemory.Maximum
+    type: gauge
+    name: Maximum available memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeableMemory/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeableMemory.Minimum
+    type: gauge
+    name: Minimum available memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeableMemory/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeableMemory.SampleCount
+    type: count,delta
+    name: Samples of available memory
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/FreeableMemory/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.FreeableMemory.Sum
+    type: count,delta
+    name: Available memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkReceiveThroughput/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkReceiveThroughput.Average
+    type: gauge
+    name: Average network receive throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkReceiveThroughput/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkReceiveThroughput.Maximum
+    type: gauge
+    name: Maximum network receive throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkReceiveThroughput/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkReceiveThroughput.Minimum
+    type: gauge
+    name: Minimum network receive throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkReceiveThroughput/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkReceiveThroughput.SampleCount
+    type: count,delta
+    name: Samples of network receive throughput
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkReceiveThroughput/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkReceiveThroughput.Sum
+    type: count,delta
+    name: Network receive throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkTransmitThroughput/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkTransmitThroughput.Average
+    type: gauge
+    name: Average network transmit throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkTransmitThroughput/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkTransmitThroughput.Maximum
+    type: gauge
+    name: Maximum network transmit throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkTransmitThroughput/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkTransmitThroughput.Minimum
+    type: gauge
+    name: Minimum network transmit throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkTransmitThroughput/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkTransmitThroughput.SampleCount
+    type: count,delta
+    name: Samples of network transmit throughput
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/NetworkTransmitThroughput/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.NetworkTransmitThroughput.Sum
+    type: count,delta
+    name: Network transmit throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/Queries/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.Queries.Sum
+    type: count,delta
+    name: Queries
+    unit: '{query}'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadIOPS/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadIOPS.Average
+    type: gauge
+    name: Average read operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadIOPS/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadIOPS.Maximum
+    type: gauge
+    name: Maximum read operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadIOPS/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadIOPS.Minimum
+    type: gauge
+    name: Minimum read operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadIOPS/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadIOPS.SampleCount
+    type: count,delta
+    name: Samples for read operations per second
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadIOPS/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadIOPS.Sum
+    type: count,delta
+    name: Read operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadLatency/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadLatency.Average
+    type: gauge
+    name: Average read operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadLatency/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadLatency.Maximum
+    type: gauge
+    name: Maximum read operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadLatency/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadLatency.Minimum
+    type: gauge
+    name: Minimum read operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadLatency/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadLatency.SampleCount
+    type: count,delta
+    name: Samples of read operation latency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadLatency/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadLatency.Sum
+    type: count,delta
+    name: Read operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadThroughput/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadThroughput.Average
+    type: gauge
+    name: Average disk read throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadThroughput/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadThroughput.Maximum
+    type: gauge
+    name: Maximum disk read throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadThroughput/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadThroughput.Minimum
+    type: gauge
+    name: Minimum disk read throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadThroughput/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadThroughput.SampleCount
+    type: count,delta
+    name: Samples of disk read throughput
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReadThroughput/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReadThroughput.Sum
+    type: count,delta
+    name: Disk read throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReplicaLag/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.ReplicaLag.Average
+    type: gauge
+    name: Average replication lag
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReplicaLag/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReplicaLag.Maximum
+    type: gauge
+    name: Maximum replication lag
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReplicaLag/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReplicaLag.Minimum
+    type: gauge
+    name: Minimum replication lag
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReplicaLag/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.ReplicaLag.SampleCount
+    type: count,delta
+    name: Samples of replication lag
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/ReplicaLag/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.ReplicaLag.Sum
+    type: count,delta
+    name: Replication lag
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/SwapUsage/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.SwapUsage.Average
+    type: gauge
+    name: Average swap used
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/SwapUsage/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.SwapUsage.Maximum
+    type: gauge
+    name: Maximum swap used
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/SwapUsage/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.SwapUsage.Minimum
+    type: gauge
+    name: Minimum swap used
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/SwapUsage/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.SwapUsage.SampleCount
+    type: count,delta
+    name: Samples of swap used
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/SwapUsage/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.SwapUsage.Sum
+    type: count,delta
+    name: Swap used
+    unit: By
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteIOPS/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteIOPS.Average
+    type: gauge
+    name: Average write operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteIOPS/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteIOPS.Maximum
+    type: gauge
+    name: Maximum write operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteIOPS/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteIOPS.Minimum
+    type: gauge
+    name: Minimum write operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteIOPS/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteIOPS.SampleCount
+    type: count,delta
+    name: Samples of write operations per second
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteIOPS/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteIOPS.Sum
+    type: count,delta
+    name: Write operations per second
+    unit: 1/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteLatency/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteLatency.Average
+    type: gauge
+    name: Average write operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteLatency/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteLatency.Maximum
+    type: gauge
+    name: Maximum write operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteLatency/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteLatency.Minimum
+    type: gauge
+    name: Minimum write operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteLatency/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteLatency.SampleCount
+    type: count,delta
+    name: Samples of write operation latency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteLatency/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteLatency.Sum
+    type: count,delta
+    name: Write operation latency
+    unit: s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteThroughput/Average
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteThroughput.Average
+    type: gauge
+    name: Average disk write throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteThroughput/Maximum
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteThroughput.Maximum
+    type: gauge
+    name: Maximum disk write throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteThroughput/Minimum
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteThroughput.Minimum
+    type: gauge
+    name: Minimum disk write throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteThroughput/SampleCount
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteThroughput.SampleCount
+    type: count,delta
+    name: Samples of disk write throughput
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: aws.googleapis.com/RDS/WriteThroughput/Sum
+    id: cloud.gcp.aws_googleapis_com.RDS.WriteThroughput.Sum
+    type: count,delta
+    name: Disk write throughput
+    unit: By/s
+    gcpOptions:
+      ingestDelay: 600s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.EngineName
+    - value: metric.labels.DatabaseClass
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

@@ -1,0 +1,1898 @@
+id: aws_alb_load_balancer
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology: Google Amazon Elasticache Cluster
+gcp:
+- service: aws_elasticache_cluster
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.cluster_id
+    id: cluster_id
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/ElastiCache/AverageBytesUsedForCacheItemsPercentage/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.AverageBytesUsedForCacheItemsPercentage.Average
+    type: gauge
+    name: Average memory used for Memcached cache
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/AverageBytesUsedForCachePercentage/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.AverageBytesUsedForCachePercentage.Average
+    type: gauge
+    name: Average memory used for Redis cache
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/AverageFreeableMemoryPercentage/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.AverageFreeableMemoryPercentage.Average
+    type: gauge
+    name: Average freeable memory
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/AverageUnusedMemoryPercentage/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.AverageUnusedMemoryPercentage.Average
+    type: gauge
+    name: Average unused memory
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesReadIntoMemcached/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesReadIntoMemcached.Average
+    type: gauge
+    name: Average bytes read by Memcached
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesReadIntoMemcached/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesReadIntoMemcached.Maximum
+    type: gauge
+    name: Maximum bytes read by Memcached
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesReadIntoMemcached/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesReadIntoMemcached.Minimum
+    type: gauge
+    name: Minimum bytes read by Memcached
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesReadIntoMemcached/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesReadIntoMemcached.SampleCount
+    type: count,delta
+    name: Samples of bytes read by Memcached
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesReadIntoMemcached/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesReadIntoMemcached.Sum
+    type: count,delta
+    name: Bytes read by Memcached
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCache/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCache.Average
+    type: gauge
+    name: Average Redis cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCache/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCache.Maximum
+    type: gauge
+    name: Maximum Redis cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCache/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCache.Minimum
+    type: gauge
+    name: Minimum Redis cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCache/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCache.SampleCount
+    type: count,delta
+    name: Samples of Redis cache size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCache/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCache.Sum
+    type: count,delta
+    name: Redis cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCacheItems/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCacheItems.Average
+    type: gauge
+    name: Average Memcached cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCacheItems/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCacheItems.Maximum
+    type: gauge
+    name: Maximum Memcached cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCacheItems/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCacheItems.Minimum
+    type: gauge
+    name: Minimum Memcached cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCacheItems/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCacheItems.SampleCount
+    type: count,delta
+    name: Samples of Memcached cache size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForCacheItems/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForCacheItems.Sum
+    type: count,delta
+    name: Memcached cache size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForHash/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForHash.Average
+    type: gauge
+    name: Average hash tables size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForHash/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForHash.Maximum
+    type: gauge
+    name: Maximum hash tables size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForHash/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForHash.Minimum
+    type: gauge
+    name: Minimum hash tables size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForHash/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForHash.SampleCount
+    type: count,delta
+    name: Samples of hash tables size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesUsedForHash/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesUsedForHash.Sum
+    type: count,delta
+    name: Hash tables size
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesWrittenOutFromMemcached/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesWrittenOutFromMemcached.Average
+    type: gauge
+    name: Average bytes written by Memcached
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesWrittenOutFromMemcached/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesWrittenOutFromMemcached.Maximum
+    type: gauge
+    name: Maximum bytes written by Memcached
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesWrittenOutFromMemcached/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesWrittenOutFromMemcached.Minimum
+    type: gauge
+    name: Minimum bytes written by Memcached
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesWrittenOutFromMemcached/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesWrittenOutFromMemcached.SampleCount
+    type: count,delta
+    name: Samples of bytes written by Memcached
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/BytesWrittenOutFromMemcached/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.BytesWrittenOutFromMemcached.Sum
+    type: count,delta
+    name: Bytes written by Memcached
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CPUUtilization/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CPUUtilization.Average
+    type: gauge
+    name: Average CPU used
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CPUUtilization/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CPUUtilization.Maximum
+    type: gauge
+    name: Maximum CPU used
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CPUUtilization/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CPUUtilization.Minimum
+    type: gauge
+    name: Minimum CPU used
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CPUUtilization/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CPUUtilization.SampleCount
+    type: count,delta
+    name: Samples of CPU used
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CPUUtilization/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CPUUtilization.Sum
+    type: count,delta
+    name: CPU used
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CacheHits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CacheHits.SampleCount
+    type: count,delta
+    name: Samples of cache hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CacheHits/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CacheHits.Sum
+    type: count,delta
+    name: Cache hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CacheMisses/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CacheMisses.SampleCount
+    type: count,delta
+    name: Samples of cache misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CacheMisses/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CacheMisses.Sum
+    type: count,delta
+    name: Cache misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CasBadval/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CasBadval.SampleCount
+    type: count,delta
+    name: Samples of CAS failures
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CasBadval/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CasBadval.Sum
+    type: count,delta
+    name: CAS failures
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CasHits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CasHits.SampleCount
+    type: count,delta
+    name: Samples of CAS successes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CasHits/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CasHits.Sum
+    type: count,delta
+    name: CAS successes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CasMisses/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CasMisses.SampleCount
+    type: count,delta
+    name: Samples of CAS misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CasMisses/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CasMisses.Sum
+    type: count,delta
+    name: CAS misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdConfigGet/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdConfigGet.SampleCount
+    type: count,delta
+    name: Samples of config get calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdConfigGet/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdConfigGet.Sum
+    type: count,delta
+    name: Config get calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdConfigSet/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdConfigSet.SampleCount
+    type: count,delta
+    name: Samples of config set calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdConfigSet/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdConfigSet.Sum
+    type: count,delta
+    name: Config set calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdFlush/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdFlush.SampleCount
+    type: count,delta
+    name: Samples of flush calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdFlush/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdFlush.Sum
+    type: count,delta
+    name: Flush calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdGet/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdGet.SampleCount
+    type: count,delta
+    name: Samples of get calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdGet/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdGet.Sum
+    type: count,delta
+    name: Get calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdSet/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdSet.SampleCount
+    type: count,delta
+    name: Samples of set calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdSet/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdSet.Sum
+    type: count,delta
+    name: Set calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdTouch/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdTouch.SampleCount
+    type: count,delta
+    name: Samples of touch calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CmdTouch/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CmdTouch.Sum
+    type: count,delta
+    name: Touch calls
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConfig/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConfig.Average
+    type: gauge
+    name: Average current configs
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConfig/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConfig.Maximum
+    type: gauge
+    name: Maximum current configs
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConfig/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConfig.Minimum
+    type: gauge
+    name: Minimum current configs
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConfig/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConfig.SampleCount
+    type: count,delta
+    name: Samples of current configs
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConfig/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConfig.Sum
+    type: count,delta
+    name: Current configs
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConnections/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConnections.Average
+    type: gauge
+    name: Average active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConnections/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConnections.Maximum
+    type: gauge
+    name: Maximum active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConnections/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConnections.Minimum
+    type: gauge
+    name: Minimum active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConnections/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConnections.SampleCount
+    type: count,delta
+    name: Samples of active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrConnections/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrConnections.Sum
+    type: count,delta
+    name: Active connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrItems/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrItems.Average
+    type: gauge
+    name: Average cache items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrItems/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrItems.Maximum
+    type: gauge
+    name: Maximum cache items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrItems/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrItems.Minimum
+    type: gauge
+    name: Minimum cache items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrItems/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrItems.SampleCount
+    type: count,delta
+    name: Samples of cache items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/CurrItems/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.CurrItems.Sum
+    type: count,delta
+    name: Cache items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/DecrHits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.DecrHits.SampleCount
+    type: count,delta
+    name: Samples of decrement hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/DecrHits/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.DecrHits.Sum
+    type: count,delta
+    name: Decrement hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/DecrMisses/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.DecrMisses.SampleCount
+    type: count,delta
+    name: Samples of decrement misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/DecrMisses/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.DecrMisses.Sum
+    type: count,delta
+    name: Decrement misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/DeleteHits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.DeleteHits.SampleCount
+    type: count,delta
+    name: Samples of delete hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/DeleteHits/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.DeleteHits.Sum
+    type: count,delta
+    name: Delete hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/DeleteMisses/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.DeleteMisses.SampleCount
+    type: count,delta
+    name: Samples of delete misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/DeleteMisses/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.DeleteMisses.Sum
+    type: count,delta
+    name: Delete misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/EvictedUnfetched/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.EvictedUnfetched.SampleCount
+    type: count,delta
+    name: Samples of untouched evictions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/EvictedUnfetched/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.EvictedUnfetched.Sum
+    type: count,delta
+    name: Untouched evictions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/Evictions/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.Evictions.SampleCount
+    type: count,delta
+    name: Samples of evictions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/Evictions/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.Evictions.Sum
+    type: count,delta
+    name: Evictions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/ExpiredUnfetched/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.ExpiredUnfetched.SampleCount
+    type: count,delta
+    name: Samples of untouched expirations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/ExpiredUnfetched/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.ExpiredUnfetched.Sum
+    type: count,delta
+    name: Untouched expirations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/FreeableMemory/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.FreeableMemory.Average
+    type: gauge
+    name: Average unused memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/FreeableMemory/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.FreeableMemory.Maximum
+    type: gauge
+    name: Maximum unused memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/FreeableMemory/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.FreeableMemory.Minimum
+    type: gauge
+    name: Minimum unused memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/FreeableMemory/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.FreeableMemory.SampleCount
+    type: count,delta
+    name: Samples of unused memory
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/FreeableMemory/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.FreeableMemory.Sum
+    type: count,delta
+    name: Unused memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/GetHits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.GetHits.SampleCount
+    type: count,delta
+    name: Samples of get hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/GetHits/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.GetHits.Sum
+    type: count,delta
+    name: Get hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/GetMisses/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.GetMisses.SampleCount
+    type: count,delta
+    name: Samples of get misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/GetMisses/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.GetMisses.Sum
+    type: count,delta
+    name: Get misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/GetTypeCmds/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.GetTypeCmds.SampleCount
+    type: count,delta
+    name: Samples of get type commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/GetTypeCmds/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.GetTypeCmds.Sum
+    type: count,delta
+    name: Get type commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/HashBasedCmds/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.HashBasedCmds.SampleCount
+    type: count,delta
+    name: Samples of hash commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/HashBasedCmds/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.HashBasedCmds.Sum
+    type: count,delta
+    name: Hash commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/IncrHits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.IncrHits.SampleCount
+    type: count,delta
+    name: Samples of increment hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/IncrHits/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.IncrHits.Sum
+    type: count,delta
+    name: Increment hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/IncrMisses/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.IncrMisses.SampleCount
+    type: count,delta
+    name: Samples of increment misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/IncrMisses/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.IncrMisses.Sum
+    type: count,delta
+    name: Increment misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/KeyBasedCmds/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.KeyBasedCmds.SampleCount
+    type: count,delta
+    name: Samples of key commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/KeyBasedCmds/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.KeyBasedCmds.Sum
+    type: count,delta
+    name: Key commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/ListBasedCmds/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.ListBasedCmds.SampleCount
+    type: count,delta
+    name: Samples of list commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/ListBasedCmds/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.ListBasedCmds.Sum
+    type: count,delta
+    name: List commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesIn/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesIn.Average
+    type: gauge
+    name: Average network data read
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesIn/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesIn.Maximum
+    type: gauge
+    name: Maximum network data read
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesIn/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesIn.Minimum
+    type: gauge
+    name: Minimum network data read
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesIn/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesIn.SampleCount
+    type: count,delta
+    name: Samples of network data read
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesIn/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesIn.Sum
+    type: count,delta
+    name: Network data read
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesOut/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesOut.Average
+    type: gauge
+    name: Average network data written
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesOut/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesOut.Maximum
+    type: gauge
+    name: Maximum network data written
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesOut/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesOut.Minimum
+    type: gauge
+    name: Minimum network data written
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesOut/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesOut.SampleCount
+    type: count,delta
+    name: Samples of network data written
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NetworkBytesOut/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NetworkBytesOut.Sum
+    type: count,delta
+    name: Network data written
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NewConnections/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NewConnections.SampleCount
+    type: count,delta
+    name: Samples of new connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NewConnections/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NewConnections.Sum
+    type: count,delta
+    name: New connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NewItems/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NewItems.SampleCount
+    type: count,delta
+    name: Samples of new items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/NewItems/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.NewItems.Sum
+    type: count,delta
+    name: New items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/Reclaimed/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.Reclaimed.SampleCount
+    type: count,delta
+    name: Samples of reclaimed items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/Reclaimed/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.Reclaimed.Sum
+    type: count,delta
+    name: Reclaimed items
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/ReplicationLag/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.ReplicationLag.Average
+    type: gauge
+    name: Average replication lag
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/ReplicationLag/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.ReplicationLag.Maximum
+    type: gauge
+    name: Maximum replication lag
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/ReplicationLag/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.ReplicationLag.Minimum
+    type: gauge
+    name: Minimum replication lag
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/ReplicationLag/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.ReplicationLag.SampleCount
+    type: count,delta
+    name: Samples of replication lag
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/ReplicationLag/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.ReplicationLag.Sum
+    type: count,delta
+    name: Replication lag
+    unit: s
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SetBasedCmds/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SetBasedCmds.SampleCount
+    type: count,delta
+    name: Samples of set commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SetBasedCmds/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SetBasedCmds.Sum
+    type: count,delta
+    name: Set commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SetTypeCmds/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SetTypeCmds.SampleCount
+    type: count,delta
+    name: Samples of set type commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SetTypeCmds/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SetTypeCmds.Sum
+    type: count,delta
+    name: Set type commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SlabsMoved/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SlabsMoved.SampleCount
+    type: count,delta
+    name: Samples of slabs moved
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SlabsMoved/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SlabsMoved.Sum
+    type: count,delta
+    name: Slabs moved
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SortedSetBasedCmds/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SortedSetBasedCmds.SampleCount
+    type: count,delta
+    name: Samples of sorted set commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SortedSetBasedCmds/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SortedSetBasedCmds.Sum
+    type: count,delta
+    name: Sorted set commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/StringBasedCmds/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.StringBasedCmds.SampleCount
+    type: count,delta
+    name: Samples of string commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/StringBasedCmds/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.StringBasedCmds.Sum
+    type: count,delta
+    name: String commands
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SwapUsage/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SwapUsage.Average
+    type: gauge
+    name: Average swap used
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SwapUsage/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SwapUsage.Maximum
+    type: gauge
+    name: Maximum swap used
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SwapUsage/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SwapUsage.Minimum
+    type: gauge
+    name: Minimum swap used
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SwapUsage/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SwapUsage.SampleCount
+    type: count,delta
+    name: Samples of swap used
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/SwapUsage/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.SwapUsage.Sum
+    type: count,delta
+    name: Swap used
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/TouchHits/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.TouchHits.SampleCount
+    type: count,delta
+    name: Samples of touch hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/TouchHits/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.TouchHits.Sum
+    type: count,delta
+    name: Touch hits
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/TouchMisses/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.TouchMisses.SampleCount
+    type: count,delta
+    name: Samples of touch misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/TouchMisses/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.TouchMisses.Sum
+    type: count,delta
+    name: Touch misses
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/UnusedMemory/Average
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.UnusedMemory.Average
+    type: gauge
+    name: Average unused memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/UnusedMemory/Maximum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.UnusedMemory.Maximum
+    type: gauge
+    name: Maximum unused memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/UnusedMemory/Minimum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.UnusedMemory.Minimum
+    type: gauge
+    name: Minimum unused memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/UnusedMemory/SampleCount
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.UnusedMemory.SampleCount
+    type: count,delta
+    name: Samples of unused memory
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: aws.googleapis.com/ElastiCache/UnusedMemory/Sum
+    id: cloud.gcp.aws_googleapis_com.ElastiCache.UnusedMemory.Sum
+    type: count,delta
+    name: Unused memory
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.CacheNodeId
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

@@ -1,0 +1,531 @@
+id: aws_kinesis_stream
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Amazon Kinesis Stream
+gcp:
+- service: aws_kinesis_stream
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.stream_name
+    id: stream_name
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/Kinesis/GetRecordsBytes/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsBytes.SampleCount
+    type: count,delta
+    name: Samples of bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsBytes/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsBytes.Sum
+    type: count,delta
+    name: Bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsIteratorAgeMilliseconds/Average
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsIteratorAgeMilliseconds.Average
+    type: gauge
+    name: Average GetRecords iterator age
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsIteratorAgeMilliseconds/Maximum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsIteratorAgeMilliseconds.Maximum
+    type: gauge
+    name: Maximum GetRecords iterator age
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsIteratorAgeMilliseconds/Minimum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsIteratorAgeMilliseconds.Minimum
+    type: gauge
+    name: Minimum GetRecords iterator age
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsIteratorAgeMilliseconds/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsIteratorAgeMilliseconds.SampleCount
+    type: count,delta
+    name: Samples of GetRecords iterator age
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsIteratorAgeMilliseconds/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsIteratorAgeMilliseconds.Sum
+    type: count,delta
+    name: GetRecords iterator age
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsLatency/Average
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsLatency.Average
+    type: gauge
+    name: Average GetRecords latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsLatency/Maximum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsLatency.Maximum
+    type: gauge
+    name: Maximum GetRecords latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsLatency/Minimum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsLatency.Minimum
+    type: gauge
+    name: Minimum GetRecords latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsLatency/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsLatency.SampleCount
+    type: count,delta
+    name: Samples of GetRecords latency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsLatency/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsLatency.Sum
+    type: count,delta
+    name: GetRecords latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsSuccess/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsSuccess.SampleCount
+    type: count,delta
+    name: Samples of GetRecords operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/GetRecordsSuccess/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.GetRecordsSuccess.Sum
+    type: count,delta
+    name: GetRecords operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/IncomingBytes/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.IncomingBytes.SampleCount
+    type: count,delta
+    name: Samples of bytes sent
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.ShardId
+  - value: aws.googleapis.com/Kinesis/IncomingBytes/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.IncomingBytes.Sum
+    type: count,delta
+    name: Bytes sent
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.ShardId
+  - value: aws.googleapis.com/Kinesis/IncomingRecords/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.IncomingRecords.SampleCount
+    type: count,delta
+    name: Samples of records sent
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.ShardId
+  - value: aws.googleapis.com/Kinesis/IncomingRecords/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.IncomingRecords.Sum
+    type: count,delta
+    name: Records sent
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.ShardId
+  - value: aws.googleapis.com/Kinesis/PutRecordBytes/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordBytes.SampleCount
+    type: count,delta
+    name: Samples of PutRecord bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordBytes/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordBytes.Sum
+    type: count,delta
+    name: PutRecord bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordLatency/Average
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordLatency.Average
+    type: gauge
+    name: Average PutRecord latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordLatency/Maximum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordLatency.Maximum
+    type: gauge
+    name: Maximum PutRecord latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordLatency/Minimum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordLatency.Minimum
+    type: gauge
+    name: Minimum PutRecord latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordLatency/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordLatency.SampleCount
+    type: count,delta
+    name: Samples of PutRecord latency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordLatency/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordLatency.Sum
+    type: count,delta
+    name: PutRecord latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordSuccess/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordSuccess.SampleCount
+    type: count,delta
+    name: Samples of PutRecord operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordSuccess/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordSuccess.Sum
+    type: count,delta
+    name: PutRecord operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsBytes/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsBytes.SampleCount
+    type: count,delta
+    name: Samples of PutRecords bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsBytes/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsBytes.Sum
+    type: count,delta
+    name: PutRecords bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsLatency/Average
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsLatency.Average
+    type: gauge
+    name: Average PutRecords latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsLatency/Maximum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsLatency.Maximum
+    type: gauge
+    name: Maximum PutRecords latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsLatency/Minimum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsLatency.Minimum
+    type: gauge
+    name: Minimum PutRecords latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsLatency/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsLatency.SampleCount
+    type: count,delta
+    name: Samples of PutRecords latency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsLatency/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsLatency.Sum
+    type: count,delta
+    name: PutRecords latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsRecords/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsRecords.SampleCount
+    type: count,delta
+    name: Samples of PutRecords record count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsRecords/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsRecords.Sum
+    type: count,delta
+    name: PutRecords record count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsSuccess/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsSuccess.SampleCount
+    type: count,delta
+    name: PutRecords operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/PutRecordsSuccess/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.PutRecordsSuccess.Sum
+    type: count,delta
+    name: PutRecords operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/ShardCount/Average
+    id: cloud.gcp.aws_googleapis_com.Kinesis.ShardCount.Average
+    type: gauge
+    name: Average shards
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: aws.googleapis.com/Kinesis/ShardCount/Sum
+    id: cloud.gcp.aws_googleapis_com.Kinesis.ShardCount.Sum
+    type: count,delta
+    name: Shards
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1200s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

@@ -1,0 +1,150 @@
+id: pubsub_topic
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud Pub/Sub Topic
+gcp:
+- service: pubsub_topic
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.topic_id
+    id: topic_id
+  metrics:
+  - value: pubsub.googleapis.com/topic/byte_cost
+    id: cloud.gcp.pubsub_googleapis_com.topic.byte_cost
+    type: count,delta
+    name: Topic byte cost
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.operation_type
+    - value: metric.labels.response_code
+  - value: pubsub.googleapis.com/topic/config_updates_count
+    id: cloud.gcp.pubsub_googleapis_com.topic.config_updates_count
+    type: count,delta
+    name: Topic updates
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code
+    - value: metric.labels.operation_type
+  - value: pubsub.googleapis.com/topic/message_sizes
+    id: cloud.gcp.pubsub_googleapis_com.topic.message_sizes
+    type: gauge
+    name: Publish message size
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions: []
+  - value: pubsub.googleapis.com/topic/num_retained_acked_messages_by_region
+    id: cloud.gcp.pubsub_googleapis_com.topic.num_retained_acked_messages_by_region
+    type: gauge
+    name: Retained acked messages by region
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.region
+  - value: pubsub.googleapis.com/topic/num_unacked_messages_by_region
+    id: cloud.gcp.pubsub_googleapis_com.topic.num_unacked_messages_by_region
+    type: gauge
+    name: Unacked messages by region
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.region
+  - value: pubsub.googleapis.com/topic/oldest_retained_acked_message_age_by_region
+    id: cloud.gcp.pubsub_googleapis_com.topic.oldest_retained_acked_message_age_by_region
+    type: gauge
+    name: Oldest retained acked message age by region
+    unit: s
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.region
+  - value: pubsub.googleapis.com/topic/oldest_unacked_message_age_by_region
+    id: cloud.gcp.pubsub_googleapis_com.topic.oldest_unacked_message_age_by_region
+    type: gauge
+    name: Oldest unacked message age by region
+    unit: s
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.region
+  - value: pubsub.googleapis.com/topic/retained_acked_bytes_by_region
+    id: cloud.gcp.pubsub_googleapis_com.topic.retained_acked_bytes_by_region
+    type: gauge
+    name: Retained acked bytes by region
+    unit: By
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.region
+  - value: pubsub.googleapis.com/topic/send_message_operation_count
+    id: cloud.gcp.pubsub_googleapis_com.topic.send_message_operation_count
+    type: count,delta
+    name: Publish message operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code
+  - value: pubsub.googleapis.com/topic/send_request_count
+    id: cloud.gcp.pubsub_googleapis_com.topic.send_request_count
+    type: count,delta
+    name: Publish requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_class
+    - value: metric.labels.response_code
+  - value: pubsub.googleapis.com/topic/unacked_bytes_by_region
+    id: cloud.gcp.pubsub_googleapis_com.topic.unacked_bytes_by_region
+    type: gauge
+    name: Unacked bytes by region
+    unit: By
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.region
+dashboards:
+  - dashboard: "dashboards/pubsub.json"

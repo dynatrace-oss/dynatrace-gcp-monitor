@@ -1,0 +1,219 @@
+id: aws_lambda_function
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Amazon Lambda Function
+gcp:
+- service: aws_lambda_function
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.function_name
+    id: function_name
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.aws_account
+    id: aws_account
+  metrics:
+  - value: aws.googleapis.com/Lambda/Duration/Average
+    id: cloud.gcp.aws_googleapis_com.Lambda.Duration.Average
+    type: gauge
+    name: Average invocation latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Duration/Maximum
+    id: cloud.gcp.aws_googleapis_com.Lambda.Duration.Maximum
+    type: gauge
+    name: Maximum invocation latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Duration/Minimum
+    id: cloud.gcp.aws_googleapis_com.Lambda.Duration.Minimum
+    type: gauge
+    name: Minimum invocation latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Duration/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Lambda.Duration.SampleCount
+    type: count,delta
+    name: Samples of invocation latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Duration/Sum
+    id: cloud.gcp.aws_googleapis_com.Lambda.Duration.Sum
+    type: count,delta
+    name: Invocation latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Errors/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Lambda.Errors.SampleCount
+    type: count,delta
+    name: Samples of failed operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Errors/Sum
+    id: cloud.gcp.aws_googleapis_com.Lambda.Errors.Sum
+    type: count,delta
+    name: Failed operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Invocations/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Lambda.Invocations.SampleCount
+    type: count,delta
+    name: Samples of invocations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Invocations/Sum
+    id: cloud.gcp.aws_googleapis_com.Lambda.Invocations.Sum
+    type: count,delta
+    name: Invocations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Throttles/SampleCount
+    id: cloud.gcp.aws_googleapis_com.Lambda.Throttles.SampleCount
+    type: count,delta
+    name: Samples of throttled functions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Resource
+  - value: aws.googleapis.com/Lambda/Throttles/Sum
+    id: cloud.gcp.aws_googleapis_com.Lambda.Throttles.Sum
+    type: count,delta
+    name: Throttled functions
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 1800s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.Resource
+  - value: custom.googleapis.com/dynatrace/connectivity
+    id: cloud.gcp.custom_googleapis_com.dynatrace.connectivity
+    type: gauge
+    name: Dynatrace Integration Connectivity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reason
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/ingest_lines
+    id: cloud.gcp.custom_googleapis_com.dynatrace.ingest_lines
+    type: gauge
+    name: Dynatrace Integration Ingest Lines Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/logs_volume
+    id: cloud.gcp.custom_googleapis_com.dynatrace.logs_volume
+    type: count,delta
+    name: Dynatrace Integration Logs Volume
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/phase_execution_time
+    id: cloud.gcp.custom_googleapis_com.dynatrace.phase_execution_time
+    type: gauge
+    name: FixMe
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.phase
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+  - value: custom.googleapis.com/dynatrace/request_count
+    id: cloud.gcp.custom_googleapis_com.dynatrace.request_count
+    type: gauge
+    name: Dynatrace Integration Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.dynatrace_tenant_url
+    - value: metric.labels.function_name
+    - value: metric.labels.response_code

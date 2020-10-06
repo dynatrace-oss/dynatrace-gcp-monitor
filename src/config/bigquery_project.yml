@@ -1,0 +1,173 @@
+id: bigquery_project
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud BigQuery Project
+gcp:
+- service: bigquery_project
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  metrics:
+  - value: bigquery.googleapis.com/job/num_in_flight
+    id: cloud.gcp.bigquery_googleapis_com.job.num_in_flight
+    type: gauge
+    name: Job count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 420s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.priority
+    - value: metric.labels.job_type
+    - value: metric.labels.state
+  - value: bigquery.googleapis.com/query/count
+    id: cloud.gcp.bigquery_googleapis_com.query.count
+    type: gauge
+    name: Query count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 420s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.priority
+  - value: bigquery.googleapis.com/query/execution_times
+    id: cloud.gcp.bigquery_googleapis_com.query.execution_times
+    type: gauge
+    name: Query execution times
+    unit: s
+    gcpOptions:
+      ingestDelay: 420s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.priority
+  - value: bigquery.googleapis.com/query/statement_scanned_bytes
+    id: cloud.gcp.bigquery_googleapis_com.query.statement_scanned_bytes
+    type: count,delta
+    name: Statement scanned bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 21720s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.priority
+    - value: metric.labels.statement_type
+  - value: bigquery.googleapis.com/query/statement_scanned_bytes_billed
+    id: cloud.gcp.bigquery_googleapis_com.query.statement_scanned_bytes_billed
+    type: count,delta
+    name: Statement scanned bytes billed
+    unit: By
+    gcpOptions:
+      ingestDelay: 21720s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.priority
+    - value: metric.labels.statement_type
+  - value: bigquery.googleapis.com/slots/allocated
+    id: cloud.gcp.bigquery_googleapis_com.slots.allocated
+    type: gauge
+    name: Slots used by project, reservation, and job type
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 420s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.reservation
+    - value: metric.labels.job_type
+  - value: bigquery.googleapis.com/slots/assigned
+    id: cloud.gcp.bigquery_googleapis_com.slots.assigned
+    type: gauge
+    name: Slots assigned
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.job_type
+    - value: metric.labels.reservation
+  - value: bigquery.googleapis.com/slots/capacity_committed
+    id: cloud.gcp.bigquery_googleapis_com.slots.capacity_committed
+    type: gauge
+    name: Slots capacity committed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.plan
+  - value: bigquery.googleapis.com/slots/max_assigned
+    id: cloud.gcp.bigquery_googleapis_com.slots.max_assigned
+    type: gauge
+    name: Slots max assigned
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.job_type
+    - value: metric.labels.reservation
+  - value: bigquery.googleapis.com/slots/total_allocated_for_reservation
+    id: cloud.gcp.bigquery_googleapis_com.slots.total_allocated_for_reservation
+    type: gauge
+    name: Slots used across projects in reservation
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 420s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: bigquery.googleapis.com/slots/total_available
+    id: cloud.gcp.bigquery_googleapis_com.slots.total_available
+    type: gauge
+    name: Total slots
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 420s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: bigquerybiengine.googleapis.com/reservation/total_bytes
+    id: cloud.gcp.bigquerybiengine_googleapis_com.reservation.total_bytes
+    type: gauge
+    name: Reservation total bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: bigquerybiengine.googleapis.com/reservation/used_bytes
+    id: cloud.gcp.bigquerybiengine_googleapis_com.reservation.used_bytes
+    type: gauge
+    name: Reservation used bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
