@@ -63,9 +63,17 @@ async def create_default_service_account_token(session: ClientSession):
     :return:
     """
     url = _METADATA_ROOT + "/instance/service-accounts/{0}/token".format("default")
-    response = await session.get(url, headers=_METADATA_HEADERS)
-    response_json = await response.json()
-    return response_json["access_token"]
+    try:
+        response = await session.get(url, headers=_METADATA_HEADERS)
+        if response.status >= 300:
+            body = await response.text()
+            print(f"Failed to authorize with Service Account from Metadata Service, response is {response.status} => {body}")
+            return None
+        response_json = await response.json()
+        return response_json["access_token"]
+    except Exception as e:
+        print(f"Failed to authorize with Service Account from Metadata Service due to '{e}'")
+        return None
 
 
 def get_project_id_from_environment():

@@ -69,6 +69,9 @@ async def handle_event(event: Dict, context: Dict, project_id: Optional[str]):
         setup_start_time = time.time()
         token = await create_token(session)
 
+        if token is None:
+            print("Cannot proceed without authorization token, stopping the execution")
+            return
         if not isinstance(token, str):
             raise Exception(f"Failed to fetch access token, got non string value: {token}")
 
