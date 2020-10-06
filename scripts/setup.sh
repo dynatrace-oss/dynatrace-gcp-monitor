@@ -117,7 +117,7 @@ while ! [[ "${DYNATRACE_URL}" =~ ^https:\/\/[a-z0-9-]{8}\.(live|sprint|dev)\.(dy
 done
 echo ""
 
-echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'Ingest data points' scope"
+echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'API v2 Ingest metrics' and 'API v1 Read configuration' scope"
  while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
     read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY  
 done
@@ -208,6 +208,42 @@ if [ $? -ne 0 ]; then
     echo -e "Documentation: https://cloud.google.com/monitoring/workspaces/create"
     echo 
 fi
+
+EXISTING_DASHBOARDS=$(curl -s -X GET "${DYNATRACE_URL}api/config/v1/dashboards" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"  | jq '.dashboards[].name | select (. |contains("Google"))')
+if [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; then
+    echo -e
+    echo -e "\e[93mWARNING: \e[37mFound existing Google dashboards in [${DYNATRACE_URL}] tenant:"
+    echo $EXISTING_DASHBOARDS
+    echo
+fi
+
+for FILEPATH in ./config/*.yaml ./config/*.yml
+do 
+  DASHBOARDS_NUMBER=$(yq r --length "$FILEPATH" dashboards)
+  if [ "$DASHBOARDS_NUMBER" != "" ]; then
+    MAX_INDEX=-1
+    ((MAX_INDEX += DASHBOARDS_NUMBER))
+    for INDEX in $(seq 0 "$MAX_INDEX");
+    do
+      DASHBOARD_PATH=$(yq r -j "$FILEPATH" dashboards[$INDEX].dashboard | tr -d '"')
+      DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
+      DASHBOARD_NAME=$(cat "./$DASHBOARD_PATH" | jq .dashboardMetadata.name)
+      DASHBOARD_EXISTS=$(echo $EXISTING_DASHBOARDS | grep "$DASHBOARD_NAME")
+      if ! [[ "${DASHBOARD_EXISTS}" != "" ]]; then              
+        echo "- Create [$DASHBOARD_NAME] dashboard from file [$DASHBOARD_PATH]"
+        curl -X POST "${DYNATRACE_URL}api/config/v1/dashboards" \
+            -H "Accept: application/json; charset=utf-8" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
+            -d "$DASHBOARD_JSON"
+      else
+        echo "- Dashboard [$DASHBOARD_NAME] already exists on cluster, skipping"
+      fi
+      echo ""
+    done
+  fi
+done
+
 
 echo "- cleaning up"
 
