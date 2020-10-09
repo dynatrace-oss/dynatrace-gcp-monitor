@@ -112,13 +112,13 @@ s)
 esac
 
 echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
-while ! [[ "${DYNATRACE_URL}" =~ ^https:\/\/[a-z0-9-]{8}\.(live|sprint|dev)\.(dynatrace|dynatracelabs)\.com\/$ ]]; do
+while ! [[ "${DYNATRACE_URL}" =~ ^https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/$ ]]; do
     read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
 done
 echo ""
 
 echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'API v2 Ingest metrics' and 'API v1 Read configuration' scope"
- while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
+while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
     read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY  
 done
 echo ""
