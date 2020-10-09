@@ -6,8 +6,9 @@ notifications:
 stages:
   - preparation
   - docker-deploy
+  - docker-release
   - build-zip
-  - release
+  - github-release
 env:
   global:
     - TAG=$TRAVIS_TAG
@@ -58,7 +59,7 @@ jobs:
           name: zip-folder
           paths:
             - ./artefacts
-    - stage: release
+    - stage: github-release
       install: skip
       language: minimal
       if: tag =~ /^release-.*
