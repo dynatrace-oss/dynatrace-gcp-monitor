@@ -31,9 +31,16 @@ jobs:
             - $HOME/.docker
     - stage: docker-deploy
       name: docker build
-      language: bash
+      language: bash      
       script:
         - docker build -f dockerfile -t dynatrace-gcp-function .
+      workspaces:
+        use:
+          name: dockerconfig
+    - stage: docker-release
+      language: bash
+      if: tag =~ /^release-.*
+      scripts:        
         - docker tag dynatrace-gcp-function dynatrace/dynatrace-gcp-function:$TAG
         - docker push dynatrace/dynatrace-gcp-function:$TAG
       workspaces:
@@ -54,6 +61,7 @@ jobs:
     - stage: release
       install: skip
       language: minimal
+      if: tag =~ /^release-.*
       workspaces:
         use:
           name: zip-folder
