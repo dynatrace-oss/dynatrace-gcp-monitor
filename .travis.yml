@@ -5,6 +5,7 @@ notifications:
     on_success: never
 stages:
   - preparation
+  - docker-build
   - docker-deploy
   - build-zip
   - github-release
