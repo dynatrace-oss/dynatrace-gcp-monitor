@@ -6,7 +6,6 @@ notifications:
 stages:
   - preparation
   - docker-deploy
-  - docker-release
   - build-zip
   - github-release
 env:
@@ -30,26 +29,21 @@ jobs:
           name: dockerconfig
           paths:
             - $HOME/.docker
-    - stage: docker-deploy
-      name: docker build
-      language: bash      
-      script:
-        - docker build -f dockerfile -t dynatrace-gcp-function .
+    - &push_image
+      stage: docker-deploy
+      name: Docker build
+      language: minimal      
+      script: ./build/docker-deploy.sh
       workspaces:
         use:
           name: dockerconfig
-    - stage: docker-release
-      language: bash
+    - <<: *push_image
+      name: Push docker image
       if: tag =~ /^release-.*
-      scripts:        
-        - docker tag dynatrace-gcp-function dynatrace/dynatrace-gcp-function:$TAG
-        - docker push dynatrace/dynatrace-gcp-function:$TAG
-      workspaces:
-        use:
-          name: dockerconfig
+      env: PUSH=true
     - stage: build-zip
       name: zip archive
-      language: bash
+      language: minimal
       script:
           - mkdir artefacts
           - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml
