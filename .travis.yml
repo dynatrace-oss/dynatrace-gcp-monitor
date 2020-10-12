@@ -13,33 +13,17 @@ env:
   global:
     - TAG=$TRAVIS_TAG
     - VERSION_TAG=/^release-.*
+    - DOCKER_CLI_EXPERIMENTAL=enabled
+
 jobs:
   include:
-    - stage: preparation
-      name: Set configs
-      install: skip
-      language: shell
-      git:
-        clone: false
-      script:
-        - mkdir -p ~/.docker && chmod 0700 ~/.docker
-        - touch ~/.docker/config.json && chmod 0600 ~/.docker/config.json
-        - base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
-      workspaces:
-        create:
-          name: dockerconfig
-          paths:
-            - $HOME/.docker
     - stage: docker-build
       name: Docker build
       language: minimal      
       script: ./build/docker-deploy.sh
-      workspaces:
-        use:
-          name: dockerconfig
     - stage: docker-deploy
       name: Docker deploy
-      language: minimal      
+      language: minimal
       script: ./build/docker-deploy.sh
       if: tag =~ /^release-.*
       env: PUSH=true
