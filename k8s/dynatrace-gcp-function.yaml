@@ -38,7 +38,7 @@ spec:
       serviceAccountName: dynatrace-gcp-function-sa
       automountServiceAccountToken: false
       containers:
-      - image: "{IMAGE-TAG}"
+      - image: dynatrace/dynatrace-gcp-function
         name: dynatrace-gcp-function      
         env:
         - name: GCP_SERVICES

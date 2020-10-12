@@ -50,7 +50,7 @@ Installation script will prompt for following parameters:
 | GCP project | Google Cloud project, where `dynatrace-gcp-function` should be deployed to. By default, current project set for gcloud CLI. |
 | Function size | Amount of memory that should be assigned to the function. Possible options</br> **[s]** - small, up to 500 instances, 256 MB memory allocated to function</br> **[m]** - medium, up to 1000 instances, 512 MB memory allocated to function </br>**[l]** - large, up to 5000 instances, 2048 MB memory allocated to function</br>Please note that You will be able to adjust amount of memory after installation. |
 | Dynatrace tenant URI | The URL to Your Dynatrace SaaS or Managed environment |
-| Dynatrace API token | Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `API v2 Ingest metrics` and `API v1 Read configuration` Token permission.
+| Dynatrace API token | Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `API v2 Ingest metrics`, `API v1 Read configuration` and `WriteConfig` Token permission.
 
 ## Quick start with Bash
 ### Requirements
@@ -89,24 +89,11 @@ Installation script will prompt for following parameters:
 **Please note** `dynatrace-gcp-function` uses Cloud Scheduler that requires App Engine to be created. If you don't have App Engine enabled yet, installer script will prompt you to Create it and select region, where it will run. Reference: [Cloud Scheduler documentation](https://cloud.google.com/scheduler/docs)
 
 ## Quick start on Kubernetes
-### Requirements
-* Docker CLI [Get Docker](*https://docs.docker.com/get-docker/)
+### Requirements 
 * Google Cloud SDK [Google Cloud SDK installer](https://cloud.google.com/sdk/docs/downloads-interactive#linux)
-* Kubernetes CLI [Install and setup kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-* Container Registry to push the image
-
-### Build & push docker container
-Build docker container image and push to Your container registry
-
-You can use:
-```
-docker build -t my-registry.grc.io/dynatrace/dynatrace-gcp-function .
-docker push my-registry.grc.io/dynatrace/dynatrace-gcp-function
-```
+* Kubernetes CLI [Install and setup kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
 
 ### Create Service Account & Kubernetes objects
-
-
 Create `dynatrace` namespace with `kubectl`, and secrets for Dynatrace cluster `API token` and `URL`. 
 
 Replace {DYNATRACE_URL} with URL to Your Dynatrace SaaS or Managed environment.
@@ -138,16 +125,12 @@ Download and install [dynatrace-gcp-function.yaml](k8s/dynatrace-gcp-function.ya
 ```
 wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/k8s/dynatrace-gcp-function.yaml
 ```
-You can adjust the function behavior in `dynatrace-gcp-function-config` Config Map defined in dynatrace-gcp-function.yaml.
-
-Edit `dynatrace-gcp-function.yaml` and replace `{IMAGE-TAG}` with tag that You have set for Docker image.
+You can adjust the function behavior in `dynatrace-gcp-function-config` Config Map defined in dynatrace-gcp-function.yaml. 
 
 Deploy Kubernetes objects:
 ```
 kubectl apply -f dynatrace-gcp-function.yaml
 ```
-
-"{IMAGE-PATH}" 
 
 Create annotation for service account. Replace `{GCP-PROJECT-ID}` with your GCP project ID:
 ```

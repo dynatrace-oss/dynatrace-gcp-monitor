@@ -1,0 +1,77 @@
+os: linux
+dist: xenial
+notifications:
+  email:
+    on_success: never
+stages:
+  - preparation
+  - docker-deploy
+  - docker-release
+  - build-zip
+  - github-release
+env:
+  global:
+    - TAG=$TRAVIS_TAG
+    - VERSION_TAG=/^release-.*
+jobs:
+  include:
+    - stage: preparation
+      name: Set configs
+      install: skip
+      language: shell
+      git:
+        clone: false
+      script:
+        - mkdir -p ~/.docker && chmod 0700 ~/.docker
+        - touch ~/.docker/config.json && chmod 0600 ~/.docker/config.json
+        - base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
+      workspaces:
+        create:
+          name: dockerconfig
+          paths:
+            - $HOME/.docker
+    - stage: docker-deploy
+      name: docker build
+      language: bash      
+      script:
+        - docker build -f dockerfile -t dynatrace-gcp-function .
+      workspaces:
+        use:
+          name: dockerconfig
+    - stage: docker-release
+      language: bash
+      if: tag =~ /^release-.*
+      scripts:        
+        - docker tag dynatrace-gcp-function dynatrace/dynatrace-gcp-function:$TAG
+        - docker push dynatrace/dynatrace-gcp-function:$TAG
+      workspaces:
+        use:
+          name: dockerconfig
+    - stage: build-zip
+      name: zip archive
+      language: bash
+      script:
+          - mkdir artefacts
+          - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml
+          - (cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')
+      workspaces:
+        create:
+          name: zip-folder
+          paths:
+            - ./artefacts
+    - stage: github-release
+      install: skip
+      language: minimal
+      if: tag =~ /^release-.*
+      workspaces:
+        use:
+          name: zip-folder
+      deploy:
+        provider: releases
+        file_glob: true
+        api_key:
+          secure: $GITHUB_RELEASE_API_KEY
+        file: ./artefacts/*
+        skip_cleanup: true
+        on:
+          tags: true
