@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -eu
 
 docker build -f dockerfile -t dynatrace-gcp-function .        

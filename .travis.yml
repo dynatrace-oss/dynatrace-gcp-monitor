@@ -6,7 +6,6 @@ notifications:
 stages:
   - preparation
   - docker-deploy
-  - docker-release
   - build-zip
   - github-release
 env:
@@ -32,8 +31,8 @@ jobs:
             - $HOME/.docker
     - &push_image
       stage: docker-deploy
-      name: docker build
-      language: bash      
+      name: Docker build
+      language: minimal      
       script: ./build/docker-deploy.sh
       workspaces:
         use:
@@ -44,7 +43,7 @@ jobs:
       env: PUSH=true
     - stage: build-zip
       name: zip archive
-      language: bash
+      language: minimal
       script:
           - mkdir artefacts
           - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml
