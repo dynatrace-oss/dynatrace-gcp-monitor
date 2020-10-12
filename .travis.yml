@@ -5,6 +5,7 @@ notifications:
     on_success: never
 stages:
   - preparation
+  - docker-build
   - docker-deploy
   - build-zip
   - github-release
@@ -29,18 +30,22 @@ jobs:
           name: dockerconfig
           paths:
             - $HOME/.docker
-    - &push_image
-      stage: docker-deploy
+    - stage: docker-build
       name: Docker build
       language: minimal      
       script: ./build/docker-deploy.sh
       workspaces:
         use:
           name: dockerconfig
-    - <<: *push_image
-      name: Push docker image
+    - stage: docker-deploy
+      name: Docker deploy
+      language: minimal      
+      script: ./build/docker-deploy.sh
       if: tag =~ /^release-.*
       env: PUSH=true
+      workspaces:
+        use:
+          name: dockerconfig
     - stage: build-zip
       name: zip archive
       language: minimal
