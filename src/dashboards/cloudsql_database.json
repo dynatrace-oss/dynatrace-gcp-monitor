@@ -27,8 +27,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.up",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -85,8 +84,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.up",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"],
-            "filterBy": []
+            "splitBy": ["database_id", "project_id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -143,8 +141,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.up",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["region"],
-            "filterBy": []
+            "splitBy": ["database_id", "region","project_id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -189,8 +186,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.up",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -223,8 +219,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.instance_state",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["state", "database_id"],
-            "filterBy": []
+            "splitBy": ["state", "database_id","project_id"]
         }],
         "visualConfig": {
             "type": "TABLE",
@@ -269,8 +264,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.network.connections",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": [],
-            "filterBy": []
+            "splitBy": ["project_id","database_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -315,8 +309,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.mysql.queries.count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -361,8 +354,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.mysql.queries.count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -395,8 +387,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.cpu.utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -441,8 +432,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.cpu.utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -475,8 +465,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.memory.utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -509,8 +498,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.memory.utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -555,8 +543,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -589,8 +576,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -671,8 +657,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.read_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -717,8 +702,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.read_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -763,8 +747,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.read_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -797,8 +780,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.disk.read_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -831,8 +813,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.available_for_failover",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id"],
-            "filterBy": []
+            "splitBy": ["database_id","project_id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",

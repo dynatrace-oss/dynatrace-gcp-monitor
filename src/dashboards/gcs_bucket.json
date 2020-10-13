@@ -15,9 +15,9 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
+            "top": 38,
             "left": 0,
-            "width": 304,
+            "width": 608,
             "height": 38
         },
         "tileFilter": {},
@@ -27,8 +27,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
-            "left": 304,
+            "top": 760,
+            "left": 0,
             "width": 304,
             "height": 304
         },
@@ -36,11 +36,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.total_byte_seconds",
+            "metric": "cloud.gcp.storage_googleapis_com.storage.total_byte_seconds",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["storage_class"],
-            "filterBy": []
+            "splitBy": ["storage_class", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -56,9 +55,9 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
-            "left": 304,
-            "width": 304,
+            "top": 722,
+            "left": 0,
+            "width": 608,
             "height": 38
         },
         "tileFilter": {},
@@ -68,7 +67,7 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
+            "top": 76,
             "left": 0,
             "width": 304,
             "height": 304
@@ -77,11 +76,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.total_bytes",
+            "metric": "cloud.gcp.storage_googleapis_com.storage.total_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["storage_class"],
-            "filterBy": []
+            "splitBy": ["storage_class", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -97,7 +95,7 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
+            "top": 418,
             "left": 608,
             "width": 304,
             "height": 304
@@ -106,11 +104,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.sent_bytes_count",
+            "metric": "cloud.gcp.storage_googleapis_com.network.sent_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method"],
-            "filterBy": []
+            "splitBy": ["method", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -126,9 +123,9 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
+            "top": 380,
             "left": 608,
-            "width": 304,
+            "width": 608,
             "height": 38
         },
         "tileFilter": {},
@@ -138,8 +135,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
-            "left": 912,
+            "top": 760,
+            "left": 1254,
             "width": 304,
             "height": 304
         },
@@ -147,11 +144,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.sent_bytes_count",
+            "metric": "cloud.gcp.storage_googleapis_com.network.sent_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code"],
-            "filterBy": []
+            "splitBy": ["response_code", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -167,9 +163,9 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
-            "left": 912,
-            "width": 304,
+            "top": 722,
+            "left": 1254,
+            "width": 646,
             "height": 38
         },
         "tileFilter": {},
@@ -179,8 +175,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
-            "left": 1216,
+            "top": 76,
+            "left": 608,
             "width": 304,
             "height": 304
         },
@@ -188,11 +184,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.request_count",
+            "metric": "cloud.gcp.storage_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method"],
-            "filterBy": []
+            "splitBy": ["method", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -208,9 +203,9 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
-            "left": 1216,
-            "width": 304,
+            "top": 38,
+            "left": 608,
+            "width": 608,
             "height": 38
         },
         "tileFilter": {},
@@ -220,8 +215,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
-            "left": 1520,
+            "top": 76,
+            "left": 1254,
             "width": 304,
             "height": 304
         },
@@ -229,11 +224,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.request_count",
+            "metric": "cloud.gcp.storage_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code"],
-            "filterBy": []
+            "splitBy": ["response_code", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -249,9 +243,9 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
-            "left": 1520,
-            "width": 304,
+            "top": 38,
+            "left": 1254,
+            "width": 950,
             "height": 38
         },
         "tileFilter": {},
@@ -261,7 +255,7 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 380,
+            "top": 418,
             "left": 0,
             "width": 304,
             "height": 304
@@ -270,11 +264,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.received_bytes_count",
+            "metric": "cloud.gcp.storage_googleapis_com.network.received_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method"],
-            "filterBy": []
+            "splitBy": ["method", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -290,9 +283,9 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 342,
+            "top": 380,
             "left": 0,
-            "width": 304,
+            "width": 608,
             "height": 38
         },
         "tileFilter": {},
@@ -302,8 +295,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 380,
-            "left": 304,
+            "top": 418,
+            "left": 1254,
             "width": 304,
             "height": 304
         },
@@ -311,11 +304,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.received_bytes_count",
+            "metric": "cloud.gcp.storage_googleapis_com.network.received_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code"],
-            "filterBy": []
+            "splitBy": ["response_code", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -331,9 +323,9 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 342,
-            "left": 304,
-            "width": 304,
+            "top": 380,
+            "left": 1254,
+            "width": 646,
             "height": 38
         },
         "tileFilter": {},
@@ -343,79 +335,21 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 342,
-            "left": 608,
-            "width": 304,
+            "top": 380,
+            "left": 2242,
+            "width": 608,
             "height": 38
         },
         "tileFilter": {},
         "markdown": "Authentication count by Access ID"
     }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 380,
-            "left": 608,
-            "width": 304,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.authentication_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["access_id"],
-            "filterBy": []
-        }],
-        "visualConfig": {
-            "type": "GRAPH_CHART",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": []
-        }
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 380,
-            "left": 912,
-            "width": 304,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.authentication_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["authentication_method"],
-            "filterBy": []
-        }],
-        "visualConfig": {
-            "type": "GRAPH_CHART",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": []
-        }
-    }, {
         "name": "Markdown",
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 342,
-            "left": 912,
-            "width": 304,
+            "top": 38,
+            "left": 2242,
+            "width": 608,
             "height": 38
         },
         "tileFilter": {},
@@ -425,8 +359,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 380,
-            "left": 1216,
+            "top": 1140,
+            "left": 342,
             "width": 304,
             "height": 304
         },
@@ -434,11 +368,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.authentication_count",
+            "metric": "cloud.gcp.storage_googleapis_com.authz.acl_operations_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method"],
-            "filterBy": []
+            "splitBy": ["acl_operation", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -454,90 +387,8 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 342,
-            "left": 1216,
-            "width": 304,
-            "height": 38
-        },
-        "tileFilter": {},
-        "markdown": "Authentication count by Authentication method"
-    }, {
-        "name": "Markdown",
-        "tileType": "MARKDOWN",
-        "configured": true,
-        "bounds": {
-            "top": 342,
-            "left": 1520,
-            "width": 304,
-            "height": 38
-        },
-        "tileFilter": {},
-        "markdown": "Authentication count by Response code"
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 380,
-            "left": 1520,
-            "width": 304,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.authentication_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code"],
-            "filterBy": []
-        }],
-        "visualConfig": {
-            "type": "GRAPH_CHART",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": []
-        }
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 722,
-            "left": 0,
-            "width": 304,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.acl_operations_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["acl_operation"],
-            "filterBy": []
-        }],
-        "visualConfig": {
-            "type": "GRAPH_CHART",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": []
-        }
-    }, {
-        "name": "Markdown",
-        "tileType": "MARKDOWN",
-        "configured": true,
-        "bounds": {
-            "top": 684,
-            "left": 0,
+            "top": 1102,
+            "left": 342,
             "width": 304,
             "height": 38
         },
@@ -548,8 +399,8 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 684,
-            "left": 304,
+            "top": 1102,
+            "left": 646,
             "width": 304,
             "height": 38
         },
@@ -560,8 +411,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 722,
-            "left": 304,
+            "top": 1140,
+            "left": 646,
             "width": 304,
             "height": 304
         },
@@ -569,11 +420,10 @@
         "customName": "Data Explorer results",
         "queries": [{
             "id": "A",
-            "metric": "cloud.gcp.gcs_bucket.object_count.gauge",
+            "metric": "cloud.gcp.storage_googleapis_com.storage.object_count.gauge",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["storage_class"],
-            "filterBy": []
+            "splitBy": ["storage_class", "project_id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -583,6 +433,458 @@
                 "seriesType": "LINE"
             },
             "rules": []
+        }
+    }, {
+        "name": "Usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 0,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 304,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.storage.total_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["storage_class", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 304,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.network.received_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["method", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 912,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.network.sent_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["method", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 760,
+            "left": 304,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.storage.total_byte_seconds",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["storage_class", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Response codes",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 1254,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 912,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.api.request_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["method", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Authentication and security",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 2242,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 1558,
+            "width": 342,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.network.received_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["response_code", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 760,
+            "left": 1558,
+            "width": 342,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.network.sent_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["response_code", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 1558,
+            "width": 342,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.api.request_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["response_code", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 1900,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.api.request_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["response_code"]
+        }],
+        "visualConfig": {
+            "type": "PIE_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 2546,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.authn.authentication_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id", "bucket_name", "authentication_method"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 2242,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.authn.authentication_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id", "bucket_name", "authentication_method"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 2242,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.authn.authentication_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["access_id", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 2546,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.storage_googleapis_com.authn.authentication_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["access_id", "project_id", "bucket_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
         }
     }]
 }

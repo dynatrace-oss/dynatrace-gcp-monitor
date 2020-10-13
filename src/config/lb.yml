@@ -642,4 +642,5 @@ gcp:
     - value: metric.labels.client_continent
     - value: metric.labels.client_country
 dashboards:
-  - dashboard: "dashboards/lb.json"
+  - dashboard: "dashboards/lb_https.json"
+  - dashboard: "dashboards/lb_tcp.json"
