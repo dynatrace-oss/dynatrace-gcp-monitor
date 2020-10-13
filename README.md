@@ -50,7 +50,7 @@ Installation script will prompt for following parameters:
 | GCP project | Google Cloud project, where `dynatrace-gcp-function` should be deployed to. By default, current project set for gcloud CLI. |
 | Function size | Amount of memory that should be assigned to the function. Possible options</br> **[s]** - small, up to 500 instances, 256 MB memory allocated to function</br> **[m]** - medium, up to 1000 instances, 512 MB memory allocated to function </br>**[l]** - large, up to 5000 instances, 2048 MB memory allocated to function</br>Please note that You will be able to adjust amount of memory after installation. |
 | Dynatrace tenant URI | The URL to Your Dynatrace SaaS or Managed environment |
-| Dynatrace API token | Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `API v2 Ingest metrics` and `API v1 Read configuration` Token permission.
+| Dynatrace API token | Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `API v2 Ingest metrics`, `API v1 Read configuration` and `WriteConfig` Token permission.
 
 ## Quick start with Bash
 ### Requirements

@@ -117,7 +117,7 @@ while ! [[ "${DYNATRACE_URL}" =~ ^https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/$ ]]; 
 done
 echo ""
 
-echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'API v2 Ingest metrics' and 'API v1 Read configuration' scope"
+echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'API v2 Ingest metrics', 'API v1 Read configuration' and `WriteConfig` scope"
 while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
     read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY  
 done
