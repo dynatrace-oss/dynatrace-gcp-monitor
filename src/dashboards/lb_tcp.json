@@ -1,6 +1,7 @@
 {
+    "id": "eccb1b9c-c4a8-4117-91cd-c26862ae89af",
     "dashboardMetadata": {
-        "name": "Google Cloud APIs",
+        "name": "Google Cloud TCP Load Balancing",
         "shared": false,
         "sharingDetails": {
             "linkShared": true,
@@ -11,24 +12,84 @@
         }
     },
     "tiles": [{
-        "name": "Request count by service",
-        "tileType": "HEADER",
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
             "top": 38,
-            "left": 0,
-            "width": 342,
+            "left": 1862,
+            "width": 608,
             "height": 38
         },
-        "tileFilter": {}
+        "tileFilter": {},
+        "markdown": "RTT latencies [ms] by Backend name and Subnetwork"
     }, {
-        "name": "Request count by location",
-        "tileType": "HEADER",
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 608,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Ingress packets by Forwarding rule"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
             "top": 380,
             "left": 0,
-            "width": 342,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Ingress bytes by Backend name and Subnetwork"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 722,
+            "left": 0,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Egress packets by Backend name and Subnetwork"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 1064,
+            "left": 0,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Egress bytes by Backend name and Subnetwork"
+    }, {
+        "name": "Usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 0,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Performance",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 1862,
+            "width": 304,
             "height": 38
         },
         "tileFilter": {}
@@ -37,19 +98,619 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 418,
-            "left": 0,
-            "width": 342,
+            "top": 76,
+            "left": 608,
+            "width": 304,
             "height": 304
         },
         "tileFilter": {},
         "customName": "Data Explorer results",
         "queries": [{
             "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["location","project_id"]
+            "splitBy": ["load_balancer_name", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 1216,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Ingress packets by Client country"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 912,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["load_balancer_name", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 0,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Ingress packets by Backend name and Subnetwork"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 1216,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["client_country", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "PIE_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 304,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 304,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 608,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Ingress bytes by Forwarding rule"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 608,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": [ "forwarding_rule_network_tier", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 912,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 760,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 760,
+            "left": 304,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 722,
+            "left": 608,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Egress packets by Forwarding rule"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 760,
+            "left": 608,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 760,
+            "left": 912,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1102,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1102,
+            "left": 304,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 1064,
+            "left": 608,
+            "width": 608,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Egress bytes by Backend name and Forwarding rule"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1102,
+            "left": 608,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1102,
+            "left": 912,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id", "forwarding_rule_name"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 1520,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Ingress packets by Network"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 1520,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "B",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["network_name", "project_id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -71,513 +732,18 @@
         "configured": true,
         "bounds": {
             "top": 76,
-            "left": 342,
-            "width": 342,
+            "left": 1862,
+            "width": 304,
             "height": 304
         },
         "tileFilter": {},
         "customName": "Data Explorer results",
         "queries": [{
             "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.rtt_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method","project_id"]
-        }],
-        "visualConfig": {
-            "type": "TOP_LIST",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Top method called",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 38,
-            "left": 342,
-            "width": 342,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 418,
-            "left": 342,
-            "width": 342,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["protocol","project_id"]
-        }],
-        "visualConfig": {
-            "type": "TOP_LIST",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Protocols in use",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 380,
-            "left": 342,
-            "width": 342,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 760,
-            "left": 0,
-            "width": 342,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"]
-        }],
-        "visualConfig": {
-            "type": "TOP_LIST",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Requests by GCP project",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 722,
-            "left": 0,
-            "width": 342,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 760,
-            "left": 342,
-            "width": 342,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["version","project_id"]
-        }],
-        "visualConfig": {
-            "type": "TOP_LIST",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Request by API version",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 722,
-            "left": 342,
-            "width": 342,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Usage",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 0,
-            "left": 0,
-            "width": 684,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Performance",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 0,
-            "left": 722,
-            "width": 684,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 76,
-            "left": 722,
-            "width": 342,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_latencies",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["method","project_id"]
-        }],
-        "visualConfig": {
-            "type": "TOP_LIST",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Method call latency",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 38,
-            "left": 722,
-            "width": 342,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 418,
-            "left": 722,
-            "width": 342,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_latencies",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["service","project_id"]
-        }],
-        "visualConfig": {
-            "type": "TOP_LIST",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Service call latency",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 380,
-            "left": 722,
-            "width": 342,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 760,
-            "left": 722,
-            "width": 342,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_latencies",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["location","project_id"]
-        }],
-        "visualConfig": {
-            "type": "TOP_LIST",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Latency by region",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 722,
-            "left": 722,
-            "width": 342,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 760,
-            "left": 1064,
-            "width": 532,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_latencies",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["location","project_id"]
-        }],
-        "visualConfig": {
-            "type": "GRAPH_CHART",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 418,
-            "left": 1064,
-            "width": 532,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_latencies",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["service","project_id"]
-        }],
-        "visualConfig": {
-            "type": "GRAPH_CHART",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 76,
-            "left": 1064,
-            "width": 532,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_latencies",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["method","project_id"]
-        }],
-        "visualConfig": {
-            "type": "GRAPH_CHART",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Failures",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 0,
-            "left": 1634,
-            "width": 684,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "4xx errors by method",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 38,
-            "left": 1634,
-            "width": 342,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "5xx errors by method",
-        "tileType": "HEADER",
-        "configured": true,
-        "bounds": {
-            "top": 380,
-            "left": 1634,
-            "width": 342,
-            "height": 38
-        },
-        "tileFilter": {}
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 76,
-            "left": 1634,
-            "width": 532,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "response_code","project_id"]
-        }],
-        "visualConfig": {
-            "type": "TOP_LIST",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 418,
-            "left": 1634,
-            "width": 532,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "response_code","project_id"]
+            "splitBy": ["backend_name", "backend_subnetwork_name", "project_id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -600,50 +766,17 @@
         "bounds": {
             "top": 76,
             "left": 2166,
-            "width": 532,
+            "width": 304,
             "height": 304
         },
         "tileFilter": {},
         "customName": "Data Explorer results",
         "queries": [{
             "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.rtt_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "response_code","project_id"]
-        }],
-        "visualConfig": {
-            "type": "GRAPH_CHART",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": [{
-                "matcher": "B:",
-                "properties": {
-                    "seriesType": "LINE"
-                }
-            }]
-        }
-    }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 418,
-            "left": 2166,
-            "width": 532,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "response_code","project_id"]
+            "splitBy": ["backend_name", "backend_subnetwork_name", "project_id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -666,17 +799,17 @@
         "bounds": {
             "top": 76,
             "left": 0,
-            "width": 342,
+            "width": 304,
             "height": 304
         },
         "tileFilter": {},
         "customName": "Data Explorer results",
         "queries": [{
             "id": "B",
-            "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
+            "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["service","project_id"]
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",

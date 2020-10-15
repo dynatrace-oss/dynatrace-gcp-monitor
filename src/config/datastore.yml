@@ -12,8 +12,6 @@ gcp:
       dimension: module_id
     - value: resource.labels.version_id
       dimension: version_id
-    - value: resource.labels.version_id
-      location: version_id
   metrics:
     - value: datastore.googleapis.com/entity/write_sizes
       id: cloud.gcp.datastore_googleapis_com.entity.write_sizes

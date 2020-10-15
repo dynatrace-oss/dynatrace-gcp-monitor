@@ -1,19 +1,13 @@
 {
-    "metadata": {
-        "configurationVersions": [3],
-        "clusterVersion": "1.203.14.20200914-111831"
-    },
-    "id": "7782a75b-1387-41c1-ae81-8e8c7d2638b8",
     "dashboardMetadata": {
         "name": "Google Cloud Filestore",
         "shared": false,
-        "owner": "pawel.siwek@dynatrace.com",
         "sharingDetails": {
             "linkShared": true,
             "published": false
         },
         "dashboardFilter": {
-            "timeframe": "-72h to now"
+            "timeframe": ""
         }
     },
     "tiles": [{
@@ -69,8 +63,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["name"],
-            "filterBy": []
+            "splitBy": ["name","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -122,8 +115,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["version"],
-            "filterBy": []
+            "splitBy": ["version","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -223,8 +215,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -252,8 +243,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_milliseconds_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -281,8 +271,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -310,8 +299,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_milliseconds_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -339,8 +327,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -390,8 +377,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -430,8 +416,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["name"],
-            "filterBy": []
+            "splitBy": ["name","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -488,8 +473,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -534,8 +518,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -568,8 +551,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["version"],
-            "filterBy": []
+            "splitBy": ["version","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -626,8 +608,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -672,8 +653,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -706,8 +686,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.free_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -740,8 +719,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.free_bytes_percent",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -786,8 +764,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.used_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -820,8 +797,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.used_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -878,8 +854,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_milliseconds_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -912,8 +887,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_milliseconds_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share"],
-            "filterBy": []
+            "splitBy": ["file_share","project_id","instance_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",

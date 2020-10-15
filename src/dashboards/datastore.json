@@ -15,8 +15,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
-            "left": 0,
+            "top": 418,
+            "left": 304,
             "width": 304,
             "height": 304
         },
@@ -27,8 +27,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.write_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["op"],
-            "filterBy": []
+            "splitBy": ["op", "project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -44,7 +43,7 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
+            "top": 380,
             "left": 0,
             "width": 304,
             "height": 38
@@ -56,8 +55,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
-            "left": 608,
+            "top": 760,
+            "left": 0,
             "width": 304,
             "height": 304
         },
@@ -68,8 +67,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.read_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["type"],
-            "filterBy": []
+            "splitBy": ["type", "project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -85,8 +83,8 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
-            "left": 608,
+            "top": 722,
+            "left": 0,
             "width": 304,
             "height": 38
         },
@@ -97,8 +95,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 380,
-            "left": 608,
+            "top": 76,
+            "left": 304,
             "width": 304,
             "height": 304
         },
@@ -109,8 +107,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"],
-            "filterBy": []
+            "splitBy": ["project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -126,8 +123,8 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 342,
-            "left": 608,
+            "top": 38,
+            "left": 304,
             "width": 304,
             "height": 38
         },
@@ -138,8 +135,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 380,
-            "left": 0,
+            "top": 76,
+            "left": 1558,
             "width": 304,
             "height": 304
         },
@@ -150,8 +147,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code"],
-            "filterBy": []
+            "splitBy": ["response_code", "project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -167,49 +163,20 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 342,
-            "left": 0,
+            "top": 38,
+            "left": 1558,
             "width": 304,
             "height": 38
         },
         "tileFilter": {},
         "markdown": "Requests by Response code"
     }, {
-        "name": "Data Explorer",
-        "tileType": "DATA_EXPLORER",
-        "configured": true,
-        "bounds": {
-            "top": 380,
-            "left": 304,
-            "width": 304,
-            "height": 304
-        },
-        "tileFilter": {},
-        "customName": "Data Explorer results",
-        "queries": [{
-            "id": "A",
-            "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
-            "spaceAggregation": "AVG",
-            "timeAggregation": "DEFAULT",
-            "splitBy": ["api_method"],
-            "filterBy": []
-        }],
-        "visualConfig": {
-            "type": "GRAPH_CHART",
-            "global": {
-                "theme": "DEFAULT",
-                "thresholds": [],
-                "seriesType": "LINE"
-            },
-            "rules": []
-        }
-    }, {
         "name": "Markdown",
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 342,
-            "left": 304,
+            "top": 38,
+            "left": 912,
             "width": 304,
             "height": 38
         },
@@ -220,8 +187,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
-            "left": 912,
+            "top": 760,
+            "left": 304,
             "width": 304,
             "height": 304
         },
@@ -232,8 +199,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.read_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"],
-            "filterBy": []
+            "splitBy": ["project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -249,8 +215,8 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
-            "left": 912,
+            "top": 722,
+            "left": 304,
             "width": 304,
             "height": 38
         },
@@ -261,8 +227,8 @@
         "tileType": "DATA_EXPLORER",
         "configured": true,
         "bounds": {
-            "top": 38,
-            "left": 304,
+            "top": 418,
+            "left": 912,
             "width": 304,
             "height": 304
         },
@@ -273,8 +239,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.write_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"],
-            "filterBy": []
+            "splitBy": ["project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -290,12 +255,287 @@
         "tileType": "MARKDOWN",
         "configured": true,
         "bounds": {
-            "top": 0,
-            "left": 304,
+            "top": 380,
+            "left": 912,
             "width": 304,
             "height": 38
         },
         "tileFilter": {},
         "markdown": "Sizes of written entities by Project ID"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 912,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["api_method", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.datastore_googleapis_com.entity.write_sizes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["op", "module_id", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 418,
+            "left": 608,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.datastore_googleapis_com.entity.write_sizes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 304,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Sizes of written entities by Op"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 608,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Sizes of written entities by Project ID"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 1254,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["response_code", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "PIE_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 1254,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Requests by Response code"
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 608,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Requests by API method"
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 608,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["api_method", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "PIE_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Data Explorer",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 76,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Data Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["project_id"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "thresholds": [],
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Markdown",
+        "tileType": "MARKDOWN",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 0,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {},
+        "markdown": "Requests by Project ID"
+    }, {
+        "name": "Usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 0,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Failures",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 1254,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {}
     }]
 }
