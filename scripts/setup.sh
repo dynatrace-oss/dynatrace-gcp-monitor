@@ -13,7 +13,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-readonly FUNCTION_REPOSITORY_RELEASE_URL=https://github.com/dynatrace-oss/dynatrace-gcp-function/archive/release-0.0.11.zip
+readonly FUNCTION_REPOSITORY_RELEASE_URL=https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/release-0.0.11/dynatrace-gcp-function.zip
 readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
