@@ -12,6 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import asyncio
+import os
 
 from main import async_dynatrace_gcp_extension
 
@@ -21,8 +22,40 @@ async def scheduling_loop():
         loop.create_task(async_dynatrace_gcp_extension())
         await asyncio.sleep(60)
 
+print("                      ,,,,,..")
+print("                  ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.")
+print("               ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,")
+print("            .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,     ,,")
+print("          ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,    .,,,,")
+print("       ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,     ,,,,,,,.")
+print("    .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    ,,,,,,,,,,,")
+print("  ,,,,,,,,,,,,,,,,,......  ......,,,,,,,    .,,,,,,,,,,,,,")
+print(",,                                        ,,,,,,,,,,,,,,,,")
+print(",,,,,,,,,,,,,,,,,                        .,,,,,,,,,,,,,,,,")
+print(",,,,,,,,,,,,,,,,,                        .,,,,,,,,,,,,,,,,.")
+print(",,,,,,,,,,,,,,,,,       Dynatrace        .,,,,,,,,,,,,,,,,.")
+print(",,,,,,,,,,,,,,,,, dynatrace-gcp-function .,,,,,,,,,,,,,,,,,")
+print(",,,,,,,,,,,,,,,,,                        .,,,,,,,,,,,,,,,,,")
+print(",,,,,,,,,,,,,,,,,                        ,,,,,,,,,,,,,,,,,,")
+print(",,,,,,,,,,,,,,,,,                        ,,,,,,,,,,,,,,,,,,")
+print(".,,,,,,,,,,,,,,,                         ,,,,,,,,,,,,,,,,,")
+print(".,,,,,,,,,,,,,    .,,,,,,,,,,,,,,,,,,.   ,,,,,,,,,,,,,,,")
+print(" ,,,,,,,,,,     ,,,,,,,,,,,,,,,,,,,,,,  .,,,,,,,,,,,,.")
+print(" ,,,,,,,     ,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,,,,,,,,")
+print(" ,,,,,    .,,,,,,,,,,,,,,,,,,,,,,,,,,.  ,,,,,,,,")
+print("  ,     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,,,,")
+print("     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,")
+print("")
 
-print("Setting up")
+
+print("Dynatrace function for Google Cloud Platform monitoring")
+print("")
+
+if "GCP_SERVICES" in os.environ:
+    services = os.environ.get("GCP_SERVICES", "")
+    print(f"Running with configured services: {services}")
+
+print("Setting up..")
 loop = asyncio.get_event_loop()
 loop.create_task(scheduling_loop())
 loop.run_forever()
