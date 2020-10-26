@@ -63,7 +63,8 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
             "Authorization": f"Api-Token {context.dynatrace_api_key}",
             "Content-Type": "text/plain; charset=utf-8"
         },
-        data=ingest_input
+        data=ingest_input,
+        verify_ssl=context.require_valid_certificate
     )
 
     if ingest_response.status == 401:

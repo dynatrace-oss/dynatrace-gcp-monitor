@@ -24,3 +24,4 @@ Worker function execution can be tweaked with environment variables. In Google F
 | GOOGLE_APPLICATION_CREDENTIALS | path to GCP service account key file | |
 | MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE | Max number of MINT ingest lines processed in one minute interval | 100 000 |
 | METRIC_INGEST_BATCH_SIZE | size of MINT ingest batch sent to Dynatrace cluster | 1000 |
+| REQUIRE_VALID_CERTIFICATE | determines whether worker will verify SSL certificate of Dynatrace endpoint | True |
