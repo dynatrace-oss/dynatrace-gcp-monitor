@@ -107,6 +107,7 @@ async def handle_event(event: Dict, context: Dict, project_id: Optional[str]):
             print_metric_ingest_input=print_metric_ingest_input,
             scheduled_execution_id=context.scheduled_execution_id
         )
+
         context.setup_execution_time = (time.time() - setup_start_time)
 
         fetch_gcp_data_start_time = time.time()

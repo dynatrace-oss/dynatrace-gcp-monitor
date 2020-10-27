@@ -61,6 +61,7 @@ class Context(LoggingContext):
         self.location = os.environ.get("FUNCTION_REGION", "us-east1")
         self.maximum_metric_data_points_per_minute = int(os.environ.get("MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE", "100000"))
         self.metric_ingest_batch_size = int(os.environ.get("METRIC_INGEST_BATCH_SIZE", "1000"))
+        self.require_valid_certificate = os.environ.get("REQUIRE_VALID_CERTIFICATE", "True") in ["True", "T", "true"]
 
         # self monitoring data
         self.dynatrace_request_count = {}
