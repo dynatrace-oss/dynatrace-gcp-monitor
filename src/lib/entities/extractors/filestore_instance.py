@@ -93,4 +93,4 @@ async def get_filestore_instance_entity(ctx: Context, svc_def: GCPService) -> It
         project_id=ctx.project_id
     )
     mapper_func = partial(_filestore_instance_resp_to_monitored_entities, svc_def=svc_def)
-    return await generic_paging(url, ctx.token, ctx.session, mapper_func)
+    return await generic_paging(url, ctx, mapper_func)

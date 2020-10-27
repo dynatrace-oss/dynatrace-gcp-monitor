@@ -91,4 +91,4 @@ async def get_cloud_function_entity(ctx: Context, svc_def: GCPService) -> Iterab
         project_id=ctx.project_id
     )
     mapper_func = partial(_cloud_function_resp_to_monitored_entities, svc_def=svc_def)
-    return await generic_paging(url, ctx.token, ctx.session, mapper_func)
+    return await generic_paging(url, ctx, mapper_func)

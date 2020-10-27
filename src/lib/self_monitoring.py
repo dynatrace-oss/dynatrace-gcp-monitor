@@ -23,7 +23,7 @@ from lib.metric_descriptor import SELF_MONITORING_METRIC_PREFIX, SELF_MONITORING
 
 async def push_self_monitoring_time_series(context: Context):
     try:
-        print(f"Pushing self monitoring time series to GCP Monitor...")
+        context.log(f"Pushing self monitoring time series to GCP Monitor...")
         await create_metric_descriptors_if_missing(context)
 
         time_series = create_self_monitoring_time_series(context)
@@ -36,12 +36,12 @@ async def push_self_monitoring_time_series(context: Context):
         status = self_monitoring_response.status
         if status != 200:
             self_monitoring_response_json = await self_monitoring_response.json()
-            print(f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
+            context.log(f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
         else:
-            print(f"Finished pushing self monitoring time series to GCP Monitor")
+            context.log(f"Finished pushing self monitoring time series to GCP Monitor")
         self_monitoring_response.close()
     except Exception as e:
-        print(f"Failed to push self monitoring time series, reason is {type(e).__name__} {e}")
+        context.log(f"Failed to push self monitoring time series, reason is {type(e).__name__} {e}")
 
 
 async def create_metric_descriptors_if_missing(context: Context):
@@ -56,7 +56,7 @@ async def create_metric_descriptors_if_missing(context: Context):
         types = [metric.get("type", "") for metric in dynatrace_metrics_descriptors_json.get("metricDescriptors", [])]
         for metric_type, metric_descriptor in SELF_MONITORING_METRIC_MAP.items():
             if metric_type not in types:
-                print(f"Creating missing metric descriptor for '{metric_type}'")
+                context.log(f"Creating missing metric descriptor for '{metric_type}'")
                 await context.session.request(
                     "POST",
                     url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id}/metricDescriptors",
@@ -64,7 +64,7 @@ async def create_metric_descriptors_if_missing(context: Context):
                     headers={"Authorization": f"Bearer {context.token}"}
                 )
     except Exception as e:
-        print(f"Failed to create self monitoring metrics descriptors, reason is {type(e).__name__} {e}")
+        context.log(f"Failed to create self monitoring metrics descriptors, reason is {type(e).__name__} {e}")
 
 
 def create_time_serie(
