@@ -15,8 +15,6 @@
 
 from typing import Any, Callable, Dict, List, Text
 
-from aiohttp import ClientSession
-
 from lib.context import Context
 from lib.entities.model import Entity
 
@@ -47,14 +45,13 @@ async def fetch_zones(
 
 async def generic_paging(
         url: Text,
-        auth_token: Text,
-        session: ClientSession,
+        ctx: Context,
         mapper: Callable[[Dict[Any, Any]], List[Entity]]
 ) -> List[Entity]:
     """Apply mapper function on any page returned by gcp api url."""
     headers = {
         "Accept": "application/json",
-        "Authorization": "Bearer {token}".format(token=auth_token)
+        "Authorization": "Bearer {token}".format(token=ctx.token)
     }
 
     get_page = True
@@ -62,7 +59,7 @@ async def generic_paging(
     entities: List[Entity] = []
     while get_page:
         try:
-            resp = await session.request(
+            resp = await ctx.session.request(
                 "GET",
                 params=params,
                 url=url,
@@ -71,13 +68,13 @@ async def generic_paging(
             )
             page = await resp.json()
         except Exception as ex:
-            print("Failed to retrieve information from googleapis. {0}".format(ex))
+            ctx.log("Failed to retrieve information from googleapis. {0}".format(ex))
             return entities
 
         try:
             entities.extend(mapper(page))
         except Exception as ex:
-            print("Failed to map response from googleapis. {0}".format(ex))
+            ctx.log("Failed to map response from googleapis. {0}".format(ex))
             return entities
 
         get_page = "nextPageToken" in page

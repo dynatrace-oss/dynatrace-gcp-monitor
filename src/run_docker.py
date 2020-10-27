@@ -14,6 +14,7 @@
 import asyncio
 import os
 
+from lib.context import LoggingContext
 from main import async_dynatrace_gcp_extension
 
 
@@ -47,15 +48,15 @@ print("  ,     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,,,,")
 print("     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,")
 print("")
 
+logging_context = LoggingContext(None)
 
-print("Dynatrace function for Google Cloud Platform monitoring")
-print("")
+logging_context.log("Dynatrace function for Google Cloud Platform monitoring\n")
 
 if "GCP_SERVICES" in os.environ:
     services = os.environ.get("GCP_SERVICES", "")
     print(f"Running with configured services: {services}")
 
-print("Setting up..")
+logging_context.log("Setting up... \n")
 loop = asyncio.get_event_loop()
 loop.create_task(scheduling_loop())
 loop.run_forever()

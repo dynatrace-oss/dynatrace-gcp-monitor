@@ -40,22 +40,23 @@ async def push_ingest_lines(context: Context, fetch_metric_results: List[IngestL
                 await _push_to_dynatrace(context, lines_batch)
                 lines_dropped_count = len(fetch_metric_results) - maximum_lines_threshold
                 context.dynatrace_ingest_lines_dropped_count = lines_dropped_count
-                print(f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
+                context.log(f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
                 return
         if lines_batch:
             await _push_to_dynatrace(context, lines_batch)
     except Exception as e:
         if isinstance(e, InvalidURL):
             context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
-        print(f"Failed to push ingest lines to Dynatrace due to {type(e).__name__} {e}")
+        context.log(f"Failed to push ingest lines to Dynatrace due to {type(e).__name__} {e}")
     finally:
         context.push_to_dynatrace_execution_time = time.time() - start_time
-        print(f"Finished uploading metric ingest lines to Dynatrace in {context.push_to_dynatrace_execution_time} s")
+        context.log(f"Finished uploading metric ingest lines to Dynatrace in {context.push_to_dynatrace_execution_time} s")
 
 
 async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
     ingest_input = "\n".join([line.to_string() for line in lines_batch])
     if context.print_metric_ingest_input:
+        context.log("Ingest input is: ")
         print(ingest_input)
     ingest_response = await context.session.post(
         url=urljoin(context.dynatrace_url, "/api/v2/metrics/ingest"),
@@ -80,11 +81,11 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
     context.dynatrace_request_count[ingest_response.status] = context.dynatrace_request_count.get(ingest_response.status, 0) + 1
     context.dynatrace_ingest_lines_ok_count += ingest_response_json.get("linesOk", 0)
     context.dynatrace_ingest_lines_invalid_count += ingest_response_json.get("linesInvalid", 0)
-    print(f"Ingest response: {ingest_response_json}")
-    await log_invalid_lines(ingest_response_json, lines_batch)
+    context.log(f"Ingest response: {ingest_response_json}")
+    await log_invalid_lines(context, ingest_response_json, lines_batch)
 
 
-async def log_invalid_lines(ingest_response_json: Dict, lines_batch: List[IngestLine]):
+async def log_invalid_lines(context: Context, ingest_response_json: Dict, lines_batch: List[IngestLine]):
     error = ingest_response_json.get("error", None)
     if error is None:
         return
@@ -95,7 +96,7 @@ async def log_invalid_lines(ingest_response_json: Dict, lines_batch: List[Ingest
             line_index = invalid_line_error_message.get("line", 0) - 1
             if line_index > -1:
                 invalid_line_error_message = invalid_line_error_message.get("error", "")
-                print(f"INVALID LINE: '{lines_batch[line_index].to_string()}', reason: '{invalid_line_error_message}'")
+                context.log(f"INVALID LINE: '{lines_batch[line_index].to_string()}', reason: '{invalid_line_error_message}'")
 
 
 async def fetch_metric(
@@ -138,7 +139,6 @@ async def fetch_metric(
     while should_fetch:
         resp = await context.session.request('GET', url=context.url, params=params, headers=headers)
         page = await resp.json()
-        # print(f"{metric.google_metric} => {page}")
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
         if 'error' in page:
             raise Exception(str(page))

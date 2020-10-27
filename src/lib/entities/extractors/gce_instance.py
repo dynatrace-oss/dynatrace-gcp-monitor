@@ -117,7 +117,7 @@ async def get_cloud_function_entity(ctx: Context, svc_def: GCPService) -> Iterab
     for zone in zones:
         url = f"https://compute.googleapis.com/compute/v1/projects/{ctx.project_id}/zones/{zone}/instances"
         mapper_func = partial(_cloud_function_resp_to_monitored_entities, svc_def=svc_def)
-        tasks.append(generic_paging(url, ctx.token, ctx.session, mapper_func))
+        tasks.append(generic_paging(url, ctx, mapper_func))
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
     all_results = []
