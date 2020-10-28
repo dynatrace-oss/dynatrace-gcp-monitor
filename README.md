@@ -121,6 +121,12 @@ gcloud projects add-iam-policy-binding {GCP-PROJECT-ID} --member="serviceAccount
 gcloud projects add-iam-policy-binding {GCP-PROJECT-ID} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/pubsub.viewer
 ```
 
+Enable API's required for monitoring
+```
+gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com
+```
+
+
 Download and install [dynatrace-gcp-function.yaml](k8s/dynatrace-gcp-function.yaml) Kubernetes objects:
 ```
 wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/k8s/dynatrace-gcp-function.yaml
