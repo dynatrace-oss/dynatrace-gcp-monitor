@@ -15,11 +15,25 @@
 import enum
 import os
 from datetime import datetime, timedelta
+from typing import Optional
 
 import aiohttp
 
 
-class Context:
+class LoggingContext:
+    def __init__(self, scheduled_execution_id: Optional[str]):
+        self.scheduled_execution_id: str = scheduled_execution_id[0:8] if scheduled_execution_id else None
+
+    def log(self, message: str):
+        timestamp_utc = datetime.utcnow()
+        timestamp_utc_iso = timestamp_utc.isoformat(sep=" ")
+        if self.scheduled_execution_id:
+            print(f"{timestamp_utc_iso} [{self.scheduled_execution_id}] : {message}")
+        else:
+            print(f"{timestamp_utc_iso} : {message}")
+
+
+class Context(LoggingContext):
     def __init__(
             self,
             session: aiohttp.ClientSession,
@@ -29,8 +43,11 @@ class Context:
             execution_interval_seconds: int,
             dynatrace_api_key: str,
             dynatrace_url: str,
-            print_metric_ingest_input: bool
+            print_metric_ingest_input: bool,
+            scheduled_execution_id: Optional[str]
     ):
+        super().__init__(scheduled_execution_id)
+
         self.session = session
         self.project_id_owner = project_id_owner
         self.token = token
@@ -43,6 +60,7 @@ class Context:
         self.location = os.environ.get("FUNCTION_REGION", "us-east1")
         self.maximum_metric_data_points_per_minute = int(os.environ.get("MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE", "100000"))
         self.metric_ingest_batch_size = int(os.environ.get("METRIC_INGEST_BATCH_SIZE", "1000"))
+        self.require_valid_certificate = os.environ.get("REQUIRE_VALID_CERTIFICATE", "True") in ["True", "T", "true"]
 
         # self monitoring data
         self.dynatrace_request_count = {}

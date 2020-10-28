@@ -39,7 +39,7 @@ def entity_extractor(service_type: Text):
             try:
                 entities = await fun(ctx, project_id, svc_def)
             except Exception as e:
-                print(f"Failed to finish entity extractor task, reason is {type(e).__name__} {e}")
+                ctx.log(f"Failed to finish entity extractor task, reason is {type(e).__name__} {e}")
                 return []
 
             return entities

@@ -15,8 +15,6 @@
 
 from typing import Any, Callable, Dict, List, Text
 
-from aiohttp import ClientSession
-
 from lib.context import Context
 from lib.entities.model import Entity
 
@@ -48,21 +46,20 @@ async def fetch_zones(
 
 async def generic_paging(
         url: Text,
-        auth_token: Text,
-        session: ClientSession,
+        ctx: Context,
         mapper: Callable[[Dict[Any, Any]], List[Entity]]
 ) -> List[Entity]:
     """Apply mapper function on any page returned by gcp api url."""
     headers = {
         "Accept": "application/json",
-        "Authorization": "Bearer {token}".format(token=auth_token)
+        "Authorization": "Bearer {token}".format(token=ctx.token)
     }
 
     get_page = True
     params: Dict[Text, Text] = {}
     entities: List[Entity] = []
     while get_page:
-        resp = await session.request(
+        resp = await ctx.session.request(
             "GET",
             params=params,
             url=url,
@@ -74,17 +71,17 @@ async def generic_paging(
         except Exception:
             error_message = await resp.text()
             error_message = ' '.join(error_message.split())
-            print(f'Failed to decode JSON. {url} {error_message}')
+            ctx.log(f'Failed to decode JSON. {url} {error_message}')
             return entities
 
         if resp.status >= 400:
-            print(f'Failed to retrieve information from googleapis. {url} {page}')
+            ctx.log(f'Failed to retrieve information from googleapis. {url} {page}')
             return entities
 
         try:
             entities.extend(mapper(page))
         except Exception as ex:
-            print(f"Failed to map response from googleapis. {url} {ex}")
+            ctx.log(f"Failed to map response from googleapis. {url} {ex}")
             return entities
 
         get_page = "nextPageToken" in page

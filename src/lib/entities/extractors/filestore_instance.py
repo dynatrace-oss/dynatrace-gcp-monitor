@@ -24,7 +24,6 @@ from lib.entities.ids import get_func_create_entity_id, LabelToApiRspMapping
 from lib.entities.model import CdProperty, Entity
 from lib.metrics import GCPService
 
-
 export_labels_regex = re.compile(
     r"^projects\/([\w,-]*)\/locations\/([\w,-]*)\/instances\/([\w,-]*)$"
 )
@@ -91,4 +90,4 @@ async def get_filestore_instance_entity(ctx: Context, project_id: str, svc_def: 
     """ Retrieve entity info on GCP filestore instance from google api. """
     url = f"https://file.googleapis.com/v1/projects/{project_id}/locations/-/instances"
     mapper_func = partial(_filestore_instance_resp_to_monitored_entities, svc_def=svc_def)
-    return await generic_paging(url, ctx.token, ctx.session, mapper_func)
+    return await generic_paging(url, ctx, mapper_func)

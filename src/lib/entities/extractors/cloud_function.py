@@ -23,7 +23,6 @@ from lib.entities.ids import get_func_create_entity_id, LabelToApiRspMapping
 from lib.entities.model import CdProperty, Entity
 from lib.metrics import GCPService
 
-
 export_labels_regex = re.compile(
     r"^projects\/([\w,-]*)\/locations\/([\w,-]*)\/functions\/([\w,-]*)$"
 )
@@ -89,4 +88,4 @@ async def get_cloud_function_entity(ctx: Context, project_id: str, svc_def: GCPS
     """ Retrieve entity info on GCP cloud functions from google api. """
     url = f"https://cloudfunctions.googleapis.com/v1/projects/{project_id}/locations/-/functions"
     mapper_func = partial(_cloud_function_resp_to_monitored_entities, svc_def=svc_def)
-    return await generic_paging(url, ctx.token, ctx.session, mapper_func)
+    return await generic_paging(url, ctx, mapper_func)
