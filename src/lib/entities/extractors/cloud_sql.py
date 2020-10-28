@@ -60,10 +60,8 @@ def _cloud_sql_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: GCPSer
 
 
 @entity_extractor("cloudsql_database")
-async def get_cloud_sql_entity(ctx: Context, svc_def: GCPService) -> Iterable[Entity]:
+async def get_cloud_sql_entity(ctx: Context, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP Cloud SQL from google api. """
-    url = "https://sqladmin.googleapis.com/sql/v1beta4/projects/{project_id}/instances".format(
-        project_id=ctx.project_id
-    )
+    url = f"https://sqladmin.googleapis.com/sql/v1beta4/projects/{project_id}/instances"
     mapper_func = partial(_cloud_sql_resp_to_monitored_entities, svc_def=svc_def)
     return await generic_paging(url, ctx.token, ctx.session, mapper_func)

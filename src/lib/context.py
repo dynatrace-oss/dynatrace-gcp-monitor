@@ -23,7 +23,7 @@ class Context:
     def __init__(
             self,
             session: aiohttp.ClientSession,
-            project_id: str,
+            project_id_owner: str,
             token: str,
             execution_time: datetime,
             execution_interval_seconds: int,
@@ -32,8 +32,7 @@ class Context:
             print_metric_ingest_input: bool
     ):
         self.session = session
-        self.project_id = project_id
-        self.url = "https://monitoring.googleapis.com/v3/projects/{name}/timeSeries".format(name=project_id)
+        self.project_id_owner = project_id_owner
         self.token = token
         self.execution_time = execution_time.replace(microsecond=0)
         self.execution_interval = timedelta(seconds=execution_interval_seconds)

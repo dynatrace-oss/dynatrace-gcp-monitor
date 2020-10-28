@@ -87,10 +87,8 @@ def _filestore_instance_resp_to_monitored_entities(page: Dict[Text, Any], svc_de
 
 
 @entity_extractor("filestore_instance")
-async def get_filestore_instance_entity(ctx: Context, svc_def: GCPService) -> Iterable[Entity]:
+async def get_filestore_instance_entity(ctx: Context, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP filestore instance from google api. """
-    url = "https://file.googleapis.com/v1/projects/{project_id}/locations/-/instances".format(
-        project_id=ctx.project_id
-    )
+    url = f"https://file.googleapis.com/v1/projects/{project_id}/locations/-/instances"
     mapper_func = partial(_filestore_instance_resp_to_monitored_entities, svc_def=svc_def)
     return await generic_paging(url, ctx.token, ctx.session, mapper_func)

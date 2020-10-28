@@ -100,6 +100,7 @@ async def log_invalid_lines(ingest_response_json: Dict, lines_batch: List[Ingest
 
 async def fetch_metric(
         context: Context,
+        project_id: str,
         service: GCPService,
         metric: Metric
 ) -> List[IngestLine]:
@@ -136,7 +137,8 @@ async def fetch_metric(
 
     lines = []
     while should_fetch:
-        resp = await context.session.request('GET', url=context.url, params=params, headers=headers)
+        url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/timeSeries"
+        resp = await context.session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()
         # print(f"{metric.google_metric} => {page}")
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body

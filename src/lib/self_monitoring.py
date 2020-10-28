@@ -29,7 +29,7 @@ async def push_self_monitoring_time_series(context: Context):
         time_series = create_self_monitoring_time_series(context)
         self_monitoring_response = await context.session.request(
             "POST",
-            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id}/timeSeries",
+            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/timeSeries",
             data=json.dumps(time_series),
             headers={"Authorization": "Bearer {token}".format(token=context.token)}
         )
@@ -48,7 +48,7 @@ async def create_metric_descriptors_if_missing(context: Context):
     try:
         dynatrace_metrics_descriptors = await context.session.request(
             'GET',
-            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id}/metricDescriptors",
+            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/metricDescriptors",
             params=[('filter', f'metric.type = starts_with("{SELF_MONITORING_METRIC_PREFIX}")')],
             headers={"Authorization": f"Bearer {context.token}"}
         )
@@ -59,7 +59,7 @@ async def create_metric_descriptors_if_missing(context: Context):
                 print(f"Creating missing metric descriptor for '{metric_type}'")
                 await context.session.request(
                     "POST",
-                    url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id}/metricDescriptors",
+                    url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/metricDescriptors",
                     data=json.dumps(metric_descriptor),
                     headers={"Authorization": f"Bearer {context.token}"}
                 )
@@ -77,7 +77,7 @@ def create_time_serie(
         "resource": {
             "type": "generic_task",
             "labels": {
-                "project_id": context.project_id,
+                "project_id": context.project_id_owner,
                 "location": context.location,
                 "namespace": context.function_name,
                 "job": context.function_name,
