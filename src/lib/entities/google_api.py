@@ -21,6 +21,7 @@ from lib.entities.model import Entity
 
 async def fetch_zones(
         context: Context,
+        project_id: str
 ) -> List[str]:
     headers = {
         "Accept": "application/json",
@@ -30,7 +31,7 @@ async def fetch_zones(
     resp = await context.session.request(
         "GET",
         params={},
-        url=f"https://compute.googleapis.com/compute/v1/projects/{context.project_id}/zones",
+        url=f"https://compute.googleapis.com/compute/v1/projects/{project_id}/zones",
         headers=headers,
         raise_for_status=True
     )
@@ -58,23 +59,29 @@ async def generic_paging(
     params: Dict[Text, Text] = {}
     entities: List[Entity] = []
     while get_page:
+        resp = await ctx.session.request(
+            "GET",
+            params=params,
+            url=url,
+            headers=headers
+        )
+
         try:
-            resp = await ctx.session.request(
-                "GET",
-                params=params,
-                url=url,
-                headers=headers,
-                raise_for_status=True
-            )
             page = await resp.json()
-        except Exception as ex:
-            ctx.log("Failed to retrieve information from googleapis. {0}".format(ex))
+        except Exception:
+            error_message = await resp.text()
+            error_message = ' '.join(error_message.split())
+            ctx.log(f'Failed to decode JSON. {url} {error_message}')
+            return entities
+
+        if resp.status >= 400:
+            ctx.log(f'Failed to retrieve information from googleapis. {url} {page}')
             return entities
 
         try:
             entities.extend(mapper(page))
         except Exception as ex:
-            ctx.log("Failed to map response from googleapis. {0}".format(ex))
+            ctx.log(f"Failed to map response from googleapis. {url} {ex}")
             return entities
 
         get_page = "nextPageToken" in page

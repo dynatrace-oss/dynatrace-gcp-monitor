@@ -20,7 +20,7 @@ import time
 import jwt
 from aiohttp import ClientSession
 
-from lib.context import LoggingContext
+from lib.context import LoggingContext, Context
 
 _METADATA_ROOT = "http://metadata.google.internal/computeMetadata/v1"
 _METADATA_FLAVOR_HEADER = "metadata-flavor"
@@ -118,3 +118,13 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
     async with session.post(uri, data=request) as resp:
         response = await resp.json()
         return response["access_token"]
+
+
+async def get_all_accessible_projects(context: Context, session: ClientSession):
+        url = "https://cloudresourcemanager.googleapis.com/v1/projects"
+        headers = {"Authorization": "Bearer {token}".format(token=context.token)}
+        response = await session.get(url, headers=headers)
+        response_json = await response.json()
+        all_projects = [project["projectId"] for project in response_json.get("projects", [])]
+        context.log("Access to following projects: " + ", ".join(all_projects))
+        return all_projects

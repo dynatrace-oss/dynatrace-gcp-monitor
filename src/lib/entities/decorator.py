@@ -35,15 +35,12 @@ def entity_extractor(service_type: Text):
 
     def register_extractor(fun: ExtractEntitesFunc) -> ExtractEntitesFunc:
         @wraps(fun)
-        async def get_and_upload(ctx: Context, svc_def: GCPService) -> Iterable[Entity]:
-            ctx.log("Starting download of metadata for service '{}'".format(svc_def.name))
+        async def get_and_upload(ctx: Context, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
             try:
-                entities = await fun(ctx, svc_def)
+                entities = await fun(ctx, project_id, svc_def)
             except Exception as e:
                 ctx.log(f"Failed to finish entity extractor task, reason is {type(e).__name__} {e}")
                 return []
-
-            ctx.log("Download of metadata for service '{}' finished".format(svc_def.name))
 
             return entities
 

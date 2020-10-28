@@ -57,7 +57,7 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
     ingest_input = "\n".join([line.to_string() for line in lines_batch])
     if context.print_metric_ingest_input:
         context.log("Ingest input is: ")
-        print(ingest_input)
+        context.log(ingest_input)
     ingest_response = await context.session.post(
         url=urljoin(context.dynatrace_url, "/api/v2/metrics/ingest"),
         headers={
@@ -102,6 +102,7 @@ async def log_invalid_lines(context: Context, ingest_response_json: Dict, lines_
 
 async def fetch_metric(
         context: Context,
+        project_id: str,
         service: GCPService,
         metric: Metric
 ) -> List[IngestLine]:
@@ -138,7 +139,8 @@ async def fetch_metric(
 
     lines = []
     while should_fetch:
-        resp = await context.session.request('GET', url=context.url, params=params, headers=headers)
+        url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/timeSeries"
+        resp = await context.session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
         if 'error' in page:
