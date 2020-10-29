@@ -9,5 +9,6 @@ if [[ "${PUSH:-}" == "true" ]]; then
     base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
     docker tag dynatrace-gcp-function dynatrace/dynatrace-gcp-function:$TAG
     docker push dynatrace/dynatrace-gcp-function:$TAG
+    docker tag dynatrace-gcp-function dynatrace/dynatrace-gcp-function:latest
     docker push dynatrace/dynatrace-gcp-function:latest
 fi
