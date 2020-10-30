@@ -297,7 +297,8 @@ def extract_value(point, typed_value_key: str, metric: Metric):
             min = 0
             max = 0
 
-        if count == 1:
+        # No point in calculating min and max from distribution here
+        if count == 1 or count == 2:
             return gauge_line(min, max, count, sum)
 
         bucket_options = value['bucketOptions']
