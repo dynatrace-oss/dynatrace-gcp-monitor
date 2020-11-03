@@ -59,7 +59,7 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
         context.log("Ingest input is: ")
         context.log(ingest_input)
     ingest_response = await context.session.post(
-        url=urljoin(context.dynatrace_url, "/api/v2/metrics/ingest"),
+        url=f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest",
         headers={
             "Authorization": f"Api-Token {context.dynatrace_api_key}",
             "Content-Type": "text/plain; charset=utf-8"
