@@ -76,10 +76,10 @@ def generate_metadata():
             if not metadata:
                 continue
 
-            write_metadata(metadata, metric)
+            filename = write_metadata(metadata, metric)
 
             units.add(metric.unit)
-            toc.append(metric.dynatrace_name)
+            toc.append(filename)
 
     write_toc(toc)
 
@@ -87,9 +87,13 @@ def generate_metadata():
     print(f"\nFailed to map units: {unmapped_units}")
 
 
-def write_metadata(metadata, metric):
-    with open(f"metric-metadata/{metric.dynatrace_name}.json", "a") as metadata_file:
+def write_metadata(metadata, metric) -> str:
+    filename = metric.dynatrace_name
+    if "count" in metric.dynatrace_metric_type:
+        filename += ".count"
+    with open(f"metric-metadata/{filename}.json", "a") as metadata_file:
         json.dump(metadata, metadata_file, indent=4)
+    return filename
 
 
 def create_metadata(metric: Metric, unmapped_units: Set[str]) -> Optional[Dict]:
@@ -107,7 +111,8 @@ def create_metadata(metric: Metric, unmapped_units: Set[str]) -> Optional[Dict]:
 
     metadata = {
         "displayName": metric.name,
-        "unit": mapped_unit
+        "unit": mapped_unit,
+        "dimensions": []
     }
 
     print(metadata)
