@@ -13,6 +13,9 @@ googleCloud:
     # Path to Google credentials file
     # googleApplicationCredentialsPath: ''
     cloudFunctionSize: s 
+    # Require valid SSL certificate when communicating with Dynatrace Cluster / Active Gate
+    # May be set to false in case communication through Active Gate is debugged, for non-production use cases
+    requireValidCertificate: true
   metrics:
     # Name of the Pub/Sub topic for metric function
     pubSubTopic: dynatrace-gcp-service-invocation
