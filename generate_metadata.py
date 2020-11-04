@@ -24,9 +24,9 @@ from main import load_supported_services
 _UNIT_MAPPING = {
     "s": "Second",
     # "s{CPU}": "Second",
-    "us": "Microsecond",
-    "ns": "Nanosecond",
-    "ms": "Millisecond",
+    "us": "MicroSecond",
+    "ns": "NanoSecond",
+    "ms": "MilliSecond",
     "min": "Minute",
     "h": "Hour",
     "d": "Day",
@@ -89,8 +89,10 @@ def generate_metadata():
 
 def write_metadata(metadata, metric) -> str:
     filename = metric.dynatrace_name
-    if "count" in metric.dynatrace_metric_type:
+    if "count" in metric.dynatrace_metric_type and not filename.endswith("count"):
         filename += ".count"
+    if "gauge" in metric.dynatrace_metric_type and filename.endswith("count"):
+        filename += ".gauge"
     with open(f"metric-metadata/{filename}.json", "a") as metadata_file:
         json.dump(metadata, metadata_file, indent=4)
     return filename
