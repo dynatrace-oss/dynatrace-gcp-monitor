@@ -180,7 +180,8 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
         try:
             with open(config_file_path, encoding="utf-8") as config_file:
                 config_yaml = yaml.safe_load(config_file)
-                technology_name = config_yaml.get("technology", {}).get("name", "N/A")
+                technology_name = extract_technology_name(config_yaml)
+
                 for service_yaml in config_yaml.get("gcp", {}):
                     # If whitelist of services exists and current service is not present in it, skip
                     should_skip = selected_services and \
@@ -194,6 +195,13 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
     services_names = [service.name for service in services]
     context.log("Selected services: " + ",".join(services_names))
     return services
+
+
+def extract_technology_name(config_yaml):
+    technology_name = config_yaml.get("technology", {})
+    if isinstance(technology_name, Dict):
+        technology_name = technology_name.get("name", "N/A")
+    return technology_name
 
 
 async def run_fetch_metric(
