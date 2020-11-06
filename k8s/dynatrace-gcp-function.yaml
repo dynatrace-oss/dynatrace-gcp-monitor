@@ -71,6 +71,16 @@ spec:
             cpu: "200m"
           limits:
             memory: "512Mi"
-            cpu: "500m"                  
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
       imagePullSecrets:
       - name: regcred
