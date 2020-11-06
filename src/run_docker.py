@@ -14,6 +14,8 @@
 import asyncio
 import os
 
+from aiohttp import web
+
 from lib.context import LoggingContext
 from main import async_dynatrace_gcp_extension
 
@@ -22,6 +24,11 @@ async def scheduling_loop():
     while True:
         loop.create_task(async_dynatrace_gcp_extension())
         await asyncio.sleep(60)
+
+
+async def health(request):
+    return web.Response(status=200)
+
 
 print("                      ,,,,,..")
 print("                  ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.")
@@ -58,5 +65,20 @@ if "GCP_SERVICES" in os.environ:
 
 logging_context.log("Setting up... \n")
 loop = asyncio.get_event_loop()
+app = web.Application()
+app.add_routes([web.get('/health', health)])
+
+runner = web.AppRunner(app)
+loop.run_until_complete(runner.setup())
+site = web.TCPSite(runner, '0.0.0.0', 8080)
+
+loop.run_until_complete(site.start())
 loop.create_task(scheduling_loop())
-loop.run_forever()
+
+try:
+    loop.run_forever()
+finally:
+    loop.run_until_complete(app.shutdown())
+    loop.run_until_complete(runner.cleanup())
+    loop.run_until_complete(app.cleanup())
+    loop.close()

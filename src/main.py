@@ -20,7 +20,7 @@ import traceback
 from datetime import datetime
 from os import listdir
 from os.path import isfile
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import aiohttp
 import yaml

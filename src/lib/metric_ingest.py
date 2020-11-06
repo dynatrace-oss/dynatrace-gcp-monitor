@@ -15,7 +15,6 @@ import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List
-from urllib.parse import urljoin
 
 from lib.context import Context, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
