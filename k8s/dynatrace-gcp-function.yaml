@@ -82,5 +82,3 @@ spec:
             path: /health
             port: 8080
           initialDelaySeconds: 10
-      imagePullSecrets:
-      - name: regcred

@@ -104,9 +104,11 @@ kubectl create namespace dynatrace
 kubectl -n dynatrace create secret generic dynatrace-gcp-function-secret --from-literal="access-key={DYNATRACE_API_TOKEN}" --from-literal="url={DYNATRACE_URL}"
 ```
 
-Create IAM Service Account with Cloud Shell. Replace `{GCP-PROJECT-ID}` with your GCP project ID
+Create IAM Service Account with Cloud Shell and configure it for workload identity. Replace `{GCP-PROJECT-ID}` with your GCP project ID
 
 ```
+gcloud iam service-accounts create dynatrace-gcp-function-sa
+
 gcloud iam service-accounts add-iam-policy-binding --role roles/iam.workloadIdentityUser --member "serviceAccount:{GCP-PROJECT-ID}.svc.id.goog[dynatrace/dynatrace-gcp-function-sa]" dynatrace-gcp-function-sa@{GCP-PROJECT-ID}.iam.gserviceaccount.com
 ```
 
@@ -120,6 +122,12 @@ gcloud projects add-iam-policy-binding {GCP-PROJECT-ID} --member="serviceAccount
 gcloud projects add-iam-policy-binding {GCP-PROJECT-ID} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/file.viewer
 gcloud projects add-iam-policy-binding {GCP-PROJECT-ID} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/pubsub.viewer
 ```
+
+Enable API's required for monitoring
+```
+gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com
+```
+
 
 Download and install [dynatrace-gcp-function.yaml](k8s/dynatrace-gcp-function.yaml) Kubernetes objects:
 ```

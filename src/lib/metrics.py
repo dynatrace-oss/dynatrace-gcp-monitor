@@ -70,6 +70,7 @@ class Dimension:
 class Metric:
     """Represents singular metric to be ingested."""
 
+    name: str
     google_metric: Text
     google_metric_kind: Text
     dynatrace_name: Text
@@ -83,12 +84,13 @@ class Metric:
 
     def __init__(self, **kwargs):
         gcp_options = kwargs.get("gcpOptions", {})
+        object.__setattr__(self, "name", kwargs.get("name", ""))
         object.__setattr__(self, "metric_type", kwargs.get("type", ""))
         object.__setattr__(self, "google_metric", kwargs.get("value", ""))
         object.__setattr__(self, "google_metric_kind", gcp_options.get("metricKind", ""))
         object.__setattr__(self, "dynatrace_name", kwargs.get("id", "").replace(":", "."))
         object.__setattr__(self, "dynatrace_metric_type", kwargs.get("type", ""))
-        object.__setattr__(self, "unit", gcp_options.get("unit", ""))
+        object.__setattr__(self, "unit", kwargs.get("unit", ""))
         object.__setattr__(self, "value_type", gcp_options.get("valueType", ""))
         object.__setattr__(self, "dimensions", [
             Dimension(**x) for x in kwargs.get("dimensions", {})

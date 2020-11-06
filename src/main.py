@@ -20,7 +20,7 @@ import traceback
 from datetime import datetime
 from os import listdir
 from os.path import isfile
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import aiohttp
 import yaml
@@ -35,7 +35,7 @@ from lib.metrics import GCPService, Metric
 from lib.self_monitoring import push_self_monitoring_time_series
 
 
-def dynatrace_gcp_extension(event, context: Dict[Any, Any] = None, project_id: Optional[str] = None):
+def dynatrace_gcp_extension(event, context, project_id: Optional[str] = None):
     try:
         asyncio.run(handle_event(event, context, project_id))
     except Exception as e:
@@ -49,7 +49,7 @@ async def async_dynatrace_gcp_extension():
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
     logging_context = LoggingContext(execution_identifier)
     logging_context.log(f"Starting execution")
-    context = {
+    event_context = {
         'timestamp': timestamp_utc_iso,
         'event_id': timestamp_utc.timestamp(),
         'event_type': 'test',
@@ -58,7 +58,7 @@ async def async_dynatrace_gcp_extension():
     data = {'data': '', 'publishTime': timestamp_utc_iso}
 
     start_time = time.time()
-    await handle_event(data, context, "dynatrace-gcp-extension")
+    await handle_event(data, event_context, "dynatrace-gcp-extension")
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
@@ -67,8 +67,11 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, context: Dict, project_id_owner: Optional[str]):
-    context = LoggingContext(context.get("execution_id", None))
+async def handle_event(event: Dict, event_context, project_id_owner: Optional[str]):
+    if event_context is Dict:
+        context = LoggingContext(event_context.get("execution_id", None))
+    else:
+        context = LoggingContext(None)
 
     selected_services = None
     if "GCP_SERVICES" in os.environ:
@@ -180,7 +183,8 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
         try:
             with open(config_file_path, encoding="utf-8") as config_file:
                 config_yaml = yaml.safe_load(config_file)
-                technology_name = config_yaml.get("technology", {}).get("name", "N/A")
+                technology_name = extract_technology_name(config_yaml)
+
                 for service_yaml in config_yaml.get("gcp", {}):
                     # If whitelist of services exists and current service is not present in it, skip
                     should_skip = selected_services and \
@@ -194,6 +198,13 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
     services_names = [service.name for service in services]
     context.log("Selected services: " + ",".join(services_names))
     return services
+
+
+def extract_technology_name(config_yaml):
+    technology_name = config_yaml.get("technology", {})
+    if isinstance(technology_name, Dict):
+        technology_name = technology_name.get("name", "N/A")
+    return technology_name
 
 
 async def run_fetch_metric(

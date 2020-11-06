@@ -15,7 +15,6 @@ import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List
-from urllib.parse import urljoin
 
 from lib.context import Context, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
@@ -59,7 +58,7 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
         context.log("Ingest input is: ")
         context.log(ingest_input)
     ingest_response = await context.session.post(
-        url=urljoin(context.dynatrace_url, "/api/v2/metrics/ingest"),
+        url=f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest",
         headers={
             "Authorization": f"Api-Token {context.dynatrace_api_key}",
             "Content-Type": "text/plain; charset=utf-8"
@@ -297,7 +296,8 @@ def extract_value(point, typed_value_key: str, metric: Metric):
             min = 0
             max = 0
 
-        if count == 1:
+        # No point in calculating min and max from distribution here
+        if count == 1 or count == 2:
             return gauge_line(min, max, count, sum)
 
         bucket_options = value['bucketOptions']
