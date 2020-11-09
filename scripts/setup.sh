@@ -28,6 +28,7 @@ if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
 fi
 
 readonly GCP_SERVICE_ACCOUNT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.serviceAccount')
+readonly REQUIRE_VALID_CERTIFICATE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.requireValidCertificate')
 readonly GCP_PUBSUB_TOPIC=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.pubSubTopic')
 readonly GCP_FUNCTION_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.function')
 readonly GCP_SCHEDULER_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.scheduler')
@@ -182,7 +183,7 @@ mkdir -p $GCP_FUNCTION_NAME
 unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
 cd ./$GCP_FUNCTION_NAME
-gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME
+gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE
 
 echo -e
 echo "- schedule the runs"
