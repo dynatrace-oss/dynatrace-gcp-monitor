@@ -13,7 +13,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-readonly FUNCTION_REPOSITORY_RELEASE_URL=https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/release-0.0.14
+readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
 readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
@@ -174,8 +174,8 @@ else
 fi
 
 echo -e
-echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL/$FUNCTION_ZIP_PACKAGE]"
-wget -q $FUNCTION_REPOSITORY_RELEASE_URL/$FUNCTION_ZIP_PACKAGE  -O $FUNCTION_ZIP_PACKAGE 
+echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
+wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE 
 
 
 echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
