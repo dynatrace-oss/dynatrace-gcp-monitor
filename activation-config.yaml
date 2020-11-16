@@ -66,6 +66,16 @@ activation:
     - pubsub_topic
     # Google Cloud Pub/Sub / Lite Topics
     - pubsublite_topic_partition
+    # Google Cloud BigQuery / BI Engine Model
+    - bigquery_biengine_model
+    # Google Cloud BigQuery / Dataset
+    - bigquery_dataset
+    # Google Cloud BigQuery / Project
+    - bigquery_project
+    # Google Cloud Composer Environment
+    - cloud_composer_environment
+    # Google Cloud Spanner
+    - spanner_instance
 #   logs:
 #     services: # List of services to forward Logs from Google Operations/Logging to Dynatrace, for those services Log Router Sinks and Pub/Sub topic will be created
 #     - cloudsql_database
