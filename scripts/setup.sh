@@ -187,7 +187,7 @@ gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_exte
 
 echo -e
 echo "- schedule the runs"
-if [[ $(gcloud scheduler jobs list --filter=name:dynatrace-gcp-schedule --format="value(name)") ]]; then 
+if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then 
     echo "Scheduler [$GCP_SCHEDULER_NAME] already exists, skipping"
 else
     gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
