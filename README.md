@@ -10,7 +10,13 @@ Maintaining its lifecycle places a burden on the operational team.
 
 In addition to metrics `dynatrace-gcp-function` is calling Service specific API's (for example Pub/Sub API). The purpose is to get properties of the instances that are not available in Monitoring API.  Particularly the function try to retrieve endpoint addresses (FQDN's, IP addresses).
 
-![Architecture](./img/architecture.svg)
+*Architecture with Google Cloud Function deployment*
+![Google Cloud Function Architecture](./img/architecture-function.svg)
+
+As alternative to `Cloud Function` deployment it's possible to run monitoring as Kubernetes Container. In this case all configurations and secretes are stored as K8S ConfigMap / Secretes objects. 
+
+*Architecture with Google Cloud Function deployment*
+![GKE Container Architecture](./img/architecture-k8s.svg)
 
 ## Supported Google Cloud services
 | Google Cloud service                 | Metric pulling | Pre-defined dashboards | Pre-defined alerts |
@@ -162,6 +168,39 @@ Finished uploading metric ingest lines to Dynatrace in 0.36574411392211914 s
 Pushing self monitoring time series to GCP Monitor...
 Finished pushing self monitoring time series to GCP Monitor
 ```
+
+## Monitoring multiple GCP projects
+It's possible to deploy `dynatrace-gcp-function` to push metrics to Dynatrace from multiple GCP projects. 
+
+For example: it's possible to run function in project dedicated for monitoring and get metrics from production/stage/dev projects. The concept is illustrated on the diagram below:
+
+*Sample multi-project deployment*
+![GKE Container Architecture](./img/architecture-multi-project.svg)
+
+To configure multi-project support in this example You will need:
+* Running `dynatrace-gcp-function` (Cloud Function or Kubernetes)
+* IAM service account configured with `dynatrace-gcp-function` (for example `dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com`)
+
+Now You need to grant required IAM policies to Service Account for desired projects (for example `PROJECT-A`, `PROJECT-B`, `PROJECT-C`). 
+
+Replace `{GCP-PROJECT-ID-TO-MONITOR}` with the project You wish to enable monitoring for. Replace `{GCP-FUNCTION-PROJECT-ID}` with the project the Service Account is created on / function is deployed. Repeat the step for all projects.
+```
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/monitoring.editor
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/monitoring.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/compute.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/cloudsql.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/cloudfunctions.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/file.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/pubsub.viewer
+```
+
+After next monitoring run (~1 minute) metrics from configured projects should start appearing in Dynatrace.
+
+Alternatively You may grant access for all projects in `IAM & Admin` console in Google Cloud Portal. Simply navigate to all of the projects and add permissions for Service Account attached to function:
+
+![iam](./img/multi-project-iam.png)
+
+
 
 ## Monitoring GCP instances in Dynatrace
 
