@@ -131,7 +131,7 @@ gcloud projects add-iam-policy-binding {GCP-PROJECT-ID} --member="serviceAccount
 
 Enable API's required for monitoring
 ```
-gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com
+gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com cloudresourcemanager.googleapis.com
 ```
 
 
