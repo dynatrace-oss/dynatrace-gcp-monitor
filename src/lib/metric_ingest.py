@@ -191,7 +191,9 @@ def create_dimensions(time_serie: Dict) -> List[DimensionValue]:
     metric = time_serie.get('metric', {})
     labels = metric.get('labels', {}).copy()
     resource_labels = time_serie.get('resource', {}).get('labels', {})
-    labels.update(resource_labels)
+    labels.update(resource_labels)    
+    system_labels = time_serie.get('metadata', {}).get('systemLabels', {})
+    labels.update(system_labels)
 
     dimension_values = [DimensionValue(label, value) for label, value in labels.items()]
 
