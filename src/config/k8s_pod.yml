@@ -23,6 +23,8 @@ gcp:
     id: component_name
   - value: metadata.system_labels.state 
     id: state
+  - value: metadata.system_labels.container_image
+    id: container_image
   metrics:
   - value: kubernetes.io/pod/network/received_bytes_count
     id: cloud.gcp.kubernetes_io.pod.network.received_bytes_count
