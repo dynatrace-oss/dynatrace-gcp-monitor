@@ -30,6 +30,13 @@ FUNCTION_NAME_LABEL_DESCRIPTOR = {
     "description": "Name of deployed function"
 }
 
+PROJECT_ID_LABEL_DESCRIPTOR = {
+    "key": "project_id",
+    "valueType": "STRING",
+    "description": "GCP project id"
+}
+
+
 SELF_MONITORING_CONNECTIVITY_METRIC_DESCRIPTOR = {
     "type": SELF_MONITORING_CONNECTIVITY_METRIC_TYPE,
     "valueType": "INT64",
@@ -60,6 +67,7 @@ SELF_MONITORING_INGEST_LINES_METRIC_DESCRIPTOR = {
     "labels": [
         FUNCTION_NAME_LABEL_DESCRIPTOR,
         DYNATRACE_TENANT_URL_LABEL_DESCRIPTOR,
+        PROJECT_ID_LABEL_DESCRIPTOR,
         {
             "key": "status",
             "valueType": "STRING",
@@ -88,9 +96,9 @@ SELF_MONITORING_REQUEST_COUNT_METRIC_DESCRIPTOR = {
 }
 
 SELF_MONITORING_PHASE_EXECUTION_TIME_METRIC_DESCRIPTOR = {
-    "type": SELF_MONITORING_REQUEST_COUNT_METRIC_TYPE,
-    "valueType": "INT64",
-    "metricKind": "DOUBLE",
+    "type": SELF_MONITORING_PHASE_EXECUTION_TIME_METRIC_TYPE,
+    "valueType": "DOUBLE",
+    "metricKind": "GAUGE",
     "description": "Dynatrace integration self monitoring metric",
     "displayName": "Dynatrace Integration Phase Execution Time",
     "unit": "s",
@@ -98,8 +106,9 @@ SELF_MONITORING_PHASE_EXECUTION_TIME_METRIC_DESCRIPTOR = {
     "labels": [
         FUNCTION_NAME_LABEL_DESCRIPTOR,
         DYNATRACE_TENANT_URL_LABEL_DESCRIPTOR,
+        PROJECT_ID_LABEL_DESCRIPTOR,
         {
-            "key": "execution_phase",
+            "key": "phase",
             "valueType": "STRING",
             "description": "Phase of integration worker execution"
         },
