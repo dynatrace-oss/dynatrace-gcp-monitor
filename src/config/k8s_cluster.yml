@@ -13,19 +13,6 @@ gcp:
   - value: resource.labels.cluster_name
     id: cluster_name
   metrics:
-  - value: logging.googleapis.com/byte_count
-    id: cloud.gcp.logging.googleapis.com.byte_count
-    type: gauge
-    name: Log bytes
-    unit: '1'
-    gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
-      valueType: INT64
-      metricKind: GAUGE
-    dimensions:
-    - value: metric.labels.log
-    - value: metric.labels.severity
   - value: logging.googleapis.com/log_entry_count
     id: cloud.gcp.logging.googleapis.com.log_entry_count
     type: gauge

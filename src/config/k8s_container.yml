@@ -21,65 +21,9 @@ gcp:
     id: container_name
   - value: metadata.system_labels.node_name
     id: node_name
-  - value: metadata.system_labels.component_name
-    id: component_name
   - value: metadata.system_labels.state 
     id: state
   metrics: 
-  - value: kubernetes.io/container/accelerator/duty_cycle
-    id: cloud.gcp.kubernetes_io.container.accelerator.duty_cycle
-    type: gauge
-    name: Accelerator duty cycle
-    unit: '%'
-    gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
-      valueType: INT64
-      metricKind: GAUGE
-    dimensions:
-    - value: metric.labels.make
-    - value: metric.labels.accelerator_id
-    - value: metric.labels.model
-  - value: kubernetes.io/container/accelerator/memory_total
-    id: cloud.gcp.kubernetes_io.container.accelerator.memory_total
-    type: gauge
-    name: Accelerator memory total
-    unit: By
-    gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
-      valueType: INT64
-      metricKind: GAUGE
-    dimensions:
-    - value: metric.labels.make
-    - value: metric.labels.accelerator_id
-    - value: metric.labels.model
-  - value: kubernetes.io/container/accelerator/memory_used
-    id: cloud.gcp.kubernetes_io.container.accelerator.memory_used
-    type: gauge
-    name: Accelerator memory used
-    unit: By
-    gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
-      valueType: INT64
-      metricKind: GAUGE
-    dimensions:
-    - value: metric.labels.make
-    - value: metric.labels.accelerator_id
-    - value: metric.labels.model
-  - value: kubernetes.io/container/accelerator/request
-    id: cloud.gcp.kubernetes_io.container.accelerator.request
-    type: gauge
-    name: Request accelerators
-    unit: '{devices}'
-    gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
-      valueType: INT64
-      metricKind: GAUGE
-    dimensions:
-    - value: metric.labels.resource_name
   - value: kubernetes.io/container/cpu/core_usage_time
     id: cloud.gcp.kubernetes_io.container.cpu.core_usage_time
     type: count,delta
