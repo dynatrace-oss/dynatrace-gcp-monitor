@@ -34,15 +34,18 @@ async def scheduling_loop(project_ids: Optional[List[str]] = None):
 async def init():
     async with aiohttp.ClientSession() as session:
         token = await create_token(logging_context, session)
-        fast_check_result = await FastCheck(session, token, logging_context)
-        if fast_check_result.projects:
-            logging_context.log(f'Monitoring enabled for the following projects: {fast_check_result}')
-            instance_metadata = await InstanceMetadata(session, token, logging_context)
-            if instance_metadata:
-                logging_context.log(f'GCP: {instance_metadata}')
-            loop.create_task(scheduling_loop(fast_check_result.projects))
+        if token:
+            fast_check_result = await FastCheck(session, token, logging_context)
+            if fast_check_result.projects:
+                logging_context.log(f'Monitoring enabled for the following projects: {fast_check_result}')
+                instance_metadata = await InstanceMetadata(session, token, logging_context)
+                if instance_metadata:
+                    logging_context.log(f'GCP: {instance_metadata}')
+                loop.create_task(scheduling_loop(fast_check_result.projects))
+            else:
+                logging_context.log("Monitoring disabled. Check your project(s) settings.")
         else:
-            logging_context.log("Monitoring disabled. Check your project(s) settings.")
+            logging_context.log(f'Monitoring disabled. Unable to acquire authorization token.')
     await session.close()
 
 
