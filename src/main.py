@@ -31,7 +31,7 @@ from lib.credentials import create_token, get_project_id_from_environment, fetch
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
-from lib.metrics import GCPService, Metric
+from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import push_self_monitoring_time_series
 
 
@@ -68,7 +68,7 @@ def is_yaml_file(f: str) -> bool:
 
 
 async def handle_event(event: Dict, event_context, project_id_owner: Optional[str]):
-    if event_context is Dict:
+    if isinstance(event_context, Dict):
         context = LoggingContext(event_context.get("execution_id", None))
     else:
         context = LoggingContext(None)
@@ -114,19 +114,20 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
         projects_ids = await get_all_accessible_projects(context, session)
 
-        context.setup_execution_time = (time.time() - setup_start_time)
+        setup_time = (time.time() - setup_start_time)
+        context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}
 
-        fetch_gcp_data_start_time = time.time()
+        context.start_processing_timestamp = time.time()
 
-        fetch_ingest_lines_tasks = [fetch_ingest_lines_task(context, project_id, services) for project_id in projects_ids]
-        ingest_lines_per_project = await asyncio.gather(*fetch_ingest_lines_tasks, return_exceptions=True)
-        ingest_lines = [ingest_line for sublist in ingest_lines_per_project for ingest_line in sublist]
+        process_project_metrics_tasks = [
+            process_project_metrics(context, project_id, services)
+            for project_id
+            in projects_ids
+        ]
+        await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
+        context.log(f"Fetched and pushed GCP data in {time.time() - context.start_processing_timestamp} s")
+        context.log(f"Processed {sum(context.dynatrace_ingest_lines_ok_count.values())} lines")
 
-        context.fetch_gcp_data_execution_time = time.time() - fetch_gcp_data_start_time
-
-        context.log(f"Fetched GCP data in {context.fetch_gcp_data_execution_time} s")
-
-        await push_ingest_lines(context, ingest_lines)
         await push_self_monitoring_time_series(context)
 
         await session.close()
@@ -134,13 +135,34 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
 
-async def fetch_ingest_lines_task(context, project_id, services):
+async def process_project_metrics(context: Context, project_id: str, services: List[GCPService]):
+    context.log(project_id, f"Starting processing...")
+    ingest_lines = await fetch_ingest_lines_task(context, project_id, services)
+    fetch_data_time = time.time() - context.start_processing_timestamp
+    context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
+    context.log(project_id, f"Finished fetching data in {fetch_data_time}")
+    await push_ingest_lines(context, project_id, ingest_lines)
+
+
+async def fetch_ingest_lines_task(context: Context, project_id: str, services: List[GCPService]) -> List[IngestLine]:
     fetch_metric_tasks = []
     topology_tasks = []
+    topology_task_services = []
+
     for service in services:
         if service.name in entities_extractors:
             topology_task = entities_extractors[service.name](context, project_id, service)
             topology_tasks.append(topology_task)
+            topology_task_services.append(service)
+    fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
+
+    skipped_services = []
+    for service in services:
+        if service in topology_task_services:
+            service_topology = fetch_topology_results[topology_task_services.index(service)]
+            if not service_topology:
+                skipped_services.append(service.name)
+                continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
             fetch_metric_task = run_fetch_metric(
                 context=context,
@@ -149,12 +171,12 @@ async def fetch_ingest_lines_task(context, project_id, services):
                 metric=metric
             )
             fetch_metric_tasks.append(fetch_metric_task)
-    all_results = await asyncio.gather(
-        asyncio.gather(*fetch_metric_tasks, return_exceptions=True),
-        asyncio.gather(*topology_tasks, return_exceptions=True)
-    )
-    fetch_metric_results = all_results[0]
-    fetch_topology_results = all_results[1]
+
+    if skipped_services:
+        skipped_services_string = ', '.join(skipped_services)
+        context.log(project_id, f"Skipped fetching metrics for {skipped_services_string} due to no instances detected")
+
+    fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
     entity_id_map = build_entity_id_map(fetch_topology_results)
     flat_metric_results = flatten_and_enrich_metric_results(fetch_metric_results, entity_id_map)
     return flat_metric_results
@@ -216,5 +238,5 @@ async def run_fetch_metric(
     try:
         return await fetch_metric(context, project_id, service, metric)
     except Exception as e:
-        context.log(f"Failed to finish task for [{metric.google_metric}], reason is {type(e).__name__} {e}")
+        context.log(project_id, f"Failed to finish task for [{metric.google_metric}], reason is {type(e).__name__} {e}")
         return []

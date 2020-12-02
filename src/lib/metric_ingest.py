@@ -23,7 +23,14 @@ from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING,
     DimensionValue, IngestLine
 
 
-async def push_ingest_lines(context: Context, fetch_metric_results: List[IngestLine]):
+async def push_ingest_lines(context: Context, project_id: str, fetch_metric_results: List[IngestLine]):
+    if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
+        context.log(project_id, f"Skipping push due to detected connectivity error")
+        return
+
+    if not fetch_metric_results:
+        context.log(project_id, "Skipping push due to detected connectivity error")
+
     lines_sent = 0
     maximum_lines_threshold = context.maximum_metric_data_points_per_minute
     start_time = time.time()
@@ -33,26 +40,28 @@ async def push_ingest_lines(context: Context, fetch_metric_results: List[IngestL
             lines_batch.append(result)
             lines_sent += 1
             if len(lines_batch) >= context.metric_ingest_batch_size:
-                await _push_to_dynatrace(context, lines_batch)
+                await _push_to_dynatrace(context, project_id, lines_batch)
                 lines_batch = []
             if lines_sent >= maximum_lines_threshold:
-                await _push_to_dynatrace(context, lines_batch)
+                await _push_to_dynatrace(context, project_id, lines_batch)
                 lines_dropped_count = len(fetch_metric_results) - maximum_lines_threshold
-                context.dynatrace_ingest_lines_dropped_count = lines_dropped_count
-                context.log(f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
+                context.dynatrace_ingest_lines_dropped_count[project_id] = \
+                    context.dynatrace_ingest_lines_dropped_count.get(project_id, 0) + lines_dropped_count
+                context.log(project_id, f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
                 return
         if lines_batch:
-            await _push_to_dynatrace(context, lines_batch)
+            await _push_to_dynatrace(context, project_id, lines_batch)
     except Exception as e:
         if isinstance(e, InvalidURL):
             context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
-        context.log(f"Failed to push ingest lines to Dynatrace due to {type(e).__name__} {e}")
+        context.log(project_id, f"Failed to push ingest lines to Dynatrace due to {type(e).__name__} {e}")
     finally:
-        context.push_to_dynatrace_execution_time = time.time() - start_time
-        context.log(f"Finished uploading metric ingest lines to Dynatrace in {context.push_to_dynatrace_execution_time} s")
+        push_data_time = time.time() - start_time
+        context.push_to_dynatrace_execution_time[project_id] = push_data_time
+        context.log(project_id, f"Finished uploading metric ingest lines to Dynatrace in {push_data_time} s")
 
 
-async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
+async def _push_to_dynatrace(context: Context, project_id: str, lines_batch: List[IngestLine]):
     ingest_input = "\n".join([line.to_string() for line in lines_batch])
     if context.print_metric_ingest_input:
         context.log("Ingest input is: ")
@@ -78,10 +87,13 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
         raise Exception("Wrong URL")
 
     ingest_response_json = await ingest_response.json()
-    context.dynatrace_request_count[ingest_response.status] = context.dynatrace_request_count.get(ingest_response.status, 0) + 1
-    context.dynatrace_ingest_lines_ok_count += ingest_response_json.get("linesOk", 0)
-    context.dynatrace_ingest_lines_invalid_count += ingest_response_json.get("linesInvalid", 0)
-    context.log(f"Ingest response: {ingest_response_json}")
+    context.dynatrace_request_count[ingest_response.status] \
+        = context.dynatrace_request_count.get(ingest_response.status, 0) + 1
+    context.dynatrace_ingest_lines_ok_count[project_id] \
+        = context.dynatrace_ingest_lines_ok_count.get(project_id, 0) + ingest_response_json.get("linesOk", 0)
+    context.dynatrace_ingest_lines_invalid_count[project_id] \
+        = context.dynatrace_ingest_lines_invalid_count.get(project_id, 0) + ingest_response_json.get("linesInvalid", 0)
+    context.log(project_id, f"Ingest response: {ingest_response_json}")
     await log_invalid_lines(context, ingest_response_json, lines_batch)
 
 
