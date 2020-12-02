@@ -204,4 +204,6 @@ gcp:
       valueType: DOUBLE
       metricKind: GAUGE
     dimensions: []
+dashboards:
+  - dashboard: "dashboards/k8s.json"
 
