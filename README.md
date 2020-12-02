@@ -29,6 +29,10 @@ As alternative to `Cloud Function` deployment it's possible to run monitoring as
 | Google Cloud Storage        |  Y   |  Y   |  N   |
 | Google Cloud Load Balancing |  Y   |  Y   |  N   |
 | Google Cloud Pub/Sub        |  Y   |  Y   |  N   |
+| Google Kubernetes Node      |  Y   |  Y   |  N   |
+| Google Kubernetes Container |  Y   |  Y   |  N   |
+| Google Kubernetes Cluster   |  Y   |  Y   |  N   |
+| VM Instance                 |  Y   |  N   |  N   |
 
 ## Quick start with Google Cloud Shell
 

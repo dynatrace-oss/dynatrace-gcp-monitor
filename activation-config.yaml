@@ -66,6 +66,12 @@ activation:
     - pubsub_topic
     # Google Cloud Pub/Sub / Lite Topics
     - pubsublite_topic_partition
+    # Google Kubernetes cluster
+    - k8s_cluster
+    # Google Kubernetes node
+    - k8s_node
+    # Google Kubernetes container
+    - k8s_container
 #   logs:
 #     services: # List of services to forward Logs from Google Operations/Logging to Dynatrace, for those services Log Router Sinks and Pub/Sub topic will be created
 #     - cloudsql_database

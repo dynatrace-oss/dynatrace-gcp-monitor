@@ -1,0 +1,2204 @@
+{
+    "dashboardMetadata": {
+        "name": "Google Kubernetes Engine",
+        "shared": false,
+        "sharingDetails": {
+            "linkShared": true,
+            "published": false
+        }
+    },
+    "tiles": [{
+        "name": "Volume utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 2128,
+            "left": 2812,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.pod.volume.utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Volume usage",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 2128,
+            "left": 3116,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.pod.volume.used_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Volume capacity",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 2128,
+            "left": 3420,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.pod.volume.total_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Bytes transmitted",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 2128,
+            "left": 3724,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.pod.network.sent_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Bytes received",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 2128,
+            "left": 4028,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.pod.network.received_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": []
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Log entries",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 2204,
+            "left": 4712,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.logging.googleapis.com.log_entry_count.gauge",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "CPU allocatable utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 2394,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.cpu.allocatable_utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Node CPU usage time",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 3154,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.cpu.core_usage_time.count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Node daemon CPU usage time",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 3610,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node_daemon.cpu.core_usage_time.count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Node daemon Memory usage",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 3610,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node_daemon.memory.used_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Node Memory usage",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 3154,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.memory.used_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Memory allocatable utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 2394,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.memory.allocatable_utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "PID usage",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1064,
+            "left": 2394,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.pid_used",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Bytes received",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1406,
+            "left": 2394,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.network.received_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Bytes transmitted",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1406,
+            "left": 2850,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.network.sent_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "CPU allocatable utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 2698,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.cpu.allocatable_utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Ephemeral storage usage",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 722,
+            "left": 2394,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.used_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Ephemeral storage usage",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 722,
+            "left": 2698,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.used_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Free inodes",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1064,
+            "left": 3496,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.inodes_free",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Memory allocatable utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 2698,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.memory.allocatable_utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Inodes overview",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1064,
+            "left": 2888,
+            "width": 608,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.inodes_total",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }, {
+            "id": "B",
+            "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.inodes_free",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Ephemeral storage overview",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 722,
+            "left": 1786,
+            "width": 608,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.total_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }, {
+            "id": "B",
+            "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.allocatable_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Total memory overview",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 1786,
+            "width": 608,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.memory.total_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }, {
+            "id": "B",
+            "metric": "cloud.gcp.kubernetes_io.node.memory.allocatable_bytes",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "CPU core overview",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 1786,
+            "width": 608,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.cpu.total_cores",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }, {
+            "id": "B",
+            "metric": "cloud.gcp.kubernetes_io.node.cpu.allocatable_cores",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "PID overview",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1064,
+            "left": 1786,
+            "width": 608,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.pid_limit",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }, {
+            "id": "B",
+            "metric": "cloud.gcp.kubernetes_io.node.pid_used",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Network usage overview",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1406,
+            "left": 1786,
+            "width": 608,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.node.network.received_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }, {
+            "id": "B",
+            "metric": "cloud.gcp.kubernetes_io.node.network.sent_bytes_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["node_name", "cluster_name", "project_id"]
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "CPU overview",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 380,
+            "left": 0,
+            "width": 1748,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "C",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.request_cores",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "D",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.request_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "E",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.limit_cores",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "F",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.limit_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "G",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.core_usage_time.count",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "C:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "D:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Memory overview",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1026,
+            "left": 0,
+            "width": 1748,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "G",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.request_bytes",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "H",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.request_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "I",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.limit_bytes",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "J",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.limit_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "K",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.page_fault_count",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "C:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "D:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Storage overview",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1672,
+            "left": 0,
+            "width": 1748,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "G",
+            "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.request_bytes",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "H",
+            "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.used_bytes",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "I",
+            "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.limit_bytes",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "G:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "H:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "I:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "CPU request utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 684,
+            "left": 304,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.request_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "CPU request utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 684,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.request_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "CPU limit utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 684,
+            "left": 1064,
+            "width": 380,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.limit_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "node_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "CPU limit utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 684,
+            "left": 760,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.limit_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "node_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Memory request utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1330,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.request_utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Memory request utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1330,
+            "left": 304,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.request_utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Memory limit utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1330,
+            "left": 760,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.limit_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Memory limit utilization",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1330,
+            "left": 1064,
+            "width": 380,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.limit_utilization",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "CPU usage time",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 684,
+            "left": 1444,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.core_usage_time.count",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Page faults",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1330,
+            "left": 1444,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.page_fault_count",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Ephemeral storage usage",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1976,
+            "left": 304,
+            "width": 456,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.used_bytes",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "GRAPH_CHART",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": []
+        }
+    }, {
+        "name": "Ephemeral storage usage",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 1976,
+            "left": 0,
+            "width": 304,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.used_bytes",
+            "spaceAggregation": "PERCENTILE_90",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "TOP_LIST",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }, {
+        "name": "Containers status",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 0,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Containers CPU usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 342,
+            "left": 0,
+            "width": 456,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Containers memory usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 988,
+            "left": 0,
+            "width": 494,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Containers storage usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 1634,
+            "left": 0,
+            "width": 456,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Nodes CPU usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 0,
+            "left": 1786,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Nodes memory usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 342,
+            "left": 1786,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Nodes storage usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 684,
+            "left": 1786,
+            "width": 304,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "PID and inodes capacity usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 1026,
+            "left": 1786,
+            "width": 418,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Network usage",
+        "tileType": "HEADER",
+        "configured": true,
+        "bounds": {
+            "top": 1368,
+            "left": 1786,
+            "width": 418,
+            "height": 38
+        },
+        "tileFilter": {}
+    }, {
+        "name": "Restart count",
+        "tileType": "DATA_EXPLORER",
+        "configured": true,
+        "bounds": {
+            "top": 38,
+            "left": 0,
+            "width": 1748,
+            "height": 304
+        },
+        "tileFilter": {},
+        "customName": "Explorer results",
+        "queries": [{
+            "id": "A",
+            "metric": "cloud.gcp.kubernetes_io.container.restart_count",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "state"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "B",
+            "metric": "cloud.gcp.kubernetes_io.container.uptime",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "state"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "C",
+            "metric": "cloud.gcp.kubernetes_io.container.cpu.limit_utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "state"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }]
+                }],
+                "criteria": []
+            }
+        }, {
+            "id": "D",
+            "metric": "cloud.gcp.kubernetes_io.container.memory.limit_utilization",
+            "spaceAggregation": "AVG",
+            "timeAggregation": "DEFAULT",
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "state"],
+            "filterBy": {
+                "filterOperator": "AND",
+                "nestedFilters": [{
+                    "filter": "namespace_name",
+                    "filterType": "DIMENSION",
+                    "filterOperator": "AND",
+                    "nestedFilters": [],
+                    "criteria": [{
+                        "value": "kube-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "kalm-system",
+                        "evaluator": "NE"
+                    },
+                    {
+                        "value": "application-system",
+                        "evaluator": "NE"
+                    }
+                    ]
+                }],
+                "criteria": []
+            }
+        }],
+        "visualConfig": {
+            "type": "TABLE",
+            "global": {
+                "theme": "DEFAULT",
+                "seriesType": "LINE"
+            },
+            "rules": [{
+                "matcher": "A:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "B:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "C:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }, {
+                "matcher": "D:",
+                "properties": {
+                    "seriesType": "LINE"
+                }
+            }]
+        }
+    }]
+}
