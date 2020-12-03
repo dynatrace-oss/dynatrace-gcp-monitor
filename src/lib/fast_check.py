@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from aiohttp import ClientSession
 
 from lib.context import LoggingContext
-from lib.credentials import get_all_accessible_projects, fetch_secret
+from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fetch_dynatrace_api_key
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -87,8 +87,8 @@ class FastCheck:
 
     async def _check_dynatrace(self, project_id):
         try:
-            dynatrace_url = await fetch_secret(self.session, project_id, self.token, "DYNATRACE_URL")
-            dynatrace_access_key = await fetch_secret(self.session, project_id, self.token, "DYNATRACE_ACCESS_KEY")
+            dynatrace_url = await fetch_dynatrace_url(self.session, project_id, self.token)
+            dynatrace_access_key = await fetch_dynatrace_api_key(self.session, project_id, self.token)
             if not dynatrace_url or not dynatrace_access_key:
                 self.logging_context.log(f'No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
                                          f'Add required secrets to Secret Manager.')
