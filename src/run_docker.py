@@ -31,7 +31,7 @@ async def scheduling_loop(project_ids: Optional[List[str]] = None):
         await asyncio.sleep(60)
 
 
-async def init():
+async def initial_check():
     async with aiohttp.ClientSession() as session:
         token = await create_token(logging_context, session)
         if token:
@@ -95,7 +95,7 @@ runner = web.AppRunner(app)
 loop.run_until_complete(runner.setup())
 site = web.TCPSite(runner, '0.0.0.0', 8080)
 
-loop.run_until_complete(init())
+loop.run_until_complete(initial_check())
 loop.run_until_complete(site.start())
 
 try:
