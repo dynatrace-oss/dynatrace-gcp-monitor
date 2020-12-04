@@ -28,6 +28,12 @@ def find_service_name(service):
     return service_name_pattern.match(service).group(2) if service_name_pattern.match(service) else None
 
 
+def valid_dynatrace_scopes(token_metadata: dict):
+    """Check whether Dynatrace token metadata has required scopes to start ingest metrics"""
+    token_scopes = token_metadata.get('scopes', [])
+    return all(scope in token_scopes for scope in dynatrace_required_token_scopes) if token_scopes else False
+
+
 class FastCheck:
 
     def __init__(self, session: ClientSession, token: str, logging_context: LoggingContext):
@@ -55,7 +61,7 @@ class FastCheck:
             self.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
             return {}
 
-    async def get_dynatrace_token_metadata(self, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2):
+    async def get_dynatrace_token_metadata(self, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
         try:
             response = await self.session.post(
                 url=urljoin(dynatrace_url, "/api/v1/tokens/lookup"),
@@ -69,12 +75,12 @@ class FastCheck:
                 timeout=timeout)
             if response.status != 200:
                 self.logging_context.log(f'Unable to get Dynatrace token metadata: {response.status}, url: {response.url}, reason: {response.reason}')
-                return None
+                return {}
 
             return await response.json()
         except Exception as e:
             self.logging_context.log(f'Unable to get Dynatrace token metadata. Error details: {e}')
-            return None
+            return {}
 
     async def _check_services(self, project_id):
         list_services_result = await self.list_services(project_id)
@@ -95,7 +101,7 @@ class FastCheck:
                 return None
 
             token_metadata = await self.get_dynatrace_token_metadata(dynatrace_url, dynatrace_access_key)
-            if token_metadata['revoked'] or not all(scope in token_metadata['scopes'] for scope in dynatrace_required_token_scopes):
+            if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
                 self.logging_context.log(f'Dynatrace API Token for project: \'{project_id}\'is not valid. '
                                          f'Check expiration time and required token scopes: {dynatrace_required_token_scopes}')
                 return None
