@@ -43,12 +43,12 @@ def dynatrace_gcp_extension(event, context, project_id: Optional[str] = None):
         raise e
 
 
-async def async_dynatrace_gcp_extension():
+async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None):
     timestamp_utc = datetime.utcnow()
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
     logging_context = LoggingContext(execution_identifier)
-    logging_context.log(f"Starting execution")
+    logging_context.log(f'Starting execution for project(s): {project_ids}' if project_ids else "Starting execution")
     event_context = {
         'timestamp': timestamp_utc_iso,
         'event_id': timestamp_utc.timestamp(),
@@ -58,7 +58,7 @@ async def async_dynatrace_gcp_extension():
     data = {'data': '', 'publishTime': timestamp_utc_iso}
 
     start_time = time.time()
-    await handle_event(data, event_context, "dynatrace-gcp-extension")
+    await handle_event(data, event_context, "dynatrace-gcp-extension", project_ids)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
@@ -67,7 +67,7 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, event_context, project_id_owner: Optional[str]):
+async def handle_event(event: Dict, event_context, project_id_owner: Optional[str], projects_ids: Optional[List[str]] = None):
     if isinstance(event_context, Dict):
         context = LoggingContext(event_context.get("execution_id", None))
     else:
@@ -112,7 +112,8 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
             scheduled_execution_id=context.scheduled_execution_id
         )
 
-        projects_ids = await get_all_accessible_projects(context, session)
+        if not projects_ids:
+            projects_ids = await get_all_accessible_projects(context, session, token)
 
         setup_time = (time.time() - setup_start_time)
         context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}

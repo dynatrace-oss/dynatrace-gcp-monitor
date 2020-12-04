@@ -120,9 +120,9 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
         return response["access_token"]
 
 
-async def get_all_accessible_projects(context: Context, session: ClientSession):
+async def get_all_accessible_projects(context: LoggingContext, session: ClientSession, token: str):
         url = "https://cloudresourcemanager.googleapis.com/v1/projects"
-        headers = {"Authorization": "Bearer {token}".format(token=context.token)}
+        headers = {"Authorization": "Bearer {token}".format(token=token)}
         response = await session.get(url, headers=headers)
         response_json = await response.json()
         all_projects = [project["projectId"] for project in response_json.get("projects", [])]

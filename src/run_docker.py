@@ -13,17 +13,40 @@
 #     limitations under the License.
 import asyncio
 import os
+from typing import Optional, List
 
+import aiohttp
 from aiohttp import web
 
 from lib.context import LoggingContext
+from lib.credentials import create_token
+from lib.fast_check import FastCheck
+from lib.instance_metadata import InstanceMetadata
 from main import async_dynatrace_gcp_extension
 
 
-async def scheduling_loop():
+async def scheduling_loop(project_ids: Optional[List[str]] = None):
     while True:
-        loop.create_task(async_dynatrace_gcp_extension())
+        loop.create_task(async_dynatrace_gcp_extension(project_ids))
         await asyncio.sleep(60)
+
+
+async def initial_check():
+    async with aiohttp.ClientSession() as session:
+        token = await create_token(logging_context, session)
+        if token:
+            fast_check_result = await FastCheck(session, token, logging_context)
+            if fast_check_result.projects:
+                logging_context.log(f'Monitoring enabled for the following projects: {fast_check_result}')
+                instance_metadata = await InstanceMetadata(session, token, logging_context)
+                if instance_metadata:
+                    logging_context.log(f'GCP: {instance_metadata}')
+                loop.create_task(scheduling_loop(fast_check_result.projects))
+            else:
+                logging_context.log("Monitoring disabled. Check your project(s) settings.")
+        else:
+            logging_context.log(f'Monitoring disabled. Unable to acquire authorization token.')
+    await session.close()
 
 
 async def health(request):
@@ -72,8 +95,8 @@ runner = web.AppRunner(app)
 loop.run_until_complete(runner.setup())
 site = web.TCPSite(runner, '0.0.0.0', 8080)
 
+loop.run_until_complete(initial_check())
 loop.run_until_complete(site.start())
-loop.create_task(scheduling_loop())
 
 try:
     loop.run_forever()
