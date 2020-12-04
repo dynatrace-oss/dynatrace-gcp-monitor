@@ -48,12 +48,12 @@ class FastCheck:
                 timeout=timeout)
             if response.status != 200:
                 self.logging_context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
-                return None
+                return {}
 
             return await response.json()
         except Exception as e:
             self.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
-            return None
+            return {}
 
     async def get_dynatrace_token_metadata(self, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2):
         try:
@@ -78,13 +78,12 @@ class FastCheck:
 
     async def _check_services(self, project_id):
         list_services_result = await self.list_services(project_id)
-        if list_services_result:
-            service_names = [find_service_name(service['name']) for service in list_services_result['services']]
-            if not all(name in service_names for name in required_services):
-                self.logging_context.log(f'Cannot monitor project: \'{project_id}\'. '
-                                         f'Enable required services: {required_services}')
-                return None
-            return service_names
+        service_names = [find_service_name(service['name']) for service in list_services_result.get('services', [])]
+        if not all(name in service_names for name in required_services):
+            self.logging_context.log(f'Cannot monitor project: \'{project_id}\'. '
+                                     f'Enable required services: {required_services}')
+            return None
+        return service_names
 
     async def _check_dynatrace(self, project_id):
         try:
