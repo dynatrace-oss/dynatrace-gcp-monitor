@@ -12,6 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import time
+import traceback
 from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List
@@ -31,7 +32,8 @@ async def push_ingest_lines(context: Context, project_id: str, fetch_metric_resu
         return
 
     if not fetch_metric_results:
-        context.log(project_id, "Skipping push due to detected connectivity error")
+        context.log(project_id, "Skipping push due to empty ingest lines batch")
+        return
 
     lines_sent = 0
     maximum_lines_threshold = context.maximum_metric_data_points_per_minute
@@ -54,6 +56,7 @@ async def push_ingest_lines(context: Context, project_id: str, fetch_metric_resu
         if lines_batch:
             await _push_to_dynatrace(context, project_id, lines_batch)
     except Exception as e:
+        traceback.print_exc()
         if isinstance(e, InvalidURL):
             context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
         context.log(project_id, f"Failed to push ingest lines to Dynatrace due to {type(e).__name__} {e}")
