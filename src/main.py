@@ -147,9 +147,13 @@ async def process_project_metrics(context: Context, project_id: str, services: L
 
 
 async def check_x_goog_user_project_header_permissions(context: Context, project_id: str):
-    # TODO if env variable disabled, just set False
-
     if project_id in context.use_x_goog_user_project_header:
+        return
+
+    service_usage_booking = os.environ['SERVICE_USAGE_BOOKING'] if 'SERVICE_USAGE_BOOKING' in os.environ.keys() \
+        else 'source'
+    if service_usage_booking != 'destination':
+        context.use_x_goog_user_project_header[project_id] = False
         return
 
     url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
