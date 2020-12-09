@@ -138,11 +138,35 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
 async def process_project_metrics(context: Context, project_id: str, services: List[GCPService]):
     context.log(project_id, f"Starting processing...")
+    await check_x_goog_user_project_header_permissions(context, project_id)
     ingest_lines = await fetch_ingest_lines_task(context, project_id, services)
     fetch_data_time = time.time() - context.start_processing_timestamp
     context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
     context.log(project_id, f"Finished fetching data in {fetch_data_time}")
     await push_ingest_lines(context, project_id, ingest_lines)
+
+
+async def check_x_goog_user_project_header_permissions(context: Context, project_id: str):
+    # TODO if env variable disabled, just set False
+
+    if project_id in context.use_x_goog_user_project_header:
+        return
+
+    url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
+    params = [('pageSize', 1)]
+    headers = {
+        "Authorization": "Bearer {token}".format(token=context.token),
+        "x-goog-user-project": project_id
+    }
+    resp = await context.session.get(url=url, params=params, headers=headers)
+    page = await resp.json()
+
+    if resp.status == 200:
+        context.use_x_goog_user_project_header[project_id] = True
+    elif resp.status == 403 and 'serviceusage.services.use' in page['error']['message']:
+        context.use_x_goog_user_project_header[project_id] = False
+    else:
+        raise Exception(str(page))
 
 
 async def fetch_ingest_lines_task(context: Context, project_id: str, services: List[GCPService]) -> List[IngestLine]:
