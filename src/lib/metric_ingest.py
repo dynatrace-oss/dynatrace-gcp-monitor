@@ -22,6 +22,8 @@ from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
+UNIT_10TO2PERCENT = "10^2.%"
+
 
 async def push_ingest_lines(context: Context, project_id: str, fetch_metric_results: List[IngestLine]):
     if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
@@ -353,6 +355,13 @@ def extract_value(point, typed_value_key: str, metric: Metric):
                 min = bounds[min_bucket]
                 max = bounds[max_bucket]
 
+        if metric.unit == UNIT_10TO2PERCENT:
+            min = 100 * min
+            max = 100 * max
+            sum = 100 * sum
+
         return gauge_line(min, max, count, sum)
     else:
+        if metric.unit == UNIT_10TO2PERCENT:
+            value = 100 * value
         return value
