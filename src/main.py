@@ -147,6 +147,13 @@ async def process_project_metrics(context: Context, project_id: str, services: L
 
 
 async def check_x_goog_user_project_header_permissions(context: Context, project_id: str):
+    try:
+        await _check_x_goog_user_project_header_permissions(context, project_id)
+    except Exception as e:
+        context.log(project_id, f"Unexpected exception when checking 'x-goog-user-project' header: {e}")
+
+
+async def _check_x_goog_user_project_header_permissions(context: Context, project_id: str):
     if project_id in context.use_x_goog_user_project_header:
         return
 
@@ -170,7 +177,7 @@ async def check_x_goog_user_project_header_permissions(context: Context, project
     elif resp.status == 403 and 'serviceusage.services.use' in page['error']['message']:
         context.use_x_goog_user_project_header[project_id] = False
     else:
-        raise Exception(str(page))
+        context.log(project_id, f"Unexpected response when checking 'x-goog-user-project' header: {str(page)}")
 
 
 async def fetch_ingest_lines_task(context: Context, project_id: str, services: List[GCPService]) -> List[IngestLine]:

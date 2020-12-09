@@ -147,7 +147,7 @@ async def fetch_metric(
     headers = {
         "Authorization": "Bearer {token}".format(token=context.token)
     }
-    if context.use_x_goog_user_project_header[project_id]:
+    if context.use_x_goog_user_project_header.get(project_id, False):
         headers["x-goog-user-project"] = project_id
 
     should_fetch = True
