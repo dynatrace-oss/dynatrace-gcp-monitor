@@ -176,6 +176,7 @@ async def _check_x_goog_user_project_header_permissions(context: Context, projec
         context.use_x_goog_user_project_header[project_id] = True
     elif resp.status == 403 and 'serviceusage.services.use' in page['error']['message']:
         context.use_x_goog_user_project_header[project_id] = False
+        context.log(project_id, "Ignoring SERVICE_USAGE_BOOKING. Missing permission: 'serviceusage.services.use'")
     else:
         context.log(project_id, f"Unexpected response when checking 'x-goog-user-project' header: {str(page)}")
 
