@@ -34,6 +34,29 @@ def valid_dynatrace_scopes(token_metadata: dict):
     return all(scope in token_scopes for scope in dynatrace_required_token_scopes) if token_scopes else False
 
 
+
+async def get_dynatrace_token_metadata(session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
+    try:
+        response = await session.post(
+            url=urljoin(dynatrace_url, "/api/v1/tokens/lookup"),
+            headers={
+                "Authorization": f"Api-Token {dynatrace_api_key}",
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            json={
+                "token": dynatrace_api_key
+            },
+            timeout=timeout)
+        if response.status != 200:
+            context.log(f'Unable to get Dynatrace token metadata: {response.status}, url: {response.url}, reason: {response.reason}')
+            return {}
+
+        return await response.json()
+    except Exception as e:
+        context.log(f'Unable to get Dynatrace token metadata. Error details: {e}')
+        return {}
+
+
 class FastCheck:
 
     def __init__(self, session: ClientSession, token: str, logging_context: LoggingContext):
@@ -61,27 +84,6 @@ class FastCheck:
             self.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
             return {}
 
-    async def get_dynatrace_token_metadata(self, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
-        try:
-            response = await self.session.post(
-                url=urljoin(dynatrace_url, "/api/v1/tokens/lookup"),
-                headers={
-                    "Authorization": f"Api-Token {dynatrace_api_key}",
-                    "Content-Type": "application/json; charset=utf-8"
-                },
-                json={
-                    "token": dynatrace_api_key
-                },
-                timeout=timeout)
-            if response.status != 200:
-                self.logging_context.log(f'Unable to get Dynatrace token metadata: {response.status}, url: {response.url}, reason: {response.reason}')
-                return {}
-
-            return await response.json()
-        except Exception as e:
-            self.logging_context.log(f'Unable to get Dynatrace token metadata. Error details: {e}')
-            return {}
-
     async def _check_services(self, project_id):
         list_services_result = await self.list_services(project_id)
         service_names = [find_service_name(service['name']) for service in list_services_result.get('services', [])]
@@ -100,7 +102,7 @@ class FastCheck:
                                          f'Add required secrets to Secret Manager.')
                 return None
 
-            token_metadata = await self.get_dynatrace_token_metadata(dynatrace_url, dynatrace_access_key)
+            token_metadata = await self.get_dynatrace_token_metadata(self.session, self.logging_context, dynatrace_url, dynatrace_access_key)
             if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
                 self.logging_context.log(f'Dynatrace API Token for project: \'{project_id}\'is not valid. '
                                          f'Check expiration time and required token scopes: {dynatrace_required_token_scopes}')

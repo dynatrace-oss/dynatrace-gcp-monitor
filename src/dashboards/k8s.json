@@ -1,10 +1,11 @@
 {
     "dashboardMetadata": {
         "name": "Google Kubernetes Engine",
-        "shared": false,
+        "shared": true,
+        "owner": "Dynatrace Open Source",
         "sharingDetails": {
             "linkShared": true,
-            "published": false
+            "published": true
         }
     },
     "tiles": [{
