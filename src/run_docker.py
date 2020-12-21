@@ -52,7 +52,6 @@ async def initial_check():
 async def try_configure_dynatrace():
     async with aiohttp.ClientSession() as session:
         dashboards_result = await ConfigureDynatrace(session, logging_context)
-    await session.close()
 
 
 async def health(request):

@@ -3,7 +3,7 @@ import re
 import os
 from os import listdir
 from os.path import isfile
-from typing import NamedTuple, List, Optional
+from typing import NamedTuple, List, Optional, Dict 
 from urllib.parse import urljoin
 
 from aiohttp import ClientSession
@@ -16,8 +16,9 @@ import yaml
 import json
 from main import is_yaml_file
 
+
 class ConfigureDynatrace:
-    async def post_dashboard(self, dynatrace_url: str, dynatrace_api_key: str, path: str, name:str, timeout: Optional[int] = 2) -> dict:
+    async def post_dashboard(self, dynatrace_url: str, dynatrace_api_key: str, path: str, name:str, timeout: Optional[int] = 2) -> List[Dict]:
         try:
             with open(path, encoding="utf-8") as dashboard_file:
                  dashboard_json = json.load(dashboard_file) 
@@ -33,15 +34,12 @@ class ConfigureDynatrace:
             if response.status != 201:
                 response_json=  await response.json()
                 self.logging_context.log(f'Unable to create dashboard {name} in Dynatrace: {response.status}, url: {response.url}, reason: {response.reason}, message {response_json}')                                
-                return {}
             else:
                 self.logging_context.log(f"Installed dashboard {name}")
-            return {}
         except Exception as e:
             self.logging_context.log(f'Unable to create dashboard in Dynatrace. Error details: {e}')
-            return {}
 
-    async def get_existing_dashboards(self, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
+    async def get_existing_dashboards(self, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> List[dict]:
         try:
             response = await self.session.get(
                 url=urljoin(dynatrace_url, "/api/config/v1/dashboards"),
@@ -59,10 +57,10 @@ class ConfigureDynatrace:
             return all_dashboards
         except Exception as e:
             self.logging_context.log(f'Unable to get existing dashboards config. Error details: {e}')
-            return {}
+            return []
 
 
-    async def get_available_dashboards(self) -> dict:
+    async def get_available_dashboards(self) -> List[Dict]:
         try:
             selected_services = None
             if "GCP_SERVICES" in os.environ:
@@ -90,10 +88,12 @@ class ConfigureDynatrace:
                     except Exception as error:
                          self.logging_context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
                          continue                
-                return dashboards            
+                return dashboards   
+            else:
+                return []
         except Exception as e:
             self.logging_context.log(f'Unable to get available dashboards. Error details: {e}')
-            return {}
+            return []
             
 
     def __init__(self, session: ClientSession, logging_context: LoggingContext):
@@ -104,7 +104,7 @@ class ConfigureDynatrace:
         dynatrace_url = await fetch_dynatrace_url(self.session, "", "")
         dynatrace_access_key = await fetch_dynatrace_api_key(self.session,"", "")
         scopes = await  get_dynatrace_token_metadata(self.session, self.logging_context, dynatrace_url, dynatrace_access_key)
-        has_write_config_permission=any(s in scopes.get('scopes') for s in ["WriteConfig", "ReadConfig"])        
+        has_write_config_permission=any(s in scopes.get('scopes', []) for s in ["WriteConfig", "ReadConfig"])        
         if not has_write_config_permission:
             self.logging_context.log("Missing ReadConfig/WriteConfig permission for Dynatrace API token, skipping dashboards configuration")
         else:
@@ -113,7 +113,7 @@ class ConfigureDynatrace:
             dashboards_to_install = [dash for dash in available_dashboards if dash["name"] not in existing_dashboards]
 
             self.logging_context.log(f"Available dashboards: {[dash['name'] for dash in available_dashboards]}")
-            if len(dashboards_to_install) > 0 :
+            if dashboards_to_install:
                 self.logging_context.log(f"New dashboards to install: {[dash['name'] for dash in dashboards_to_install]}")
                 for dashboard in dashboards_to_install:
                     await self.post_dashboard(dynatrace_url, dynatrace_access_key, dashboard["path"], dashboard["name"])
