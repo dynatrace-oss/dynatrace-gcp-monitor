@@ -17,10 +17,12 @@ from main import is_yaml_file
 
 
 class ConfigureDynatrace:
-    async def post_dashboard(self, dynatrace_url: str, dynatrace_api_key: str, path: str, name:str, timeout: Optional[int] = 2) -> List[Dict]:
+    async def post_dashboard(self, dynatrace_url: str, dynatrace_api_key: str, path: str, name:str, remove_owner: bool, timeout: Optional[int] = 2) -> List[Dict]:
         try:
             with open(path, encoding="utf-8") as dashboard_file:
-                 dashboard_json = json.load(dashboard_file)             
+                 dashboard_json = json.load(dashboard_file) 
+            if remove_owner:                                         
+                del dashboard_json["dashboardMetadata"]["owner"]
             response = await self.session.post(              
                 url=f"{dynatrace_url.rstrip('/')}/api/config/v1/dashboards",
                 headers={
@@ -31,20 +33,8 @@ class ConfigureDynatrace:
                 json=dashboard_json)
             if response.status != 201:
                 response_json=  await response.json()                
-                if 'owner' in json.dumps(response_json):                                        
-                    del dashboard_json["dashboardMetadata"]["owner"]
-                    response = await self.session.post(              
-                        url=f"{dynatrace_url.rstrip('/')}/api/config/v1/dashboards",
-                        headers={
-                            "Authorization": f"Api-Token {dynatrace_api_key}",
-                            "Content-Type": "application/json; charset=utf-8"
-                        },
-                        timeout=timeout,
-                        json=dashboard_json)
-                    if response.status != 201:
-                        self.logging_context.log(f'Unable to create dashboard {name} in Dynatrace: {response.status}, url: {response.url}, reason: {response.reason}, message {response_json}')                                                      
-                    else:
-                        self.logging_context.log(f"Installed dashboard {name}")
+                if 'owner' in json.dumps(response_json):
+                    await self.post_dashboard(dynatrace_url, dynatrace_api_key, path, name, True)
                 else:
                     self.logging_context.log(f'Unable to create dashboard {name} in Dynatrace: {response.status}, url: {response.url}, reason: {response.reason}, message {response_json}')                                
             else:
@@ -129,7 +119,7 @@ class ConfigureDynatrace:
             if dashboards_to_install:
                 self.logging_context.log(f"New dashboards to install: {[dash['name'] for dash in dashboards_to_install]}")
                 for dashboard in dashboards_to_install:
-                    await self.post_dashboard(dynatrace_url, dynatrace_access_key, dashboard["path"], dashboard["name"])
+                    await self.post_dashboard(dynatrace_url, dynatrace_access_key, dashboard["path"], dashboard["name"], False)
             else :
                 self.logging_context.log(f"All dashboards already installed, skipping. (if you wish to upgrade a dashboard, please delete it first)")
     def __await__(self):
