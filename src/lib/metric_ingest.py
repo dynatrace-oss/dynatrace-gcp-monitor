@@ -68,8 +68,9 @@ async def _push_to_dynatrace(context: Context, project_id: str, lines_batch: Lis
     if context.print_metric_ingest_input:
         context.log("Ingest input is: ")
         context.log(ingest_input)
+    dt_url=f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
     ingest_response = await context.session.post(
-        url=f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest",
+        url=dt_url,
         headers={
             "Authorization": f"Api-Token {context.dynatrace_api_key}",
             "Content-Type": "text/plain; charset=utf-8"
@@ -86,7 +87,7 @@ async def _push_to_dynatrace(context: Context, project_id: str, lines_batch: Lis
         raise Exception("Wrong token - missing 'Ingest metrics using API V2' permission")
     elif ingest_response.status == 404 or ingest_response.status == 405:
         context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
-        raise Exception("Wrong URL")
+        raise Exception(f"Wrong URL {dt_url}")
 
     ingest_response_json = await ingest_response.json()
     context.dynatrace_request_count[ingest_response.status] \
