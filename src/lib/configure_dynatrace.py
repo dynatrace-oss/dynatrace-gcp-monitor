@@ -20,8 +20,7 @@ class ConfigureDynatrace:
     async def post_dashboard(self, dynatrace_url: str, dynatrace_api_key: str, path: str, name:str, timeout: Optional[int] = 2) -> List[Dict]:
         try:
             with open(path, encoding="utf-8") as dashboard_file:
-                 dashboard_json = json.load(dashboard_file) 
-
+                 dashboard_json = json.load(dashboard_file)             
             response = await self.session.post(              
                 url=f"{dynatrace_url.rstrip('/')}/api/config/v1/dashboards",
                 headers={
@@ -31,8 +30,23 @@ class ConfigureDynatrace:
                 timeout=timeout,
                 json=dashboard_json)
             if response.status != 201:
-                response_json=  await response.json()
-                self.logging_context.log(f'Unable to create dashboard {name} in Dynatrace: {response.status}, url: {response.url}, reason: {response.reason}, message {response_json}')                                
+                response_json=  await response.json()                
+                if 'owner' in json.dumps(response_json):                                        
+                    del dashboard_json["dashboardMetadata"]["owner"]
+                    response = await self.session.post(              
+                        url=f"{dynatrace_url.rstrip('/')}/api/config/v1/dashboards",
+                        headers={
+                            "Authorization": f"Api-Token {dynatrace_api_key}",
+                            "Content-Type": "application/json; charset=utf-8"
+                        },
+                        timeout=timeout,
+                        json=dashboard_json)
+                    if response.status != 201:
+                        self.logging_context.log(f'Unable to create dashboard {name} in Dynatrace: {response.status}, url: {response.url}, reason: {response.reason}, message {response_json}')                                                      
+                    else:
+                        self.logging_context.log(f"Installed dashboard {name}")
+                else:
+                    self.logging_context.log(f'Unable to create dashboard {name} in Dynatrace: {response.status}, url: {response.url}, reason: {response.reason}, message {response_json}')                                
             else:
                 self.logging_context.log(f"Installed dashboard {name}")
         except Exception as e:
