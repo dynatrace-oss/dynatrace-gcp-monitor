@@ -1,7 +1,6 @@
 import asyncio
 import re
 from typing import NamedTuple, List, Optional
-from urllib.parse import urljoin
 
 from aiohttp import ClientSession
 
@@ -38,7 +37,7 @@ def valid_dynatrace_scopes(token_metadata: dict):
 async def get_dynatrace_token_metadata(session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:
         response = await session.post(
-            url=urljoin(dynatrace_url, "/api/v1/tokens/lookup"),
+            url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
             headers={
                 "Authorization": f"Api-Token {dynatrace_api_key}",
                 "Content-Type": "application/json; charset=utf-8"

@@ -4,7 +4,6 @@ import os
 from os import listdir
 from os.path import isfile
 from typing import NamedTuple, List, Optional, Dict 
-from urllib.parse import urljoin
 
 from aiohttp import ClientSession
 
@@ -23,8 +22,8 @@ class ConfigureDynatrace:
             with open(path, encoding="utf-8") as dashboard_file:
                  dashboard_json = json.load(dashboard_file) 
 
-            response = await self.session.post(
-                url=urljoin(dynatrace_url, "/api/config/v1/dashboards"),
+            response = await self.session.post(              
+                url=f"{dynatrace_url.rstrip('/')}/api/config/v1/dashboards",
                 headers={
                     "Authorization": f"Api-Token {dynatrace_api_key}",
                     "Content-Type": "application/json; charset=utf-8"
@@ -42,7 +41,7 @@ class ConfigureDynatrace:
     async def get_existing_dashboards(self, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> List[dict]:
         try:
             response = await self.session.get(
-                url=urljoin(dynatrace_url, "/api/config/v1/dashboards"),
+                url=f"{dynatrace_url.rstrip('/')}/api/config/v1/dashboards",
                 headers={
                     "Authorization": f"Api-Token {dynatrace_api_key}",
                     "Content-Type": "application/json; charset=utf-8"
