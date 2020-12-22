@@ -1,10 +1,11 @@
 {
     "dashboardMetadata": {
         "name": "Google Cloud HTTPs Load Balancing",
-        "shared": false,
+        "shared": true,
+        "owner": "Dynatrace Open Source",
         "sharingDetails": {
             "linkShared": true,
-            "published": false
+            "published": true
         },
         "dashboardFilter": {
             "timeframe": ""
@@ -1321,7 +1322,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "response_code", "forwarding_rule_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "response_code", "forwarding_rule_name", "project_id"]
         }],
         "visualConfig": {
             "type": "TABLE",

@@ -1,10 +1,11 @@
 {
     "dashboardMetadata": {
         "name": "Google Cloud APIs",
-        "shared": false,
+        "shared": true,
+        "owner": "Dynatrace Open Source",
         "sharingDetails": {
             "linkShared": true,
-            "published": false
+            "published": true
         },
         "dashboardFilter": {
             "timeframe": ""

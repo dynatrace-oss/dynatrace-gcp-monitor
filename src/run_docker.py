@@ -21,6 +21,7 @@ from aiohttp import web
 from lib.context import LoggingContext
 from lib.credentials import create_token
 from lib.fast_check import FastCheck
+from lib.configure_dynatrace import ConfigureDynatrace
 from lib.instance_metadata import InstanceMetadata
 from main import async_dynatrace_gcp_extension
 
@@ -47,6 +48,10 @@ async def initial_check():
         else:
             logging_context.log(f'Monitoring disabled. Unable to acquire authorization token.')
     await session.close()
+
+async def try_configure_dynatrace():
+    async with aiohttp.ClientSession() as session:
+        dashboards_result = await ConfigureDynatrace(session, logging_context)
 
 
 async def health(request):
@@ -95,6 +100,7 @@ runner = web.AppRunner(app)
 loop.run_until_complete(runner.setup())
 site = web.TCPSite(runner, '0.0.0.0', 8080)
 
+loop.run_until_complete(try_configure_dynatrace())
 loop.run_until_complete(initial_check())
 loop.run_until_complete(site.start())
 
