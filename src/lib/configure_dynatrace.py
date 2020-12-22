@@ -33,7 +33,7 @@ class ConfigureDynatrace:
                 json=dashboard_json)
             if response.status != 201:
                 response_json=  await response.json()                
-                if 'owner' in json.dumps(response_json):
+                if not remove_owner and 'owner' in json.dumps(response_json):
                     await self.post_dashboard(dynatrace_url, dynatrace_api_key, path, name, True)
                 else:
                     self.logging_context.log(f'Unable to create dashboard {name} in Dynatrace: {response.status}, url: {response.url}, reason: {response.reason}, message {response_json}')                                
