@@ -102,7 +102,7 @@ class FastCheck:
                                          f'Add required secrets to Secret Manager.')
                 return None
 
-            token_metadata = await self.get_dynatrace_token_metadata(self.session, self.logging_context, dynatrace_url, dynatrace_access_key)
+            token_metadata = await get_dynatrace_token_metadata(self.session, self.logging_context, dynatrace_url, dynatrace_access_key)
             if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
                 self.logging_context.log(f'Dynatrace API Token for project: \'{project_id}\'is not valid. '
                                          f'Check expiration time and required token scopes: {dynatrace_required_token_scopes}')
