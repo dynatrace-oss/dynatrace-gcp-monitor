@@ -2,6 +2,7 @@ import asyncio
 import re
 from typing import NamedTuple, List, Optional
 
+from urllib.parse import urljoin, urlparse
 from aiohttp import ClientSession
 
 from lib.context import LoggingContext
