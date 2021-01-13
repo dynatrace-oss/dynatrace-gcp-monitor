@@ -102,6 +102,8 @@ Installation script will prompt for following parameters:
 ### Requirements 
 * Google Cloud SDK [Google Cloud SDK installer](https://cloud.google.com/sdk/docs/downloads-interactive#linux)
 * Kubernetes CLI [Install and setup kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
+* `Workload identity` enabled on GKE Cluster [Enabling Workload Identity on a cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable_on_cluster)
+* `GKE_METADATA` enabled on GKE node pools [Enabling Workload Identity on a cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable_on_cluster)
 
 ### Create Service Account & Kubernetes objects
 Create `dynatrace` namespace with `kubectl`, and secrets for Dynatrace cluster `API token` and `URL`. 
