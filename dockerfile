@@ -20,4 +20,4 @@ WORKDIR /code
 COPY --from=build /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/site-packages
 COPY src/ .
 COPY LICENSE.md /licenses/
-CMD [ "python", "./run_docker.py" ]
+CMD [ "python", "-u", "./run_docker.py" ]
