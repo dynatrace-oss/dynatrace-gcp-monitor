@@ -18,6 +18,11 @@ data:
   # if true function requires valid SSL certificates when communicating with Dynatrace cluster
   # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate
   REQUIRE_VALID_CERTIFICATE: "true"
+  # if API calls should use default billing mechanism, `destination` if they should be billed per project
+    # if set to source: monitoring API calls are booked towards project where K8S container is running
+    # if set to destination: monitoring API calls are booked towards project which is monitored
+    # REQUIRES serviceusage.services.use Permission granted for Service Account!
+  SERVICE_USAGE_BOOKING: "source"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -60,6 +65,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: REQUIRE_VALID_CERTIFICATE
+        - name: SERVICE_USAGE_BOOKING
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: SERVICE_USAGE_BOOKING
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
         - name: DYNATRACE_URL_SECRET_NAME
