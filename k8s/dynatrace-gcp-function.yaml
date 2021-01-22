@@ -18,10 +18,10 @@ data:
   # if true function requires valid SSL certificates when communicating with Dynatrace cluster
   # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate
   REQUIRE_VALID_CERTIFICATE: "true"
-  # if API calls should use default billing mechanism, `destination` if they should be billed per project
-    # if set to source: monitoring API calls are booked towards project where K8S container is running
-    # if set to destination: monitoring API calls are booked towards project which is monitored
-    # REQUIRES serviceusage.services.use Permission granted for Service Account!
+  # Determines a caller-specified project for quota and billing purposes 
+  # if set to source: monitoring API calls are booked towards project where K8S container is running
+  # if set to destination: monitoring API calls are booked towards project which is monitored
+  # REQUIRES serviceusage.services.use Permission granted for Service Account!
   SERVICE_USAGE_BOOKING: "source"
 ---
 apiVersion: apps/v1

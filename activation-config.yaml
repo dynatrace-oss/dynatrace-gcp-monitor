@@ -16,7 +16,7 @@ googleCloud:
     # Require valid SSL certificate when communicating with Dynatrace Cluster / Active Gate
     # May be set to false in case communication through Active Gate is debugged, for non-production use cases
     requireValidCertificate: true
-    # if API calls should use default billing mechanism, `destination` if they should be billed per project
+    # Determines a caller-specified project for quota and billing purposes 
     # if set to source: monitoring API calls are booked towards project where K8S container is running
     # if set to destination: monitoring API calls are booked towards project which is monitored
     # REQUIRES serviceusage.services.use Permission granted for Service Account!
