@@ -1,0 +1,42 @@
+os: linux
+dist: xenial
+notifications:
+  email:
+    on_success: never
+stages:
+- docker-build
+- github-deploy
+env:
+  global:
+  - TAG=$TRAVIS_TAG
+  - VERSION_TAG=/^release-.*
+  - DOCKER_CLI_EXPERIMENTAL=enabled
+jobs:
+  include:
+  - stage: docker-build
+    name: Docker build
+    language: minimal
+    script: "./build/docker-deploy.sh"
+  - stage: docker-deploy
+    name: Docker Hub deploy
+    if: tag =~ /^release-.*
+    language: minimal
+    script: "./build/docker-deploy.sh"
+    env: PUSH=true
+  - stage: github-deploy
+    name: GitHub deploy
+    #if: tag =~ /^release-.*
+    install: skip
+    language: minimal
+    before_deploy:
+    - mkdir artefacts
+    - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml
+    - "(cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')"
+    deploy:
+      provider: releases
+      file_glob: true
+      api_key: $GITHUB_RELEASE_API_KEY
+      file: "./artefacts/*"
+      skip_cleanup: true
+      on:
+        tags: true

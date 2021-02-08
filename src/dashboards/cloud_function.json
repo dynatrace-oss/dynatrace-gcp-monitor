@@ -1,10 +1,11 @@
 {
     "dashboardMetadata": {
         "name": "Google Cloud Function",
-        "shared": false,
+        "shared": true,
+        "owner": "Dynatrace Open Source",
         "sharingDetails": {
             "linkShared": true,
-            "published": false
+            "published": true
         },
         "dashboardFilter": {
             "timeframe": ""
@@ -192,7 +193,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.active_instances",
             "spaceAggregation": "SUM",
             "timeAggregation": "AVG",
-            "splitBy": ["region"]
+            "splitBy": ["region","project_id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -225,7 +226,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.active_instances",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["function_name", "project_id"]
+            "splitBy": ["function_name","project_id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -491,7 +492,7 @@
             "timeAggregation": "DEFAULT",
             "splitBy": ["status", "function_name", "project_id"],
             "filterBy": {
-                "filterOperator": "OR",
+                "filterOperator": "AND",
                 "nestedFilters": [{
                     "filter": "status",
                     "nestedFilters": [],
@@ -536,19 +537,19 @@
             "timeAggregation": "DEFAULT",
             "splitBy": ["status", "function_name", "project_id"],
             "filterBy": {
-                "filterOperator": "OR",
+                "filterOperator": "AND",
                 "nestedFilters": [{
                     "filter": "status",
                     "filterType": "DIMENSION",
                     "nestedFilters": [],
                     "criteria": [{
+                        "value": "timeout",
+                        "evaluator": "EQ"
+                    }, {
                         "value": "error",
                         "evaluator": "EQ"
                     }, {
                         "value": "crash",
-                        "evaluator": "EQ"
-                    }, {
-                        "value": "timeout",
                         "evaluator": "EQ"
                     }]
                 }],

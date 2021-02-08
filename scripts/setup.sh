@@ -13,7 +13,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-readonly FUNCTION_REPOSITORY_RELEASE_URL=https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/release-0.0.2
+readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
 readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
@@ -28,6 +28,7 @@ if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
 fi
 
 readonly GCP_SERVICE_ACCOUNT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.serviceAccount')
+readonly REQUIRE_VALID_CERTIFICATE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.requireValidCertificate')
 readonly GCP_PUBSUB_TOPIC=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.pubSubTopic')
 readonly GCP_FUNCTION_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.function')
 readonly GCP_SCHEDULER_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.scheduler')
@@ -38,6 +39,7 @@ readonly FUNCTION_GCP_SERVICES=$(yq r $FUNCTION_ACTIVATION_CONFIG 'activation.me
 readonly DASHBOARDS_TO_ACTIVATE=$(yq r -j -P $FUNCTION_ACTIVATION_CONFIG 'activation.metrics.services' | jq -r .[]) 
 readonly PRINT_METRIC_INGEST_INPUT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'debug.printMetricIngestInput')
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.cloudFunctionSize')
+readonly SERVICE_USAGE_BOOKING=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.serviceUsageBooking')
 
 
 if ! command -v gcloud &> /dev/null
@@ -112,13 +114,13 @@ s)
 esac
 
 echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
-while ! [[ "${DYNATRACE_URL}" =~ ^https:\/\/[a-z0-9-]{8}\.(live|sprint|dev)\.(dynatrace|dynatracelabs)\.com\/$ ]]; do
+while ! [[ "${DYNATRACE_URL}" =~ ^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/)(e\/[a-z0-9-]{36}\/)?$ ]]; do
     read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
 done
 echo ""
 
-echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'Ingest data points' scope"
- while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
+echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'API v2 Ingest metrics', 'API v1 Read configuration' and 'WriteConfig' scope"
+while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
     read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY  
 done
 echo ""
@@ -127,8 +129,8 @@ echo "- set current project to [$GCP_PROJECT]"
 gcloud config set project $GCP_PROJECT
 
 echo -e
-echo "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com]"
-gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com
+echo "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com]"
+gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com
 
 echo -e
 echo "- create the pubsub topic [$GCP_PUBSUB_TOPIC]"
@@ -173,8 +175,8 @@ else
 fi
 
 echo -e
-echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL/$FUNCTION_ZIP_PACKAGE]"
-wget -q $FUNCTION_REPOSITORY_RELEASE_URL/$FUNCTION_ZIP_PACKAGE  -O $FUNCTION_ZIP_PACKAGE 
+echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
+wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE 
 
 
 echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
@@ -182,11 +184,11 @@ mkdir -p $GCP_FUNCTION_NAME
 unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
 cd ./$GCP_FUNCTION_NAME
-gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME
+gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING
 
 echo -e
 echo "- schedule the runs"
-if [[ $(gcloud scheduler jobs list --filter=name:dynatrace-gcp-schedule --format="value(name)") ]]; then 
+if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then 
     echo "Scheduler [$GCP_SCHEDULER_NAME] already exists, skipping"
 else
     gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
@@ -208,6 +210,42 @@ if [ $? -ne 0 ]; then
     echo -e "Documentation: https://cloud.google.com/monitoring/workspaces/create"
     echo 
 fi
+
+EXISTING_DASHBOARDS=$(curl -s -X GET "${DYNATRACE_URL}api/config/v1/dashboards" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"  | jq '.dashboards[].name | select (. |contains("Google"))')
+if [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; then
+    echo -e
+    echo -e "\e[93mWARNING: \e[37mFound existing Google dashboards in [${DYNATRACE_URL}] tenant:"
+    echo $EXISTING_DASHBOARDS
+    echo
+fi
+
+for FILEPATH in ./config/*.yaml ./config/*.yml
+do 
+  DASHBOARDS_NUMBER=$(yq r --length "$FILEPATH" dashboards)
+  if [ "$DASHBOARDS_NUMBER" != "" ]; then
+    MAX_INDEX=-1
+    ((MAX_INDEX += DASHBOARDS_NUMBER))
+    for INDEX in $(seq 0 "$MAX_INDEX");
+    do
+      DASHBOARD_PATH=$(yq r -j "$FILEPATH" dashboards[$INDEX].dashboard | tr -d '"')
+      DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
+      DASHBOARD_NAME=$(cat "./$DASHBOARD_PATH" | jq .dashboardMetadata.name)
+      DASHBOARD_EXISTS=$(echo $EXISTING_DASHBOARDS | grep "$DASHBOARD_NAME")
+      if ! [[ "${DASHBOARD_EXISTS}" != "" ]]; then              
+        echo "- Create [$DASHBOARD_NAME] dashboard from file [$DASHBOARD_PATH]"
+        curl -X POST "${DYNATRACE_URL}api/config/v1/dashboards" \
+            -H "Accept: application/json; charset=utf-8" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
+            -d "$DASHBOARD_JSON"
+      else
+        echo "- Dashboard [$DASHBOARD_NAME] already exists on cluster, skipping"
+      fi
+      echo ""
+    done
+  fi
+done
+
 
 echo "- cleaning up"
 

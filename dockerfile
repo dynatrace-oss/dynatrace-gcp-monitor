@@ -4,8 +4,20 @@ RUN pip install --upgrade pip
 COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
 
+
 FROM python:3.8-slim-buster
+
+LABEL name="dynatrace-gcp-function" \
+      vendor="Dynatrace LLC" \
+      maintainer="Dynatrace Open Source" \
+      version="1.x" \
+      release="1" \
+      url="https://github.com/dynatrace-oss/dynatrace-gcp-function/" \
+      summary="Dynatrace function for Google Cloud Platform monitoring. This project is maintained by Dynatrace as Open Source Project and is not officaly supported." \
+      description="Dynatrace function for Google Cloud Platform provides the mechanism to pull Google Cloud metrics into Dynatrace."
+
 WORKDIR /code
 COPY --from=build /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/site-packages
 COPY src/ .
-CMD [ "python", "./run_docker.py" ]
+COPY LICENSE.md /licenses/
+CMD [ "python", "-u", "./run_docker.py" ]

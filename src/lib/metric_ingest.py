@@ -15,7 +15,6 @@ import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List
-from urllib.parse import urljoin
 
 from lib.context import Context, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
@@ -23,8 +22,17 @@ from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
+UNIT_10TO2PERCENT = "10^2.%"
 
-async def push_ingest_lines(context: Context, fetch_metric_results: List[IngestLine]):
+
+async def push_ingest_lines(context: Context, project_id: str, fetch_metric_results: List[IngestLine]):
+    if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
+        context.log(project_id, f"Skipping push due to detected connectivity error")
+        return
+
+    if not fetch_metric_results:
+        context.log(project_id, "Skipping push due to detected connectivity error")
+
     lines_sent = 0
     maximum_lines_threshold = context.maximum_metric_data_points_per_minute
     start_time = time.time()
@@ -34,36 +42,41 @@ async def push_ingest_lines(context: Context, fetch_metric_results: List[IngestL
             lines_batch.append(result)
             lines_sent += 1
             if len(lines_batch) >= context.metric_ingest_batch_size:
-                await _push_to_dynatrace(context, lines_batch)
+                await _push_to_dynatrace(context, project_id, lines_batch)
                 lines_batch = []
             if lines_sent >= maximum_lines_threshold:
-                await _push_to_dynatrace(context, lines_batch)
+                await _push_to_dynatrace(context, project_id, lines_batch)
                 lines_dropped_count = len(fetch_metric_results) - maximum_lines_threshold
-                context.dynatrace_ingest_lines_dropped_count = lines_dropped_count
-                print(f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
+                context.dynatrace_ingest_lines_dropped_count[project_id] = \
+                    context.dynatrace_ingest_lines_dropped_count.get(project_id, 0) + lines_dropped_count
+                context.log(project_id, f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
                 return
         if lines_batch:
-            await _push_to_dynatrace(context, lines_batch)
+            await _push_to_dynatrace(context, project_id, lines_batch)
     except Exception as e:
         if isinstance(e, InvalidURL):
             context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
-        print(f"Failed to push ingest lines to Dynatrace due to {type(e).__name__} {e}")
+        context.log(project_id, f"Failed to push ingest lines to Dynatrace due to {type(e).__name__} {e}")
     finally:
-        context.push_to_dynatrace_execution_time = time.time() - start_time
-        print(f"Finished uploading metric ingest lines to Dynatrace in {context.push_to_dynatrace_execution_time} s")
+        push_data_time = time.time() - start_time
+        context.push_to_dynatrace_execution_time[project_id] = push_data_time
+        context.log(project_id, f"Finished uploading metric ingest lines to Dynatrace in {push_data_time} s")
 
 
-async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
+async def _push_to_dynatrace(context: Context, project_id: str, lines_batch: List[IngestLine]):
     ingest_input = "\n".join([line.to_string() for line in lines_batch])
     if context.print_metric_ingest_input:
-        print(ingest_input)
+        context.log("Ingest input is: ")
+        context.log(ingest_input)
+    dt_url=f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
     ingest_response = await context.session.post(
-        url=urljoin(context.dynatrace_url, "/api/v2/metrics/ingest"),
+        url=dt_url,
         headers={
             "Authorization": f"Api-Token {context.dynatrace_api_key}",
             "Content-Type": "text/plain; charset=utf-8"
         },
-        data=ingest_input
+        data=ingest_input,
+        verify_ssl=context.require_valid_certificate
     )
 
     if ingest_response.status == 401:
@@ -74,17 +87,20 @@ async def _push_to_dynatrace(context: Context, lines_batch: List[IngestLine]):
         raise Exception("Wrong token - missing 'Ingest metrics using API V2' permission")
     elif ingest_response.status == 404 or ingest_response.status == 405:
         context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
-        raise Exception("Wrong URL")
+        raise Exception(f"Wrong URL {dt_url}")
 
     ingest_response_json = await ingest_response.json()
-    context.dynatrace_request_count[ingest_response.status] = context.dynatrace_request_count.get(ingest_response.status, 0) + 1
-    context.dynatrace_ingest_lines_ok_count += ingest_response_json.get("linesOk", 0)
-    context.dynatrace_ingest_lines_invalid_count += ingest_response_json.get("linesInvalid", 0)
-    print(f"Ingest response: {ingest_response_json}")
-    await log_invalid_lines(ingest_response_json, lines_batch)
+    context.dynatrace_request_count[ingest_response.status] \
+        = context.dynatrace_request_count.get(ingest_response.status, 0) + 1
+    context.dynatrace_ingest_lines_ok_count[project_id] \
+        = context.dynatrace_ingest_lines_ok_count.get(project_id, 0) + ingest_response_json.get("linesOk", 0)
+    context.dynatrace_ingest_lines_invalid_count[project_id] \
+        = context.dynatrace_ingest_lines_invalid_count.get(project_id, 0) + ingest_response_json.get("linesInvalid", 0)
+    context.log(project_id, f"Ingest response: {ingest_response_json}")
+    await log_invalid_lines(context, ingest_response_json, lines_batch)
 
 
-async def log_invalid_lines(ingest_response_json: Dict, lines_batch: List[IngestLine]):
+async def log_invalid_lines(context: Context, ingest_response_json: Dict, lines_batch: List[IngestLine]):
     error = ingest_response_json.get("error", None)
     if error is None:
         return
@@ -95,11 +111,12 @@ async def log_invalid_lines(ingest_response_json: Dict, lines_batch: List[Ingest
             line_index = invalid_line_error_message.get("line", 0) - 1
             if line_index > -1:
                 invalid_line_error_message = invalid_line_error_message.get("error", "")
-                print(f"INVALID LINE: '{lines_batch[line_index].to_string()}', reason: '{invalid_line_error_message}'")
+                context.log(f"INVALID LINE: '{lines_batch[line_index].to_string()}', reason: '{invalid_line_error_message}'")
 
 
 async def fetch_metric(
         context: Context,
+        project_id: str,
         service: GCPService,
         metric: Metric
 ) -> List[IngestLine]:
@@ -131,14 +148,16 @@ async def fetch_metric(
     headers = {
         "Authorization": "Bearer {token}".format(token=context.token)
     }
+    if context.use_x_goog_user_project_header.get(project_id, False):
+        headers["x-goog-user-project"] = project_id
 
     should_fetch = True
 
     lines = []
     while should_fetch:
-        resp = await context.session.request('GET', url=context.url, params=params, headers=headers)
+        url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/timeSeries"
+        resp = await context.session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()
-        # print(f"{metric.google_metric} => {page}")
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
         if 'error' in page:
             raise Exception(str(page))
@@ -189,7 +208,9 @@ def create_dimensions(time_serie: Dict) -> List[DimensionValue]:
     metric = time_serie.get('metric', {})
     labels = metric.get('labels', {}).copy()
     resource_labels = time_serie.get('resource', {}).get('labels', {})
-    labels.update(resource_labels)
+    labels.update(resource_labels)    
+    system_labels = time_serie.get('metadata', {}).get('systemLabels', {})
+    labels.update(system_labels)
 
     dimension_values = [DimensionValue(label, value) for label, value in labels.items()]
 
@@ -294,7 +315,8 @@ def extract_value(point, typed_value_key: str, metric: Metric):
             min = 0
             max = 0
 
-        if count == 1:
+        # No point in calculating min and max from distribution here
+        if count == 1 or count == 2:
             return gauge_line(min, max, count, sum)
 
         bucket_options = value['bucketOptions']
@@ -334,6 +356,13 @@ def extract_value(point, typed_value_key: str, metric: Metric):
                 min = bounds[min_bucket]
                 max = bounds[max_bucket]
 
+        if metric.unit == UNIT_10TO2PERCENT:
+            min = 100 * min
+            max = 100 * max
+            sum = 100 * sum
+
         return gauge_line(min, max, count, sum)
     else:
+        if metric.unit == UNIT_10TO2PERCENT:
+            value = 100 * value
         return value

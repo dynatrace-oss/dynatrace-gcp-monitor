@@ -45,4 +45,4 @@ class Entity:  # pylint: disable=R0902
     dns_names: FrozenSet[str]
 
 
-ExtractEntitesFunc = Callable[[Context, GCPService], Iterable[Entity]]
+ExtractEntitesFunc = Callable[[Context, str, GCPService], Iterable[Entity]]

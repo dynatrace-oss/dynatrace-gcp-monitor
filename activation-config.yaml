@@ -13,6 +13,14 @@ googleCloud:
     # Path to Google credentials file
     # googleApplicationCredentialsPath: ''
     cloudFunctionSize: s 
+    # Require valid SSL certificate when communicating with Dynatrace Cluster / Active Gate
+    # May be set to false in case communication through Active Gate is debugged, for non-production use cases
+    requireValidCertificate: true
+    # Determines a caller-specified project for quota and billing purposes 
+    # if set to source: monitoring API calls are booked towards project where K8S container is running
+    # if set to destination: monitoring API calls are booked towards project which is monitored
+    # REQUIRES serviceusage.services.use Permission granted for Service Account!
+    serviceUsageBooking: source
   metrics:
     # Name of the Pub/Sub topic for metric function
     pubSubTopic: dynatrace-gcp-service-invocation
@@ -63,6 +71,12 @@ activation:
     - pubsub_topic
     # Google Cloud Pub/Sub / Lite Topics
     - pubsublite_topic_partition
+    # Google Kubernetes cluster
+    - k8s_cluster
+    # Google Kubernetes node
+    - k8s_node
+    # Google Kubernetes container
+    - k8s_container
 #   logs:
 #     services: # List of services to forward Logs from Google Operations/Logging to Dynatrace, for those services Log Router Sinks and Pub/Sub topic will be created
 #     - cloudsql_database

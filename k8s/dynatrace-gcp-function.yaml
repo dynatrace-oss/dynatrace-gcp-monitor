@@ -12,9 +12,17 @@ metadata:
   namespace: dynatrace
 data:
   # coma separated list of GCP services, which should be queried for metrics and ingested into Dynatrace
-  GCP_SERVICES: "api,cloud_function,cloudsql_database,datastore_request,filestore_instance,gcs_bucket,https_lb_rule,internal_http_lb_rule,internal_tcp_lb_rule,internal_udp_lb_rule,tcp_lb_rule,udp_lb_rule,pubsub_snapshot,pubsub_subscription,pubsub_topic,pubsublite_topic_partition"
+  GCP_SERVICES: "api,cloud_function,cloudsql_database,datastore_request,filestore_instance,gcs_bucket,https_lb_rule,internal_http_lb_rule,internal_tcp_lb_rule,internal_udp_lb_rule,tcp_lb_rule,udp_lb_rule,pubsub_snapshot,pubsub_subscription,pubsub_topic,pubsublite_topic_partition,k8s_pod,k8s_node,k8s_container,k8s_cluster,gce_instance"
   # if true function will output lines of metrics into stdout
   PRINT_METRIC_INGEST_INPUT: "false"
+  # if true function requires valid SSL certificates when communicating with Dynatrace cluster
+  # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate
+  REQUIRE_VALID_CERTIFICATE: "true"
+  # Determines a caller-specified project for quota and billing purposes 
+  # if set to source: monitoring API calls are booked towards project where K8S container is running
+  # if set to destination: monitoring API calls are booked towards project which is monitored
+  # REQUIRES serviceusage.services.use Permission granted for Service Account!
+  SERVICE_USAGE_BOOKING: "source"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -38,8 +46,9 @@ spec:
       serviceAccountName: dynatrace-gcp-function-sa
       automountServiceAccountToken: false
       containers:
-      - image: "{IMAGE-TAG}"
+      - image: dynatrace/dynatrace-gcp-function
         name: dynatrace-gcp-function      
+        imagePullPolicy: Always
         env:
         - name: GCP_SERVICES
           valueFrom:
@@ -51,6 +60,16 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: PRINT_METRIC_INGEST_INPUT
+        - name: REQUIRE_VALID_CERTIFICATE
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: REQUIRE_VALID_CERTIFICATE
+        - name: SERVICE_USAGE_BOOKING
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: SERVICE_USAGE_BOOKING
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
         - name: DYNATRACE_URL_SECRET_NAME
@@ -71,6 +90,13 @@ spec:
             cpu: "200m"
           limits:
             memory: "512Mi"
-            cpu: "500m"                  
-      imagePullSecrets:
-      - name: regcred
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10

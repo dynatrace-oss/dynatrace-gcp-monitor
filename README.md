@@ -10,7 +10,13 @@ Maintaining its lifecycle places a burden on the operational team.
 
 In addition to metrics `dynatrace-gcp-function` is calling Service specific API's (for example Pub/Sub API). The purpose is to get properties of the instances that are not available in Monitoring API.  Particularly the function try to retrieve endpoint addresses (FQDN's, IP addresses).
 
-![Architecture](./img/architecture.svg)
+*Architecture with Google Cloud Function deployment*
+![Google Cloud Function Architecture](./img/architecture-function.svg)
+
+As alternative to `Cloud Function` deployment it's possible to run monitoring as Kubernetes Container. In this case all configurations and secretes are stored as K8S ConfigMap / Secretes objects. 
+
+*Architecture with Google Cloud Function deployment*
+![GKE Container Architecture](./img/architecture-k8s.svg)
 
 ## Supported Google Cloud services
 | Google Cloud service                 | Metric pulling | Pre-defined dashboards | Pre-defined alerts |
@@ -23,6 +29,10 @@ In addition to metrics `dynatrace-gcp-function` is calling Service specific API'
 | Google Cloud Storage        |  Y   |  Y   |  N   |
 | Google Cloud Load Balancing |  Y   |  Y   |  N   |
 | Google Cloud Pub/Sub        |  Y   |  Y   |  N   |
+| Google Kubernetes Node      |  Y   |  Y   |  N   |
+| Google Kubernetes Container |  Y   |  Y   |  N   |
+| Google Kubernetes Cluster   |  Y   |  Y   |  N   |
+| VM Instance                 |  Y   |  N   |  N   |
 
 ## Quick start with Google Cloud Shell
 
@@ -50,7 +60,7 @@ Installation script will prompt for following parameters:
 | GCP project | Google Cloud project, where `dynatrace-gcp-function` should be deployed to. By default, current project set for gcloud CLI. |
 | Function size | Amount of memory that should be assigned to the function. Possible options</br> **[s]** - small, up to 500 instances, 256 MB memory allocated to function</br> **[m]** - medium, up to 1000 instances, 512 MB memory allocated to function </br>**[l]** - large, up to 5000 instances, 2048 MB memory allocated to function</br>Please note that You will be able to adjust amount of memory after installation. |
 | Dynatrace tenant URI | The URL to Your Dynatrace SaaS or Managed environment |
-| Dynatrace API token | Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `Ingest metrics using API V2` Token permission.
+| Dynatrace API token | Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `API v2 Ingest metrics`, `API v1 Read configuration` and `WriteConfig` Token permission.
 
 ## Quick start with Bash
 ### Requirements
@@ -89,24 +99,13 @@ Installation script will prompt for following parameters:
 **Please note** `dynatrace-gcp-function` uses Cloud Scheduler that requires App Engine to be created. If you don't have App Engine enabled yet, installer script will prompt you to Create it and select region, where it will run. Reference: [Cloud Scheduler documentation](https://cloud.google.com/scheduler/docs)
 
 ## Quick start on Kubernetes
-### Requirements
-* Docker CLI [Get Docker](*https://docs.docker.com/get-docker/)
+### Requirements 
 * Google Cloud SDK [Google Cloud SDK installer](https://cloud.google.com/sdk/docs/downloads-interactive#linux)
-* Kubernetes CLI [Install and setup kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-* Container Registry to push the image
-
-### Build & push docker container
-Build docker container image and push to Your container registry
-
-You can use:
-```
-docker build -t my-registry.grc.io/dynatrace/dynatrace-gcp-function .
-docker push my-registry.grc.io/dynatrace/dynatrace-gcp-function
-```
+* Kubernetes CLI [Install and setup kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 
+* `Workload identity` enabled on GKE Cluster [Enabling Workload Identity on a cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable_on_cluster)
+* `GKE_METADATA` enabled on GKE node pools [Enabling Workload Identity on a cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#enable_on_cluster)
 
 ### Create Service Account & Kubernetes objects
-
-
 Create `dynatrace` namespace with `kubectl`, and secrets for Dynatrace cluster `API token` and `URL`. 
 
 Replace {DYNATRACE_URL} with URL to Your Dynatrace SaaS or Managed environment.
@@ -117,9 +116,11 @@ kubectl create namespace dynatrace
 kubectl -n dynatrace create secret generic dynatrace-gcp-function-secret --from-literal="access-key={DYNATRACE_API_TOKEN}" --from-literal="url={DYNATRACE_URL}"
 ```
 
-Create IAM Service Account with Cloud Shell. Replace `{GCP-PROJECT-ID}` with your GCP project ID
+Create IAM Service Account with Cloud Shell and configure it for workload identity. Replace `{GCP-PROJECT-ID}` with your GCP project ID
 
 ```
+gcloud iam service-accounts create dynatrace-gcp-function-sa
+
 gcloud iam service-accounts add-iam-policy-binding --role roles/iam.workloadIdentityUser --member "serviceAccount:{GCP-PROJECT-ID}.svc.id.goog[dynatrace/dynatrace-gcp-function-sa]" dynatrace-gcp-function-sa@{GCP-PROJECT-ID}.iam.gserviceaccount.com
 ```
 
@@ -134,20 +135,22 @@ gcloud projects add-iam-policy-binding {GCP-PROJECT-ID} --member="serviceAccount
 gcloud projects add-iam-policy-binding {GCP-PROJECT-ID} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/pubsub.viewer
 ```
 
+Enable API's required for monitoring
+```
+gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com cloudresourcemanager.googleapis.com
+```
+
+
 Download and install [dynatrace-gcp-function.yaml](k8s/dynatrace-gcp-function.yaml) Kubernetes objects:
 ```
 wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/k8s/dynatrace-gcp-function.yaml
 ```
-You can adjust the function behavior in `dynatrace-gcp-function-config` Config Map defined in dynatrace-gcp-function.yaml.
-
-Edit `dynatrace-gcp-function.yaml` and replace `{IMAGE-TAG}` with tag that You have set for Docker image.
+You can adjust the function behavior in `dynatrace-gcp-function-config` Config Map defined in dynatrace-gcp-function.yaml. 
 
 Deploy Kubernetes objects:
 ```
 kubectl apply -f dynatrace-gcp-function.yaml
 ```
-
-"{IMAGE-PATH}" 
 
 Create annotation for service account. Replace `{GCP-PROJECT-ID}` with your GCP project ID:
 ```
@@ -171,6 +174,39 @@ Finished uploading metric ingest lines to Dynatrace in 0.36574411392211914 s
 Pushing self monitoring time series to GCP Monitor...
 Finished pushing self monitoring time series to GCP Monitor
 ```
+
+## Monitoring multiple GCP projects
+It's possible to deploy `dynatrace-gcp-function` to push metrics to Dynatrace from multiple GCP projects. 
+
+For example: it's possible to run function in project dedicated for monitoring and get metrics from production/stage/dev projects. The concept is illustrated on the diagram below:
+
+*Sample multi-project deployment*
+![GKE Container Architecture](./img/architecture-multi-project.svg)
+
+To configure multi-project support in this example You will need:
+* Running `dynatrace-gcp-function` (Cloud Function or Kubernetes)
+* IAM service account configured with `dynatrace-gcp-function` (for example `dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com`)
+
+Now You need to grant required IAM policies to Service Account for desired projects (for example `PROJECT-A`, `PROJECT-B`, `PROJECT-C`). 
+
+Replace `{GCP-PROJECT-ID-TO-MONITOR}` with the project You wish to enable monitoring for. Replace `{GCP-FUNCTION-PROJECT-ID}` with the project the Service Account is created on / function is deployed. Repeat the step for all projects.
+```
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/monitoring.editor
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/monitoring.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/compute.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/cloudsql.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/cloudfunctions.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/file.viewer
+gcloud projects add-iam-policy-binding {GCP-PROJECT-ID-TO-MONITOR} --member="serviceAccount:dynatrace-gcp-function-sa@{GCP-FUNCTION-PROJECT-ID}.iam.gserviceaccount.com" --role=roles/pubsub.viewer
+```
+
+After next monitoring run (~1 minute) metrics from configured projects should start appearing in Dynatrace.
+
+Alternatively You may grant access for all projects in `IAM & Admin` console in Google Cloud Portal. Simply navigate to all of the projects and add permissions for Service Account attached to function:
+
+![iam](./img/multi-project-iam.png)
+
+
 
 ## Monitoring GCP instances in Dynatrace
 
