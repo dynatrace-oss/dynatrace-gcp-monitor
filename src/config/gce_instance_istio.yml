@@ -1,0 +1,544 @@
+id: gce_instance
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google VM Instance
+gcp:
+- service: gce_instance
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.instance_id
+    id: instance_id
+  - value: resource.labels.zone
+    id: zone
+  metrics:
+  - value: istio.io/service/client/connection_close_count
+    id: cloud.gcp.istio_io.service.client.connection_close_count
+    type: count,delta
+    name: Client Connection Close Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/client/connection_open_count
+    id: cloud.gcp.istio_io.service.client.connection_open_count
+    type: count,delta
+    name: Client Connection Open Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/client/received_bytes_count
+    id: cloud.gcp.istio_io.service.client.received_bytes_count
+    type: count,delta
+    name: Client Received Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/client/request_bytes
+    id: cloud.gcp.istio_io.service.client.request_bytes
+    type: gauge
+    name: Client Request Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/request_count
+    id: cloud.gcp.istio_io.service.client.request_count
+    type: count,delta
+    name: Client Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/response_bytes
+    id: cloud.gcp.istio_io.service.client.response_bytes
+    type: gauge
+    name: Client Response Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/roundtrip_latencies
+    id: cloud.gcp.istio_io.service.client.roundtrip_latencies
+    type: gauge
+    name: Client Roundtrip Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/sent_bytes_count
+    id: cloud.gcp.istio_io.service.client.sent_bytes_count
+    type: count,delta
+    name: Client Sent Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/server/connection_close_count
+    id: cloud.gcp.istio_io.service.server.connection_close_count
+    type: count,delta
+    name: Server Connection Close Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/server/connection_open_count
+    id: cloud.gcp.istio_io.service.server.connection_open_count
+    type: count,delta
+    name: Server Connection Open Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/server/received_bytes_count
+    id: cloud.gcp.istio_io.service.server.received_bytes_count
+    type: count,delta
+    name: Server Received Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/server/request_bytes
+    id: cloud.gcp.istio_io.service.server.request_bytes
+    type: gauge
+    name: Server Request Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/server/request_count
+    id: cloud.gcp.istio_io.service.server.request_count
+    type: count,delta
+    name: Server Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/server/response_bytes
+    id: cloud.gcp.istio_io.service.server.response_bytes
+    type: gauge
+    name: Server Response Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/server/response_latencies
+    id: cloud.gcp.istio_io.service.server.response_latencies
+    type: gauge
+    name: Server Response Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/server/sent_bytes_count
+    id: cloud.gcp.istio_io.service.server.sent_bytes_count
+    type: count,delta
+    name: Server Sent Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision

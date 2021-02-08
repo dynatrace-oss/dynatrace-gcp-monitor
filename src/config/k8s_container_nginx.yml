@@ -1,0 +1,123 @@
+id: k8s_container
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Kubernetes Container
+gcp:
+- service: k8s_container_nginx
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.cluster_name
+    id: cluster_name
+  - value: resource.labels.namespace_name
+    id: namespace_name
+  - value: resource.labels.pod_name
+    id: pod_name
+  - value: resource.labels.container_name
+    id: container_name
+  metrics:
+  - value: kubernetes.io/nginx/connections_accepted
+    id: cloud.gcp.kubernetes_io.nginx.connections_accepted
+    type: count,delta
+    name: Nginx connections_accepted
+    unit: '{connection}'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/nginx/connections_active
+    id: cloud.gcp.kubernetes_io.nginx.connections_active
+    type: gauge
+    name: Nginx connections_active
+    unit: '{connection}'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/nginx/connections_handled
+    id: cloud.gcp.kubernetes_io.nginx.connections_handled
+    type: count,delta
+    name: Nginx connections_handled
+    unit: '{connection}'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/nginx/connections_reading
+    id: cloud.gcp.kubernetes_io.nginx.connections_reading
+    type: gauge
+    name: Nginx connections_reading
+    unit: '{connection}'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/nginx/connections_waiting
+    id: cloud.gcp.kubernetes_io.nginx.connections_waiting
+    type: gauge
+    name: Nginx connections_waiting
+    unit: '{connection}'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/nginx/connections_writing
+    id: cloud.gcp.kubernetes_io.nginx.connections_writing
+    type: gauge
+    name: Nginx connections_writing
+    unit: '{connection}'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/nginx/http_requests_total
+    id: cloud.gcp.kubernetes_io.nginx.http_requests_total
+    type: count,delta
+    name: Nginx http_requests_total
+    unit: '{request}'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/nginx/nginxexporter_build_info
+    id: cloud.gcp.kubernetes_io.nginx.nginxexporter_build_info
+    type: gauge
+    name: Nginx nginxexporter_build_info
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.gitCommit
+    - value: metric.labels.version
+  - value: kubernetes.io/nginx/up
+    id: cloud.gcp.kubernetes_io.nginx.up
+    type: gauge
+    name: Nginx up
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
