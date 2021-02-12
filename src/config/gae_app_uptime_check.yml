@@ -3,9 +3,10 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 technology:
-  name: Google App Engine Application
+  name: Google App Engine Application - Uptime Checks
 gcp:
-- service: gae_app
+- service: gae_app_uptime_check
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

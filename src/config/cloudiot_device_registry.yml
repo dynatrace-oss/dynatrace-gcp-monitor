@@ -6,6 +6,7 @@ technology:
   name: Google Cloud IoT Registry
 gcp:
 - service: cloudiot_device_registry
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

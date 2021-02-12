@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Dataproc Cluster
 gcp:
 - service: cloud_dataproc_cluster
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

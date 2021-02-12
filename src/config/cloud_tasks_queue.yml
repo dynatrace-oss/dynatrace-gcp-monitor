@@ -6,6 +6,7 @@ technology:
   name: Amazon EC2 Instance (via GCP)
 gcp:
 - service: cloud_tasks_queue
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

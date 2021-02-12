@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Datastore
 gcp:
 - service: datastore_request
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

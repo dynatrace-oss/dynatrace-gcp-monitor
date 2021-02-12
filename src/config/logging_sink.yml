@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Logging export sink
 gcp:
 - service: logging_sink
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Run for Anthos Broker
 gcp:
 - service: knative_broker
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

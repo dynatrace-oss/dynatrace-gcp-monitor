@@ -5,7 +5,7 @@ minDynatraceVersion: 1.199
 technology:
   name: Google Cloud VPN Tunnel
 gcp:
-- service: vpn_gateway
+- service: vpn_gatewayv
   dimensions:
   - value: resource.labels.project_id
     id: project_id

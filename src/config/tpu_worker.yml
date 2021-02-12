@@ -6,6 +6,7 @@ technology:
   name: Google Cloud TPU Worker
 gcp:
 - service: tpu_worker
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google NetApp CVS-SO
 gcp:
 - service: cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO
+  featureSet: default
   dimensions:
   - value: resource.labels.resource_container
     id: resource_container

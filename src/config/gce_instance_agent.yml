@@ -3,9 +3,10 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 technology:
-  name: Google VM Instance
+  name: Google VM Instance Agent
 gcp:
 - service: gce_instance
+  featureSet: agent
   dimensions:
   - value: resource.labels.project_id
     id: project_id

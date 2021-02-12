@@ -6,6 +6,7 @@ technology:
   name: Cloud SQL Database
 gcp:
 - service: cloudsql_database
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

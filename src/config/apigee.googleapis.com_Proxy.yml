@@ -6,6 +6,7 @@ technology:
 minDynatraceVersion: 1.199
 gcp:
 - service: apigee.googleapis.com/Proxy
+  featureSet: default
   dimensions:
   - value: resource.labels.resource_container
     id: resource_container

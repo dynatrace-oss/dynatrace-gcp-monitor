@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Pub/Sub Topic
 gcp:
 - service: pubsub_topic
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

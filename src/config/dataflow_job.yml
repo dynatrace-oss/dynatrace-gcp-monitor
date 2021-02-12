@@ -6,6 +6,7 @@ technology:
   name: Google Dataflow Job
 gcp:
 - service: dataflow_job
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

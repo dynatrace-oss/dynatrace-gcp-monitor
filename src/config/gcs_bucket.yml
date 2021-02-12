@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Storage bucket
 gcp:
 - service: gcs_bucket
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

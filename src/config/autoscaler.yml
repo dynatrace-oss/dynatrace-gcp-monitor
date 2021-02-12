@@ -6,6 +6,7 @@ technology:
   name: Google Autoscaler
 gcp:
 - service: autoscaler
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

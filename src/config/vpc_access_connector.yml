@@ -6,6 +6,7 @@ technology:
   name: Google VPC Access Connector
 gcp:
 - service: vpc_access_connector
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

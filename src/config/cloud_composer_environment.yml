@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Composer Environment
 gcp:
 - service: cloud_composer_environment
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

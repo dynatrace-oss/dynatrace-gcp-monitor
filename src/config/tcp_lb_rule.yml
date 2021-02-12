@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Network TCP Load Balancer Rule
 gcp:
 - service: tcp_lb_rule
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id
@@ -104,4 +105,4 @@ gcp:
     - value: metric.labels.client_continent
     - value: metric.labels.client_country
 dashboards:
-  - dashboard: "dashboards/lb.json"
+  - dashboard: "dashboards/lb_tcp.json"

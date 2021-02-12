@@ -6,6 +6,7 @@ technology:
   name: Google Instance Group
 gcp:
 - service: instance_group
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

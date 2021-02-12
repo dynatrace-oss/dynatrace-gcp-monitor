@@ -6,6 +6,7 @@ technology:
   name: Google Cloud ML Model Version
 gcp:
 - service: cloudml_model_version
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

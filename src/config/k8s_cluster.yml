@@ -1,10 +1,9 @@
 id: k8s_cluster
-version: FixMe
-technology:
-  name: FixMe
-minDynatraceVersion: FixMe
+version: 0.0.1
+minDynatraceVersion: 1.199
 gcp:
 - service: k8s_cluster
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

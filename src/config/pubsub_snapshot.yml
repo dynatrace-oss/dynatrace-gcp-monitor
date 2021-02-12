@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Pub/Sub Snapshot
 gcp:
 - service: pubsub_snapshot
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

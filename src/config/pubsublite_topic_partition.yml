@@ -6,6 +6,7 @@ technology:
   name: Google Pub/Sub Lite Topic Partition
 gcp:
 - service: pubsublite_topic_partition
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

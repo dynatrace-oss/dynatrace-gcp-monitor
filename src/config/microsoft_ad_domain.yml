@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Microsoft Active Directory Domain
 gcp:
 - service: microsoft_ad_domain
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

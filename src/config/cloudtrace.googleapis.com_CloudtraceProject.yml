@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Trace
 gcp:
 - service: cloudtrace.googleapis.com/CloudtraceProject
+  featureSet: default
   dimensions:
   - value: resource.labels.resource_container
     id: resource_container

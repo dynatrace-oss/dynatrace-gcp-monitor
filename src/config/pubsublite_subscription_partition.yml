@@ -6,6 +6,7 @@ technology:
   name: Google Pub/Sub Lite Subscription Partition
 gcp:
 - service: pubsublite_subscription_partition
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

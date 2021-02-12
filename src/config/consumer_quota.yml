@@ -6,6 +6,7 @@ technology:
   name: Google Consumer Quota
 gcp:
 - service: consumer_quota
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

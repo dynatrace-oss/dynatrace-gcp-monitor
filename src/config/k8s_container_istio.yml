@@ -3,9 +3,10 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 technology:
-  name: Google Kubernetes Container
+  name: Google Kubernetes Container Istio
 gcp:
-- service: k8s_container_istio
+- service: k8s_container
+  featureSet: istio
   dimensions:
   - value: resource.labels.project_id
     id: project_id

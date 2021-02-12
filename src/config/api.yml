@@ -6,6 +6,7 @@ technology:
 minDynatraceVersion: 1.199
 gcp:
 - service: api
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google Consumed API
 gcp:
 - service: consumed_api
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

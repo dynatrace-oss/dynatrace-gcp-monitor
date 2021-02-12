@@ -6,6 +6,7 @@ technology:
   name: Google Cloud ML Job
 gcp:
 - service: cloudml_job
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

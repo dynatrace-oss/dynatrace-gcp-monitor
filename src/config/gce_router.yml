@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Router
 gcp:
 - service: gce_router
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

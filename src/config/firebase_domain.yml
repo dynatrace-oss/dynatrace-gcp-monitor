@@ -6,6 +6,7 @@ technology:
   name: Google Firebase Hosting Site Domain
 gcp:
 - service: firebase_domain
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

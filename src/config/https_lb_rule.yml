@@ -6,6 +6,7 @@ technology:
   name: Google Cloud HTTP/S Load Balancing Rule
 gcp:
 - service: https_lb_rule
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Spanner Instance
 gcp:
 - service: spanner_instance
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

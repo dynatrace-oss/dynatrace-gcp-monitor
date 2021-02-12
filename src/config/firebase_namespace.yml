@@ -6,6 +6,7 @@ technology:
   name: Google Firebase Realtime Database
 gcp:
 - service: firebase_namespace
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

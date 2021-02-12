@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Run Revision
 gcp:
 - service: cloud_run_revision
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

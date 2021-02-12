@@ -6,6 +6,7 @@ technology:
   name: Google Kubernetes Pod
 gcp:
 - service: k8s_pod
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

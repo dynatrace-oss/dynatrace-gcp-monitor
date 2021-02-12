@@ -6,6 +6,7 @@ technology:
   name: Google Firestore Instance
 gcp:
 - service: firestore_instance
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

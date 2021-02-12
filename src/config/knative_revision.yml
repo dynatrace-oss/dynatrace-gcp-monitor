@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Run for Anthos Revision
 gcp:
 - service: knative_revision
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google Cloud BigQuery Dataset
 gcp:
 - service: bigquery_dataset
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

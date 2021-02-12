@@ -6,6 +6,7 @@ technology:
   name: Google Cloud BigQuery BI Engine Model
 gcp:
 - service: bigquery_biengine_model
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

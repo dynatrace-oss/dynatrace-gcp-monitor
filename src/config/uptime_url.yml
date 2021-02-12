@@ -6,6 +6,7 @@ technology:
   name: Google Uptime Check URL
 gcp:
 - service: uptime_url
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google Filestore Instance
 gcp:
 - service: filestore_instance
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

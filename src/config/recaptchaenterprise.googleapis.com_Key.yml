@@ -6,6 +6,7 @@ technology:
   name: Google reCAPTCHA Key
 gcp:
 - service: recaptchaenterprise.googleapis.com/Key
+  featureSet: default
   dimensions:
   - value: resource.labels.resource_container
     id: resource_container

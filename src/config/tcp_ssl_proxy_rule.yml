@@ -6,6 +6,7 @@ technology:
   name: Google Cloud TCP/SSL Proxy Rule
 gcp:
 - service: tcp_ssl_proxy_rule
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

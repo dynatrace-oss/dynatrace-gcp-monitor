@@ -6,6 +6,7 @@ technology:
   name: Google Assistant Action Project 
 gcp:
 - service: assistant_action_project
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

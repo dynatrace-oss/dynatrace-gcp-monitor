@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Function
 gcp:
 - service: Cloud Function
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Bigtable Table
 gcp:
 - service: bigtable_table
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

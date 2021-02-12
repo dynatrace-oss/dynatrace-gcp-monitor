@@ -6,6 +6,7 @@ technology:
   name: Google Internal TCP Load Balancer Rule
 gcp:
 - service: internal_tcp_lb_rule
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id
@@ -103,4 +104,4 @@ gcp:
     - value: metric.labels.client_subnetwork
     - value: metric.labels.client_zone
 dashboards:
-  - dashboard: "dashboards/lb.json"
+  - dashboard: "dashboards/lb_tcp.json"

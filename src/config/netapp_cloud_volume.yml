@@ -6,6 +6,7 @@ technology:
   name: Google NetApp Cloud Volume
 gcp:
 - service: netapp_cloud_volume
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

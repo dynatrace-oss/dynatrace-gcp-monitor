@@ -6,6 +6,7 @@ technology:
   name: Google Zone Network Health
 gcp:
 - service: gce_zone_network_health
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google App Engine Application
 gcp:
 - service: gae_app
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

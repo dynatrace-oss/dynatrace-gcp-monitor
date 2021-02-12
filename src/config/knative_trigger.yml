@@ -6,6 +6,7 @@ technology:
   name: Google Cloud Run for Anthos Trigger
 gcp:
 - service: knative_trigger
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

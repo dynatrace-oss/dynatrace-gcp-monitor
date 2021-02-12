@@ -6,6 +6,7 @@ technology:
   name: Google Internal UDP Load Balancer Rule
 gcp:
 - service: internal_udp_lb_rule
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id
@@ -88,5 +89,3 @@ gcp:
     - value: metric.labels.client_network
     - value: metric.labels.client_subnetwork
     - value: metric.labels.client_zone
-dashboards:
-  - dashboard: "dashboards/lb.json"

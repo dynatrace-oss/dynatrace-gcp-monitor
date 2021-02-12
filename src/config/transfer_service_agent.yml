@@ -6,6 +6,7 @@ technology:
   name: Google Transfer Service Agent
 gcp:
 - service: transfer_service_agent
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google Istio Canonical Service
 gcp:
 - service: istio_canonical_service
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google Cloud DNS Query
 gcp:
 - service: dns_query
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

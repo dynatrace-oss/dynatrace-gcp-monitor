@@ -6,6 +6,7 @@ technology:
   name: Google Internal HTTP/S Load Balancing Rule
 gcp:
 - service: internal_http_lb_rule
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id
@@ -110,4 +111,4 @@ gcp:
     - value: metric.labels.response_code_class
     - value: metric.labels.cache_result
 dashboards:
-  - dashboard: "dashboards/lb.json"
+  - dashboard: "dashboards/lb_https.json"

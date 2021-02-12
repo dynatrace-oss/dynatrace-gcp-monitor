@@ -6,6 +6,7 @@ technology:
   name: Google Interconnect Attachment
 gcp:
 - service: interconnect_attachment
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -6,6 +6,7 @@ technology:
   name: Google Apigee Proxy (v2)
 gcp:
 - service: apigee.googleapis.com/ProxyV2
+  featureSet: default
   dimensions:
   - value: resource.labels.resource_container
     id: resource_container

@@ -6,6 +6,7 @@ technology:
   name: Google VM Instance
 gcp:
 - service: gce_instance
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id
