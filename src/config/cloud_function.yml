@@ -1,11 +1,12 @@
-id: gcp_cloud_function
+id: cloud_function
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
+minDynatraceVersion: 1.199
 technology:
   name: Google Cloud Function
-minDynatraceVersion: 1.199
 gcp:
-- service: cloud_function
+- service: Cloud Function
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id
@@ -79,26 +80,5 @@ gcp:
     dimensions:
     - value: metric.labels.memory
     - value: metric.labels.trigger_type
-alerting:
-  - name: "Function failures"
-    description: "Cloud function failures occured"
-    ##query: "avg:host.cpu:dimenions(extension_name=$this & serialNumber={{snmpDeviceSerialNumber}}).rollup(5min)" -to do confirm this alerting format / vsMINT
-    query: "cloud.gcp.cloudfunctions_googleapis_com.function.execution_count"
-    aggregationType: VALUE
-    event_type: info
-    metricDimensions:
-      filterType: STRING
-      key: status
-      textFilter:
-        value: "crash"
-        operator: EQUALS
-    model:
-      type: STATIC_THRESHOLD #alternative baseline
-      alertCondition: ABOVE
-      samples: 5
-      dealertingSamples: 3
-      violatingSamples: 3
-      threshold: 0
-      unit: UNSPECIFIED
 dashboards:
   - dashboard: "dashboards/cloud_function.json"

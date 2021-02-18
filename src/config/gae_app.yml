@@ -1,0 +1,427 @@
+id: gae_app
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google App Engine Application
+gcp:
+- service: gae_app
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.module_id
+    id: module_id
+  - value: resource.labels.version_id
+    id: version_id
+  - value: resource.labels.zone
+    id: zone
+  metrics:
+  - value: agent.googleapis.com/agent/api_request_count
+    id: cloud.gcp.agent_googleapis_com.agent.api_request_count
+    type: count,delta
+    name: Monitoring Agent API Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.state
+  - value: agent.googleapis.com/agent/log_entry_count
+    id: cloud.gcp.agent_googleapis_com.agent.log_entry_count
+    type: count,delta
+    name: Logging Agent Log Entry Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/agent/log_entry_retry_count
+    id: cloud.gcp.agent_googleapis_com.agent.log_entry_retry_count
+    type: count,delta
+    name: Logging Agent Retried Log Entry Writes Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/agent/memory_usage
+    id: cloud.gcp.agent_googleapis_com.agent.memory_usage
+    type: gauge
+    name: Monitoring Agent Memory Usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/agent/monitoring/point_count
+    id: cloud.gcp.agent_googleapis_com.agent.monitoring.point_count
+    type: count,delta
+    name: Monitoring Agent Metric Point Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+  - value: agent.googleapis.com/agent/request_count
+    id: cloud.gcp.agent_googleapis_com.agent.request_count
+    type: count,delta
+    name: Logging Agent API Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/agent/streamspace_size
+    id: cloud.gcp.agent_googleapis_com.agent.streamspace_size
+    type: gauge
+    name: Monitoring Agent Process Labels Size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/agent/streamspace_size_throttling
+    id: cloud.gcp.agent_googleapis_com.agent.streamspace_size_throttling
+    type: gauge
+    name: Monitoring Agent is Throttling Processes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/agent/uptime
+    id: cloud.gcp.agent_googleapis_com.agent.uptime
+    type: count,delta
+    name: Monitoring/Logging Agent Uptime
+    unit: s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.version
+  - value: appengine.googleapis.com/flex/autoscaler/capacity
+    id: cloud.gcp.appengine_googleapis_com.flex.autoscaler.capacity
+    type: gauge
+    name: Autoscaling Metrics Utilization Capacity
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: appengine.googleapis.com/flex/autoscaler/current_utilization
+    id: cloud.gcp.appengine_googleapis_com.flex.autoscaler.current_utilization
+    type: gauge
+    name: Autoscaling Metrics Current Utilization
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.metric_type
+  - value: appengine.googleapis.com/flex/connections/current
+    id: cloud.gcp.appengine_googleapis_com.flex.connections.current
+    type: gauge
+    name: Connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: appengine.googleapis.com/flex/cpu/reserved_cores
+    id: cloud.gcp.appengine_googleapis_com.flex.cpu.reserved_cores
+    type: gauge
+    name: Reserved cores
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: appengine.googleapis.com/flex/cpu/utilization
+    id: cloud.gcp.appengine_googleapis_com.flex.cpu.utilization
+    type: gauge
+    name: CPU utilization
+    unit: 10^2.%
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: appengine.googleapis.com/flex/disk/read_bytes_count
+    id: cloud.gcp.appengine_googleapis_com.flex.disk.read_bytes_count
+    type: count,delta
+    name: Disk bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: appengine.googleapis.com/flex/disk/write_bytes_count
+    id: cloud.gcp.appengine_googleapis_com.flex.disk.write_bytes_count
+    type: count,delta
+    name: Disk bytes written
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: appengine.googleapis.com/flex/network/received_bytes_count
+    id: cloud.gcp.appengine_googleapis_com.flex.network.received_bytes_count
+    type: count,delta
+    name: Network bytes received.
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: appengine.googleapis.com/flex/network/sent_bytes_count
+    id: cloud.gcp.appengine_googleapis_com.flex.network.sent_bytes_count
+    type: count,delta
+    name: Network bytes sent.
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: appengine.googleapis.com/http/server/dos_intercept_count
+    id: cloud.gcp.appengine_googleapis_com.http.server.dos_intercept_count
+    type: count,delta
+    name: Interception count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: appengine.googleapis.com/http/server/quota_denial_count
+    id: cloud.gcp.appengine_googleapis_com.http.server.quota_denial_count
+    type: count,delta
+    name: Quota denial count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: appengine.googleapis.com/http/server/response_count
+    id: cloud.gcp.appengine_googleapis_com.http.server.response_count
+    type: count,delta
+    name: Response count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.loading
+    - value: metric.labels.response_code
+  - value: appengine.googleapis.com/http/server/response_latencies
+    id: cloud.gcp.appengine_googleapis_com.http.server.response_latencies
+    type: gauge
+    name: Response latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.loading
+    - value: metric.labels.response_code
+  - value: appengine.googleapis.com/http/server/response_style_count
+    id: cloud.gcp.appengine_googleapis_com.http.server.response_style_count
+    type: count,delta
+    name: Response count by style
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.dynamic
+    - value: metric.labels.cached
+  - value: appengine.googleapis.com/memcache/centi_mcu_count
+    id: cloud.gcp.appengine_googleapis_com.memcache.centi_mcu_count
+    type: count,delta
+    name: Memcache utilization
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.command
+  - value: appengine.googleapis.com/memcache/hit_ratio
+    id: cloud.gcp.appengine_googleapis_com.memcache.hit_ratio
+    type: gauge
+    name: Hit ratio
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: appengine.googleapis.com/memcache/operation_count
+    id: cloud.gcp.appengine_googleapis_com.memcache.operation_count
+    type: count,delta
+    name: Memcache operations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.command
+    - value: metric.labels.status
+  - value: appengine.googleapis.com/memcache/received_bytes_count
+    id: cloud.gcp.appengine_googleapis_com.memcache.received_bytes_count
+    type: count,delta
+    name: Memcache received bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.command
+  - value: appengine.googleapis.com/memcache/sent_bytes_count
+    id: cloud.gcp.appengine_googleapis_com.memcache.sent_bytes_count
+    type: count,delta
+    name: Memcache sent bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.command
+  - value: appengine.googleapis.com/memcache/used_cache_size
+    id: cloud.gcp.appengine_googleapis_com.memcache.used_cache_size
+    type: gauge
+    name: Used Cache Size
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: appengine.googleapis.com/system/billed_instance_estimate_count
+    id: cloud.gcp.appengine_googleapis_com.system.billed_instance_estimate_count
+    type: gauge
+    name: Estimated instance count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: appengine.googleapis.com/system/cpu/usage
+    id: cloud.gcp.appengine_googleapis_com.system.cpu.usage
+    type: gauge
+    name: CPU megacycles
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.source
+  - value: appengine.googleapis.com/system/instance_count
+    id: cloud.gcp.appengine_googleapis_com.system.instance_count
+    type: gauge
+    name: Instance count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.state
+  - value: appengine.googleapis.com/system/memory/usage
+    id: cloud.gcp.appengine_googleapis_com.system.memory.usage
+    type: gauge
+    name: Memory usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: appengine.googleapis.com/system/network/received_bytes_count
+    id: cloud.gcp.appengine_googleapis_com.system.network.received_bytes_count
+    type: count,delta
+    name: Received bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.cached
+  - value: appengine.googleapis.com/system/network/sent_bytes_count
+    id: cloud.gcp.appengine_googleapis_com.system.network.sent_bytes_count
+    type: count,delta
+    name: Sent bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.cached

@@ -6,6 +6,7 @@ technology:
   name: Google Kubernetes Container
 gcp:
 - service: k8s_container
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

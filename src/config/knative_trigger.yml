@@ -1,0 +1,109 @@
+id: knative_trigger
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud Run for Anthos Trigger
+gcp:
+- service: knative_trigger
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.cluster_name
+    id: cluster_name
+  - value: resource.labels.namespace_name
+    id: namespace_name
+  - value: resource.labels.broker_name
+    id: broker_name
+  - value: resource.labels.trigger_name
+    id: trigger_name
+  metrics:
+  - value: knative.dev/eventing/trigger/event_count
+    id: cloud.gcp.knative_dev.eventing.trigger.event_count
+    type: count,delta
+    name: Trigger Event Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+    - value: metric.labels.filter_type
+  - value: knative.dev/eventing/trigger/event_dispatch_latencies
+    id: cloud.gcp.knative_dev.eventing.trigger.event_dispatch_latencies
+    type: gauge
+    name: Event Dispatch Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+    - value: metric.labels.filter_type
+  - value: knative.dev/eventing/trigger/event_processing_latencies
+    id: cloud.gcp.knative_dev.eventing.trigger.event_processing_latencies
+    type: gauge
+    name: Event Processing Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.filter_type
+  - value: knative.dev/internal/eventing/trigger/event_count
+    id: cloud.gcp.knative_dev.internal.eventing.trigger.event_count
+    type: count,delta
+    name: Write Only Trigger Event Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.container_name
+    - value: metric.labels.pod_name
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+    - value: metric.labels.filter_type
+  - value: knative.dev/internal/eventing/trigger/event_dispatch_latencies
+    id: cloud.gcp.knative_dev.internal.eventing.trigger.event_dispatch_latencies
+    type: count,delta
+    name: Write Only Event Dispatch Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.container_name
+    - value: metric.labels.pod_name
+    - value: metric.labels.response_code_class
+    - value: metric.labels.response_code
+    - value: metric.labels.filter_type
+  - value: knative.dev/internal/eventing/trigger/event_processing_latencies
+    id: cloud.gcp.knative_dev.internal.eventing.trigger.event_processing_latencies
+    type: count,delta
+    name: Write Only Event Processing Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.container_name
+    - value: metric.labels.pod_name
+    - value: metric.labels.filter_type

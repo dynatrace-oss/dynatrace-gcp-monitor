@@ -77,6 +77,11 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
     if "GCP_SERVICES" in os.environ:
         selected_services_string = os.environ.get("GCP_SERVICES", "")
         selected_services = selected_services_string.split(",") if selected_services_string else []
+        #set default featureset if featureset not present in env variable
+        for i, service in enumerate(selected_services):
+            if "/" not in service:
+                selected_services[i]=f"{service}/default"
+    
     services = load_supported_services(context, selected_services)
 
     async with aiohttp.ClientSession() as session:
@@ -194,8 +199,8 @@ async def fetch_ingest_lines_task(context: Context, project_id: str, services: L
     fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
 
     skipped_services = []
-    for service in services:
-        if service in topology_task_services:
+    for service in services:   
+        if service in topology_task_services:                
             service_topology = fetch_topology_results[topology_task_services.index(service)]
             if not service_topology:
                 skipped_services.append(service.name)
@@ -227,7 +232,7 @@ def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str,
     return result
 
 
-def load_supported_services(context: LoggingContext, selected_services: List[str]) -> List[GCPService]:
+def load_supported_services(context: LoggingContext, selected_featuresets: List[str]) -> List[GCPService]:
     working_directory = os.path.dirname(os.path.realpath(__file__))
     config_directory = os.path.join(working_directory, "config")
     config_files = [
@@ -246,16 +251,16 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
 
                 for service_yaml in config_yaml.get("gcp", {}):
                     # If whitelist of services exists and current service is not present in it, skip
-                    should_skip = selected_services and \
-                                  (service_yaml.get("service", "None") not in selected_services)
+                    should_skip = selected_featuresets and \
+                                  (f'{service_yaml.get("service", "None")}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets)
                     if should_skip:
                         continue
                     services.append(GCPService(tech_name=technology_name, **service_yaml))
         except Exception as error:
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
             continue
-    services_names = [service.name for service in services]
-    context.log("Selected services: " + ",".join(services_names))
+    featureSets = [f"{service.name}/{service.featureSet}" for service in services]
+    context.log("Selected feature sets: " + ",".join(featureSets))
     return services
 
 
