@@ -259,7 +259,7 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
         except Exception as error:
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
             continue
-    featureSets = [f"{service.name}/{service.featureSet}" for service in services]
+    featureSets = [f"{service.name}/{service.feature_set}" for service in services]
     context.log("Selected feature sets: " + ",".join(featureSets))
     return services
 

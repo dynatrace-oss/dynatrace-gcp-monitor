@@ -21,7 +21,7 @@ ASSUMED_AVG_DIMENSION_VALUES = 3
 
 def generate_ddu_estimation():
     supported_services = load_supported_services(LoggingContext(None), [])
-    print("|| name || data points rate (/min) || estimated DDU rate (/min) (1 data point = 0.001 DDU)||")
+    print("|| name || Service Name || feature set || data points rate (/min) || estimated DDU rate (/min) (1 data point = 0.001 DDU)||")
     for supported_service in supported_services:
         data_points_per_minute = 0
 
@@ -32,7 +32,8 @@ def generate_ddu_estimation():
 
         ddu_estimation = round(data_points_per_minute * DATA_POINT_WEIGHT, DECIMAL_PLACES)
         data_points_rate_estimation = round(data_points_per_minute, 0)
-        print(f"| {supported_service.name} | {data_points_rate_estimation} | {ddu_estimation} |")
+        feature_set = supported_service.feature_set if supported_service.feature_set != "default" else " "
+        print(f"| {supported_service.name} | {supported_service.technology_name} | {feature_set} | {data_points_rate_estimation} | {ddu_estimation} |")
 
 
 if __name__ == "__main__":
