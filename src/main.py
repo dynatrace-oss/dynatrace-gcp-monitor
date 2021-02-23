@@ -67,6 +67,14 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
+def init_dt_client_session() -> aiohttp.ClientSession:
+    return aiohttp.ClientSession(trust_env=(os.environ.get("USE_PROXY", "").upper() in ["ALL", "DT_ONLY"]))
+
+
+def init_gcp_client_session() -> aiohttp.ClientSession:
+    return aiohttp.ClientSession(trust_env=(os.environ.get("USE_PROXY", "").upper() in ["ALL", "GCP_ONLY"]))
+
+
 async def handle_event(event: Dict, event_context, project_id_owner: Optional[str], projects_ids: Optional[List[str]] = None):
     if isinstance(event_context, Dict):
         context = LoggingContext(event_context.get("execution_id", None))
@@ -79,9 +87,9 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         selected_services = selected_services_string.split(",") if selected_services_string else []
     services = load_supported_services(context, selected_services)
 
-    async with aiohttp.ClientSession() as session:
+    async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         setup_start_time = time.time()
-        token = await create_token(context, session)
+        token = await create_token(context, gcp_session)
 
         if token is None:
             context.log("Cannot proceed without authorization token, stopping the execution")
@@ -94,14 +102,15 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         if not project_id_owner:
             project_id_owner = get_project_id_from_environment()
 
-        dynatrace_api_key = await fetch_dynatrace_api_key(session=session, project_id=project_id_owner, token=token)
-        dynatrace_url = await fetch_dynatrace_url(session=session, project_id=project_id_owner, token=token)
+        dynatrace_api_key = await fetch_dynatrace_api_key(session=gcp_session, project_id=project_id_owner, token=token)
+        dynatrace_url = await fetch_dynatrace_url(session=gcp_session, project_id=project_id_owner, token=token)
 
         print_metric_ingest_input = \
             "PRINT_METRIC_INGEST_INPUT" in os.environ and os.environ["PRINT_METRIC_INGEST_INPUT"].upper() == "TRUE"
 
         context = Context(
-            session=session,
+            gcp_session=gcp_session,
+            dt_session=dt_session,
             project_id_owner=project_id_owner,
             token=token,
             execution_time=datetime.utcnow(),
@@ -113,7 +122,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         )
 
         if not projects_ids:
-            projects_ids = await get_all_accessible_projects(context, session, token)
+            projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
         setup_time = (time.time() - setup_start_time)
         context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}
@@ -131,7 +140,8 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
         await push_self_monitoring_time_series(context)
 
-        await session.close()
+        await gcp_session.close()
+        await dt_session.close()
 
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
@@ -169,7 +179,7 @@ async def _check_x_goog_user_project_header_permissions(context: Context, projec
         "Authorization": "Bearer {token}".format(token=context.token),
         "x-goog-user-project": project_id
     }
-    resp = await context.session.get(url=url, params=params, headers=headers)
+    resp = await context.gcp_session.get(url=url, params=params, headers=headers)
     page = await resp.json()
 
     if resp.status == 200:

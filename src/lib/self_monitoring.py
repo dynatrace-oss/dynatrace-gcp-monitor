@@ -27,7 +27,7 @@ async def push_self_monitoring_time_series(context: Context, is_retry: bool = Fa
         await create_metric_descriptors_if_missing(context)
 
         time_series = create_self_monitoring_time_series(context)
-        self_monitoring_response = await context.session.request(
+        self_monitoring_response = await context.gcp_session.request(
             "POST",
             url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/timeSeries",
             data=json.dumps(time_series),
@@ -50,7 +50,7 @@ async def push_self_monitoring_time_series(context: Context, is_retry: bool = Fa
 
 async def create_metric_descriptors_if_missing(context: Context):
     try:
-        dynatrace_metrics_descriptors = await context.session.request(
+        dynatrace_metrics_descriptors = await context.gcp_session.request(
             'GET',
             url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/metricDescriptors",
             params=[('filter', f'metric.type = starts_with("{SELF_MONITORING_METRIC_PREFIX}")')],
@@ -84,7 +84,7 @@ async def replace_metric_descriptor_if_required(context: Context,
 
 async def delete_metric_descriptor(context: Context, metric_type: str):
     context.log(f"Removing old descriptor for '{metric_type}'")
-    response = await context.session.request(
+    response = await context.gcp_session.request(
         "DELETE",
         url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/metricDescriptors/{metric_type}",
         headers={"Authorization": f"Bearer {context.token}"}
@@ -96,7 +96,7 @@ async def delete_metric_descriptor(context: Context, metric_type: str):
 
 async def create_metric_descriptor(context: Context, metric_descriptor: Dict, metric_type: str):
     context.log(f"Creating missing metric descriptor for '{metric_type}'")
-    response = await context.session.request(
+    response = await context.gcp_session.request(
         "POST",
         url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/metricDescriptors",
         data=json.dumps(metric_descriptor),
