@@ -90,6 +90,8 @@ wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/mast
 
 *Alternatively, you can change the `GCP_SERVICES` runtime environment variable and deploy it.*
 
+![Google Cloud Function Architecture](../../img/extend-function-640-low.gif)
+
 
 
 ### Troubleshoot and support
