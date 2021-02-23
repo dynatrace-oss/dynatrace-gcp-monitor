@@ -85,7 +85,28 @@ Finished pushing self monitoring time series to GCP Monitor
 
 
 ### Extend monitoring scope
-...
+
+1. Download latest deployment configuration to your console. 
+
+```
+wget https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.yaml
+```
+
+2. Edit `data.GCP_SERVICES` section and specify services with featureSets you want to monitor
+
+<< animation? >>
+
+3. Apply your configuration
+
+```
+kubectl apply -f dynatrace-gcp-function.yaml
+```
+
+4. Rollout new configuration
+
+```
+kubectl -n dynatrace rollout restart deployment dynatrace-gcp-function
+```
 
 ### Troubleshoot and support
 #### I can not see metrics in Dynatrace...
