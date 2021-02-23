@@ -36,6 +36,7 @@ readonly ACTIVATION_SERVICES=$(yq r activation-config.yaml 'activation.metrics.s
 readonly PRINT_METRIC_INGEST_INPUT=$(yq r activation-config.yaml 'debug.printMetricIngestInput')
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r activation-config.yaml 'googleCloud.common.cloudFunctionSize')
 readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-function Self monitoring"
+readonly USE_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.useProxy')
 
 
 if ! command -v gcloud &> /dev/null
