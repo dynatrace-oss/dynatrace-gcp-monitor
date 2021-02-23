@@ -4,7 +4,7 @@
 It's possible to run monitoring as Kubernetes Container. In this case all configurations and secretes are stored as K8S ConfigMap / Secretes objects. 
 
 *Architecture with Google Cloud Function deployment*
-![GKE Container Architecture](./img/architecture-k8s.svg)
+![GKE Container Architecture](../../img/architecture-k8s.svg)
 
 
 ### Requirements 

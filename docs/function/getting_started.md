@@ -6,7 +6,7 @@
 In addition to metrics `dynatrace-gcp-function` is calling Service specific API's (for example Pub/Sub API). The purpose is to get properties of the instances that are not available in Monitoring API.  Particularly the function try to retrieve endpoint addresses (FQDN's, IP addresses).
 
 *Architecture with Google Cloud Function deployment*
-![Google Cloud Function Architecture](./img/architecture-function.svg)
+![Google Cloud Function Architecture](../../img/architecture-function.svg)
 
 ### Requirements
 Make sure the following dependencies are installed:
