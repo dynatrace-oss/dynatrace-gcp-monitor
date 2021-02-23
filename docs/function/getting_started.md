@@ -73,7 +73,22 @@ Installation script will prompt for following parameters:
 
 
 ### Extend monitoring scope
-...
+
+1. Download and modify configuration file
+```
+wget https://github.com/dynatrace-oss/dynatrace-gcp-function/blob/documentation_update/activation-config.yaml
+```
+
+2. Uncomment services you want to monitor under `activation.metrics.services` section
+
+<< animation? >>
+
+3. Download & run the `dynatrace-gcp-function` installation script in the same folder as your `activation-config.yaml` file is
+```
+wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/scripts/setup.sh -O setup.sh ; chmod a+x setup.sh ; ./setup.sh
+```
+
+*Alternatively, you can change the `GCP_SERVICES` runtime environment variable and deploy it.*
 
 
 
