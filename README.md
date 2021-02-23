@@ -6,7 +6,7 @@ Maintaining its lifecycle places a burden on the operational team.
 
 
 ## Getting started
-There are two deployment options available. You can either ![run it on Kubernetes](docs/k8s/getting_started.md) or ![deploy a Google Cloud Function](docs/function/getting_started.md)
+There are two deployment options available. You can either [run it on Kubernetes](docs/k8s/getting_started.md) or [deploy a Google Cloud Function](docs/function/getting_started.md)
 
 
 ## Supported Google Cloud services
