@@ -1,6 +1,8 @@
 id: k8s_cluster
 version: 0.0.1
 minDynatraceVersion: 1.199
+technology:
+  name: Google Kubernetes Cluster
 gcp:
 - service: k8s_cluster
   featureSet: default
