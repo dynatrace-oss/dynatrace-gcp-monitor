@@ -15,9 +15,9 @@ import asyncio
 import os
 from typing import Optional, List
 
-import aiohttp
 from aiohttp import web
 
+from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import LoggingContext
 from lib.credentials import create_token
 from lib.fast_check import FastCheck
@@ -33,13 +33,13 @@ async def scheduling_loop(project_ids: Optional[List[str]] = None):
 
 
 async def initial_check():
-    async with aiohttp.ClientSession() as session:
-        token = await create_token(logging_context, session)
+    async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
+        token = await create_token(logging_context, gcp_session)
         if token:
-            fast_check_result = await FastCheck(session, token, logging_context)
+            fast_check_result = await FastCheck(gcp_session=gcp_session, dt_session=dt_session, token=token, logging_context=logging_context)
             if fast_check_result.projects:
                 logging_context.log(f'Monitoring enabled for the following projects: {fast_check_result}')
-                instance_metadata = await InstanceMetadata(session, token, logging_context)
+                instance_metadata = await InstanceMetadata(gcp_session, token, logging_context)
                 if instance_metadata:
                     logging_context.log(f'GCP: {instance_metadata}')
                 loop.create_task(scheduling_loop(fast_check_result.projects))
@@ -47,11 +47,12 @@ async def initial_check():
                 logging_context.log("Monitoring disabled. Check your project(s) settings.")
         else:
             logging_context.log(f'Monitoring disabled. Unable to acquire authorization token.')
-    await session.close()
+    await gcp_session.close()
+    await dt_session.close()
 
 async def try_configure_dynatrace():
-    async with aiohttp.ClientSession() as session:
-        dashboards_result = await ConfigureDynatrace(session, logging_context)
+    async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
+        dashboards_result = await ConfigureDynatrace(gcp_session=gcp_session, dt_session=dt_session, logging_context=logging_context)
 
 
 async def health(request):

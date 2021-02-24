@@ -22,14 +22,14 @@ instance_metadata = namedtuple('instance_metadata', [
 
 class InstanceMetadata:
 
-    def __init__(self, session: ClientSession(), token: [str], logging_context: LoggingContext):
-        self.session = session
+    def __init__(self, gcp_session: ClientSession(), token: [str], logging_context: LoggingContext):
+        self.gcp_session = gcp_session
         self.token = token
         self.logging_context = logging_context
 
     async def _get_metadata(self, url_path: str, timeout: Optional[int] = 2):
         try:
-            response = await self.session.get(
+            response = await self.gcp_session.get(
                 urljoin(METADATA_URL, url_path),
                 headers={
                     "Authorization": f'Bearer {self.token}',

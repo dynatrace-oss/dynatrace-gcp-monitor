@@ -22,9 +22,9 @@ from os import listdir
 from os.path import isfile
 from typing import Dict, List, Optional
 
-import aiohttp
 import yaml
 
+from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import Context, LoggingContext
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
@@ -67,14 +67,6 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-def init_dt_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trust_env=(os.environ.get("USE_PROXY", "").upper() in ["ALL", "DT_ONLY"]))
-
-
-def init_gcp_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trust_env=(os.environ.get("USE_PROXY", "").upper() in ["ALL", "GCP_ONLY"]))
-
-
 async def handle_event(event: Dict, event_context, project_id_owner: Optional[str], projects_ids: Optional[List[str]] = None):
     if isinstance(event_context, Dict):
         context = LoggingContext(event_context.get("execution_id", None))
@@ -102,8 +94,8 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         if not project_id_owner:
             project_id_owner = get_project_id_from_environment()
 
-        dynatrace_api_key = await fetch_dynatrace_api_key(session=gcp_session, project_id=project_id_owner, token=token)
-        dynatrace_url = await fetch_dynatrace_url(session=gcp_session, project_id=project_id_owner, token=token)
+        dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+        dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
 
         print_metric_ingest_input = \
             "PRINT_METRIC_INGEST_INPUT" in os.environ and os.environ["PRINT_METRIC_INGEST_INPUT"].upper() == "TRUE"
