@@ -23,6 +23,13 @@ data:
   # if set to destination: monitoring API calls are booked towards project which is monitored
   # REQUIRES serviceusage.services.use Permission granted for Service Account!
   SERVICE_USAGE_BOOKING: "source"
+  # Depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
+  # if set to ALL: proxy settings will be used for requests to Dynatrace and GCP API
+  # if set to DT_ONLY: proxy settings will be used only for requests to Dynatrace
+  # if set to GCP_ONLY: proxy settings will be used only for requests to GCP API
+  # if not set: default, proxy settings won't be used
+  USE_PROXY: ""
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -70,6 +77,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SERVICE_USAGE_BOOKING
+        - name: USE_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: USE_PROXY
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
         - name: DYNATRACE_URL_SECRET_NAME

@@ -53,7 +53,8 @@ class LoggingContext:
 class Context(LoggingContext):
     def __init__(
             self,
-            session: aiohttp.ClientSession,
+            gcp_session: aiohttp.ClientSession,
+            dt_session: aiohttp.ClientSession,
             project_id_owner: str,
             token: str,
             execution_time: datetime,
@@ -65,7 +66,8 @@ class Context(LoggingContext):
     ):
         super().__init__(scheduled_execution_id)
 
-        self.session = session
+        self.gcp_session = gcp_session
+        self.dt_session = dt_session
         self.project_id_owner = project_id_owner
         self.token = token
         self.execution_time = execution_time.replace(microsecond=0)

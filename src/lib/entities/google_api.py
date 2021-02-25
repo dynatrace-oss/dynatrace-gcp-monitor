@@ -28,7 +28,7 @@ async def fetch_zones(
         "Authorization": "Bearer {token}".format(token=context.token)
     }
 
-    resp = await context.session.request(
+    resp = await context.gcp_session.request(
         "GET",
         params={},
         url=f"https://compute.googleapis.com/compute/v1/projects/{project_id}/zones",
@@ -59,7 +59,7 @@ async def generic_paging(
     params: Dict[Text, Text] = {}
     entities: List[Entity] = []
     while get_page:
-        resp = await ctx.session.request(
+        resp = await ctx.gcp_session.request(
             "GET",
             params=params,
             url=url,

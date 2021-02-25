@@ -23,7 +23,7 @@ class ConfigureDynatrace:
                  dashboard_json = json.load(dashboard_file) 
             if remove_owner:                                         
                 del dashboard_json["dashboardMetadata"]["owner"]
-            response = await self.session.post(              
+            response = await self.dt_session.post(
                 url=f"{dynatrace_url.rstrip('/')}/api/config/v1/dashboards",
                 headers={
                     "Authorization": f"Api-Token {dynatrace_api_key}",
@@ -44,7 +44,7 @@ class ConfigureDynatrace:
 
     async def get_existing_dashboards(self, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> List[dict]:
         try:
-            response = await self.session.get(
+            response = await self.dt_session.get(
                 url=f"{dynatrace_url.rstrip('/')}/api/config/v1/dashboards",
                 headers={
                     "Authorization": f"Api-Token {dynatrace_api_key}",
@@ -99,15 +99,16 @@ class ConfigureDynatrace:
             return []
             
 
-    def __init__(self, session: ClientSession, logging_context: LoggingContext):
-        self.session = session
+    def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, logging_context: LoggingContext):
+        self.gcp_session = gcp_session
+        self.dt_session = dt_session
         self.logging_context = logging_context
             
     async def _init_(self):        
-        dynatrace_url = await fetch_dynatrace_url(self.session, "", "")
+        dynatrace_url = await fetch_dynatrace_url(self.gcp_session, "", "")
         self.logging_context.log(f"Using Dynatrace endpoint: {dynatrace_url}")
-        dynatrace_access_key = await fetch_dynatrace_api_key(self.session,"", "")
-        scopes = await  get_dynatrace_token_metadata(self.session, self.logging_context, dynatrace_url, dynatrace_access_key)
+        dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session,"", "")
+        scopes = await  get_dynatrace_token_metadata(self.dt_session, self.logging_context, dynatrace_url, dynatrace_access_key)
         has_write_config_permission=any(s in scopes.get('scopes', []) for s in ["WriteConfig", "ReadConfig"])        
         if not has_write_config_permission:
             self.logging_context.log("Missing ReadConfig/WriteConfig permission for Dynatrace API token, skipping dashboards configuration")
