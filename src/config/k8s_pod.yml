@@ -1,0 +1,1285 @@
+id: k8s_pod
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Kubernetes Pod
+gcp:
+- service: k8s_pod
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.cluster_name
+    id: cluster_name
+  - value: resource.labels.namespace_name
+    id: namespace_name
+  - value: resource.labels.pod_name
+    id: pod_name
+  metrics:
+  - value: istio.io/service/client/connection_close_count
+    id: cloud.gcp.istio_io.service.client.connection_close_count
+    type: count,delta
+    name: Client Connection Close Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/client/connection_open_count
+    id: cloud.gcp.istio_io.service.client.connection_open_count
+    type: count,delta
+    name: Client Connection Open Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/client/received_bytes_count
+    id: cloud.gcp.istio_io.service.client.received_bytes_count
+    type: count,delta
+    name: Client Received Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: istio.io/service/client/request_bytes
+    id: cloud.gcp.istio_io.service.client.request_bytes
+    type: gauge
+    name: Client Request Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/request_count
+    id: cloud.gcp.istio_io.service.client.request_count
+    type: count,delta
+    name: Client Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/response_bytes
+    id: cloud.gcp.istio_io.service.client.response_bytes
+    type: gauge
+    name: Client Response Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/roundtrip_latencies
+    id: cloud.gcp.istio_io.service.client.roundtrip_latencies
+    type: gauge
+    name: Client Roundtrip Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+    - value: metric.labels.request_operation
+    - value: metric.labels.api_version
+    - value: metric.labels.response_code
+    - value: metric.labels.api_name
+  - value: istio.io/service/client/sent_bytes_count
+    id: cloud.gcp.istio_io.service.client.sent_bytes_count
+    type: count,delta
+    name: Client Sent Bytes Count
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.request_protocol
+    - value: metric.labels.service_authentication_policy
+    - value: metric.labels.mesh_uid
+    - value: metric.labels.destination_service_name
+    - value: metric.labels.destination_service_namespace
+    - value: metric.labels.destination_port
+    - value: metric.labels.source_principal
+    - value: metric.labels.source_workload_name
+    - value: metric.labels.source_workload_namespace
+    - value: metric.labels.source_owner
+    - value: metric.labels.destination_principal
+    - value: metric.labels.destination_workload_name
+    - value: metric.labels.destination_workload_namespace
+    - value: metric.labels.destination_owner
+    - value: metric.labels.source_canonical_service_name
+    - value: metric.labels.destination_canonical_service_name
+    - value: metric.labels.source_canonical_service_namespace
+    - value: metric.labels.destination_canonical_service_namespace
+    - value: metric.labels.source_canonical_revision
+    - value: metric.labels.destination_canonical_revision
+  - value: kubernetes.io/anthos/activator_request_count
+    id: cloud.gcp.kubernetes_io.anthos.activator_request_count
+    type: count,delta
+    name: activator_request_count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.configuration_name
+    - value: metric.labels.namespace_name
+    - value: metric.labels.num_tries
+    - value: metric.labels.response_code
+    - value: metric.labels.response_code_class
+    - value: metric.labels.revision_name
+    - value: metric.labels.service_name
+  - value: kubernetes.io/anthos/activator_request_latencies
+    id: cloud.gcp.kubernetes_io.anthos.activator_request_latencies
+    type: count,delta
+    name: activator_request_latencies
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.configuration_name
+    - value: metric.labels.namespace_name
+    - value: metric.labels.response_code
+    - value: metric.labels.response_code_class
+    - value: metric.labels.revision_name
+    - value: metric.labels.service_name
+  - value: kubernetes.io/anthos/autoscaler_actual_pods
+    id: cloud.gcp.kubernetes_io.anthos.autoscaler_actual_pods
+    type: gauge
+    name: autoscaler_actual_pods
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.configuration_name
+    - value: metric.labels.namespace_name
+    - value: metric.labels.revision_name
+    - value: metric.labels.service_name
+  - value: kubernetes.io/anthos/autoscaler_desired_pods
+    id: cloud.gcp.kubernetes_io.anthos.autoscaler_desired_pods
+    type: gauge
+    name: autoscaler_desired_pods
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.configuration_name
+    - value: metric.labels.namespace_name
+    - value: metric.labels.revision_name
+    - value: metric.labels.service_name
+  - value: kubernetes.io/anthos/autoscaler_panic_mode
+    id: cloud.gcp.kubernetes_io.anthos.autoscaler_panic_mode
+    type: gauge
+    name: autoscaler_panic_mode
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.configuration_name
+    - value: metric.labels.namespace_name
+    - value: metric.labels.revision_name
+    - value: metric.labels.service_name
+  - value: kubernetes.io/anthos/autoscaler_panic_request_concurrency
+    id: cloud.gcp.kubernetes_io.anthos.autoscaler_panic_request_concurrency
+    type: gauge
+    name: autoscaler_panic_request_concurrency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.configuration_name
+    - value: metric.labels.namespace_name
+    - value: metric.labels.revision_name
+    - value: metric.labels.service_name
+  - value: kubernetes.io/anthos/autoscaler_requested_pods
+    id: cloud.gcp.kubernetes_io.anthos.autoscaler_requested_pods
+    type: gauge
+    name: autoscaler_requested_pods
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.configuration_name
+    - value: metric.labels.namespace_name
+    - value: metric.labels.revision_name
+    - value: metric.labels.service_name
+  - value: kubernetes.io/anthos/autoscaler_stable_request_concurrency
+    id: cloud.gcp.kubernetes_io.anthos.autoscaler_stable_request_concurrency
+    type: gauge
+    name: autoscaler_stable_request_concurrency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.configuration_name
+    - value: metric.labels.namespace_name
+    - value: metric.labels.revision_name
+    - value: metric.labels.service_name
+  - value: kubernetes.io/anthos/autoscaler_target_concurrency_per_pod
+    id: cloud.gcp.kubernetes_io.anthos.autoscaler_target_concurrency_per_pod
+    type: gauge
+    name: autoscaler_target_concurrency_per_pod
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.configuration_name
+    - value: metric.labels.namespace_name
+    - value: metric.labels.revision_name
+    - value: metric.labels.service_name
+  - value: kubernetes.io/anthos/esxi_cluster_size
+    id: cloud.gcp.kubernetes_io.anthos.esxi_cluster_size
+    type: gauge
+    name: esxi_cluster_size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/esxi_config_info
+    id: cloud.gcp.kubernetes_io.anthos.esxi_config_info
+    type: gauge
+    name: esxi_config_info
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.drs_enabled
+    - value: metric.labels.ha_enabled
+    - value: metric.labels.vsan_enabled
+  - value: kubernetes.io/anthos/esxi_cpu_cores_total
+    id: cloud.gcp.kubernetes_io.anthos.esxi_cpu_cores_total
+    type: gauge
+    name: esxi_cpu_cores_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/esxi_evc_info
+    id: cloud.gcp.kubernetes_io.anthos.esxi_evc_info
+    type: gauge
+    name: esxi_evc_info
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.mode
+  - value: kubernetes.io/anthos/esxi_host_info
+    id: cloud.gcp.kubernetes_io.anthos.esxi_host_info
+    type: gauge
+    name: esxi_host_info
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.build
+    - value: metric.labels.version
+  - value: kubernetes.io/anthos/esxi_memory_total_bytes
+    id: cloud.gcp.kubernetes_io.anthos.esxi_memory_total_bytes
+    type: gauge
+    name: esxi_memory_total_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/gkeconnect_dialer_connection_attempts_total
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_dialer_connection_attempts_total
+    type: count,delta
+    name: gkeconnect_dialer_connection_attempts_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/gkeconnect_dialer_connection_errors_total
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_dialer_connection_errors_total
+    type: count,delta
+    name: gkeconnect_dialer_connection_errors_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/gkeconnect_dialer_connections
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_dialer_connections
+    type: gauge
+    name: gkeconnect_dialer_connections
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/gkeconnect_http_request_duration_seconds
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_http_request_duration_seconds
+    type: gauge
+    name: gkeconnect_http_request_duration_seconds
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.quantile
+  - value: kubernetes.io/anthos/gkeconnect_http_request_duration_seconds_count
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_http_request_duration_seconds_count
+    type: count,delta
+    name: gkeconnect_http_request_duration_seconds_count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.method
+  - value: kubernetes.io/anthos/gkeconnect_http_request_duration_seconds_sum
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_http_request_duration_seconds_sum
+    type: count,delta
+    name: gkeconnect_http_request_duration_seconds_sum
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.method
+  - value: kubernetes.io/anthos/gkeconnect_http_request_header_duration_seconds
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_http_request_header_duration_seconds
+    type: gauge
+    name: gkeconnect_http_request_header_duration_seconds
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.quantile
+  - value: kubernetes.io/anthos/gkeconnect_http_request_header_duration_seconds_count
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_http_request_header_duration_seconds_count
+    type: count,delta
+    name: gkeconnect_http_request_header_duration_seconds_count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.method
+  - value: kubernetes.io/anthos/gkeconnect_http_request_header_duration_seconds_sum
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_http_request_header_duration_seconds_sum
+    type: count,delta
+    name: gkeconnect_http_request_header_duration_seconds_sum
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.method
+  - value: kubernetes.io/anthos/gkeconnect_http_requests_total
+    id: cloud.gcp.kubernetes_io.anthos.gkeconnect_http_requests_total
+    type: count,delta
+    name: gkeconnect_http_requests_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.status
+  - value: kubernetes.io/anthos/go_gc_duration_seconds
+    id: cloud.gcp.kubernetes_io.anthos.go_gc_duration_seconds
+    type: gauge
+    name: go_gc_duration_seconds
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.quantile
+  - value: kubernetes.io/anthos/go_gc_duration_seconds_count
+    id: cloud.gcp.kubernetes_io.anthos.go_gc_duration_seconds_count
+    type: count,delta
+    name: go_gc_duration_seconds_count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_gc_duration_seconds_sum
+    id: cloud.gcp.kubernetes_io.anthos.go_gc_duration_seconds_sum
+    type: count,delta
+    name: go_gc_duration_seconds_sum
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_goroutines
+    id: cloud.gcp.kubernetes_io.anthos.go_goroutines
+    type: gauge
+    name: go_goroutines
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_info
+    id: cloud.gcp.kubernetes_io.anthos.go_info
+    type: gauge
+    name: go_info
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.exported_version
+    - value: metric.labels.version
+  - value: kubernetes.io/anthos/go_memstats_alloc_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_alloc_bytes
+    type: gauge
+    name: go_memstats_alloc_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_alloc_bytes_total
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_alloc_bytes_total
+    type: count,delta
+    name: go_memstats_alloc_bytes_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_buck_hash_sys_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_buck_hash_sys_bytes
+    type: gauge
+    name: go_memstats_buck_hash_sys_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_frees_total
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_frees_total
+    type: count,delta
+    name: go_memstats_frees_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_gc_cpu_fraction
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_gc_cpu_fraction
+    type: gauge
+    name: go_memstats_gc_cpu_fraction
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_gc_sys_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_gc_sys_bytes
+    type: gauge
+    name: go_memstats_gc_sys_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_heap_alloc_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_heap_alloc_bytes
+    type: gauge
+    name: go_memstats_heap_alloc_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_heap_idle_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_heap_idle_bytes
+    type: gauge
+    name: go_memstats_heap_idle_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_heap_inuse_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_heap_inuse_bytes
+    type: gauge
+    name: go_memstats_heap_inuse_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_heap_objects
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_heap_objects
+    type: gauge
+    name: go_memstats_heap_objects
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_heap_released_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_heap_released_bytes
+    type: gauge
+    name: go_memstats_heap_released_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_heap_sys_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_heap_sys_bytes
+    type: gauge
+    name: go_memstats_heap_sys_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_last_gc_time_seconds
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_last_gc_time_seconds
+    type: gauge
+    name: go_memstats_last_gc_time_seconds
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_lookups_total
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_lookups_total
+    type: count,delta
+    name: go_memstats_lookups_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_mallocs_total
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_mallocs_total
+    type: count,delta
+    name: go_memstats_mallocs_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_mcache_inuse_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_mcache_inuse_bytes
+    type: gauge
+    name: go_memstats_mcache_inuse_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_mcache_sys_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_mcache_sys_bytes
+    type: gauge
+    name: go_memstats_mcache_sys_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_mspan_inuse_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_mspan_inuse_bytes
+    type: gauge
+    name: go_memstats_mspan_inuse_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_mspan_sys_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_mspan_sys_bytes
+    type: gauge
+    name: go_memstats_mspan_sys_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_next_gc_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_next_gc_bytes
+    type: gauge
+    name: go_memstats_next_gc_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_other_sys_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_other_sys_bytes
+    type: gauge
+    name: go_memstats_other_sys_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_stack_inuse_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_stack_inuse_bytes
+    type: gauge
+    name: go_memstats_stack_inuse_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_stack_sys_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_stack_sys_bytes
+    type: gauge
+    name: go_memstats_stack_sys_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_memstats_sys_bytes
+    id: cloud.gcp.kubernetes_io.anthos.go_memstats_sys_bytes
+    type: gauge
+    name: go_memstats_sys_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/go_threads
+    id: cloud.gcp.kubernetes_io.anthos.go_threads
+    type: gauge
+    name: go_threads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/nsx_info
+    id: cloud.gcp.kubernetes_io.anthos.nsx_info
+    type: gauge
+    name: nsx_info
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.type
+    - value: metric.labels.version
+  - value: kubernetes.io/anthos/process_cpu_seconds_total
+    id: cloud.gcp.kubernetes_io.anthos.process_cpu_seconds_total
+    type: count,delta
+    name: process_cpu_seconds_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/process_max_fds
+    id: cloud.gcp.kubernetes_io.anthos.process_max_fds
+    type: gauge
+    name: process_max_fds
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/process_open_fds
+    id: cloud.gcp.kubernetes_io.anthos.process_open_fds
+    type: gauge
+    name: process_open_fds
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/process_resident_memory_bytes
+    id: cloud.gcp.kubernetes_io.anthos.process_resident_memory_bytes
+    type: gauge
+    name: process_resident_memory_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/process_start_time_seconds
+    id: cloud.gcp.kubernetes_io.anthos.process_start_time_seconds
+    type: gauge
+    name: process_start_time_seconds
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/process_virtual_memory_bytes
+    id: cloud.gcp.kubernetes_io.anthos.process_virtual_memory_bytes
+    type: gauge
+    name: process_virtual_memory_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/process_virtual_memory_max_bytes
+    id: cloud.gcp.kubernetes_io.anthos.process_virtual_memory_max_bytes
+    type: gauge
+    name: process_virtual_memory_max_bytes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/promhttp_metric_handler_requests_in_flight
+    id: cloud.gcp.kubernetes_io.anthos.promhttp_metric_handler_requests_in_flight
+    type: gauge
+    name: promhttp_metric_handler_requests_in_flight
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/promhttp_metric_handler_requests_total
+    id: cloud.gcp.kubernetes_io.anthos.promhttp_metric_handler_requests_total
+    type: count,delta
+    name: promhttp_metric_handler_requests_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.code
+  - value: kubernetes.io/anthos/scrape_duration_seconds
+    id: cloud.gcp.kubernetes_io.anthos.scrape_duration_seconds
+    type: gauge
+    name: scrape_duration_seconds
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/scrape_samples_post_metric_relabeling
+    id: cloud.gcp.kubernetes_io.anthos.scrape_samples_post_metric_relabeling
+    type: gauge
+    name: scrape_samples_post_metric_relabeling
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/scrape_samples_scraped
+    id: cloud.gcp.kubernetes_io.anthos.scrape_samples_scraped
+    type: gauge
+    name: scrape_samples_scraped
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/up
+    id: cloud.gcp.kubernetes_io.anthos.up
+    type: gauge
+    name: up
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: kubernetes.io/anthos/vcenter_api_request_total
+    id: cloud.gcp.kubernetes_io.anthos.vcenter_api_request_total
+    type: count,delta
+    name: vcenter_api_request_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/anthos/vcenter_info
+    id: cloud.gcp.kubernetes_io.anthos.vcenter_info
+    type: gauge
+    name: vcenter_info
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.build
+    - value: metric.labels.version
+  - value: kubernetes.io/anthos/vm_cpu_ready_seconds
+    id: cloud.gcp.kubernetes_io.anthos.vm_cpu_ready_seconds
+    type: count,delta
+    name: vm_cpu_ready_seconds
+    unit: s
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.node
+  - value: kubernetes.io/anthos/vm_disk_read_bytes_total
+    id: cloud.gcp.kubernetes_io.anthos.vm_disk_read_bytes_total
+    type: count,delta
+    name: vm_disk_read_bytes_total
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.node
+  - value: kubernetes.io/anthos/vm_disk_write_bytes_total
+    id: cloud.gcp.kubernetes_io.anthos.vm_disk_write_bytes_total
+    type: count,delta
+    name: vm_disk_write_bytes_total
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.node
+  - value: kubernetes.io/anthos/vm_memory_access_latency
+    id: cloud.gcp.kubernetes_io.anthos.vm_memory_access_latency
+    type: gauge
+    name: vm_memory_access_latency
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: kubernetes.io/anthos/vm_memory_consumed_bytes
+    id: cloud.gcp.kubernetes_io.anthos.vm_memory_consumed_bytes
+    type: gauge
+    name: vm_memory_consumed_bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.node
+  - value: kubernetes.io/anthos/vm_virtualdisk_read_latency_seconds
+    id: cloud.gcp.kubernetes_io.anthos.vm_virtualdisk_read_latency_seconds
+    type: count,delta
+    name: vm_virtualdisk_read_latency_seconds
+    unit: s
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.node
+  - value: kubernetes.io/anthos/vm_virtualdisk_write_latency_seconds
+    id: cloud.gcp.kubernetes_io.anthos.vm_virtualdisk_write_latency_seconds
+    type: count,delta
+    name: vm_virtualdisk_write_latency_seconds
+    unit: s
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.node
+  - value: kubernetes.io/anthos/vsphere_vm_operations_total
+    id: cloud.gcp.kubernetes_io.anthos.vsphere_vm_operations_total
+    type: count,delta
+    name: vsphere_vm_operations_total
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.operation
+  - value: kubernetes.io/pod/network/received_bytes_count
+    id: cloud.gcp.kubernetes_io.pod.network.received_bytes_count
+    type: count,delta
+    name: Bytes received
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/pod/network/sent_bytes_count
+    id: cloud.gcp.kubernetes_io.pod.network.sent_bytes_count
+    type: count,delta
+    name: Bytes transmitted
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions: []
+  - value: kubernetes.io/pod/volume/total_bytes
+    id: cloud.gcp.kubernetes_io.pod.volume.total_bytes
+    type: gauge
+    name: Volume capacity
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.volume_name
+  - value: kubernetes.io/pod/volume/used_bytes
+    id: cloud.gcp.kubernetes_io.pod.volume.used_bytes
+    type: gauge
+    name: Volume usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.volume_name
+  - value: kubernetes.io/pod/volume/utilization
+    id: cloud.gcp.kubernetes_io.pod.volume.utilization
+    type: gauge
+    name: Volume utilization
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.volume_name

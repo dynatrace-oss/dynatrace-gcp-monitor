@@ -1,0 +1,228 @@
+id: cloud_composer_environment
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud Composer Environment
+gcp:
+- service: cloud_composer_environment
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.environment_name
+    id: environment_name
+  metrics:
+  - value: composer.googleapis.com/environment/api/request_count
+    id: cloud.gcp.composer_googleapis_com.environment.api.request_count
+    type: count,delta
+    name: API Requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.api_version
+    - value: metric.labels.api_method
+  - value: composer.googleapis.com/environment/api/request_latencies
+    id: cloud.gcp.composer_googleapis_com.environment.api.request_latencies
+    type: gauge
+    name: API Latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.status
+    - value: metric.labels.api_version
+    - value: metric.labels.api_method
+  - value: composer.googleapis.com/environment/dag_processing/parse_error_count
+    id: cloud.gcp.composer_googleapis_com.environment.dag_processing.parse_error_count
+    type: count,delta
+    name: Parse Error Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/dag_processing/processes
+    id: cloud.gcp.composer_googleapis_com.environment.dag_processing.processes
+    type: gauge
+    name: DAG parsing processes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/dag_processing/processor_timeout_count
+    id: cloud.gcp.composer_googleapis_com.environment.dag_processing.processor_timeout_count
+    type: count,delta
+    name: Processors Timeout Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/dag_processing/total_parse_time
+    id: cloud.gcp.composer_googleapis_com.environment.dag_processing.total_parse_time
+    type: gauge
+    name: Total Parse Time
+    unit: s
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/dagbag_size
+    id: cloud.gcp.composer_googleapis_com.environment.dagbag_size
+    type: gauge
+    name: Dag Bag Size
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/database_health
+    id: cloud.gcp.composer_googleapis_com.environment.database_health
+    type: gauge
+    name: Database Healthy
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.image_version
+    - value: metric.labels.environment_type
+  - value: composer.googleapis.com/environment/executor/open_slots
+    id: cloud.gcp.composer_googleapis_com.environment.executor.open_slots
+    type: gauge
+    name: Executor Open Slots
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/executor/running_tasks
+    id: cloud.gcp.composer_googleapis_com.environment.executor.running_tasks
+    type: gauge
+    name: Executor Running Tasks
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/finished_task_instance_count
+    id: cloud.gcp.composer_googleapis_com.environment.finished_task_instance_count
+    type: count,delta
+    name: Task Instance Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.state
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/healthy
+    id: cloud.gcp.composer_googleapis_com.environment.healthy
+    type: gauge
+    name: Healthy
+    unit: ''
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 300s
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/num_celery_workers
+    id: cloud.gcp.composer_googleapis_com.environment.num_celery_workers
+    type: gauge
+    name: Celery Workers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/scheduler_heartbeat_count
+    id: cloud.gcp.composer_googleapis_com.environment.scheduler_heartbeat_count
+    type: count,delta
+    name: Scheduler Heartbeats
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/task_queue_length
+    id: cloud.gcp.composer_googleapis_com.environment.task_queue_length
+    type: gauge
+    name: Task Queue Length
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.image_version
+    - value: metric.labels.queue_name
+  - value: composer.googleapis.com/environment/worker/pod_eviction_count
+    id: cloud.gcp.composer_googleapis_com.environment.worker.pod_eviction_count
+    type: count,delta
+    name: Worker Pod Eviction Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.image_version
+  - value: composer.googleapis.com/environment/zombie_task_killed_count
+    id: cloud.gcp.composer_googleapis_com.environment.zombie_task_killed_count
+    type: count,delta
+    name: Zombie Tasks Killed
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.image_version

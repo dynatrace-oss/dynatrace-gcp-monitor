@@ -1,186 +1,188 @@
-id: gcp_filestore
+id: filestore_instance
+$schema: gcp_schema_v_1_0.json
 version: 0.0.1
-technology:
-  name: Google Cloud Filestore
 minDynatraceVersion: 1.199
+technology:
+  name: Google Filestore Instance
 gcp:
 - service: filestore_instance
+  featureSet: default
   dimensions:
-    - value: resource.labels.project_id
-      id: project_id
-    - value: resource.labels.location
-      id: location
-    - value: resource.labels.instance_name
-      location: instance_name
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.instance_name
+    id: instance_name
   metrics:
-    - value: file.googleapis.com/nfs/server/average_read_latency
-      id: cloud.gcp.file_googleapis_com.nfs.server.average_read_latency
-      type: gauge
-      name: Average read latency
-      unit: ms
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: DOUBLE
-        metricKind: GAUGE
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/average_write_latency
-      id: cloud.gcp.file_googleapis_com.nfs.server.average_write_latency
-      type: gauge
-      name: Average write latency
-      unit: ms
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: DOUBLE
-        metricKind: GAUGE
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/free_bytes
-      id: cloud.gcp.file_googleapis_com.nfs.server.free_bytes
-      type: gauge
-      name: Free disk bytes
-      unit: By
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: GAUGE
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/free_bytes_percent
-      id: cloud.gcp.file_googleapis_com.nfs.server.free_bytes_percent
-      type: gauge
-      name: Free disk space percent
-      unit: '%'
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: DOUBLE
-        metricKind: GAUGE
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/metadata_ops_count
-      id: cloud.gcp.file_googleapis_com.nfs.server.metadata_ops_count
-      type: count,delta
-      name: Metadata operation count
-      unit: "1"
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: DELTA
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/read_bytes_count
-      id: cloud.gcp.file_googleapis_com.nfs.server.read_bytes_count
-      type: count,delta
-      name: Bytes read
-      unit: By
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: DELTA
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/read_milliseconds_count
-      id: cloud.gcp.file_googleapis_com.nfs.server.read_milliseconds_count
-      type: count,delta
-      name: Time (in milliseconds) spent on read operations
-      unit: ms
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: DELTA
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/read_ops_count
-      id: cloud.gcp.file_googleapis_com.nfs.server.read_ops_count
-      type: count,delta
-      name: Disk read operation count
-      unit: "1"
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: DELTA
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/used_bytes
-      id: cloud.gcp.file_googleapis_com.nfs.server.used_bytes
-      type: gauge
-      name: Used disk bytes
-      unit: By
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: GAUGE
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/used_bytes_percent
-      id: cloud.gcp.file_googleapis_com.nfs.server.used_bytes_percent
-      type: gauge
-      name: Used disk space percent
-      unit: '%'
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: DOUBLE
-        metricKind: GAUGE
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/write_bytes_count
-      id: cloud.gcp.file_googleapis_com.nfs.server.write_bytes_count
-      type: count,delta
-      name: Bytes written
-      unit: By
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: DELTA
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/write_milliseconds_count
-      id: cloud.gcp.file_googleapis_com.nfs.server.write_milliseconds_count
-      type: count,delta
-      name: Time (in milliseconds) spent on write operations
-      unit: ms
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: DELTA
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/write_ops_count
-      id: cloud.gcp.file_googleapis_com.nfs.server.write_ops_count
-      type: count,delta
-      name: Disk write operation count
-      unit: "1"
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: DELTA
-      dimensions:
-        - value: metric.labels.file_share
-    - value: file.googleapis.com/nfs/server/procedure_call_count
-      id: cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count
-      type: count,delta
-      name: Procedure call count
-      unit: "1"
-      gcpOptions:
-        ingestDelay: 180s
-        samplePeriod: 60s
-        valueType: INT64
-        metricKind: DELTA
-      dimensions:
-        - value: metric.labels.name
-        - value: metric.labels.version
+  - value: file.googleapis.com/nfs/server/average_read_latency
+    id: cloud.gcp.file_googleapis_com.nfs.server.average_read_latency
+    type: gauge
+    name: Average read latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/average_write_latency
+    id: cloud.gcp.file_googleapis_com.nfs.server.average_write_latency
+    type: gauge
+    name: Average write latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/free_bytes
+    id: cloud.gcp.file_googleapis_com.nfs.server.free_bytes
+    type: gauge
+    name: Free disk bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/free_bytes_percent
+    id: cloud.gcp.file_googleapis_com.nfs.server.free_bytes_percent
+    type: gauge
+    name: Free disk space percent
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/metadata_ops_count
+    id: cloud.gcp.file_googleapis_com.nfs.server.metadata_ops_count
+    type: count,delta
+    name: Metadata operation count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/procedure_call_count
+    id: cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count
+    type: count,delta
+    name: Procedure call count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.name
+    - value: metric.labels.version
+  - value: file.googleapis.com/nfs/server/read_bytes_count
+    id: cloud.gcp.file_googleapis_com.nfs.server.read_bytes_count
+    type: count,delta
+    name: Bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/read_milliseconds_count
+    id: cloud.gcp.file_googleapis_com.nfs.server.read_milliseconds_count
+    type: count,delta
+    name: Time (in milliseconds) spent on read operations
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/read_ops_count
+    id: cloud.gcp.file_googleapis_com.nfs.server.read_ops_count
+    type: count,delta
+    name: Disk read operation count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/used_bytes
+    id: cloud.gcp.file_googleapis_com.nfs.server.used_bytes
+    type: gauge
+    name: Used disk bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/used_bytes_percent
+    id: cloud.gcp.file_googleapis_com.nfs.server.used_bytes_percent
+    type: gauge
+    name: Used disk space percent
+    unit: '%'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/write_bytes_count
+    id: cloud.gcp.file_googleapis_com.nfs.server.write_bytes_count
+    type: count,delta
+    name: Bytes written
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/write_milliseconds_count
+    id: cloud.gcp.file_googleapis_com.nfs.server.write_milliseconds_count
+    type: count,delta
+    name: Time (in milliseconds) spent on write operations
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.file_share
+  - value: file.googleapis.com/nfs/server/write_ops_count
+    id: cloud.gcp.file_googleapis_com.nfs.server.write_ops_count
+    type: count,delta
+    name: Disk write operation count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.file_share
 dashboards:
   - dashboard: "dashboards/filestore_instance.json"

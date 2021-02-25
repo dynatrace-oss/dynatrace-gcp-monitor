@@ -1,0 +1,164 @@
+id: bigtable_table
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud Bigtable Table
+gcp:
+- service: bigtable_table
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.instance
+    id: instance
+  - value: resource.labels.cluster
+    id: cluster
+  - value: resource.labels.table
+    id: table
+  - value: resource.labels.zone
+    id: zone
+  metrics:
+  - value: bigtable.googleapis.com/replication/latency
+    id: cloud.gcp.bigtable_googleapis_com.replication.latency
+    type: gauge
+    name: Replication latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.source_cluster
+    - value: metric.labels.source_zone
+  - value: bigtable.googleapis.com/replication/max_delay
+    id: cloud.gcp.bigtable_googleapis_com.replication.max_delay
+    type: gauge
+    name: Replication maximum delay
+    unit: s
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.source_cluster
+    - value: metric.labels.source_zone
+  - value: bigtable.googleapis.com/server/error_count
+    id: cloud.gcp.bigtable_googleapis_com.server.error_count
+    type: count,delta
+    name: Error count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.error_code
+    - value: metric.labels.app_profile
+  - value: bigtable.googleapis.com/server/latencies
+    id: cloud.gcp.bigtable_googleapis_com.server.latencies
+    type: gauge
+    name: Server Latencies
+    unit: ms
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.app_profile
+  - value: bigtable.googleapis.com/server/modified_rows_count
+    id: cloud.gcp.bigtable_googleapis_com.server.modified_rows_count
+    type: count,delta
+    name: Modified rows
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.app_profile
+  - value: bigtable.googleapis.com/server/multi_cluster_failovers_count
+    id: cloud.gcp.bigtable_googleapis_com.server.multi_cluster_failovers_count
+    type: count,delta
+    name: Multi-cluster failovers
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.app_profile
+  - value: bigtable.googleapis.com/server/received_bytes_count
+    id: cloud.gcp.bigtable_googleapis_com.server.received_bytes_count
+    type: count,delta
+    name: Received bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.app_profile
+  - value: bigtable.googleapis.com/server/request_count
+    id: cloud.gcp.bigtable_googleapis_com.server.request_count
+    type: count,delta
+    name: Request count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.app_profile
+  - value: bigtable.googleapis.com/server/returned_rows_count
+    id: cloud.gcp.bigtable_googleapis_com.server.returned_rows_count
+    type: count,delta
+    name: Returned rows
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.app_profile
+  - value: bigtable.googleapis.com/server/sent_bytes_count
+    id: cloud.gcp.bigtable_googleapis_com.server.sent_bytes_count
+    type: count,delta
+    name: Sent bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.app_profile
+  - value: bigtable.googleapis.com/table/bytes_used
+    id: cloud.gcp.bigtable_googleapis_com.table.bytes_used
+    type: gauge
+    name: Data stored
+    unit: By
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.storage_type

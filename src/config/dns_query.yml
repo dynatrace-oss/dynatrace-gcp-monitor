@@ -1,0 +1,33 @@
+id: dns_query
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Cloud DNS Query
+gcp:
+- service: dns_query
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.target_name
+    id: target_name
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.target_type
+    id: target_type
+  - value: resource.labels.source_type
+    id: source_type
+  metrics:
+  - value: dns.googleapis.com/query/response_count
+    id: cloud.gcp.dns_googleapis_com.query.response_count
+    type: count,delta
+    name: DNS response counts
+    unit: '{requests}'
+    gcpOptions:
+      ingestDelay: 60s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code

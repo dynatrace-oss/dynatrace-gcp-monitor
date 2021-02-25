@@ -106,6 +106,7 @@ class ConfigureDynatrace:
             
     async def _init_(self):        
         dynatrace_url = await fetch_dynatrace_url(self.gcp_session, "", "")
+        self.logging_context.log(f"Using Dynatrace endpoint: {dynatrace_url}")
         dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session,"", "")
         scopes = await  get_dynatrace_token_metadata(self.dt_session, self.logging_context, dynatrace_url, dynatrace_access_key)
         has_write_config_permission=any(s in scopes.get('scopes', []) for s in ["WriteConfig", "ReadConfig"])        

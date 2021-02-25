@@ -1,0 +1,96 @@
+id: firestore_instance
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Firestore Instance
+gcp:
+- service: firestore_instance
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  metrics:
+  - value: firestore.googleapis.com/document/delete_count
+    id: cloud.gcp.firestore_googleapis_com.document.delete_count
+    type: count,delta
+    name: Document Deletes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.module
+    - value: metric.labels.version
+  - value: firestore.googleapis.com/document/read_count
+    id: cloud.gcp.firestore_googleapis_com.document.read_count
+    type: count,delta
+    name: Document Reads
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.module
+    - value: metric.labels.version
+    - value: metric.labels.type
+  - value: firestore.googleapis.com/document/write_count
+    id: cloud.gcp.firestore_googleapis_com.document.write_count
+    type: count,delta
+    name: Document Writes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.module
+    - value: metric.labels.version
+    - value: metric.labels.op
+  - value: firestore.googleapis.com/network/active_connections
+    id: cloud.gcp.firestore_googleapis_com.network.active_connections
+    type: gauge
+    name: Connected Clients
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.module
+    - value: metric.labels.version
+  - value: firestore.googleapis.com/network/snapshot_listeners
+    id: cloud.gcp.firestore_googleapis_com.network.snapshot_listeners
+    type: gauge
+    name: Snapshot Listeners
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.module
+    - value: metric.labels.version
+  - value: firestore.googleapis.com/rules/evaluation_count
+    id: cloud.gcp.firestore_googleapis_com.rules.evaluation_count
+    type: count,delta
+    name: Rule Evaluations
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.request_method
+    - value: metric.labels.ruleset_label
+    - value: metric.labels.version
+    - value: metric.labels.module
+    - value: metric.labels.result

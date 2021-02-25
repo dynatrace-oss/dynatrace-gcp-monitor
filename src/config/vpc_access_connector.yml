@@ -1,0 +1,61 @@
+id: vpc_access_connector
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google VPC Access Connector
+gcp:
+- service: vpc_access_connector
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.connector_name
+    id: connector_name
+  metrics:
+  - value: vpcaccess.googleapis.com/connector/received_bytes_count
+    id: cloud.gcp.vpcaccess_googleapis_com.connector.received_bytes_count
+    type: count,delta
+    name: Bytes received delta
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: vpcaccess.googleapis.com/connector/received_packets_count
+    id: cloud.gcp.vpcaccess_googleapis_com.connector.received_packets_count
+    type: count,delta
+    name: Packets received delta
+    unit: '{packet}'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: vpcaccess.googleapis.com/connector/sent_bytes_count
+    id: cloud.gcp.vpcaccess_googleapis_com.connector.sent_bytes_count
+    type: count,delta
+    name: Bytes sent delta
+    unit: By
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: vpcaccess.googleapis.com/connector/sent_packets_count
+    id: cloud.gcp.vpcaccess_googleapis_com.connector.sent_packets_count
+    type: count,delta
+    name: Packets sent delta
+    unit: '{packet}'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []

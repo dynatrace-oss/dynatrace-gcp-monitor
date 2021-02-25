@@ -1,0 +1,91 @@
+id: internal_udp_lb_rule
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Internal UDP Load Balancer Rule
+gcp:
+- service: internal_udp_lb_rule
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.region
+    id: region
+  - value: resource.labels.network_name
+    id: network_name
+  - value: resource.labels.backend_target_type
+    id: backend_target_type
+  - value: resource.labels.backend_target_name
+    id: backend_target_name
+  - value: resource.labels.load_balancer_name
+    id: load_balancer_name
+  - value: resource.labels.forwarding_rule_name
+    id: forwarding_rule_name
+  - value: resource.labels.backend_name
+    id: backend_name
+  - value: resource.labels.backend_type
+    id: backend_type
+  - value: resource.labels.backend_scope
+    id: backend_scope
+  - value: resource.labels.backend_scope_type
+    id: backend_scope_type
+  - value: resource.labels.backend_subnetwork_name
+    id: backend_subnetwork_name
+  metrics:
+  - value: loadbalancing.googleapis.com/l3/internal/egress_bytes_count
+    id: cloud.gcp.loadbalancing_googleapis_com.l3.internal.egress_bytes_count
+    type: count,delta
+    name: Egress bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 150s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.client_network
+    - value: metric.labels.client_subnetwork
+    - value: metric.labels.client_zone
+  - value: loadbalancing.googleapis.com/l3/internal/egress_packets_count
+    id: cloud.gcp.loadbalancing_googleapis_com.l3.internal.egress_packets_count
+    type: count,delta
+    name: Egress packets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 150s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.client_network
+    - value: metric.labels.client_subnetwork
+    - value: metric.labels.client_zone
+  - value: loadbalancing.googleapis.com/l3/internal/ingress_bytes_count
+    id: cloud.gcp.loadbalancing_googleapis_com.l3.internal.ingress_bytes_count
+    type: count,delta
+    name: Ingress bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 150s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.client_network
+    - value: metric.labels.client_subnetwork
+    - value: metric.labels.client_zone
+  - value: loadbalancing.googleapis.com/l3/internal/ingress_packets_count
+    id: cloud.gcp.loadbalancing_googleapis_com.l3.internal.ingress_packets_count
+    type: count,delta
+    name: Ingress packets
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 150s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.client_network
+    - value: metric.labels.client_subnetwork
+    - value: metric.labels.client_zone

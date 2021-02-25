@@ -1,0 +1,128 @@
+id: k8s_container
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Kubernetes Container Agent
+gcp:
+- service: k8s_container
+  featureSet: agent
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.cluster_name
+    id: cluster_name
+  - value: resource.labels.namespace_name
+    id: namespace_name
+  - value: resource.labels.pod_name
+    id: pod_name
+  - value: resource.labels.container_name
+    id: container_name
+  metrics:
+  - value: agent.googleapis.com/agent/api_request_count
+    id: cloud.gcp.agent_googleapis_com.agent.api_request_count
+    type: count,delta
+    name: Monitoring Agent API Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.state
+  - value: agent.googleapis.com/agent/log_entry_count
+    id: cloud.gcp.agent_googleapis_com.agent.log_entry_count
+    type: count,delta
+    name: Logging Agent Log Entry Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/agent/log_entry_retry_count
+    id: cloud.gcp.agent_googleapis_com.agent.log_entry_retry_count
+    type: count,delta
+    name: Logging Agent Retried Log Entry Writes Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/agent/memory_usage
+    id: cloud.gcp.agent_googleapis_com.agent.memory_usage
+    type: gauge
+    name: Monitoring Agent Memory Usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/agent/monitoring/point_count
+    id: cloud.gcp.agent_googleapis_com.agent.monitoring.point_count
+    type: count,delta
+    name: Monitoring Agent Metric Point Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.status
+  - value: agent.googleapis.com/agent/request_count
+    id: cloud.gcp.agent_googleapis_com.agent.request_count
+    type: count,delta
+    name: Logging Agent API Request Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.response_code
+  - value: agent.googleapis.com/agent/streamspace_size
+    id: cloud.gcp.agent_googleapis_com.agent.streamspace_size
+    type: gauge
+    name: Monitoring Agent Process Labels Size
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/agent/streamspace_size_throttling
+    id: cloud.gcp.agent_googleapis_com.agent.streamspace_size_throttling
+    type: gauge
+    name: Monitoring Agent is Throttling Processes
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+  - value: agent.googleapis.com/agent/uptime
+    id: cloud.gcp.agent_googleapis_com.agent.uptime
+    type: count,delta
+    name: Monitoring/Logging Agent Uptime
+    unit: s
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: CUMULATIVE
+    dimensions:
+    - value: metric.labels.version

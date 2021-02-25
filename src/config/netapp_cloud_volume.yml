@@ -1,0 +1,109 @@
+id: netapp_cloud_volume
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google NetApp Cloud Volume
+gcp:
+- service: netapp_cloud_volume
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.location
+    id: location
+  - value: resource.labels.volume_id
+    id: volume_id
+  metrics:
+  - value: netapp.com/cloudvolume/inode_allocation
+    id: cloud.gcp.netapp_com.cloudvolume.inode_allocation
+    type: gauge
+    name: Volume inode allocation
+    unit: '{inode}'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 300s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: netapp.com/cloudvolume/inode_usage
+    id: cloud.gcp.netapp_com.cloudvolume.inode_usage
+    type: gauge
+    name: Volume inode usage
+    unit: '{inode}'
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 300s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.type
+  - value: netapp.com/cloudvolume/operation_count
+    id: cloud.gcp.netapp_com.cloudvolume.operation_count
+    type: count,delta
+    name: Operations count
+    unit: count
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.type
+  - value: netapp.com/cloudvolume/read_bytes_count
+    id: cloud.gcp.netapp_com.cloudvolume.read_bytes_count
+    type: count,delta
+    name: Bytes read
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []
+  - value: netapp.com/cloudvolume/request_latencies
+    id: cloud.gcp.netapp_com.cloudvolume.request_latencies
+    type: gauge
+    name: Volume IO operation latency
+    unit: ms
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+  - value: netapp.com/cloudvolume/volume_size
+    id: cloud.gcp.netapp_com.cloudvolume.volume_size
+    type: gauge
+    name: Volume space allocation
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: netapp.com/cloudvolume/volume_usage
+    id: cloud.gcp.netapp_com.cloudvolume.volume_usage
+    type: gauge
+    name: Volume space usage
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.type
+  - value: netapp.com/cloudvolume/write_bytes_count
+    id: cloud.gcp.netapp_com.cloudvolume.write_bytes_count
+    type: count,delta
+    name: Bytes written
+    unit: By
+    gcpOptions:
+      ingestDelay: 0s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions: []

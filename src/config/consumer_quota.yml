@@ -1,0 +1,68 @@
+id: consumer_quota
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Google Consumer Quota
+gcp:
+- service: consumer_quota
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.service
+    id: service
+  - value: resource.labels.location
+    id: location
+  metrics:
+  - value: serviceruntime.googleapis.com/quota/allocation/usage
+    id: cloud.gcp.serviceruntime_googleapis_com.quota.allocation.usage
+    type: gauge
+    name: Allocation quota usage
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.quota_metric
+  - value: serviceruntime.googleapis.com/quota/exceeded
+    id: cloud.gcp.serviceruntime_googleapis_com.quota.exceeded
+    type: gauge
+    name: Quota exceeded error
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: 60s
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.limit_name
+    - value: metric.labels.quota_metric
+  - value: serviceruntime.googleapis.com/quota/limit
+    id: cloud.gcp.serviceruntime_googleapis_com.quota.limit
+    type: gauge
+    name: Quota limit
+    unit: '1'
+    gcpOptions:
+      ingestDelay: ''
+      samplePeriod: 86400s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.limit_name
+    - value: metric.labels.quota_metric
+  - value: serviceruntime.googleapis.com/quota/rate/net_usage
+    id: cloud.gcp.serviceruntime_googleapis_com.quota.rate.net_usage
+    type: count,delta
+    name: Rate quota usage
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.method
+    - value: metric.labels.quota_metric

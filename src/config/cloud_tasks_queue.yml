@@ -1,0 +1,64 @@
+id: cloud_tasks_queue
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Amazon EC2 Instance (via GCP)
+gcp:
+- service: cloud_tasks_queue
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.queue_id
+    id: queue_id
+  - value: resource.labels.target_type
+    id: target_type
+  metrics:
+  - value: cloudtasks.googleapis.com/api/request_count
+    id: cloud.gcp.cloudtasks_googleapis_com.api.request_count
+    type: count,delta
+    name: API requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 240s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.api_method
+    - value: metric.labels.response_code
+  - value: cloudtasks.googleapis.com/queue/depth
+    id: cloud.gcp.cloudtasks_googleapis_com.queue.depth
+    type: gauge
+    name: Queue depth
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: cloudtasks.googleapis.com/queue/task_attempt_count
+    id: cloud.gcp.cloudtasks_googleapis_com.queue.task_attempt_count
+    type: count,delta
+    name: Task attempt count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.response_code
+  - value: cloudtasks.googleapis.com/queue/task_attempt_delays
+    id: cloud.gcp.cloudtasks_googleapis_com.queue.task_attempt_delays
+    type: gauge
+    name: Task attempt delays
+    unit: ms
+    gcpOptions:
+      ingestDelay: 120s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions: []
