@@ -6,27 +6,13 @@ Maintaining its lifecycle places a burden on the operational team.
 
 
 ## Getting started
-There are two deployment options available. You can either [run it on Kubernetes](docs/k8s/getting_started.md) or [deploy a Google Cloud Function](docs/function/getting_started.md)
+There are two deployment options available, you can:
+- [run it on Google Kubernetes Engine](docs/k8s/getting_started.md) or 
+- [deploy a Google Cloud Function](docs/function/getting_started.md)
 
 
-## Supported Google Cloud services
-| Google Cloud service                 | Metric pulling | Pre-defined dashboards | Pre-defined alerts |
-| --------------------------  | ---- | ---- | ---- |
-| Google Cloud APIs           |  Y   |  Y   |  N   |
-| Google Cloud Function       |  Y   |  Y   |  N   |
-| Google Cloud SQL            |  Y   |  Y   |  N   | 
-| Google Cloud Datastore      |  Y   |  Y   |  N   |
-| Google Cloud Filestore      |  Y   |  Y   |  N   |
-| Google Cloud Storage        |  Y   |  Y   |  N   |
-| Google Cloud Load Balancing |  Y   |  Y   |  N   |
-| Google Cloud Pub/Sub        |  Y   |  Y   |  N   |
-| Google Kubernetes Node      |  Y   |  Y   |  N   |
-| Google Kubernetes Container |  Y   |  Y   |  N   |
-| Google Kubernetes Cluster   |  Y   |  Y   |  N   |
-| VM Instance                 |  Y   |  N   |  N   |
-
-You can extend monitoring scope and add any service that has metrics in Monitoring API. Configuration depends on your deployment model.
-
+## Pricing
+Metrics will consume DDUs for more details [refer to documention](https://dynatrace.com)
 
 ## Monitoring multiple GCP projects
 It's possible to deploy `dynatrace-gcp-function` to push metrics to Dynatrace from multiple GCP projects. 
@@ -61,17 +47,31 @@ Alternatively You may grant access for all projects in `IAM & Admin` console in 
 
 
 
-## Monitoring GCP instances in Dynatrace
+## Monitoring Google Cloud Platform using Dashboards in Dynatrace
 
-Installation script deploys Dynatrace Dashboards for GCP services within provided Dynatrace tenant. You can browse them in Dynatrace UI.
+Installation script deploys Dynatrace Dashboards for GCP services within provided Dynatrace tenant. Following services will get out-of-the-box dashboards: 
+- Google Cloud APIs
+- Google Cloud Function
+- Google Cloud SQL
+- Google Cloud Datastore
+- Google Cloud Filestore
+- Google Cloud Storage  
+- Google Cloud Load Balancing
+- Google Cloud Pub/Sub
+- Google Kubernetes Node
+- Google Kubernetes Container
+- Google Kubernetes Cluster
 
-Dashboards list:
+**Feel free to contribute.** Simply create a dashboard in Dynatrace, export it as json and create a PR with configuration added to `src/dashboards` (make sure that the dashboard filename is equal to service configuration filename `src/config`)
+
+Imported dashboards can be found in Dynatrace UI under Dashboards list:
 
 ![Dashboards list](./img/gcp_dashboards_list.png)
 
-Sample dashboard for GCP API:
+Sample dashboard for Google Cloud API:
 
 ![Sample dashboard](./img/gcp_api_dashboard.png)
+
 
 ## Self-monitoring
 
