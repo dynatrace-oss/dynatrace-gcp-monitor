@@ -1,7 +1,10 @@
+- @TODO: Linking to Dynatrace documentation
+
+
 # Dynatrace function for Google Cloud Platform monitoring
 
-This is the home of `dynatrace-gcp-function` which provides the mechanism to pull [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) into Dynatrace.
-To help with function deployment you can use automation scripts available in this repo.
+This is the home of `dynatrace-gcp-function` which provides the mechanism to pull all [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) into Dynatrace. 
+To help with deployment you can use automation scripts available in this repo.
 Maintaining its lifecycle places a burden on the operational team.
 
 
@@ -92,7 +95,7 @@ Installation script deploy `dynatrace-gcp-function Self Monitoring` dashboard up
 
 ## Support
 Before you create a ticket check troubshooting guides specific to your deployment.  
-If you didn't find a solution please create a support ticket. 
+If you didn't find a solution please [contact Dynatrace support](https://www.dynatrace.com/support/contact-support/). 
 
 
 ## Contributing
