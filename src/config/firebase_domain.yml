@@ -15,39 +15,6 @@ gcp:
   - value: resource.labels.domain_name
     id: domain_name
   metrics:
-  - value: firebasehosting.googleapis.com/network/monthly_sent
-    id: cloud.gcp.firebasehosting_googleapis_com.network.monthly_sent
-    type: gauge
-    name: Bytes sent monthly
-    unit: By
-    gcpOptions:
-      ingestDelay: 4200s
-      samplePeriod: 28800s
-      valueType: INT64
-      metricKind: GAUGE
-    dimensions: []
-  - value: firebasehosting.googleapis.com/network/monthly_sent_limit
-    id: cloud.gcp.firebasehosting_googleapis_com.network.monthly_sent_limit
-    type: gauge
-    name: Bytes sent limit
-    unit: By
-    gcpOptions:
-      ingestDelay: 4200s
-      samplePeriod: 28800s
-      valueType: INT64
-      metricKind: GAUGE
-    dimensions: []
-  - value: firebasehosting.googleapis.com/network/sent_bytes_count
-    id: cloud.gcp.firebasehosting_googleapis_com.network.sent_bytes_count
-    type: count,delta
-    name: Bytes sent
-    unit: By
-    gcpOptions:
-      ingestDelay: 15060s
-      samplePeriod: 60s
-      valueType: INT64
-      metricKind: DELTA
-    dimensions: []
   - value: firebasehosting.googleapis.com/storage/limit
     id: cloud.gcp.firebasehosting_googleapis_com.storage.limit
     type: gauge

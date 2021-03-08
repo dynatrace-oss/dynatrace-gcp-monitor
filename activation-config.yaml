@@ -52,9 +52,7 @@ activation:
     #Google Autoscaler
     #- autoscaler/default
     #Google Cloud BigQuery BI Engine Model
-    #- bigquery_biengine_model/default
-    #Google Cloud BigQuery Dataset
-    #- bigquery_dataset/default
+    #- bigquery_biengine_model/default 
     #Google Cloud BigQuery Project
     #- bigquery_project/default
     #Google Cloud Bigtable Cluster
@@ -133,8 +131,6 @@ activation:
     #- gke_container/default
     #Google Cloud HTTP/S Load Balancing Rule
     - https_lb_rule/default
-    #Google IAM Service Account
-    #- iam_service_account/default
     #Google Instance Group
     #- instance_group/default
     #Google Interconnect
