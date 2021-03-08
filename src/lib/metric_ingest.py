@@ -69,7 +69,7 @@ async def _push_to_dynatrace(context: Context, project_id: str, lines_batch: Lis
         context.log("Ingest input is: ")
         context.log(ingest_input)
     dt_url=f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
-    ingest_response = await context.session.post(
+    ingest_response = await context.dt_session.post(
         url=dt_url,
         headers={
             "Authorization": f"Api-Token {context.dynatrace_api_key}",
@@ -156,7 +156,7 @@ async def fetch_metric(
     lines = []
     while should_fetch:
         url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/timeSeries"
-        resp = await context.session.request('GET', url=url, params=params, headers=headers)
+        resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
         if 'error' in page:

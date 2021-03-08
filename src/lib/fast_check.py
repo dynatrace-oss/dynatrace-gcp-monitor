@@ -35,9 +35,9 @@ def valid_dynatrace_scopes(token_metadata: dict):
 
 
 
-async def get_dynatrace_token_metadata(session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
+async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:
-        response = await session.post(
+        response = await dt_session.post(
             url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
             headers={
                 "Authorization": f"Api-Token {dynatrace_api_key}",
@@ -59,14 +59,15 @@ async def get_dynatrace_token_metadata(session: ClientSession, context: LoggingC
 
 class FastCheck:
 
-    def __init__(self, session: ClientSession, token: str, logging_context: LoggingContext):
-        self.session = session
+    def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, token: str, logging_context: LoggingContext):
+        self.gcp_session = gcp_session
+        self.dt_session = dt_session
         self.logging_context = logging_context
         self.token = token
 
     async def list_services(self, project_id: str, timeout: Optional[int] = 2):
         try:
-            response = await self.session.get(
+            response = await self.gcp_session.get(
                 urljoin(GCP_SERVICE_USAGE_URL, f'{project_id}/services'),
                 headers={
                     "Authorization": f'Bearer {self.token}'
@@ -95,14 +96,14 @@ class FastCheck:
 
     async def _check_dynatrace(self, project_id):
         try:
-            dynatrace_url = await fetch_dynatrace_url(self.session, project_id, self.token)
-            dynatrace_access_key = await fetch_dynatrace_api_key(self.session, project_id, self.token)
+            dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
+            dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
             if not dynatrace_url or not dynatrace_access_key:
                 self.logging_context.log(f'No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
                                          f'Add required secrets to Secret Manager.')
                 return None
 
-            token_metadata = await get_dynatrace_token_metadata(self.session, self.logging_context, dynatrace_url, dynatrace_access_key)
+            token_metadata = await get_dynatrace_token_metadata(self.dt_session, self.logging_context, dynatrace_url, dynatrace_access_key)
             if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
                 self.logging_context.log(f'Dynatrace API Token for project: \'{project_id}\'is not valid. '
                                          f'Check expiration time and required token scopes: {dynatrace_required_token_scopes}')
@@ -114,7 +115,7 @@ class FastCheck:
         return dynatrace_url, token_metadata
 
     async def _init_(self) -> FastCheckResult:
-        project_list = await get_all_accessible_projects(self.logging_context, self.session, self.token)
+        project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
         ready_to_monitor = []
         for project_id in project_list:

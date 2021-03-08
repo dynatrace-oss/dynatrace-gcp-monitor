@@ -31,12 +31,12 @@ _DYNATRACE_ACCESS_KEY_SECRET_NAME = os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_
 _DYNATRACE_URL_SECRET_NAME = os.environ.get("DYNATRACE_URL_SECRET_NAME","DYNATRACE_URL")
 
 
-async def fetch_dynatrace_api_key(session: ClientSession, project_id: str, token: str,):
-    return await fetch_secret(session, project_id, token, _DYNATRACE_ACCESS_KEY_SECRET_NAME)
+async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str, ):
+    return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_ACCESS_KEY_SECRET_NAME)
 
 
-async def fetch_dynatrace_url(session: ClientSession, project_id: str, token: str,):
-    return await fetch_secret(session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
+async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token: str, ):
+    return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
 
 
 async def fetch_secret(session: ClientSession, project_id: str, token: str, secret_name: str):
