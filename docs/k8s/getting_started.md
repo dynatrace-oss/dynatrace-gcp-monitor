@@ -1,3 +1,7 @@
+- @todo add more troubleshooting points
+- @todo animation for comment-uncomment
+
+
 ## Quick start on Kubernetes
 
 ### Overview
@@ -16,9 +20,9 @@ It's possible to run monitoring as Kubernetes Container. In this case all config
 ### Create Service Account & Kubernetes objects
 Create `dynatrace` namespace with `kubectl`, and secrets for Dynatrace cluster `API token` and `URL`. 
 
-Replace {DYNATRACE_URL} with URL to Your Dynatrace SaaS or Managed environment.
+Replace `{DYNATRACE_URL}` with URL to Your Dynatrace SaaS or Managed environment.
 
-Replace {DYNATRACE_API_TOKEN} with  Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `Ingest metrics using API V2` Token permission.
+Replace `{DYNATRACE_API_TOKEN}` with  Dynatrace API token. You can learn how to generate token [Dynatrace API - Tokens and authentication](https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication) manual. Integration requires `Ingest metrics using API V2` Token permission.
 ```
 kubectl create namespace dynatrace
 kubectl -n dynatrace create secret generic dynatrace-gcp-function-secret --from-literal="access-key={DYNATRACE_API_TOKEN}" --from-literal="url={DYNATRACE_URL}"
@@ -96,7 +100,7 @@ wget https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/dow
 
 << animation? >>
 
-3. Apply your configuration
+1. Apply your configuration
 
 ```
 kubectl apply -f dynatrace-gcp-function.yaml
