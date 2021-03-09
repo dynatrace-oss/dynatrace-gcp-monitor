@@ -22,10 +22,10 @@ Ingested metrics will consume DDUs. For more details [refer to documention](http
 
 
 ## Additional resources
-- [Architecture overview for Kubernetes deployment]()
-- [Architecture overview for Google Cloud Function]()
-- 
-
+- [Architecture overview of Kubernetes deployment](./docs/k8s.md)
+- [Architecture overview of Google Cloud Function deployment](./docs/function.md)
+- [Monitoring multiple projects](https://dynatrace.com)
+- [Self-monitoring in Google Cloud](https://dynatrace.com)
 
 ## Support
 Before you create a ticket check troubshooting guides specific to your deployment.  
