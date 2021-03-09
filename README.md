@@ -1,10 +1,13 @@
 - @TODO: Linking to Dynatrace documentation
 
 
-# Dynatrace function for Google Cloud Platform monitoring
+
+# Dynatrace integration for Google Cloud Platform monitoring
 
 This is the home of `dynatrace-gcp-function` which provides the mechanism to pull all [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) into Dynatrace. 
+ 
 To help with deployment you can use automation scripts available in this repo.
+
 Maintaining its lifecycle places a burden on the operational team.
 
 
@@ -15,7 +18,31 @@ There are two deployment options available, you can:
 
 
 ## Pricing
-Metrics will consume DDUs for more details [refer to documention](https://dynatrace.com)
+Ingested metrics will consume DDUs. For more details [refer to documention](https://dynatrace.com)
+
+
+## Additional resources
+- [Architecture overview for Kubernetes deployment]()
+- [Architecture overview for Google Cloud Function]()
+- 
+
+
+## Support
+Before you create a ticket check troubshooting guides specific to your deployment.  
+If you didn't find a solution please [contact Dynatrace support](https://www.dynatrace.com/support/contact-support/). 
+
+
+## Contributing
+
+See [CONTRIBUTING](CONTRIBUTING.md) for details on submitting changes.
+
+## License
+
+`dynatrace-gcp-function` is under Apache 2.0 license. See [LICENSE](LICENSE.md) for details.
+
+
+---
+
 
 ## Monitoring multiple GCP projects
 It's possible to deploy `dynatrace-gcp-function` to push metrics to Dynatrace from multiple GCP projects. 
@@ -92,16 +119,3 @@ Installation script deploy `dynatrace-gcp-function Self Monitoring` dashboard up
 
 ![Self monitoring](./img/self_monitoring.png)
 
-
-## Support
-Before you create a ticket check troubshooting guides specific to your deployment.  
-If you didn't find a solution please [contact Dynatrace support](https://www.dynatrace.com/support/contact-support/). 
-
-
-## Contributing
-
-See [CONTRIBUTING](CONTRIBUTING.md) for details on submitting changes.
-
-## License
-
-`dynatrace-gcp-function` is under Apache 2.0 license. See [LICENSE](LICENSE.md) for details.
