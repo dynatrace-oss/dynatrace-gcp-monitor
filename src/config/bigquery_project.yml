@@ -51,32 +51,6 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.priority
-  - value: bigquery.googleapis.com/query/statement_scanned_bytes
-    id: cloud.gcp.bigquery_googleapis_com.query.statement_scanned_bytes
-    type: count,delta
-    name: Statement scanned bytes
-    unit: By
-    gcpOptions:
-      ingestDelay: 21720s
-      samplePeriod: 60s
-      valueType: INT64
-      metricKind: DELTA
-    dimensions:
-    - value: metric.labels.priority
-    - value: metric.labels.statement_type
-  - value: bigquery.googleapis.com/query/statement_scanned_bytes_billed
-    id: cloud.gcp.bigquery_googleapis_com.query.statement_scanned_bytes_billed
-    type: count,delta
-    name: Statement scanned bytes billed
-    unit: By
-    gcpOptions:
-      ingestDelay: 21720s
-      samplePeriod: 60s
-      valueType: INT64
-      metricKind: DELTA
-    dimensions:
-    - value: metric.labels.priority
-    - value: metric.labels.statement_type
   - value: bigquery.googleapis.com/slots/allocated
     id: cloud.gcp.bigquery_googleapis_com.slots.allocated
     type: gauge

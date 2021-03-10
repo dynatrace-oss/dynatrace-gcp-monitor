@@ -186,17 +186,6 @@ gcp:
     - value: metric.labels.request_method
     - value: metric.labels.ruleset_label
     - value: metric.labels.result
-  - value: firebasedatabase.googleapis.com/storage/disabled_for_overages
-    id: cloud.gcp.firebasedatabase_googleapis_com.storage.disabled_for_overages
-    type: gauge
-    name: Disabled for storage
-    unit: ''
-    gcpOptions:
-      ingestDelay: 86400s
-      samplePeriod: 86400s
-      valueType: BOOL
-      metricKind: GAUGE
-    dimensions: []
   - value: firebasedatabase.googleapis.com/storage/limit
     id: cloud.gcp.firebasedatabase_googleapis_com.storage.limit
     type: gauge
@@ -205,17 +194,6 @@ gcp:
     gcpOptions:
       ingestDelay: 1800s
       samplePeriod: 900s
-      valueType: INT64
-      metricKind: GAUGE
-    dimensions: []
-  - value: firebasedatabase.googleapis.com/storage/total_bytes
-    id: cloud.gcp.firebasedatabase_googleapis_com.storage.total_bytes
-    type: gauge
-    name: Bytes stored
-    unit: By
-    gcpOptions:
-      ingestDelay: 86400s
-      samplePeriod: 86400s
       valueType: INT64
       metricKind: GAUGE
     dimensions: []

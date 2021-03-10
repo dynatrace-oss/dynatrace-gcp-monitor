@@ -40,43 +40,176 @@ activation:
     # List of services to forward Google Monitoring Metrics to Dynatrace
     services:
     # Google Cloud APIs
-    - api
+    - api/default     
+    # Google Apigee Environment
+    #- apigee.googleapis.com/Environment/default
+    # Google Apigee Proxy
+    #- apigee.googleapis.com/Proxy/default
+    # Google Apigee Proxy (v2)
+    #- apigee.googleapis.com/ProxyV2/default
+    # Google Assistant Action Project
+    #- assistant_action_project/default
+    # Google Autoscaler
+    #- autoscaler/default
+    # Google Cloud BigQuery BI Engine Model
+    #- bigquery_biengine_model/default 
+    # Google Cloud BigQuery Project
+    #- bigquery_project/default
+    # Google Cloud Bigtable Cluster
+    #- bigtable_cluster/default
+    # Google Cloud Bigtable Table
+    #- bigtable_table/default
+    # Google Cloud IoT Registry
+    #- cloudiot_device_registry/default
+    # Google Cloud ML Job
+    #- cloudml_job/default
+    # Google Cloud ML Model Version
+    #- cloudml_model_version/default
+    #Cloud SQL Database
+    - cloudsql_database/default
+    # Google Cloud Trace
+    #- cloudtrace.googleapis.com/CloudtraceProject/default
+    # Google NetApp CVS-SO
+    #- cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO/default
+    # Google Cloud Composer Environment
+    #- cloud_composer_environment/default
+    # Google Cloud Dataproc Cluster
+    #- cloud_dataproc_cluster/default
+    # Google Cloud Data Loss Prevention Project
+    #- cloud_dlp_project/default
     # Google Cloud Function
-    - cloud_function
-    # Google Cloud SQL
-    - cloudsql_database
-    # Google Cloud Datastore 
-    - datastore_request
-    # Google Cloud Filestore
-    - filestore_instance
-    # Google Cloud Storage
-    - gcs_bucket
-    # Google Cloud Load Balancing / HTTP(S) Load Balancing
-    - https_lb_rule
-    # Google Cloud Load Balancing / HTTP(S) Load Balancing / Internal
-    - internal_http_lb_rule
-    # Google Cloud Load Balancing / TCP Load Balancing / Internal
-    - internal_tcp_lb_rule
-    # Google Cloud Load Balancing / UDP Load Balancing / Internal 
-    - internal_udp_lb_rule
-     # Google Cloud Load Balancing / TCP Load Balancing 
-    - tcp_lb_rule
-    # Google Cloud Load Balancing / UDP Load Balancing 
-    - udp_lb_rule
-    # Google Cloud Pub/Sub / Snapshots
-    - pubsub_snapshot
-    # Google Cloud Pub/Sub / Subscriptions
-    - pubsub_subscription
-    # Google Cloud Pub/Sub / Topics
-    - pubsub_topic
-    # Google Cloud Pub/Sub / Lite Topics
-    - pubsublite_topic_partition
-    # Google Kubernetes cluster
-    - k8s_cluster
-    # Google Kubernetes node
-    - k8s_node
-    # Google Kubernetes container
-    - k8s_container
-#   logs:
-#     services: # List of services to forward Logs from Google Operations/Logging to Dynatrace, for those services Log Router Sinks and Pub/Sub topic will be created
-#     - cloudsql_database
+    - cloud_function/default
+    # Google Cloud Run Revision
+    #- cloud_run_revision/default
+    #Amazon EC2 Instance (via GCP)
+    #- cloud_tasks_queue/default
+    # Google Consumed API
+    #- consumed_api/default
+    # Google Consumer Quota
+    #- consumer_quota/default
+    # Google Dataflow Job
+    #- dataflow_job/default
+    # Google Cloud Datastore
+    - datastore_request/default
+    # Google Cloud DNS Query
+    #- dns_query/default
+    # Google Filestore Instance
+    #- filestore_instance/default
+    # Google Firebase Hosting Site Domain
+    #- firebase_domain/default
+    # Google Firebase Realtime Database
+    #- firebase_namespace/default
+    # Google Firestore Instance
+    #- firestore_instance/default
+    # Google App Engine Application
+    #- gae_app/default
+    # Google App Engine Application - Uptime Checks
+    #- gae_app_uptime_check/default
+    # Google App Engine Instance
+    #- gae_instance/default
+    # Google VM Instance
+    #- gce_instance/default
+    # Google VM Instance Agent
+    #- gce_instance/agent
+    # Google VM Instance
+    #- gce_instance/appenginee
+    # Google VM Instance Firewall Insights
+    #- gce_instance/firewallinsights
+    # Google VM Instance Istio
+    #- gce_instance/istio
+    # Google VM Instance Uptime Checks
+    #- gce_instance/uptime_check
+    # Google VM Instance VM Flow
+    #- gce_instance_vm_flow/None
+    # Google Cloud Router
+    #- gce_router/default
+    # Google Zone Network Health
+    #- gce_zone_network_health/default
+    # Google Cloud Storage bucket
+    - gcs_bucket/default
+    # Google GKE Container
+    #- gke_container/default
+    # Google Cloud HTTP/S Load Balancing Rule
+    - https_lb_rule/default
+    # Google Instance Group
+    #- instance_group/default
+    # Google Interconnect
+    #- interconnect/default
+    # Google Interconnect Attachment
+    #- interconnect_attachment/default
+    # Google Internal HTTP/S Load Balancing Rule
+    - internal_http_lb_rule/default
+    # Google Internal TCP Load Balancer Rule
+    - internal_tcp_lb_rule/default
+    # Google Internal UDP Load Balancer Rule
+    - internal_udp_lb_rule/default
+    # Google Istio Canonical Service
+    #- istio_canonical_service/default
+    # Google Kubernetes Cluster
+    #- k8s_cluster/default
+    # Google Kubernetes Container
+    - k8s_container/default
+    # Google Kubernetes Container Agent
+    #- k8s_container/agent
+    # Google Kubernetes Container Apigee
+    #- k8s_container/apigee
+    # Google Kubernetes Container Istio
+    #- k8s_container/istio
+    # Google Kubernetes Container Nginx
+    #- k8s_container/nginx
+    # Google Kubernetes Node
+    - k8s_node/default
+    # Google Kubernetes Pod
+    - k8s_pod/default
+    # Google Kubernetes Pod
+    #- k8s_pod/istio
+    # Google Cloud Run for Anthos Broker
+    #- knative_broker/default
+    # Google Cloud Run for Anthos Revision
+    #- knative_revision/default
+    # Google Cloud Run for Anthos Trigger
+    #- knative_trigger/default
+    # Google Cloud Logging export sink
+    #- logging_sink/default
+    # Google Cloud Microsoft Active Directory Domain
+    #- microsoft_ad_domain/default
+    # Google Cloud NAT Gateway
+    #- nat_gateway/default
+    # Google NetApp Cloud Volume
+    #- netapp_cloud_volume/default
+    # Google Network Security Policy
+    #- network_security_policy/default
+    # Google Producer Quota
+    #- producer_quota/default
+    # Google Pub/Sub Lite Subscription Partition
+    - pubsublite_subscription_partition/default
+    # Google Pub/Sub Lite Topic Partition
+    - pubsublite_topic_partition/default
+    # Google Cloud Pub/Sub Snapshot
+    - pubsub_snapshot/default
+    # Google Cloud Pub/Sub Subscription
+    - pubsub_subscription/default
+    # Google Cloud Pub/Sub Topic
+    - pubsub_topic/default
+    # Google reCAPTCHA Key
+    #- recaptchaenterprise.googleapis.com/Key/default
+    # Google Cloud Memorystore
+    - redis_instance/default
+    # Google Cloud Spanner Instance
+    #- spanner_instance/default
+    # Google Cloud Network TCP Load Balancer Rule
+    - tcp_lb_rule/default
+    # Google Cloud TCP/SSL Proxy Rule
+    #- tcp_ssl_proxy_rule/default
+    # Google Cloud TPU Worker
+    #- tpu_worker/default
+    # Google Transfer Service Agent
+    #- transfer_service_agent/default
+    # Google Cloud Network UDP Load Balancer Rule
+    #- udp_lb_rule/default
+    # Google Uptime Check URL
+    #- uptime_url/default
+    # Google VPC Access Connector
+    #- vpc_access_connector/default
+    # Google Cloud VPN Tunnel
+    #- vpn_gatewayv/None
