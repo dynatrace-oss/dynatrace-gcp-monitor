@@ -83,5 +83,3 @@ gcp:
       valueType: INT64
       metricKind: DELTA
     dimensions: []
-dashboards:
-  - dashboard: "dashboards/pubsub.json"

@@ -139,5 +139,3 @@ gcp:
       valueType: DOUBLE
       metricKind: GAUGE
     dimensions: []
-dashboards:
-  - dashboard: "dashboards/pubsub.json"

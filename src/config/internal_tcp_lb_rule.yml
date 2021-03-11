@@ -103,5 +103,3 @@ gcp:
     - value: metric.labels.client_network
     - value: metric.labels.client_subnetwork
     - value: metric.labels.client_zone
-dashboards:
-  - dashboard: "dashboards/lb_tcp.json"
