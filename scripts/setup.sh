@@ -205,7 +205,7 @@ else
 fi
 
 
-EXISTING_DASHBOARDS=$(curl -k  -s -XGET "${DYNATRACE_URL}api/config/v1/dashboards" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"  | jq '.dashboards[].name | select (. |contains("Google"))')
+EXISTING_DASHBOARDS=$(curl -k -s -X GET "${DYNATRACE_URL}api/config/v1/dashboards" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"  | jq '.dashboards[].name | select (. |contains("Google"))')
 if [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; then
     echo -e
     echo -e "\e[93mWARNING: \e[37mFound existing Google dashboards in [${DYNATRACE_URL}] tenant:"
@@ -227,7 +227,7 @@ do
       DASHBOARD_EXISTS=$(echo $EXISTING_DASHBOARDS | grep "$DASHBOARD_NAME")
       if ! [[ "${DASHBOARD_EXISTS}" != "" ]]; then              
         echo "- Create [$DASHBOARD_NAME] dashboard from file [$DASHBOARD_PATH]"
-        DASHBOARD_RESPONSE=$(curl -k -s -X  POST "${DYNATRACE_URL}api/config/v1/dashboards" \
+        DASHBOARD_RESPONSE=$(curl -k -s -X POST "${DYNATRACE_URL}api/config/v1/dashboards" \
             -H "Accept: application/json; charset=utf-8" \
             -H "Content-Type: application/json; charset=utf-8" \
             -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
