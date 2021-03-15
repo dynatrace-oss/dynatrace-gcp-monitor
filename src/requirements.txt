@@ -2,4 +2,4 @@ aiohttp==3.6.2
 aiodns==2.0.0
 mmh3==2.5.1
 PyJWT==1.7.1
-PyYAML==5.3.1
+PyYAML==5.4
