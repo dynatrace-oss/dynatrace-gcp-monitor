@@ -3,13 +3,12 @@
         "name": "Google Cloud Filestore",
         "shared": true,
         "owner": "Dynatrace Open Source",
-        "sharingDetails": {
-            "linkShared": true,
-            "published": true
-        },
         "dashboardFilter": {
             "timeframe": ""
-        }
+        },
+        "tags": [
+            "Google Cloud"
+        ]
     },
     "tiles": [{
         "name": "markdown",

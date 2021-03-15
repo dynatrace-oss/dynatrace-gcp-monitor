@@ -95,5 +95,3 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-dashboards:
-  - dashboard: "dashboards/pubsub.json"

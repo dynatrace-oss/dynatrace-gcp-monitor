@@ -204,15 +204,8 @@ else
     gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
 fi
 
-if [ $? -ne 0 ]; then
-    echo -e "\e[93mWARNING: \e[37mSelf monitoring dashboard could not be created."
-    echo -e
-    echo -e "Please verify if project [$GCP_PROJECT] is assigned to Google Monitoring Workspace, in the console https://console.cloud.google.com/monitoring/dashboards "
-    echo -e "Documentation: https://cloud.google.com/monitoring/workspaces/create"
-    echo 
-fi
 
-EXISTING_DASHBOARDS=$(curl -s -X GET "${DYNATRACE_URL}api/config/v1/dashboards" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"  | jq '.dashboards[].name | select (. |contains("Google"))')
+EXISTING_DASHBOARDS=$(curl -k -s -X GET "${DYNATRACE_URL}api/config/v1/dashboards" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"  | jq '.dashboards[].name | select (. |contains("Google"))')
 if [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; then
     echo -e
     echo -e "\e[93mWARNING: \e[37mFound existing Google dashboards in [${DYNATRACE_URL}] tenant:"
@@ -234,11 +227,20 @@ do
       DASHBOARD_EXISTS=$(echo $EXISTING_DASHBOARDS | grep "$DASHBOARD_NAME")
       if ! [[ "${DASHBOARD_EXISTS}" != "" ]]; then              
         echo "- Create [$DASHBOARD_NAME] dashboard from file [$DASHBOARD_PATH]"
-        curl -X POST "${DYNATRACE_URL}api/config/v1/dashboards" \
+        DASHBOARD_RESPONSE=$(curl -k -s -X POST "${DYNATRACE_URL}api/config/v1/dashboards" \
             -H "Accept: application/json; charset=utf-8" \
             -H "Content-Type: application/json; charset=utf-8" \
             -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
-            -d "$DASHBOARD_JSON"
+            -d "$DASHBOARD_JSON")
+        DASHBOARD_ID=$(echo "${DASHBOARD_RESPONSE}" | jq -r .id)
+        echo $DASHBOARD_ID
+        echo "{ \"id\": \"${DASHBOARD_ID}\",\"published\": \"false\"}"
+        DASHBOARD_SHARE_RESPONSE=$(curl -k -s -X PUT "${DYNATRACE_URL}api/config/v1/dashboards/${DASHBOARD_ID}/shareSettings" \
+            -H "Accept: application/json; charset=utf-8" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
+            -d "{ \"id\": \"${DASHBOARD_ID}\",\"published\": \"true\", \"enabled\" : \"true\", \"publicAccess\" : { \"managementZoneIds\": [], \"urls\": {}}, \"permissions\": [ { \"type\": \"ALL\", \"permission\": \"VIEW\"} ] }")
+        echo $DASHBOARD_SHARE_RESPONSE
       else
         echo "- Dashboard [$DASHBOARD_NAME] already exists on cluster, skipping"
       fi
