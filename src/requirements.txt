@@ -1,4 +1,4 @@
-aiohttp==3.6.2
+aiohttp==3.7.4
 aiodns==2.0.0
 mmh3==2.5.1
 PyJWT==1.7.1
