@@ -12,4 +12,4 @@ For a quick start guide [refer to documentation](https://www.dynatrace.com/suppo
 
 
 ## Troubleshooting
-For troubleshooting [refer to documentation](https://www.dynatrace.com/support/help/technology-support/cloud-platforms/google-cloud-platform/monitor-gcp-services-with-dynatrace/troubleshoot/)
+For troubleshooting [refer to documentation](https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp)
