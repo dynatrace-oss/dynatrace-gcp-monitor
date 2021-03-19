@@ -31,7 +31,7 @@ async def push_ingest_lines(context: Context, project_id: str, fetch_metric_resu
         return
 
     if not fetch_metric_results:
-        context.log(project_id, "Skipping push due to detected connectivity error")
+        context.log(project_id, "Skipping push due to no data to push")
 
     lines_sent = 0
     maximum_lines_threshold = context.maximum_metric_data_points_per_minute
@@ -155,6 +155,8 @@ async def fetch_metric(
 
     lines = []
     while should_fetch:
+        context.gcp_metric_request_count[project_id] = context.gcp_metric_request_count.get(project_id, 0) + 1
+
         url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/timeSeries"
         resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()

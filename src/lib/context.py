@@ -86,6 +86,8 @@ class Context(LoggingContext):
         self.dynatrace_request_count = {}
         self.dynatrace_connectivity = DynatraceConnectivity.Ok
 
+        self.gcp_metric_request_count = {}
+
         self.dynatrace_ingest_lines_ok_count = {}
         self.dynatrace_ingest_lines_invalid_count = {}
         self.dynatrace_ingest_lines_dropped_count = {}

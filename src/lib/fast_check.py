@@ -1,14 +1,26 @@
 import asyncio
+import os
 import re
 from typing import NamedTuple, List, Optional
 
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 from aiohttp import ClientSession
 
 from lib.context import LoggingContext
-from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fetch_dynatrace_api_key
+from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fetch_dynatrace_api_key, \
+    get_project_id_from_environment
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
+
+CONFIGURATION_FLAGS = [
+    "PRINT_METRIC_INGEST_INPUT",
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    "MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE",
+    "METRIC_INGEST_BATCH_SIZE",
+    "REQUIRE_VALID_CERTIFICATE",
+    "SERVICE_USAGE_BOOKING",
+    "USE_PROXY"
+]
 
 GCP_SERVICE_USAGE_URL = 'https://serviceusage.googleapis.com/v1/projects/'
 
@@ -115,18 +127,32 @@ class FastCheck:
         return dynatrace_url, token_metadata
 
     async def _init_(self) -> FastCheckResult:
+        self._check_configuration_flags()
+
         project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
         ready_to_monitor = []
         for project_id in project_list:
-            tasks = [self._check_services(project_id), self._check_dynatrace(project_id)]
+            tasks = [self._check_services(project_id)]
 
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
             if all(result is not None for result in results):
                 ready_to_monitor.append(project_id)
 
+        await self._check_dynatrace(get_project_id_from_environment())
+
         return FastCheckResult(projects=ready_to_monitor)
+
+    def _check_configuration_flags(self):
+        configuration_flag_values = []
+        for key in CONFIGURATION_FLAGS:
+            value = os.environ.get(key, None)
+            if value is None:
+                configuration_flag_values.append(f"{key} is None")
+            else:
+                configuration_flag_values.append(f"{key} = '{value}'")
+        self.logging_context.log(f"Found configuration flags: {', '.join(configuration_flag_values)}")
 
     def __await__(self):
         return self._init_().__await__()
