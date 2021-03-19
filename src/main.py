@@ -133,7 +133,6 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         ]
         await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
         context.log(f"Fetched and pushed GCP data in {time.time() - context.start_processing_timestamp} s")
-        context.log(f"Processed {sum(context.dynatrace_ingest_lines_ok_count.values())} lines")
 
         await push_self_monitoring_time_series(context)
 
@@ -166,7 +165,8 @@ async def _check_x_goog_user_project_header_permissions(context: Context, projec
 
     service_usage_booking = os.environ['SERVICE_USAGE_BOOKING'] if 'SERVICE_USAGE_BOOKING' in os.environ.keys() \
         else 'source'
-    if service_usage_booking != 'destination':
+    if service_usage_booking.casefold().strip() != 'destination':
+        context.log(project_id, "Using SERVICE_USAGE_BOOKING = source")
         context.use_x_goog_user_project_header[project_id] = False
         return
 
@@ -181,9 +181,10 @@ async def _check_x_goog_user_project_header_permissions(context: Context, projec
 
     if resp.status == 200:
         context.use_x_goog_user_project_header[project_id] = True
+        context.log(project_id, "Using SERVICE_USAGE_BOOKING = destination")
     elif resp.status == 403 and 'serviceusage.services.use' in page['error']['message']:
         context.use_x_goog_user_project_header[project_id] = False
-        context.log(project_id, "Ignoring SERVICE_USAGE_BOOKING. Missing permission: 'serviceusage.services.use'")
+        context.log(project_id, "Ignoring destination SERVICE_USAGE_BOOKING. Missing permission: 'serviceusage.services.use'")
     else:
         context.log(project_id, f"Unexpected response when checking 'x-goog-user-project' header: {str(page)}")
 

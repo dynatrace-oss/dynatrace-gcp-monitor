@@ -155,6 +155,8 @@ async def fetch_metric(
 
     lines = []
     while should_fetch:
+        context.gcp_metric_request_count[project_id] = context.gcp_metric_request_count.get(project_id, 0) + 1
+
         url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/timeSeries"
         resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()

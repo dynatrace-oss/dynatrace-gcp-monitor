@@ -21,7 +21,19 @@ from lib.metric_descriptor import SELF_MONITORING_METRIC_PREFIX, SELF_MONITORING
     SELF_MONITORING_REQUEST_COUNT_METRIC_TYPE, SELF_MONITORING_PHASE_EXECUTION_TIME_METRIC_TYPE
 
 
+def log_self_monitoring_data(context: Context):
+    context.log("SFM", f"GCP Monitoring API request count [per project]: {context.gcp_metric_request_count}")
+    context.log("SFM", f"Dynatrace MINT API request count [per response code]: {context.dynatrace_request_count}")
+    context.log("SFM", f"Dynatrace MINT accepted lines count [per project]: {context.dynatrace_ingest_lines_ok_count}")
+    context.log("SFM", f"Dynatrace MINT invalid lines count [per project]: {context.dynatrace_ingest_lines_invalid_count}")
+    context.log("SFM", f"Dynatrace MINT dropped lines count [per project]: {context.dynatrace_ingest_lines_dropped_count}")
+    context.log("SFM", f"Setup execution time: {context.setup_execution_time.get(context.project_id_owner, None)}") # values are the same for all projects
+    context.log("SFM", f"Fetch GCP data execution time [per project]: {context.fetch_gcp_data_execution_time}")
+    context.log("SFM", f"Push data to Dynatrace execution time [per project]: {context.push_to_dynatrace_execution_time}")
+
+
 async def push_self_monitoring_time_series(context: Context, is_retry: bool = False):
+    log_self_monitoring_data(context)
     try:
         context.log(f"Pushing self monitoring time series to GCP Monitor...")
         await create_metric_descriptors_if_missing(context)
