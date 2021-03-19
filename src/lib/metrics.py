@@ -117,12 +117,13 @@ class GCPService:
 
     name: Text
     technology_name: Text
+    feature_set: Text
     dimensions: List[Dimension]
     metrics = List[Metric]
 
     def __init__(self, **kwargs):
         object.__setattr__(self, "name", kwargs.get("service", ""))
-        object.__setattr__(self, "featureSet", kwargs.get("featureSet", ""))
+        object.__setattr__(self, "feature_set", kwargs.get("featureSet", ""))
         object.__setattr__(self, "technology_name", kwargs.get("tech_name", "N/A"))
         object.__setattr__(self, "dimensions", [
             Dimension(**x) for x in kwargs.get("dimensions", {})
