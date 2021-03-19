@@ -135,7 +135,7 @@ async def fetch_metric(
         ('filter', f'metric.type = "{metric.google_metric}"'),
         ('interval.startTime', start_time.isoformat() + "Z"),
         ('interval.endTime', end_time.isoformat() + "Z"),
-        ('aggregation.alignmentPeriod', f"{metric.sample_period_seconds.seconds}s"),
+        ('aggregation.alignmentPeriod', f"{metric.sample_period_seconds.total_seconds()}s"),
         ('aggregation.perSeriesAligner', aligner),
         ('aggregation.crossSeriesReducer', reducer)
     ]

@@ -145,7 +145,7 @@ gcp:
       ingestDelay: 180s
       samplePeriod: 60s
       valueType: INT64
-      metricKind: DELTA
+      metricKind: CUMULATIVE
     dimensions:
     - value: metric.labels.fault_type
   - value: kubernetes.io/container/memory/request_bytes
