@@ -31,7 +31,7 @@ async def push_ingest_lines(context: Context, project_id: str, fetch_metric_resu
         return
 
     if not fetch_metric_results:
-        context.log(project_id, "Skipping push due to detected connectivity error")
+        context.log(project_id, "Skipping push due to no data to push")
 
     lines_sent = 0
     maximum_lines_threshold = context.maximum_metric_data_points_per_minute
