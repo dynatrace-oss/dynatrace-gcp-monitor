@@ -128,6 +128,7 @@ class FastCheck:
 
     async def _init_(self) -> FastCheckResult:
         self._check_configuration_flags()
+        self._check_version()
 
         project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
@@ -153,6 +154,14 @@ class FastCheck:
             else:
                 configuration_flag_values.append(f"{key} = '{value}'")
         self.logging_context.log(f"Found configuration flags: {', '.join(configuration_flag_values)}")
+    
+    def _check_version(self):        
+        script_directory = os.path.dirname(os.path.realpath(__file__))
+        version_file_path = os.path.join(script_directory, "./../version.txt")
+        with open(version_file_path) as version_file:
+            _version = version_file.readline()
+            self.logging_context.log(f"Found version: {_version}")
+
 
     def __await__(self):
         return self._init_().__await__()
