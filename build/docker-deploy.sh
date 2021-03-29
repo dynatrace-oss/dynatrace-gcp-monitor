@@ -1,8 +1,16 @@
 #!/bin/bash
 set -eu
 
+#write version file on release
+if [[ "${PUSH:-}" == "true" ]]; then
+    chmod +x ./build/version.sh
+    sh ./build/version.sh
+fi
+
+#build contaienr
 docker build -f dockerfile -t dynatrace-gcp-function .        
 
+#tag contaienr
 if [[ "${PUSH:-}" == "true" ]]; then
     mkdir -p ~/.docker && chmod 0700 ~/.docker
     touch ~/.docker/config.json && chmod 0600 ~/.docker/config.json
