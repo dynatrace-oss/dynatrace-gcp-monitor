@@ -16,7 +16,7 @@ jobs:
   - stage: docker-build
     name: Docker build
     language: minimal
-    script: "./build/docker-deploy.sh"
+    script: "./build/docker-deploy.sh"    
   - stage: docker-deploy
     name: Docker Hub deploy
     if: tag =~ /^release-.*
@@ -30,7 +30,9 @@ jobs:
     language: minimal
     before_deploy:
     - mkdir artefacts
-    - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml
+    - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml    
+    - chmod +x ./build/version.sh
+    - sh ./build/version.sh
     - "(cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')"
     deploy:
       provider: releases
