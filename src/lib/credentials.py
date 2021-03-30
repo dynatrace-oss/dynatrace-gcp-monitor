@@ -20,7 +20,7 @@ import time
 import jwt
 from aiohttp import ClientSession
 
-from lib.context import LoggingContext, Context
+from lib.context import LoggingContext
 
 _METADATA_ROOT = "http://metadata.google.internal/computeMetadata/v1"
 _METADATA_FLAVOR_HEADER = "metadata-flavor"
@@ -37,6 +37,14 @@ async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, t
 
 async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token: str, ):
     return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
+
+
+def get_dynatrace_api_key_from_env():
+    return os.environ.get(_DYNATRACE_ACCESS_KEY_SECRET_NAME, None)
+
+
+def get_dynatrace_url_from_env():
+    return os.environ.get(_DYNATRACE_URL_SECRET_NAME, None)
 
 
 async def fetch_secret(session: ClientSession, project_id: str, token: str, secret_name: str):

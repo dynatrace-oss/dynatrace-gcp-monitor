@@ -16,7 +16,7 @@ from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List
 
-from lib.context import Context, DynatraceConnectivity
+from lib.context import MetricsContext, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
 from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
@@ -25,7 +25,7 @@ from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING,
 UNIT_10TO2PERCENT = "10^2.%"
 
 
-async def push_ingest_lines(context: Context, project_id: str, fetch_metric_results: List[IngestLine]):
+async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
     if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
         context.log(project_id, f"Skipping push due to detected connectivity error")
         return
@@ -63,7 +63,7 @@ async def push_ingest_lines(context: Context, project_id: str, fetch_metric_resu
         context.log(project_id, f"Finished uploading metric ingest lines to Dynatrace in {push_data_time} s")
 
 
-async def _push_to_dynatrace(context: Context, project_id: str, lines_batch: List[IngestLine]):
+async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_batch: List[IngestLine]):
     ingest_input = "\n".join([line.to_string() for line in lines_batch])
     if context.print_metric_ingest_input:
         context.log("Ingest input is: ")
@@ -100,7 +100,7 @@ async def _push_to_dynatrace(context: Context, project_id: str, lines_batch: Lis
     await log_invalid_lines(context, ingest_response_json, lines_batch)
 
 
-async def log_invalid_lines(context: Context, ingest_response_json: Dict, lines_batch: List[IngestLine]):
+async def log_invalid_lines(context: MetricsContext, ingest_response_json: Dict, lines_batch: List[IngestLine]):
     error = ingest_response_json.get("error", None)
     if error is None:
         return
@@ -115,7 +115,7 @@ async def log_invalid_lines(context: Context, ingest_response_json: Dict, lines_
 
 
 async def fetch_metric(
-        context: Context,
+        context: MetricsContext,
         project_id: str,
         service: GCPService,
         metric: Metric

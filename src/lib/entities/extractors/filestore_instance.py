@@ -17,7 +17,7 @@ import re
 from functools import partial
 from typing import Any, Dict, Iterable, Text
 
-from lib.context import Context
+from lib.context import MetricsContext
 from lib.entities.decorator import entity_extractor
 from lib.entities.google_api import generic_paging
 from lib.entities.ids import get_func_create_entity_id, LabelToApiRspMapping
@@ -86,7 +86,7 @@ def _filestore_instance_resp_to_monitored_entities(page: Dict[Text, Any], svc_de
 
 
 @entity_extractor("filestore_instance")
-async def get_filestore_instance_entity(ctx: Context, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
+async def get_filestore_instance_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP filestore instance from google api. """
     url = f"https://file.googleapis.com/v1/projects/{project_id}/locations/-/instances"
     mapper_func = partial(_filestore_instance_resp_to_monitored_entities, svc_def=svc_def)

@@ -25,7 +25,7 @@ from typing import Dict, List, Optional
 import yaml
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
-from lib.context import Context, LoggingContext
+from lib.context import MetricsContext, LoggingContext
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
 from lib.entities import entities_extractors
@@ -105,7 +105,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         print_metric_ingest_input = \
             "PRINT_METRIC_INGEST_INPUT" in os.environ and os.environ["PRINT_METRIC_INGEST_INPUT"].upper() == "TRUE"
 
-        context = Context(
+        context = MetricsContext(
             gcp_session=gcp_session,
             dt_session=dt_session,
             project_id_owner=project_id_owner,
@@ -142,7 +142,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
 
-async def process_project_metrics(context: Context, project_id: str, services: List[GCPService]):
+async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService]):
     context.log(project_id, f"Starting processing...")
     await check_x_goog_user_project_header_permissions(context, project_id)
     ingest_lines = await fetch_ingest_lines_task(context, project_id, services)
@@ -152,14 +152,14 @@ async def process_project_metrics(context: Context, project_id: str, services: L
     await push_ingest_lines(context, project_id, ingest_lines)
 
 
-async def check_x_goog_user_project_header_permissions(context: Context, project_id: str):
+async def check_x_goog_user_project_header_permissions(context: MetricsContext, project_id: str):
     try:
         await _check_x_goog_user_project_header_permissions(context, project_id)
     except Exception as e:
         context.log(project_id, f"Unexpected exception when checking 'x-goog-user-project' header: {e}")
 
 
-async def _check_x_goog_user_project_header_permissions(context: Context, project_id: str):
+async def _check_x_goog_user_project_header_permissions(context: MetricsContext, project_id: str):
     if project_id in context.use_x_goog_user_project_header:
         return
 
@@ -189,7 +189,7 @@ async def _check_x_goog_user_project_header_permissions(context: Context, projec
         context.log(project_id, f"Unexpected response when checking 'x-goog-user-project' header: {str(page)}")
 
 
-async def fetch_ingest_lines_task(context: Context, project_id: str, services: List[GCPService]) -> List[IngestLine]:
+async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService]) -> List[IngestLine]:
     fetch_metric_tasks = []
     topology_tasks = []
     topology_task_services = []
@@ -275,7 +275,7 @@ def extract_technology_name(config_yaml):
 
 
 async def run_fetch_metric(
-        context: Context,
+        context: MetricsContext,
         project_id: str,
         service: GCPService,
         metric: Metric
