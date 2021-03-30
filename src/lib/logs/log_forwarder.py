@@ -30,7 +30,7 @@ SUBSCRIPTION_ID = os.environ.get('LOGS_SUBSCRIPTION_ID', None)
 
 
 MAX_MESSAGES_PROCESSED = 10_000
-MAX_WORKERS = 10_000
+MAX_WORKERS = 100
 
 
 def run_logs(logging_context: LoggingContext):
