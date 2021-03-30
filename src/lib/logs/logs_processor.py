@@ -27,6 +27,7 @@ from lib.context import LoggingContext, get_int_environment_value
 
 _CONTENT_LENGTH_LIMIT = get_int_environment_value("DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH", 8192)
 _EVENT_AGE_LIMIT_SECONDS = get_int_environment_value("DYNATRACE_LOG_INGEST_EVENT_MAX_AGE_SECONDS", int(timedelta(days=1).total_seconds()))
+SENDING_WORKER_EXECUTION_PERIOD_SECONDS = get_int_environment_value("DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD", 60)
 
 
 class LogProcessingJob:
@@ -66,7 +67,7 @@ def _do_process_message(context: LoggingContext, log_jobs_queue: Queue, message:
         message.ack()
     else:
         job = LogProcessingJob(payload, message)
-        log_jobs_queue.put(job, True, 61)
+        log_jobs_queue.put(job, True, SENDING_WORKER_EXECUTION_PERIOD_SECONDS + 1)
 
 
 def _create_dt_log_payload(context: LoggingContext, message_data: str) -> Optional[Dict]:

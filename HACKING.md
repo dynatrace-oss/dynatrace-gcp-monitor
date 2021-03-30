@@ -41,5 +41,5 @@ Worker function execution can be tweaked with environment variables. In Google F
 | DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH | determines max content length of log event. Should be the same or lower than on cluster | 8192 characters |
 | DYNATRACE_LOG_INGEST_EVENT_MAX_AGE_SECONDS | Determines max age of forwarded log event. Should be the same or lower than on cluster | 1 day |
 | LOGS_SUBSCRIPTION_PROJECT | GCP project of log sink pubsub subscription | |
-| SUBSCRIPTION_ID | subscription id of log sink pubsub subscription | |
+| LOGS_SUBSCRIPTION_ID | subscription id of log sink pubsub subscription | |
 | DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD | Period of sending batched logs to Dynatrace | 60 seconds |
