@@ -18,12 +18,18 @@ from typing import Optional, List
 from aiohttp import web
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
+from lib.configure_dynatrace import ConfigureDynatrace
 from lib.context import LoggingContext
 from lib.credentials import create_token
 from lib.fast_check import FastCheck
-from lib.configure_dynatrace import ConfigureDynatrace
 from lib.instance_metadata import InstanceMetadata
+from lib.logs.log_forwarder import run_logs
 from main import async_dynatrace_gcp_extension
+from operation_mode import OperationMode
+
+OPERATION_MODE = OperationMode.from_environment_string(os.environ.get("OPERATION_MODE", None)) or OperationMode.Metrics
+
+loop = asyncio.get_event_loop()
 
 
 async def scheduling_loop(project_ids: Optional[List[str]] = None):
@@ -50,6 +56,7 @@ async def initial_check():
     await gcp_session.close()
     await dt_session.close()
 
+
 async def try_configure_dynatrace():
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         dashboards_result = await ConfigureDynatrace(gcp_session=gcp_session, dt_session=dt_session, logging_context=logging_context)
@@ -57,6 +64,26 @@ async def try_configure_dynatrace():
 
 async def health(request):
     return web.Response(status=200)
+
+
+def run_metrics():
+    if "GCP_SERVICES" in os.environ:
+        services = os.environ.get("GCP_SERVICES", "")
+        logging_context.log(f"Running with configured services: {services}")
+    loop.run_until_complete(try_configure_dynatrace())
+    loop.run_until_complete(initial_check())
+
+    run_loop_forever()
+
+
+def run_loop_forever():
+    try:
+        loop.run_forever()
+    finally:
+        loop.run_until_complete(app.shutdown())
+        loop.run_until_complete(runner.cleanup())
+        loop.run_until_complete(app.cleanup())
+        loop.close()
 
 
 print("                      ,,,,,..")
@@ -88,27 +115,20 @@ logging_context = LoggingContext(None)
 
 logging_context.log("Dynatrace function for Google Cloud Platform monitoring\n")
 
-if "GCP_SERVICES" in os.environ:
-    services = os.environ.get("GCP_SERVICES", "")
-    print(f"Running with configured services: {services}")
-
 logging_context.log("Setting up... \n")
-loop = asyncio.get_event_loop()
 app = web.Application()
 app.add_routes([web.get('/health', health)])
 
+# setup webapp
 runner = web.AppRunner(app)
 loop.run_until_complete(runner.setup())
 site = web.TCPSite(runner, '0.0.0.0', 8080)
-
-loop.run_until_complete(try_configure_dynatrace())
-loop.run_until_complete(initial_check())
 loop.run_until_complete(site.start())
 
-try:
-    loop.run_forever()
-finally:
-    loop.run_until_complete(app.shutdown())
-    loop.run_until_complete(runner.cleanup())
-    loop.run_until_complete(app.cleanup())
-    loop.close()
+logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
+
+if OPERATION_MODE == OperationMode.Metrics:
+    run_metrics()
+
+elif OPERATION_MODE == OperationMode.Logs:
+    run_logs(logging_context)

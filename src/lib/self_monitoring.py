@@ -15,13 +15,13 @@ import asyncio
 import json
 from typing import Dict, List
 
-from lib.context import Context
+from lib.context import MetricsContext
 from lib.metric_descriptor import SELF_MONITORING_METRIC_PREFIX, SELF_MONITORING_METRIC_MAP, \
     SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, SELF_MONITORING_INGEST_LINES_METRIC_TYPE, \
     SELF_MONITORING_REQUEST_COUNT_METRIC_TYPE, SELF_MONITORING_PHASE_EXECUTION_TIME_METRIC_TYPE
 
 
-def log_self_monitoring_data(context: Context):
+def log_self_monitoring_data(context: MetricsContext):
     context.log("SFM", f"GCP Monitoring API request count [per project]: {context.gcp_metric_request_count}")
     context.log("SFM", f"Dynatrace MINT API request count [per response code]: {context.dynatrace_request_count}")
     context.log("SFM", f"Dynatrace MINT accepted lines count [per project]: {context.dynatrace_ingest_lines_ok_count}")
@@ -32,7 +32,7 @@ def log_self_monitoring_data(context: Context):
     context.log("SFM", f"Push data to Dynatrace execution time [per project]: {context.push_to_dynatrace_execution_time}")
 
 
-async def push_self_monitoring_time_series(context: Context, is_retry: bool = False):
+async def push_self_monitoring_time_series(context: MetricsContext, is_retry: bool = False):
     log_self_monitoring_data(context)
     try:
         context.log(f"Pushing self monitoring time series to GCP Monitor...")
@@ -60,7 +60,7 @@ async def push_self_monitoring_time_series(context: Context, is_retry: bool = Fa
         context.log(f"Failed to push self monitoring time series, reason is {type(e).__name__} {e}")
 
 
-async def create_metric_descriptors_if_missing(context: Context):
+async def create_metric_descriptors_if_missing(context: MetricsContext):
     try:
         dynatrace_metrics_descriptors = await context.gcp_session.request(
             'GET',
@@ -83,7 +83,7 @@ async def create_metric_descriptors_if_missing(context: Context):
         context.log(f"Failed to create self monitoring metrics descriptors, reason is {type(e).__name__} {e}")
 
 
-async def replace_metric_descriptor_if_required(context: Context,
+async def replace_metric_descriptor_if_required(context: MetricsContext,
                                                 existing_metric_descriptor: Dict,
                                                 metric_descriptor: Dict,
                                                 metric_type: str):
@@ -94,7 +94,7 @@ async def replace_metric_descriptor_if_required(context: Context,
         await create_metric_descriptor(context, metric_descriptor, metric_type)
 
 
-async def delete_metric_descriptor(context: Context, metric_type: str):
+async def delete_metric_descriptor(context: MetricsContext, metric_type: str):
     context.log(f"Removing old descriptor for '{metric_type}'")
     response = await context.gcp_session.request(
         "DELETE",
@@ -106,7 +106,7 @@ async def delete_metric_descriptor(context: Context, metric_type: str):
         context.log(f"Failed to remove descriptor for '{metric_type}' due to '{response_body}'")
 
 
-async def create_metric_descriptor(context: Context, metric_descriptor: Dict, metric_type: str):
+async def create_metric_descriptor(context: MetricsContext, metric_descriptor: Dict, metric_type: str):
     context.log(f"Creating missing metric descriptor for '{metric_type}'")
     response = await context.gcp_session.request(
         "POST",
@@ -125,7 +125,7 @@ def extract_label_keys(metric_descriptor: Dict):
 
 
 def create_time_serie(
-        context: Context,
+        context: MetricsContext,
         metric_type: str,
         metric_labels: Dict,
         points: List[Dict],
@@ -151,7 +151,7 @@ def create_time_serie(
     }
 
 
-def create_self_monitoring_time_series(context: Context) -> Dict:
+def create_self_monitoring_time_series(context: MetricsContext) -> Dict:
     interval = {"endTime": context.execution_time.isoformat() + "Z"}
     time_series = [
         create_time_serie(

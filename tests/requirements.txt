@@ -1,0 +1,2 @@
+pytest==6.2.2
+wiremock==2.1.3

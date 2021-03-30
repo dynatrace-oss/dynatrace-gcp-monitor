@@ -3,3 +3,5 @@ aiodns==2.0.0
 mmh3==2.5.1
 PyJWT==1.7.1
 PyYAML==5.4
+google-cloud-pubsub==2.4.0
+python-dateutil==2.8.1

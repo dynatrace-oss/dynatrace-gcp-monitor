@@ -17,7 +17,7 @@
 from functools import wraps
 from typing import Dict, Iterable, Text
 
-from lib.context import Context
+from lib.context import MetricsContext
 from lib.entities.model import Entity, ExtractEntitesFunc
 from lib.metrics import GCPService
 
@@ -35,7 +35,7 @@ def entity_extractor(service_type: Text):
 
     def register_extractor(fun: ExtractEntitesFunc) -> ExtractEntitesFunc:
         @wraps(fun)
-        async def get_and_upload(ctx: Context, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
+        async def get_and_upload(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
             try:
                 entities = await fun(ctx, project_id, svc_def)
             except Exception as e:
