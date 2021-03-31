@@ -81,10 +81,8 @@ get_ext_files()
     if ! (grep -q "$SERVICE" <<< "$SERVICES_TO_ACTIVATE") ; then
       continue
     fi
-#    echo "FP $FILEPATH $YAML_PATH"
     for EXT_FILE in $(yq r -j "$FILEPATH" "$YAML_PATH" | tr -d '"')
     do
-#      echo "EF  $EXT_FILE"
       if [ ! -f "./$EXT_FILE" ] ; then
         warn "Missing file $EXT_FILE"
         continue
