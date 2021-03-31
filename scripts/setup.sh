@@ -36,12 +36,64 @@ readonly GCP_SCHEDULER_CRON=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metr
 readonly DYNATRACE_URL_SECRET_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.dynatraceUrlSecretName')
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.dynatraceAccessKeySecretName')
 readonly FUNCTION_GCP_SERVICES=$(yq r -j -P $FUNCTION_ACTIVATION_CONFIG 'activation.metrics.services' | jq 'join(",")')
-readonly DASHBOARDS_TO_ACTIVATE=$(yq r -j -P $FUNCTION_ACTIVATION_CONFIG 'activation.metrics.services' | jq -r .[]) 
+readonly SERVICES_TO_ACTIVATE=$(yq r -j -P $FUNCTION_ACTIVATION_CONFIG 'activation.metrics.services' | jq -r .[] | sed 's/\/.*$//')
 readonly PRINT_METRIC_INGEST_INPUT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'debug.printMetricIngestInput')
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.cloudFunctionSize')
 readonly SERVICE_USAGE_BOOKING=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.serviceUsageBooking')
 readonly USE_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.useProxy')
 
+shopt -s nullglob
+
+
+dt_api()
+{
+  URL=$1
+  if [ $# -eq 3 ]; then
+    METHOD="$2"
+    DATA=("-d" "$3")
+  else
+    METHOD="GET"
+  fi
+  if RESPONSE=$(curl -k -s -X $METHOD "${DYNATRACE_URL}${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}"); then
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<< "$RESPONSE")
+    sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<< "$RESPONSE"
+    if [ "$CODE" -ge 400 ]; then
+      return 255
+    fi
+  fi
+
+}
+
+warn()
+{
+  MESSAGE=$1
+  echo -e >&2
+  echo -e "\e[93mWARNING: \e[37m$MESSAGE" >&2
+  echo -e >&2
+}
+
+get_ext_files()
+{
+  YAML_PATH=$1
+  for FILEPATH in ./config/*.yaml ./config/*.yml
+  do
+    SERVICE=$(basename -s .yml "$(basename -s .yaml "$FILEPATH")" )
+    if ! (grep -q "$SERVICE" <<< "$SERVICES_TO_ACTIVATE") ; then
+      continue
+    fi
+#    echo "FP $FILEPATH $YAML_PATH"
+    for EXT_FILE in $(yq r -j "$FILEPATH" "$YAML_PATH" | tr -d '"')
+    do
+#      echo "EF  $EXT_FILE"
+      if [ ! -f "./$EXT_FILE" ] ; then
+        warn "Missing file $EXT_FILE"
+        continue
+      else
+        echo "$EXT_FILE"
+      fi
+    done
+  done
+}
 
 if ! command -v gcloud &> /dev/null
 then
@@ -50,7 +102,7 @@ then
     echo -e
     echo -e "https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version"
     echo -e
-    echo 
+    echo
     exit
 fi
 
@@ -61,28 +113,28 @@ then
     echo -e "\e[93mWARNING: \e[37m yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions"
     echo -e
     echo -e "YQ: https://github.com/mikefarah/yq"
-    if ! command -v jq &> /dev/null 
+    if ! command -v jq &> /dev/null
     then
         echo -e "JQ: https://stedolan.github.io/jq/download/"
-    fi 
+    fi
     echo -e
     echo -e "You may also try installing YQ with PIP: pip install yq"
     echo -e ""
-    echo 
+    echo
     exit
 fi
 
 
-GCP_ACCOUNT=$(gcloud config get-value account) 
+GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
 echo
 DEFAULT_PROJECT=$(gcloud config get-value project)
 
 echo "Please provide the GCP project ID where Dynatrace function should be deployed to. Default value: [$DEFAULT_PROJECT] (current project)"
-echo 
+echo
 echo "Available projects:"
 gcloud projects list --format="value(project_id)"
-echo 
+echo
 while ! [[ "${GCP_PROJECT}" =~ ^[a-z]{1}[a-z0-9-]{5,29}$ ]]; do
     read -p "Enter GCP project ID: " -i $DEFAULT_PROJECT -e GCP_PROJECT
 done
@@ -122,7 +174,7 @@ echo ""
 
 echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'API v2 Ingest metrics', 'API v1 Read configuration' and 'WriteConfig' scope"
 while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
-    read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY  
+    read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
 done
 echo ""
 
@@ -135,7 +187,7 @@ gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.co
 
 echo -e
 echo "- create the pubsub topic [$GCP_PUBSUB_TOPIC]"
-if [[ $(gcloud pubsub topics list --filter=name:dynatrace-gcp-service-invocation --format="value(name)") ]]; then 
+if [[ $(gcloud pubsub topics list --filter=name:dynatrace-gcp-service-invocation --format="value(name)") ]]; then
     echo "Topic [$GCP_PUBSUB_TOPIC] already exists, skipping"
 else
     gcloud pubsub topics create "$GCP_PUBSUB_TOPIC"
@@ -154,7 +206,7 @@ else
     stty -echo
     printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
     stty echo
-fi 
+fi
 
 echo -e
 echo "- create service account [$GCP_SERVICE_ACCOUNT with permissions [roles/monitoring.editor, roles/monitoring.viewer, roles/secretmanager.secretAccessor, roles/secretmanager.viewer, roles/cloudfunctions.viewer, roles/cloudsql.viewer, roles/compute.viewer, roles/file.viewer, roles/pubsub.viewer"
@@ -168,7 +220,7 @@ else
     gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/cloudsql.viewer
     gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/cloudfunctions.viewer
     gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/file.viewer
-    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/pubsub.viewer 
+    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/pubsub.viewer
     gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
     gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer
     gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
@@ -177,23 +229,23 @@ fi
 
 echo -e
 echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
-wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE 
+wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
 
 
 echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 mkdir -p $GCP_FUNCTION_NAME
 unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
-cd ./$GCP_FUNCTION_NAME
+cd ./$GCP_FUNCTION_NAME || exit
 gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY
 
 echo -e
 echo "- schedule the runs"
-if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then 
+if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then
     echo "Scheduler [$GCP_SCHEDULER_NAME] already exists, skipping"
 else
     gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
-fi    
+fi
 
 echo -e
 echo "- create self monitoring dashboard"
@@ -204,52 +256,65 @@ else
     gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
 fi
 
+if [ "$IMPORT_DASHBOARDS" != "no" ] ; then
+  EXISTING_DASHBOARDS=$(dt_api "api/config/v1/dashboards" | jq -r '.dashboards[].name | select (. |contains("Google"))')
+  if [ -n "${EXISTING_DASHBOARDS}" ]; then
+      warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_DASHBOARDS"
+  fi
 
-EXISTING_DASHBOARDS=$(curl -k -s -X GET "${DYNATRACE_URL}api/config/v1/dashboards" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"  | jq '.dashboards[].name | select (. |contains("Google"))')
-if [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; then
-    echo -e
-    echo -e "\e[93mWARNING: \e[37mFound existing Google dashboards in [${DYNATRACE_URL}] tenant:"
-    echo $EXISTING_DASHBOARDS
-    echo
+  for DASHBOARD_PATH in $(get_ext_files 'dashboards[*].dashboard')
+  do
+    DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
+    DASHBOARD_NAME=$(jq -r .dashboardMetadata.name < "./$DASHBOARD_PATH")
+    if ! grep -q "$DASHBOARD_NAME" <<< "$EXISTING_DASHBOARDS"; then
+      echo "- Create [$DASHBOARD_NAME] dashboard from file [$DASHBOARD_PATH]"
+          if ! DASHBOARD_RESPONSE=$(dt_api "api/config/v1/dashboards" POST "$DASHBOARD_JSON"); then
+            warn "Unable to create dashboard($?)\n$DASHBOARD_RESPONSE"
+            continue
+          fi
+          DASHBOARD_ID=$(jq -r .id <<< "$DASHBOARD_RESPONSE")
+          DASHBOARD_SHARE_RESPONSE=$(dt_api "api/config/v1/dashboards/${DASHBOARD_ID}/shareSettings" \
+            PUT "{ \"id\": \"${DASHBOARD_ID}\",\"published\": \"true\", \"enabled\" : \"true\", \"publicAccess\" : { \"managementZoneIds\": [], \"urls\": {}}, \"permissions\": [ { \"type\": \"ALL\", \"permission\": \"VIEW\"} ] }"\
+            ) || warn "Unable to set dashboard permissions($?)\n$DASHBOARD_SHARE_RESPONSE"
+    else
+      echo "- Dashboard [$DASHBOARD_NAME] already exists on cluster, skipping"
+    fi
+  done
+
+else
+  echo "Dashboards import disabled"
 fi
 
-for FILEPATH in ./config/*.yaml ./config/*.yml
-do 
-  DASHBOARDS_NUMBER=$(yq r --length "$FILEPATH" dashboards)
-  if [ "$DASHBOARDS_NUMBER" != "" ]; then
-    MAX_INDEX=-1
-    ((MAX_INDEX += DASHBOARDS_NUMBER))
-    for INDEX in $(seq 0 "$MAX_INDEX");
-    do
-      DASHBOARD_PATH=$(yq r -j "$FILEPATH" dashboards[$INDEX].dashboard | tr -d '"')
-      DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
-      DASHBOARD_NAME=$(cat "./$DASHBOARD_PATH" | jq .dashboardMetadata.name)
-      DASHBOARD_EXISTS=$(echo $EXISTING_DASHBOARDS | grep "$DASHBOARD_NAME")
-      if ! [[ "${DASHBOARD_EXISTS}" != "" ]]; then              
-        echo "- Create [$DASHBOARD_NAME] dashboard from file [$DASHBOARD_PATH]"
-        DASHBOARD_RESPONSE=$(curl -k -s -X POST "${DYNATRACE_URL}api/config/v1/dashboards" \
-            -H "Accept: application/json; charset=utf-8" \
-            -H "Content-Type: application/json; charset=utf-8" \
-            -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
-            -d "$DASHBOARD_JSON")
-        DASHBOARD_ID=$(echo "${DASHBOARD_RESPONSE}" | jq -r .id)
-        echo $DASHBOARD_ID
-        echo "{ \"id\": \"${DASHBOARD_ID}\",\"published\": \"false\"}"
-        DASHBOARD_SHARE_RESPONSE=$(curl -k -s -X PUT "${DYNATRACE_URL}api/config/v1/dashboards/${DASHBOARD_ID}/shareSettings" \
-            -H "Accept: application/json; charset=utf-8" \
-            -H "Content-Type: application/json; charset=utf-8" \
-            -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" \
-            -d "{ \"id\": \"${DASHBOARD_ID}\",\"published\": \"true\", \"enabled\" : \"true\", \"publicAccess\" : { \"managementZoneIds\": [], \"urls\": {}}, \"permissions\": [ { \"type\": \"ALL\", \"permission\": \"VIEW\"} ] }")
-        echo $DASHBOARD_SHARE_RESPONSE
-      else
-        echo "- Dashboard [$DASHBOARD_NAME] already exists on cluster, skipping"
-      fi
-      echo ""
-    done
+if [ "$IMPORT_ALERTS" != "no" ] ; then
+  EXISTING_ALERTS=$(dt_api "api/config/v1/anomalyDetection/metricEvents"| jq -r '.values[] | select (.id |startswith("cloud.gcp.")) | (.id + "\t" + .name )')
+  if [ -n "${EXISTING_ALERTS}" ]; then
+      warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"
   fi
-done
 
+  if [ "$IMPORT_ALERTS" == "inactive" ]; then
+    echo "Imported alerts would be inactive by default"
+  fi
 
+  for ALERT_PATH in $(get_ext_files 'alerts[*].path')
+  do
+    ALERT_JSON=$(cat "./$ALERT_PATH")
+    ALERT_ID=$(jq -r .id < "./$ALERT_PATH")
+    ALERT_NAME=$(jq -r  .name < "./$ALERT_PATH" )
+
+    if [ "$IMPORT_ALERTS" == "inactive" ]; then
+      ALERT_JSON=$(sed 's/"enabled"\s*:\s*\w*/"enabled": false/' <<< $ALERT_JSON)
+    fi
+
+    if ! grep -q "$ALERT_ID" <<< "$EXISTING_ALERTS"; then
+      echo "- Create [$ALERT_NAME] alert from file [$ALERT_PATH]"
+      RESPONSE=$(dt_api "api/config/v1/anomalyDetection/metricEvents/$ALERT_ID" PUT "$ALERT_JSON") || warn "Unable to create alert($?):\n$RESPONSE"
+    else
+      echo "- Alert [$ALERT_NAME] already exists on cluster, skipping"
+    fi
+  done
+else
+  echo "Alerts import disabled"
+fi
 echo "- cleaning up"
 
 cd ..
