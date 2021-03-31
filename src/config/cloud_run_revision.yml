@@ -102,3 +102,6 @@ gcp:
     - value: metric.labels.response_code
     - value: metric.labels.response_code_class
     - value: metric.labels.route
+alerts:
+  - path: alerts/cloud_run_revision/cpu.utilizations.json
+  - path: alerts/cloud_run_revision/memory.utilizations.json

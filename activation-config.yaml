@@ -42,101 +42,101 @@ activation:
     # Google Cloud APIs
     - api/default     
     # Google Apigee Environment
-    #- apigee.googleapis.com/Environment/default
+    - apigee.googleapis.com/Environment/default
     # Google Apigee Proxy
-    #- apigee.googleapis.com/Proxy/default
+    - apigee.googleapis.com/Proxy/default
     # Google Apigee Proxy (v2)
-    #- apigee.googleapis.com/ProxyV2/default
+    - apigee.googleapis.com/ProxyV2/default
     # Google Assistant Action Project
-    #- assistant_action_project/default
+    - assistant_action_project/default
     # Google Autoscaler
-    #- autoscaler/default
+    - autoscaler/default
     # Google Cloud BigQuery BI Engine Model
-    #- bigquery_biengine_model/default 
+    - bigquery_biengine_model/default
     # Google Cloud BigQuery Project
-    #- bigquery_project/default
+    - bigquery_project/default
     # Google Cloud Bigtable Cluster
-    #- bigtable_cluster/default
+    - bigtable_cluster/default
     # Google Cloud Bigtable Table
-    #- bigtable_table/default
+    - bigtable_table/default
     # Google Cloud IoT Registry
-    #- cloudiot_device_registry/default
+    - cloudiot_device_registry/default
     # Google Cloud ML Job
-    #- cloudml_job/default
+    - cloudml_job/default
     # Google Cloud ML Model Version
-    #- cloudml_model_version/default
+    - cloudml_model_version/default
     #Cloud SQL Database
     - cloudsql_database/default
     # Google Cloud Trace
-    #- cloudtrace.googleapis.com/CloudtraceProject/default
+    - cloudtrace.googleapis.com/CloudtraceProject/default
     # Google NetApp CVS-SO
-    #- cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO/default
+    - cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO/default
     # Google Cloud Composer Environment
-    #- cloud_composer_environment/default
+    - cloud_composer_environment/default
     # Google Cloud Dataproc Cluster
-    #- cloud_dataproc_cluster/default
+    - cloud_dataproc_cluster/default
     # Google Cloud Data Loss Prevention Project
-    #- cloud_dlp_project/default
+    - cloud_dlp_project/default
     # Google Cloud Function
     - cloud_function/default
     # Google Cloud Run Revision
-    #- cloud_run_revision/default
+    - cloud_run_revision/default
     #Amazon EC2 Instance (via GCP)
-    #- cloud_tasks_queue/default
+    - cloud_tasks_queue/default
     # Google Consumed API
-    #- consumed_api/default
+    - consumed_api/default
     # Google Consumer Quota
-    #- consumer_quota/default
+    - consumer_quota/default
     # Google Dataflow Job
-    #- dataflow_job/default
+    - dataflow_job/default
     # Google Cloud Datastore
     - datastore_request/default
     # Google Cloud DNS Query
-    #- dns_query/default
+    - dns_query/default
     # Google Filestore Instance
-    #- filestore_instance/default
+    - filestore_instance/default
     # Google Firebase Hosting Site Domain
-    #- firebase_domain/default
+    - firebase_domain/default
     # Google Firebase Realtime Database
-    #- firebase_namespace/default
+    - firebase_namespace/default
     # Google Firestore Instance
-    #- firestore_instance/default
+    - firestore_instance/default
     # Google App Engine Application
-    #- gae_app/default
+    - gae_app/default
     # Google App Engine Application - Uptime Checks
-    #- gae_app_uptime_check/default
+    - gae_app_uptime_check/default
     # Google App Engine Instance
-    #- gae_instance/default
+    - gae_instance/default
     # Google VM Instance
-    #- gce_instance/default
+    - gce_instance/default
     # Google VM Instance Agent
-    #- gce_instance/agent
+    - gce_instance/agent
     # Google VM Instance
-    #- gce_instance/appenginee
+    - gce_instance/appenginee
     # Google VM Instance Firewall Insights
-    #- gce_instance/firewallinsights
+    - gce_instance/firewallinsights
     # Google VM Instance Istio
-    #- gce_instance/istio
+    - gce_instance/istio
     # Google VM Instance Uptime Checks
-    #- gce_instance/uptime_check
+    - gce_instance/uptime_check
     # Google VM Instance VM Flow
-    #- gce_instance_vm_flow/None
+    - gce_instance_vm_flow/None
     # Google Cloud Router
-    #- gce_router/default
+    - gce_router/default
     # Google Zone Network Health
-    #- gce_zone_network_health/default
+    - gce_zone_network_health/default
     # Google Cloud Storage bucket
     - gcs_bucket/default
     # Google GKE Container
-    #- gke_container/default
+    - gke_container/default
     # Google Cloud HTTP/S Load Balancing Rule
     - https_lb_rule/default
     # Google Instance Group
-    #- instance_group/default
+    - instance_group/default
     # Google Interconnect
-    #- interconnect/default
+    - interconnect/default
     # Google Interconnect Attachment
-    #- interconnect_attachment/default
+    - interconnect_attachment/default
     # Google Internal HTTP/S Load Balancing Rule
     - internal_http_lb_rule/default
     # Google Internal TCP Load Balancer Rule
@@ -144,43 +144,43 @@ activation:
     # Google Internal UDP Load Balancer Rule
     - internal_udp_lb_rule/default
     # Google Istio Canonical Service
-    #- istio_canonical_service/default
+    - istio_canonical_service/default
     # Google Kubernetes Cluster
-    #- k8s_cluster/default
+    - k8s_cluster/default
     # Google Kubernetes Container
     - k8s_container/default
     # Google Kubernetes Container Agent
-    #- k8s_container/agent
+    - k8s_container/agent
     # Google Kubernetes Container Apigee
-    #- k8s_container/apigee
+    - k8s_container/apigee
     # Google Kubernetes Container Istio
-    #- k8s_container/istio
+    - k8s_container/istio
     # Google Kubernetes Container Nginx
-    #- k8s_container/nginx
+    - k8s_container/nginx
     # Google Kubernetes Node
     - k8s_node/default
     # Google Kubernetes Pod
     - k8s_pod/default
     # Google Kubernetes Pod
-    #- k8s_pod/istio
+    - k8s_pod/istio
     # Google Cloud Run for Anthos Broker
-    #- knative_broker/default
+    - knative_broker/default
     # Google Cloud Run for Anthos Revision
-    #- knative_revision/default
+    - knative_revision/default
     # Google Cloud Run for Anthos Trigger
-    #- knative_trigger/default
+    - knative_trigger/default
     # Google Cloud Logging export sink
-    #- logging_sink/default
+    - logging_sink/default
     # Google Cloud Microsoft Active Directory Domain
-    #- microsoft_ad_domain/default
+    - microsoft_ad_domain/default
     # Google Cloud NAT Gateway
-    #- nat_gateway/default
+    - nat_gateway/default
     # Google NetApp Cloud Volume
-    #- netapp_cloud_volume/default
+    - netapp_cloud_volume/default
     # Google Network Security Policy
-    #- network_security_policy/default
+    - network_security_policy/default
     # Google Producer Quota
-    #- producer_quota/default
+    - producer_quota/default
     # Google Pub/Sub Lite Subscription Partition
     - pubsublite_subscription_partition/default
     # Google Pub/Sub Lite Topic Partition
@@ -192,24 +192,24 @@ activation:
     # Google Cloud Pub/Sub Topic
     - pubsub_topic/default
     # Google reCAPTCHA Key
-    #- recaptchaenterprise.googleapis.com/Key/default
+    - recaptchaenterprise.googleapis.com/Key/default
     # Google Cloud Memorystore
     - redis_instance/default
     # Google Cloud Spanner Instance
-    #- spanner_instance/default
+    - spanner_instance/default
     # Google Cloud Network TCP Load Balancer Rule
     - tcp_lb_rule/default
     # Google Cloud TCP/SSL Proxy Rule
-    #- tcp_ssl_proxy_rule/default
+    - tcp_ssl_proxy_rule/default
     # Google Cloud TPU Worker
-    #- tpu_worker/default
+    - tpu_worker/default
     # Google Transfer Service Agent
-    #- transfer_service_agent/default
+    - transfer_service_agent/default
     # Google Cloud Network UDP Load Balancer Rule
-    #- udp_lb_rule/default
+    - udp_lb_rule/default
     # Google Uptime Check URL
-    #- uptime_url/default
+    - uptime_url/default
     # Google VPC Access Connector
-    #- vpc_access_connector/default
+    - vpc_access_connector/default
     # Google Cloud VPN Tunnel
-    #- vpn_gatewayv/None
+    - vpn_gatewayv/None

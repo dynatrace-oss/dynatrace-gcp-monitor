@@ -226,3 +226,5 @@ gcp:
       valueType: DOUBLE
       metricKind: CUMULATIVE
     dimensions: []
+alerts:
+  - path: alerts/gke_container/cpu.utilization.json

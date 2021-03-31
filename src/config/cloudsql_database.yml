@@ -499,3 +499,5 @@ gcp:
     dimensions: []
 dashboards:
   - dashboard: "dashboards/cloudsql_database.json"
+alerts:
+  - path: "alerts/cloudsql_database/cpu.utilization.json"

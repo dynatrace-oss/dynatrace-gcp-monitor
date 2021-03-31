@@ -1,0 +1,18 @@
+{
+    "id": "cloud.gcp.run_googleapis_com.container.memory.utilizations_alert",
+    "enabled": true,
+    "name": "Google Cloud Run Revision Container memory utilization [GCP]",
+    "description": "The {metricname} value of {severity} was {alert_condition} your custom threshold of {threshold}.",
+    "metricId": "cloud.gcp.run_googleapis_com.container.memory.utilizations",
+    "aggregationType": "AVG",
+    "severity": "RESOURCE_CONTENTION",
+    "monitoringStrategy": {
+        "type": "STATIC_THRESHOLD",
+        "alertCondition": "ABOVE",
+        "samples": 10,
+        "dealertingSamples": 10,
+        "violatingSamples": 3,
+        "threshold": 95,
+        "unit": "PERCENT"
+    }
+}

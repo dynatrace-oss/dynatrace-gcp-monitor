@@ -94,3 +94,5 @@ gcp:
     - value: metric.labels.version
     - value: metric.labels.module
     - value: metric.labels.result
+alerts:
+  - path: alerts/filestore_instance/server.free_bytes_percent.json

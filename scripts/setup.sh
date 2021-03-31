@@ -286,7 +286,7 @@ fi
 if [ "$IMPORT_ALERTS" != "no" ] ; then
   EXISTING_ALERTS=$(dt_api "api/config/v1/anomalyDetection/metricEvents"| jq -r '.values[] | select (.id |startswith("cloud.gcp.")) | (.id + "\t" + .name )')
   if [ -n "${EXISTING_ALERTS}" ]; then
-      warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"
+      warn "Found existing Google alerts in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"
   fi
 
   if [ "$IMPORT_ALERTS" == "inactive" ]; then
