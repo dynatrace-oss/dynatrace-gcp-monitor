@@ -19,7 +19,7 @@ from typing import Dict, List
 from lib.context import Context, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
 from lib.entities.model import Entity
-from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
+from lib.metrics import DISTRIBUTION_VALUE_KEY, INT_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
 UNIT_10TO2PERCENT = "10^2.%"
@@ -365,6 +365,8 @@ def extract_value(point, typed_value_key: str, metric: Metric):
 
         return gauge_line(min, max, count, sum)
     else:
+        if (typed_value_key == INT_VALUE_KEY) and isinstance(value,str):
+            value = int(value)
         if metric.unit == UNIT_10TO2PERCENT:
             value = 100 * value
         return value
