@@ -139,3 +139,6 @@ gcp:
       valueType: DOUBLE
       metricKind: GAUGE
     dimensions: []
+alerts:
+  - path: alerts/pubsublite_topic_partition/publish_quota_utilization.json
+  - path: alerts/pubsublite_topic_partition/subscribe_quota_utilization.json

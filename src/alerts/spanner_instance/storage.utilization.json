@@ -1,0 +1,18 @@
+{
+    "id": "cloud.gcp.spanner_googleapis_com.instance.storage.utilization_alert",
+    "enabled": true,
+    "name": "Google Cloud Spanner Instance storage utilization [GCP]",
+    "description": "The {metricname} value of {severity} was {alert_condition} your custom threshold of {threshold}.",
+    "metricId": "cloud.gcp.spanner_googleapis_com.instance.storage.utilization",
+    "aggregationType": "AVG",
+    "severity": "RESOURCE_CONTENTION",
+    "monitoringStrategy": {
+        "type": "STATIC_THRESHOLD",
+        "alertCondition": "ABOVE",
+        "samples": 10,
+        "dealertingSamples": 10,
+        "violatingSamples": 3,
+        "threshold": 95,
+        "unit": "PERCENT"
+    }
+}

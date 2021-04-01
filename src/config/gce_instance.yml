@@ -856,3 +856,5 @@ gcp:
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.ip_protocol
+alerts:
+  - path: alerts/gce_instance/cpu.utilization.json

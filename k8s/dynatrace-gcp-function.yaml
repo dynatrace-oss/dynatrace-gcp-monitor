@@ -29,7 +29,10 @@ data:
   # if set to GCP_ONLY: proxy settings will be used only for requests to GCP API
   # if not set: default, proxy settings won't be used
   USE_PROXY: ""
-
+  # Import predefined dashboards for selected services. Allowed values: `yes`, `no`
+  IMPORT_DASHBOARDS: "yes"
+  # Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services. Allowed values: `yes`, `no`, `inactive`
+  IMPORT_ALERTS: "yes"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -82,6 +85,16 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: USE_PROXY
+        - name: IMPORT_DASHBOARDS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: IMPORT_DASHBOARDS
+        - name: IMPORT_ALERTS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: IMPORT_ALERTS
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
         - name: DYNATRACE_URL_SECRET_NAME
