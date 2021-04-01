@@ -217,9 +217,9 @@ class ConfigureDynatrace:
         if not has_write_config_permission:
             self.logging_context.log("Missing ReadConfig/WriteConfig permission for Dynatrace API token, skipping dashboards configuration")
         else:
-            dashboards_import = os.environ.get("IMPORT_DASHBOARDS", "yes") != "no"
-            alerts_import = os.environ.get("IMPORT_ALERTS", "yes") != "no"
-            alerts_enabled = os.environ.get("IMPORT_ALERTS", "yes") != "inactive"
+            dashboards_import = os.environ.get("IMPORT_DASHBOARDS", "yes").lower() != "no"
+            alerts_import = os.environ.get("IMPORT_ALERTS", "yes").lower() != "no"
+            alerts_enabled = os.environ.get("IMPORT_ALERTS", "yes").lower() != "inactive"
 
             if dashboards_import:
                 await self.import_dashboards(dt_api)

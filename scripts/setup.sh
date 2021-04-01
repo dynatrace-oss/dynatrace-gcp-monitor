@@ -41,6 +41,9 @@ readonly PRINT_METRIC_INGEST_INPUT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'debug.pri
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.cloudFunctionSize')
 readonly SERVICE_USAGE_BOOKING=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.serviceUsageBooking')
 readonly USE_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.useProxy')
+readonly IMPORT_DASHBOARDS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importDashboards')
+readonly IMPORT_ALERTS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importAlerts')
+
 
 shopt -s nullglob
 
@@ -234,7 +237,7 @@ echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 mkdir -p $GCP_FUNCTION_NAME
 unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
-cd ./$GCP_FUNCTION_NAME || exit
+pushd ./$GCP_FUNCTION_NAME || exit
 gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY
 
 echo -e
@@ -254,7 +257,7 @@ else
     gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
 fi
 
-if [ "$IMPORT_DASHBOARDS" != "no" ] ; then
+if [ "${IMPORT_DASHBOARDS,,}" != "no" ] ; then
   EXISTING_DASHBOARDS=$(dt_api "api/config/v1/dashboards" | jq -r '.dashboards[].name | select (. |contains("Google"))')
   if [ -n "${EXISTING_DASHBOARDS}" ]; then
       warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_DASHBOARDS"
@@ -283,13 +286,13 @@ else
   echo "Dashboards import disabled"
 fi
 
-if [ "$IMPORT_ALERTS" != "no" ] ; then
+if [ "${IMPORT_ALERTS,,}" != "no" ] ; then
   EXISTING_ALERTS=$(dt_api "api/config/v1/anomalyDetection/metricEvents"| jq -r '.values[] | select (.id |startswith("cloud.gcp.")) | (.id + "\t" + .name )')
   if [ -n "${EXISTING_ALERTS}" ]; then
       warn "Found existing Google alerts in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"
   fi
 
-  if [ "$IMPORT_ALERTS" == "inactive" ]; then
+  if [ "${IMPORT_ALERTS,,}" == "inactive" ]; then
     echo "Imported alerts would be inactive by default"
   fi
 
@@ -315,7 +318,7 @@ else
 fi
 echo "- cleaning up"
 
-cd ..
+popd || exit 1
 echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
 rm ./$FUNCTION_ZIP_PACKAGE
 
