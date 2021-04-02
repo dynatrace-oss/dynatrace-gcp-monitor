@@ -31,7 +31,7 @@ data:
   USE_PROXY: ""
   # Import predefined dashboards for selected services. Allowed values: `yes`, `no`
   IMPORT_DASHBOARDS: "yes"
-  # Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services. Allowed values: `yes`, `no`, `inactive`
+  # Import predefined alerting rules (inactive by default) for selected services. Allowed values: `yes`, `no`
   IMPORT_ALERTS: "yes"
 ---
 apiVersion: apps/v1
