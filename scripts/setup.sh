@@ -292,19 +292,11 @@ if [ "${IMPORT_ALERTS,,}" != "no" ] ; then
       warn "Found existing Google alerts in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"
   fi
 
-  if [ "${IMPORT_ALERTS,,}" == "inactive" ]; then
-    echo "Imported alerts would be inactive by default"
-  fi
-
   for ALERT_PATH in $(get_ext_files 'alerts[*].path')
   do
     ALERT_JSON=$(cat "./$ALERT_PATH")
     ALERT_ID=$(jq -r .id < "./$ALERT_PATH")
     ALERT_NAME=$(jq -r  .name < "./$ALERT_PATH" )
-
-    if [ "$IMPORT_ALERTS" == "inactive" ]; then
-      ALERT_JSON=$(sed 's/"enabled"\s*:\s*\w*/"enabled": false/' <<< $ALERT_JSON)
-    fi
 
     if ! grep -q "$ALERT_ID" <<< "$EXISTING_ALERTS"; then
       echo "- Create [$ALERT_NAME] alert from file [$ALERT_PATH]"
