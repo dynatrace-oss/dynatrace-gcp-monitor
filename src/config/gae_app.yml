@@ -425,3 +425,5 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.cached
+alerts:
+  - path: alerts/gae_app/cpu.utilization.json

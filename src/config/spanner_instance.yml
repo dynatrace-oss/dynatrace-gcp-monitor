@@ -210,3 +210,6 @@ gcp:
     - value: metric.labels.status
     - value: metric.labels.query_type
     - value: metric.labels.optimizer_version
+alerts:
+  - path: "alerts/spanner_instance/cpu.utilization.json"
+  - path: "alerts/spanner_instance/storage.utilization.json"

@@ -21,6 +21,10 @@ googleCloud:
     # if set to destination: monitoring API calls are booked towards project which is monitored
     # REQUIRES serviceusage.services.use Permission granted for Service Account!
     serviceUsageBooking: source
+    # Import predefined dashboards for selected services (yes/no)
+    importDashboards: yes
+    # Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services (yes/inactive/no)
+    importAlerts: yes
   metrics:
     # Name of the Pub/Sub topic for metric function
     pubSubTopic: dynatrace-gcp-service-invocation
@@ -52,7 +56,7 @@ activation:
     # Google Autoscaler
     #- autoscaler/default
     # Google Cloud BigQuery BI Engine Model
-    #- bigquery_biengine_model/default 
+    #- bigquery_biengine_model/default
     # Google Cloud BigQuery Project
     #- bigquery_project/default
     # Google Cloud Bigtable Cluster

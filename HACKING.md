@@ -29,6 +29,8 @@ Worker function execution can be tweaked with environment variables. In Google F
 | REQUIRE_VALID_CERTIFICATE | determines whether worker will verify SSL certificate of Dynatrace endpoint | True |
 | SERVICE_USAGE_BOOKING | `source` if API calls should use default billing mechanism, `destination` if they should be billed per project | `source` |
 | USE_PROXY | Depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both. Allowed values: `ALL`, `DT_ONLY`, `GCP_ONLY` |  |
+| IMPORT_DASHBOARDS | Import predefined dashboards for selected services. Allowed values: `yes`, `no` | `yes` |
+| IMPORT_ALERTS | Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services. Allowed values: `yes`, `no`, `inactive` | `yes` |
 
 ### Log processing configuration variables
 

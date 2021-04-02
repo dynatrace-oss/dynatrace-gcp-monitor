@@ -74,3 +74,5 @@ gcp:
       valueType: DOUBLE
       metricKind: GAUGE
     dimensions: []
+alerts:
+  - path: alerts/gae_instance/cpu.utilization.json
