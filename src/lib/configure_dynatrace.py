@@ -108,41 +108,6 @@ class ConfigureDynatrace:
         except Exception as e:
             self.logging_context.log(f'Unable to get available dashboards. Error details: {e}')
             return []
-
-    async def get_available_dashboards(self) -> List[Dict]:
-        try:
-            selected_services = None
-            if "GCP_SERVICES" in os.environ:
-                selected_services_string = os.environ.get("GCP_SERVICES", "")
-                selected_services = selected_services_string.split(",") if selected_services_string else []
-                working_directory = os.path.dirname(os.path.realpath(__file__))
-                config_directory = os.path.join(working_directory, "../config")
-                config_files = [
-                    file for file
-                    in listdir(config_directory)
-                    if isfile(os.path.join(config_directory, file)) and is_yaml_file(file)
-                ]
-                dashboards = []
-                for file in config_files:
-                    config_file_path = os.path.join(config_directory, file)
-                    try:
-                        with open(config_file_path, encoding="utf-8") as config_file:
-                            config_yaml = yaml.safe_load(config_file)
-                            for dashboard in config_yaml.get("dashboards", []):                        
-                                dashboard_file_path = os.path.join(working_directory, '../', dashboard.get("dashboard",{}))                                                                
-                                with open(dashboard_file_path, encoding="utf-8") as dashboard_file:
-                                    dashboard_json = json.load(dashboard_file) 
-                                    dashboard_name = dashboard_json.get("dashboardMetadata",{}).get("name",{})
-                                    dashboards.append({"path": dashboard_file_path,"name": dashboard_name})                            
-                    except Exception as error:
-                         self.logging_context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
-                         continue                
-                return dashboards   
-            else:
-                return []
-        except Exception as e:
-            self.logging_context.log(f'Unable to get available dashboards. Error details: {e}')
-            return []
             
     def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, logging_context: LoggingContext):
         self.gcp_session = gcp_session
@@ -182,12 +147,11 @@ class ConfigureDynatrace:
             self.logging_context.log(
                 f"All dashboards already installed, skipping. (if you wish to upgrade a dashboard, please delete it first)")
 
-    async def import_alerts(self, dt_api: DtApi, enable_alerts: bool = True):
+    async def import_alerts(self, dt_api: DtApi):
         existing_alerts = await self.get_existing_alerts(dt_api)
         available_alerts = self.get_ext_resources("alerts", "path", lambda x: {
             "id": x.get("id", ""), "name": x.get("name", "")})
         alerts_to_install = [alert for alert in available_alerts if alert["id"] not in existing_alerts]
-        #alerts_to_install = available_alerts
         self.logging_context.log(f"Available alerts: {[alert['name'] for alert in available_alerts]}")
         if alerts_to_install:
             self.logging_context.log(f"New alerts to install: {[alert['name'] for alert in alerts_to_install]}")
@@ -195,7 +159,6 @@ class ConfigureDynatrace:
                 try:
                     with open(alert["path"], encoding="utf-8") as alert_file:
                         alert_json = json.load(alert_file)
-                        alert_json["enabled"] = enable_alerts
                         response = await dt_api.call("PUT", f"/api/config/v1/anomalyDetection/metricEvents/{alert['id']}", alert_json)
                         response.raise_for_status()
                         self.logging_context.log(f"Installed alert {alert['name']}")
@@ -219,21 +182,16 @@ class ConfigureDynatrace:
         else:
             dashboards_import = os.environ.get("IMPORT_DASHBOARDS", "yes").lower() != "no"
             alerts_import = os.environ.get("IMPORT_ALERTS", "yes").lower() != "no"
-            alerts_enabled = os.environ.get("IMPORT_ALERTS", "yes").lower() != "inactive"
 
             if dashboards_import:
                 await self.import_dashboards(dt_api)
             else:
-                self.logging_context.log(
-                    "Dashboards import disabled")
+                self.logging_context.log("Dashboards import disabled")
 
             if alerts_import:
-                if not alerts_enabled:
-                    self.logging_context.log("Imported alerts would be inactive by default")
-                await self.import_alerts(dt_api, alerts_enabled)
+                await self.import_alerts(dt_api)
             else:
-                self.logging_context.log(
-                    "Alerts import disabled")
+                self.logging_context.log("Alerts import disabled")
 
     def __await__(self):
         return self._init_().__await__()

@@ -23,7 +23,7 @@ googleCloud:
     serviceUsageBooking: source
     # Import predefined dashboards for selected services (yes/no)
     importDashboards: yes
-    # Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services (yes/inactive/no)
+    # Import predefined alerting rules (inactive by default) for selected services (yes/no)
     importAlerts: yes
   metrics:
     # Name of the Pub/Sub topic for metric function
