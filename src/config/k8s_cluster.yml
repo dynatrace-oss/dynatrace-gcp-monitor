@@ -3,16 +3,28 @@ version: 0.0.1
 minDynatraceVersion: 1.199
 technology:
   name: Google Kubernetes Cluster
+
+vars:
+ - id: location_filter
+   displayName: Pattern matching locations for which metrics should be queried
+   type: pattern
+ - id: cluster_name_filter
+   displayName: Pattern matching clusters for which metrics should be queried
+   type: pattern
+
 gcp:
 - service: k8s_cluster
   featureSet: default
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
     id: project_id
   - value: resource.labels.location
     id: location
+    filter: vars:location_filter
   - value: resource.labels.cluster_name
     id: cluster_name
+    filter: vars:cluster_name_filter
   metrics:
   - value: logging.googleapis.com/log_entry_count
     id: cloud.gcp.logging.googleapis.com.log_entry_count

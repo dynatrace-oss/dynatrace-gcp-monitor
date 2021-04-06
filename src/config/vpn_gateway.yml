@@ -4,8 +4,13 @@ version: 0.0.1
 minDynatraceVersion: 1.199
 technology:
   name: Google Cloud VPN Tunnel
+vars:
+ - id: filter_conditions
+   displayName: Metric query filter for which metrics should be queried
+   type: variables
 gcp:
-- service: vpn_gatewayv
+- service: vpn_gateway
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
     id: project_id

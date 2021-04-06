@@ -4,9 +4,14 @@ version: 0.0.1
 minDynatraceVersion: 1.199
 technology:
   name: Google Cloud NAT Gateway
+vars:
+ - id: filter_conditions
+   displayName: Metric query filter for which metrics should be queried
+   type: variables
 gcp:
 - service: nat_gateway
   featureSet: default
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
     id: project_id

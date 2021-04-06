@@ -3,10 +3,15 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 technology:
-  name: Google Assistant Action Project 
+  name: Google Assistant Action Project
+vars:
+ - id: filter_conditions
+   displayName: Metric query filter for which metrics should be queried
+   type: variables
 gcp:
 - service: assistant_action_project
   featureSet: default
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
     id: project_id

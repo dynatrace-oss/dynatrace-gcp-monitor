@@ -4,9 +4,14 @@ version: 0.0.1
 minDynatraceVersion: 1.199
 technology:
   name: Google Cloud Storage bucket
+vars:
+ - id: filter_conditions
+   displayName: Metric query filter for which metrics should be queried
+   type: variables
 gcp:
 - service: gcs_bucket
   featureSet: default
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
     id: project_id
