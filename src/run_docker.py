@@ -19,7 +19,7 @@ from aiohttp import web
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configure_dynatrace import ConfigureDynatrace
-from lib.context import LoggingContext, get_int_environment_value
+from lib.context import LoggingContext
 from lib.credentials import create_token
 from lib.fast_check import FastCheck
 from lib.instance_metadata import InstanceMetadata
@@ -28,7 +28,6 @@ from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode
 
 OPERATION_MODE = OperationMode.from_environment_string(os.environ.get("OPERATION_MODE", None)) or OperationMode.Metrics
-HEALTH_CHECK_PORT = get_int_environment_value("HEALTH_CHECK_PORT", 8080)
 
 loop = asyncio.get_event_loop()
 
@@ -123,7 +122,7 @@ app.add_routes([web.get('/health', health)])
 # setup webapp
 runner = web.AppRunner(app)
 loop.run_until_complete(runner.setup())
-site = web.TCPSite(runner, '0.0.0.0', HEALTH_CHECK_PORT)
+site = web.TCPSite(runner, '0.0.0.0', 8080)
 loop.run_until_complete(site.start())
 
 logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
