@@ -22,11 +22,10 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request
 
-from lib.context import LogsContext
+from lib.context import LogsContext, get_should_require_valid_certificate
 
-should_verify_ssl_certificate = os.environ.get("REQUIRE_VALID_CERTIFICATE", "True") in ["True", "true"]
 ssl_context = ssl.create_default_context()
-if not should_verify_ssl_certificate:
+if not get_should_require_valid_certificate():
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
 
@@ -54,6 +53,7 @@ def send_logs(context: LogsContext, logs: List[Dict]):
             )
             if status > 299:
                 context.error(f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"')
+                number_of_http_errors += 1
             else:
                 context.log("Log ingest payload pushed successfully")
         except HTTPError as e:

@@ -13,6 +13,7 @@
 #     limitations under the License.
 import json
 import time
+from datetime import datetime
 from queue import Queue
 from typing import NewType, Any
 
@@ -99,8 +100,12 @@ def test_execution_successful():
 
     expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 10)]
 
+    message_data_json = json.loads(LOG_MESSAGE_DATA)
+    message_data_json["timestamp"] = datetime.utcnow().isoformat() + "Z"
+    fresh_message_data = json.dumps(message_data_json)
+
     for ack_id in expected_ack_ids:
-        message = create_fake_message(ack_queue, ack_id=ack_id)
+        message = create_fake_message(ack_queue, ack_id=ack_id, message_data=fresh_message_data)
         message_handler(message)
 
     _loop_single_period(0, job_queue)
@@ -117,8 +122,9 @@ def test_execution_successful():
 
 
 def verify_requests(expected_cluster_response_code):
-    sent_requests = Requests.get_all_received_requests().get_json_data()
-    for request in sent_requests.get('requests'):
+    sent_requests = Requests.get_all_received_requests().get_json_data().get('requests')
+    assert len(sent_requests) > 0
+    for request in sent_requests:
         assert_correct_body_structure(request)
         assert request.get('responseDefinition').get('status') == expected_cluster_response_code
 
@@ -137,9 +143,9 @@ def assert_correct_body_structure(request):
 
 def create_fake_message(
         ack_queue,
+        message_data,
         ack_id="ACK_ID",
         message_id="MESSAGE_ID",
-        message_data=LOG_MESSAGE_DATA,
         timestamp_epoch_seconds=int(time.time())
 ):
     publish_time_timestamp = Timestamp()
