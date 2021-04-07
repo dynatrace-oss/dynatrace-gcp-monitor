@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dynatrace-gcp-function-sa
+  namespace: dynatrace
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dynatrace-gcp-function-config
+  namespace: dynatrace
+data:
+  GCP_SERVICES: {{ .Values.gcpServices | quote }}
+  PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
+  REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
+  SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
+  USE_PROXY: {{ .Values.useProxy | quote }}
+  LOGS_SUBSCRIPTION_PROJECT: {{ .Values.logsSubscriptionProject | quote }}
+  LOGS_SUBSCRIPTION_ID: {{ .Values.logsSubscriptionId | quote }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynatrace-gcp-function
+  labels:
+    app: dynatrace-gcp-function
+  namespace: dynatrace
+spec:
+  selector:
+    matchLabels:
+      app: dynatrace-gcp-function
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dynatrace-gcp-function
+      annotations:
+        "version" : "1"
+    spec:
+      serviceAccountName: dynatrace-gcp-function-sa
+      automountServiceAccountToken: false
+      containers:
+      {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
+      #todo ms
+      - image: gcr.io/dynatrace-gcp-extension/dynatrace-gcp-function
+        name: dynatrace-gcp-function-metrics      
+        imagePullPolicy: Always
+        env:
+        - name: OPERATION_MODE
+          value: Metrics
+        - name: GCP_SERVICES
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: GCP_SERVICES
+        - name: PRINT_METRIC_INGEST_INPUT
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: PRINT_METRIC_INGEST_INPUT
+        - name: REQUIRE_VALID_CERTIFICATE
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: REQUIRE_VALID_CERTIFICATE
+        - name: SERVICE_USAGE_BOOKING
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: SERVICE_USAGE_BOOKING
+        - name: USE_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: USE_PROXY
+        - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
+          value: DYNATRACE_ACCESS_KEY
+        - name: DYNATRACE_URL_SECRET_NAME
+          value: DYNATRACE_URL
+        - name: DYNATRACE_URL
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-gcp-function-secret
+              key: url
+        - name: DYNATRACE_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-gcp-function-secret
+              key: access-key
+        - name: HEALTH_CHECK_PORT
+          value: "8080"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+      {{- end }}
+      {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
+      #todo ms
+      - image: gcr.io/dynatrace-gcp-extension/dynatrace-gcp-function
+        name: dynatrace-gcp-function-logs
+        imagePullPolicy: Always
+        env:
+        - name: OPERATION_MODE
+          value: Logs
+        - name: LOGS_SUBSCRIPTION_PROJECT
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: LOGS_SUBSCRIPTION_PROJECT
+        - name: LOGS_SUBSCRIPTION_ID
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: LOGS_SUBSCRIPTION_ID
+        - name: REQUIRE_VALID_CERTIFICATE
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: REQUIRE_VALID_CERTIFICATE
+        - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
+          value: DYNATRACE_ACCESS_KEY
+        - name: DYNATRACE_URL_SECRET_NAME
+          value: DYNATRACE_URL
+        - name: DYNATRACE_URL
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-gcp-function-secret
+              key: url
+        - name: DYNATRACE_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-gcp-function-secret
+              key: access-key
+        - name: HEALTH_CHECK_PORT
+          value: "8081"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 10
+      {{- end }}
