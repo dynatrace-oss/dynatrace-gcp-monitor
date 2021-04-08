@@ -18,7 +18,7 @@ wget https://get.helm.sh/helm-v3.5.3-linux-amd64.tar.gz
 FILE=./helm-v3.5.3-linux-amd64.tar.gz
 if [ ! -f "$FILE" ]; then
     echo "$FILE does not exist. Can't create helm chart."
-    exit 0
+    exit 1
 fi
 
 tar -zxvf helm-v3.5.3-linux-amd64.tar.gz
@@ -26,17 +26,8 @@ tar -zxvf helm-v3.5.3-linux-amd64.tar.gz
 FILE=./linux-amd64/helm
 if [ ! -f "$FILE" ]; then
     echo "$FILE does not exist. Can't create helm chart."
-    exit 0
-else
-  echo "$FILE exists."
+    exit 1
 fi
 
 sudo mv linux-amd64/helm /usr/local/bin/helm
-helm package ./k8s/helm-chart/dynatrace-gcp-function
-
-FILE=./dynatrace-gcp-function-0.1.0.tgz
-if [ ! -f "$FILE" ]; then
-    echo "$FILE does not exist. Can't create helm chart."
-    exit 0
-fi
-#helm package ./k8s/helm-chart/dynatrace-gcp-function -d ./artefacts
+helm package ./k8s/helm-chart/dynatrace-gcp-function -d ./artefacts

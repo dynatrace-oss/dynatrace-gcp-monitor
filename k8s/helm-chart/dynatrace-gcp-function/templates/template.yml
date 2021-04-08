@@ -42,8 +42,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
-      #todo ms
-      - image: gcr.io/dynatrace-gcp-extension/dynatrace-gcp-function
+      - image: dynatrace/dynatrace-gcp-function
         name: dynatrace-gcp-function-metrics      
         imagePullPolicy: Always
         env:
@@ -108,8 +107,7 @@ spec:
           initialDelaySeconds: 10
       {{- end }}
       {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
-      #todo ms
-      - image: gcr.io/dynatrace-gcp-extension/dynatrace-gcp-function
+      - image: dynatrace/dynatrace-gcp-function
         name: dynatrace-gcp-function-logs
         imagePullPolicy: Always
         env:

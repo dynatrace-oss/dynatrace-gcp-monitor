@@ -27,6 +27,6 @@ useProxy: ""
 
 # LOGS VALUES
 # GCP project of log sink pubsub subscription
-logsSubscriptionProject: "dynatrace-gcp-extension"
+logsSubscriptionProject: ""
 # subscription id of log sink pubsub subscription
-logsSubscriptionId: "dynatrace-gcp-log-forwarder-sub"
+logsSubscriptionId: ""

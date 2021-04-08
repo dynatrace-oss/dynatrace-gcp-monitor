@@ -13,6 +13,7 @@
 #     limitations under the License.
 import asyncio
 import os
+import threading
 from typing import Optional, List
 
 from aiohttp import web
@@ -132,4 +133,5 @@ if OPERATION_MODE == OperationMode.Metrics:
     run_metrics()
 
 elif OPERATION_MODE == OperationMode.Logs:
+    threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
     run_logs(logging_context)
