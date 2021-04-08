@@ -134,5 +134,8 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
         response = await session.get(url, headers=headers)
         response_json = await response.json()
         all_projects = [project["projectId"] for project in response_json.get("projects", [])]
-        context.log("Access to following projects: " + ", ".join(all_projects))
+        if all_projects:
+            context.log("Access to following projects: " + ", ".join(all_projects))
+        else:
+            context.log("There is no access to any projects. Check service account configuration.")
         return all_projects

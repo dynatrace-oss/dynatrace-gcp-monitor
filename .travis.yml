@@ -48,6 +48,7 @@ jobs:
     - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml    
     - chmod +x ./build/version.sh
     - sh ./build/version.sh
+    - sh ./build/helm-package.sh
     - "(cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')"
     deploy:
       provider: releases
