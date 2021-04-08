@@ -81,6 +81,7 @@ class InstanceMetadataCheck:
                     audience=audience
                 )
                 self.logging_context.log(f'GCP instance metadata: {metadata}')
+                return metadata
             return None
 
     def _gcp_deployment(self):
