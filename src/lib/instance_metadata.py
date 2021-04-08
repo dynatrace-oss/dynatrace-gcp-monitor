@@ -1,4 +1,5 @@
 import asyncio
+import os
 import socket
 from collections import namedtuple
 from typing import Optional
@@ -16,7 +17,8 @@ InstanceMetadata = namedtuple('InstanceMetadata', [
     'container_name',
     'token_scopes',
     'service_account',
-    'audience'
+    'audience',
+    'hostname'
 ])
 
 
@@ -78,7 +80,8 @@ class InstanceMetadataCheck:
                     container_name=results[1],
                     token_scopes=results[2],
                     service_account=results[3],
-                    audience=audience
+                    audience=audience,
+                    hostname=os.environ.get("HOSTNAME", "")
                 )
                 self.logging_context.log(f'GCP instance metadata: {metadata}')
                 return metadata

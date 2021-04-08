@@ -169,7 +169,7 @@ class LogsFastCheck:
         _check_configuration_flags(self.logging_context, LOGS_CONFIGURATION_FLAGS)
         _check_version(self.logging_context)
         self.logging_context.log("Sending the startup message")
-        container_name = self.instance_metadata.container_name if self.instance_metadata else "local deployment"
+        container_name = self.instance_metadata.hostname if self.instance_metadata else "local deployment"
         fast_check_event = {
             'timestamp': datetime.utcnow().isoformat(" "),
             'cloud.provider': 'gcp',
