@@ -28,6 +28,10 @@ jobs:
           - default-jre
     script:
       - PYTHONPATH="./src" pytest tests/integration -v
+  - stage: helm-chart
+    name: Create helm chart
+    language: minimal
+    script: "./build/helm-package.sh"
   - stage: docker-build
     name: Docker build
     language: minimal
@@ -50,11 +54,11 @@ jobs:
     - sh ./build/version.sh
     - sh ./build/helm-package.sh
     - "(cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')"
-#    deploy:
-#      provider: releases
-#      file_glob: true
-#      api_key: $GITHUB_RELEASE_API_KEY
-#      file: "./artefacts/*"
-#      skip_cleanup: true
-#      on:
-#        tags: true
+    deploy:
+      provider: releases
+      file_glob: true
+      api_key: $GITHUB_RELEASE_API_KEY
+      file: "./artefacts/*"
+      skip_cleanup: true
+      on:
+        tags: true
