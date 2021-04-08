@@ -1,6 +1,9 @@
 import asyncio
 import os
 import re
+import time
+from datetime import datetime
+from queue import Queue
 from typing import NamedTuple, List, Optional
 
 from urllib.parse import urljoin
@@ -9,10 +12,13 @@ from aiohttp import ClientSession
 from lib.context import LoggingContext
 from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fetch_dynatrace_api_key, \
     get_project_id_from_environment
+from lib.instance_metadata import InstanceMetadata
+from lib.logs.dynatrace_client import send_logs
+from lib.logs.logs_sending_worker import create_logs_context
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
-CONFIGURATION_FLAGS = [
+METRICS_CONFIGURATION_FLAGS = [
     "PRINT_METRIC_INGEST_INPUT",
     "GOOGLE_APPLICATION_CREDENTIALS",
     "MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE",
@@ -22,14 +28,23 @@ CONFIGURATION_FLAGS = [
     "USE_PROXY"
 ]
 
+LOGS_CONFIGURATION_FLAGS = [
+    "REQUIRE_VALID_CERTIFICATE",
+    "DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH",
+    "DYNATRACE_LOG_INGEST_EVENT_MAX_AGE_SECONDS",
+    "LOGS_SUBSCRIPTION_PROJECT",
+    "LOGS_SUBSCRIPTION_ID",
+    "DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD",
+]
+
 GCP_SERVICE_USAGE_URL = 'https://serviceusage.googleapis.com/v1/projects/'
 
-required_services = [
+REQUIRED_SERVICES = [
     'monitoring.googleapis.com',
     'cloudresourcemanager.googleapis.com'
 ]
 
-dynatrace_required_token_scopes = [
+DYNATRACE_REQUIRED_TOKEN_SCOPES = [
     'metrics.ingest',
 ]
 
@@ -43,8 +58,7 @@ def find_service_name(service):
 def valid_dynatrace_scopes(token_metadata: dict):
     """Check whether Dynatrace token metadata has required scopes to start ingest metrics"""
     token_scopes = token_metadata.get('scopes', [])
-    return all(scope in token_scopes for scope in dynatrace_required_token_scopes) if token_scopes else False
-
+    return all(scope in token_scopes for scope in DYNATRACE_REQUIRED_TOKEN_SCOPES) if token_scopes else False
 
 
 async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
@@ -69,7 +83,7 @@ async def get_dynatrace_token_metadata(dt_session: ClientSession, context: Loggi
         return {}
 
 
-class FastCheck:
+class MetricsFastCheck:
 
     def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, token: str, logging_context: LoggingContext):
         self.gcp_session = gcp_session
@@ -100,9 +114,9 @@ class FastCheck:
     async def _check_services(self, project_id):
         list_services_result = await self.list_services(project_id)
         service_names = [find_service_name(service['name']) for service in list_services_result.get('services', [])]
-        if not all(name in service_names for name in required_services):
+        if not all(name in service_names for name in REQUIRED_SERVICES):
             self.logging_context.log(f'Cannot monitor project: \'{project_id}\'. '
-                                     f'Enable required services: {required_services}')
+                                     f'Enable required services: {REQUIRED_SERVICES}')
             return None
         return service_names
 
@@ -118,7 +132,7 @@ class FastCheck:
             token_metadata = await get_dynatrace_token_metadata(self.dt_session, self.logging_context, dynatrace_url, dynatrace_access_key)
             if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
                 self.logging_context.log(f'Dynatrace API Token for project: \'{project_id}\'is not valid. '
-                                         f'Check expiration time and required token scopes: {dynatrace_required_token_scopes}')
+                                         f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
                 return None
         except Exception as e:
             self.logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
@@ -126,9 +140,9 @@ class FastCheck:
 
         return dynatrace_url, token_metadata
 
-    async def _init_(self) -> FastCheckResult:
-        self._check_configuration_flags()
-        self._check_version()
+    async def execute(self) -> FastCheckResult:
+        _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
+        _check_version(self.logging_context)
 
         project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
@@ -145,23 +159,40 @@ class FastCheck:
 
         return FastCheckResult(projects=ready_to_monitor)
 
-    def _check_configuration_flags(self):
-        configuration_flag_values = []
-        for key in CONFIGURATION_FLAGS:
-            value = os.environ.get(key, None)
-            if value is None:
-                configuration_flag_values.append(f"{key} is None")
-            else:
-                configuration_flag_values.append(f"{key} = '{value}'")
-        self.logging_context.log(f"Found configuration flags: {', '.join(configuration_flag_values)}")
-    
-    def _check_version(self):        
-        script_directory = os.path.dirname(os.path.realpath(__file__))
-        version_file_path = os.path.join(script_directory, "./../version.txt")
-        with open(version_file_path) as version_file:
-            _version = version_file.readline()
-            self.logging_context.log(f"Found version: {_version}")
+
+class LogsFastCheck:
+    def __init__(self, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+        self.instance_metadata = instance_metadata
+        self.logging_context = logging_context
+
+    def execute(self):
+        _check_configuration_flags(self.logging_context, LOGS_CONFIGURATION_FLAGS)
+        _check_version(self.logging_context)
+        self.logging_context.log("Sending the startup message")
+        container_name = self.instance_metadata.hostname if self.instance_metadata else "local deployment"
+        fast_check_event = {
+            'timestamp': datetime.utcnow().isoformat(" "),
+            'cloud.provider': 'gcp',
+            'content': f'GCP Log Forwarder has started at {container_name}',
+            'severity': 'INFO'
+        }
+        send_logs(create_logs_context(Queue()), [fast_check_event])
 
 
-    def __await__(self):
-        return self._init_().__await__()
+def _check_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):
+    configuration_flag_values = []
+    for key in flags_to_check:
+        value = os.environ.get(key, None)
+        if value is None:
+            configuration_flag_values.append(f"{key} is None")
+        else:
+            configuration_flag_values.append(f"{key} = '{value}'")
+    logging_context.log(f"Found configuration flags: {', '.join(configuration_flag_values)}")
+
+
+def _check_version(logging_context: LoggingContext):
+    script_directory = os.path.dirname(os.path.realpath(__file__))
+    version_file_path = os.path.join(script_directory, "./../version.txt")
+    with open(version_file_path) as version_file:
+        _version = version_file.readline()
+        logging_context.log(f"Found version: {_version}")

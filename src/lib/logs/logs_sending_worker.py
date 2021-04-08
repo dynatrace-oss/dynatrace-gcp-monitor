@@ -27,7 +27,7 @@ def create_log_sending_worker_loop(execution_period_seconds : int, job_queue: Qu
     return partial(_log_sending_worker_loop, execution_period_seconds, job_queue)
 
 
-def _create_logs_context(job_queue: Queue):
+def create_logs_context(job_queue: Queue):
     dynatrace_api_key = get_dynatrace_api_key_from_env()
     dynatrace_url = get_dynatrace_url_from_env()
     project_id_owner = get_project_id_from_environment()
@@ -48,7 +48,7 @@ def _log_sending_worker_loop(execution_period_seconds : int, job_queue: Queue):
 
 def _loop_single_period(execution_period_seconds: int, job_queue: Queue):
     try:
-        context = _create_logs_context(job_queue)
+        context = create_logs_context(job_queue)
         _sleep_until_next_execution(execution_period_seconds)
         _process_jobs(context)
     except Exception:

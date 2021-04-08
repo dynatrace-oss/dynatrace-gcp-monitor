@@ -26,6 +26,10 @@ def get_int_environment_value(key: str, default_value: int) -> int:
     return int(environment_value) if environment_value and environment_value.isdigit() else default_value
 
 
+def get_should_require_valid_certificate() -> bool:
+    return os.environ.get("REQUIRE_VALID_CERTIFICATE", "True") in ["True", "T", "true"]
+
+
 class LoggingContext:
     def __init__(self, scheduled_execution_id: Optional[str]):
         self.scheduled_execution_id: str = scheduled_execution_id[0:8] if scheduled_execution_id else None
@@ -73,7 +77,7 @@ class ExecutionContext(LoggingContext):
         self.dynatrace_url = dynatrace_url
         self.function_name = os.environ.get("FUNCTION_NAME", "Local")
         self.location = os.environ.get("FUNCTION_REGION", "us-east1")
-        self.require_valid_certificate = os.environ.get("REQUIRE_VALID_CERTIFICATE", "True") in ["True", "T", "true"]
+        self.require_valid_certificate = get_should_require_valid_certificate()
 
 
 class LogsContext(ExecutionContext):

@@ -54,4 +54,8 @@ def run_logs(logging_context: LoggingContext):
     logs_sending_worker_thread = Thread(target=worker_loop, name="LogsSendingWorkerThread", daemon=True)
     logs_sending_worker_thread.start()
 
-    subscriber.result()
+    try:
+        subscriber.result()
+    except Exception as subscription_exception:
+        logging_context.error(f"Pub/sub subscriber crashed for path {subscription_path}")
+        raise subscription_exception
