@@ -41,9 +41,13 @@ def create_logs_context(job_queue: Queue):
     )
 
 
-def _log_sending_worker_loop(execution_period_seconds : int, job_queue: Queue):
+def _log_sending_worker_loop(execution_period_seconds: int, job_queue: Queue):
     while True:
-        _loop_single_period(execution_period_seconds, job_queue)
+        try:
+            _loop_single_period(execution_period_seconds, job_queue)
+        except Exception:
+            print("Logs Sending Worker Loop Exception:")
+            traceback.print_exc()
 
 
 def _loop_single_period(execution_period_seconds: int, job_queue: Queue):

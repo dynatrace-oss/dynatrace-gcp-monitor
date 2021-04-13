@@ -45,3 +45,4 @@ Worker function execution can be tweaked with environment variables. In Google F
 | LOGS_SUBSCRIPTION_PROJECT | GCP project of log sink pubsub subscription | |
 | LOGS_SUBSCRIPTION_ID | subscription id of log sink pubsub subscription | |
 | DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD | Period of sending batched logs to Dynatrace | 60 seconds |
+| DYNATRACE_TIMEOUT_SECONDS | Timeout of request to Dynatrace Log Ingest | 30 seconds |

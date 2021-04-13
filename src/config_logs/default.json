@@ -1,0 +1,15 @@
+{
+  "name": "default",
+  "displayName": "Default",
+  "rules": [
+    {
+      "sources": [],
+      "attributes": [
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}

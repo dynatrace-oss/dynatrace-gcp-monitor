@@ -14,6 +14,7 @@
 
 import enum
 import os
+import traceback
 from datetime import datetime, timedelta
 from queue import Queue
 from typing import Optional
@@ -36,6 +37,10 @@ class LoggingContext:
 
     def error(self, *args):
         self.log("ERROR", *args)
+
+    def exception(self, *args):
+        self.error(*args)
+        traceback.print_exc()
 
     def log(self, *args):
         """

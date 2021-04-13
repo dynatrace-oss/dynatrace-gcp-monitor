@@ -41,7 +41,7 @@ def run_logs(logging_context: LoggingContext):
     subscriber_client = pubsub.SubscriberClient()
     subscription_path = subscriber_client.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
     logging_context.log(f"Subscribing on '{subscription_path}'")
-    flow_control = FlowControl(max_messages=MAX_MESSAGES_PROCESSED)
+    flow_control = FlowControl(max_messages=MAX_MESSAGES_PROCESSED-10)
     subscriber = subscriber_client.subscribe(
         subscription=subscription_path,
         callback=create_process_message_handler(job_queue),

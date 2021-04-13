@@ -1,0 +1,51 @@
+{
+  "name": "common",
+  "displayName": "Common",
+  "rules": [
+    {
+      "sources": [],
+      "attributes": [
+        {
+          "key": "severity",
+          "pattern": "severity"
+        },
+        {
+          "key": "cloud.provider",
+          "pattern": "`gcp`"
+        },
+        {
+          "key": "cloud.region",
+          "pattern": "resource.labels.region || resource.labels.location"
+        },
+        {
+          "key": "gcp.region",
+          "pattern": "resource.labels.region || resource.labels.location"
+        },
+        {
+          "key": "gcp.project.id",
+          "pattern": "resource.labels.project_id"
+        },
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.instance_id"
+        },
+        {
+          "key": "gcp.instance.name",
+          "pattern": "resource.labels.function_name"
+        },
+        {
+          "key": "gcp.resource.type",
+          "pattern": "resource.type"
+        },
+        {
+          "key": "timestamp",
+          "pattern": "timestamp"
+        },
+        {
+          "key": "dt.logpath",
+          "pattern": "logName"
+        }
+      ]
+    }
+  ]
+}

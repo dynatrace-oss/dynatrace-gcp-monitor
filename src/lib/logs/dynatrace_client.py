@@ -13,7 +13,6 @@
 #   limitations under the License.
 
 import json
-import os
 import ssl
 import time
 import urllib
@@ -22,12 +21,14 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request
 
-from lib.context import LogsContext, get_should_require_valid_certificate
+from lib.context import LogsContext, get_should_require_valid_certificate, get_int_environment_value
 
 ssl_context = ssl.create_default_context()
 if not get_should_require_valid_certificate():
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
+
+_TIMEOUT = get_int_environment_value("DYNATRACE_TIMEOUT_SECONDS", 30)
 
 
 def send_logs(context: LogsContext, logs: List[Dict]):
@@ -49,7 +50,7 @@ def send_logs(context: LogsContext, logs: List[Dict]):
                 headers={
                     "Authorization": f"Api-Token {context.dynatrace_api_key}",
                     "Content-Type": "application/json; charset=utf-8"
-                }
+                },
             )
             if status > 299:
                 context.error(f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"')
@@ -79,7 +80,7 @@ def _perform_http_request(
         method=method
     )
     try:
-        response = urllib.request.urlopen(req, context=ssl_context)
+        response = urllib.request.urlopen(req, context=ssl_context, timeout=_TIMEOUT)
         return response.code, response.reason, response.read().decode("utf-8")
     except HTTPError as e:
         response_body = e.read().decode("utf-8")
