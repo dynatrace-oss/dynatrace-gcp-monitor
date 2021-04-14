@@ -12,12 +12,15 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import json
+from datetime import datetime
 
 from lib.context import LoggingContext
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
     ATTRIBUTE_DT_LOGPATH
+
+timestamp = datetime.utcnow().isoformat() + "Z"
 
 record = {
     "insertId": "6075332400049b1f937691ca",
@@ -37,7 +40,7 @@ record = {
         "type": "cloud_run_revision"
     },
     "textPayload": "Saved 6333542b-b5fd-4996-8138-8b86e8156e29: ",
-    "timestamp": "2021-04-13T05:59:00.301855Z"
+    "timestamp": timestamp
 }
 
 record_string = json.dumps(record)
@@ -48,7 +51,7 @@ expected_output = {
     ATTRIBUTE_GCP_REGION: 'us-central1',
     ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_run_revision',
-    ATTRIBUTE_TIMESTAMP: '2021-04-13T05:59:00.301855Z',
+    ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: record_string,
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/run.googleapis.com%2Fstdout'
 }

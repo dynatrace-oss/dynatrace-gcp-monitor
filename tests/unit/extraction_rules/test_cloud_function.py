@@ -12,12 +12,15 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import json
+from datetime import datetime
 
 from lib.context import LoggingContext
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
     ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH
+
+timestamp = datetime.utcnow().isoformat() + "Z"
 
 record = {
     "insertId": "000000-34c62aef-5df9-4f63-b692-a92f64febd2c",
@@ -36,7 +39,7 @@ record = {
     },
     "severity": "DEBUG",
     "textPayload": "Function execution started",
-    "timestamp": "2021-04-13T10:27:01.747066421Z",
+    "timestamp": timestamp,
     "trace": "projects/dynatrace-gcp-extension/traces/b24dd86d3aa6a386ff2aa6a7f16660a0"
 }
 
@@ -51,7 +54,7 @@ expected_output = {
     ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
     ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-function',
-    ATTRIBUTE_TIMESTAMP: '2021-04-13T10:27:01.747066421Z',
+    ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: "Function execution started",
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions',
     'faas.id': 'j22o0ucdhpop'
