@@ -18,6 +18,10 @@
         {
           "key": "content",
           "pattern": "textPayload"
+        },
+        {
+          "key": "gcp.instance.name",
+          "pattern": "resource.labels.function_name"
         }
       ]
     }

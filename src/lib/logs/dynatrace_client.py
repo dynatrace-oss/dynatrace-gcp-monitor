@@ -50,7 +50,7 @@ def send_logs(context: LogsContext, logs: List[Dict]):
                 headers={
                     "Authorization": f"Api-Token {context.dynatrace_api_key}",
                     "Content-Type": "application/json; charset=utf-8"
-                },
+                }
             )
             if status > 299:
                 context.error(f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"')

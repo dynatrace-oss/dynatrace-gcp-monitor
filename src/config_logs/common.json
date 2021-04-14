@@ -30,10 +30,6 @@
           "pattern": "resource.labels.instance_id"
         },
         {
-          "key": "gcp.instance.name",
-          "pattern": "resource.labels.function_name"
-        },
-        {
           "key": "gcp.resource.type",
           "pattern": "resource.type"
         },
