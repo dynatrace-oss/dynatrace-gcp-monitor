@@ -30,8 +30,9 @@ from wiremock.server import WireMockServer
 
 from lib.logs.logs_processor import create_process_message_handler
 from lib.logs.logs_sending_worker import _loop_single_period
+from lib.logs.metadata_engine import ATTRIBUTE_TIMESTAMP, ATTRIBUTE_CONTENT, ATTRIBUTE_CLOUD_PROVIDER
 
-LOG_MESSAGE_DATA = '{"insertId":"000000-ff1a5bfd-b64a-442e-91b2-deba5557dbfe","labels":{"execution_id":"zh2htc8ax7y6"},"logName":"projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions","receiveTimestamp":"2021-03-29T10:25:15.862698697Z","resource":{"labels":{"function_name":"dynatrace-gcp-function","project_id":"dynatrace-gcp-extension","region":"us-central1"},"type":"cloud_function"},"severity":"INFO","textPayload":"2021-03-29 10:25:11.101768  : Access to following projects: dynatrace-gcp-extension","timestamp":"2021-03-29T10:25:11.101Z","trace":"projects/dynatrace-gcp-extension/traces/f748c1e106a134178afee611c90bf984"}'
+LOG_MESSAGE_DATA = '{"insertId":"000000-ff1a5bfd-b64a-442e-91b2-deba5557dbfe","labels":{"execution_id":"zh2htc8ax7y6"},"logName":"projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions","receiveTimestamp":"2021-03-29T10:25:15.862698697Z","resource":{"labels":{"function_name":"dynatrace-gcp-function","project_id":"dynatrace-gcp-extension","region":"us-central1"},"type":"not_cloud_function"},"severity":"INFO","textPayload":"2021-03-29 10:25:11.101768  : Access to following projects: dynatrace-gcp-extension","timestamp":"2021-03-29T10:25:11.101Z","trace":"projects/dynatrace-gcp-extension/traces/f748c1e106a134178afee611c90bf984"}'
 
 MOCKED_API_PORT = 9011
 ACCESS_KEY = 'abcdefjhij1234567890'
@@ -123,7 +124,7 @@ def test_execution_successful():
 
 def verify_requests(expected_cluster_response_code):
     sent_requests = Requests.get_all_received_requests().get_json_data().get('requests')
-    assert len(sent_requests) > 0
+    assert len(sent_requests) == 3
     for request in sent_requests:
         assert_correct_body_structure(request)
         assert request.get('responseDefinition').get('status') == expected_cluster_response_code
@@ -135,10 +136,9 @@ def assert_correct_body_structure(request):
     request_data = json.loads(request_body)
 
     for record in request_data:
-        assert 'cloud.provider' in record
-        assert record.get("cloud.provider") == "gcp"
-        assert 'content' in record
-        assert 'timestamp' in record
+        assert record.get(ATTRIBUTE_CLOUD_PROVIDER, None) == "gcp"
+        assert ATTRIBUTE_CONTENT in record
+        assert ATTRIBUTE_TIMESTAMP in record
 
 
 def create_fake_message(

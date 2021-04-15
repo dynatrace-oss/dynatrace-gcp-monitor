@@ -24,10 +24,13 @@ from dateutil.parser import *
 from google.cloud.pubsub_v1.subscriber.message import Message
 
 from lib.context import LoggingContext, get_int_environment_value
+from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
 
 _CONTENT_LENGTH_LIMIT = get_int_environment_value("DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH", 8192)
 _EVENT_AGE_LIMIT_SECONDS = get_int_environment_value("DYNATRACE_LOG_INGEST_EVENT_MAX_AGE_SECONDS", int(timedelta(days=1).total_seconds()))
 SENDING_WORKER_EXECUTION_PERIOD_SECONDS = get_int_environment_value("DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD", 60)
+
+_metadata_engine = MetadataEngine()
 
 
 class LogProcessingJob:
@@ -71,29 +74,27 @@ def _do_process_message(context: LoggingContext, log_jobs_queue: Queue, message:
 
 
 def _create_dt_log_payload(context: LoggingContext, message_data: str) -> Optional[Dict]:
-    event = json.loads(message_data)
-    payload = {}
+    record = json.loads(message_data)
+    parsed_record = {}
 
-    timestamp = event['timestamp']
-    if 'timestamp' in event:
-        timestamp_datetime = parse(timestamp)
-        event_age_in_seconds = (datetime.now(timezone.utc) - timestamp_datetime).total_seconds()
-        if event_age_in_seconds > _EVENT_AGE_LIMIT_SECONDS:
-            context.log(f"Skipping message due to too old timestamp: {timestamp}")
-            return None
+    _metadata_engine.apply(context, record, parsed_record)
 
-    payload['timestamp'] = timestamp
-    payload['cloud.provider'] = 'gcp'
-    payload['content'] = message_data[:_CONTENT_LENGTH_LIMIT]
-    payload['severity'] = event.get("severity", None)
+    parsed_timestamp = parsed_record.get(ATTRIBUTE_TIMESTAMP, None)
+    if _is_log_too_old(parsed_timestamp):
+        context.log(f"Skipping message due to too old timestamp: {parsed_timestamp}")
+        return None
 
-    return payload
+    content = parsed_record.get(ATTRIBUTE_CONTENT, None)
+    if content:
+        if not isinstance(content, str):
+            parsed_record[ATTRIBUTE_CONTENT] = json.dumps(parsed_record[ATTRIBUTE_CONTENT])
+        if len(parsed_record[ATTRIBUTE_CONTENT]) >= _CONTENT_LENGTH_LIMIT:
+            parsed_record[ATTRIBUTE_CONTENT] = parsed_record[ATTRIBUTE_CONTENT][:_CONTENT_LENGTH_LIMIT]
+
+    return parsed_record
 
 
-def _adjust_log_content(content: str, max_len: Optional[int] = 8192, trailing_chars: Optional[str] = "...more"):
-    """
-    Truncate log content to the actual Dynatrace log content length limit
-    """
-    if max_len is not None and len(content) >= max_len:
-        return content[0:max_len - len(trailing_chars)] + trailing_chars if trailing_chars else content[0:max_len]
-    return content
+def _is_log_too_old(timestamp: Optional[str]):
+    timestamp_datetime = parse(timestamp)
+    event_age_in_seconds = (datetime.now(timezone.utc) - timestamp_datetime).total_seconds()
+    return event_age_in_seconds > _EVENT_AGE_LIMIT_SECONDS
