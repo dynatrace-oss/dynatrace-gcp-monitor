@@ -4,6 +4,7 @@ notifications:
   email:
     on_success: never
 stages:
+- tests
 - docker-build
 - github-deploy
 env:
@@ -13,6 +14,16 @@ env:
   - DOCKER_CLI_EXPERIMENTAL=enabled
 jobs:
   include:
+  - stage: tests
+    name: Tests
+    language: python
+    python:
+      - "3.8"
+    install:
+      - pip install -r src/requirements.txt
+      - pip install -r tests/requirements.txt
+    script:
+      - PYTHONPATH="./src" pytest tests/unit -v
   - stage: docker-build
     name: Docker build
     language: minimal
