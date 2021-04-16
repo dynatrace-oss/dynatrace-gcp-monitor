@@ -210,12 +210,10 @@ def extract_typed_value_key(time_serie):
 
 def create_dimension(name: str, value: str, context: LoggingContext = LoggingContext(None)) -> DimensionValue:
     if len(name) > MAX_DIMENSION_NAME_LENGTH:
-        context.log("MINT rejects dimension names longer that {max_dim_name_length} chars. Dimension name \"{name}\" "
-                    "has been truncated".format(max_dim_name_length=MAX_DIMENSION_NAME_LENGTH, name=name))
+        context.log(f'MINT rejects dimension names longer that {MAX_DIMENSION_NAME_LENGTH} chars. Dimension name \"{name}\" "has been truncated')
         name = name[:MAX_DIMENSION_NAME_LENGTH]
     if len(value) > MAX_DIMENSION_VALUE_LENGTH:
-        context.log("MINT rejects dimension values longer that {max_dim_value_length} chars. Dimension value"
-                    " \"{value}\" has been truncated".format(max_dim_value_length=MAX_DIMENSION_VALUE_LENGTH, value=value))
+        context.log(f'MINT rejects dimension values longer that {MAX_DIMENSION_VALUE_LENGTH} chars. Dimension value \"{value}\" has been truncated')
         value = value[:MAX_DIMENSION_VALUE_LENGTH]
 
     return DimensionValue(name, value)
