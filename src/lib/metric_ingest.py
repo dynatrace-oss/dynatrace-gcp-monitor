@@ -11,6 +11,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import os
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
@@ -23,8 +24,8 @@ from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING,
     DimensionValue, IngestLine
 
 UNIT_10TO2PERCENT = "10^2.%"
-MAX_DIMENSION_NAME_LENGTH = 100
-MAX_DIMENSION_VALUE_LENGTH = 250
+MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
+MAX_DIMENSION_VALUE_LENGTH = os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
 
 
 async def push_ingest_lines(context: Context, project_id: str, fetch_metric_results: List[IngestLine]):
