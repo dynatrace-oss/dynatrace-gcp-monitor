@@ -11,18 +11,21 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import os
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List
 
-from lib.context import Context, DynatraceConnectivity
+from lib.context import LoggingContext, Context, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
 from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
 UNIT_10TO2PERCENT = "10^2.%"
+MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
+MAX_DIMENSION_VALUE_LENGTH = os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
 
 
 async def push_ingest_lines(context: Context, project_id: str, fetch_metric_results: List[IngestLine]):
@@ -168,7 +171,7 @@ async def fetch_metric(
 
         for time_serie in page['timeSeries']:
             typed_value_key = extract_typed_value_key(time_serie)
-            dimensions = create_dimensions(time_serie)
+            dimensions = create_dimensions(context, time_serie)
             entity_id = create_entity_id(service, time_serie)
 
             for point in time_serie['points']:
@@ -206,7 +209,18 @@ def extract_typed_value_key(time_serie):
     return typed_value_key
 
 
-def create_dimensions(time_serie: Dict) -> List[DimensionValue]:
+def create_dimension(name: str, value: str, context: LoggingContext = LoggingContext(None)) -> DimensionValue:
+    if len(name) > MAX_DIMENSION_NAME_LENGTH:
+        context.log(f'MINT rejects dimension names longer that {MAX_DIMENSION_NAME_LENGTH} chars. Dimension name \"{name}\" "has been truncated')
+        name = name[:MAX_DIMENSION_NAME_LENGTH]
+    if len(value) > MAX_DIMENSION_VALUE_LENGTH:
+        context.log(f'MINT rejects dimension values longer that {MAX_DIMENSION_VALUE_LENGTH} chars. Dimension value \"{value}\" has been truncated')
+        value = value[:MAX_DIMENSION_VALUE_LENGTH]
+
+    return DimensionValue(name, value)
+
+
+def create_dimensions(context: Context, time_serie: Dict) -> List[DimensionValue]:
     metric = time_serie.get('metric', {})
     labels = metric.get('labels', {}).copy()
     resource_labels = time_serie.get('resource', {}).get('labels', {})
@@ -214,12 +228,13 @@ def create_dimensions(time_serie: Dict) -> List[DimensionValue]:
     system_labels = time_serie.get('metadata', {}).get('systemLabels', {})
     labels.update(system_labels)
 
-    dimension_values = [DimensionValue(label, value) for label, value in labels.items()]
+    dimension_values = [create_dimension(label, value, context) for label, value in labels.items()]
 
     return dimension_values
 
 
 def flatten_and_enrich_metric_results(
+        context: Context,
         fetch_metric_results: List[List[IngestLine]],
         entity_id_map: Dict[str, Entity]
 ) -> List[IngestLine]:
@@ -232,18 +247,19 @@ def flatten_and_enrich_metric_results(
             if entity:
                 for index, dns_name in enumerate(entity.dns_names):
                     dim_name = "dns_name" if index == 0 else f"dns_name.{index}"
-                    dimension_value = DimensionValue(name=entity_dimension_prefix + dim_name, value=dns_name)
+                    dimension_value = create_dimension(name=entity_dimension_prefix + dim_name, value=dns_name, context=context)
                     ingest_line.dimension_values.append(dimension_value)
 
                 for index, ip_address in enumerate(entity.ip_addresses):
                     dim_name = "ip_address" if index == 0 else f"ip_address.{index}"
-                    dimension_value = DimensionValue(name=entity_dimension_prefix + dim_name, value=ip_address)
+                    dimension_value = create_dimension(name=entity_dimension_prefix + dim_name, value=ip_address, context=context)
                     ingest_line.dimension_values.append(dimension_value)
 
                 for cd_property in entity.properties:
-                    dimension_value = DimensionValue(
+                    dimension_value = create_dimension(
                         name=entity_dimension_prefix + cd_property.key.replace(" ", "_").lower(),
-                        value=cd_property.value
+                        value=cd_property.value,
+                        context=context
                     )
                     ingest_line.dimension_values.append(dimension_value)
 

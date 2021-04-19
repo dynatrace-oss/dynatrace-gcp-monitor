@@ -223,7 +223,7 @@ async def fetch_ingest_lines_task(context: Context, project_id: str, services: L
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
     entity_id_map = build_entity_id_map(fetch_topology_results)
-    flat_metric_results = flatten_and_enrich_metric_results(fetch_metric_results, entity_id_map)
+    flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
     return flat_metric_results
 
 
