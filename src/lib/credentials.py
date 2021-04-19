@@ -29,6 +29,8 @@ _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_NAME", "DYNATRACE_ACCESS_KEY")
 _DYNATRACE_URL_SECRET_NAME = os.environ.get("DYNATRACE_URL_SECRET_NAME","DYNATRACE_URL")
+_DYNATRACE_LOG_INGEST_URL_SECRET_NAME = os.environ.get("DYNATRACE_LOG_INGEST_URL_SECRET_NAME","DYNATRACE_LOG_INGEST_URL")
+
 
 
 async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str, ):
@@ -43,8 +45,13 @@ def get_dynatrace_api_key_from_env():
     return os.environ.get(_DYNATRACE_ACCESS_KEY_SECRET_NAME, None)
 
 
-def get_dynatrace_url_from_env():
-    return os.environ.get(_DYNATRACE_URL_SECRET_NAME, None)
+def get_dynatrace_log_ingest_url_from_env():
+    # TODO alternatively fetch from GCP secret
+    #return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
+    url = os.environ.get(_DYNATRACE_LOG_INGEST_URL_SECRET_NAME, None)
+    if url is None:
+        raise Exception("{env_var} environment variable is not set".format(env_var=_DYNATRACE_LOG_INGEST_URL_SECRET_NAME))
+    return url
 
 
 async def fetch_secret(session: ClientSession, project_id: str, token: str, secret_name: str):

@@ -5,10 +5,8 @@ debug:
 googleCloud:
   common:
     # Name of Google Secret Manager Secret containing Dynatrace Access Key
-    dynatraceAccessKeySecretName: DYNATRACE_ACCESS_KEY 
-    # Name of Google Secret Manager Secret containing Dynatrace URL
-    dynatraceUrlSecretName: DYNATRACE_URL
-    # Name of the Service Account that should be created for Dynatrace Function to authenticate with Google Monitoring API 
+    dynatraceAccessKeySecretName: DYNATRACE_ACCESS_KEY
+    # Name of the Service Account that should be created for Dynatrace Function to authenticate with Google Monitoring API
     serviceAccount: dynatrace-gcp-service
     # Path to Google credentials file
     # googleApplicationCredentialsPath: ''
@@ -26,6 +24,8 @@ googleCloud:
     # Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services (yes/inactive/no)
     importAlerts: yes
   metrics:
+    # Name of Google Secret Manager Secret containing Dynatrace URL
+    dynatraceUrlSecretName: DYNATRACE_URL
     # Name of the Pub/Sub topic for metric function
     pubSubTopic: dynatrace-gcp-service-invocation
     # Name of the metric forwarding function 
@@ -35,6 +35,8 @@ googleCloud:
     # Cron schedule for Cloud Scheduler instance
     schedulerSchedule: "* * * * *" 
   logs:
+    # Name of Google Secret Manager Secret containing Dynatrace logs ingest URL
+    dynatraceUrlSecretName: DYNATRACE_LOG_INGEST_URL
     # Name of the log forwarding function
     function: dynatrace-gcp-logs-function
     # Prefix for Log Router Sink for log forwarding function
