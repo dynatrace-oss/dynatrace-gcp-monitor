@@ -32,7 +32,6 @@ _DYNATRACE_URL_SECRET_NAME = os.environ.get("DYNATRACE_URL_SECRET_NAME","DYNATRA
 _DYNATRACE_LOG_INGEST_URL_SECRET_NAME = os.environ.get("DYNATRACE_LOG_INGEST_URL_SECRET_NAME","DYNATRACE_LOG_INGEST_URL")
 
 
-
 async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str, ):
     return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_ACCESS_KEY_SECRET_NAME)
 
