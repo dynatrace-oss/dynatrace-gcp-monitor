@@ -130,13 +130,13 @@ spec:
               key: REQUIRE_VALID_CERTIFICATE
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
-        - name: DYNATRACE_URL_SECRET_NAME
-          value: DYNATRACE_URL
-        - name: DYNATRACE_URL
+        - name: DYNATRACE_LOG_INGEST_URL_SECRET_NAME
+          value: DYNATRACE_LOG_INGEST_URL
+        - name: DYNATRACE_LOG_INGEST_URL
           valueFrom:
             secretKeyRef:
               name: dynatrace-gcp-function-secret
-              key: url
+              key: log-ingest-url
         - name: DYNATRACE_ACCESS_KEY
           valueFrom:
             secretKeyRef:

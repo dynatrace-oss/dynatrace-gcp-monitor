@@ -41,7 +41,7 @@ MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 system_variables = {
     # 'DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH': str(500),
     'DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE': str(5 * 1024),
-    'DYNATRACE_URL': 'http://localhost:' + str(MOCKED_API_PORT),
+    'DYNATRACE_LOG_INGEST_URL': 'http://localhost:' + str(MOCKED_API_PORT),
     'DYNATRACE_ACCESS_KEY': ACCESS_KEY,
     'REQUIRE_VALID_CERTIFICATE': 'False'
 }

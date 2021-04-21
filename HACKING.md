@@ -9,7 +9,9 @@ to install all the dependencies run
 pip install -r requirements.txt
 ```
 
-To run worker function run `local_test.py` script file. 
+To run metrics ingest worker function run `local_test.py` script file.
+
+To run logs ingest worker function run `local_test.py` script file with `OPERATION_MODE` set to `Logs` 
 
 ## Environment variables
 
@@ -37,7 +39,7 @@ Worker function execution can be tweaked with environment variables. In Google F
 | Variable name | description   | default value |
 | ----------------- | ------------- | ----------- |
 | DYNATRACE_ACCESS_KEY_SECRET_NAME | name of environment variable or Google Secret Manager Secret containing Dynatrace Access Key | DYNATRACE_ACCESS_KEY |
-| DYNATRACE_URL_SECRET_NAME | name of environment variable or Google Secret Manager Secret containing Dynatrace URL | DYNATRACE_URL |
+| DYNATRACE_LOG_INGEST_URL_SECRET_NAME | name of environment variable or Google Secret Manager Secret containing Dynatrace URL | DYNATRACE_LOG_INGEST_URL |
 | GOOGLE_APPLICATION_CREDENTIALS | path to GCP service account key file | |
 | REQUIRE_VALID_CERTIFICATE | determines whether worker will verify SSL certificate of Dynatrace endpoint | True |
 | DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH | determines max content length of log event. Should be the same or lower than on cluster | 8192 characters |

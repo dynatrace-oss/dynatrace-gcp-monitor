@@ -18,7 +18,7 @@ from time import sleep, time
 from typing import List, Callable
 
 from lib.context import LogsContext
-from lib.credentials import get_dynatrace_api_key_from_env, get_dynatrace_url_from_env, get_project_id_from_environment
+from lib.credentials import get_dynatrace_api_key_from_env, get_dynatrace_log_ingest_url_from_env, get_project_id_from_environment
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.logs_processor import LogProcessingJob
 
@@ -29,7 +29,7 @@ def create_log_sending_worker_loop(execution_period_seconds : int, job_queue: Qu
 
 def create_logs_context(job_queue: Queue):
     dynatrace_api_key = get_dynatrace_api_key_from_env()
-    dynatrace_url = get_dynatrace_url_from_env()
+    dynatrace_url = get_dynatrace_log_ingest_url_from_env()
     project_id_owner = get_project_id_from_environment()
 
     return LogsContext(
