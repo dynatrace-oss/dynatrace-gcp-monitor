@@ -46,8 +46,6 @@ def get_dynatrace_api_key_from_env():
 
 
 def get_dynatrace_log_ingest_url_from_env():
-    # TODO alternatively fetch from GCP secret
-    #return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
     url = os.environ.get(_DYNATRACE_LOG_INGEST_URL_SECRET_NAME, None)
     if url is None:
         raise Exception("{env_var} environment variable is not set".format(env_var=_DYNATRACE_LOG_INGEST_URL_SECRET_NAME))
