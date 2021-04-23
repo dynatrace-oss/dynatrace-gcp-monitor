@@ -1,0 +1,24 @@
+title: Dynatrace GCP Metrics Function
+description: Role for Dynatrace GCP function operating in metrics mode
+stage: GA
+includedPermissions:
+  # projects and available services
+  - resourcemanager.projects.get
+  - serviceusage.services.list
+  # specific services
+  - cloudfunctions.functions.list
+  - cloudsql.instances.list
+  - compute.instances.list
+  - compute.zones.list
+  - file.instances.list
+  - pubsub.subscriptions.list
+  # metric fetching
+  - monitoring.timeSeries.list
+  # self monitoring
+  - monitoring.metricDescriptors.create
+  - monitoring.metricDescriptors.delete
+  - monitoring.metricDescriptors.list
+  - monitoring.timeSeries.create
+  - monitoring.timeSeries.list
+
+

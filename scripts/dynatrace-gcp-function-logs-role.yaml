@@ -1,0 +1,14 @@
+title: Dynatrace GCP Logs Function
+description: Role for Dynatrace GCP function operating in logs mode
+stage: GA
+includedPermissions:
+  # pub sub subscription
+  - pubsub.subscriptions.consume
+  # self monitoring
+  - monitoring.metricDescriptors.create
+  - monitoring.metricDescriptors.delete
+  - monitoring.metricDescriptors.list
+  - monitoring.timeSeries.create
+  - monitoring.timeSeries.list
+
+
