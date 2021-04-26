@@ -1,11 +1,12 @@
+# For Kubernetes
 title: Dynatrace GCP Metrics Function
 description: Role for Dynatrace GCP function operating in metrics mode
 stage: GA
 includedPermissions:
-  # projects and available services
+  # available projects and services
   - resourcemanager.projects.get
   - serviceusage.services.list
-  # specific services
+  # services instances
   - cloudfunctions.functions.list
   - cloudsql.instances.list
   - compute.instances.list
