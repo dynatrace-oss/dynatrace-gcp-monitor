@@ -15,7 +15,7 @@ import os
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from lib.context import LoggingContext, Context, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
@@ -209,15 +209,17 @@ def extract_typed_value_key(time_serie):
     return typed_value_key
 
 
-def create_dimension(name: str, value: str, context: LoggingContext = LoggingContext(None)) -> DimensionValue:
+def create_dimension(name: str, value: Any, context: LoggingContext = LoggingContext(None)) -> DimensionValue:
+    string_value = str(value)
+
     if len(name) > MAX_DIMENSION_NAME_LENGTH:
         context.log(f'MINT rejects dimension names longer that {MAX_DIMENSION_NAME_LENGTH} chars. Dimension name \"{name}\" "has been truncated')
         name = name[:MAX_DIMENSION_NAME_LENGTH]
-    if len(value) > MAX_DIMENSION_VALUE_LENGTH:
-        context.log(f'MINT rejects dimension values longer that {MAX_DIMENSION_VALUE_LENGTH} chars. Dimension value \"{value}\" has been truncated')
-        value = value[:MAX_DIMENSION_VALUE_LENGTH]
+    if len(string_value) > MAX_DIMENSION_VALUE_LENGTH:
+        context.log(f'MINT rejects dimension values longer that {MAX_DIMENSION_VALUE_LENGTH} chars. Dimension value \"{string_value}\" has been truncated')
+        string_value = string_value[:MAX_DIMENSION_VALUE_LENGTH]
 
-    return DimensionValue(name, value)
+    return DimensionValue(name, string_value)
 
 
 def create_dimensions(context: Context, time_serie: Dict) -> List[DimensionValue]:
