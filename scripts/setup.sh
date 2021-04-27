@@ -44,6 +44,7 @@ readonly USE_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.usePro
 readonly IMPORT_DASHBOARDS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importDashboards')
 readonly IMPORT_ALERTS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importAlerts')
 readonly GCP_IAM_ROLE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.iamRole')
+# Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
 readonly GCP_IAM_ROLE_PERMISSIONS=(
   resourcemanager.projects.get
   serviceusage.services.list
@@ -58,7 +59,6 @@ readonly GCP_IAM_ROLE_PERMISSIONS=(
   monitoring.metricDescriptors.delete
   monitoring.metricDescriptors.list
   monitoring.timeSeries.create
-  monitoring.timeSeries.list
 )
 
 

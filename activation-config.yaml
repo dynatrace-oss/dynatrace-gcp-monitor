@@ -17,16 +17,16 @@ googleCloud:
     cloudFunctionSize: s 
     # Require valid SSL certificate when communicating with Dynatrace Cluster / Active Gate
     # May be set to false in case communication through Active Gate is debugged, for non-production use cases
-    requireValidCertificate: false
+    requireValidCertificate: true
     # Determines a caller-specified project for quota and billing purposes 
     # if set to source: monitoring API calls are booked towards project where K8S container is running
     # if set to destination: monitoring API calls are booked towards project which is monitored
     # REQUIRES serviceusage.services.use Permission granted for Service Account!
     serviceUsageBooking: source
     # Import predefined dashboards for selected services (yes/no)
-    importDashboards: no
+    importDashboards: yes
     # Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services (yes/inactive/no)
-    importAlerts: no
+    importAlerts: yes
   metrics:
     # Name of the Pub/Sub topic for metric function
     pubSubTopic: dynatrace-gcp-service-invocation
