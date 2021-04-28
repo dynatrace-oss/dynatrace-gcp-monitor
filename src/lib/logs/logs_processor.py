@@ -27,6 +27,7 @@ from lib.context import LoggingContext, get_int_environment_value
 from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
 
 _CONTENT_LENGTH_LIMIT = get_int_environment_value("DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH", 8192)
+_ATTRIBUTE_VALUE_LENGTH_LIMIT = get_int_environment_value("DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH", 250)
 _EVENT_AGE_LIMIT_SECONDS = get_int_environment_value("DYNATRACE_LOG_INGEST_EVENT_MAX_AGE_SECONDS", int(timedelta(days=1).total_seconds()))
 SENDING_WORKER_EXECUTION_PERIOD_SECONDS = get_int_environment_value("DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD", 60)
 
@@ -83,6 +84,13 @@ def _create_dt_log_payload(context: LoggingContext, message_data: str) -> Option
     if _is_log_too_old(parsed_timestamp):
         context.log(f"Skipping message due to too old timestamp: {parsed_timestamp}")
         return None
+
+    for attribute_key, attribute_value in parsed_record.items():
+        if attribute_key not in ["content", "severity", "timestamp"] and attribute_value:
+            string_attribute_value = attribute_value
+            if not isinstance(attribute_value, str):
+                string_attribute_value = str(attribute_value)
+            parsed_record[attribute_key] = string_attribute_value[: _ATTRIBUTE_VALUE_LENGTH_LIMIT]
 
     content = parsed_record.get(ATTRIBUTE_CONTENT, None)
     if content:
