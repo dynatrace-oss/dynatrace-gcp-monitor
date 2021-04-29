@@ -83,34 +83,35 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Que
     try:
         sfm_list = _pull_sfm(sfm_queue)
         if sfm_list:
-            context = await _create_sfm_logs_context(sfm_queue, context)
-            self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
-            _log_self_monitoring_data(self_monitoring, context)
-            if context.self_monitoring_enabled:
-                await _push_log_self_monitoring_time_series(self_monitoring, context)
-            for _ in sfm_list:
-                sfm_queue.task_done()
+            async with aiohttp.ClientSession() as gcp_session:
+                context = await _create_sfm_logs_context(sfm_queue, context, gcp_session)
+                self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
+                _log_self_monitoring_data(self_monitoring, context)
+                if context.self_monitoring_enabled:
+                    await _push_log_self_monitoring_time_series(self_monitoring, context)
+                for _ in sfm_list:
+                    sfm_queue.task_done()
     except Exception:
         print("Log SFM Loop Exception:")
         traceback.print_exc()
 
 
-async def _create_sfm_logs_context(sfm_queue, context: LoggingContext):
-    async with aiohttp.ClientSession() as gcp_session:
-        dynatrace_url = get_dynatrace_log_ingest_url_from_env()
-        logs_subscription_project = os.environ.get("LOGS_SUBSCRIPTION_PROJECT")
-        logs_subscription_id = os.environ.get('LOGS_SUBSCRIPTION_ID', "")
-        self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "False").upper() == "TRUE"
-        token = await create_token(context, gcp_session)
-        return LogsSfmContext(
-            project_id_owner=logs_subscription_project,
-            dynatrace_url=dynatrace_url,
-            logs_subscription_id=logs_subscription_id,
-            token=token,
-            scheduled_execution_id=str(int(time.time()))[-8:],
-            sfm_queue=sfm_queue,
-            self_monitoring_enabled=self_monitoring_enabled
-        )
+async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_session: aiohttp.ClientSession()):
+    dynatrace_url = get_dynatrace_log_ingest_url_from_env()
+    logs_subscription_project = os.environ.get("LOGS_SUBSCRIPTION_PROJECT")
+    logs_subscription_id = os.environ.get('LOGS_SUBSCRIPTION_ID', "")
+    self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "False").upper() == "TRUE"
+    token = await create_token(context, gcp_session)
+    return LogsSfmContext(
+        project_id_owner=logs_subscription_project,
+        dynatrace_url=dynatrace_url,
+        logs_subscription_id=logs_subscription_id,
+        token=token,
+        scheduled_execution_id=str(int(time.time()))[-8:],
+        sfm_queue=sfm_queue,
+        self_monitoring_enabled=self_monitoring_enabled,
+        gcp_session=gcp_session
+    )
 
 
 def _pull_sfm(sfm_queue: Queue):
@@ -129,31 +130,29 @@ async def _push_log_self_monitoring_time_series(self_monitoring: LogSelfMonitori
     if not isinstance(context.token, str):
         context.log(f"Failed to fetch access token, got non string value: {context.token}")
         return
-
     try:
         context.log(f"Pushing self monitoring time series to GCP Monitor...")
-        async with aiohttp.ClientSession() as gcp_session:
-            await create_metric_descriptors_if_missing(context, gcp_session)
-            time_series = create_self_monitoring_time_series(self_monitoring, context)
-            self_monitoring_response = await gcp_session.request(
-                "POST",
-                url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/timeSeries",
-                data=json.dumps(time_series),
-                headers={"Authorization": "Bearer {token}".format(token=context.token)}
-            )
-            status = self_monitoring_response.status
-            if status == 500 and not is_retry:
-                context.log(
-                    "GCP Monitor responded with 500 Internal Error, it may occur when metric descriptor is updated. Retrying after 5 seconds")
-                await asyncio.sleep(5)
-                await _push_log_self_monitoring_time_series(self_monitoring, context, True)
-            elif status != 200:
-                self_monitoring_response_json = await self_monitoring_response.json()
-                context.log(
-                    f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
-            else:
-                context.log(f"Finished pushing self monitoring time series to GCP Monitor")
-            self_monitoring_response.close()
+        await create_metric_descriptors_if_missing(context)
+        time_series = create_self_monitoring_time_series(self_monitoring, context)
+        self_monitoring_response = await context.gcp_session.request(
+            "POST",
+            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/timeSeries",
+            data=json.dumps(time_series),
+            headers={"Authorization": "Bearer {token}".format(token=context.token)}
+        )
+        status = self_monitoring_response.status
+        if status == 500 and not is_retry:
+            context.log(
+                "GCP Monitor responded with 500 Internal Error, it may occur when metric descriptor is updated. Retrying after 5 seconds")
+            await asyncio.sleep(5)
+            await _push_log_self_monitoring_time_series(self_monitoring, context, True)
+        elif status != 200:
+            self_monitoring_response_json = await self_monitoring_response.json()
+            context.log(
+                f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
+        else:
+            context.log(f"Finished pushing self monitoring time series to GCP Monitor")
+        self_monitoring_response.close()
     except Exception as e:
         context.log(f"Failed to push self monitoring time series, reason is {type(e).__name__} {e}")
 
@@ -171,9 +170,9 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Total logs sending time [s]: {self_monitoring.sending_time}")
 
 
-async def create_metric_descriptors_if_missing(context: LogsSfmContext, gcp_session):
+async def create_metric_descriptors_if_missing(context: LogsSfmContext):
     try:
-        dynatrace_metrics_descriptors = await gcp_session.request(
+        dynatrace_metrics_descriptors = await context.gcp_session.request(
             'GET',
             url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/metricDescriptors",
             params=[('filter', f'metric.type = starts_with("{LOG_SELF_MONITORING_METRIC_PREFIX}")')],
@@ -188,9 +187,9 @@ async def create_metric_descriptors_if_missing(context: LogsSfmContext, gcp_sess
                                                       existing_metric_descriptor,
                                                       metric_descriptor,
                                                       metric_type,
-                                                      gcp_session)
+                                                      context.gcp_session)
             else:
-                await create_metric_descriptor(context, metric_descriptor, metric_type, gcp_session)
+                await create_metric_descriptor(context, metric_descriptor, metric_type, context.gcp_session)
     except Exception as e:
         context.log(f"Failed to create self monitoring metrics descriptors, reason is {type(e).__name__} {e}")
 

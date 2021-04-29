@@ -3,7 +3,7 @@ from queue import Queue
 from lib.context import DynatraceConnectivity, LogsSfmContext
 from lib.logs.log_self_monitoring import LogSelfMonitoring, create_self_monitoring_time_series
 
-context = LogsSfmContext("project_id", "http://localhost:9011", "dynatrace-gcp-log-forwarder-sub", None, "token", "", Queue(), True)
+context = LogsSfmContext("project_id", "http://localhost:9011", "dynatrace-gcp-log-forwarder-sub", "token", "", Queue(), True, None)
 end_time = context.timestamp.isoformat() + "Z"
 
 expected_metric_data = {

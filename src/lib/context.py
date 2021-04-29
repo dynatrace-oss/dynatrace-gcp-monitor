@@ -115,7 +115,8 @@ class LogsSfmContext(ExecutionContext):
             token,
             scheduled_execution_id: Optional[str],
             sfm_queue: Queue,
-            self_monitoring_enabled: bool
+            self_monitoring_enabled: bool,
+            gcp_session: aiohttp.ClientSession,
     ):
         super().__init__(
             project_id_owner=project_id_owner,
@@ -128,6 +129,7 @@ class LogsSfmContext(ExecutionContext):
         self.logs_subscription_id = logs_subscription_id
         self.timestamp = datetime.utcnow()
         self.self_monitoring_enabled = self_monitoring_enabled
+        self.gcp_session = gcp_session
 
 
 class MetricsContext(ExecutionContext):
