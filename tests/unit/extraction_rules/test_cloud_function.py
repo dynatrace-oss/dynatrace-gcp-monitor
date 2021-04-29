@@ -15,6 +15,7 @@ import json
 from datetime import datetime
 
 from lib.context import LoggingContext
+from lib.logs.log_self_monitoring import LogSelfMonitoring
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
@@ -62,5 +63,5 @@ expected_output = {
 
 
 def test_extraction():
-    actual_output = _create_dt_log_payload(LoggingContext("TEST"), record_string)
+    actual_output = _create_dt_log_payload(LoggingContext("TEST"), record_string, LogSelfMonitoring())
     assert actual_output == expected_output

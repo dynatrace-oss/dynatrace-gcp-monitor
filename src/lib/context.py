@@ -106,6 +106,30 @@ class LogsContext(ExecutionContext):
         self.batch_max_messages = get_int_environment_value("DYNATRACE_LOG_INGEST_BATCH_MAX_MESSAGES", 10_000)
 
 
+class LogsSfmContext(ExecutionContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            dynatrace_url: str,
+            logs_subscription_id: str,
+            token,
+            scheduled_execution_id: Optional[str],
+            sfm_queue: Queue,
+            self_monitoring_enabled: bool
+    ):
+        super().__init__(
+            project_id_owner=project_id_owner,
+            dynatrace_api_key="",
+            dynatrace_url=dynatrace_url,
+            scheduled_execution_id=scheduled_execution_id
+        )
+        self.token = token
+        self.sfm_queue = sfm_queue
+        self.logs_subscription_id = logs_subscription_id
+        self.timestamp = datetime.utcnow()
+        self.self_monitoring_enabled = self_monitoring_enabled
+
+
 class MetricsContext(ExecutionContext):
     def __init__(
             self,
@@ -118,6 +142,7 @@ class MetricsContext(ExecutionContext):
             dynatrace_api_key: str,
             dynatrace_url: str,
             print_metric_ingest_input: bool,
+            self_monitoring_enabled: bool,
             scheduled_execution_id: Optional[str]
     ):
         super().__init__(
@@ -132,6 +157,7 @@ class MetricsContext(ExecutionContext):
         self.execution_time = execution_time.replace(microsecond=0)
         self.execution_interval = timedelta(seconds=execution_interval_seconds)
         self.print_metric_ingest_input = print_metric_ingest_input
+        self.self_monitoring_enabled = self_monitoring_enabled
         self.maximum_metric_data_points_per_minute = get_int_environment_value("MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE", 100000)
         self.metric_ingest_batch_size = get_int_environment_value("METRIC_INGEST_BATCH_SIZE", 1000)
         self.use_x_goog_user_project_header = {project_id_owner: False}
@@ -154,8 +180,10 @@ class MetricsContext(ExecutionContext):
 
 
 class DynatraceConnectivity(enum.Enum):
-    Ok = 0,
-    ExpiredToken = 1,
-    WrongToken = 2,
-    WrongURL = 3,
-    Other = 4
+    Ok = 0
+    ExpiredToken = 1
+    WrongToken = 2
+    WrongURL = 3
+    InvalidInput = 4
+    TooManyRequests = 5
+    Other = 6

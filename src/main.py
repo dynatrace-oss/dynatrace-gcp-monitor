@@ -32,7 +32,7 @@ from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
-from lib.self_monitoring import push_self_monitoring_time_series
+from lib.self_monitoring import push_self_monitoring_time_series, log_self_monitoring_data
 
 
 def dynatrace_gcp_extension(event, context, project_id: Optional[str] = None):
@@ -105,6 +105,8 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         print_metric_ingest_input = \
             "PRINT_METRIC_INGEST_INPUT" in os.environ and os.environ["PRINT_METRIC_INGEST_INPUT"].upper() == "TRUE"
 
+        self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "False").upper() == "TRUE"
+
         context = MetricsContext(
             gcp_session=gcp_session,
             dt_session=dt_session,
@@ -115,6 +117,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
             dynatrace_api_key=dynatrace_api_key,
             dynatrace_url=dynatrace_url,
             print_metric_ingest_input=print_metric_ingest_input,
+            self_monitoring_enabled=self_monitoring_enabled,
             scheduled_execution_id=context.scheduled_execution_id
         )
 
@@ -134,7 +137,9 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
         context.log(f"Fetched and pushed GCP data in {time.time() - context.start_processing_timestamp} s")
 
-        await push_self_monitoring_time_series(context)
+        log_self_monitoring_data(context)
+        if context.self_monitoring_enabled:
+            await push_self_monitoring_time_series(context)
 
         await gcp_session.close()
         await dt_session.close()

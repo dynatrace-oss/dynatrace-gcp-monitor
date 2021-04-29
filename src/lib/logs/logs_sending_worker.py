@@ -18,13 +18,14 @@ from time import sleep, time
 from typing import List, Callable
 
 from lib.context import LogsContext
-from lib.credentials import get_dynatrace_api_key_from_env, get_dynatrace_log_ingest_url_from_env, get_project_id_from_environment
+from lib.credentials import get_dynatrace_api_key_from_env, get_dynatrace_log_ingest_url_from_env, \
+    get_project_id_from_environment
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.logs_processor import LogProcessingJob
 
 
-def create_log_sending_worker_loop(execution_period_seconds : int, job_queue: Queue) -> Callable:
-    return partial(_log_sending_worker_loop, execution_period_seconds, job_queue)
+def create_log_sending_worker_loop(execution_period_seconds : int, job_queue: Queue, sfm_queue: Queue) -> Callable:
+    return partial(_log_sending_worker_loop, execution_period_seconds, job_queue, sfm_queue)
 
 
 def create_logs_context(job_queue: Queue):
@@ -41,20 +42,20 @@ def create_logs_context(job_queue: Queue):
     )
 
 
-def _log_sending_worker_loop(execution_period_seconds: int, job_queue: Queue):
+def _log_sending_worker_loop(execution_period_seconds: int, job_queue: Queue, sfm_queue: Queue):
     while True:
         try:
-            _loop_single_period(execution_period_seconds, job_queue)
+            _loop_single_period(execution_period_seconds, job_queue, sfm_queue)
         except Exception:
             print("Logs Sending Worker Loop Exception:")
             traceback.print_exc()
 
 
-def _loop_single_period(execution_period_seconds: int, job_queue: Queue):
+def _loop_single_period(execution_period_seconds: int, job_queue: Queue, sfm_queue: Queue):
     try:
         context = create_logs_context(job_queue)
         _sleep_until_next_execution(execution_period_seconds)
-        _process_jobs(context)
+        _process_jobs(context, sfm_queue)
     except Exception:
         print("Logs Sending Worker Loop Exception:")
         traceback.print_exc()
@@ -71,19 +72,20 @@ def _sleep_until_next_execution(execution_period_seconds):
             sleep(sleep_time)
 
 
-def _process_jobs(context: LogsContext):
+def _process_jobs(context: LogsContext, sfm_queue: Queue):
     context.log("Starting log sending worker execution")
     jobs = _pull_jobs(context)
     context.log(f"Processing {len(jobs)} messages")
     payloads = [job.payload for job in jobs]
     if payloads:
-        send_logs(context, payloads)
+        sfm_list = [job.self_monitoring for job in jobs]
+        send_logs(context, payloads, sfm_list, sfm_queue)
         for job in jobs:
             job.message.ack()
             context.job_queue.task_done()
     else:
         context.log("Found no messages, skipping")
-    context.log(f"Finished Processing")
+    context.log("Finished Processing")
 
 
 def _pull_jobs(context):

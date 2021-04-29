@@ -33,6 +33,9 @@ data:
   IMPORT_DASHBOARDS: "yes"
   # Import predefined alerting rules (inactive by default) for selected services. Allowed values: `yes`, `no`
   IMPORT_ALERTS: "yes"
+  # Send custom metrics to GCP to diagnose quickly if your gcp-log-forwarder processes and sends logs to Dynatrace properly. [true/false]
+  SELF_MONITORING_ENABLED: "false"
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -108,7 +111,12 @@ spec:
           valueFrom:
             secretKeyRef:
               name: dynatrace-gcp-function-secret
-              key: access-key   
+              key: access-key
+        - name: SELF_MONITORING_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: SELF_MONITORING_ENABLED
         resources:
           requests:
             memory: "256Mi"

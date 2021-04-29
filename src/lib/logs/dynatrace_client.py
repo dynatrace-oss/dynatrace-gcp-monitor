@@ -16,12 +16,15 @@ import json
 import ssl
 import time
 import urllib
+from queue import Queue
 from typing import List, Dict, Tuple
 from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request
 
-from lib.context import LogsContext, get_should_require_valid_certificate, get_int_environment_value
+from lib.context import LogsContext, get_should_require_valid_certificate, get_int_environment_value, \
+    DynatraceConnectivity
+from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
 
 ssl_context = ssl.create_default_context()
 if not get_should_require_valid_certificate():
@@ -31,9 +34,10 @@ if not get_should_require_valid_certificate():
 _TIMEOUT = get_int_environment_value("DYNATRACE_TIMEOUT_SECONDS", 30)
 
 
-def send_logs(context: LogsContext, logs: List[Dict]):
+def send_logs(context: LogsContext, logs: List[Dict], processing_sfm_list: List[LogSelfMonitoring], sfm_queue: Queue):
     # pylint: disable=R0912
-    start_time = time.time()
+    self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), processing_sfm_list)
+    self_monitoring.sending_time_start = time.perf_counter()
     log_ingest_url = urlparse(context.dynatrace_url + "/api/v2/logs/ingest").geturl()
     batches = prepare_serialized_batches(context, logs)
 
@@ -43,6 +47,7 @@ def send_logs(context: LogsContext, logs: List[Dict]):
             encoded_body_bytes = batch.encode("UTF-8")
             context.log('Log ingest payload size: {} kB'.format(round((len(encoded_body_bytes) / 1024), 3)))
 
+            self_monitoring.all_requests += 1
             status, reason, response = _perform_http_request(
                 method="POST",
                 url=log_ingest_url,
@@ -54,17 +59,39 @@ def send_logs(context: LogsContext, logs: List[Dict]):
             )
             if status > 299:
                 context.error(f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"')
-                number_of_http_errors += 1
+                if status == 400:
+                    self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.InvalidInput)
+                elif status == 401:
+                    self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.ExpiredToken)
+                elif status == 403:
+                    self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.WrongToken)
+                elif status == 404 or status == 405:
+                    self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.WrongURL)
+                elif status == 413 or status == 429:
+                    self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.TooManyRequests)
+                    raise HTTPError(log_ingest_url, 429, "Dynatrace throttling response")
+                elif status == 500:
+                    self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
+                    raise HTTPError(log_ingest_url, 500, "Dynatrace server error")
             else:
+                self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Ok)
                 context.log("Log ingest payload pushed successfully")
         except HTTPError as e:
+            self_monitoring.calculate_sending_time()
+            put_sfm_into_queue(sfm_queue, self_monitoring, context)
             raise e
         except Exception as e:
             context.error("Failed to ingest logs")
             number_of_http_errors += 1
-            # all http requests failed and this is the last batch, raise this exception to trigger retry
+            self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
+            # all http requests failed and this is the last batch, raise this exception
             if number_of_http_errors == len(batches):
+                self_monitoring.calculate_sending_time()
+                put_sfm_into_queue(sfm_queue, self_monitoring, context)
                 raise e
+
+    self_monitoring.calculate_sending_time()
+    put_sfm_into_queue(sfm_queue, self_monitoring, context)
 
 
 def _perform_http_request(

@@ -33,7 +33,6 @@ def log_self_monitoring_data(context: MetricsContext):
 
 
 async def push_self_monitoring_time_series(context: MetricsContext, is_retry: bool = False):
-    log_self_monitoring_data(context)
     try:
         context.log(f"Pushing self monitoring time series to GCP Monitor...")
         await create_metric_descriptors_if_missing(context)

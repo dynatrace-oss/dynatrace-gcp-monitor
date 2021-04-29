@@ -33,6 +33,7 @@ Worker function execution can be tweaked with environment variables. In Google F
 | USE_PROXY | Depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both. Allowed values: `ALL`, `DT_ONLY`, `GCP_ONLY` |  |
 | IMPORT_DASHBOARDS | Import predefined dashboards for selected services. Allowed values: `yes`, `no` | `yes` |
 | IMPORT_ALERTS | Import predefined alerting rules (inactive by default) for selected services. Allowed values: `yes`, `no`| `yes` |
+| SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your gcp-log-forwarder processes and sends logs to Dynatrace properly | False |
 
 ### Log processing configuration variables
 
@@ -48,3 +49,4 @@ Worker function execution can be tweaked with environment variables. In Google F
 | LOGS_SUBSCRIPTION_ID | subscription id of log sink pubsub subscription | |
 | DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD | Period of sending batched logs to Dynatrace | 60 seconds |
 | DYNATRACE_TIMEOUT_SECONDS | Timeout of request to Dynatrace Log Ingest | 30 seconds |
+| SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your gcp-log-forwarder processes and sends logs to Dynatrace properly | False |
