@@ -18,7 +18,7 @@ from math import ceil
 from queue import Queue
 from typing import NewType, Any
 
-from lib.context import LoggingContext, LogsContext
+from lib.context import LogsContext
 from lib.logs import dynatrace_client
 from lib.logs.metadata_engine import ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CONTENT, ATTRIBUTE_SEVERITY
 
