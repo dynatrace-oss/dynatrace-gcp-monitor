@@ -18,6 +18,11 @@ data:
   USE_PROXY: {{ .Values.useProxy | quote }}
   LOGS_SUBSCRIPTION_PROJECT: {{ .Values.logsSubscriptionProject | quote }}
   LOGS_SUBSCRIPTION_ID: {{ .Values.logsSubscriptionId | quote }}
+  DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH: {{ .Values.logIngestContentMaxLength | quote }}
+  DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH: {{ .Values.logIngestAttributeValueMaxLength | quote }}
+  DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS: {{ .Values.logIngestRequestMaxEvents | quote }}
+  DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
+  DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -123,6 +128,31 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: LOGS_SUBSCRIPTION_ID
+        - name: DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH
+        - name: DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH
+        - name: DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS
+        - name: DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE
+        - name: DYNATRACE_TIMEOUT_SECONDS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: DYNATRACE_TIMEOUT_SECONDS
         - name: REQUIRE_VALID_CERTIFICATE
           valueFrom:
             configMapKeyRef:
