@@ -24,6 +24,10 @@ serviceUsageBooking: source
 # if set to GCP_ONLY: proxy settings will be used only for requests to GCP API
 # if not set: default, proxy settings won't be used
 useProxy: ""
+# httpProxy: set the http proxy address. To be used in conjunction with USE_PROXY.
+httpProxy: ""
+# httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
+httpsProxy: ""
 
 # LOGS VALUES
 # GCP project of log sink pubsub subscription
