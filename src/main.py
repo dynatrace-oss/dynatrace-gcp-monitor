@@ -32,7 +32,7 @@ from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
-from lib.self_monitoring import push_self_monitoring_time_series, log_self_monitoring_data
+from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
 
 
 def dynatrace_gcp_extension(event, context, project_id: Optional[str] = None):
@@ -139,7 +139,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
         log_self_monitoring_data(context)
         if context.self_monitoring_enabled:
-            await push_self_monitoring_time_series(context)
+            await push_self_monitoring(context)
 
         await gcp_session.close()
         await dt_session.close()

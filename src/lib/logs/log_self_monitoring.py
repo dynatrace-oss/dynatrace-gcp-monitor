@@ -12,7 +12,6 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import asyncio
-import json
 import os
 import queue
 import time
@@ -26,11 +25,12 @@ import aiohttp
 from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity
 from lib.credentials import create_token, get_dynatrace_log_ingest_url_from_env
 from lib.logs.log_forwarder_variables import SENDING_WORKER_EXECUTION_PERIOD_SECONDS, MAX_MESSAGES_PROCESSED
-from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_PREFIX, LOG_SELF_MONITORING_METRIC_MAP, \
-    LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE, \
+from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, \
+    LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE, LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE, \
     LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE, LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE
+from lib.self_monitoring import push_self_monitoring_time_series
 
 
 class LogSelfMonitoring:
@@ -88,7 +88,14 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Que
                 self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
                 _log_self_monitoring_data(self_monitoring, context)
                 if context.self_monitoring_enabled:
-                    await _push_log_self_monitoring_time_series(self_monitoring, context)
+                    if context.token is None:
+                        context.log("Cannot proceed without authorization token, failed to send log self monitoring")
+                        return
+                    if not isinstance(context.token, str):
+                        context.log(f"Failed to fetch access token, got non string value: {context.token}")
+                        return
+                    time_series = create_self_monitoring_time_series(self_monitoring, context)
+                    await push_self_monitoring_time_series(context, time_series)
                 for _ in sfm_list:
                     sfm_queue.task_done()
     except Exception:
@@ -123,40 +130,6 @@ def _pull_sfm(sfm_queue: Queue):
     return sfm_list
 
 
-async def _push_log_self_monitoring_time_series(self_monitoring: LogSelfMonitoring, context: LogsSfmContext, is_retry: bool = False):
-    if context.token is None:
-        context.log("Cannot proceed without authorization token, failed to send ")
-        return
-    if not isinstance(context.token, str):
-        context.log(f"Failed to fetch access token, got non string value: {context.token}")
-        return
-    try:
-        context.log(f"Pushing self monitoring time series to GCP Monitor...")
-        await create_metric_descriptors_if_missing(context)
-        time_series = create_self_monitoring_time_series(self_monitoring, context)
-        self_monitoring_response = await context.gcp_session.request(
-            "POST",
-            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/timeSeries",
-            data=json.dumps(time_series),
-            headers={"Authorization": "Bearer {token}".format(token=context.token)}
-        )
-        status = self_monitoring_response.status
-        if status == 500 and not is_retry:
-            context.log(
-                "GCP Monitor responded with 500 Internal Error, it may occur when metric descriptor is updated. Retrying after 5 seconds")
-            await asyncio.sleep(5)
-            await _push_log_self_monitoring_time_series(self_monitoring, context, True)
-        elif status != 200:
-            self_monitoring_response_json = await self_monitoring_response.json()
-            context.log(
-                f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
-        else:
-            context.log(f"Finished pushing self monitoring time series to GCP Monitor")
-        self_monitoring_response.close()
-    except Exception as e:
-        context.log(f"Failed to push self monitoring time series, reason is {type(e).__name__} {e}")
-
-
 def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_context: LoggingContext):
     dynatrace_connectivity = Counter(self_monitoring.dynatrace_connectivity)
     dynatrace_connectivity = [f"{connectivity.name}:{count}" for connectivity, count in dynatrace_connectivity.items()]
@@ -168,72 +141,6 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Number of records with too long content: {self_monitoring.records_with_too_long_content}")
     logging_context.log("SFM", f"Total logs processing time [s]: {self_monitoring.processing_time}")
     logging_context.log("SFM", f"Total logs sending time [s]: {self_monitoring.sending_time}")
-
-
-async def create_metric_descriptors_if_missing(context: LogsSfmContext):
-    try:
-        dynatrace_metrics_descriptors = await context.gcp_session.request(
-            'GET',
-            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/metricDescriptors",
-            params=[('filter', f'metric.type = starts_with("{LOG_SELF_MONITORING_METRIC_PREFIX}")')],
-            headers={"Authorization": f"Bearer {context.token}"}
-        )
-        dynatrace_metrics_descriptors_json = await dynatrace_metrics_descriptors.json()
-        existing_metric_types = {metric.get("type", ""): metric for metric in dynatrace_metrics_descriptors_json.get("metricDescriptors", [])}
-        for metric_type, metric_descriptor in LOG_SELF_MONITORING_METRIC_MAP.items():
-            existing_metric_descriptor = existing_metric_types.get(metric_type, None)
-            if existing_metric_descriptor:
-                await replace_metric_descriptor_if_required(context,
-                                                      existing_metric_descriptor,
-                                                      metric_descriptor,
-                                                      metric_type,
-                                                      context.gcp_session)
-            else:
-                await create_metric_descriptor(context, metric_descriptor, metric_type, context.gcp_session)
-    except Exception as e:
-        context.log(f"Failed to create self monitoring metrics descriptors, reason is {type(e).__name__} {e}")
-
-
-async def replace_metric_descriptor_if_required(context: LogsSfmContext,
-                                                existing_metric_descriptor: Dict,
-                                                metric_descriptor: Dict,
-                                                metric_type: str,
-                                                gcp_session):
-    existing_label_keys = extract_label_keys(existing_metric_descriptor)
-    descriptor_label_keys = extract_label_keys(metric_descriptor)
-    if existing_label_keys != descriptor_label_keys:
-        await delete_metric_descriptor(context, metric_type, gcp_session)
-        await create_metric_descriptor(context, metric_descriptor, metric_type, gcp_session)
-
-
-async def delete_metric_descriptor(context: LogsSfmContext, metric_type: str, gcp_session):
-    context.log(f"Removing old descriptor for '{metric_type}'")
-    response = await gcp_session.request(
-        "DELETE",
-        url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/metricDescriptors/{metric_type}",
-        headers={"Authorization": f"Bearer {context.token}"}
-    )
-    if response.status != 200:
-        response_body = await response.json()
-        context.log(f"Failed to remove descriptor for '{metric_type}' due to '{response_body}'")
-
-
-async def create_metric_descriptor(context: LogsSfmContext, metric_descriptor: Dict, metric_type: str, gcp_session):
-    context.log(f"Creating missing metric descriptor for '{metric_type}'")
-    response = await gcp_session.request(
-        "POST",
-        url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/metricDescriptors",
-        data=json.dumps(metric_descriptor),
-        headers={"Authorization": f"Bearer {context.token}"}
-    )
-
-    if response.status > 202:
-        response_body = await response.json()
-        context.log(f"Failed to create descriptor for '{metric_type}' due to '{response_body}'")
-
-
-def extract_label_keys(metric_descriptor: Dict):
-    return sorted([label.get("key", "") for label in metric_descriptor.get("labels", [])])
 
 
 def create_time_serie(

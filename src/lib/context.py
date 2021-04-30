@@ -106,7 +106,29 @@ class LogsContext(ExecutionContext):
         self.batch_max_messages = get_int_environment_value("DYNATRACE_LOG_INGEST_BATCH_MAX_MESSAGES", 10_000)
 
 
-class LogsSfmContext(ExecutionContext):
+class SfmContext(ExecutionContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            dynatrace_api_key: str,
+            dynatrace_url: str,
+            token,
+            scheduled_execution_id: Optional[str],
+            self_monitoring_enabled: bool,
+            gcp_session: aiohttp.ClientSession,
+    ):
+        super().__init__(
+            project_id_owner=project_id_owner,
+            dynatrace_api_key=dynatrace_api_key,
+            dynatrace_url=dynatrace_url,
+            scheduled_execution_id=scheduled_execution_id
+        )
+        self.token = token
+        self.self_monitoring_enabled = self_monitoring_enabled
+        self.gcp_session = gcp_session
+
+
+class LogsSfmContext(SfmContext):
     def __init__(
             self,
             project_id_owner: str,
@@ -122,17 +144,17 @@ class LogsSfmContext(ExecutionContext):
             project_id_owner=project_id_owner,
             dynatrace_api_key="",
             dynatrace_url=dynatrace_url,
-            scheduled_execution_id=scheduled_execution_id
+            token=token,
+            scheduled_execution_id=scheduled_execution_id,
+            self_monitoring_enabled = self_monitoring_enabled,
+            gcp_session = gcp_session
         )
-        self.token = token
         self.sfm_queue = sfm_queue
         self.logs_subscription_id = logs_subscription_id
         self.timestamp = datetime.utcnow()
-        self.self_monitoring_enabled = self_monitoring_enabled
-        self.gcp_session = gcp_session
 
 
-class MetricsContext(ExecutionContext):
+class MetricsContext(SfmContext):
     def __init__(
             self,
             gcp_session: aiohttp.ClientSession,
@@ -151,11 +173,12 @@ class MetricsContext(ExecutionContext):
             project_id_owner=project_id_owner,
             dynatrace_api_key=dynatrace_api_key,
             dynatrace_url=dynatrace_url,
-            scheduled_execution_id=scheduled_execution_id
+            token=token,
+            scheduled_execution_id=scheduled_execution_id,
+            self_monitoring_enabled=self_monitoring_enabled,
+            gcp_session=gcp_session
         )
         self.dt_session = dt_session
-        self.gcp_session = gcp_session
-        self.token = token
         self.execution_time = execution_time.replace(microsecond=0)
         self.execution_interval = timedelta(seconds=execution_interval_seconds)
         self.print_metric_ingest_input = print_metric_ingest_input
