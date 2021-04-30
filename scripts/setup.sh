@@ -43,6 +43,23 @@ readonly SERVICE_USAGE_BOOKING=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.c
 readonly USE_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.useProxy')
 readonly IMPORT_DASHBOARDS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importDashboards')
 readonly IMPORT_ALERTS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importAlerts')
+readonly GCP_IAM_ROLE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.iamRole')
+# Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
+readonly GCP_IAM_ROLE_PERMISSIONS=(
+  resourcemanager.projects.get
+  serviceusage.services.list
+  cloudfunctions.functions.list
+  cloudsql.instances.list
+  compute.instances.list
+  compute.zones.list
+  file.instances.list
+  pubsub.subscriptions.list
+  monitoring.timeSeries.list
+  monitoring.metricDescriptors.create
+  monitoring.metricDescriptors.delete
+  monitoring.metricDescriptors.list
+  monitoring.timeSeries.create
+)
 
 
 shopt -s nullglob
@@ -210,18 +227,23 @@ else
 fi
 
 echo -e
-echo "- create service account [$GCP_SERVICE_ACCOUNT with permissions [roles/monitoring.editor, roles/monitoring.viewer, roles/secretmanager.secretAccessor, roles/secretmanager.viewer, roles/cloudfunctions.viewer, roles/cloudsql.viewer, roles/compute.viewer, roles/file.viewer, roles/pubsub.viewer"
+echo "- create GCP IAM Role"
+if [[ $(gcloud iam service-accounts list --filter=name:$GCP_IAM_ROLE --format="value(name)") ]]; then
+    echo "Role [$GCP_IAM_ROLE] already exists, skipping"
+else
+    readonly GCP_IAM_ROLE_TITLE="Dynatrace GCP Metrics Function"
+    readonly GCP_IAM_ROLE_DESCRIPTION="Role for Dynatrace GCP function operating in metrics mode"
+    readonly GCP_IAM_ROLE_PERMISSIONS_STRING=$(IFS=, ; echo "${GCP_IAM_ROLE_PERMISSIONS[*]}")
+    gcloud iam roles create $GCP_IAM_ROLE --project="$GCP_PROJECT" --title="$GCP_IAM_ROLE_TITLE" --description="$GCP_IAM_ROLE_DESCRIPTION" --stage="GA" --permissions="$GCP_IAM_ROLE_PERMISSIONS_STRING"
+fi
+
+echo -e
+echo "- create service account [$GCP_SERVICE_ACCOUNT with created role [roles/$GCP_IAM_ROLE]"
 if [[ $(gcloud iam service-accounts list --filter=name:$GCP_SERVICE_ACCOUNT --format="value(name)") ]]; then
     echo "Service account [$GCP_SERVICE_ACCOUNT] already exists, skipping"
 else
     gcloud iam service-accounts create "$GCP_SERVICE_ACCOUNT"
-    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/monitoring.editor
-    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/monitoring.viewer
-    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/compute.viewer
-    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/cloudsql.viewer
-    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/cloudfunctions.viewer
-    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/file.viewer
-    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/pubsub.viewer
+    gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$GCP_IAM_ROLE"
     gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
     gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer
     gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor

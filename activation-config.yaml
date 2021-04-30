@@ -9,7 +9,9 @@ googleCloud:
     # Name of Google Secret Manager Secret containing Dynatrace URL
     dynatraceUrlSecretName: DYNATRACE_URL
     # Name of the Service Account that should be created for Dynatrace Function to authenticate with Google Monitoring API 
-    serviceAccount: dynatrace-gcp-service
+    serviceAccount: dynatrace-gcp-service-custom
+    # Name of the GCP IAM Role that should be created for Dynatrace Function Service Account
+    iamRole: dynatrace_extension.metrics
     # Path to Google credentials file
     # googleApplicationCredentialsPath: ''
     cloudFunctionSize: s 
