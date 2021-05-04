@@ -66,6 +66,8 @@ spec:
         name: dynatrace-gcp-function      
         imagePullPolicy: Always
         env:
+        - name: OPERATION_MODE
+          value: Metrics
         - name: GCP_SERVICES
           valueFrom:
             configMapKeyRef:

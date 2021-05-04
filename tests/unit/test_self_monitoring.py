@@ -213,7 +213,7 @@ expected_metric_data = {
                 }
             },
             "metric": {
-                "type": "custom.googleapis.com/dynatrace/logs/connectivity",
+                "type": "custom.googleapis.com/dynatrace/logs/connectivity_failures",
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
@@ -246,7 +246,7 @@ expected_metric_data = {
                 }
             },
             "metric": {
-                "type": "custom.googleapis.com/dynatrace/logs/connectivity",
+                "type": "custom.googleapis.com/dynatrace/logs/connectivity_failures",
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
