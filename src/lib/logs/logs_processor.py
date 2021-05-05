@@ -15,18 +15,15 @@
 import json
 import queue
 import time
-import traceback
 from datetime import datetime, timezone
-from functools import partial
 from queue import Queue
-from typing import Optional, Dict, Callable
+from typing import Optional, Dict
 
 from dateutil.parser import *
-from google.cloud.pubsub_v1.subscriber.message import Message
+from google.pubsub_v1 import ReceivedMessage, PubsubMessage
 
 from lib.context import LogsProcessingContext, LogsContext
-from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, SENDING_WORKER_EXECUTION_PERIOD_SECONDS, \
-    CONTENT_LENGTH_LIMIT, ATTRIBUTE_VALUE_LENGTH_LIMIT
+from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, CONTENT_LENGTH_LIMIT, ATTRIBUTE_VALUE_LENGTH_LIMIT
 from lib.logs.log_self_monitoring import LogSelfMonitoring, put_sfm_into_queue
 from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
 
@@ -34,42 +31,34 @@ _metadata_engine = MetadataEngine()
 
 
 class LogProcessingJob:
-    payload: Dict
-    message: Message
+    payload: str
     self_monitoring: LogSelfMonitoring
 
-    def __init__(self, payload: Dict, message: Message, self_monitoring: LogSelfMonitoring):
+    def __init__(self, payload: str, self_monitoring: LogSelfMonitoring):
         self.payload = payload
-        self.message = message
         self.self_monitoring: LogSelfMonitoring = self_monitoring
+        self.bytes_size = len(payload.encode("UTF-8"))
 
 
-def create_process_message_handler(log_jobs_queue: Queue, sfm_queue: Queue) -> Callable[[Message], None]:
-    return partial(_process_message, log_jobs_queue, sfm_queue)
-
-
-def _process_message(log_jobs_queue: Queue, sfm_queue: Queue, message: Message):
+def _process_message(sfm_queue: Queue, message: ReceivedMessage):
     context = LogsProcessingContext(
         scheduled_execution_id=str(message.ack_id.__hash__())[-8:],
-        job_queue=log_jobs_queue,
         sfm_queue=sfm_queue
     )
     try:
-        _do_process_message(context, message)
+        return _do_process_message(context, message.message)
     except Exception as exception:
         if isinstance(exception, queue.Full):
             context.error(f"Failed to process message due full job queue, rejecting the message")
-            message.nack()
         else:
-            context.error(f"Failed to process message due to {type(exception).__name__}")
-            message.ack()
+            context.exception(f"Failed to process message due to {type(exception).__name__}")
             context.self_monitoring.parsing_errors += 1
             context.self_monitoring.calculate_processing_time()
             put_sfm_into_queue(context)
-            traceback.print_exc()
+        return None
 
 
-def _do_process_message(context: LogsContext, message: Message):
+def _do_process_message(context: LogsContext, message: PubsubMessage):
     context.self_monitoring.processing_time_start = time.perf_counter()
     data = message.data.decode("UTF-8")
     # context.log(f"Data: {data}")
@@ -79,11 +68,11 @@ def _do_process_message(context: LogsContext, message: Message):
     context.self_monitoring.calculate_processing_time()
 
     if not payload:
-        message.ack()
         put_sfm_into_queue(context)
+        return None
     else:
-        job = LogProcessingJob(payload, message, context.self_monitoring)
-        context.job_queue.put(job, True, SENDING_WORKER_EXECUTION_PERIOD_SECONDS + 1)
+        job = LogProcessingJob(json.dumps(payload), context.self_monitoring)
+        return job
 
 
 def _create_dt_log_payload(context: LogsContext, message_data: str) -> Optional[Dict]:

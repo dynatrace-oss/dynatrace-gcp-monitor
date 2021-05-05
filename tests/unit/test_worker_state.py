@@ -14,17 +14,16 @@
 
 import json
 import random
-from math import ceil
-from queue import Queue
 from typing import NewType, Any
 
-from lib.context import LogsContext
-from lib.logs import dynatrace_client
+from lib.logs import worker_state
+from lib.logs.log_forwarder_variables import SENDING_WORKER_EXECUTION_PERIOD_SECONDS
+from lib.logs.log_sfm_metrics import LogSelfMonitoring
+from lib.logs.logs_processor import LogProcessingJob
 from lib.logs.metadata_engine import ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CONTENT, ATTRIBUTE_SEVERITY
+from lib.logs.worker_state import WorkerState
 
 log_message = "WALTHAM, Mass.--(BUSINESS WIRE)-- Software intelligence company Dynatrace (NYSE: DT) announced today its entry into the cloud application security market with the addition of a new module to its industry-leading Software Intelligence Platform. The Dynatrace® Application Security Module provides continuous runtime application self-protection (RASP) capabilities for applications in production as well as preproduction and is optimized for Kubernetes architectures and DevSecOps approaches. This module inherits the automation, AI, scalability, and enterprise-grade robustness of the Dynatrace® Software Intelligence Platform and extends it to modern cloud RASP use cases. Dynatrace customers can launch this module with the flip of a switch, empowering the world’s leading organizations currently using the Dynatrace platform to immediately increase security coverage and precision.;"
-
-request_body_len_max = len(log_message.encode("UTF-8")) * 3 + 20
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 
@@ -33,60 +32,48 @@ def create_log_entry_with_random_len_msg():
     random_len = random.randint(1, len(log_message))
     random_len_str = log_message[0: random_len]
 
-    return {
+    as_dict = {
         ATTRIBUTE_CONTENT: random_len_str,
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
         ATTRIBUTE_SEVERITY: 'INFO'
     }
 
+    return LogProcessingJob(json.dumps(as_dict), LogSelfMonitoring())
 
-def test_prepare_serialized_batches(monkeypatch: MonkeyPatchFixture):
-    monkeypatch.setattr(dynatrace_client, 'REQUEST_BODY_MAX_SIZE', request_body_len_max)
 
-    how_many_logs = 200
+def test_should_flush_on_batch_exceeding_request_size(monkeypatch: MonkeyPatchFixture):
+    how_many_logs = 100
     logs = [create_log_entry_with_random_len_msg() for x in range(how_many_logs)]
+    limit = sum(len(log_message.payload.encode("UTF-8")) for log_message in logs) + how_many_logs + 2 + 1
 
-    batches = dynatrace_client.prepare_serialized_batches(create_test_logs_context(), logs)
+    monkeypatch.setattr(worker_state, 'REQUEST_BODY_MAX_SIZE', limit)
 
-    assert len(batches) >= 1
+    test_state = WorkerState("TEST")
+    for log in logs:
+        assert not test_state.should_flush(log)
+        test_state.add_job(log, "")
 
-    entries_in_batches = 0
-
-    for batch in batches:
-        assert len(batch) <= request_body_len_max
-        entries_in_batches += len(json.loads(batch))
-
-    assert entries_in_batches == how_many_logs
-
-    logs_lengths = [len(log) for log in logs]
-    logs_total_length = sum(logs_lengths)
-
-    batches_lengths = [len(batch) for batch in batches]
-    batches_total_length = sum(batches_lengths)
-
-    assert batches_total_length > logs_total_length
+    assert test_state.should_flush(create_log_entry_with_random_len_msg())
+    assert len(test_state.finished_batch.encode("UTF-8")) == test_state.finished_batch_bytes_size
 
 
-def test_prepare_serialized_batches_split_by_events_limit(monkeypatch: MonkeyPatchFixture):
+def test_should_flush_on_too_many_events(monkeypatch: MonkeyPatchFixture):
     max_events = 5
-    how_many_logs = 51
-    expected_batches = ceil(how_many_logs / max_events)
+    monkeypatch.setattr(worker_state, 'REQUEST_MAX_EVENTS', max_events)
 
-    monkeypatch.setattr(dynatrace_client, 'REQUEST_MAX_EVENTS', max_events)
+    logs = [create_log_entry_with_random_len_msg() for x in range(max_events)]
+    test_state = WorkerState("TEST")
 
-    logs = [create_log_entry_with_random_len_msg() for x in range(how_many_logs)]
+    for log in logs:
+        assert not test_state.should_flush(log)
+        test_state.add_job(log, "")
 
-    batches = dynatrace_client.prepare_serialized_batches(create_test_logs_context(), logs)
-
-    assert len(batches) == expected_batches
-
-    entries_in_batches = 0
-
-    for batch in batches:
-        entries_in_batches += len(json.loads(batch))
-
-    assert entries_in_batches == how_many_logs
+    assert test_state.should_flush(create_log_entry_with_random_len_msg())
+    assert len(test_state.jobs) == max_events
 
 
-def create_test_logs_context():
-    return LogsContext("test_id","test_api_key","http://test.dt.url", "TEST", Queue(), Queue())
+def test_should_flush_on_time_passed(monkeypatch: MonkeyPatchFixture):
+    test_state = WorkerState("TEST")
+    test_state.last_flush_time -= (2 * SENDING_WORKER_EXECUTION_PERIOD_SECONDS)
+
+    assert test_state.should_flush(create_log_entry_with_random_len_msg())
