@@ -177,7 +177,7 @@ class LogsFastCheck:
             'content': f'GCP Log Forwarder has started at {container_name}',
             'severity': 'INFO'
         }
-        send_logs(create_logs_context(Queue()), [fast_check_event], processing_sfm_list=[], sfm_queue=Queue())
+        send_logs(create_logs_context(Queue(), Queue()), [fast_check_event], processing_sfm_list=[])
 
 
 def _check_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):

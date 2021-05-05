@@ -22,34 +22,19 @@ from typing import Dict, List
 
 import aiohttp
 
-from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity
+from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity, LogsContext
 from lib.credentials import create_token, get_dynatrace_log_ingest_url_from_env
-from lib.logs.log_forwarder_variables import SENDING_WORKER_EXECUTION_PERIOD_SECONDS, MAX_MESSAGES_PROCESSED
+from lib.instance_metadata import InstanceMetadata
+from lib.logs.log_forwarder_variables import SENDING_WORKER_EXECUTION_PERIOD_SECONDS, MAX_MESSAGES_PROCESSED, \
+    LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID
 from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, \
     LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE, LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE, \
     LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE, LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE, \
-    LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE
+    LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE, LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, \
+    LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE
+from lib.logs.log_sfm_metrics import LogSelfMonitoring
 from lib.self_monitoring import push_self_monitoring_time_series
-
-
-class LogSelfMonitoring:
-    def __init__(self):
-        self.too_old_records: int = 0
-        self.parsing_errors: int = 0
-        self.records_with_too_long_content: int = 0
-        self.all_requests: int = 0
-        self.dynatrace_connectivity = []
-        self.processing_time_start: float = 0
-        self.processing_time: float = 0
-        self.sending_time_start: float = 0
-        self.sending_time: float = 0
-
-    def calculate_processing_time(self):
-        self.processing_time = (time.perf_counter() - self.processing_time_start)
-
-    def calculate_sending_time(self):
-        self.sending_time = (time.perf_counter() - self.sending_time_start)
 
 
 def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_list: List[LogSelfMonitoring]):
@@ -61,30 +46,36 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
         aggregated_sfm.dynatrace_connectivity.extend(sfm.dynatrace_connectivity)
         aggregated_sfm.processing_time += sfm.processing_time
         aggregated_sfm.sending_time += sfm.sending_time
+        aggregated_sfm.log_ingest_payload_size += sfm.log_ingest_payload_size
+        aggregated_sfm.sent_logs_entries += sfm.sent_logs_entries
     return aggregated_sfm
 
 
-def put_sfm_into_queue(sfm_queue: Queue, sfm: LogSelfMonitoring, logging_context: LoggingContext):
+def put_sfm_into_queue(context: LogsContext):
     try:
-        sfm_queue.put(sfm, True, SENDING_WORKER_EXECUTION_PERIOD_SECONDS + 1)
+        context.sfm_queue.put(context.self_monitoring, False, SENDING_WORKER_EXECUTION_PERIOD_SECONDS + 1)
     except Exception as exception:
         if isinstance(exception, queue.Full):
-            logging_context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
+            context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
 
-async def create_sfm_worker_loop(sfm_queue: Queue, logging_context: LoggingContext):
+async def create_sfm_worker_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
     while True:
-        await asyncio.sleep(SENDING_WORKER_EXECUTION_PERIOD_SECONDS)
-        self_monitoring = LogSelfMonitoring()
-        asyncio.get_event_loop().create_task(_loop_single_period(self_monitoring, sfm_queue, logging_context))
+        try:
+            await asyncio.sleep(SENDING_WORKER_EXECUTION_PERIOD_SECONDS)
+            self_monitoring = LogSelfMonitoring()
+            asyncio.get_event_loop().create_task(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
+        except Exception:
+            print("Logs Self Monitoring Worker Loop Exception:")
+            traceback.print_exc()
 
 
-async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Queue, context: LoggingContext):
+async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Queue, context: LoggingContext, instance_metadata: InstanceMetadata):
     try:
         sfm_list = _pull_sfm(sfm_queue)
         if sfm_list:
             async with aiohttp.ClientSession() as gcp_session:
-                context = await _create_sfm_logs_context(sfm_queue, context, gcp_session)
+                context = await _create_sfm_logs_context(sfm_queue, context, gcp_session, instance_metadata)
                 self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
                 _log_self_monitoring_data(self_monitoring, context)
                 if context.self_monitoring_enabled:
@@ -103,21 +94,23 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Que
         traceback.print_exc()
 
 
-async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_session: aiohttp.ClientSession()):
+async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_session: aiohttp.ClientSession(), instance_metadata: InstanceMetadata):
     dynatrace_url = get_dynatrace_log_ingest_url_from_env()
-    logs_subscription_project = os.environ.get("LOGS_SUBSCRIPTION_PROJECT")
-    logs_subscription_id = os.environ.get('LOGS_SUBSCRIPTION_ID', "")
     self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "False").upper() == "TRUE"
     token = await create_token(context, gcp_session)
+    container_name = instance_metadata.hostname if instance_metadata else "local deployment"
+    zone = instance_metadata.zone if instance_metadata else "us-east1"
     return LogsSfmContext(
-        project_id_owner=logs_subscription_project,
+        project_id_owner=LOGS_SUBSCRIPTION_PROJECT,
         dynatrace_url=dynatrace_url,
-        logs_subscription_id=logs_subscription_id,
+        logs_subscription_id=LOGS_SUBSCRIPTION_ID,
         token=token,
         scheduled_execution_id=str(int(time.time()))[-8:],
         sfm_queue=sfm_queue,
         self_monitoring_enabled=self_monitoring_enabled,
-        gcp_session=gcp_session
+        gcp_session=gcp_session,
+        container_name=container_name,
+        zone=zone
     )
 
 
@@ -141,6 +134,8 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Number of records with too long content: {self_monitoring.records_with_too_long_content}")
     logging_context.log("SFM", f"Total logs processing time [s]: {self_monitoring.processing_time}")
     logging_context.log("SFM", f"Total logs sending time [s]: {self_monitoring.sending_time}")
+    logging_context.log("SFM", f"Log ingest payload size [kB]: {self_monitoring.log_ingest_payload_size}")
+    logging_context.log("SFM", f"Number of sent logs entries: {self_monitoring.sent_logs_entries}")
 
 
 def create_time_serie(
@@ -154,11 +149,10 @@ def create_time_serie(
             "type": "generic_task",
             "labels": {
                 "project_id": context.project_id_owner,
-                "location": context.location,
+                "location": context.zone,
                 "namespace": context.function_name,
                 "job": context.function_name,
                 "task_id": context.function_name
-
             }
         },
         "metric": {
@@ -181,7 +175,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE,
                 {
                     "dynatrace_tenant_url": context.dynatrace_url,
-                    "logs_subscription_id": context.logs_subscription_id
+                    "logs_subscription_id": context.logs_subscription_id,
+                    "container_name": context.container_name
                 },
                 [{
                     "interval": interval,
@@ -195,7 +190,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE,
                 {
                     "dynatrace_tenant_url": context.dynatrace_url,
-                    "logs_subscription_id": context.logs_subscription_id
+                    "logs_subscription_id": context.logs_subscription_id,
+                    "container_name": context.container_name
                 },
                 [{
                     "interval": interval,
@@ -209,7 +205,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE,
                 {
                     "dynatrace_tenant_url": context.dynatrace_url,
-                    "logs_subscription_id": context.logs_subscription_id
+                    "logs_subscription_id": context.logs_subscription_id,
+                    "container_name": context.container_name
                 },
                 [{
                     "interval": interval,
@@ -223,7 +220,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE,
                 {
                     "dynatrace_tenant_url": context.dynatrace_url,
-                    "logs_subscription_id": context.logs_subscription_id
+                    "logs_subscription_id": context.logs_subscription_id,
+                    "container_name": context.container_name
                 },
                 [{
                     "interval": interval,
@@ -235,7 +233,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE,
             {
                 "dynatrace_tenant_url": context.dynatrace_url,
-                "logs_subscription_id": context.logs_subscription_id
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name
             },
             [{
                 "interval": interval,
@@ -248,7 +247,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE,
             {
                 "dynatrace_tenant_url": context.dynatrace_url,
-                "logs_subscription_id": context.logs_subscription_id
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name
             },
             [{
                 "interval": interval,
@@ -265,12 +265,44 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                     {
                         "dynatrace_tenant_url": context.dynatrace_url,
                         "logs_subscription_id": context.logs_subscription_id,
+                        "container_name": context.container_name,
                         "connectivity_status": dynatrace_connectivity.name
                     },
                     [{
                         "interval": interval,
                         "value": {"int64Value": counter}
                     }]))
+
+    if sfm.log_ingest_payload_size:
+        time_series.append(create_time_serie(
+            context,
+            LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name
+            },
+            [{
+                "interval": interval,
+                "value": {"doubleValue": sfm.log_ingest_payload_size}
+            }],
+            "DOUBLE"
+        ))
+
+    if sfm.sent_logs_entries:
+        time_series.append(create_time_serie(
+            context,
+            LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name
+            },
+            [{
+                "interval": interval,
+                "value": {"int64Value": sfm.sent_logs_entries}
+            }]
+        ))
 
     return {"timeSeries": time_series}
 

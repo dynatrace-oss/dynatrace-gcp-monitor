@@ -13,9 +13,9 @@
 #     limitations under the License.
 import json
 from datetime import datetime
+from queue import Queue
 
-from lib.context import LoggingContext
-from lib.logs.log_self_monitoring import LogSelfMonitoring
+from lib.context import LogsContext
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
@@ -150,15 +150,26 @@ error_proto_record_expected_output = {
     'faas.name': 'dynatrace-gcp-function'
 }
 
+logs_context = LogsContext(
+    project_id_owner="",
+    dynatrace_api_key="",
+    dynatrace_url="",
+    scheduled_execution_id="",
+    job_queue=Queue(),
+    sfm_queue=Queue()
+)
+
 
 def test_extraction_debug_text():
-    actual_output = _create_dt_log_payload(LoggingContext("TEST"), json.dumps(debug_text_record), LogSelfMonitoring())
+    actual_output = _create_dt_log_payload(logs_context, json.dumps(debug_text_record))
     assert actual_output == debug_text_record_expected_output
 
+
 def test_extraction_notice_json():
-    actual_output = _create_dt_log_payload(LoggingContext("TEST"), json.dumps(notice_json_record), LogSelfMonitoring())
+    actual_output = _create_dt_log_payload(logs_context, json.dumps(notice_json_record))
     assert actual_output == notice_json_record_expected_output
 
+
 def test_extraction_error_proto():
-    actual_output = _create_dt_log_payload(LoggingContext("TEST"), json.dumps(error_proto_record), LogSelfMonitoring())
+    actual_output = _create_dt_log_payload(logs_context, json.dumps(error_proto_record))
     assert actual_output == error_proto_record_expected_output

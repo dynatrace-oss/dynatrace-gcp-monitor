@@ -17,9 +17,13 @@ import os
 import traceback
 from datetime import datetime, timedelta
 from queue import Queue
-from typing import Optional
+from typing import Optional, Dict
 
 import aiohttp
+
+from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
+from lib.logs.log_sfm_metrics import LogSelfMonitoring
+from lib.metric_descriptor import SELF_MONITORING_METRIC_MAP
 
 
 def get_int_environment_value(key: str, default_value: int) -> int:
@@ -92,7 +96,8 @@ class LogsContext(ExecutionContext):
             dynatrace_api_key: str,
             dynatrace_url: str,
             scheduled_execution_id: Optional[str],
-            job_queue: Queue
+            job_queue: Queue,
+            sfm_queue: Queue,
     ):
         super().__init__(
             project_id_owner=project_id_owner,
@@ -102,8 +107,25 @@ class LogsContext(ExecutionContext):
         )
 
         self.job_queue = job_queue
-        self.request_body_max_size = get_int_environment_value("DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE", 1048576)
-        self.batch_max_messages = get_int_environment_value("DYNATRACE_LOG_INGEST_BATCH_MAX_MESSAGES", 10_000)
+        self.sfm_queue = sfm_queue
+        self.self_monitoring = LogSelfMonitoring()
+
+
+class LogsProcessingContext(LogsContext):
+    def __init__(
+            self,
+            scheduled_execution_id: Optional[str],
+            job_queue: Queue,
+            sfm_queue: Queue
+    ):
+        super().__init__(
+            project_id_owner="",
+            dynatrace_api_key="",
+            dynatrace_url="",
+            scheduled_execution_id=scheduled_execution_id,
+            job_queue = job_queue,
+            sfm_queue = sfm_queue
+        )
 
 
 class SfmContext(ExecutionContext):
@@ -115,6 +137,7 @@ class SfmContext(ExecutionContext):
             token,
             scheduled_execution_id: Optional[str],
             self_monitoring_enabled: bool,
+            sfm_metric_map: Dict,
             gcp_session: aiohttp.ClientSession,
     ):
         super().__init__(
@@ -125,6 +148,7 @@ class SfmContext(ExecutionContext):
         )
         self.token = token
         self.self_monitoring_enabled = self_monitoring_enabled
+        self.sfm_metric_map = sfm_metric_map
         self.gcp_session = gcp_session
 
 
@@ -139,6 +163,8 @@ class LogsSfmContext(SfmContext):
             sfm_queue: Queue,
             self_monitoring_enabled: bool,
             gcp_session: aiohttp.ClientSession,
+            container_name: str,
+            zone: str
     ):
         super().__init__(
             project_id_owner=project_id_owner,
@@ -147,11 +173,14 @@ class LogsSfmContext(SfmContext):
             token=token,
             scheduled_execution_id=scheduled_execution_id,
             self_monitoring_enabled = self_monitoring_enabled,
+            sfm_metric_map = LOG_SELF_MONITORING_METRIC_MAP,
             gcp_session = gcp_session
         )
         self.sfm_queue = sfm_queue
         self.logs_subscription_id = logs_subscription_id
         self.timestamp = datetime.utcnow()
+        self.container_name = container_name
+        self.zone = zone
 
 
 class MetricsContext(SfmContext):
@@ -176,6 +205,7 @@ class MetricsContext(SfmContext):
             token=token,
             scheduled_execution_id=scheduled_execution_id,
             self_monitoring_enabled=self_monitoring_enabled,
+            sfm_metric_map=SELF_MONITORING_METRIC_MAP,
             gcp_session=gcp_session
         )
         self.dt_session = dt_session

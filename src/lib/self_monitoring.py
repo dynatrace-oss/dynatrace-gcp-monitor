@@ -73,7 +73,7 @@ async def create_metric_descriptors_if_missing(context: SfmContext):
         )
         dynatrace_metrics_descriptors_json = await dynatrace_metrics_descriptors.json()
         existing_metric_types = {metric.get("type", ""): metric for metric in dynatrace_metrics_descriptors_json.get("metricDescriptors", [])}
-        for metric_type, metric_descriptor in SELF_MONITORING_METRIC_MAP.items():
+        for metric_type, metric_descriptor in context.sfm_metric_map.items():
             existing_metric_descriptor = existing_metric_types.get(metric_type, None)
             if existing_metric_descriptor:
                 await replace_metric_descriptor_if_required(context,

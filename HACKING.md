@@ -33,7 +33,7 @@ Worker function execution can be tweaked with environment variables. In Google F
 | USE_PROXY | Depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both. Allowed values: `ALL`, `DT_ONLY`, `GCP_ONLY` |  |
 | IMPORT_DASHBOARDS | Import predefined dashboards for selected services. Allowed values: `yes`, `no` | `yes` |
 | IMPORT_ALERTS | Import predefined alerting rules (inactive by default) for selected services. Allowed values: `yes`, `no`| `yes` |
-| SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your gcp-log-forwarder processes and sends logs to Dynatrace properly | False |
+| SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly | False |
 
 ### Log processing configuration variables
 

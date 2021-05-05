@@ -12,7 +12,6 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import asyncio
-import os
 from asyncio import AbstractEventLoop
 from concurrent.futures.thread import ThreadPoolExecutor
 from queue import Queue
@@ -23,26 +22,22 @@ from google.cloud.pubsub_v1.subscriber.scheduler import ThreadScheduler
 from google.cloud.pubsub_v1.types import FlowControl
 
 from lib.context import LoggingContext
+from lib.instance_metadata import InstanceMetadata
 from lib.logs.log_forwarder_variables import MAX_MESSAGES_PROCESSED, MAX_WORKERS, \
-    SENDING_WORKER_EXECUTION_PERIOD_SECONDS
+    SENDING_WORKER_EXECUTION_PERIOD_SECONDS, LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID
+from lib.logs.log_self_monitoring import create_sfm_worker_loop
 from lib.logs.logs_processor import create_process_message_handler
 from lib.logs.logs_sending_worker import create_log_sending_worker_loop
 
-PROJECT_ID = os.environ.get('LOGS_SUBSCRIPTION_PROJECT', None)
-SUBSCRIPTION_ID = os.environ.get('LOGS_SUBSCRIPTION_ID', None)
 
-
-from lib.logs.log_self_monitoring import create_sfm_worker_loop
-
-
-def run_logs(logging_context: LoggingContext, asyncio_loop: AbstractEventLoop):
-    if not PROJECT_ID or not SUBSCRIPTION_ID:
+def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadata, asyncio_loop: AbstractEventLoop):
+    if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception("Cannot start pubsub streaming pull - LOGS_SUBSCRIPTION_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
     # Settings for job queue size and subscriber should be fine tuned, but we have to do performance tests first
     job_queue = Queue(MAX_MESSAGES_PROCESSED)
     sfm_queue = Queue(MAX_MESSAGES_PROCESSED)
     subscriber_client = pubsub.SubscriberClient()
-    subscription_path = subscriber_client.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
+    subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
     logging_context.log(f"Subscribing on '{subscription_path}'")
     flow_control = FlowControl(max_messages=MAX_MESSAGES_PROCESSED-10)
     subscriber = subscriber_client.subscribe(
@@ -57,7 +52,7 @@ def run_logs(logging_context: LoggingContext, asyncio_loop: AbstractEventLoop):
     logs_sending_worker_thread = Thread(target=worker_loop, name="LogsSendingWorkerThread", daemon=True)
     logs_sending_worker_thread.start()
 
-    asyncio.run_coroutine_threadsafe(create_sfm_worker_loop(sfm_queue, logging_context), asyncio_loop)
+    asyncio.run_coroutine_threadsafe(create_sfm_worker_loop(sfm_queue, logging_context, instance_metadata), asyncio_loop)
 
     try:
         subscriber.result()

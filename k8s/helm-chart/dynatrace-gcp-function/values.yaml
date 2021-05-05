@@ -11,7 +11,7 @@ requireValidCertificate: true
 # 'Ingest logs' for deployment type 'all' or'logs'
 # 'Ingest metrics', 'Read configuration', 'Write configuration' for deployment type 'all' or 'metrics'
 dynatraceAccessKey: ""
-# Send custom metrics to GCP to diagnose quickly if your gcp-log-forwarder processes and sends logs to Dynatrace properly. [true/false]
+# Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics/logs to Dynatrace properly. [true/false]
 selfMonitoringEnabled: false
 
 

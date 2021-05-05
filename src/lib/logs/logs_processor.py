@@ -24,8 +24,9 @@ from typing import Optional, Dict, Callable
 from dateutil.parser import *
 from google.cloud.pubsub_v1.subscriber.message import Message
 
-from lib.context import LoggingContext, get_int_environment_value
-from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, SENDING_WORKER_EXECUTION_PERIOD_SECONDS
+from lib.context import LogsProcessingContext, LogsContext
+from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, SENDING_WORKER_EXECUTION_PERIOD_SECONDS, \
+    CONTENT_LENGTH_LIMIT
 from lib.logs.log_self_monitoring import LogSelfMonitoring, put_sfm_into_queue
 from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
 
@@ -48,10 +49,13 @@ def create_process_message_handler(log_jobs_queue: Queue, sfm_queue: Queue) -> C
 
 
 def _process_message(log_jobs_queue: Queue, sfm_queue: Queue, message: Message):
-    context = LoggingContext(str(message.ack_id.__hash__())[-8:])
-    self_monitoring = LogSelfMonitoring()
+    context = LogsProcessingContext(
+        scheduled_execution_id=str(message.ack_id.__hash__())[-8:],
+        job_queue=log_jobs_queue,
+        sfm_queue=sfm_queue
+    )
     try:
-        _do_process_message(context, log_jobs_queue, message, sfm_queue, self_monitoring)
+        _do_process_message(context, message)
     except Exception as exception:
         if isinstance(exception, queue.Full):
             context.error(f"Failed to process message due full job queue, rejecting the message")
@@ -59,30 +63,30 @@ def _process_message(log_jobs_queue: Queue, sfm_queue: Queue, message: Message):
         else:
             context.error(f"Failed to process message due to {type(exception).__name__}")
             message.ack()
-            self_monitoring.parsing_errors += 1
-            self_monitoring.calculate_processing_time()
-            put_sfm_into_queue(sfm_queue, self_monitoring, context)
+            context.self_monitoring.parsing_errors += 1
+            context.self_monitoring.calculate_processing_time()
+            put_sfm_into_queue(context)
             traceback.print_exc()
 
 
-def _do_process_message(context: LoggingContext, log_jobs_queue: Queue, message: Message, sfm_queue: Queue, self_monitoring: LogSelfMonitoring):
-    self_monitoring.processing_time_start = time.perf_counter()
+def _do_process_message(context: LogsContext, message: Message):
+    context.self_monitoring.processing_time_start = time.perf_counter()
     data = message.data.decode("UTF-8")
     # context.log(f"Data: {data}")
 
-    payload = _create_dt_log_payload(context, data, self_monitoring)
+    payload = _create_dt_log_payload(context, data)
     # context.log(f"Payload: {payload}")
-    self_monitoring.calculate_processing_time()
+    context.self_monitoring.calculate_processing_time()
 
     if not payload:
         message.ack()
-        put_sfm_into_queue(sfm_queue, self_monitoring, context)
+        put_sfm_into_queue(context)
     else:
-        job = LogProcessingJob(payload, message, self_monitoring)
-        log_jobs_queue.put(job, True, SENDING_WORKER_EXECUTION_PERIOD_SECONDS + 1)
+        job = LogProcessingJob(payload, message, context.self_monitoring)
+        context.job_queue.put(job, True, SENDING_WORKER_EXECUTION_PERIOD_SECONDS + 1)
 
 
-def _create_dt_log_payload(context: LoggingContext, message_data: str, self_monitoring: LogSelfMonitoring) -> Optional[Dict]:
+def _create_dt_log_payload(context: LogsContext, message_data: str) -> Optional[Dict]:
     record = json.loads(message_data)
     parsed_record = {}
 
@@ -91,17 +95,16 @@ def _create_dt_log_payload(context: LoggingContext, message_data: str, self_moni
     parsed_timestamp = parsed_record.get(ATTRIBUTE_TIMESTAMP, None)
     if _is_log_too_old(parsed_timestamp):
         context.log(f"Skipping message due to too old timestamp: {parsed_timestamp}")
-        self_monitoring.too_old_records += 1
+        context.self_monitoring.too_old_records += 1
         return None
 
     content = parsed_record.get(ATTRIBUTE_CONTENT, None)
     if content:
         if not isinstance(content, str):
             parsed_record[ATTRIBUTE_CONTENT] = json.dumps(parsed_record[ATTRIBUTE_CONTENT])
-        CONTENT_LENGTH_LIMIT = get_int_environment_value("DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH", 8192)
         if len(parsed_record[ATTRIBUTE_CONTENT]) >= CONTENT_LENGTH_LIMIT:
             parsed_record[ATTRIBUTE_CONTENT] = parsed_record[ATTRIBUTE_CONTENT][:CONTENT_LENGTH_LIMIT]
-            self_monitoring.records_with_too_long_content += 1
+            context.self_monitoring.records_with_too_long_content += 1
 
     return parsed_record
 

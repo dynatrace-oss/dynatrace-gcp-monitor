@@ -21,6 +21,7 @@ from lib.context import LogsContext
 from lib.credentials import get_dynatrace_api_key_from_env, get_dynatrace_log_ingest_url_from_env, \
     get_project_id_from_environment
 from lib.logs.dynatrace_client import send_logs
+from lib.logs.log_forwarder_variables import BATCH_MAX_MESSAGES
 from lib.logs.logs_processor import LogProcessingJob
 
 
@@ -28,7 +29,7 @@ def create_log_sending_worker_loop(execution_period_seconds : int, job_queue: Qu
     return partial(_log_sending_worker_loop, execution_period_seconds, job_queue, sfm_queue)
 
 
-def create_logs_context(job_queue: Queue):
+def create_logs_context(job_queue: Queue, sfm_queue: Queue):
     dynatrace_api_key = get_dynatrace_api_key_from_env()
     dynatrace_url = get_dynatrace_log_ingest_url_from_env()
     project_id_owner = get_project_id_from_environment()
@@ -38,7 +39,8 @@ def create_logs_context(job_queue: Queue):
         dynatrace_api_key=dynatrace_api_key,
         dynatrace_url=dynatrace_url,
         scheduled_execution_id=str(int(time()))[-8:],
-        job_queue=job_queue
+        job_queue=job_queue,
+        sfm_queue=sfm_queue
     )
 
 
@@ -53,9 +55,9 @@ def _log_sending_worker_loop(execution_period_seconds: int, job_queue: Queue, sf
 
 def _loop_single_period(execution_period_seconds: int, job_queue: Queue, sfm_queue: Queue):
     try:
-        context = create_logs_context(job_queue)
+        context = create_logs_context(job_queue, sfm_queue)
         _sleep_until_next_execution(execution_period_seconds)
-        _process_jobs(context, sfm_queue)
+        _process_jobs(context)
     except Exception:
         print("Logs Sending Worker Loop Exception:")
         traceback.print_exc()
@@ -72,14 +74,16 @@ def _sleep_until_next_execution(execution_period_seconds):
             sleep(sleep_time)
 
 
-def _process_jobs(context: LogsContext, sfm_queue: Queue):
+def _process_jobs(context: LogsContext):
     context.log("Starting log sending worker execution")
     jobs = _pull_jobs(context)
-    context.log(f"Processing {len(jobs)} messages")
+    number_of_messages = len(jobs)
+    context.log(f"Processing {number_of_messages} messages")
     payloads = [job.payload for job in jobs]
     if payloads:
         sfm_list = [job.self_monitoring for job in jobs]
-        send_logs(context, payloads, sfm_list, sfm_queue)
+        send_logs(context, payloads, sfm_list)
+        context.self_monitoring.sent_logs_entries += number_of_messages
         for job in jobs:
             job.message.ack()
             context.job_queue.task_done()
@@ -91,7 +95,7 @@ def _process_jobs(context: LogsContext, sfm_queue: Queue):
 def _pull_jobs(context):
     jobs: List[LogProcessingJob] = []
     # Limit for batch size to avoid pulling forever
-    while len(jobs) < context.batch_max_messages and context.job_queue.qsize() > 0:
+    while len(jobs) < BATCH_MAX_MESSAGES and context.job_queue.qsize() > 0:
         job: LogProcessingJob = context.job_queue.get()
         jobs.append(job)
     return jobs

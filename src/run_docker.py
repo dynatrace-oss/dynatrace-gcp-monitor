@@ -152,4 +152,4 @@ if OPERATION_MODE == OperationMode.Metrics:
 elif OPERATION_MODE == OperationMode.Logs:
     threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
     LogsFastCheck(logging_context, instance_metadata).execute()
-    run_logs(logging_context, loop)
+    run_logs(logging_context, instance_metadata, loop)

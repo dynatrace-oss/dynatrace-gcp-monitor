@@ -18,7 +18,8 @@ InstanceMetadata = namedtuple('InstanceMetadata', [
     'token_scopes',
     'service_account',
     'audience',
-    'hostname'
+    'hostname',
+    'zone'
 ])
 
 
@@ -61,6 +62,9 @@ class InstanceMetadataCheck:
     async def audience(self):
         return await self._get_metadata('instance/service-accounts/default/identity?audience=https://accounts.google.com')
 
+    async def zone(self):
+        return await self._get_metadata('instance/zone')
+
     async def execute(self) -> Optional[InstanceMetadata]:
         if self._gcp_deployment():
             metadata = [
@@ -68,20 +72,24 @@ class InstanceMetadataCheck:
                 self.running_container(),
                 self.token_scopes(),
                 self.service_accounts(),
-                self.audience()
+                self.audience(),
+                self.zone()
             ]
 
             results = await asyncio.gather(*metadata, return_exceptions=True)
 
             if not all(result is None for result in results):
                 audience = jwt.decode(results[4], verify=False) if results[4] else ''
+                # zone = "projects/<projectID>/zones/us-central1-c"
+                zone = results[5].split("/")[-1] if results[5] else "us-east1"
                 metadata = InstanceMetadata(
                     project_id=results[0],
                     container_name=results[1],
                     token_scopes=results[2],
                     service_account=results[3],
                     audience=audience,
-                    hostname=os.environ.get("HOSTNAME", "")
+                    hostname=os.environ.get("HOSTNAME", ""),
+                    zone=zone
                 )
                 self.logging_context.log(f'GCP instance metadata: {metadata}')
                 return metadata

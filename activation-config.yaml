@@ -25,7 +25,7 @@ googleCloud:
     importDashboards: yes
     # Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services (yes/inactive/no)
     importAlerts: yes
-    # Send custom metrics to GCP to diagnose quickly if your gcp-log-forwarder processes and sends logs to Dynatrace properly. [true/false]
+    # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. [true/false]
     selfMonitoringEnabled: false
   metrics:
     # Name of the Pub/Sub topic for metric function

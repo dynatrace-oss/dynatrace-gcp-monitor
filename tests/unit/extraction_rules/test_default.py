@@ -13,9 +13,9 @@
 #     limitations under the License.
 import json
 from datetime import datetime
+from queue import Queue
 
-from lib.context import LoggingContext
-from lib.logs.log_self_monitoring import LogSelfMonitoring
+from lib.context import LogsContext
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_CLOUD_PROVIDER, \
     ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
@@ -57,7 +57,16 @@ expected_output = {
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/run.googleapis.com%2Fstdout'
 }
 
+logs_context = LogsContext(
+    project_id_owner="",
+    dynatrace_api_key="",
+    dynatrace_url="",
+    scheduled_execution_id="",
+    job_queue=Queue(),
+    sfm_queue=Queue()
+)
+
 
 def test_extraction():
-    actual_output = _create_dt_log_payload(LoggingContext("TEST"), record_string, LogSelfMonitoring())
+    actual_output = _create_dt_log_payload(logs_context, record_string)
     assert actual_output == expected_output

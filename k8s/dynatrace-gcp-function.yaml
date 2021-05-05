@@ -33,7 +33,7 @@ data:
   IMPORT_DASHBOARDS: "yes"
   # Import predefined alerting rules (inactive by default) for selected services. Allowed values: `yes`, `no`
   IMPORT_ALERTS: "yes"
-  # Send custom metrics to GCP to diagnose quickly if your gcp-log-forwarder processes and sends logs to Dynatrace properly. [true/false]
+  # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. [true/false]
   SELF_MONITORING_ENABLED: "false"
 
 ---
