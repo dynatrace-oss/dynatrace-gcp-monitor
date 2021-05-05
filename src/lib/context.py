@@ -103,6 +103,7 @@ class LogsContext(ExecutionContext):
 
         self.job_queue = job_queue
         self.request_body_max_size = get_int_environment_value("DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE", 1048576)
+        self.request_max_events = get_int_environment_value("DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS", 5000)
         self.batch_max_messages = get_int_environment_value("DYNATRACE_LOG_INGEST_BATCH_MAX_MESSAGES", 10_000)
 
 
