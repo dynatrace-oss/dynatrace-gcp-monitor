@@ -16,6 +16,8 @@ data:
   REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
   SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
   USE_PROXY: {{ .Values.useProxy | quote }}
+  HTTP_PROXY: {{ .Values.httpProxy | quote }}
+  HTTPS_PROXY: {{ .Values.httpsProxy | quote }}
   LOGS_SUBSCRIPTION_PROJECT: {{ .Values.logsSubscriptionProject | quote }}
   LOGS_SUBSCRIPTION_ID: {{ .Values.logsSubscriptionId | quote }}
   DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH: {{ .Values.logIngestContentMaxLength | quote }}
@@ -92,6 +94,16 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: USE_PROXY
+        - name: HTTP_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: HTTP_PROXY
+        - name: HTTPS_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: HTTPS_PROXY
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
         - name: DYNATRACE_URL_SECRET_NAME
