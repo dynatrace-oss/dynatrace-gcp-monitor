@@ -53,7 +53,7 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
 
 def put_sfm_into_queue(context: LogsContext):
     try:
-        context.sfm_queue.put(context.self_monitoring, False, SENDING_WORKER_EXECUTION_PERIOD_SECONDS + 1)
+        context.sfm_queue.put_nowait(context.self_monitoring)
     except Exception as exception:
         if isinstance(exception, queue.Full):
             context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
