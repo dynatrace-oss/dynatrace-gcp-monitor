@@ -13,9 +13,10 @@
 #     limitations under the License.
 import json
 from datetime import datetime
+from queue import Queue
 from typing import NewType, Any
 
-from lib.context import LoggingContext
+from lib.context import LogsContext
 from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
@@ -59,6 +60,15 @@ expected_output = {
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/run.googleapis.com%2Fstdout'
 }
 
+logs_context = LogsContext(
+    project_id_owner="",
+    dynatrace_api_key="",
+    dynatrace_url="",
+    scheduled_execution_id="",
+    job_queue=Queue(),
+    sfm_queue=Queue()
+)
+
 expected_output_attribute_values_trimmed = {
     ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
     ATTRIBUTE_CLOUD_REGION: 'us-c',
@@ -70,11 +80,13 @@ expected_output_attribute_values_trimmed = {
     ATTRIBUTE_DT_LOGPATH: 'proj'
 }
 
+
 def test_extraction():
-    actual_output = logs_processor._create_dt_log_payload(LoggingContext("TEST"), record_string)
+    actual_output = logs_processor._create_dt_log_payload(logs_context, record_string)
     assert actual_output == expected_output
 
+
 def test_trimming_attribute_values(monkeypatch: MonkeyPatchFixture):
-    monkeypatch.setattr(logs_processor, '_ATTRIBUTE_VALUE_LENGTH_LIMIT', 4)
-    actual_output = logs_processor._create_dt_log_payload(LoggingContext("TEST"), record_string)
+    monkeypatch.setattr(logs_processor, 'ATTRIBUTE_VALUE_LENGTH_LIMIT', 4)
+    actual_output = logs_processor._create_dt_log_payload(logs_context, record_string)
     assert actual_output == expected_output_attribute_values_trimmed

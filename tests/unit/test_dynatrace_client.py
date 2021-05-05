@@ -41,7 +41,7 @@ def create_log_entry_with_random_len_msg():
 
 
 def test_prepare_serialized_batches(monkeypatch: MonkeyPatchFixture):
-    monkeypatch.setenv("DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE", str(request_body_len_max))
+    monkeypatch.setattr(dynatrace_client, 'REQUEST_BODY_MAX_SIZE', request_body_len_max)
 
     how_many_logs = 200
     logs = [create_log_entry_with_random_len_msg() for x in range(how_many_logs)]
@@ -72,7 +72,7 @@ def test_prepare_serialized_batches_split_by_events_limit(monkeypatch: MonkeyPat
     how_many_logs = 51
     expected_batches = ceil(how_many_logs / max_events)
 
-    monkeypatch.setenv("DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS", str(max_events))
+    monkeypatch.setattr(dynatrace_client, 'REQUEST_MAX_EVENTS', max_events)
 
     logs = [create_log_entry_with_random_len_msg() for x in range(how_many_logs)]
 
@@ -89,4 +89,4 @@ def test_prepare_serialized_batches_split_by_events_limit(monkeypatch: MonkeyPat
 
 
 def create_test_logs_context():
-    return LogsContext("test_id","test_api_key","http://test.dt.url", "TEST", Queue())
+    return LogsContext("test_id","test_api_key","http://test.dt.url", "TEST", Queue(), Queue())

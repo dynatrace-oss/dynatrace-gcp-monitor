@@ -13,7 +13,9 @@
 #     limitations under the License.
 import json
 import time
+from collections import Counter
 from datetime import datetime
+from importlib import reload
 from queue import Queue
 from typing import NewType, Any
 
@@ -28,22 +30,31 @@ from wiremock.resources.mappings.resource import Mappings
 from wiremock.resources.requests.resource import Requests
 from wiremock.server import WireMockServer
 
+from lib.context import LoggingContext, DynatraceConnectivity
+from lib.instance_metadata import InstanceMetadata
+from lib.logs import logs_sending_worker, log_self_monitoring, log_forwarder_variables, logs_processor, dynatrace_client
+from lib.logs.log_self_monitoring import LogSelfMonitoring
 from lib.logs.logs_processor import create_process_message_handler
-from lib.logs.logs_sending_worker import _loop_single_period
 from lib.logs.metadata_engine import ATTRIBUTE_TIMESTAMP, ATTRIBUTE_CONTENT, ATTRIBUTE_CLOUD_PROVIDER
 
 LOG_MESSAGE_DATA = '{"insertId":"000000-ff1a5bfd-b64a-442e-91b2-deba5557dbfe","labels":{"execution_id":"zh2htc8ax7y6"},"logName":"projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions","receiveTimestamp":"2021-03-29T10:25:15.862698697Z","resource":{"labels":{"function_name":"dynatrace-gcp-function","project_id":"dynatrace-gcp-extension","region":"us-central1"},"type":"not_cloud_function"},"severity":"INFO","textPayload":"2021-03-29 10:25:11.101768  : Access to following projects: dynatrace-gcp-extension","timestamp":"2021-03-29T10:25:11.101Z","trace":"projects/dynatrace-gcp-extension/traces/f748c1e106a134178afee611c90bf984"}'
+INVALID_LOG_MESSAGE_DATA = '{"insertId":"000000-ff1a5bfd-b64a-442e-91b2-deba5557dbfe","labels":{"execution_id":"zh2htc8ax7y6"},"logName":"projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions","receiveTimestamp":"2021-03-29T10:25:15.862698697Z","resource":{"labels":{"function_name":"dynatrace-gcp-function","project_id":"dynatrace-gcp-extension","region":"us-central1"},"type":"not_cloud_function"},"severity":"INFO","textPayload":"2021-03-29 10:25:11.101768  : Access to following projects: dynatrace-gcp-extension","timestamp":"INVALID_TIMESTAMP","trace":"projects/dynatrace-gcp-extension/traces/f748c1e106a134178afee611c90bf984"}'
 
 MOCKED_API_PORT = 9011
 ACCESS_KEY = 'abcdefjhij1234567890'
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 system_variables = {
-    # 'DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH': str(500),
+    'DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH': str(800),
     'DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE': str(5 * 1024),
     'DYNATRACE_LOG_INGEST_URL': 'http://localhost:' + str(MOCKED_API_PORT),
     'DYNATRACE_ACCESS_KEY': ACCESS_KEY,
-    'REQUIRE_VALID_CERTIFICATE': 'False'
+    'REQUIRE_VALID_CERTIFICATE': 'False',
+    # Set below-mentioned environment variables to push custom metrics to GCP Monitor
+    # 'SELF_MONITORING_ENABLED': 'True',
+    # 'GOOGLE_APPLICATION_CREDENTIALS': '',
+    # 'LOGS_SUBSCRIPTION_PROJECT': '',
+    # 'LOGS_SUBSCRIPTION_ID': ''
 }
 
 
@@ -71,6 +82,10 @@ def cleanup():
 def setup_env(monkeypatch):
     for variable_name in system_variables:
         monkeypatch.setenv(variable_name, system_variables[variable_name])
+    reload(log_forwarder_variables)
+    reload(logs_processor)
+    reload(log_self_monitoring)
+    reload(dynatrace_client)
 
 
 def response(status: int, status_message: str):
@@ -89,15 +104,92 @@ def response(status: int, status_message: str):
     ))
 
 
-def test_execution_successful():
+@pytest.mark.asyncio
+async def test_execution_successful():
     expected_cluster_response_code = 200
+    expected_sent_requests = 3
 
     response(expected_cluster_response_code, "Success")
 
     ack_queue = Queue()
     job_queue = Queue()
+    sfm_queue = Queue()
 
-    message_handler = create_process_message_handler(job_queue)
+    message_handler = create_process_message_handler(job_queue, sfm_queue)
+
+    expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 13)]
+    expected_ack_ids_of_valid_messages = [f"ACK_ID_{i}" for i in range(0, 10)]
+
+    message_data_json = json.loads(LOG_MESSAGE_DATA)
+    message_data_json["timestamp"] = datetime.utcnow().isoformat() + "Z"
+    fresh_message_data = json.dumps(message_data_json)
+
+    for ack_id in expected_ack_ids_of_valid_messages:
+        message = create_fake_message(ack_queue, ack_id=ack_id, message_data=fresh_message_data)
+        message_handler(message)
+
+    message_data_json["content"] = "CONTENT"*100
+    too_long_content_message_data = json.dumps(message_data_json)
+    message = create_fake_message(ack_queue, ack_id='ACK_ID_10', message_data=too_long_content_message_data)
+    message_handler(message)
+
+    message_data_json = json.loads(LOG_MESSAGE_DATA)
+    too_old_message_data = json.dumps(message_data_json)
+    message = create_fake_message(ack_queue, ack_id='ACK_ID_11', message_data=too_old_message_data)
+    message_handler(message)
+
+    invalid_message_data_json = json.loads(INVALID_LOG_MESSAGE_DATA)
+    invalid_message_data = json.dumps(invalid_message_data_json)
+    message = create_fake_message(ack_queue, ack_id='ACK_ID_12', message_data=invalid_message_data)
+    message_handler(message)
+
+    logs_sending_worker._loop_single_period(0, job_queue, sfm_queue)
+    job_queue.join()
+
+    metadata = InstanceMetadata(
+        project_id="",
+        container_name="",
+        token_scopes="",
+        service_account="",
+        audience="",
+        hostname="local deployment 1",
+        zone="us-east1"
+    )
+
+    self_monitoring = LogSelfMonitoring()
+    await log_self_monitoring._loop_single_period(self_monitoring, sfm_queue, LoggingContext("TEST"), metadata)
+    sfm_queue.join()
+
+    assert ack_queue.qsize() == len(expected_ack_ids)
+    while ack_queue.qsize() > 0:
+        request = ack_queue.get_nowait()
+        assert isinstance(request, AckRequest)
+        assert request.ack_id in expected_ack_ids
+        expected_ack_ids.remove(request.ack_id)
+
+    # verify_requests(expected_cluster_response_code, expected_sent_requests)
+
+    assert self_monitoring.too_old_records == 1
+    assert self_monitoring.parsing_errors == 1
+    assert self_monitoring.records_with_too_long_content == 1
+    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 3}
+    assert self_monitoring.processing_time > 0
+    assert self_monitoring.sending_time > 0
+    assert self_monitoring.sent_logs_entries == 11
+
+
+@pytest.mark.asyncio
+async def test_execution_expired_token():
+    expected_cluster_response_code = 401
+    expected_sent_requests = 3
+
+    response(expected_cluster_response_code, "Expired token")
+
+    ack_queue = Queue()
+    job_queue = Queue()
+    sfm_queue = Queue()
+
+    message_handler = create_process_message_handler(job_queue, sfm_queue)
 
     expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 10)]
 
@@ -109,8 +201,21 @@ def test_execution_successful():
         message = create_fake_message(ack_queue, ack_id=ack_id, message_data=fresh_message_data)
         message_handler(message)
 
-    _loop_single_period(0, job_queue)
-    job_queue.join()
+    logs_sending_worker._loop_single_period(0, job_queue, sfm_queue)
+
+    metadata = InstanceMetadata(
+        project_id="",
+        container_name="",
+        token_scopes="",
+        service_account="",
+        audience="",
+        hostname="local deployment 2",
+        zone="us-east1"
+    )
+
+    self_monitoring = LogSelfMonitoring()
+    await log_self_monitoring._loop_single_period(self_monitoring, sfm_queue, LoggingContext("TEST"), metadata)
+    sfm_queue.join()
 
     assert ack_queue.qsize() == len(expected_ack_ids)
     while ack_queue.qsize() > 0:
@@ -119,12 +224,19 @@ def test_execution_successful():
         assert request.ack_id in expected_ack_ids
         expected_ack_ids.remove(request.ack_id)
 
-    verify_requests(expected_cluster_response_code)
+    verify_requests(expected_cluster_response_code, expected_sent_requests)
+
+    assert self_monitoring.too_old_records == 0
+    assert self_monitoring.parsing_errors == 0
+    assert self_monitoring.records_with_too_long_content == 0
+    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.ExpiredToken: 3}
+    assert self_monitoring.processing_time > 0
+    assert self_monitoring.sending_time > 0
 
 
-def verify_requests(expected_cluster_response_code):
+def verify_requests(expected_cluster_response_code, expected_sent_requests):
     sent_requests = Requests.get_all_received_requests().get_json_data().get('requests')
-    assert len(sent_requests) == 3
+    assert len(sent_requests) == expected_sent_requests
     for request in sent_requests:
         assert_correct_body_structure(request)
         assert request.get('responseDefinition').get('status') == expected_cluster_response_code

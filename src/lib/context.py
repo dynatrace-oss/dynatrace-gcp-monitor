@@ -17,9 +17,13 @@ import os
 import traceback
 from datetime import datetime, timedelta
 from queue import Queue
-from typing import Optional
+from typing import Optional, Dict
 
 import aiohttp
+
+from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
+from lib.logs.log_sfm_metrics import LogSelfMonitoring
+from lib.metric_descriptor import SELF_MONITORING_METRIC_MAP
 
 
 def get_int_environment_value(key: str, default_value: int) -> int:
@@ -92,7 +96,8 @@ class LogsContext(ExecutionContext):
             dynatrace_api_key: str,
             dynatrace_url: str,
             scheduled_execution_id: Optional[str],
-            job_queue: Queue
+            job_queue: Queue,
+            sfm_queue: Queue,
     ):
         super().__init__(
             project_id_owner=project_id_owner,
@@ -102,12 +107,83 @@ class LogsContext(ExecutionContext):
         )
 
         self.job_queue = job_queue
-        self.request_body_max_size = get_int_environment_value("DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE", 1048576)
-        self.request_max_events = get_int_environment_value("DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS", 5000)
-        self.batch_max_messages = get_int_environment_value("DYNATRACE_LOG_INGEST_BATCH_MAX_MESSAGES", 10_000)
+        self.sfm_queue = sfm_queue
+        self.self_monitoring = LogSelfMonitoring()
 
 
-class MetricsContext(ExecutionContext):
+class LogsProcessingContext(LogsContext):
+    def __init__(
+            self,
+            scheduled_execution_id: Optional[str],
+            job_queue: Queue,
+            sfm_queue: Queue
+    ):
+        super().__init__(
+            project_id_owner="",
+            dynatrace_api_key="",
+            dynatrace_url="",
+            scheduled_execution_id=scheduled_execution_id,
+            job_queue = job_queue,
+            sfm_queue = sfm_queue
+        )
+
+
+class SfmContext(ExecutionContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            dynatrace_api_key: str,
+            dynatrace_url: str,
+            token,
+            scheduled_execution_id: Optional[str],
+            self_monitoring_enabled: bool,
+            sfm_metric_map: Dict,
+            gcp_session: aiohttp.ClientSession,
+    ):
+        super().__init__(
+            project_id_owner=project_id_owner,
+            dynatrace_api_key=dynatrace_api_key,
+            dynatrace_url=dynatrace_url,
+            scheduled_execution_id=scheduled_execution_id
+        )
+        self.token = token
+        self.self_monitoring_enabled = self_monitoring_enabled
+        self.sfm_metric_map = sfm_metric_map
+        self.gcp_session = gcp_session
+
+
+class LogsSfmContext(SfmContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            dynatrace_url: str,
+            logs_subscription_id: str,
+            token,
+            scheduled_execution_id: Optional[str],
+            sfm_queue: Queue,
+            self_monitoring_enabled: bool,
+            gcp_session: aiohttp.ClientSession,
+            container_name: str,
+            zone: str
+    ):
+        super().__init__(
+            project_id_owner=project_id_owner,
+            dynatrace_api_key="",
+            dynatrace_url=dynatrace_url,
+            token=token,
+            scheduled_execution_id=scheduled_execution_id,
+            self_monitoring_enabled = self_monitoring_enabled,
+            sfm_metric_map = LOG_SELF_MONITORING_METRIC_MAP,
+            gcp_session = gcp_session
+        )
+        self.sfm_queue = sfm_queue
+        self.logs_subscription_id = logs_subscription_id
+        self.timestamp = datetime.utcnow()
+        self.container_name = container_name
+        self.zone = zone
+
+
+class MetricsContext(SfmContext):
     def __init__(
             self,
             gcp_session: aiohttp.ClientSession,
@@ -119,20 +195,24 @@ class MetricsContext(ExecutionContext):
             dynatrace_api_key: str,
             dynatrace_url: str,
             print_metric_ingest_input: bool,
+            self_monitoring_enabled: bool,
             scheduled_execution_id: Optional[str]
     ):
         super().__init__(
             project_id_owner=project_id_owner,
             dynatrace_api_key=dynatrace_api_key,
             dynatrace_url=dynatrace_url,
-            scheduled_execution_id=scheduled_execution_id
+            token=token,
+            scheduled_execution_id=scheduled_execution_id,
+            self_monitoring_enabled=self_monitoring_enabled,
+            sfm_metric_map=SELF_MONITORING_METRIC_MAP,
+            gcp_session=gcp_session
         )
         self.dt_session = dt_session
-        self.gcp_session = gcp_session
-        self.token = token
         self.execution_time = execution_time.replace(microsecond=0)
         self.execution_interval = timedelta(seconds=execution_interval_seconds)
         self.print_metric_ingest_input = print_metric_ingest_input
+        self.self_monitoring_enabled = self_monitoring_enabled
         self.maximum_metric_data_points_per_minute = get_int_environment_value("MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE", 100000)
         self.metric_ingest_batch_size = get_int_environment_value("METRIC_INGEST_BATCH_SIZE", 1000)
         self.use_x_goog_user_project_header = {project_id_owner: False}
@@ -155,8 +235,10 @@ class MetricsContext(ExecutionContext):
 
 
 class DynatraceConnectivity(enum.Enum):
-    Ok = 0,
-    ExpiredToken = 1,
-    WrongToken = 2,
-    WrongURL = 3,
-    Other = 4
+    Ok = 0
+    ExpiredToken = 1
+    WrongToken = 2
+    WrongURL = 3
+    InvalidInput = 4
+    TooManyRequests = 5
+    Other = 6

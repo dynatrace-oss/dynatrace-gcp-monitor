@@ -25,6 +25,20 @@ data:
   DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS: {{ .Values.logIngestRequestMaxEvents | quote }}
   DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
+  SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dynatrace-gcp-function-secret
+  namespace: dynatrace
+type: "kubernetes.io/storageos"
+data:
+  access-key: {{ .Values.dynatraceAccessKey | b64enc | quote }}
+  url: {{ .Values.dynatraceUrl | b64enc | quote }}
+  log-ingest-url: {{ .Values.dynatraceLogIngestUrl | b64enc | quote }}
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -104,6 +118,11 @@ spec:
             secretKeyRef:
               name: dynatrace-gcp-function-secret
               key: access-key
+        - name: SELF_MONITORING_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: SELF_MONITORING_ENABLED
         - name: HEALTH_CHECK_PORT
           value: "8080"
         resources:
@@ -184,6 +203,11 @@ spec:
             secretKeyRef:
               name: dynatrace-gcp-function-secret
               key: access-key
+        - name: SELF_MONITORING_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: SELF_MONITORING_ENABLED
         - name: HEALTH_CHECK_PORT
           value: "8081"
         resources:

@@ -7,6 +7,13 @@ deploymentType: all
 # requireValidCertificate: if true function requires valid SSL certificates when communicating with Dynatrace cluster
 # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate
 requireValidCertificate: true
+# Dynatrace API token with permissions:
+# 'Ingest logs' for deployment type 'all' or'logs'
+# 'Ingest metrics', 'Read configuration', 'Write configuration' for deployment type 'all' or 'metrics'
+dynatraceAccessKey: ""
+# Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics/logs to Dynatrace properly. [true/false]
+selfMonitoringEnabled: false
+
 
 # METRICS VALUES
 # gcpServices: coma separated list of GCP services, which should be queried for metrics and ingested into Dynatrace
@@ -18,6 +25,8 @@ printMetricIngestInput: false
 # if set to destination: monitoring API calls are booked towards project which is monitored
 # REQUIRES serviceusage.services.use Permission granted for Service Account!
 serviceUsageBooking: source
+# Dynatrace environment endpoint, for example: https://environment-id.live.dynatrace.com
+dynatraceUrl: ""
 # useProxy: depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
 # if set to ALL: proxy settings will be used for requests to Dynatrace and GCP API
 # if set to DT_ONLY: proxy settings will be used only for requests to Dynatrace
@@ -30,6 +39,8 @@ httpProxy: ""
 httpsProxy: ""
 
 # LOGS VALUES
+# ActiveGate endpoint used to ingest logs to Dynatrace, for example: https://environemnt-active-gate-url:9999/e/environment-id"
+dynatraceLogIngestUrl: ""
 # GCP project of log sink pubsub subscription
 logsSubscriptionProject: ""
 # subscription id of log sink pubsub subscription

@@ -1,12 +1,11 @@
 import asyncio
 import os
 import re
-import time
 from datetime import datetime
 from queue import Queue
 from typing import NamedTuple, List, Optional
-
 from urllib.parse import urljoin
+
 from aiohttp import ClientSession
 
 from lib.context import LoggingContext
@@ -25,7 +24,8 @@ METRICS_CONFIGURATION_FLAGS = [
     "METRIC_INGEST_BATCH_SIZE",
     "REQUIRE_VALID_CERTIFICATE",
     "SERVICE_USAGE_BOOKING",
-    "USE_PROXY"
+    "USE_PROXY",
+    "SELF_MONITORING_ENABLED"
 ]
 
 LOGS_CONFIGURATION_FLAGS = [
@@ -39,6 +39,7 @@ LOGS_CONFIGURATION_FLAGS = [
     "LOGS_SUBSCRIPTION_PROJECT",
     "LOGS_SUBSCRIPTION_ID",
     "DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD",
+    "SELF_MONITORING_ENABLED"
 ]
 
 GCP_SERVICE_USAGE_URL = 'https://serviceusage.googleapis.com/v1/projects/'
@@ -180,7 +181,7 @@ class LogsFastCheck:
             'content': f'GCP Log Forwarder has started at {container_name}',
             'severity': 'INFO'
         }
-        send_logs(create_logs_context(Queue()), [fast_check_event])
+        send_logs(create_logs_context(Queue(), Queue()), [fast_check_event], processing_sfm_list=[])
 
 
 def _check_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):
