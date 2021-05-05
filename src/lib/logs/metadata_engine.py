@@ -37,7 +37,7 @@ _SOURCE_VALUE_EXTRACTOR_MAP = {
 
 ATTRIBUTE_SEVERITY = "severity"
 
-ATTRIBUTE_DT_LOGPATH = "dt.logpath"
+ATTRIBUTE_DT_LOGPATH = "log.source"
 
 ATTRIBUTE_TIMESTAMP = "timestamp"
 

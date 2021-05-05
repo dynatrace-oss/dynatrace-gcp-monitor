@@ -38,7 +38,7 @@
           "pattern": "timestamp"
         },
         {
-          "key": "dt.logpath",
+          "key": "log.source",
           "pattern": "logName"
         }
       ]

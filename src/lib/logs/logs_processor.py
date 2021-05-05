@@ -26,7 +26,7 @@ from google.cloud.pubsub_v1.subscriber.message import Message
 
 from lib.context import LogsProcessingContext, LogsContext
 from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, SENDING_WORKER_EXECUTION_PERIOD_SECONDS, \
-    CONTENT_LENGTH_LIMIT
+    CONTENT_LENGTH_LIMIT, ATTRIBUTE_VALUE_LENGTH_LIMIT
 from lib.logs.log_self_monitoring import LogSelfMonitoring, put_sfm_into_queue
 from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
 
@@ -97,6 +97,13 @@ def _create_dt_log_payload(context: LogsContext, message_data: str) -> Optional[
         context.log(f"Skipping message due to too old timestamp: {parsed_timestamp}")
         context.self_monitoring.too_old_records += 1
         return None
+
+    for attribute_key, attribute_value in parsed_record.items():
+        if attribute_key not in ["content", "severity", "timestamp"] and attribute_value:
+            string_attribute_value = attribute_value
+            if not isinstance(attribute_value, str):
+                string_attribute_value = str(attribute_value)
+            parsed_record[attribute_key] = string_attribute_value[: ATTRIBUTE_VALUE_LENGTH_LIMIT]
 
     content = parsed_record.get(ATTRIBUTE_CONTENT, None)
     if content:

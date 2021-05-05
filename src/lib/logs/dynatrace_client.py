@@ -23,7 +23,7 @@ from urllib.request import Request
 
 from lib.context import get_should_require_valid_certificate, get_int_environment_value, \
     DynatraceConnectivity, LogsContext
-from lib.logs.log_forwarder_variables import REQUEST_BODY_MAX_SIZE
+from lib.logs.log_forwarder_variables import REQUEST_BODY_MAX_SIZE, REQUEST_MAX_EVENTS
 from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
 
 ssl_context = ssl.create_default_context()
@@ -124,12 +124,10 @@ def prepare_serialized_batches(context: LogsContext, logs: List[Dict]) -> List[s
 
     logs_for_next_batch: List[str] = []
     logs_for_next_batch_total_len = 0
+    logs_for_next_batch_events_count = 0
 
     for log_entry in logs:
-        brackets_len = 2
-        commas_len = len(logs_for_next_batch) - 1
-
-        new_batch_len = logs_for_next_batch_total_len + brackets_len + commas_len
+        new_batch_len = logs_for_next_batch_total_len + 2 + len(logs_for_next_batch) - 1 # add bracket length (2) and commas for each entry but last one.
 
         next_entry_serialized = json.dumps(log_entry)
 
@@ -140,16 +138,18 @@ def prepare_serialized_batches(context: LogsContext, logs: List[Dict]) -> List[s
 
         batch_length_if_added_entry = new_batch_len + 1 + len(next_entry_serialized)  # +1 is for comma
 
-        if batch_length_if_added_entry > REQUEST_BODY_MAX_SIZE:
+        if batch_length_if_added_entry > REQUEST_BODY_MAX_SIZE or logs_for_next_batch_events_count >= REQUEST_MAX_EVENTS:
             # would overflow limit, close batch and prepare new
             batch = "[" + ",".join(logs_for_next_batch) + "]"
             batches.append(batch)
 
             logs_for_next_batch = []
             logs_for_next_batch_total_len = 0
+            logs_for_next_batch_events_count = 0
 
         logs_for_next_batch.append(next_entry_serialized)
         logs_for_next_batch_total_len += next_entry_size
+        logs_for_next_batch_events_count += 1
 
     if len(logs_for_next_batch) >= 1:
         # finalize last batch

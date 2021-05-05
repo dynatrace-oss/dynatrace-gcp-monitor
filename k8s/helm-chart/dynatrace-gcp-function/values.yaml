@@ -41,3 +41,13 @@ dynatraceLogIngestUrl: ""
 logsSubscriptionProject: ""
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
+# max content length of log event. Should be the same or lower than on cluster
+logIngestContentMaxLength: 8192
+# max length of log event attribute value. If it surpasses server limit, Content will be truncated
+logIngestAttributeValueMaxLength: 250
+# max number of log events in single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code
+logIngestRequestMaxEvents: 5000
+# max size in bytes of single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code
+logIngestRequestMaxSize: 1048576
+# Determines max age of forwarded log event. Should be the same or lower than on cluster
+logIngestEventMaxAgeSeconds: 86400
