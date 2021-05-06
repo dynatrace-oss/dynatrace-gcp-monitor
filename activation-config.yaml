@@ -8,8 +8,10 @@ googleCloud:
     dynatraceUrlSecretName: DYNATRACE_URL
     # Name of Google Secret Manager Secret containing Dynatrace Access Key
     dynatraceAccessKeySecretName: DYNATRACE_ACCESS_KEY
-    # Name of the Service Account that should be created for Dynatrace Function to authenticate with Google Monitoring API
-    serviceAccount: dynatrace-gcp-service
+    # Name of the Service Account that should be created for Dynatrace Function to authenticate with Google Monitoring API 
+    serviceAccount: dynatrace-gcp-service-custom
+    # Name of the GCP IAM Role that should be created for Dynatrace Function Service Account
+    iamRole: dynatrace_extension.metrics
     # Path to Google credentials file
     # googleApplicationCredentialsPath: ''
     cloudFunctionSize: s 
@@ -35,7 +37,7 @@ googleCloud:
     # Name of the metric forwarding Cloud Scheduler instance
     scheduler: dynatrace-gcp-schedule
     # Cron schedule for Cloud Scheduler instance
-    schedulerSchedule: "* * * * *" 
+    schedulerSchedule: "* * * * *"
 activation:
   metrics:
     # List of services to forward Google Monitoring Metrics to Dynatrace

@@ -148,13 +148,17 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService]):
-    context.log(project_id, f"Starting processing...")
-    await check_x_goog_user_project_header_permissions(context, project_id)
-    ingest_lines = await fetch_ingest_lines_task(context, project_id, services)
-    fetch_data_time = time.time() - context.start_processing_timestamp
-    context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
-    context.log(project_id, f"Finished fetching data in {fetch_data_time}")
-    await push_ingest_lines(context, project_id, ingest_lines)
+    try:
+        context.log(project_id, f"Starting processing...")
+        await check_x_goog_user_project_header_permissions(context, project_id)
+        ingest_lines = await fetch_ingest_lines_task(context, project_id, services)
+        fetch_data_time = time.time() - context.start_processing_timestamp
+        context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
+        context.log(project_id, f"Finished fetching data in {fetch_data_time}")
+        await push_ingest_lines(context, project_id, ingest_lines)
+    except Exception as e:
+        context.log(f"Failed to finish processing due to {e}")
+        traceback.print_exc()
 
 
 async def check_x_goog_user_project_header_permissions(context: MetricsContext, project_id: str):
@@ -228,7 +232,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
     entity_id_map = build_entity_id_map(fetch_topology_results)
-    flat_metric_results = flatten_and_enrich_metric_results(fetch_metric_results, entity_id_map)
+    flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
     return flat_metric_results
 
 

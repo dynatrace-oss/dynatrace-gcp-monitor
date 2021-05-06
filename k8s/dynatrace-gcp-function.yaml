@@ -30,8 +30,8 @@ data:
   # if not set: default, proxy settings won't be used
   USE_PROXY: ""
   # Set the proxy addresses. To be used in conjunction with USE_PROXY.
-  HTTPS_PROXY: ""
   HTTP_PROXY: ""
+  HTTPS_PROXY: ""
   # Import predefined dashboards for selected services. Allowed values: `yes`, `no`
   IMPORT_DASHBOARDS: "yes"
   # Import predefined alerting rules (inactive by default) for selected services. Allowed values: `yes`, `no`
@@ -102,15 +102,15 @@ spec:
               name: dynatrace-gcp-function-config
               key: IMPORT_ALERTS
         - name: HTTP_PROXY
-          valueFrom:
-            configMapKeyRef:
-              name: dynatrace-gcp-function-config
-              key: HTTP_PROXY
+            valueFrom:
+              configMapKeyRef:
+                name: dynatrace-gcp-function-config
+                key: HTTP_PROXY
         - name: HTTPS_PROXY
-          valueFrom:
-            configMapKeyRef:
-              name: dynatrace-gcp-function-config
-              key: HTTPS_PROXY
+            valueFrom:
+              configMapKeyRef:
+                name: dynatrace-gcp-function-config
+                key: HTTPS_PROXY
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
         - name: DYNATRACE_URL_SECRET_NAME

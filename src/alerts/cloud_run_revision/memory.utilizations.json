@@ -13,6 +13,6 @@
         "dealertingSamples": 10,
         "violatingSamples": 3,
         "threshold": 95,
-        "unit": "PERCENT"
+        "unit": "UNSPECIFIED"
     }
 }
