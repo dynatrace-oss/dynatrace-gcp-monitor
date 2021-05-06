@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import re
 from datetime import datetime
@@ -13,7 +14,7 @@ from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fe
     get_project_id_from_environment
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
-from lib.logs.logs_sending_worker import create_logs_context
+from lib.logs.log_forwarder import create_logs_context
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -181,7 +182,7 @@ class LogsFastCheck:
             'content': f'GCP Log Forwarder has started at {container_name}',
             'severity': 'INFO'
         }
-        send_logs(create_logs_context(Queue(), Queue()), [fast_check_event], processing_sfm_list=[])
+        send_logs(create_logs_context(Queue()), [], json.dumps([fast_check_event]))
 
 
 def _check_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):

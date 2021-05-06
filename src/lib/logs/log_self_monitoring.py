@@ -25,8 +25,8 @@ import aiohttp
 from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity, LogsContext
 from lib.credentials import create_token, get_dynatrace_log_ingest_url_from_env
 from lib.instance_metadata import InstanceMetadata
-from lib.logs.log_forwarder_variables import SENDING_WORKER_EXECUTION_PERIOD_SECONDS, MAX_MESSAGES_PROCESSED, \
-    LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID
+from lib.logs.log_forwarder_variables import LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID, \
+    SFM_WORKER_EXECUTION_PERIOD_SECONDS, MAX_SFM_MESSAGES_PROCESSED
 from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, \
     LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE, LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE, \
@@ -62,7 +62,7 @@ def put_sfm_into_queue(context: LogsContext):
 async def create_sfm_worker_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
     while True:
         try:
-            await asyncio.sleep(SENDING_WORKER_EXECUTION_PERIOD_SECONDS)
+            await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
             self_monitoring = LogSelfMonitoring()
             asyncio.get_event_loop().create_task(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
         except Exception:
@@ -117,7 +117,7 @@ async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_sessi
 def _pull_sfm(sfm_queue: Queue):
     sfm_list: List[LogSelfMonitoring] = []
     # Limit used to avoid pulling forever (the same as for job_queue)
-    while len(sfm_list) < MAX_MESSAGES_PROCESSED and sfm_queue.qsize() > 0:
+    while len(sfm_list) < MAX_SFM_MESSAGES_PROCESSED and sfm_queue.qsize() > 0:
         single_sfm: LogSelfMonitoring = sfm_queue.get()
         sfm_list.append(single_sfm)
     return sfm_list

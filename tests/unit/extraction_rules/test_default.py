@@ -65,7 +65,6 @@ logs_context = LogsContext(
     dynatrace_api_key="",
     dynatrace_url="",
     scheduled_execution_id="",
-    job_queue=Queue(),
     sfm_queue=Queue()
 )
 

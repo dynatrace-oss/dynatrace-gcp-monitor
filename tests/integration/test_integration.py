@@ -17,13 +17,11 @@ from collections import Counter
 from datetime import datetime
 from importlib import reload
 from queue import Queue
-from typing import NewType, Any
+from typing import NewType, Any, List, Dict
 
 import pytest
-from google.cloud.pubsub_v1.subscriber._protocol.requests import AckRequest
-from google.cloud.pubsub_v1.subscriber.message import Message
 from google.protobuf.timestamp_pb2 import Timestamp
-from google.pubsub_v1 import PubsubMessage
+from google.pubsub_v1 import PubsubMessage, PullResponse, ReceivedMessage, PullRequest
 from wiremock.constants import Config
 from wiremock.resources.mappings import MappingRequest, HttpMethods, MappingResponse, Mapping
 from wiremock.resources.mappings.resource import Mappings
@@ -32,9 +30,9 @@ from wiremock.server import WireMockServer
 
 from lib.context import LoggingContext, DynatraceConnectivity
 from lib.instance_metadata import InstanceMetadata
-from lib.logs import logs_sending_worker, log_self_monitoring, log_forwarder_variables, logs_processor, dynatrace_client
+from lib.logs import log_self_monitoring, log_forwarder_variables, logs_processor, dynatrace_client, worker_state
+from lib.logs.log_forwarder import WorkerState, perform_pull, perform_flush
 from lib.logs.log_self_monitoring import LogSelfMonitoring
-from lib.logs.logs_processor import create_process_message_handler
 from lib.logs.metadata_engine import ATTRIBUTE_TIMESTAMP, ATTRIBUTE_CONTENT, ATTRIBUTE_CLOUD_PROVIDER
 
 LOG_MESSAGE_DATA = '{"insertId":"000000-ff1a5bfd-b64a-442e-91b2-deba5557dbfe","labels":{"execution_id":"zh2htc8ax7y6"},"logName":"projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions","receiveTimestamp":"2021-03-29T10:25:15.862698697Z","resource":{"labels":{"function_name":"dynatrace-gcp-function","project_id":"dynatrace-gcp-extension","region":"us-central1"},"type":"not_cloud_function"},"severity":"INFO","textPayload":"2021-03-29 10:25:11.101768  : Access to following projects: dynatrace-gcp-extension","timestamp":"2021-03-29T10:25:11.101Z","trace":"projects/dynatrace-gcp-extension/traces/f748c1e106a134178afee611c90bf984"}'
@@ -84,6 +82,7 @@ def setup_env(monkeypatch):
         monkeypatch.setenv(variable_name, system_variables[variable_name])
     reload(log_forwarder_variables)
     reload(logs_processor)
+    reload(worker_state)
     reload(log_self_monitoring)
     reload(dynatrace_client)
 
@@ -104,18 +103,36 @@ def response(status: int, status_message: str):
     ))
 
 
+class MockSubscriberClient:
+    received_messages: List[ReceivedMessage]
+    ack_queue : Queue
+
+    def __init__(self, ack_queue: Queue):
+        self.received_messages = []
+        self.ack_queue = ack_queue
+
+    def add_message(self, message: ReceivedMessage):
+        self.received_messages.append(message)
+
+    def pull(self, pull_request: PullRequest) -> PullResponse:
+        pull_response = PullResponse()
+        pull_response.received_messages = self.received_messages.copy()
+        return pull_response
+
+    def acknowledge(self, request: Dict):
+        for ack_id in request.get("ack_ids", []):
+            self.ack_queue.put_nowait(ack_id)
+
+
 @pytest.mark.asyncio
 async def test_execution_successful():
     expected_cluster_response_code = 200
-    expected_sent_requests = 3
 
     response(expected_cluster_response_code, "Success")
 
     ack_queue = Queue()
-    job_queue = Queue()
     sfm_queue = Queue()
-
-    message_handler = create_process_message_handler(job_queue, sfm_queue)
+    mock_subscriber_client = MockSubscriberClient(ack_queue)
 
     expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 13)]
     expected_ack_ids_of_valid_messages = [f"ACK_ID_{i}" for i in range(0, 10)]
@@ -125,26 +142,28 @@ async def test_execution_successful():
     fresh_message_data = json.dumps(message_data_json)
 
     for ack_id in expected_ack_ids_of_valid_messages:
-        message = create_fake_message(ack_queue, ack_id=ack_id, message_data=fresh_message_data)
-        message_handler(message)
+        message = create_fake_message(ack_id=ack_id, message_data=fresh_message_data)
+        mock_subscriber_client.add_message(message)
 
     message_data_json["content"] = "CONTENT"*100
     too_long_content_message_data = json.dumps(message_data_json)
-    message = create_fake_message(ack_queue, ack_id='ACK_ID_10', message_data=too_long_content_message_data)
-    message_handler(message)
+    message = create_fake_message(ack_id='ACK_ID_10', message_data=too_long_content_message_data)
+    mock_subscriber_client.add_message(message)
 
     message_data_json = json.loads(LOG_MESSAGE_DATA)
     too_old_message_data = json.dumps(message_data_json)
-    message = create_fake_message(ack_queue, ack_id='ACK_ID_11', message_data=too_old_message_data)
-    message_handler(message)
+    message = create_fake_message(ack_id='ACK_ID_11', message_data=too_old_message_data)
+    mock_subscriber_client.add_message(message)
 
     invalid_message_data_json = json.loads(INVALID_LOG_MESSAGE_DATA)
     invalid_message_data = json.dumps(invalid_message_data_json)
-    message = create_fake_message(ack_queue, ack_id='ACK_ID_12', message_data=invalid_message_data)
-    message_handler(message)
+    message = create_fake_message(ack_id='ACK_ID_12', message_data=invalid_message_data)
+    mock_subscriber_client.add_message(message)
 
-    logs_sending_worker._loop_single_period(0, job_queue, sfm_queue)
-    job_queue.join()
+    worker_state = WorkerState("TEST")
+    perform_pull(worker_state, sfm_queue, mock_subscriber_client, "")
+    # Flush down rest of messages
+    perform_flush(worker_state, sfm_queue, mock_subscriber_client, "")
 
     metadata = InstanceMetadata(
         project_id="",
@@ -162,12 +181,11 @@ async def test_execution_successful():
 
     assert ack_queue.qsize() == len(expected_ack_ids)
     while ack_queue.qsize() > 0:
-        request = ack_queue.get_nowait()
-        assert isinstance(request, AckRequest)
-        assert request.ack_id in expected_ack_ids
-        expected_ack_ids.remove(request.ack_id)
+        ack_id = ack_queue.get_nowait()
+        assert ack_id in expected_ack_ids
+        expected_ack_ids.remove(ack_id)
 
-    # verify_requests(expected_cluster_response_code, expected_sent_requests)
+    verify_requests(expected_cluster_response_code, 3)
 
     assert self_monitoring.too_old_records == 1
     assert self_monitoring.parsing_errors == 1
@@ -186,10 +204,8 @@ async def test_execution_expired_token():
     response(expected_cluster_response_code, "Expired token")
 
     ack_queue = Queue()
-    job_queue = Queue()
     sfm_queue = Queue()
-
-    message_handler = create_process_message_handler(job_queue, sfm_queue)
+    mock_subscriber_client = MockSubscriberClient(ack_queue)
 
     expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 10)]
 
@@ -198,10 +214,13 @@ async def test_execution_expired_token():
     fresh_message_data = json.dumps(message_data_json)
 
     for ack_id in expected_ack_ids:
-        message = create_fake_message(ack_queue, ack_id=ack_id, message_data=fresh_message_data)
-        message_handler(message)
+        message = create_fake_message(ack_id=ack_id, message_data=fresh_message_data)
+        mock_subscriber_client.add_message(message)
 
-    logs_sending_worker._loop_single_period(0, job_queue, sfm_queue)
+    worker_state = WorkerState("TEST")
+    perform_pull(worker_state, sfm_queue, mock_subscriber_client, "")
+    # Flush down rest of messages
+    perform_flush(worker_state, sfm_queue, mock_subscriber_client, "")
 
     metadata = InstanceMetadata(
         project_id="",
@@ -217,12 +236,7 @@ async def test_execution_expired_token():
     await log_self_monitoring._loop_single_period(self_monitoring, sfm_queue, LoggingContext("TEST"), metadata)
     sfm_queue.join()
 
-    assert ack_queue.qsize() == len(expected_ack_ids)
-    while ack_queue.qsize() > 0:
-        request = ack_queue.get_nowait()
-        assert isinstance(request, AckRequest)
-        assert request.ack_id in expected_ack_ids
-        expected_ack_ids.remove(request.ack_id)
+    assert ack_queue.qsize() == 0
 
     verify_requests(expected_cluster_response_code, expected_sent_requests)
 
@@ -254,12 +268,11 @@ def assert_correct_body_structure(request):
 
 
 def create_fake_message(
-        ack_queue,
         message_data,
         ack_id="ACK_ID",
         message_id="MESSAGE_ID",
         timestamp_epoch_seconds=int(time.time())
-):
+) -> ReceivedMessage:
     publish_time_timestamp = Timestamp()
     publish_time_timestamp.seconds = timestamp_epoch_seconds
 
@@ -269,4 +282,9 @@ def create_fake_message(
     pubsub_message.publish_time = publish_time_timestamp
     pubsub_message.ordering_key = ""
 
-    return Message(PubsubMessage.pb(pubsub_message), ack_id, 0, ack_queue)
+    received_message = ReceivedMessage()
+    received_message.ack_id = ack_id
+    received_message.message = pubsub_message
+    received_message.delivery_attempt = 0
+
+    return received_message

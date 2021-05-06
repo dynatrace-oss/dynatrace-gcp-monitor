@@ -96,7 +96,6 @@ class LogsContext(ExecutionContext):
             dynatrace_api_key: str,
             dynatrace_url: str,
             scheduled_execution_id: Optional[str],
-            job_queue: Queue,
             sfm_queue: Queue,
     ):
         super().__init__(
@@ -106,7 +105,6 @@ class LogsContext(ExecutionContext):
             scheduled_execution_id=scheduled_execution_id
         )
 
-        self.job_queue = job_queue
         self.sfm_queue = sfm_queue
         self.self_monitoring = LogSelfMonitoring()
 
@@ -115,7 +113,6 @@ class LogsProcessingContext(LogsContext):
     def __init__(
             self,
             scheduled_execution_id: Optional[str],
-            job_queue: Queue,
             sfm_queue: Queue
     ):
         super().__init__(
@@ -123,7 +120,6 @@ class LogsProcessingContext(LogsContext):
             dynatrace_api_key="",
             dynatrace_url="",
             scheduled_execution_id=scheduled_execution_id,
-            job_queue = job_queue,
             sfm_queue = sfm_queue
         )
 
@@ -158,7 +154,7 @@ class LogsSfmContext(SfmContext):
             project_id_owner: str,
             dynatrace_url: str,
             logs_subscription_id: str,
-            token,
+            token: str,
             scheduled_execution_id: Optional[str],
             sfm_queue: Queue,
             self_monitoring_enabled: bool,
