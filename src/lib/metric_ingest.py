@@ -222,7 +222,7 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
     return DimensionValue(name, string_value)
 
 
-def create_dimensions(context: Context, time_serie: Dict) -> List[DimensionValue]:
+def create_dimensions(context: MetricsContext, time_serie: Dict) -> List[DimensionValue]:
     metric = time_serie.get('metric', {})
     labels = metric.get('labels', {}).copy()
     resource_labels = time_serie.get('resource', {}).get('labels', {})
@@ -236,7 +236,7 @@ def create_dimensions(context: Context, time_serie: Dict) -> List[DimensionValue
 
 
 def flatten_and_enrich_metric_results(
-        context: Context,
+        context: MetricsContext,
         fetch_metric_results: List[List[IngestLine]],
         entity_id_map: Dict[str, Entity]
 ) -> List[IngestLine]:
