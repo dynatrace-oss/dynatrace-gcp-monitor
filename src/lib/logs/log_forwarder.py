@@ -99,6 +99,10 @@ def perform_pull(worker_state: WorkerState,
 
         worker_state.add_job(message_job, received_message.ack_id)
 
+    # check if should flush because of time
+    if worker_state.should_flush():
+        perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
+
 
 def perform_flush(worker_state: WorkerState,
                   sfm_queue: Queue,

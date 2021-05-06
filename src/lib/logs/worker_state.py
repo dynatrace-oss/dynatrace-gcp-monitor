@@ -12,7 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import time
-from typing import List
+from typing import List, Optional
 
 from lib.logs.log_forwarder_variables import REQUEST_MAX_EVENTS, REQUEST_BODY_MAX_SIZE, \
     SENDING_WORKER_EXECUTION_PERIOD_SECONDS
@@ -47,15 +47,18 @@ class WorkerState:
         self.batch_bytes_size += log_processing_job.bytes_size
         self.jobs.append(log_processing_job)
 
-    def should_flush(self, log_processing_job: LogProcessingJob) -> bool:
+    def should_flush(self, next_log_processing_job: Optional[LogProcessingJob] = None) -> bool:
         """
         Check if worker state should be flushed before calling #add_job on this WorkerState instance
-        :param log_processing_job: next log message to process
+        :param next_log_processing_job: next log message to process
         :return: bool value indicating if state should be flushed
         """
-        too_many_messages = len(self.jobs) + 1 > REQUEST_MAX_EVENTS
-        batch_is_big = self.batch_bytes_size + log_processing_job.bytes_size + 2 >= REQUEST_BODY_MAX_SIZE
         time_has_passed = (time.time() - self.last_flush_time) > SENDING_WORKER_EXECUTION_PERIOD_SECONDS
+        if not next_log_processing_job:
+            return time_has_passed
+
+        too_many_messages = len(self.jobs) + 1 > REQUEST_MAX_EVENTS
+        batch_is_big = self.batch_bytes_size + next_log_processing_job.bytes_size + 2 >= REQUEST_BODY_MAX_SIZE
         return too_many_messages or batch_is_big or time_has_passed
 
     @property
