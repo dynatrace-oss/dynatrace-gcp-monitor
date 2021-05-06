@@ -79,4 +79,4 @@ then
     exit 2
 fi
 
-gcloud pubsub subscriptions create "${SUBSCRIPTION_NAME}" --topic="${TOPIC_NAME}" --ack-deadline=180 --message-retention-duration=1d
+gcloud pubsub subscriptions create "${SUBSCRIPTION_NAME}" --topic="${TOPIC_NAME}" --ack-deadline=120 --message-retention-duration=1d
