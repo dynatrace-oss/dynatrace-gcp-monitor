@@ -1,5 +1,5 @@
 #!/bin/bash
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2021 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ onFailure() {
 
 trap onFailure ERR
 
-echo "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]"
 
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
 fi
+
+echo "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]"
 
 if [ -z "$SA_NAME" ]; then
   SA_NAME="dynatrace-gcp-function-sa"
@@ -44,7 +45,12 @@ fi
 # TODO validate connected to kube cluster
 
 echo "- 1. Create dynatrace namespace in k8s cluster."
-kubectl create namespace dynatrace
+DT_NS=$(kubectl get namespace dynatrace --ignore-not-found)
+if [ -z "$DT_NS" ]; then
+  kubectl create namespace dynatrace
+else
+  echo "namespace dyntrace already exists";
+fi;
 
 echo "- 2. Create IAM service account."
 gcloud iam service-accounts create "$SA_NAME"
