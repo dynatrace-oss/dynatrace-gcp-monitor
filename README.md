@@ -1,4 +1,4 @@
-# Dynatrace integration for Google Cloud Platform monitoring
+#  Dynatrace integration for Google Cloud Platform monitoring
 
 This is the home of `dynatrace-gcp-function` which provides the mechanism to pull all [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) into Dynatrace. 
  
