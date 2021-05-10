@@ -31,4 +31,4 @@ fi
 
 sudo mv linux-amd64/helm /usr/local/bin/helm
 RESULT_STR=$(helm package ./k8s/helm-chart/dynatrace-gcp-function -d ./artefacts)
-mv ./${"RESULT_STR"##* } ./artefacts/dynatrace-gcp-function.tgz
+mv ./${RESULT_STR##* } ./artefacts/dynatrace-gcp-function.tgz
