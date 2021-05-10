@@ -13,6 +13,11 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+DEPLOYMENT_TYPE=all
+GCP_PROJECT=""
+SA_NAME=""
+ROLE_NAME=""
+
 onFailure() {
     echo -e "- deployment failed, please examine error messages and run again"
     exit 2
@@ -31,6 +36,10 @@ if [ -z "$SA_NAME" ]; then
   SA_NAME="dynatrace-gcp-function-sa"
 fi
 
+if [ -z "$ROLE_NAME" ]; then
+  ROLE_NAME="dynatrace_function"
+fi
+
 if [ -z "$DEPLOYMENT_TYPE" ]; then
   DEPLOYMENT_TYPE="all"
   echo "Deploying metrics and logs ingest"
@@ -45,11 +54,10 @@ fi
 # TODO validate connected to kube cluster
 
 echo "- 1. Create dynatrace namespace in k8s cluster."
-DT_NS=$(kubectl get namespace dynatrace --ignore-not-found)
-if [ -z "$DT_NS" ]; then
-  kubectl create namespace dynatrace
-else
+if [[ $(kubectl get namespace dynatrace --ignore-not-found) ]]; then
   echo "namespace dyntrace already exists";
+else
+  kubectl create namespace dynatrace
 fi;
 
 echo "- 2. Create IAM service account."
@@ -60,30 +68,31 @@ gcloud iam service-accounts add-iam-policy-binding --role roles/iam.workloadIden
 
 echo "- 4. Create dynatrace-gcp-function IAM role(s)."
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml
-  gcloud iam roles create $SA_NAME.logs --project=$GCP_PROJECT --file=dynatrace-gcp-function-logs-role.yaml
+  wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml -O dynatrace-gcp-function-logs-role.yaml
+  gcloud iam roles create $ROLE_NAME.logs --project=$GCP_PROJECT --file=dynatrace-gcp-function-logs-role.yaml
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml
-  gcloud iam roles create $SA_NAME.metrics --project=$GCP_PROJECT --file=dynatrace-gcp-function-metrics-role.yaml
+  wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml -O dynatrace-gcp-function-metrics-role.yaml
+  gcloud iam roles create $ROLE_NAME.metrics --project=$GCP_PROJECT --file=dynatrace-gcp-function-metrics-role.yaml
 fi
 
 echo "- 5. Grant the required IAM policies to the service account."
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role=projects/$GCP_PROJECT/roles/$SA_NAME.logs
+  gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role=projects/$GCP_PROJECT/roles/$ROLE_NAME.logs
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role=projects/$GCP_PROJECT/roles/$SA_NAME.metrics
+  gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role=projects/$GCP_PROJECT/roles/$ROLE_NAME.metrics
 fi
 
 echo "- 6. Enable the APIs required for monitoring."
 gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com cloudresourcemanager.googleapis.com
 
 echo "- 7. Install dynatrace-gcp-funtion with helm chart."
-wget https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.tgz
-helm install dynatrace-gcp-function.tgz --set --generate-name
+wget https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.tgz -O dynatrace-gcp-function.tgz
+# TODO read values from ENV_VARS
+helm install dynatrace-gcp-function.tgz --set "deploymentType=$DEPLOYMENT_TYPE" --set "requireValidCertificate=TODO" --set "dynatraceAccessKey=TODO" --set "selfMonitoringEnabled=TODO" --set "dynatraceUrl=TODO" --set "dynatraceLogIngestUrl=TODO" --set "logsSubscriptionProject=TODO" --set "logsSubscriptionId=TODO" --generate-name
 
 echo "- 8. Create an annotation for the service account."
 kubectl annotate serviceaccount --namespace dynatrace dynatrace-gcp-function-sa iam.gke.io/gcp-service-account=$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com
