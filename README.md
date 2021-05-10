@@ -1,7 +1,9 @@
 # Dynatrace integration for Google Cloud Platform monitoring
 
 This is the home of `dynatrace-gcp-function` which provides the mechanism to pull all [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) into Dynatrace. 
- 
+
+We are currently adding support for GCP log ingest, more details in [Log Ingest setup instructions](LOGS-README.md).
+  
 To help with deployment you can use automation scripts available in this repo.
 
 Maintaining its lifecycle places a burden on the operational team.

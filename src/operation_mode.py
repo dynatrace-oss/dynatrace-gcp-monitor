@@ -11,4 +11,19 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import enum
 
+
+class OperationMode(enum.Enum):
+    Metrics = enum.auto(),
+    Logs = enum.auto()
+
+    @staticmethod
+    def from_environment_string(string: str):
+        if not string:
+            return None
+
+        try:
+            return OperationMode[string.casefold().capitalize()]
+        except Exception:
+            return None

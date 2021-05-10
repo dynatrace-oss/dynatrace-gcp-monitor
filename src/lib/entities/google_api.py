@@ -15,12 +15,12 @@
 
 from typing import Any, Callable, Dict, List, Text
 
-from lib.context import Context
+from lib.context import MetricsContext
 from lib.entities.model import Entity
 
 
 async def fetch_zones(
-        context: Context,
+        context: MetricsContext,
         project_id: str
 ) -> List[str]:
     headers = {
@@ -46,7 +46,7 @@ async def fetch_zones(
 
 async def generic_paging(
         url: Text,
-        ctx: Context,
+        ctx: MetricsContext,
         mapper: Callable[[Dict[Any, Any]], List[Entity]]
 ) -> List[Entity]:
     """Apply mapper function on any page returned by gcp api url."""

@@ -20,7 +20,7 @@ import time
 import jwt
 from aiohttp import ClientSession
 
-from lib.context import LoggingContext, Context
+from lib.context import LoggingContext
 
 _METADATA_ROOT = "http://metadata.google.internal/computeMetadata/v1"
 _METADATA_FLAVOR_HEADER = "metadata-flavor"
@@ -29,6 +29,7 @@ _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_NAME", "DYNATRACE_ACCESS_KEY")
 _DYNATRACE_URL_SECRET_NAME = os.environ.get("DYNATRACE_URL_SECRET_NAME","DYNATRACE_URL")
+_DYNATRACE_LOG_INGEST_URL_SECRET_NAME = os.environ.get("DYNATRACE_LOG_INGEST_URL_SECRET_NAME","DYNATRACE_LOG_INGEST_URL")
 
 
 async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str, ):
@@ -37,6 +38,17 @@ async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, t
 
 async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token: str, ):
     return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
+
+
+def get_dynatrace_api_key_from_env():
+    return os.environ.get(_DYNATRACE_ACCESS_KEY_SECRET_NAME, None)
+
+
+def get_dynatrace_log_ingest_url_from_env():
+    url = os.environ.get(_DYNATRACE_LOG_INGEST_URL_SECRET_NAME, None)
+    if url is None:
+        raise Exception("{env_var} environment variable is not set".format(env_var=_DYNATRACE_LOG_INGEST_URL_SECRET_NAME))
+    return url
 
 
 async def fetch_secret(session: ClientSession, project_id: str, token: str, secret_name: str):
@@ -126,5 +138,8 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
         response = await session.get(url, headers=headers)
         response_json = await response.json()
         all_projects = [project["projectId"] for project in response_json.get("projects", [])]
-        context.log("Access to following projects: " + ", ".join(all_projects))
+        if all_projects:
+            context.log("Access to following projects: " + ", ".join(all_projects))
+        else:
+            context.log("There is no access to any projects. Check service account configuration.")
         return all_projects

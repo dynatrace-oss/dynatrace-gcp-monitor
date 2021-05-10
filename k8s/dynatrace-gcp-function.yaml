@@ -36,6 +36,9 @@ data:
   IMPORT_DASHBOARDS: "yes"
   # Import predefined alerting rules (inactive by default) for selected services. Allowed values: `yes`, `no`
   IMPORT_ALERTS: "yes"
+  # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. [true/false]
+  SELF_MONITORING_ENABLED: "false"
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -63,6 +66,8 @@ spec:
         name: dynatrace-gcp-function      
         imagePullPolicy: Always
         env:
+        - name: OPERATION_MODE
+          value: Metrics
         - name: GCP_SERVICES
           valueFrom:
             configMapKeyRef:
@@ -121,7 +126,12 @@ spec:
           valueFrom:
             secretKeyRef:
               name: dynatrace-gcp-function-secret
-              key: access-key   
+              key: access-key
+        - name: SELF_MONITORING_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: SELF_MONITORING_ENABLED
         resources:
           requests:
             memory: "256Mi"

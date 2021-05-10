@@ -1,4 +1,5 @@
-#     Copyright 2020 Dynatrace LLC
+#!/bin/bash 
+#     Copyright 2021 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -12,3 +13,21 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+wget https://get.helm.sh/helm-v3.5.3-linux-amd64.tar.gz
+
+FILE=./helm-v3.5.3-linux-amd64.tar.gz
+if [ ! -f "$FILE" ]; then
+    echo "$FILE does not exist. Can't create helm chart."
+    exit 1
+fi
+
+tar -zxvf helm-v3.5.3-linux-amd64.tar.gz
+
+FILE=./linux-amd64/helm
+if [ ! -f "$FILE" ]; then
+    echo "$FILE does not exist. Can't create helm chart."
+    exit 1
+fi
+
+sudo mv linux-amd64/helm /usr/local/bin/helm
+helm package ./k8s/helm-chart/dynatrace-gcp-function -d ./artefacts

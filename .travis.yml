@@ -22,8 +22,13 @@ jobs:
     install:
       - pip install -r src/requirements.txt
       - pip install -r tests/requirements.txt
+    addons:
+      apt:
+        packages:
+          - default-jre
     script:
       - PYTHONPATH="./src" pytest tests/unit -v
+      - PYTHONPATH="./src" pytest tests/integration -v
   - stage: docker-build
     name: Docker build
     language: minimal
@@ -44,6 +49,7 @@ jobs:
     - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml    
     - chmod +x ./build/version.sh
     - sh ./build/version.sh
+    - sh ./build/helm-package.sh
     - "(cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')"
     deploy:
       provider: releases
