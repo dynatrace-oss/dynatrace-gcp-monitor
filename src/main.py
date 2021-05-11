@@ -245,6 +245,14 @@ def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str,
 
 
 def load_supported_services(context: LoggingContext, selected_featuresets: List[str]) -> List[GCPService]:
+    activation_file_path = '/code/config/activation/gcp_services.yaml'
+    try:
+        with open(activation_file_path, encoding="utf-8") as activation_file:
+            activation_yaml = yaml.safe_load(activation_file)
+    except Exception:
+        activation_yaml = yaml.safe_load(os.environ.get("ACTIVATION_CONFIG", ""))
+    activation_config = {service_activation.get('service'): service_activation for service_activation in activation_yaml.get('services', [])} if activation_yaml else {}
+
     working_directory = os.path.dirname(os.path.realpath(__file__))
     config_directory = os.path.join(working_directory, "config")
     config_files = [
@@ -262,12 +270,14 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
                 technology_name = extract_technology_name(config_yaml)
 
                 for service_yaml in config_yaml.get("gcp", {}):
+                    service_name=service_yaml.get("service", "None")
                     # If whitelist of services exists and current service is not present in it, skip
                     should_skip = selected_featuresets and \
-                                  (f'{service_yaml.get("service", "None")}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets)
+                                  (f'{service_name}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets)
                     if should_skip:
                         continue
-                    services.append(GCPService(tech_name=technology_name, **service_yaml))
+                    activation = activation_config.get(service_name)
+                    services.append(GCPService(tech_name=technology_name, activation=activation, **service_yaml))
         except Exception as error:
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
             continue

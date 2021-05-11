@@ -16,7 +16,7 @@
 
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import List, Text, Any
+from typing import List, Text, Any, Dict
 
 
 @dataclass(frozen=True)
@@ -120,6 +120,8 @@ class GCPService:
     feature_set: Text
     dimensions: List[Dimension]
     metrics = List[Metric]
+    monitoring_filter: Text
+    activation: Dict[Text, Any]
 
     def __init__(self, **kwargs):
         object.__setattr__(self, "name", kwargs.get("service", ""))
@@ -134,6 +136,13 @@ class GCPService:
             in kwargs.get("metrics", {})
             if x.get("gcpOptions", {}).get("valueType", "").upper() != "STRING"
         ])
+        object.__setattr__(self, "activation", kwargs.get("activation", {}))
+        monitoring_filter = kwargs.get("gcp_monitoring_filter", "")
+        if monitoring_filter == "var:filter_conditions":
+            object.__setattr__(self, "monitoring_filter", self.activation.get("vars", {}).get("filter_conditions", ""))
+        else:
+            object.__setattr__(self, "monitoring_filter", monitoring_filter)
+
 
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'
