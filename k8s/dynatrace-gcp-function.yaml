@@ -13,10 +13,12 @@ metadata:
 data:
   # coma separated list of GCP services, which should be queried for metrics and ingested into Dynatrace
   GCP_SERVICES: "api,cloud_function,cloudsql_database,datastore_request,filestore_instance,gcs_bucket,https_lb_rule,internal_http_lb_rule,internal_tcp_lb_rule,internal_udp_lb_rule,tcp_lb_rule,udp_lb_rule,pubsub_snapshot,pubsub_subscription,pubsub_topic,pubsublite_topic_partition,k8s_pod,k8s_node,k8s_container,k8s_cluster,gce_instance"
-  # if true function will output lines of metrics into stdout
+  # if true/yes function will output lines of metrics into stdout
+  # Allowed values: "true"/"yes", "false"/"no"
   PRINT_METRIC_INGEST_INPUT: "false"
-  # if true function requires valid SSL certificates when communicating with Dynatrace cluster
+  # if true/yes function requires valid SSL certificates when communicating with Dynatrace cluster
   # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate
+  # Allowed values: "true"/"yes", "false"/"no"
   REQUIRE_VALID_CERTIFICATE: "true"
   # Determines a caller-specified project for quota and billing purposes 
   # if set to source: monitoring API calls are booked towards project where K8S container is running
@@ -32,11 +34,12 @@ data:
   # Set the proxy addresses. To be used in conjunction with USE_PROXY.
   HTTP_PROXY: ""
   HTTPS_PROXY: ""
-  # Import predefined dashboards for selected services. Allowed values: `yes`, `no`
-  IMPORT_DASHBOARDS: "yes"
-  # Import predefined alerting rules (inactive by default) for selected services. Allowed values: `yes`, `no`
-  IMPORT_ALERTS: "yes"
-  # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. [true/false]
+  # Import predefined dashboards for selected services. Allowed values: "true"/"yes", "false"/"no"
+  IMPORT_DASHBOARDS: "true"
+  # Import predefined alerting rules (inactive by default) for selected services. Allowed values: "true"/"yes", "false"/"no"
+  IMPORT_ALERTS: "true"
+  # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly.
+  # Allowed values: "true"/"yes", "false"/"no"
   SELF_MONITORING_ENABLED: "false"
 
 ---
@@ -104,15 +107,15 @@ spec:
               name: dynatrace-gcp-function-config
               key: IMPORT_ALERTS
         - name: HTTP_PROXY
-            valueFrom:
-              configMapKeyRef:
-                name: dynatrace-gcp-function-config
-                key: HTTP_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: HTTP_PROXY
         - name: HTTPS_PROXY
-            valueFrom:
-              configMapKeyRef:
-                name: dynatrace-gcp-function-config
-                key: HTTPS_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: HTTPS_PROXY
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
         - name: DYNATRACE_URL_SECRET_NAME

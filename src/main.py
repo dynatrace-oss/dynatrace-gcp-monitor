@@ -102,10 +102,8 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
 
-        print_metric_ingest_input = \
-            "PRINT_METRIC_INGEST_INPUT" in os.environ and os.environ["PRINT_METRIC_INGEST_INPUT"].upper() == "TRUE"
-
-        self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "False").upper() == "TRUE"
+        print_metric_ingest_input = os.environ.get("PRINT_METRIC_INGEST_INPUT", "FALSE").upper() in ["TRUE", "YES"]
+        self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
 
         context = MetricsContext(
             gcp_session=gcp_session,
