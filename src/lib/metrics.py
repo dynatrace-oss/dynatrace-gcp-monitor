@@ -138,11 +138,11 @@ class GCPService:
         ])
         object.__setattr__(self, "activation", kwargs.get("activation", {}))
         monitoring_filter = kwargs.get("gcp_monitoring_filter", "")
-        if monitoring_filter == "var:filter_conditions":
-            object.__setattr__(self, "monitoring_filter", self.activation.get("vars", {}).get("filter_conditions", ""))
-        else:
-            object.__setattr__(self, "monitoring_filter", monitoring_filter)
-
+        if self.activation:
+            for var_key, var_value in self.activation.get("vars", {}).items():
+                monitoring_filter = monitoring_filter.replace(f'{{{var_key}}}', var_value)\
+                    .replace(f'var:{var_key}', var_value)
+        object.__setattr__(self, "monitoring_filter", monitoring_filter)
 
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'
