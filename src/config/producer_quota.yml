@@ -11,6 +11,7 @@ technology:
 gcp:
 - service: producer_quota
   featureSet: default
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -11,6 +11,7 @@ vars:
 gcp:
 - service: apigee.googleapis.com/Environment
   featureSet: default
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.resource_container
     id: resource_container
