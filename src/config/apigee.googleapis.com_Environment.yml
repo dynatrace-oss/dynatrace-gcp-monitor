@@ -4,6 +4,10 @@ version: 0.0.1
 technology:
   name: Google Apigee Environment
 minDynatraceVersion: 1.199
+vars:
+ - id: filter_conditions
+   displayName: Metric query filter for which metrics should be queried
+   type: variables
 gcp:
 - service: apigee.googleapis.com/Environment
   featureSet: default

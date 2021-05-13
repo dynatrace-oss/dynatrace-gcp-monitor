@@ -2,11 +2,16 @@ id: bigquery_biengine_model
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
+vars:
+ - id: filter_conditions
+   displayName: Metric query filter for which metrics should be queried
+   type: variables
 technology:
   name: Google Cloud BigQuery BI Engine Model
 gcp:
 - service: bigquery_biengine_model
   featureSet: default
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
     id: project_id
