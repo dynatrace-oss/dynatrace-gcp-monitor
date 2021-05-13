@@ -280,7 +280,7 @@ else
     gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
 fi
 
-if [ "${IMPORT_DASHBOARDS,,}" != "no" ] ; then
+if [[ "${IMPORT_DASHBOARDS,,}" =~ ^(yes|true)$ ]] ; then
   EXISTING_DASHBOARDS=$(dt_api "api/config/v1/dashboards" | jq -r '.dashboards[].name | select (. |contains("Google"))')
   if [ -n "${EXISTING_DASHBOARDS}" ]; then
       warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_DASHBOARDS"
@@ -309,7 +309,7 @@ else
   echo "Dashboards import disabled"
 fi
 
-if [ "${IMPORT_ALERTS,,}" != "no" ] ; then
+if [[ "${IMPORT_ALERTS,,}" =~ ^(yes|true)$ ]]; then
   EXISTING_ALERTS=$(dt_api "api/config/v1/anomalyDetection/metricEvents"| jq -r '.values[] | select (.id |startswith("cloud.gcp.")) | (.id + "\t" + .name )')
   if [ -n "${EXISTING_ALERTS}" ]; then
       warn "Found existing Google alerts in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"

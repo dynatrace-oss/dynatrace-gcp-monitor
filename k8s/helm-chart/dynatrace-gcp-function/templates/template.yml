@@ -11,13 +11,19 @@ metadata:
   name: dynatrace-gcp-function-config
   namespace: dynatrace
 data:
+  REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
+  SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}
+  {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
   GCP_SERVICES: {{ .Values.gcpServices | quote }}
   PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
-  REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
   SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
   USE_PROXY: {{ .Values.useProxy | quote }}
   HTTP_PROXY: {{ .Values.httpProxy | quote }}
   HTTPS_PROXY: {{ .Values.httpsProxy | quote }}
+  IMPORT_DASHBOARDS: {{ .Values.importDashboards | quote }}
+  IMPORT_ALERTS: {{ .Values.importAlerts | quote }}
+  {{- end }}
+  {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
   LOGS_SUBSCRIPTION_PROJECT: {{ .Values.logsSubscriptionProject | quote }}
   LOGS_SUBSCRIPTION_ID: {{ .Values.logsSubscriptionId | quote }}
   DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH: {{ .Values.logIngestContentMaxLength | quote }}
@@ -25,7 +31,7 @@ data:
   DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS: {{ .Values.logIngestRequestMaxEvents | quote }}
   DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
-  SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}
+  {{- end }}
 
 ---
 apiVersion: v1

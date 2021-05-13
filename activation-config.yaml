@@ -1,6 +1,6 @@
 # Debug properties for Dynatrace Cloud Function
 debug:  
-  # if true will print full MINT ingest input
+  # if true will print full MINT ingest input. Allowed values: true/yes, false/no
   printMetricIngestInput: false 
 googleCloud:
   common:
@@ -17,17 +17,19 @@ googleCloud:
     cloudFunctionSize: s 
     # Require valid SSL certificate when communicating with Dynatrace Cluster / Active Gate
     # May be set to false in case communication through Active Gate is debugged, for non-production use cases
+    # Allowed values: true/yes, false/no
     requireValidCertificate: true
     # Determines a caller-specified project for quota and billing purposes 
     # if set to source: monitoring API calls are booked towards project where K8S container is running
     # if set to destination: monitoring API calls are booked towards project which is monitored
     # REQUIRES serviceusage.services.use Permission granted for Service Account!
     serviceUsageBooking: source
-    # Import predefined dashboards for selected services (yes/no)
-    importDashboards: yes
-    # Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services (yes/inactive/no)
-    importAlerts: yes
-    # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. [true/false]
+    # Import predefined dashboards for selected services. Allowed values: true/yes, false/no
+    importDashboards: true
+    # Import predefined alerts for selected services. Allowed values: true/yes, false/no
+    importAlerts: true
+    # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly.
+    # Allowed values: true/yes, false/no
     selfMonitoringEnabled: false
   metrics:
     # Name of the Pub/Sub topic for metric function

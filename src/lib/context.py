@@ -32,7 +32,7 @@ def get_int_environment_value(key: str, default_value: int) -> int:
 
 
 def get_should_require_valid_certificate() -> bool:
-    return os.environ.get("REQUIRE_VALID_CERTIFICATE", "True") in ["True", "T", "true"]
+    return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
 
 
 class LoggingContext:

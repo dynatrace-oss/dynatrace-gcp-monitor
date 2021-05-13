@@ -96,7 +96,7 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Que
 
 async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_session: aiohttp.ClientSession(), instance_metadata: InstanceMetadata):
     dynatrace_url = get_dynatrace_log_ingest_url_from_env()
-    self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "False").upper() == "TRUE"
+    self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
     token = await create_token(context, gcp_session)
     container_name = instance_metadata.hostname if instance_metadata else "local deployment"
     zone = instance_metadata.zone if instance_metadata else "us-east1"

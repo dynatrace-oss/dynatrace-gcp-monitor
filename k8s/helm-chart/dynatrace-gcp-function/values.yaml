@@ -3,28 +3,31 @@
 # if set to metrics - deploy only one container to send GCP metrics to Dynatrace
 # if set to logs - deploy only one container to send GCP logs to Dynatrace
 # if set to all - deploy two containers to send GCP metrics and logs to Dynatrace
-deploymentType: all
+deploymentType: "all"
 # requireValidCertificate: if true function requires valid SSL certificates when communicating with Dynatrace cluster
-# may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate
-requireValidCertificate: true
+# may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate.
+# Allowed values: "true"/"yes", "false"/"no"
+requireValidCertificate: "true"
 # Dynatrace API token with permissions:
 # 'Ingest logs' for deployment type 'all' or'logs'
 # 'Ingest metrics', 'Read configuration', 'Write configuration' for deployment type 'all' or 'metrics'
 dynatraceAccessKey: ""
-# Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics/logs to Dynatrace properly. [true/false]
-selfMonitoringEnabled: false
+# Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics/logs to Dynatrace properly.
+# Allowed values: "true"/"yes", "false"/"no"
+selfMonitoringEnabled: "false"
 
 
 # METRICS VALUES
 # gcpServices: coma separated list of GCP services, which should be queried for metrics and ingested into Dynatrace
-gcpServices: api,cloud_function,cloudsql_database,datastore_request,filestore_instance,gcs_bucket,https_lb_rule,internal_http_lb_rule,internal_tcp_lb_rule,internal_udp_lb_rule,tcp_lb_rule,udp_lb_rule,pubsub_snapshot,pubsub_subscription,pubsub_topic,pubsublite_topic_partition,k8s_pod,k8s_node,k8s_container,k8s_cluster,gce_instance
+gcpServices: "api,cloud_function,cloudsql_database,datastore_request,filestore_instance,gcs_bucket,https_lb_rule,internal_http_lb_rule,internal_tcp_lb_rule,internal_udp_lb_rule,tcp_lb_rule,udp_lb_rule,pubsub_snapshot,pubsub_subscription,pubsub_topic,pubsublite_topic_partition,k8s_pod,k8s_node,k8s_container,k8s_cluster,gce_instance"
 # printMetricIngestInput: if true function will output lines of metrics into stdout
-printMetricIngestInput: false
+# Allowed values: "true"/"yes", "false"/"no"
+printMetricIngestInput: "false"
 # serviceUsageBooking determines a caller-specified project for quota and billing purposes
 # if set to source: monitoring API calls are booked towards project where K8S container is running
 # if set to destination: monitoring API calls are booked towards project which is monitored
 # REQUIRES serviceusage.services.use Permission granted for Service Account!
-serviceUsageBooking: source
+serviceUsageBooking: "source"
 # Dynatrace environment endpoint, for example: https://environment-id.live.dynatrace.com
 dynatraceUrl: ""
 # useProxy: depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
@@ -37,6 +40,10 @@ useProxy: ""
 httpProxy: ""
 # httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
 httpsProxy: ""
+# Import predefined dashboards for selected services. Allowed values: "true"/"yes", "false"/"no"
+importDashboards: "true"
+# Import predefined alerting rules (inactive by default) for selected services. Allowed values: "true"/"yes", "false"/"no"
+importAlerts: "true"
 
 # LOGS VALUES
 # ActiveGate endpoint used to ingest logs to Dynatrace, for example: https://environemnt-active-gate-url:9999/e/environment-id"
