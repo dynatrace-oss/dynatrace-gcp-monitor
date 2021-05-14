@@ -26,6 +26,7 @@ data:
   DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
   SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}
+  GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
 
 ---
 apiVersion: v1
@@ -61,6 +62,15 @@ spec:
     spec:
       serviceAccountName: dynatrace-gcp-function-sa
       automountServiceAccountToken: false
+      {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
+      volumes:
+      - name: gcp-config
+        configMap:
+          name: dynatrace-gcp-function-config
+          items:
+          - key: GCP_SERVICES_YAML
+            path: "gcp_services.yaml"
+      {{- end }}
       containers:
       {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
       - image: dynatrace/dynatrace-gcp-function
@@ -125,6 +135,10 @@ spec:
               key: SELF_MONITORING_ENABLED
         - name: HEALTH_CHECK_PORT
           value: "8080"
+        volumeMounts:
+        - mountPath: /code/config/activation
+          readOnly: true
+          name: gcp-config
         resources:
           requests:
             memory: "256Mi"
