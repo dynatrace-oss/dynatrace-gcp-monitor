@@ -28,6 +28,8 @@ export_labels_regex = re.compile(
     r"^projects\/([\w,-]*)\/zones\/([\w,-.]*)/instances$"
 )
 
+_GCP_COMPUTE_ENDPOINT = "https://compute.googleapis.com"
+
 
 def _extract_label(gfun_name: Text, group_index: int) -> Text:
     """Attempt to extract part of gcp function name.
@@ -115,7 +117,7 @@ async def get_cloud_function_entity(ctx: MetricsContext, project_id: str, svc_de
 
     tasks = []
     for zone in zones:
-        url = f"https://compute.googleapis.com/compute/v1/projects/{project_id}/zones/{zone}/instances"
+        url = f"{_GCP_COMPUTE_ENDPOINT}/compute/v1/projects/{project_id}/zones/{zone}/instances"
         mapper_func = partial(_cloud_function_resp_to_monitored_entities, svc_def=svc_def)
         tasks.append(generic_paging(url, ctx, mapper_func))
     results = await asyncio.gather(*tasks, return_exceptions=True)

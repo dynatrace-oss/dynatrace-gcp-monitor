@@ -1,0 +1,2345 @@
+{
+  "timeSeries": [
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "service": "cloudfunctions.googleapis.com",
+          "method": "google.cloud.functions.v1.CloudFunctionsService.ListFunctions",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.31855536691010611,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "service": "cloudresourcemanager.googleapis.com",
+          "method": "google.cloudresourcemanager.v1.Projects.ListProjects",
+          "version": "v1",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.0785266667653611,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.BackendServicesService.Get",
+          "version": "v1",
+          "location": "europe-west1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.20977861688312693,
+              "sumOfSquaredDeviation": 0.00041976670860352874,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1",
+          "method": "compute.v1.BackendServicesService.Get",
+          "service": "compute.googleapis.com",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "4",
+              "mean": 0.1316537208706817,
+              "sumOfSquaredDeviation": 0.0043614234618183914,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "2",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "compute.googleapis.com",
+          "version": "v1",
+          "location": "us-central2",
+          "method": "compute.v1.BackendServicesService.Get",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "7",
+              "mean": 0.13246724326279927,
+              "sumOfSquaredDeviation": 0.0044715585605657106,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "4",
+                "3"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "compute.v1.DisksService.List",
+          "service": "compute.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "3",
+              "mean": 0.13902055000895919,
+              "sumOfSquaredDeviation": 0.0011987480485434448,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central2",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "compute.v1.DisksService.List",
+          "service": "compute.googleapis.com",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.13885554176026738,
+              "sumOfSquaredDeviation": 0.00067036991181426144,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.InstanceGroupManagersService.Get",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1",
+          "location": "europe-west1",
+          "service": "compute.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.2745885998666433,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.InstanceGroupManagersService.Get",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.14579219673376553,
+              "sumOfSquaredDeviation": 0.0016310868228839104,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.InstanceGroupManagersService.Get",
+          "service": "compute.googleapis.com",
+          "version": "v1",
+          "location": "us-central2",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.13287316706238611,
+              "sumOfSquaredDeviation": 0.00075249533252117287,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.InstanceGroupManagersService.List",
+          "location": "us-central1",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "19",
+              "mean": 0.15075748199105413,
+              "sumOfSquaredDeviation": 0.012362252953154506,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "5",
+                "14"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central2",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.InstanceGroupManagersService.List",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "23",
+              "mean": 0.15802345694988593,
+              "sumOfSquaredDeviation": 0.014550448768934658,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "3",
+                "20"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "europe-west1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.InstanceGroupManagersService.ListManagedInstances",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.23254613338326888,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "method": "compute.v1.InstanceGroupManagersService.ListManagedInstances",
+          "service": "compute.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "4",
+              "mean": 0.10426356739727366,
+              "sumOfSquaredDeviation": 0.0020570611437171248,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "3",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central2",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.InstanceGroupManagersService.ListManagedInstances",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "5",
+              "mean": 0.088129288397002653,
+              "sumOfSquaredDeviation": 0.00079165705549366216,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "5"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "compute.v1.InstancesService.List",
+          "service": "compute.googleapis.com",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 16,
+                  "growthFactor": 4,
+                  "scale": 1
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.InstancesService.List",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "location": "us-central2",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 16,
+                  "growthFactor": 4,
+                  "scale": 1
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "location": "europe-west1",
+          "service": "compute.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "compute.v1.ProjectsService.Get"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.283975,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "compute.googleapis.com",
+          "version": "v1",
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "compute.v1.ProjectsService.Get"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.22375299999999998,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "version": "v1",
+          "method": "compute.v1.ProjectsService.Get",
+          "location": "us-central2"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.20311373708522576,
+              "sumOfSquaredDeviation": 0.00066478583990063264,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.RoutesService.List",
+          "service": "compute.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.15051300826554181,
+              "sumOfSquaredDeviation": 0.00047272916065156764,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.RoutesService.List",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "location": "us-central2"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "4",
+              "mean": 0.17772409988045165,
+              "sumOfSquaredDeviation": 0.0014721604873302022,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "4"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "europe-west1",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.SslCertificatesService.Get",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "6",
+              "mean": 0.26701344437254354,
+              "sumOfSquaredDeviation": 0.0010460375805508176,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "3",
+                "3"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "google.datastore.v1.Datastore.BeginTransaction",
+          "location": "us-central1",
+          "service": "datastore.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "3",
+              "mean": 0.020021588193987028,
+              "sumOfSquaredDeviation": 9.3136131602178493e-05,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "datastore.googleapis.com",
+          "method": "google.datastore.v1.Datastore.Commit",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.062644833379288889,
+              "sumOfSquaredDeviation": 9.8827829854860631e-06,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "iamcredentials.googleapis.com",
+          "method": "google.iam.credentials.v1.IAMCredentials.GenerateAccessToken",
+          "location": "us-central1",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.026879999999999998,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "logging.googleapis.com",
+          "method": "google.logging.v2.LoggingServiceV2.WriteLogEntries",
+          "version": "v2",
+          "location": "europe-north1",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "52",
+              "mean": 0.054835705341195695,
+              "sumOfSquaredDeviation": 0.021788508401046198,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "7",
+                "28",
+                "17"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "logging.googleapis.com",
+          "version": "v2",
+          "method": "google.logging.v2.LoggingServiceV2.WriteLogEntries"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "66",
+              "mean": 0.0662915946339069,
+              "sumOfSquaredDeviation": 0.049313834596082969,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "3",
+                "34",
+                "29"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v3",
+          "method": "google.monitoring.v3.AgentTranslationService.CreateCollectdTimeSeries",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "monitoring.googleapis.com",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.024827793106427465,
+              "sumOfSquaredDeviation": 0.00029557849548534693,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "monitoring.googleapis.com",
+          "version": "v3",
+          "location": "europe-north1",
+          "method": "google.monitoring.v3.MetricService.CreateTimeSeries",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "29",
+              "mean": 0.019560729703541033,
+              "sumOfSquaredDeviation": 0.0012115301204821312,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "10",
+                "16",
+                "3"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "monitoring.googleapis.com",
+          "version": "v3",
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "google.monitoring.v3.MetricService.CreateTimeSeries"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "192",
+              "mean": 0.027456897603402895,
+              "sumOfSquaredDeviation": 0.12447569341758442,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1",
+                "32",
+                "124",
+                "30",
+                "2",
+                "2",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "google.monitoring.v3.MetricService.ListMetricDescriptors",
+          "service": "monitoring.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "europe-north1",
+          "version": "v3"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 16,
+                  "growthFactor": 4,
+                  "scale": 1
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "google.monitoring.v3.MetricService.ListMetricDescriptors",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v3",
+          "service": "monitoring.googleapis.com",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.027136399980715,
+              "sumOfSquaredDeviation": 2.3475111796520023e-06,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "monitoring.googleapis.com",
+          "method": "google.monitoring.v3.MetricService.ListTimeSeries",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v3",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "236",
+              "mean": 0.2435134770163023,
+              "sumOfSquaredDeviation": 18.1987501537512,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "15",
+                "26",
+                "33",
+                "43",
+                "116",
+                "0",
+                "1",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "pubsub.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1",
+          "version": "v1",
+          "method": "google.pubsub.v1.Publisher.Publish"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.011912666649127776,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "google.pubsub.v1.Subscriber.ListSubscriptions",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "pubsub.googleapis.com",
+          "version": "v1",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.050844400004323338,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "method": "google.pubsub.v1.Subscriber.StreamingPull",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "pubsub.googleapis.com",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 16,
+                  "growthFactor": 4,
+                  "scale": 1
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "service": "secretmanager.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1",
+          "method": "google.cloud.secretmanager.v1.SecretManagerService.AccessSecretVersion"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "2",
+              "mean": 0.028199349989289167,
+              "sumOfSquaredDeviation": 1.0450710988531748e-05,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "2"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1",
+          "method": "google.cloud.sql.v1beta4.SqlInstancesService.List",
+          "service": "sqladmin.googleapis.com",
+          "version": "v1beta4"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "1",
+              "mean": 0.34602699987819996,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "europe-north1",
+          "method": "google.cloud.stackdriver.v1beta3.ResourceService.PublishResourceMetadata",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "stackdriver.googleapis.com",
+          "version": "v1beta3"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "138",
+              "mean": 0.079649572453088527,
+              "sumOfSquaredDeviation": 4.2763518861153687,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "16",
+                "73",
+                "29",
+                "1",
+                "0",
+                "2",
+                "7",
+                "10"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "serviceruntime.googleapis.com/api/request_latencies"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "stackdriver.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "google.cloud.stackdriver.v1beta3.ResourceService.PublishResourceMetadata",
+          "version": "v1beta3",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DISTRIBUTION",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "distributionValue": {
+              "count": "699",
+              "mean": 0.089425018826312277,
+              "sumOfSquaredDeviation": 24.697564404374468,
+              "bucketOptions": {
+                "exponentialBuckets": {
+                  "numFiniteBuckets": 29,
+                  "growthFactor": 2,
+                  "scale": 1e-06
+                }
+              },
+              "bucketCounts": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "65",
+                "358",
+                "170",
+                "5",
+                "0",
+                "2",
+                "35",
+                "64"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "unit": "s"
+}

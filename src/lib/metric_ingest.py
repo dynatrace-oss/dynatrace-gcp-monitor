@@ -11,6 +11,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import json
 import os
 import time
 from datetime import timezone, datetime
@@ -26,6 +27,8 @@ from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING,
 UNIT_10TO2PERCENT = "10^2.%"
 MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
 MAX_DIMENSION_VALUE_LENGTH = os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
+
+_MONITORING_ROOT = "https://monitoring.googleapis.com/v3"
 
 
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
@@ -160,7 +163,7 @@ async def fetch_metric(
     while should_fetch:
         context.gcp_metric_request_count[project_id] = context.gcp_metric_request_count.get(project_id, 0) + 1
 
-        url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/timeSeries"
+        url = f"{_MONITORING_ROOT}/projects/{project_id}/timeSeries"
         resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body

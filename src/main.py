@@ -77,11 +77,11 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
     if "GCP_SERVICES" in os.environ:
         selected_services_string = os.environ.get("GCP_SERVICES", "")
         selected_services = selected_services_string.split(",") if selected_services_string else []
-        #set default featureset if featureset not present in env variable
+        # set default featureset if featureset not present in env variable
         for i, service in enumerate(selected_services):
             if "/" not in service:
-                selected_services[i]=f"{service}/default"
-    
+                selected_services[i] = f"{service}/default"
+
     services = load_supported_services(context, selected_services)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -209,11 +209,11 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
 
     skipped_services = []
-    for service in services:   
-        if service in topology_task_services:                
+    for service in services:
+        if service in topology_task_services:
             service_topology = fetch_topology_results[topology_task_services.index(service)]
             if not service_topology:
-                skipped_services.append(service.name)
+                skipped_services.append(f"{service.name}/{service.feature_set}")
                 continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
             fetch_metric_task = run_fetch_metric(
@@ -270,7 +270,7 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
             continue
     featureSets = [f"{service.name}/{service.feature_set}" for service in services]
-    context.log("Selected feature sets: " + ",".join(featureSets))
+    context.log("Selected feature sets: " + ", ".join(featureSets))
     return services
 
 

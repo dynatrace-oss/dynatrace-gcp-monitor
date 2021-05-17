@@ -18,6 +18,8 @@ from typing import Any, Callable, Dict, List, Text
 from lib.context import MetricsContext
 from lib.entities.model import Entity
 
+_GCP_COMPUTE_ENDPOINT = "https://compute.googleapis.com"
+
 
 async def fetch_zones(
         context: MetricsContext,
@@ -31,7 +33,7 @@ async def fetch_zones(
     resp = await context.gcp_session.request(
         "GET",
         params={},
-        url=f"https://compute.googleapis.com/compute/v1/projects/{project_id}/zones",
+        url=f"{_GCP_COMPUTE_ENDPOINT}/compute/v1/projects/{project_id}/zones",
         headers=headers,
         raise_for_status=True
     )

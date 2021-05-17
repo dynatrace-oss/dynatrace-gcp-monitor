@@ -1,0 +1,57 @@
+{
+  "timeSeries": [
+    {
+      "metric": {
+        "type": "cloudsql.googleapis.com/database/cpu/utilization"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "database_id": "dynatrace-gcp-extension:pawel-001-mysql",
+          "project_id": "dynatrace-gcp-extension",
+          "region": "europe-north1"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0.029568277777782842
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "cloudsql.googleapis.com/database/cpu/utilization"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "database_id": "dynatrace-gcp-extension:pawel-001-pgsql",
+          "region": "europe-west3",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0.026627666666657508
+          }
+        }
+      ]
+    }
+  ],
+  "unit": "10^2.%"
+}

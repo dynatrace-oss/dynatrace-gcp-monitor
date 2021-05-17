@@ -1,0 +1,34 @@
+{
+  "id": "d53f284f-f5ef-4b24-b6ec-b44d5241ec3f",
+  "request": {
+    "url": "/token",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "contains": "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion="
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "gcp-login-token.json",
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8",
+      "Vary": [
+        "Origin",
+        "X-Origin",
+        "Referer"
+      ],
+      "Date": "Sun, 25 Apr 2021 19:59:27 GMT",
+      "Server": "scaffolding on HTTPServer2",
+      "Cache-Control": "private",
+      "X-XSS-Protection": "0",
+      "X-Frame-Options": "SAMEORIGIN",
+      "X-Content-Type-Options": "nosniff",
+      "Alt-Svc": "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
+    }
+  },
+  "uuid": "d53f284f-f5ef-4b24-b6ec-b44d5241ec3f",
+  "persistent": true,
+  "insertionIndex": 10
+}

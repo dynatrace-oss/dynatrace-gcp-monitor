@@ -1,0 +1,38 @@
+{
+  "id": "0f4df28b-afae-43e2-be38-e8e02e17ff7b",
+  "name": "v3_projects_dynatrace-gcp-extension_timeseries",
+  "request": {
+    "method": "GET",
+    "urlPath": "/v3/projects/dynatrace-gcp-extension/timeSeries",
+    "queryParameters": {
+      "filter": {
+        "contains": "cloudsql.googleapis.com/database/disk/bytes_used"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "bodyFileName": "cloudsql.googleapis.com.database.disk.bytes_used.json",
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8",
+      "Vary": [
+        "Origin",
+        "X-Origin",
+        "Referer"
+      ],
+      "Date": "Mon, 10 May 2021 22:13:21 GMT",
+      "Server": "ESF",
+      "Cache-Control": "private",
+      "X-XSS-Protection": "0",
+      "X-Frame-Options": "SAMEORIGIN",
+      "X-Content-Type-Options": "nosniff",
+      "Alt-Svc": "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
+    }
+  },
+  "uuid": "0f4df28b-afae-43e2-be38-e8e02e17ff7b",
+  "persistent": true,
+  "insertionIndex": 10
+}

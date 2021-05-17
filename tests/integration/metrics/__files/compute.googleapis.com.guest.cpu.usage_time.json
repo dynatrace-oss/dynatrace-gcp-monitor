@@ -1,0 +1,3905 @@
+{
+  "timeSeries": [
+    {
+      "metric": {
+        "labels": {
+          "state": "guest",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "europe-north1-a",
+          "instance_id": "5409529029243351278"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "europe-north1-a",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5409529029243351278"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "idle",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5409529029243351278",
+          "zone": "europe-north1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 10615.58744635433
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671",
+          "state": "iowait"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5409529029243351278",
+          "zone": "europe-north1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 1.3224685895065704
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671",
+          "state": "irq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "5409529029243351278",
+          "zone": "europe-north1-a",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671",
+          "state": "nice"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5409529029243351278",
+          "zone": "europe-north1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671",
+          "state": "softirq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "5409529029243351278",
+          "zone": "europe-north1-a",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 13.257277824661287
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671",
+          "state": "steal"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "europe-north1-a",
+          "instance_id": "5409529029243351278"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "system",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "europe-north1-a",
+          "instance_id": "5409529029243351278",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 408.5108856878942
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "user",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5409529029243351278",
+          "zone": "europe-north1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 712.2173833779525
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k",
+          "state": "guest"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6749453014781046837",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "europe-north1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k",
+          "state": "guest_nice"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "europe-north1-a",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "6749453014781046837"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k",
+          "state": "idle"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "europe-north1-a",
+          "instance_id": "6749453014781046837"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 9997.970206560567
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "iowait",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "europe-north1-a",
+          "instance_id": "6749453014781046837",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 5.910206935488532
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "irq",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "6749453014781046837",
+          "zone": "europe-north1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "nice",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "6749453014781046837",
+          "zone": "europe-north1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "softirq",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6749453014781046837",
+          "zone": "europe-north1-a",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 25.46126458535946
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "steal",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "europe-north1-a",
+          "instance_id": "6749453014781046837"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "system",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "6749453014781046837",
+          "zone": "europe-north1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 450.6322340122424
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "user",
+          "instance_name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6749453014781046837",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "europe-north1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 1206.30104419915
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql",
+          "state": "guest"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-a",
+          "instance_id": "3042948087178370138",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-a",
+          "instance_id": "3042948087178370138",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql",
+          "state": "idle"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3042948087178370138",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11051.228384703398
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "iowait",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "3042948087178370138",
+          "zone": "us-central1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 9.046313278813614
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql",
+          "state": "irq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "3042948087178370138",
+          "zone": "us-central1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "nice",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-a",
+          "instance_id": "3042948087178370138",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 7.317892586484959
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql",
+          "state": "softirq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3042948087178370138",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 10.63578632932331
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "steal",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-a",
+          "instance_id": "3042948087178370138"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 18.99999450732139
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "system",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-a",
+          "instance_id": "3042948087178370138"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 211.95362283289433
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-81ea1019-5gql",
+          "state": "user"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "3042948087178370138",
+          "zone": "us-central1-a"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 607.3977177869529
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f",
+          "state": "guest"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6220236357272902369",
+          "zone": "us-central1-b",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6220236357272902369",
+          "zone": "us-central1-b",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f",
+          "state": "idle"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-b",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "6220236357272902369"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11114.307584390044
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "iowait",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6220236357272902369",
+          "zone": "us-central1-b",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 10.925199714460177
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f",
+          "state": "irq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-b",
+          "instance_id": "6220236357272902369",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "nice",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-b",
+          "instance_id": "6220236357272902369"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 5.024939939976321
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f",
+          "state": "softirq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6220236357272902369",
+          "zone": "us-central1-b",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 6.950132892525289
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "steal",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6220236357272902369",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-b"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 8.975070578526356
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "system",
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6220236357272902369",
+          "zone": "us-central1-b",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 177.07494153408334
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-gke-pawel-003-gke-cl-default-pool-dddba2ed-ha2f",
+          "state": "user"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "6220236357272902369",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-b"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 599.9505784269422
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3",
+          "state": "guest"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "965441735741256437",
+          "zone": "us-central1-b"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-b",
+          "instance_id": "965441735741256437",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "idle",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-b",
+          "instance_id": "965441735741256437",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11143.273016749881
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3",
+          "state": "iowait"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-b",
+          "instance_id": "965441735741256437",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 7.66180721121691
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3",
+          "state": "irq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "965441735741256437",
+          "zone": "us-central1-b"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "nice",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-b",
+          "instance_id": "965441735741256437",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 7.3382231540222165
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "softirq",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "965441735741256437",
+          "zone": "us-central1-b"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 9.3382272027211
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "steal",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-b",
+          "instance_id": "965441735741256437",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 7.66180721121782
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3",
+          "state": "system"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-b",
+          "instance_id": "965441735741256437",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 187.70604637324868
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "user",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-0ceeda43-bmv3"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "965441735741256437",
+          "zone": "us-central1-b",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 575.0011640008888
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww",
+          "state": "guest"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1409405753440689875"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c",
+          "instance_id": "1409405753440689875"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "idle",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "1409405753440689875",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11392.619057357311
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww",
+          "state": "iowait"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "1409405753440689875",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 8.201106647786219
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "irq",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1409405753440689875",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "nice",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1409405753440689875",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 4.399454333513859
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww",
+          "state": "softirq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1409405753440689875",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 5.000004504356184
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "steal",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1409405753440689875",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 10.798910468765825
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww",
+          "state": "system"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "1409405753440689875",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 145.000130626373
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "user",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-a9ww"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "1409405753440689875",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 352.39152338169515
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "1869764395747861235",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1869764395747861235"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "idle",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1869764395747861235"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11250.121344804764
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01",
+          "state": "iowait"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1869764395747861235"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 22.942380317414063
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01",
+          "state": "irq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "1869764395747861235",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "nice",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "instance_id": "1869764395747861235",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01",
+          "state": "softirq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1869764395747861235",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 6.002515200372727
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "steal",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "1869764395747861235",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 7.000009996794688
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01",
+          "state": "system"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1869764395747861235"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 142.98767106165178
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-sv01",
+          "state": "user"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "1869764395747861235"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 494.9731339667924
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88",
+          "state": "guest"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "276299582965113373",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c",
+          "instance_id": "276299582965113373"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "idle",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "276299582965113373",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11508.566560193896
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88",
+          "state": "iowait"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "276299582965113373",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 8.662455747762579
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88",
+          "state": "irq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "instance_id": "276299582965113373",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88",
+          "state": "nice"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "276299582965113373",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "softirq",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "276299582965113373"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 3.4458479608001653
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88",
+          "state": "steal"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "276299582965113373",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 5.554151864009327
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "system",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "276299582965113373",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 121.5667818565853
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "user",
+          "instance_name": "gke-gke-helm-ms-pool-1-8c4a84b4-3c88"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "276299582965113373"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 288.89169043209404
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3016756998650290200",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c",
+          "instance_id": "3016756998650290200"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "idle",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3016756998650290200",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11485.2480224818
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "iowait",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "instance_id": "3016756998650290200",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 14.978113084289362
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "irq",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c",
+          "instance_id": "3016756998650290200"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q",
+          "state": "nice"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3016756998650290200",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 6.000004495770554
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "softirq",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "3016756998650290200"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 4.195623516010528
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q",
+          "state": "steal"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "3016756998650290200",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 10.195628011759254
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "system",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3016756998650290200",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 175.1957516456023
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-1s4q",
+          "state": "user"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3016756998650290200",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 235.45711158704944
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest",
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5137701837569569092",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c",
+          "instance_id": "5137701837569569092"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "idle",
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "instance_id": "5137701837569569092",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 23091.432894289494
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv",
+          "state": "iowait"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "5137701837569569092",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11.880793458760309
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "irq",
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "5137701837569569092",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv",
+          "state": "nice"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5137701837569569092"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "softirq",
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "5137701837569569092",
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 17.05954290032969
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "steal",
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5137701837569569092",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 8.029772762551147
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "system",
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5137701837569569092"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 165.1783294742927
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-mg-logs-docs-test-pool-3-c90a2d40-cfkv",
+          "state": "user"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5137701837569569092"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 619.4154879045673
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5757287055117344993",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8",
+          "state": "guest_nice"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "5757287055117344993",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "idle",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5757287055117344993"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11435.323323741555
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "iowait",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5757287055117344993",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11.697425714344718
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8",
+          "state": "irq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "5757287055117344993",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8",
+          "state": "nice"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c",
+          "instance_id": "5757287055117344993"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 6.330246826757502
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "softirq",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5757287055117344993"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 3.999994345700543
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "steal",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c",
+          "instance_id": "5757287055117344993"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 4.669737623924448
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8",
+          "state": "system"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5757287055117344993"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 154.97208291036077
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "user",
+          "instance_name": "gke-acceptance-gcp-metri-default-pool-400141a4-14p8"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "5757287055117344993",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 329.650812888518
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest",
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "7255539860356293058"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest_nice",
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "7255539860356293058"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "idle",
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "7255539860356293058",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11273.804278180003
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd",
+          "state": "iowait"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "7255539860356293058",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 8.999917131252005
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "irq",
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "7255539860356293058",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd",
+          "state": "nice"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "7255539860356293058",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd",
+          "state": "softirq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-c",
+          "instance_id": "7255539860356293058"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 5.952151285848231
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd",
+          "state": "steal"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-c",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "7255539860356293058"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 12.999880300703808
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd",
+          "state": "system"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "7255539860356293058",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 146.9508530087769
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "user",
+          "instance_name": "gke-gke-helm-ms-default-pool-56e1a146-pjtd"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "7255539860356293058",
+          "zone": "us-central1-c"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 478.3264809846878
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "guest",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-f",
+          "instance_id": "3406478731906233830",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9",
+          "state": "guest_nice"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3406478731906233830",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-f"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9",
+          "state": "idle"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-f",
+          "instance_id": "3406478731906233830",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 11593.266724551097
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "iowait",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-f",
+          "instance_id": "3406478731906233830",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 7.181798325656928
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9",
+          "state": "irq"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3406478731906233830",
+          "zone": "us-central1-f",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 0
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "nice",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-f",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "3406478731906233830"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 4.8181957650856475
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "softirq",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-f",
+          "instance_id": "3406478731906233830"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 2.9999985226854733
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "steal",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-f",
+          "project_id": "dynatrace-gcp-extension",
+          "instance_id": "3406478731906233830"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 3.9999980302472977
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9",
+          "state": "system"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "zone": "us-central1-f",
+          "instance_id": "3406478731906233830",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 126.27255085429351
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "user",
+          "instance_name": "gk3-pgutk-autopilot-clus-default-pool-924ed629-pot9"
+        },
+        "type": "compute.googleapis.com/guest/cpu/usage_time"
+      },
+      "resource": {
+        "type": "gce_instance",
+        "labels": {
+          "instance_id": "3406478731906233830",
+          "project_id": "dynatrace-gcp-extension",
+          "zone": "us-central1-f"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "DOUBLE",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "doubleValue": 188.27269983828592
+          }
+        }
+      ]
+    }
+  ],
+  "unit": "s{CPU}"
+}
