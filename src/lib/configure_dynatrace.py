@@ -6,6 +6,7 @@ from typing import List, Optional, Dict, Callable
 
 import yaml
 from aiohttp import ClientSession
+
 from lib.context import LoggingContext
 from lib.credentials import fetch_dynatrace_url, fetch_dynatrace_api_key
 from lib.fast_check import get_dynatrace_token_metadata
@@ -180,8 +181,8 @@ class ConfigureDynatrace:
         if not has_write_config_permission:
             self.logging_context.log("Missing ReadConfig/WriteConfig permission for Dynatrace API token, skipping dashboards configuration")
         else:
-            dashboards_import = os.environ.get("IMPORT_DASHBOARDS", "yes").lower() != "no"
-            alerts_import = os.environ.get("IMPORT_ALERTS", "yes").lower() != "no"
+            dashboards_import = os.environ.get("IMPORT_DASHBOARDS", "TRUE").upper() in ["TRUE", "YES"]
+            alerts_import = os.environ.get("IMPORT_ALERTS", "TRUE").upper() in ["TRUE", "YES"]
 
             if dashboards_import:
                 await self.import_dashboards(dt_api)
