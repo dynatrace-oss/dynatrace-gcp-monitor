@@ -13,10 +13,13 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-
+import re
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import List, Text, Any, Dict
+
+VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
+VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 
 
 @dataclass(frozen=True)
@@ -142,6 +145,9 @@ class GCPService:
             for var_key, var_value in self.activation.get("vars", {}).items():
                 monitoring_filter = monitoring_filter.replace(f'{{{var_key}}}', var_value)\
                     .replace(f'var:{var_key}', var_value)
+        # remove not matched variables
+        monitoring_filter = VARIABLE_BRACKETS_PATTERN.sub('', monitoring_filter)
+        monitoring_filter = VARIABLE_VAR_PATTERN.sub('', monitoring_filter)
         object.__setattr__(self, "monitoring_filter", monitoring_filter)
 
 
