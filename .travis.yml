@@ -27,9 +27,13 @@ jobs:
         packages:
           - default-jre
     script:
-      - PYTHONPATH="./src" pytest tests/unit -v
-      - PYTHONPATH="./src" pytest tests/integration/metrics -v
-      - PYTHONPATH="./src" pytest tests/integration/logs -v
+      - echo $TRAVIS_BUILD_DIR
+      - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/unit -v
+      - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/integration/logs -v
+      - |
+          cd tests/integration/metrics
+          PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest -v
+
   - stage: docker-build
     name: Docker build
     language: minimal
