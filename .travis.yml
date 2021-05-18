@@ -28,7 +28,8 @@ jobs:
           - default-jre
     script:
       - PYTHONPATH="./src" pytest tests/unit -v
-      - PYTHONPATH="./src" pytest tests/integration -v
+      - PYTHONPATH="./src" pytest tests/integration/metrics -v
+      - PYTHONPATH="./src" pytest tests/integration/logs -v
   - stage: docker-build
     name: Docker build
     language: minimal
