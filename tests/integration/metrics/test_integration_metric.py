@@ -15,7 +15,7 @@
 
 import base64
 import os
-from typing import NewType, Any, Dict
+from typing import NewType, Any, Dict, List
 
 import pytest
 from pytest_mock import MockerFixture
@@ -30,13 +30,10 @@ import lib.entities.extractors.cloud_sql
 import lib.entities.extractors.gce_instance
 import lib.entities.google_api
 import lib.metric_ingest
-from lib.clientsession_provider import init_gcp_client_session
-from lib.context import LoggingContext
-from lib.credentials import fetch_dynatrace_api_key, create_token
 from main import async_dynatrace_gcp_extension
 from assertpy import assert_that
 
-AUTHORIZATION_KEY = b"Fake secret - Open sesame"
+AUTHORIZATION_KEY = "Fake secret - Open sesame"
 METRIC_MESSAGE_DATA = '{}'
 MOCKED_API_PORT = 9182
 
@@ -57,10 +54,7 @@ def setup_test_variables(resource_path_root):
     lib.entities.extractors.cloud_sql._SQL_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
     lib.entities.google_api._GCP_COMPUTE_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
     lib.entities.extractors.gce_instance._GCP_COMPUTE_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
-
-    system_variables.update({
-        'GOOGLE_APPLICATION_CREDENTIALS': f"{resource_path_root}/metrics/token_for_tests.json",
-    })
+    system_variables["GOOGLE_APPLICATION_CREDENTIALS"] = f"{resource_path_root}/metrics/token_for_tests.json"
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -85,7 +79,6 @@ def clean_journal():
 def setup_wiremock():
     # setup WireMock server
 
-    wiremock = None
     Config.base_url = 'http://localhost:{}/__admin'.format(MOCKED_API_PORT)
 
     wiremock = WireMockServer(port=MOCKED_API_PORT)
@@ -113,17 +106,8 @@ async def test_metric_authorization_header():
     assert_that(matched_request).is_not_empty()
 
     result: RequestResponseRequest = matched_request.requests[0]
-    api_key = await get_dynatrace_secret_api_key()
 
-    assert_that(result.headers['Authorization']).is_equal_to(f"Api-Token {api_key}")
-
-
-async def get_dynatrace_secret_api_key():
-    context = LoggingContext(None)
-    async with init_gcp_client_session() as gcp_session:
-        token = await create_token(context, gcp_session)
-        return await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id="dynatrace-gcp-extension",
-                                             token=token)
+    assert_that(result.headers['Authorization']).is_equal_to(f"Api-Token {AUTHORIZATION_KEY}")
 
 
 @pytest.mark.asyncio
@@ -141,12 +125,7 @@ async def test_ingest_lines_output(resource_path_root):
     body = result.body
 
     with open(os.path.join(resource_path_root, "metrics/ingest_input.dat")) as ingest:
-        assert_that(ingest.readlines()).is_length(289)
-        ingest.seek(0)
         recorded_ingest = ingest.read()
+
+        assert_that(body.split("\n")).is_length(289)
         assert_that(body).is_equal_to(recorded_ingest)
-
-
-def create_authorization_payload():
-    payload_text = base64.b64encode(AUTHORIZATION_KEY)
-    print(payload_text)
