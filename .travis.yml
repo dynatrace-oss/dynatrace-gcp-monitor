@@ -30,6 +30,8 @@ jobs:
       - echo $TRAVIS_BUILD_DIR
       - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/unit -v
       - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/integration/logs -v
+#       The cd is executed due to the fact that the wiremock instance initialized in the test is using
+#       the mappings (folder mappings) and the files ( __files) in the current execution dir.
       - |
           cd tests/integration/metrics
           PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest -v
