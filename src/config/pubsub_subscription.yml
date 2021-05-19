@@ -8,14 +8,9 @@ vars:
    type: variables
 technology:
   name: Google Cloud Pub/Sub Subscription
-vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
 gcp:
 - service: pubsub_subscription
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
   gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
