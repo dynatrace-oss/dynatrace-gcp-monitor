@@ -142,7 +142,7 @@ class GCPService:
         object.__setattr__(self, "activation", kwargs.get("activation", {}))
         monitoring_filter = kwargs.get("gcp_monitoring_filter", "")
         if self.activation:
-            for var_key, var_value in self.activation.get("vars", {}).items():
+            for var_key, var_value in (self.activation.get("vars", {}) or {}).items():
                 monitoring_filter = monitoring_filter.replace(f'{{{var_key}}}', var_value)\
                     .replace(f'var:{var_key}', var_value)
         # remove not matched variables
