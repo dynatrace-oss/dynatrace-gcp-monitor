@@ -135,7 +135,7 @@ async def fetch_metric(
         aligner = 'ALIGN_DELTA'
 
     params = [
-        ('filter', f'metric.type = "{metric.google_metric}"'),
+        ('filter', f'metric.type = "{metric.google_metric}" {service.monitoring_filter}'.strip()),
         ('interval.startTime', start_time.isoformat() + "Z"),
         ('interval.endTime', end_time.isoformat() + "Z"),
         ('aggregation.alignmentPeriod', f"{metric.sample_period_seconds.total_seconds()}s"),

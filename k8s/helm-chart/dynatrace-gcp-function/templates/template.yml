@@ -22,6 +22,7 @@ data:
   HTTPS_PROXY: {{ .Values.httpsProxy | quote }}
   IMPORT_DASHBOARDS: {{ .Values.importDashboards | quote }}
   IMPORT_ALERTS: {{ .Values.importAlerts | quote }}
+  GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
   {{- end }}
   {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
   LOGS_SUBSCRIPTION_PROJECT: {{ .Values.logsSubscriptionProject | quote }}
@@ -67,6 +68,15 @@ spec:
     spec:
       serviceAccountName: dynatrace-gcp-function-sa
       automountServiceAccountToken: false
+      {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
+      volumes:
+      - name: gcp-config
+        configMap:
+          name: dynatrace-gcp-function-config
+          items:
+          - key: GCP_SERVICES_YAML
+            path: "gcp_services.yaml"
+      {{- end }}
       containers:
       {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
       - image: dynatrace/dynatrace-gcp-function
@@ -131,6 +141,10 @@ spec:
               key: SELF_MONITORING_ENABLED
         - name: HEALTH_CHECK_PORT
           value: "8080"
+        volumeMounts:
+        - mountPath: /code/config/activation
+          readOnly: true
+          name: gcp-config
         resources:
           requests:
             memory: "256Mi"
