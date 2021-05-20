@@ -1,0 +1,394 @@
+{
+  "id": "projects/dynatrace-gcp-extension/zones/europe-north1-a/instances",
+  "items": [
+    {
+      "id": "5409529029243351278",
+      "creationTimestamp": "2021-05-11T16:06:42.110-07:00",
+      "name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671",
+      "tags": {
+        "items": [
+          "gke-pawel-001-k8s-cluser-6e6f6105-node"
+        ],
+        "fingerprint": "thumb"
+      },
+      "machineType": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a/machineTypes/n1-standard-2",
+      "status": "RUNNING",
+      "zone": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a",
+      "canIpForward": true,
+      "networkInterfaces": [
+        {
+          "network": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/global/networks/pawel-001-vpc",
+          "subnetwork": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/regions/europe-north1/subnetworks/k8s-subnet",
+          "networkIP": "8.8.8.33",
+          "name": "nic0",
+          "accessConfigs": [
+            {
+              "type": "ONE_TO_ONE_NAT",
+              "name": "external-nat",
+              "natIP": "8.8.8.8",
+              "networkTier": "PREMIUM",
+              "kind": "compute#accessConfig"
+            }
+          ],
+          "aliasIpRanges": [
+            {
+              "ipCidrRange": "8.8.8.0/24",
+              "subnetworkRangeName": "gke-pawel-001-k8s-cluser-pods-6e6f6105"
+            }
+          ],
+          "fingerprint": "look at your index",
+          "kind": "compute#networkInterface"
+        }
+      ],
+      "disks": [
+        {
+          "type": "PERSISTENT",
+          "mode": "READ_WRITE",
+          "source": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a/disks/gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671",
+          "deviceName": "persistent-disk-0",
+          "index": 0,
+          "boot": true,
+          "autoDelete": true,
+          "licenses": [
+            "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/licenses/cos",
+            "https://www.googleapis.com/compute/v1/projects/cos-cloud-shielded/global/licenses/shielded-cos",
+            "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/licenses/cos-pcid",
+            "https://www.googleapis.com/compute/v1/projects/gke-node-images/global/licenses/gke-node"
+          ],
+          "interface": "SCSI",
+          "guestOsFeatures": [
+            {
+              "type": "VIRTIO_SCSI_MULTIQUEUE"
+            },
+            {
+              "type": "SEV_CAPABLE"
+            },
+            {
+              "type": "UEFI_COMPATIBLE"
+            },
+            {
+              "type": "SECURE_BOOT"
+            }
+          ],
+          "diskSizeGb": "100",
+          "shieldedInstanceInitialState": {
+            "pk": {
+              "content": "this pk",
+              "fileType": "X509"
+            },
+            "keks": [
+              {
+                "content": "that key",
+                "fileType": "X509"
+              }
+            ],
+            "dbs": [
+              {
+                "content": "oh the db",
+                "fileType": "X509"
+              }
+            ],
+            "dbxs": [
+              {
+                "content": "what's x stand for?",
+                "fileType": "X509"
+              }
+            ]
+          },
+          "kind": "compute#attachedDisk"
+        }
+      ],
+      "metadata": {
+        "fingerprint": "the one on pinky",
+        "items": [
+          {
+            "key": "instance-template",
+            "value": "projects/125992521190/global/instanceTemplates/gke-pawel-001-k8s-cluser-pool-1-e9af64cb"
+          },
+          {
+            "key": "created-by",
+            "value": "projects/125992521190/zones/europe-north1-a/instanceGroupManagers/gke-pawel-001-k8s-cluser-pool-1-300a62b1-grp"
+          },
+          {
+            "key": "serial-port-logging-enable",
+            "value": "true"
+          },
+          {
+            "key": "kube-labels",
+            "value": "cloud.google.com/gke-nodepool=pool-1,cloud.google.com/gke-os-distribution=cos,cloud.google.com/machine-family=n1,node.kubernetes.io/masq-agent-ds-ready=true,projectcalico.org/ds-ready=true"
+          },
+          {
+            "key": "google-compute-enable-pcid",
+            "value": "true"
+          },
+          {
+            "key": "enable-oslogin",
+            "value": "false"
+          },
+          {
+            "key": "kubelet-config",
+            "value": "some config that's not here"
+          },
+          {
+            "key": "cluster-name",
+            "value": "pawel-001-k8s-cluser"
+          },
+          {
+            "key": "gci-update-strategy",
+            "value": "update_disabled"
+          },
+          {
+            "key": "gci-metrics-enabled",
+            "value": "true"
+          },
+          {
+            "key": "configure-sh",
+            "value": "some missing script"
+          },
+          {
+            "key": "gci-ensure-gke-docker",
+            "value": "true"
+          },
+          {
+            "key": "disable-legacy-endpoints",
+            "value": "true"
+          }
+
+        ],
+        "kind": "compute#metadata"
+      },
+      "serviceAccounts": [
+        {
+          "email": "a@developer.gserviceaccount.com",
+          "scopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/trace.append"
+          ]
+        }
+      ],
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a/instances/gke-pawel-001-k8s-cluser-pool-1-300a62b1-7671",
+      "scheduling": {
+        "onHostMaintenance": "MIGRATE",
+        "automaticRestart": true,
+        "preemptible": false
+      },
+      "cpuPlatform": "Intel Skylake",
+      "labels": {
+        "goog-gke-node": "",
+        "environment": "demo-wordpress",
+        "owner": "pawelsiwek"
+      },
+      "labelFingerprint": "a",
+      "startRestricted": false,
+      "deletionProtection": false,
+      "shieldedInstanceConfig": {
+        "enableSecureBoot": false,
+        "enableVtpm": true,
+        "enableIntegrityMonitoring": true
+      },
+      "shieldedInstanceIntegrityPolicy": {
+        "updateAutoLearnPolicy": true
+      },
+      "fingerprint": "pinky",
+      "lastStartTimestamp": "2021-05-11T16:06:51.483-07:00",
+      "kind": "compute#instance"
+    },
+    {
+      "id": "6749453014781046837",
+      "creationTimestamp": "2021-05-11T16:10:19.334-07:00",
+      "name": "gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k",
+      "tags": {
+        "items": [
+          "gke-pawel-001-k8s-cluser-6e6f6105-node"
+        ],
+        "fingerprint": "a="
+      },
+      "machineType": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a/machineTypes/n1-standard-2",
+      "status": "RUNNING",
+      "zone": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a",
+      "canIpForward": true,
+      "networkInterfaces": [
+        {
+          "network": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/global/networks/pawel-001-vpc",
+          "subnetwork": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/regions/europe-north1/subnetworks/k8s-subnet",
+          "networkIP": "8.8.8.33",
+          "name": "nic0",
+          "accessConfigs": [
+
+          ],
+          "aliasIpRanges": [
+
+          ],
+          "fingerprint": "index",
+          "kind": "compute#networkInterface"
+        }
+      ],
+      "disks": [
+        {
+          "type": "PERSISTENT",
+          "mode": "READ_WRITE",
+          "source": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a/disks/gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k",
+          "deviceName": "persistent-disk-0",
+          "index": 0,
+          "boot": true,
+          "autoDelete": true,
+          "licenses": [
+            "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/licenses/cos",
+            "https://www.googleapis.com/compute/v1/projects/cos-cloud-shielded/global/licenses/shielded-cos",
+            "https://www.googleapis.com/compute/v1/projects/cos-cloud/global/licenses/cos-pcid",
+            "https://www.googleapis.com/compute/v1/projects/gke-node-images/global/licenses/gke-node"
+          ],
+          "interface": "SCSI",
+          "guestOsFeatures": [
+            {
+              "type": "VIRTIO_SCSI_MULTIQUEUE"
+            },
+            {
+              "type": "SEV_CAPABLE"
+            },
+            {
+              "type": "UEFI_COMPATIBLE"
+            },
+            {
+              "type": "SECURE_BOOT"
+            }
+          ],
+          "diskSizeGb": "100",
+          "shieldedInstanceInitialState": {
+            "pk": {
+
+            },
+            "keks": [
+
+            ],
+            "dbs": [
+
+            ],
+            "dbxs": [
+             ]
+          },
+          "kind": "compute#attachedDisk"
+        }
+      ],
+      "metadata": {
+        "fingerprint": "d=",
+        "items": [
+          {
+            "key": "instance-template",
+            "value": "projects/125992521190/global/instanceTemplates/gke-pawel-001-k8s-cluser-pool-1-e9af64cb"
+          },
+          {
+            "key": "created-by",
+            "value": "projects/125992521190/zones/europe-north1-a/instanceGroupManagers/gke-pawel-001-k8s-cluser-pool-1-300a62b1-grp"
+          },
+          {
+            "key": "serial-port-logging-enable",
+            "value": "true"
+          },
+          {
+            "key": "kube-labels",
+            "value": "cloud.google.com/gke-nodepool=pool-1,cloud.google.com/gke-os-distribution=cos,cloud.google.com/machine-family=n1,node.kubernetes.io/masq-agent-ds-ready=true,projectcalico.org/ds-ready=true"
+          },
+          {
+            "key": "google-compute-enable-pcid",
+            "value": "true"
+          },
+          {
+            "key": "enable-oslogin",
+            "value": "false"
+          },
+          {
+            "key": "kubelet-config",
+            "value": "empty"
+          },
+          {
+            "key": "cluster-name",
+            "value": "pawel-001-k8s-cluser"
+          },
+          {
+            "key": "gci-update-strategy",
+            "value": "update_disabled"
+          },
+          {
+            "key": "gci-metrics-enabled",
+            "value": "true"
+          },
+          {
+            "key": "configure-sh",
+            "value": "configure me"
+          },
+          {
+            "key": "gci-ensure-gke-docker",
+            "value": "true"
+          },
+          {
+            "key": "disable-legacy-endpoints",
+            "value": "true"
+          },
+          {
+            "key": "user-data",
+            "value": "RODO"
+          },
+          {
+            "key": "kube-env",
+            "value": "?"
+          },
+          {
+            "key": "cluster-uid",
+            "value": "the id"
+          },
+          {
+            "key": "cluster-location",
+            "value": "europe-north1-a"
+          }
+        ],
+        "kind": "compute#metadata"
+      },
+      "serviceAccounts": [
+        {
+          "email": "1-compute@developer.gserviceaccount.com",
+          "scopes": [
+            "https://www.googleapis.com/auth/devstorage.read_only",
+            "https://www.googleapis.com/auth/logging.write",
+            "https://www.googleapis.com/auth/monitoring",
+            "https://www.googleapis.com/auth/servicecontrol",
+            "https://www.googleapis.com/auth/service.management.readonly",
+            "https://www.googleapis.com/auth/trace.append"
+          ]
+        }
+      ],
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a/instances/gke-pawel-001-k8s-cluser-pool-1-300a62b1-cr3k",
+      "scheduling": {
+        "onHostMaintenance": "MIGRATE",
+        "automaticRestart": true,
+        "preemptible": false
+      },
+      "cpuPlatform": "Intel Skylake",
+      "labels": {
+        "owner": "pawelsiwek",
+        "goog-gke-node": "",
+        "environment": "demo-wordpress"
+      },
+      "labelFingerprint": "r=",
+      "startRestricted": false,
+      "deletionProtection": false,
+      "shieldedInstanceConfig": {
+        "enableSecureBoot": false,
+        "enableVtpm": true,
+        "enableIntegrityMonitoring": true
+      },
+      "shieldedInstanceIntegrityPolicy": {
+        "updateAutoLearnPolicy": true
+      },
+      "fingerprint": "s=",
+      "lastStartTimestamp": "2021-05-11T16:10:28.426-07:00",
+      "kind": "compute#instance"
+    }
+  ],
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a/instances",
+  "kind": "compute#instanceList"
+}

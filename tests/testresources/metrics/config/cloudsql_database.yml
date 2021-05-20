@@ -1,0 +1,66 @@
+id: cloudsql_database
+$schema: gcp_schema_v_1_0.json
+version: 0.0.1
+minDynatraceVersion: 1.199
+technology:
+  name: Cloud SQL Database
+gcp:
+- service: cloudsql_database
+  featureSet: default
+  dimensions:
+  - value: resource.labels.project_id
+    id: project_id
+  - value: resource.labels.database_id
+    id: database_id
+  - value: resource.labels.region
+    id: region
+  metrics:
+  - value: cloudsql.googleapis.com/database/disk/bytes_used
+    id: cloud.gcp.cloudsql_googleapis_com.database.disk.bytes_used
+    type: gauge
+    name: Bytes used
+    unit: By
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions: []
+  - value: cloudsql.googleapis.com/database/instance_state
+    id: cloud.gcp.cloudsql_googleapis_com.database.instance_state
+    type: gauge
+    name: Instance state
+    unit: ''
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 60s
+      valueType: BOOL
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.state
+  - value: cloudsql.googleapis.com/database/cpu/usage_time
+    id: cloud.gcp.cloudsql_googleapis_com.database.cpu.usage_time
+    type: count,delta
+    name: CPU usage
+    unit: s{CPU}
+    gcpOptions:
+      ingestDelay: 210s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: DELTA
+    dimensions: []
+  - value: cloudsql.googleapis.com/database/cpu/utilization
+    id: cloud.gcp.cloudsql_googleapis_com.database.cpu.utilization
+    type: gauge
+    name: CPU utilization
+    unit: 10^2.%
+    gcpOptions:
+      ingestDelay: 150s
+      samplePeriod: 60s
+      valueType: DOUBLE
+      metricKind: GAUGE
+    dimensions: []
+dashboards:
+  - dashboard: "dashboards/cloudsql_database.json"
+alerts:
+  - path: "alerts/cloudsql_database/cpu.utilization.json"

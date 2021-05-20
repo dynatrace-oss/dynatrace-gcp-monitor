@@ -1,0 +1,31 @@
+{
+  "id": "2d253d44-c01a-4c4d-a3b2-c09fdebd0ee5",
+  "name": "compute_v1_projects_dynatrace-gcp-extension_zones_europe-north1-a_instances",
+  "request": {
+    "url": "/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a/instances",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "north1-a_instances.json",
+    "headers": {
+      "ETag": "MckOg0wloZ00x3zuM4k1_dINWzI=/Osltxwjg7mJ0xRwi3jdspj8aDRA=",
+      "Content-Type": "application/json; charset=UTF-8",
+      "Vary": [
+        "Origin",
+        "X-Origin",
+        "Referer"
+      ],
+      "Date": "Wed, 12 May 2021 22:37:33 GMT",
+      "Server": "ESF",
+      "Cache-Control": "private",
+      "X-XSS-Protection": "0",
+      "X-Frame-Options": "SAMEORIGIN",
+      "X-Content-Type-Options": "nosniff",
+      "Alt-Svc": "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
+    }
+  },
+  "uuid": "2d253d44-c01a-4c4d-a3b2-c09fdebd0ee5",
+  "persistent": true,
+  "insertionIndex": 80
+}

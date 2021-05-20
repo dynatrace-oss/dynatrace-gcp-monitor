@@ -1,0 +1,31 @@
+{
+  "id": "bf92d6dc-af79-4d86-b173-6eda20421fc1",
+  "name": "compute_v1_projects_dynatrace-gcp-extension_zones",
+  "request": {
+    "url": "/compute/v1/projects/dynatrace-gcp-extension/zones",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "dynatrace-gcp-extension_zones.json",
+    "headers": {
+      "ETag": "nmeU7MaJYgnGzuZKqonrhnS5CF0=/Iyp7EZMjs894bCd--5z70y6eKkQ=",
+      "Content-Type": "application/json; charset=UTF-8",
+      "Vary": [
+        "Origin",
+        "X-Origin",
+        "Referer"
+      ],
+      "Date": "Wed, 12 May 2021 21:56:23 GMT",
+      "Server": "ESF",
+      "Cache-Control": "private",
+      "X-XSS-Protection": "0",
+      "X-Frame-Options": "SAMEORIGIN",
+      "X-Content-Type-Options": "nosniff",
+      "Alt-Svc": "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
+    }
+  },
+  "uuid": "bf92d6dc-af79-4d86-b173-6eda20421fc1",
+  "persistent": true,
+  "insertionIndex": 22
+}

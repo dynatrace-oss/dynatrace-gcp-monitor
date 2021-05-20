@@ -27,8 +27,11 @@ _METADATA_FLAVOR_HEADER = "metadata-flavor"
 _METADATA_FLAVOR_VALUE = "Google"
 _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 
+_SECRET_ROOT = 'https://secretmanager.googleapis.com/v1'
+_CLOUD_RESOURCE_MANAGER_ROOT = "https://cloudresourcemanager.googleapis.com/v1"
+
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_NAME", "DYNATRACE_ACCESS_KEY")
-_DYNATRACE_URL_SECRET_NAME = os.environ.get("DYNATRACE_URL_SECRET_NAME","DYNATRACE_URL")
+_DYNATRACE_URL_SECRET_NAME = os.environ.get("DYNATRACE_URL_SECRET_NAME", "DYNATRACE_URL")
 _DYNATRACE_LOG_INGEST_URL_SECRET_NAME = os.environ.get("DYNATRACE_LOG_INGEST_URL_SECRET_NAME","DYNATRACE_LOG_INGEST_URL")
 
 
@@ -56,7 +59,7 @@ async def fetch_secret(session: ClientSession, project_id: str, token: str, secr
     if env_secret_value:
         return env_secret_value
 
-    url = "https://secretmanager.googleapis.com/v1/projects/{project_id}/secrets/{secret_name}/versions/latest:access"\
+    url = _SECRET_ROOT + "/projects/{project_id}/secrets/{secret_name}/versions/latest:access" \
         .format(project_id=project_id, secret_name=secret_name)
 
     headers = {"Authorization": "Bearer {token}".format(token=token)}
@@ -133,13 +136,13 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
 
 
 async def get_all_accessible_projects(context: LoggingContext, session: ClientSession, token: str):
-        url = "https://cloudresourcemanager.googleapis.com/v1/projects"
-        headers = {"Authorization": "Bearer {token}".format(token=token)}
-        response = await session.get(url, headers=headers)
-        response_json = await response.json()
-        all_projects = [project["projectId"] for project in response_json.get("projects", [])]
-        if all_projects:
-            context.log("Access to following projects: " + ", ".join(all_projects))
-        else:
-            context.log("There is no access to any projects. Check service account configuration.")
-        return all_projects
+    url = _CLOUD_RESOURCE_MANAGER_ROOT + "/projects"
+    headers = {"Authorization": "Bearer {token}".format(token=token)}
+    response = await session.get(url, headers=headers)
+    response_json = await response.json()
+    all_projects = [project["projectId"] for project in response_json.get("projects", [])]
+    if all_projects:
+        context.log("Access to following projects: " + ", ".join(all_projects))
+    else:
+        context.log("There is no access to any projects. Check service account configuration.")
+    return all_projects
