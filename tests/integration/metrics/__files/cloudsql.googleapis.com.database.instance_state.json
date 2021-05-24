@@ -1,0 +1,411 @@
+{
+  "timeSeries": [
+    {
+      "metric": {
+        "labels": {
+          "state": "FAILED"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "database_id": "dynatrace-gcp-extension:pawel-001-mysql",
+          "region": "europe-north1"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "MAINTENANCE"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "database_id": "dynatrace-gcp-extension:pawel-001-mysql",
+          "region": "europe-north1",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "PENDING_CREATE"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "region": "europe-north1",
+          "project_id": "dynatrace-gcp-extension",
+          "database_id": "dynatrace-gcp-extension:pawel-001-mysql"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "RUNNABLE"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "database_id": "dynatrace-gcp-extension:pawel-001-mysql",
+          "project_id": "dynatrace-gcp-extension",
+          "region": "europe-north1"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "RUNNING"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "database_id": "dynatrace-gcp-extension:pawel-001-mysql",
+          "project_id": "dynatrace-gcp-extension",
+          "region": "europe-north1"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "SUSPENDED"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "database_id": "dynatrace-gcp-extension:pawel-001-mysql",
+          "project_id": "dynatrace-gcp-extension",
+          "region": "europe-north1"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "UNKNOWN_STATE"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "region": "europe-north1",
+          "database_id": "dynatrace-gcp-extension:pawel-001-mysql"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "FAILED"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "database_id": "dynatrace-gcp-extension:pawel-001-pgsql",
+          "region": "europe-west3",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "MAINTENANCE"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "region": "europe-west3",
+          "project_id": "dynatrace-gcp-extension",
+          "database_id": "dynatrace-gcp-extension:pawel-001-pgsql"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "PENDING_CREATE"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "region": "europe-west3",
+          "database_id": "dynatrace-gcp-extension:pawel-001-pgsql",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "RUNNABLE"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "database_id": "dynatrace-gcp-extension:pawel-001-pgsql",
+          "project_id": "dynatrace-gcp-extension",
+          "region": "europe-west3"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "RUNNING"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "region": "europe-west3",
+          "database_id": "dynatrace-gcp-extension:pawel-001-pgsql",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "SUSPENDED"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "region": "europe-west3",
+          "database_id": "dynatrace-gcp-extension:pawel-001-pgsql",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "state": "UNKNOWN_STATE"
+        },
+        "type": "cloudsql.googleapis.com/database/instance_state"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "database_id": "dynatrace-gcp-extension:pawel-001-pgsql",
+          "region": "europe-west3",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    }
+  ],
+  "unit": "1"
+}

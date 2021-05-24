@@ -15,12 +15,14 @@
 from functools import partial
 from typing import Any, Dict, Iterable, Text
 
-from lib.context import Context
+from lib.context import MetricsContext
 from lib.entities.decorator import entity_extractor
 from lib.entities.google_api import generic_paging
 from lib.entities.ids import get_func_create_entity_id, LabelToApiRspMapping
 from lib.entities.model import CdProperty, Entity
 from lib.metrics import GCPService
+
+_SQL_ENDPOINT = "https://sqladmin.googleapis.com"
 
 LabelToApiResponseMapping: LabelToApiRspMapping = {
     "resource.labels.project_id": lambda x: str(x["project"]),
@@ -59,8 +61,9 @@ def _cloud_sql_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: GCPSer
 
 
 @entity_extractor("cloudsql_database")
-async def get_cloud_sql_entity(ctx: Context, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
+async def get_cloud_sql_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP Cloud SQL from google api. """
-    url = f"https://sqladmin.googleapis.com/sql/v1beta4/projects/{project_id}/instances"
+
+    url = f"{_SQL_ENDPOINT}/sql/v1beta4/projects/{project_id}/instances"
     mapper_func = partial(_cloud_sql_resp_to_monitored_entities, svc_def=svc_def)
     return await generic_paging(url, ctx, mapper_func)

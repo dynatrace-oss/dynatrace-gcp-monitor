@@ -25,14 +25,14 @@ from typing import Dict, List, Optional
 import yaml
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
-from lib.context import Context, LoggingContext
+from lib.context import MetricsContext, LoggingContext
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
-from lib.self_monitoring import push_self_monitoring_time_series
+from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
 
 
 def dynatrace_gcp_extension(event, context, project_id: Optional[str] = None):
@@ -77,11 +77,11 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
     if "GCP_SERVICES" in os.environ:
         selected_services_string = os.environ.get("GCP_SERVICES", "")
         selected_services = selected_services_string.split(",") if selected_services_string else []
-        #set default featureset if featureset not present in env variable
+        # set default featureset if featureset not present in env variable
         for i, service in enumerate(selected_services):
             if "/" not in service:
-                selected_services[i]=f"{service}/default"
-    
+                selected_services[i] = f"{service}/default"
+
     services = load_supported_services(context, selected_services)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -102,10 +102,10 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
 
-        print_metric_ingest_input = \
-            "PRINT_METRIC_INGEST_INPUT" in os.environ and os.environ["PRINT_METRIC_INGEST_INPUT"].upper() == "TRUE"
+        print_metric_ingest_input = os.environ.get("PRINT_METRIC_INGEST_INPUT", "FALSE").upper() in ["TRUE", "YES"]
+        self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
 
-        context = Context(
+        context = MetricsContext(
             gcp_session=gcp_session,
             dt_session=dt_session,
             project_id_owner=project_id_owner,
@@ -115,6 +115,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
             dynatrace_api_key=dynatrace_api_key,
             dynatrace_url=dynatrace_url,
             print_metric_ingest_input=print_metric_ingest_input,
+            self_monitoring_enabled=self_monitoring_enabled,
             scheduled_execution_id=context.scheduled_execution_id
         )
 
@@ -134,7 +135,9 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
         context.log(f"Fetched and pushed GCP data in {time.time() - context.start_processing_timestamp} s")
 
-        await push_self_monitoring_time_series(context)
+        log_self_monitoring_data(context)
+        if context.self_monitoring_enabled:
+            await push_self_monitoring(context)
 
         await gcp_session.close()
         await dt_session.close()
@@ -142,7 +145,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
 
-async def process_project_metrics(context: Context, project_id: str, services: List[GCPService]):
+async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService]):
     try:
         context.log(project_id, f"Starting processing...")
         await check_x_goog_user_project_header_permissions(context, project_id)
@@ -156,14 +159,14 @@ async def process_project_metrics(context: Context, project_id: str, services: L
         traceback.print_exc()
 
 
-async def check_x_goog_user_project_header_permissions(context: Context, project_id: str):
+async def check_x_goog_user_project_header_permissions(context: MetricsContext, project_id: str):
     try:
         await _check_x_goog_user_project_header_permissions(context, project_id)
     except Exception as e:
         context.log(project_id, f"Unexpected exception when checking 'x-goog-user-project' header: {e}")
 
 
-async def _check_x_goog_user_project_header_permissions(context: Context, project_id: str):
+async def _check_x_goog_user_project_header_permissions(context: MetricsContext, project_id: str):
     if project_id in context.use_x_goog_user_project_header:
         return
 
@@ -193,7 +196,7 @@ async def _check_x_goog_user_project_header_permissions(context: Context, projec
         context.log(project_id, f"Unexpected response when checking 'x-goog-user-project' header: {str(page)}")
 
 
-async def fetch_ingest_lines_task(context: Context, project_id: str, services: List[GCPService]) -> List[IngestLine]:
+async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService]) -> List[IngestLine]:
     fetch_metric_tasks = []
     topology_tasks = []
     topology_task_services = []
@@ -206,11 +209,11 @@ async def fetch_ingest_lines_task(context: Context, project_id: str, services: L
     fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
 
     skipped_services = []
-    for service in services:   
-        if service in topology_task_services:                
+    for service in services:
+        if service in topology_task_services:
             service_topology = fetch_topology_results[topology_task_services.index(service)]
             if not service_topology:
-                skipped_services.append(service.name)
+                skipped_services.append(f"{service.name}/{service.feature_set}")
                 continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
             fetch_metric_task = run_fetch_metric(
@@ -240,6 +243,14 @@ def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str,
 
 
 def load_supported_services(context: LoggingContext, selected_featuresets: List[str]) -> List[GCPService]:
+    activation_file_path = '/code/config/activation/gcp_services.yaml'
+    try:
+        with open(activation_file_path, encoding="utf-8") as activation_file:
+            activation_yaml = yaml.safe_load(activation_file)
+    except Exception:
+        activation_yaml = yaml.safe_load(os.environ.get("ACTIVATION_CONFIG", ""))
+    activation_config = {service_activation.get('service'): service_activation for service_activation in activation_yaml.get('services', [])} if activation_yaml else {}
+
     working_directory = os.path.dirname(os.path.realpath(__file__))
     config_directory = os.path.join(working_directory, "config")
     config_files = [
@@ -257,17 +268,19 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
                 technology_name = extract_technology_name(config_yaml)
 
                 for service_yaml in config_yaml.get("gcp", {}):
+                    service_name=service_yaml.get("service", "None")
                     # If whitelist of services exists and current service is not present in it, skip
                     should_skip = selected_featuresets and \
-                                  (f'{service_yaml.get("service", "None")}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets)
+                                  (f'{service_name}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets)
                     if should_skip:
                         continue
-                    services.append(GCPService(tech_name=technology_name, **service_yaml))
+                    activation = activation_config.get(service_name)
+                    services.append(GCPService(tech_name=technology_name, activation=activation, **service_yaml))
         except Exception as error:
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
             continue
     featureSets = [f"{service.name}/{service.feature_set}" for service in services]
-    context.log("Selected feature sets: " + ",".join(featureSets))
+    context.log("Selected feature sets: " + ", ".join(featureSets))
     return services
 
 
@@ -279,7 +292,7 @@ def extract_technology_name(config_yaml):
 
 
 async def run_fetch_metric(
-        context: Context,
+        context: MetricsContext,
         project_id: str,
         service: GCPService,
         metric: Metric

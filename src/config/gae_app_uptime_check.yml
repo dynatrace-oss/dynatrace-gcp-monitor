@@ -2,11 +2,16 @@ id: gae_app
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
+vars:
+ - id: filter_conditions
+   displayName: Metric query filter for which metrics should be queried
+   type: variables
 technology:
   name: Google App Engine Application - Uptime Checks
 gcp:
 - service: gae_app_uptime_check
   featureSet: default
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
     id: project_id

@@ -15,12 +15,14 @@
 
 from typing import Any, Callable, Dict, List, Text
 
-from lib.context import Context
+from lib.context import MetricsContext
 from lib.entities.model import Entity
+
+_GCP_COMPUTE_ENDPOINT = "https://compute.googleapis.com"
 
 
 async def fetch_zones(
-        context: Context,
+        context: MetricsContext,
         project_id: str
 ) -> List[str]:
     headers = {
@@ -31,7 +33,7 @@ async def fetch_zones(
     resp = await context.gcp_session.request(
         "GET",
         params={},
-        url=f"https://compute.googleapis.com/compute/v1/projects/{project_id}/zones",
+        url=f"{_GCP_COMPUTE_ENDPOINT}/compute/v1/projects/{project_id}/zones",
         headers=headers,
         raise_for_status=True
     )
@@ -46,7 +48,7 @@ async def fetch_zones(
 
 async def generic_paging(
         url: Text,
-        ctx: Context,
+        ctx: MetricsContext,
         mapper: Callable[[Dict[Any, Any]], List[Entity]]
 ) -> List[Entity]:
     """Apply mapper function on any page returned by gcp api url."""

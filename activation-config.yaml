@@ -1,13 +1,13 @@
 # Debug properties for Dynatrace Cloud Function
 debug:  
-  # if true will print full MINT ingest input
+  # if true will print full MINT ingest input. Allowed values: true/yes, false/no
   printMetricIngestInput: false 
 googleCloud:
   common:
-    # Name of Google Secret Manager Secret containing Dynatrace Access Key
-    dynatraceAccessKeySecretName: DYNATRACE_ACCESS_KEY 
     # Name of Google Secret Manager Secret containing Dynatrace URL
     dynatraceUrlSecretName: DYNATRACE_URL
+    # Name of Google Secret Manager Secret containing Dynatrace Access Key
+    dynatraceAccessKeySecretName: DYNATRACE_ACCESS_KEY
     # Name of the Service Account that should be created for Dynatrace Function to authenticate with Google Monitoring API 
     serviceAccount: dynatrace-gcp-service-custom
     # Name of the GCP IAM Role that should be created for Dynatrace Function Service Account
@@ -17,16 +17,20 @@ googleCloud:
     cloudFunctionSize: s 
     # Require valid SSL certificate when communicating with Dynatrace Cluster / Active Gate
     # May be set to false in case communication through Active Gate is debugged, for non-production use cases
+    # Allowed values: true/yes, false/no
     requireValidCertificate: true
     # Determines a caller-specified project for quota and billing purposes 
     # if set to source: monitoring API calls are booked towards project where K8S container is running
     # if set to destination: monitoring API calls are booked towards project which is monitored
     # REQUIRES serviceusage.services.use Permission granted for Service Account!
     serviceUsageBooking: source
-    # Import predefined dashboards for selected services (yes/no)
-    importDashboards: yes
-    # Import predefined alerts (`yes`: enabled, `inactive`: disabled) for selected services (yes/inactive/no)
-    importAlerts: yes
+    # Import predefined dashboards for selected services. Allowed values: true/yes, false/no
+    importDashboards: true
+    # Import predefined alerts for selected services. Allowed values: true/yes, false/no
+    importAlerts: true
+    # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly.
+    # Allowed values: true/yes, false/no
+    selfMonitoringEnabled: false
   metrics:
     # Name of the Pub/Sub topic for metric function
     pubSubTopic: dynatrace-gcp-service-invocation
@@ -35,12 +39,7 @@ googleCloud:
     # Name of the metric forwarding Cloud Scheduler instance
     scheduler: dynatrace-gcp-schedule
     # Cron schedule for Cloud Scheduler instance
-    schedulerSchedule: "* * * * *" 
-  logs:
-    # Name of the log forwarding function
-    function: dynatrace-gcp-logs-function
-    # Prefix for Log Router Sink for log forwarding function
-    log-sink-prefix: dynatrace-log-sink_ 
+    schedulerSchedule: "* * * * *"
 activation:
   metrics:
     # List of services to forward Google Monitoring Metrics to Dynatrace

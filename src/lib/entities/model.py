@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from json import dumps
 from typing import Callable, FrozenSet, Iterable, NamedTuple, Text
 
-from lib.context import Context
+from lib.context import MetricsContext
 from lib.metrics import GCPService
 
 
@@ -45,4 +45,4 @@ class Entity:  # pylint: disable=R0902
     dns_names: FrozenSet[str]
 
 
-ExtractEntitesFunc = Callable[[Context, str, GCPService], Iterable[Entity]]
+ExtractEntitesFunc = Callable[[MetricsContext, str, GCPService], Iterable[Entity]]

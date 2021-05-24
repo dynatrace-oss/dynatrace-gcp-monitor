@@ -60,6 +60,7 @@ readonly GCP_IAM_ROLE_PERMISSIONS=(
   monitoring.metricDescriptors.list
   monitoring.timeSeries.create
 )
+readonly SELF_MONITORING_ENABLED=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.selfMonitoringEnabled')
 
 
 shopt -s nullglob
@@ -138,6 +139,13 @@ then
     echo -e
     echo -e "You may also try installing YQ with PIP: pip install yq"
     echo -e ""
+    echo
+    exit
+fi
+
+if ! command -v unzip &> /dev/null
+then
+    echo -e "\e[93mWARNING: \e[37munzip is required to install Dynatrace function"
     echo
     exit
 fi
@@ -257,10 +265,10 @@ wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
 
 echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 mkdir -p $GCP_FUNCTION_NAME
-unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME
+unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME || exit
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
 pushd ./$GCP_FUNCTION_NAME || exit
-gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY
+gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED
 
 echo -e
 echo "- schedule the runs"
@@ -279,7 +287,7 @@ else
     gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
 fi
 
-if [ "${IMPORT_DASHBOARDS,,}" != "no" ] ; then
+if [[ "${IMPORT_DASHBOARDS,,}" =~ ^(yes|true)$ ]] ; then
   EXISTING_DASHBOARDS=$(dt_api "api/config/v1/dashboards" | jq -r '.dashboards[].name | select (. |contains("Google"))')
   if [ -n "${EXISTING_DASHBOARDS}" ]; then
       warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_DASHBOARDS"
@@ -308,7 +316,7 @@ else
   echo "Dashboards import disabled"
 fi
 
-if [ "${IMPORT_ALERTS,,}" != "no" ] ; then
+if [[ "${IMPORT_ALERTS,,}" =~ ^(yes|true)$ ]]; then
   EXISTING_ALERTS=$(dt_api "api/config/v1/anomalyDetection/metricEvents"| jq -r '.values[] | select (.id |startswith("cloud.gcp.")) | (.id + "\t" + .name )')
   if [ -n "${EXISTING_ALERTS}" ]; then
       warn "Found existing Google alerts in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"

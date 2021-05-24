@@ -25,7 +25,7 @@ def test_create_dimension_too_long_dimension():
 
 
 def test_flatten_and_enrich_metric_results_all_additional_dimensions():
-    context_mock = Context(aiohttp.ClientSession(), aiohttp.ClientSession(), "", "", datetime.utcnow(), 0, "", "", False, None)
+    context_mock = MetricsContext(aiohttp.ClientSession(), aiohttp.ClientSession(), "", "", datetime.utcnow(), 0, "", "", False, False, None)
     metric_results = [[IngestLine("entity_id", "m1", "count", 1, 10000, [])]]
     entity_id_map = {"entity_id": Entity("entity_id", "", "", ip_addresses=frozenset(["0.0.0.0"]), listen_ports=frozenset([]),
                                          favicon_url="", dtype="", properties=[CdProperty("Example property", "example_value")],

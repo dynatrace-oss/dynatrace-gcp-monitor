@@ -2,11 +2,16 @@ id: recaptchaenterprise.googleapis.com/Key
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
+vars:
+ - id: filter_conditions
+   displayName: Metric query filter for which metrics should be queried
+   type: variables
 technology:
   name: Google reCAPTCHA Key
 gcp:
 - service: recaptchaenterprise.googleapis.com/Key
   featureSet: default
+  gcp_monitoring_filter: var:filter_conditions
   dimensions:
   - value: resource.labels.resource_container
     id: resource_container
