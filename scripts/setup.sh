@@ -255,7 +255,7 @@ fi
 
 if [[ $? != 0 ]]
 then
-    echo "Dyntrace url secret creation failed"
+echo "Dynatrace url secret creation failed"
     exit 3
 fi
 
