@@ -57,6 +57,30 @@ gcp:
       valueType: DISTRIBUTION
       metricKind: DELTA
     dimensions: []
+  - value: run.googleapis.com/container/instance_count
+    id: cloud.gcp.run_googleapis_com.container.instance_count
+    type: gauge
+    name: Instance Count
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: GAUGE
+    dimensions:
+    - value: metric.labels.state
+  - value: run.googleapis.com/container/max_request_concurrencies
+    id: cloud.gcp.run_googleapis_com.container.max_request_concurrencies
+    type: gauge
+    name: Max Concurrent Requests
+    unit: '1'
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: DISTRIBUTION
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.state
   - value: run.googleapis.com/container/memory/allocation_time
     id: cloud.gcp.run_googleapis_com.container.memory.allocation_time
     type: count,delta
@@ -79,6 +103,30 @@ gcp:
       valueType: DISTRIBUTION
       metricKind: DELTA
     dimensions: []
+  - value: run.googleapis.com/container/network/received_bytes_count
+    id: cloud.gcp.run_googleapis_com.container.network.received_bytes_count
+    type: count,delta
+    name: Received Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.kind
+  - value: run.googleapis.com/container/network/sent_bytes_count
+    id: cloud.gcp.run_googleapis_com.container.network.sent_bytes_count
+    type: count,delta
+    name: Sent Bytes
+    unit: By
+    gcpOptions:
+      ingestDelay: 180s
+      samplePeriod: 60s
+      valueType: INT64
+      metricKind: DELTA
+    dimensions:
+    - value: metric.labels.kind
   - value: run.googleapis.com/request_count
     id: cloud.gcp.run_googleapis_com.request_count
     type: count,delta
