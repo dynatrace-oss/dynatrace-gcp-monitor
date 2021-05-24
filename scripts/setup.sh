@@ -21,6 +21,23 @@ readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring"
 echo -e "\033[0;37m"
 
+if ! command -v yq &> /dev/null
+then
+
+    echo -e "\e[93mWARNING: \e[37m yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions"
+    echo -e
+    echo -e "YQ: https://github.com/mikefarah/yq"
+    if ! command -v jq &> /dev/null
+    then
+        echo -e "JQ: https://stedolan.github.io/jq/download/"
+    fi
+    echo -e
+    echo -e "You may also try installing YQ with PIP: pip install yq"
+    echo -e ""
+    echo
+    exit
+fi
+
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
     wget -q $FUNCTION_RAW_REPOSITORY_URL/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
@@ -41,6 +58,8 @@ readonly PRINT_METRIC_INGEST_INPUT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'debug.pri
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.cloudFunctionSize')
 readonly SERVICE_USAGE_BOOKING=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.serviceUsageBooking')
 readonly USE_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.useProxy')
+readonly HTTP_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.httpProxy')
+readonly HTTPS_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.httpsProxy')
 readonly IMPORT_DASHBOARDS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importDashboards')
 readonly IMPORT_ALERTS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importAlerts')
 readonly GCP_IAM_ROLE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.iamRole')
@@ -114,6 +133,17 @@ get_ext_files()
   done
 }
 
+check_if_parameter_is_empty()
+{
+  PARAMETER=$1
+  PARAMETER_NAME=$2
+  if [ -z "$PARAMETER" ]
+  then
+    echo "Missing required parameter: $PARAMETER_NAME. Please set proper value in activation-config.yaml"
+    exit
+  fi
+}
+
 if ! command -v gcloud &> /dev/null
 then
 
@@ -125,24 +155,6 @@ then
     exit
 fi
 
-
-if ! command -v yq &> /dev/null
-then
-
-    echo -e "\e[93mWARNING: \e[37m yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions"
-    echo -e
-    echo -e "YQ: https://github.com/mikefarah/yq"
-    if ! command -v jq &> /dev/null
-    then
-        echo -e "JQ: https://stedolan.github.io/jq/download/"
-    fi
-    echo -e
-    echo -e "You may also try installing YQ with PIP: pip install yq"
-    echo -e ""
-    echo
-    exit
-fi
-
 if ! command -v unzip &> /dev/null
 then
     echo -e "\e[93mWARNING: \e[37munzip is required to install Dynatrace function"
@@ -150,6 +162,14 @@ then
     exit
 fi
 
+check_if_parameter_is_empty "$GCP_PUBSUB_TOPIC" "GCP_PUBSUB_TOPIC"
+check_if_parameter_is_empty "$GCP_SCHEDULER_NAME" "GCP_SCHEDULER_NAME"
+check_if_parameter_is_empty "$DYNATRACE_URL_SECRET_NAME" "DYNATRACE_URL_SECRET_NAME"
+check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY_SECRET_NAME" "DYNATRACE_ACCESS_KEY_SECRET_NAME"
+check_if_parameter_is_empty "$GCP_FUNCTION_NAME" "GCP_FUNCTION_NAME"
+check_if_parameter_is_empty "$GCP_IAM_ROLE" "GCP_IAM_ROLE"
+check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "GCP_SERVICE_ACCOUNT"
+check_if_parameter_is_empty "$GCP_SCHEDULER_CRON" "GCP_SCHEDULER_CRON"
 
 GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
@@ -213,10 +233,16 @@ gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.co
 
 echo -e
 echo "- create the pubsub topic [$GCP_PUBSUB_TOPIC]"
-if [[ $(gcloud pubsub topics list --filter=name:dynatrace-gcp-service-invocation --format="value(name)") ]]; then
+if [[ $(gcloud pubsub topics list --filter=name:$GCP_PUBSUB_TOPIC --format="value(name)") ]]; then
     echo "Topic [$GCP_PUBSUB_TOPIC] already exists, skipping"
 else
     gcloud pubsub topics create "$GCP_PUBSUB_TOPIC"
+fi
+
+if [[ $? != 0 ]]
+then
+    echo "Pub/Sub Topic creation failed"
+    exit 3
 fi
 
 echo -e
@@ -226,12 +252,25 @@ if [[ $(gcloud secrets list --filter=name:$DYNATRACE_URL_SECRET_NAME --format="v
 else
     printf "$DYNATRACE_URL" | gcloud secrets create $DYNATRACE_URL_SECRET_NAME --data-file=- --replication-policy=automatic
 fi
+
+if [[ $? != 0 ]]
+then
+    echo "Dyntrace url secret creation failed"
+    exit 3
+fi
+
 if [[ $(gcloud secrets list --filter=name:$DYNATRACE_ACCESS_KEY_SECRET_NAME --format="value(name)" ) ]]; then
     echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, skipping"
 else
     stty -echo
     printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
     stty echo
+fi
+
+if [[ $? != 0 ]]
+then
+    echo "Dynatrace access key secret creation failed"
+    exit 3
 fi
 
 echo -e
@@ -243,6 +282,12 @@ else
     readonly GCP_IAM_ROLE_DESCRIPTION="Role for Dynatrace GCP function operating in metrics mode"
     readonly GCP_IAM_ROLE_PERMISSIONS_STRING=$(IFS=, ; echo "${GCP_IAM_ROLE_PERMISSIONS[*]}")
     gcloud iam roles create $GCP_IAM_ROLE --project="$GCP_PROJECT" --title="$GCP_IAM_ROLE_TITLE" --description="$GCP_IAM_ROLE_DESCRIPTION" --stage="GA" --permissions="$GCP_IAM_ROLE_PERMISSIONS_STRING"
+fi
+
+if [[ $? != 0 ]]
+then
+    echo "GCP IAM Role creation failed"
+    exit 3
 fi
 
 echo -e
@@ -258,6 +303,12 @@ else
     gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer
 fi
 
+if [[ $? != 0 ]]
+then
+    echo "Service account creation failed"
+    exit 3
+fi
+
 echo -e
 echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
 wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
@@ -268,7 +319,13 @@ mkdir -p $GCP_FUNCTION_NAME
 unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME || exit
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
 pushd ./$GCP_FUNCTION_NAME || exit
-gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED
+gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED
+
+if [[ $? != 0 ]]
+then
+    echo "Cloud function deployment failed"
+    exit 3
+fi
 
 echo -e
 echo "- schedule the runs"
@@ -276,6 +333,12 @@ if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="v
     echo "Scheduler [$GCP_SCHEDULER_NAME] already exists, skipping"
 else
     gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
+fi
+
+if [[ $? != 0 ]]
+then
+    echo "Scheduler creation failed"
+    exit 3
 fi
 
 echo -e

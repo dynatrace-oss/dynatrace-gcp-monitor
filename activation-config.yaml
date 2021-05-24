@@ -24,6 +24,15 @@ googleCloud:
     # if set to destination: monitoring API calls are booked towards project which is monitored
     # REQUIRES serviceusage.services.use Permission granted for Service Account!
     serviceUsageBooking: source
+    # Depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
+    # if set to ALL: proxy settings will be used for requests to Dynatrace and GCP API
+    # if set to DT_ONLY: proxy settings will be used only for requests to Dynatrace
+    # if set to GCP_ONLY: proxy settings will be used only for requests to GCP API
+    # if not set: default, proxy settings won't be used
+    useProxy: ""
+    # Set the proxy addresses. To be used in conjunction with USE_PROXY.
+    httpProxy: ""
+    httpsProxy: ""
     # Import predefined dashboards for selected services. Allowed values: true/yes, false/no
     importDashboards: true
     # Import predefined alerts for selected services. Allowed values: true/yes, false/no
