@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 
 from aiohttp import ClientSession
 
-from lib.context import LoggingContext
+from lib.context import LoggingContext, get_should_require_valid_certificate
 from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fetch_dynatrace_api_key, \
     get_project_id_from_environment
 from lib.instance_metadata import InstanceMetadata
@@ -80,6 +80,7 @@ async def get_dynatrace_token_metadata(dt_session: ClientSession, context: Loggi
             json={
                 "token": dynatrace_api_key
             },
+            verify_ssl=get_should_require_valid_certificate(),
             timeout=timeout)
         if response.status != 200:
             context.log(f'Unable to get Dynatrace token metadata: {response.status}, url: {response.url}, reason: {response.reason}')

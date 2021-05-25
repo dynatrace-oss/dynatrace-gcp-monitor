@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Callable
 import yaml
 from aiohttp import ClientSession
 
-from lib.context import LoggingContext
+from lib.context import LoggingContext, get_should_require_valid_certificate
 from lib.credentials import fetch_dynatrace_url, fetch_dynatrace_api_key
 from lib.fast_check import get_dynatrace_token_metadata
 from main import is_yaml_file
@@ -20,6 +20,7 @@ class ConfigureDynatrace:
             self.dt_session = dt_session
             self.dynatrace_url = dynatrace_url.rstrip('/')
             self.dynatrace_api_key = dynatrace_api_key
+            self.should_require_valid_certificate = get_should_require_valid_certificate()
 
         async def call(self, method: str, path: str, json_data: Optional[Dict] = None, timeout: Optional[int] = 2):
             return await self.dt_session.request(
@@ -30,6 +31,7 @@ class ConfigureDynatrace:
                     "Content-Type": "application/json; charset=utf-8"
                 },
                 timeout=timeout,
+                verify_ssl=self.should_require_valid_certificate,
                 json=json_data)
 
     async def post_dashboard(self, dt_api: DtApi, path: str, name:str, remove_owner: bool, timeout: Optional[int] = 2) -> str:
