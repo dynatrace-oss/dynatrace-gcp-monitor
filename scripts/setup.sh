@@ -144,6 +144,12 @@ check_if_parameter_is_empty()
   fi
 }
 
+onFailure() {
+    echo -e "- deployment failed, please examine error messages and run again"
+    exit 2
+}
+trap onFailure ERR
+
 if ! command -v gcloud &> /dev/null
 then
 
@@ -239,12 +245,6 @@ else
     gcloud pubsub topics create "$GCP_PUBSUB_TOPIC"
 fi
 
-if [[ $? != 0 ]]
-then
-    echo "Pub/Sub Topic creation failed"
-    exit 3
-fi
-
 echo -e
 echo "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]"
 if [[ $(gcloud secrets list --filter=name:$DYNATRACE_URL_SECRET_NAME --format="value(name)" ) ]]; then
@@ -253,24 +253,12 @@ else
     printf "$DYNATRACE_URL" | gcloud secrets create $DYNATRACE_URL_SECRET_NAME --data-file=- --replication-policy=automatic
 fi
 
-if [[ $? != 0 ]]
-then
-echo "Dynatrace url secret creation failed"
-    exit 3
-fi
-
 if [[ $(gcloud secrets list --filter=name:$DYNATRACE_ACCESS_KEY_SECRET_NAME --format="value(name)" ) ]]; then
     echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, skipping"
 else
     stty -echo
     printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
     stty echo
-fi
-
-if [[ $? != 0 ]]
-then
-    echo "Dynatrace access key secret creation failed"
-    exit 3
 fi
 
 echo -e
@@ -282,12 +270,6 @@ else
     readonly GCP_IAM_ROLE_DESCRIPTION="Role for Dynatrace GCP function operating in metrics mode"
     readonly GCP_IAM_ROLE_PERMISSIONS_STRING=$(IFS=, ; echo "${GCP_IAM_ROLE_PERMISSIONS[*]}")
     gcloud iam roles create $GCP_IAM_ROLE --project="$GCP_PROJECT" --title="$GCP_IAM_ROLE_TITLE" --description="$GCP_IAM_ROLE_DESCRIPTION" --stage="GA" --permissions="$GCP_IAM_ROLE_PERMISSIONS_STRING"
-fi
-
-if [[ $? != 0 ]]
-then
-    echo "GCP IAM Role creation failed"
-    exit 3
 fi
 
 echo -e
@@ -303,12 +285,6 @@ else
     gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer
 fi
 
-if [[ $? != 0 ]]
-then
-    echo "Service account creation failed"
-    exit 3
-fi
-
 echo -e
 echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
 wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
@@ -321,24 +297,12 @@ echo "- deploy the function [$GCP_FUNCTION_NAME]"
 pushd ./$GCP_FUNCTION_NAME || exit
 gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED
 
-if [[ $? != 0 ]]
-then
-    echo "Cloud function deployment failed"
-    exit 3
-fi
-
 echo -e
 echo "- schedule the runs"
 if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then
     echo "Scheduler [$GCP_SCHEDULER_NAME] already exists, skipping"
 else
     gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
-fi
-
-if [[ $? != 0 ]]
-then
-    echo "Scheduler creation failed"
-    exit 3
 fi
 
 echo -e
