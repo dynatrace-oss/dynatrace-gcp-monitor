@@ -1,7 +1,9 @@
 from queue import Queue
 
+import lib
 from lib.context import DynatraceConnectivity, LogsSfmContext
 from lib.logs.log_self_monitoring import LogSelfMonitoring, create_self_monitoring_time_series
+from lib.self_monitoring import batch_time_series
 
 context = LogsSfmContext("project_id", "http://localhost:9011", "dynatrace-gcp-log-forwarder-sub", "token", "", Queue(),
                          True, None, "container_name", "us-east1")
@@ -349,3 +351,17 @@ def test_self_monitoring_metrics():
 
     metric_data = create_self_monitoring_time_series(self_monitoring, context)
     assert metric_data == expected_metric_data
+
+
+def test_batching():
+    batched_series = batch_time_series({"timeSeries": [{"DATA": index} for index in range(1, 1001)]})
+    assert len(batched_series) == 5
+    for batch in batched_series:
+        assert len(batch.get("timeSeries", [])) == 200
+
+
+def test_batching_not_required():
+    initial = {"timeSeries": [{"DATA": index} for index in range(1, 101)]}
+    batched_series = batch_time_series(initial)
+    assert len(batched_series) == 1
+    assert initial == batched_series[0]
