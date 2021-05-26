@@ -35,11 +35,6 @@ jobs:
       - |
           cd tests/integration/metrics
           PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest -v
-
-  - stage: docker-build
-    name: Docker build
-    language: minimal
-    script: "./build/docker-deploy.sh"    
   - stage: docker-deploy
     name: Docker Hub deploy
     if: tag =~ /^release-.*
