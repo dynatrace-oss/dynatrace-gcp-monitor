@@ -34,6 +34,7 @@ from lib.logs.log_forwarder_variables import MAX_SFM_MESSAGES_PROCESSED, LOGS_SU
 from lib.logs.log_self_monitoring import create_sfm_worker_loop
 from lib.logs.logs_processor import _process_message
 from lib.logs.worker_state import WorkerState
+from lib.utilities import chunks
 
 
 def create_logs_context(sfm_queue: Queue):
@@ -149,8 +150,3 @@ def send_acks(subscriber_client: SubscriberClient, subscription_path: str, acks_
     subscriber_client.acknowledge(
         request={"subscription": subscription_path, "ack_ids": acks_ids}
     )
-
-
-def chunks(list, chunk_size):
-    chunk_size = max(1, chunk_size)
-    return (list[i:i + chunk_size] for i in range(0, len(list), chunk_size))

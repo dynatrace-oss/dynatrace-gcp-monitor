@@ -19,6 +19,7 @@ from lib.context import SfmContext, MetricsContext
 from lib.metric_descriptor import SELF_MONITORING_METRIC_PREFIX, SELF_MONITORING_METRIC_MAP, \
     SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, SELF_MONITORING_INGEST_LINES_METRIC_TYPE, \
     SELF_MONITORING_REQUEST_COUNT_METRIC_TYPE, SELF_MONITORING_PHASE_EXECUTION_TIME_METRIC_TYPE
+from lib.utilities import chunks
 
 
 def log_self_monitoring_data(context: MetricsContext):
@@ -37,30 +38,44 @@ async def push_self_monitoring(context: MetricsContext):
     await push_self_monitoring_time_series(context, time_series)
 
 
-async def push_self_monitoring_time_series(context: SfmContext, time_series: Dict, is_retry: bool = False):
+async def push_self_monitoring_time_series(context: SfmContext, time_series: Dict):
     try:
         context.log(f"Pushing self monitoring time series to GCP Monitor...")
         await create_metric_descriptors_if_missing(context)
-
-        self_monitoring_response = await context.gcp_session.request(
-            "POST",
-            url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/timeSeries",
-            data=json.dumps(time_series),
-            headers={"Authorization": "Bearer {token}".format(token=context.token)}
-        )
-        status = self_monitoring_response.status
-        if status == 500 and not is_retry:
-            context.log("GCP Monitor responded with 500 Internal Error, it may occur when metric descriptor is updated. Retrying after 5 seconds")
-            await asyncio.sleep(5)
-            await push_self_monitoring_time_series(context, time_series, True)
-        elif status != 200:
-            self_monitoring_response_json = await self_monitoring_response.json()
-            context.log(f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
-        else:
-            context.log(f"Finished pushing self monitoring time series to GCP Monitor")
-        self_monitoring_response.close()
+        for single_series in batch_time_series(time_series):
+            await push_single_self_monitoring_time_series(context, False, single_series)
     except Exception as e:
         context.log(f"Failed to push self monitoring time series, reason is {type(e).__name__} {e}")
+
+
+def batch_time_series(time_series: Dict) -> List[Dict]:
+    time_series_data = time_series.get("timeSeries", [])
+    if len(time_series_data) > 200:
+        return list([{"timeSeries": chunk} for chunk in chunks(time_series_data, 200)])
+    else:
+        return [time_series]
+
+
+async def push_single_self_monitoring_time_series(context: SfmContext, is_retry: bool, time_series: Dict):
+    self_monitoring_response = await context.gcp_session.request(
+        "POST",
+        url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/timeSeries",
+        data=json.dumps(time_series),
+        headers={"Authorization": "Bearer {token}".format(token=context.token)}
+    )
+    status = self_monitoring_response.status
+    if status == 500 and not is_retry:
+        context.log(
+            "GCP Monitor responded with 500 Internal Error, it may occur when metric descriptor is updated. Retrying after 5 seconds")
+        await asyncio.sleep(5)
+        await push_single_self_monitoring_time_series(context, True, time_series)
+    elif status != 200:
+        self_monitoring_response_json = await self_monitoring_response.json()
+        context.log(
+            f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
+    else:
+        context.log(f"Finished pushing self monitoring time series to GCP Monitor")
+    self_monitoring_response.close()
 
 
 async def create_metric_descriptors_if_missing(context: SfmContext):
