@@ -1,8 +1,8 @@
-## Self-monitoring Over
+## Self-monitoring Logs Overview
 Self monitoring allows diagnosing quickly if your function processes and sends logs to Dynatrace properly through GCP custom metrics.
 By default (if this option is not enabled) custom metrics won't be sent to GCP.
 
-### Self-monitoring metrics
+### Self-monitoring metrics for logs
 
 | Metric name                   | Description                               | Dimension | 
 | ------------------------------|-------------------------------------------|:----------:|
@@ -16,7 +16,7 @@ By default (if this option is not enabled) custom metrics won't be sent to GCP.
 | custom.googleapis.com/dynatrace/logs/log_ingest_payload_size | Size of log payload sent to Dynatrace [kB] | - |
 | custom.googleapis.com/dynatrace/logs/sent_logs_entries | Number of logs entries sent to Dynatrace | - |
 
-### Self-monitoring dashboard
+### Self-monitoring dashboard for logs
 If self monitoring is enabled, the self monitoring dashboard can be added in GCP:
 ```shell script
 wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/src/dashboards/dynatrace-gcp-function-log-self-monitoring

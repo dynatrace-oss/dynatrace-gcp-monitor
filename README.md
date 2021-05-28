@@ -9,7 +9,7 @@ Maintaining its lifecycle places a burden on the operational team.
 
 ## Getting started
 There are two deployment options available, you can:
-- [Metrics and/or logs] [run it on Google Kubernetes Engine](https://www.dynatrace.com/support/help/shortlink/deploy-k8) or 
+- [Metrics and/or logs] [run it on Google Kubernetes Engine](https://www.dynatrace.com/support/help/shortlink/deploy-k8)  
 - [Metrics] [deploy a Google Cloud Function](https://www.dynatrace.com/support/help/shortlink/deploy-gcp)
 
 
@@ -26,8 +26,9 @@ If you didn't find a solution please [contact Dynatrace support](https://www.dyn
 - [Architecture overview of Kubernetes deployment](./docs/k8s.md)
 - [Architecture overview of Google Cloud Function deployment](./docs/function.md)
 - [Monitoring multiple projects](https://www.dynatrace.com/support/help/technology-support/cloud-platforms/google-cloud-platform/monitor-gcp-services-and-logs-with-dynatrace/monitor-multiple-projects/)
-- [Self-monitoring in Google Cloud](https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp)
-- [Self-monitoring ?????](SFM.MD)
+- [Expand monitoring in a Kubernetes container](https://www.dynatrace.com/support/help/shortlink/expand-k8s)
+- [Self-monitoring in Google Cloud for metrics](https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp)
+- [Self-monitoring for logs](docs/sfm_log.MD)
 
 
 
