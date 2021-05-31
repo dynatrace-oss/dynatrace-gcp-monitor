@@ -15,7 +15,7 @@ There are two deployment options available, you can:
 
 ## Pricing
 Ingested metrics will consume DDUs. For more details [refer to documentation](https://www.dynatrace.com/support/help/reference/monitoring-consumption-calculation/#expand-gcp-service-monitoring-consumption-104)
-
+Ingested logs will consume DDUsFor more details [refer to documentation](https://www.dynatrace.com/support/help/reference/monitoring-consumption-calculation/log-monitoring-consumption/)
 
 ## Support
 Before you create a ticket check [troubleshooting guides](https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp) specific to your deployment.  
