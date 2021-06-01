@@ -201,7 +201,7 @@ if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
 fi
 
-gcloud config set project $GCP_PROJECT
+gcloud config set project "$GCP_PROJECT"
 echo "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]"
 
 if [ -z "$SA_NAME" ]; then
@@ -251,7 +251,7 @@ fi;
 
 echo
 echo "- 2. Create IAM service account."
-if [[ $(gcloud iam service-accounts list --filter="name ~ serviceAccounts/$SA_NAME@" --project=$GCP_PROJECT --format="value(name)") ]]; then
+if [[ $(gcloud iam service-accounts list --filter="name ~ serviceAccounts/$SA_NAME@" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     echo "Service Account [$SA_NAME] already exists, skipping"
 else
     gcloud iam service-accounts create "$SA_NAME"
@@ -265,32 +265,32 @@ echo
 echo "- 4. Create dynatrace-gcp-function IAM role(s)."
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml -O dynatrace-gcp-function-logs-role.yaml
-  if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.logs" --project=$GCP_PROJECT --format="value(name)") ]]; then
+  if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.logs" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     echo "Updating existing IAM role $ROLE_NAME.logs"
-    gcloud iam roles update $ROLE_NAME.logs --project=$GCP_PROJECT --file=dynatrace-gcp-function-logs-role.yaml --quiet
+    gcloud iam roles update $ROLE_NAME.logs --project="$GCP_PROJECT" --file=dynatrace-gcp-function-logs-role.yaml --quiet
   else
-    gcloud iam roles create $ROLE_NAME.logs --project=$GCP_PROJECT --file=dynatrace-gcp-function-logs-role.yaml
+    gcloud iam roles create $ROLE_NAME.logs --project="$GCP_PROJECT" --file=dynatrace-gcp-function-logs-role.yaml
   fi
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml -O dynatrace-gcp-function-metrics-role.yaml
-  if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.metrics" --project=$GCP_PROJECT --format="value(name)") ]]; then
+  if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.metrics" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     echo "Updating existing IAM role $ROLE_NAME.metrics"
-    gcloud iam roles update $ROLE_NAME.metrics --project=$GCP_PROJECT --file=dynatrace-gcp-function-metrics-role.yaml --quiet
+    gcloud iam roles update $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=dynatrace-gcp-function-metrics-role.yaml --quiet
   else
-    gcloud iam roles create $ROLE_NAME.metrics --project=$GCP_PROJECT --file=dynatrace-gcp-function-metrics-role.yaml
+    gcloud iam roles create $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=dynatrace-gcp-function-metrics-role.yaml
   fi
 fi
 
 echo
 echo "- 5. Grant the required IAM policies to the service account."
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role=projects/$GCP_PROJECT/roles/$ROLE_NAME.logs
+  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.logs"
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role=projects/$GCP_PROJECT/roles/$ROLE_NAME.metrics
+  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.metrics"
 fi
 
 echo
@@ -304,7 +304,7 @@ helm install dynatrace-gcp-function.tgz --set gcpProjectId="$GCP_PROJECT",deploy
 
 echo
 echo "- 8. Create an annotation for the service account."
-kubectl annotate serviceaccount --namespace dynatrace dynatrace-gcp-function-sa iam.gke.io/gcp-service-account=$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com --overwrite
+kubectl annotate serviceaccount --namespace dynatrace "dynatrace-gcp-function-sa iam.gke.io/gcp-service-account=$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --overwrite
 
 echo
 echo "- Deployment complete, check if containers are running:"
