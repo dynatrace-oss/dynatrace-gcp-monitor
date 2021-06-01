@@ -1,4 +1,6 @@
 # COMMON VALUES
+# GCP project ID
+gcpProjectId: ""
 # deploymentType:
 # if set to metrics - deploy only one container to send GCP metrics to Dynatrace
 # if set to logs - deploy only one container to send GCP logs to Dynatrace
@@ -42,7 +44,7 @@ httpProxy: ""
 httpsProxy: ""
 # Import predefined dashboards for selected services. Allowed values: "true"/"yes", "false"/"no"
 importDashboards: "true"
-# Import predefined alerting rules (inactive by default) for selected services. Allowed values: "true"/"yes", "false"/"no"
+# Import predefined alerting rules for selected services. Allowed values: "true"/"yes", "false"/"no"
 importAlerts: "true"
 
 # LOGS VALUES

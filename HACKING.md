@@ -34,7 +34,7 @@ Worker function execution can be tweaked with environment variables. In Google F
 | HTTP_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |  |
 | HTTPS_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |  |
 | IMPORT_DASHBOARDS | Import predefined dashboards for selected services. Allowed values: `true`/`yes`, `false`/`no` | `true` |
-| IMPORT_ALERTS | Import predefined alerting rules (inactive by default) for selected services. Allowed values: `true`/`yes`, `false`/`no` | `true` |
+| IMPORT_ALERTS | Import predefined alerting rules for selected services. Allowed values: `true`/`yes`, `false`/`no` | `true` |
 | MAX_DIMENSION_NAME_LENGTH | The maximum length of the dimension name sent to the MINT API. Longer names are truncated to the value indicated. Allowed values: positive integers. | 100 |
 | MAX_DIMENSION_VALUE_LENGTH | The maximum length of the dimension value sent to the MINT API. Longer values are truncated to the value indicated. Allowed values: positive integers. | 250 |
 | SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. Allowed values: `true`/`yes`, `false`/`no` | `false` |

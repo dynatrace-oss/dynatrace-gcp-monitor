@@ -3,6 +3,9 @@ kind: ServiceAccount
 metadata:
   name: dynatrace-gcp-function-sa
   namespace: dynatrace
+  "annotations": {
+    "iam.gke.io/gcp-service-account" : dynatrace-gcp-function-sa@{{ .Values.gcpProjectId }}.iam.gserviceaccount.com
+  }
 automountServiceAccountToken: false
 ---
 apiVersion: v1
@@ -11,6 +14,7 @@ metadata:
   name: dynatrace-gcp-function-config
   namespace: dynatrace
 data:
+  GCP_PROJECT: {{ .Values.gcpProjectId | quote }}
   REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
   SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}
   {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
@@ -120,6 +124,16 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: HTTPS_PROXY
+        - name: IMPORT_DASHBOARDS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: IMPORT_DASHBOARDS
+        - name: IMPORT_ALERTS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: IMPORT_ALERTS
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
         - name: DYNATRACE_URL_SECRET_NAME
