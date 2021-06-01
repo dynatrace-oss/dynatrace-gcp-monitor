@@ -303,10 +303,6 @@ wget https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/dow
 helm install dynatrace-gcp-function.tgz --set gcpProjectId="$GCP_PROJECT",deploymentType="$DEPLOYMENT_TYPE",dynatraceUrl="$DYNATRACE_URL",dynatraceAccessKey="$DYNATRACE_ACCESS_KEY",gcpServices="$GCP_SERVICES",serviceUsageBooking="$SERVICE_USAGE_BOOKING",useProxy="$USE_PROXY",httpProxy="$HTTP_PROXY",httpsProxy="$HTTPS_PROXY",requireValidCertificate="$REQUIRE_VALID_CERTIFICATE",selfMonitoringEnabled="$SELF_MONITORING_ENABLED",dynatraceLogIngestUrl="$DYNATRACE_LOG_INGEST_URL",logsSubscriptionProject="$GCP_PROJECT",logsSubscriptionId="$LOGS_SUBSCRIPTION_ID" --generate-name --namespace dynatrace
 
 echo
-echo "- 8. Create an annotation for the service account."
-kubectl annotate serviceaccount --namespace dynatrace "dynatrace-gcp-function-sa iam.gke.io/gcp-service-account=$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --overwrite
-
-echo
 echo "- Deployment complete, check if containers are running:"
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs"
