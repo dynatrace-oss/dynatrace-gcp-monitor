@@ -29,6 +29,7 @@ If you didn't find a solution please [contact Dynatrace support](https://www.dyn
 - [Expand monitoring in a Kubernetes container](https://www.dynatrace.com/support/help/shortlink/expand-k8s)
 - [Self-monitoring in Google Cloud for metrics](https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp)
 - [Self-monitoring for logs](docs/sfm_log.MD)
+- Azure [Azure monitoring](https://github.com/dynatrace-oss/dynatrace-azure-log-forwarder)
 
 
 
