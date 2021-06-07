@@ -19,7 +19,8 @@ from lib.context import LogsContext
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
-    ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH
+    ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_IDENTITY, \
+    ATTRIBUTE_AUDIT_RESULT
 
 timestamp = datetime.utcnow().isoformat() + "Z"
 
@@ -137,6 +138,9 @@ error_proto_record = {
 }
 
 error_proto_record_expected_output = {
+    ATTRIBUTE_AUDIT_ACTION: 'google.cloud.functions.v1.CloudFunctionsService.UpdateFunction',
+    ATTRIBUTE_AUDIT_IDENTITY: 'xxxxx@dynatrace.com',
+    ATTRIBUTE_AUDIT_RESULT: 'Failure.InvalidArgument',
     ATTRIBUTE_SEVERITY: 'ERROR',
     ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
     ATTRIBUTE_CLOUD_REGION: 'europe-central2',
@@ -145,7 +149,7 @@ error_proto_record_expected_output = {
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
     ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-function',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: "Build failed: build succeeded but did not produce the class \"com.example.Example\" specified as the function target: Error: class not found: com.example.Example; Error ID: 108a9950",
+    ATTRIBUTE_CONTENT: json.dumps(error_proto_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
     'faas.name': 'dynatrace-gcp-function'
 }
