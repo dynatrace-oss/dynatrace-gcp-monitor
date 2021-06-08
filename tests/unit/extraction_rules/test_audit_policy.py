@@ -89,7 +89,7 @@ expected_output_list = [
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fpolicy',
         ATTRIBUTE_AUDIT_IDENTITY: 'someone@google.com',
         ATTRIBUTE_AUDIT_ACTION: 'google.storage.NoBillingOk',
-        ATTRIBUTE_AUDIT_RESULT: 'Failure.PermissionDenied',
+        ATTRIBUTE_AUDIT_RESULT: 'Failed.PermissionDenied',
         ATTRIBUTE_SEVERITY: 'ERROR',
     }
 ]

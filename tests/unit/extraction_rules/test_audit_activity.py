@@ -324,7 +324,7 @@ expected_output_list = [
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
         ATTRIBUTE_AUDIT_IDENTITY: 'svc-gke-dynatrace-npd@mgmt-ple-prd-83f7.iam.gserviceaccount.com',
         ATTRIBUTE_AUDIT_ACTION: 'google.monitoring.v3.MetricService.CreateMetricDescriptor',
-        ATTRIBUTE_AUDIT_RESULT: 'Failure.PermissionDenied',
+        ATTRIBUTE_AUDIT_RESULT: 'Failed.PermissionDenied',
         ATTRIBUTE_SEVERITY: "ERROR"
     },
     {

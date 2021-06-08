@@ -279,7 +279,7 @@ expected_output_list = [
         ATTRIBUTE_CONTENT: json.dumps(record4),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fdata_access',
         ATTRIBUTE_AUDIT_ACTION: 'storage.objects.list',
-        ATTRIBUTE_AUDIT_RESULT: 'Failure.PermissionDenied',
+        ATTRIBUTE_AUDIT_RESULT: 'Failed.PermissionDenied',
         ATTRIBUTE_SEVERITY: "ERROR"
     },
 ]

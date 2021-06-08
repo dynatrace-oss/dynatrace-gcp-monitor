@@ -66,7 +66,7 @@ class MappingCustomFunctions(functions.Functions):
         if not proto_code:
             return "Succeeded"
         else:
-            return "Failure." + self.proto_error_code_to_string_dict.get(proto_code, "")
+            return "Failed." + self.proto_error_code_to_string_dict.get(proto_code, "")
 
 
 JMESPATH_OPTIONS = jmespath.Options(custom_functions=MappingCustomFunctions())

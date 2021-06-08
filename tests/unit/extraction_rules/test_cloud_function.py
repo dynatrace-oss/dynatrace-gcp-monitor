@@ -140,7 +140,7 @@ error_proto_record = {
 error_proto_record_expected_output = {
     ATTRIBUTE_AUDIT_ACTION: 'google.cloud.functions.v1.CloudFunctionsService.UpdateFunction',
     ATTRIBUTE_AUDIT_IDENTITY: 'xxxxx@dynatrace.com',
-    ATTRIBUTE_AUDIT_RESULT: 'Failure.InvalidArgument',
+    ATTRIBUTE_AUDIT_RESULT: 'Failed.InvalidArgument',
     ATTRIBUTE_SEVERITY: 'ERROR',
     ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
     ATTRIBUTE_CLOUD_REGION: 'europe-central2',
