@@ -15,11 +15,11 @@
         },
         {
           "key": "cloud.region",
-          "pattern": "resource.labels.region || resource.labels.location"
+          "pattern": "resource.labels.region || resource.labels.location || resource.labels.zone"
         },
         {
           "key": "gcp.region",
-          "pattern": "resource.labels.region || resource.labels.location"
+          "pattern": "resource.labels.region || resource.labels.location || resource.labels.zone"
         },
         {
           "key": "gcp.project.id",

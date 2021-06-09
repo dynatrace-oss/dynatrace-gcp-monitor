@@ -1,0 +1,33 @@
+{
+  "name": "audit_logs",
+  "displayName": "Cloud Audit Logs",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "logName",
+          "condition": "$contains('cloudaudit.googleapis.com')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "audit.identity",
+          "pattern": "protoPayload.authenticationInfo.principalEmail || protoPayload.authenticationInfo.principalSubject"
+        },
+        {
+          "key": "audit.action",
+          "pattern": "protoPayload.methodName"
+        },
+        {
+          "key": "audit.result",
+          "pattern": "status_from_proto_code(protoPayload.status.code)"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
