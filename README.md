@@ -14,8 +14,8 @@ There are two deployment options available, you can:
 
 
 ## Pricing
-- Ingested metrics will consume DDUs. For more details [refer to documentation](https://www.dynatrace.com/support/help/reference/monitoring-consumption-calculation/#expand-gcp-service-monitoring-consumption-104)
-- Ingested logs will consume DDUs. For more details [refer to documentation](https://www.dynatrace.com/support/help/reference/monitoring-consumption-calculation/log-monitoring-consumption/)
+- Ingested metrics will consume DDUs. For more details [GCP service monitoring consumption](https://www.dynatrace.com/support/help/reference/monitoring-consumption-calculation/#expand-gcp-service-monitoring-consumption-104)
+- Ingested logs will consume DDUs. For more details [Log monitoring consumption](https://www.dynatrace.com/support/help/reference/monitoring-consumption-calculation/log-monitoring-consumption/)
 
 ## Support
 Before you create a ticket check [troubleshooting guides](https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp) specific to your deployment.  
@@ -29,9 +29,8 @@ If you didn't find a solution please [contact Dynatrace support](https://www.dyn
 - [Expand monitoring in a Kubernetes container](https://www.dynatrace.com/support/help/shortlink/expand-k8s)
 - [Self-monitoring in Google Cloud for metrics](https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp)
 - [Self-monitoring for logs](docs/sfm_log.MD)
-- Azure [monitoring](https://github.com/dynatrace-oss/dynatrace-azure-log-forwarder)
-- AWS [monitoring](https://github.com/dynatrace-oss/dynatrace-aws-log-forwarder)
-
+- [Dynatrace Azure Log Forwarder](https://github.com/dynatrace-oss/dynatrace-azure-log-forwarder)
+- [Dynatrace AWS log forwarder](https://github.com/dynatrace-oss/dynatrace-aws-log-forwarder)
 
 ## Contributing
 
