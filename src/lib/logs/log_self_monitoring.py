@@ -25,7 +25,7 @@ import aiohttp
 from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity, LogsContext
 from lib.credentials import create_token, get_dynatrace_log_ingest_url_from_env
 from lib.instance_metadata import InstanceMetadata
-from lib.logs.log_forwarder_variables import GCP_PROJECT, LOGS_SUBSCRIPTION_ID, \
+from lib.logs.log_forwarder_variables import LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID, \
     SFM_WORKER_EXECUTION_PERIOD_SECONDS, MAX_SFM_MESSAGES_PROCESSED
 from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, \
     LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE, \
@@ -101,7 +101,7 @@ async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_sessi
     container_name = instance_metadata.hostname if instance_metadata else "local deployment"
     zone = instance_metadata.zone if instance_metadata else "us-east1"
     return LogsSfmContext(
-        project_id_owner=GCP_PROJECT,
+        project_id_owner=LOGS_SUBSCRIPTION_PROJECT,
         dynatrace_url=dynatrace_url,
         logs_subscription_id=LOGS_SUBSCRIPTION_ID,
         token=token,

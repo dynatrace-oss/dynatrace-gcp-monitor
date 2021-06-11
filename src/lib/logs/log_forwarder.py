@@ -28,7 +28,7 @@ from lib.credentials import get_dynatrace_api_key_from_env, get_dynatrace_log_in
     get_project_id_from_environment
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
-from lib.logs.log_forwarder_variables import MAX_SFM_MESSAGES_PROCESSED, GCP_PROJECT, \
+from lib.logs.log_forwarder_variables import MAX_SFM_MESSAGES_PROCESSED, LOGS_SUBSCRIPTION_PROJECT, \
     LOGS_SUBSCRIPTION_ID, \
     PROCESSING_WORKERS, PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES, REQUEST_BODY_MAX_SIZE
 from lib.logs.log_self_monitoring import create_sfm_worker_loop
@@ -52,7 +52,7 @@ def create_logs_context(sfm_queue: Queue):
 
 
 def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadata, asyncio_loop: AbstractEventLoop):
-    if not GCP_PROJECT or not LOGS_SUBSCRIPTION_ID:
+    if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception(
             "Cannot start pubsub streaming pull - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
 
@@ -67,7 +67,7 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
 def run_ack_logs(worker_name: str, sfm_queue: Queue):
     logging_context = LoggingContext(worker_name)
     subscriber_client = pubsub.SubscriberClient()
-    subscription_path = subscriber_client.subscription_path(GCP_PROJECT, LOGS_SUBSCRIPTION_ID)
+    subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
     logging_context.log(f"Starting processing")
 
     worker_state = WorkerState(worker_name)
