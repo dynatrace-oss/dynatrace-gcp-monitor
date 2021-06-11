@@ -51,7 +51,7 @@ system_variables = {
     # Set below-mentioned environment variables to push custom metrics to GCP Monitor
     # 'SELF_MONITORING_ENABLED': 'True',
     # 'GOOGLE_APPLICATION_CREDENTIALS': '',
-    # 'LOGS_SUBSCRIPTION_PROJECT': '',
+    # 'GCP_PROJECT': '',
     # 'LOGS_SUBSCRIPTION_ID': ''
 }
 

@@ -21,7 +21,7 @@ Worker function execution can be tweaked with environment variables. In Google F
 
 | Variable name | description   | default value |
 | ----------------- | ------------- | ----------- |
-| GCP_SERVICES     | comma separated list of services to monitor, if not specified will monitor all the services, e.g. `gce_instance,cloud_function` |  |
+| GCP_PROJECT | GCP project id | |
 | PRINT_METRIC_INGEST_INPUT | boolean value, if true will print full MINT ingest input. Allowed values: `true`/`yes`, `false`/`no` | `false` |
 | DYNATRACE_ACCESS_KEY_SECRET_NAME | name of environment variable or Google Secret Manager Secret containing Dynatrace Access Key | DYNATRACE_ACCESS_KEY |
 | DYNATRACE_URL_SECRET_NAME | name of environment variable or Google Secret Manager Secret containing Dynatrace URL | DYNATRACE_URL |
@@ -53,7 +53,7 @@ Worker function execution can be tweaked with environment variables. In Google F
 | DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS | Max number of log events in single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code  | 5000 |
 | DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE | Max size in bytes of single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code | 1048576 (1 mb) |
 | DYNATRACE_LOG_INGEST_EVENT_MAX_AGE_SECONDS | Determines max age of forwarded log event. Should be the same or lower than on cluster | 1 day |
-| LOGS_SUBSCRIPTION_PROJECT | GCP project of log sink pubsub subscription | |
+| GCP_PROJECT | GCP project of log sink pubsub subscription | |
 | LOGS_SUBSCRIPTION_ID | subscription id of log sink pubsub subscription | |
 | DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD | Period of sending batched logs to Dynatrace | 60 seconds |
 | DYNATRACE_TIMEOUT_SECONDS | Timeout of request to Dynatrace Log Ingest | 30 seconds |

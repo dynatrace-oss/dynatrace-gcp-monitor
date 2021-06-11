@@ -30,5 +30,7 @@ if [ ! -f "$FILE" ]; then
 fi
 
 sudo mv linux-amd64/helm /usr/local/bin/helm
-RESULT_STR=$(helm package ./k8s/helm-chart/dynatrace-gcp-function -d ./artefacts)
-mv ./${RESULT_STR##* } ./artefacts/dynatrace-gcp-function.tgz
+mkdir ./helm-deployment-package
+cp -r ./k8s/helm-chart/dynatrace-gcp-function ./helm-deployment-package
+cp ./scripts/deploy-helm.sh ./helm-deployment-package
+tar -cf ./artefacts/helm-deployment-package.tar ./helm-deployment-package
