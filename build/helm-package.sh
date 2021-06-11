@@ -13,23 +13,6 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-wget https://get.helm.sh/helm-v3.5.3-linux-amd64.tar.gz
-
-FILE=./helm-v3.5.3-linux-amd64.tar.gz
-if [ ! -f "$FILE" ]; then
-    echo "$FILE does not exist. Can't create helm chart."
-    exit 1
-fi
-
-tar -zxvf helm-v3.5.3-linux-amd64.tar.gz
-
-FILE=./linux-amd64/helm
-if [ ! -f "$FILE" ]; then
-    echo "$FILE does not exist. Can't create helm chart."
-    exit 1
-fi
-
-sudo mv linux-amd64/helm /usr/local/bin/helm
 mkdir ./helm-deployment-package
 cp -r ./k8s/helm-chart/dynatrace-gcp-function ./helm-deployment-package
 cp ./scripts/deploy-helm.sh ./helm-deployment-package
