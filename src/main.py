@@ -288,7 +288,10 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
             continue
     featureSets = [f"{service.name}/{service.feature_set}" for service in services]
-    context.log("Selected feature sets: " + ", ".join(featureSets))
+    if featureSets:
+        context.log("Selected feature sets: " + ", ".join(featureSets))
+    else:
+        context.log("Empty feature sets. GCP services not monitored.")
     return services
 
 
