@@ -110,6 +110,10 @@ readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{
 readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}")
 readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
 
+if [ -z "$GCP_PROJECT" ]; then
+  GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
+fi
+
 gcloud config set project "$GCP_PROJECT"
 echo "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]"
 
