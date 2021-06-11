@@ -33,7 +33,14 @@ _CONDITION_COMPARATOR_MAP = {
 
 _SOURCE_VALUE_EXTRACTOR_MAP = {
     "resourceType".casefold(): lambda record, parsed_record: parsed_record.get("gcp.resource.type", None),
+    "logName".casefold(): lambda record, parsed_record: record.get("logName", None),
 }
+
+ATTRIBUTE_AUDIT_IDENTITY = "audit.identity"
+
+ATTRIBUTE_AUDIT_ACTION = "audit.action"
+
+ATTRIBUTE_AUDIT_RESULT = "audit.result"
 
 ATTRIBUTE_SEVERITY = "severity"
 
@@ -61,7 +68,10 @@ DEFAULT_RULE_NAME = "default"
 
 COMMON_RULE_NAME = "common"
 
+AUDIT_LOGS_RULE = "audit_logs"
+
 SPECIAL_RULE_NAMES = (DEFAULT_RULE_NAME, COMMON_RULE_NAME)
+
 
 @dataclass(frozen=True)
 class Attribute:
@@ -113,12 +123,14 @@ class ConfigRule:
 
 class MetadataEngine:
     rules: List[ConfigRule]
+    audit_logs_rules: List[ConfigRule]
     default_rule: ConfigRule = None
     common_rule: ConfigRule = None
     context: LoggingContext
 
     def __init__(self):
         self.rules = []
+        self.audit_logs_rules = []
         self._load_configs()
 
     def _load_configs(self):
@@ -139,21 +151,31 @@ class MetadataEngine:
                         self.default_rule = _create_config_rules(context, config_json)[0]
                     elif config_json.get("name", "") == COMMON_RULE_NAME:
                         self.common_rule = _create_config_rules(context, config_json)[0]
+                    elif config_json.get("name", "").startswith(AUDIT_LOGS_RULE):
+                        self.audit_logs_rules = _create_config_rules(context, config_json)
                     else:
                         self.rules.extend(_create_config_rules(context, config_json))
             except Exception as e:
                 context.exception(f"Failed to load configuration file: '{config_file_path}'")
 
+    @staticmethod
+    def _apply_rules(context, rules: List[ConfigRule], record: Dict, parsed_record: Dict) -> bool:
+        any_rule_applied = False
+        for rule in rules:
+            if _check_if_rule_applies(rule, record, parsed_record):
+                _apply_rule(context, rule, record, parsed_record)
+                any_rule_applied = True
+        return any_rule_applied
+
     def apply(self, context: LoggingContext, record: Dict, parsed_record: Dict):
         try:
             if self.common_rule:
                 _apply_rule(context, self.common_rule, record, parsed_record)
-            for rule in self.rules:
-                if _check_if_rule_applies(rule, record, parsed_record):
-                    _apply_rule(context, rule, record, parsed_record)
-                    return
+            any_rule_applied = self._apply_rules(context, self.rules, record, parsed_record)
+            any_audit_rule_applied = self._apply_rules(context, self.audit_logs_rules, record, parsed_record)
             # No matching rule has been found, applying the default rule
-            if self.default_rule:
+            no_rule_applied = not (any_rule_applied or any_audit_rule_applied)
+            if no_rule_applied and self.default_rule:
                 _apply_rule(context, self.default_rule, record, parsed_record)
         except Exception:
             context.exception("Encountered exception when running Rule Engine")

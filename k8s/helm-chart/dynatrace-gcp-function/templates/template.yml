@@ -56,7 +56,7 @@ spec:
       {{- end }}
       containers:
       {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
-      - image: dynatrace/dynatrace-gcp-function
+      - image: {{ .Values.dockerImage | quote }}
         name: dynatrace-gcp-function-metrics      
         imagePullPolicy: Always
         env:
@@ -145,7 +145,7 @@ spec:
           initialDelaySeconds: 10
       {{- end }}
       {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
-      - image: dynatrace/dynatrace-gcp-function
+      - image: {{ .Values.dockerImage | quote }}
         name: dynatrace-gcp-function-logs
         imagePullPolicy: Always
         env:

@@ -41,5 +41,32 @@ class MappingCustomFunctions(functions.Functions):
         else:
             return if_false_expression.visit(if_false_expression.expression, node_scope)
 
+    # based on https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
+    proto_error_code_to_string_dict = {
+        1:  "Cancelled",
+        2:  "Unknown",
+        3:  "InvalidArgument",
+        4:  "DeadlineExceeded",
+        5:  "NotFound",
+        6:  "AlreadyExists",
+        7:  "PermissionDenied",
+        8:  "ResourceExhausted",
+        9:  "FailedPrecondition",
+        10: "Aborted",
+        11: "OutOfRange",
+        12: "Unimplemented",
+        13: "Internal",
+        14: "Unavailable",
+        15: "DataLoss",
+        16: "Unauthenticated"
+    }
+
+    @functions.signature({'types': []})
+    def _func_status_from_proto_code(self, proto_code):
+        if not proto_code:
+            return "Succeeded"
+        else:
+            return "Failed." + self.proto_error_code_to_string_dict.get(proto_code, "")
+
 
 JMESPATH_OPTIONS = jmespath.Options(custom_functions=MappingCustomFunctions())
