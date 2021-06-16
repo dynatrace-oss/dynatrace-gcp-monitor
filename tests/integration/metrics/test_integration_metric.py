@@ -40,9 +40,9 @@ MOCKED_API_PORT = 9182
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 system_variables: Dict = {
     'DYNATRACE_URL': 'http://localhost:' + str(MOCKED_API_PORT),
-    'REQUIRE_VALID_CERTIFICATE': 'False'
+    'REQUIRE_VALID_CERTIFICATE': 'False',
+    'GCP_SERVICES': "gce_instance/default,api/default,gce_instance/default,cloudsql_database/default"
     # 'DYNATRACE_ACCESS_KEY': ACCESS_KEY, this one is encoded in mocks files
-    # 'GCP_SERVICES': "gce_instance/default,api/default,gce_instance/default,cloudsql_database/default"
 }
 
 
@@ -103,7 +103,7 @@ async def test_metric_authorization_header():
 
     matched_request: RequestResponseFindResponse = Requests.get_matching_requests(request)
 
-    assert_that(matched_request).is_not_empty()
+    assert_that(matched_request.requests).is_not_empty()
 
     result: RequestResponseRequest = matched_request.requests[0]
 

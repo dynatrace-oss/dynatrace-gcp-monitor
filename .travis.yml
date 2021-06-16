@@ -48,7 +48,6 @@ jobs:
     language: minimal
     before_deploy:
     - mkdir artefacts
-    - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml    
     - chmod +x ./build/version.sh
     - sh ./build/version.sh
     - sh ./build/helm-package.sh

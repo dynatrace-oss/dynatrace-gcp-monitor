@@ -73,7 +73,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
     else:
         context = LoggingContext(None)
 
-    selected_services = None
+    selected_services = []
     if "GCP_SERVICES" in os.environ:
         selected_services_string = os.environ.get("GCP_SERVICES", "")
         selected_services = selected_services_string.split(",") if selected_services_string else []
@@ -249,7 +249,7 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
             activation_yaml = yaml.safe_load(activation_file)
     except Exception:
         activation_yaml = yaml.safe_load(os.environ.get("ACTIVATION_CONFIG", ""))
-    activation_config = {service_activation.get('service'): service_activation for service_activation in activation_yaml.get('services', [])} if activation_yaml else {}
+    activation_config = {service_activation.get('service'): service_activation for service_activation in activation_yaml['services']} if activation_yaml and activation_yaml['services'] else {}
 
     working_directory = os.path.dirname(os.path.realpath(__file__))
     config_directory = os.path.join(working_directory, "config")
@@ -269,18 +269,29 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
 
                 for service_yaml in config_yaml.get("gcp", {}):
                     service_name=service_yaml.get("service", "None")
+                    featureSet=service_yaml.get("featureSet", "None")
                     # If whitelist of services exists and current service is not present in it, skip
-                    should_skip = selected_featuresets and \
-                                  (f'{service_name}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets)
+                    if activation_config:
+                        activation_config_feature_sets = activation_config.get(service_name, {}).get("featureSets", [])
+                        should_skip = featureSet not in activation_config_feature_sets
+                        activation = activation_config.get(service_name)
+                        gcp_service = GCPService(tech_name=technology_name, activation=activation, **service_yaml)
+                    else:
+                        should_skip = f'{service_name}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets
+                        gcp_service = GCPService(tech_name=technology_name, **service_yaml)
                     if should_skip:
                         continue
-                    activation = activation_config.get(service_name)
-                    services.append(GCPService(tech_name=technology_name, activation=activation, **service_yaml))
+
+                    services.append(gcp_service)
+
         except Exception as error:
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
             continue
     featureSets = [f"{service.name}/{service.feature_set}" for service in services]
-    context.log("Selected feature sets: " + ", ".join(featureSets))
+    if featureSets:
+        context.log("Selected feature sets: " + ", ".join(featureSets))
+    else:
+        context.log("Empty feature sets. GCP services not monitored.")
     return services
 
 

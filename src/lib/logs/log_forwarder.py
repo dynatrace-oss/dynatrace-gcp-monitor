@@ -54,7 +54,7 @@ def create_logs_context(sfm_queue: Queue):
 def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadata, asyncio_loop: AbstractEventLoop):
     if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception(
-            "Cannot start pubsub streaming pull - LOGS_SUBSCRIPTION_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
+            "Cannot start pubsub streaming pull - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
 
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
     asyncio.run_coroutine_threadsafe(create_sfm_worker_loop(sfm_queue, logging_context, instance_metadata),

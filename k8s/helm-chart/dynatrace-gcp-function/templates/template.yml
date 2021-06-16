@@ -1,3 +1,17 @@
+#     Copyright 2020 Dynatrace LLC
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -7,49 +21,6 @@ metadata:
     "iam.gke.io/gcp-service-account" : dynatrace-gcp-function-sa@{{ .Values.gcpProjectId }}.iam.gserviceaccount.com
   }
 automountServiceAccountToken: false
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dynatrace-gcp-function-config
-  namespace: dynatrace
-data:
-  GCP_PROJECT: {{ .Values.gcpProjectId | quote }}
-  REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
-  SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}
-  {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
-  GCP_SERVICES: {{ .Values.gcpServices | quote }}
-  PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
-  SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
-  USE_PROXY: {{ .Values.useProxy | quote }}
-  HTTP_PROXY: {{ .Values.httpProxy | quote }}
-  HTTPS_PROXY: {{ .Values.httpsProxy | quote }}
-  IMPORT_DASHBOARDS: {{ .Values.importDashboards | quote }}
-  IMPORT_ALERTS: {{ .Values.importAlerts | quote }}
-  GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
-  {{- end }}
-  {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
-  LOGS_SUBSCRIPTION_PROJECT: {{ .Values.logsSubscriptionProject | quote }}
-  LOGS_SUBSCRIPTION_ID: {{ .Values.logsSubscriptionId | quote }}
-  DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH: {{ .Values.logIngestContentMaxLength | quote }}
-  DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH: {{ .Values.logIngestAttributeValueMaxLength | quote }}
-  DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS: {{ .Values.logIngestRequestMaxEvents | quote }}
-  DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
-  DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
-  {{- end }}
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: dynatrace-gcp-function-secret
-  namespace: dynatrace
-type: "kubernetes.io/storageos"
-data:
-  access-key: {{ .Values.dynatraceAccessKey | b64enc | quote }}
-  url: {{ .Values.dynatraceUrl | b64enc | quote }}
-  log-ingest-url: {{ .Values.dynatraceLogIngestUrl | b64enc | quote }}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -69,6 +40,8 @@ spec:
         app: dynatrace-gcp-function
       annotations:
         "version" : "1"
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
       serviceAccountName: dynatrace-gcp-function-sa
       automountServiceAccountToken: false
@@ -89,11 +62,6 @@ spec:
         env:
         - name: OPERATION_MODE
           value: Metrics
-        - name: GCP_SERVICES
-          valueFrom:
-            configMapKeyRef:
-              name: dynatrace-gcp-function-config
-              key: GCP_SERVICES
         - name: PRINT_METRIC_INGEST_INPUT
           valueFrom:
             configMapKeyRef:
@@ -183,11 +151,11 @@ spec:
         env:
         - name: OPERATION_MODE
           value: Logs
-        - name: LOGS_SUBSCRIPTION_PROJECT
+        - name: GCP_PROJECT
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
-              key: LOGS_SUBSCRIPTION_PROJECT
+              key: GCP_PROJECT
         - name: LOGS_SUBSCRIPTION_ID
           valueFrom:
             configMapKeyRef:
