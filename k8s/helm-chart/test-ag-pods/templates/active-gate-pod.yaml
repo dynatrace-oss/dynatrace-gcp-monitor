@@ -38,6 +38,7 @@ spec:
     metadata:
       labels:
         app: dynatrace-gcpmon
+        envid: {{ template "environmentID" .}}
       annotations:
         "version": "1"
     spec:
