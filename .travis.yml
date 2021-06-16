@@ -84,15 +84,9 @@ jobs:
       - if [ ! -d ${HOME}/google-cloud-sdk ]; then
           curl https://sdk.cloud.google.com | bash;
         fi
-      # Install kubectl
-      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
-      # Install helm
-      - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
     before_script:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
-      - gcloud config set project dynatrace-gcp-extension
-      - gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project dynatrace-gcp-extension
     script:
       - chmod +x ./tests/e2e/deployment-test.sh
       - sh ./tests/e2e/deployment-test.sh
