@@ -20,13 +20,13 @@ cp -r ./k8s/helm-chart/dynatrace-gcp-function/ ./e2e_test/dynatrace-gcp-function
 
 VALUES_FILE="./e2e_test/dynatrace-gcp-function/values.yaml"
 
-sed -e '/^gcpProjectId:/c\gcpProjectId: "'${GCP_PROJECT_ID}'"' ${VALUES_FILE}
-sed -e '/^deploymentType:/c\deploymentType: "logs"' ${VALUES_FILE}
-sed -e '/^dynatraceAccessKey:/c\dynatraceAccessKey: "'${DYNATRACE_ACCESS_KEY}'"' ${VALUES_FILE}
-sed -e '/^dynatraceLogIngestUrl:/c\dynatraceLogIngestUrl: "'${DYNATRACE_LOG_INGEST_URL}'"' ${VALUES_FILE}
-sed -e '/^logsSubscriptionId:/c\logsSubscriptionId: "'${PUBSUB_SUBSCRIPTION}'"' ${VALUES_FILE}
-sed -e '/^requireValidCertificate:/c\requireValidCertificate: "false"' ${VALUES_FILE}
+sed -i '/^gcpProjectId:/c\gcpProjectId: "'${GCP_PROJECT_ID}'"' ${VALUES_FILE}
+sed -i '/^deploymentType:/c\deploymentType: "logs"' ${VALUES_FILE}
+sed -i '/^dynatraceAccessKey:/c\dynatraceAccessKey: "'${DYNATRACE_ACCESS_KEY}'"' ${VALUES_FILE}
+sed -i '/^dynatraceLogIngestUrl:/c\dynatraceLogIngestUrl: "'${DYNATRACE_LOG_INGEST_URL}'"' ${VALUES_FILE}
+sed -i '/^logsSubscriptionId:/c\logsSubscriptionId: "'${PUBSUB_SUBSCRIPTION}'"' ${VALUES_FILE}
+sed -i '/^requireValidCertificate:/c\requireValidCertificate: "false"' ${VALUES_FILE}
 
 
 chmod +x ./e2e_test/deploy-helm.sh
-./scripts/deploy-helm.sh --service-account e2e-test-dynatrace-gcp-function-sa --role-name e2e_test_dynatrace_function
+./e2e_test/deploy-helm.sh --service-account e2e-test-dynatrace-gcp-function-sa --role-name e2e_test_dynatrace_function
