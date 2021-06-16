@@ -89,7 +89,7 @@ jobs:
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
     script:
       - chmod +x ./tests/e2e/deployment-test.sh
-      - sh ./tests/e2e/deployment-test.sh
+      - ./tests/e2e/deployment-test.sh
     after_script:
       - gcloud pubsub subscriptions delete "$PUBSUB_SUBSCRIPTION"
       - gcloud pubsub topics delete "$PUBSUB_TOPIC"

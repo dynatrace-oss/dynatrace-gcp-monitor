@@ -67,4 +67,5 @@ sed -i '/^requireValidCertificate:/c\requireValidCertificate: "false"' ${VALUES_
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
 
 chmod +x ./e2e_test/deploy-helm.sh
-./e2e_test/deploy-helm.sh --service-account e2e-test-dynatrace-gcp-function-sa --role-name e2e_test_dynatrace_function
+cd e2e_test
+./deploy-helm.sh --service-account e2e-test-dynatrace-gcp-function-sa --role-name e2e_test_dynatrace_function
