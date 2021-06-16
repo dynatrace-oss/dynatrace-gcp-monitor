@@ -95,7 +95,7 @@ jobs:
       - gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project dynatrace-gcp-extension
     script:
       - chmod +x ./tests/e2e/deployment-test.sh
-      - ./tests/e2e/deployment-test.sh
+      - sh ./tests/e2e/deployment-test.sh
     after_script:
       - gcloud pubsub subscriptions delete "$PUBSUB_SUBSCRIPTION"
       - gcloud pubsub topics delete "$PUBSUB_TOPIC"
