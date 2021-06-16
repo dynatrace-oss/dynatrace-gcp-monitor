@@ -7,6 +7,7 @@ stages:
 - tests
 - docker-build
 - github-deploy
+- e2e-deployment-test-logs
 env:
   global:
   - TAG=$TRAVIS_TAG
@@ -60,3 +61,44 @@ jobs:
       skip_cleanup: true
       on:
         tags: true
+
+  - stage: e2e-deployment-test-logs
+    name: E2E GCP deployment test
+    sudo: required
+    language: minimal
+    if: branch IN (master, E2E-deployment-test)
+    cache:
+      directories:
+        - "$HOME/google-cloud-sdk/"
+    env:
+      - PATH=$PATH:${HOME}/google-cloud-sdk/bin CLOUDSDK_CORE_DISABLE_PROMPTS=1
+      - PUBSUB_TOPIC="e2e_test_topic_${TRAVIS_BRANCH}"
+      - PUBSUB_SUBSCRIPTION="e2e_test_subscription_${TRAVIS_BRANCH}"
+      - K8S_CLUSTER="e2e-test-master"
+      - GCP_PROJECT_ID="dynatrace-gcp-extension"
+      - secure: "PS8O/Kr5Z0E4AwJY4IFTpI4oGvbatM3gZZTEb+3Gf+qKCq3+mFTXM777X7u8638x1qwtjmCPe8/GOQQ/4QkGGwHXXC/24ZdlkrUi59rUFcVXgY5ZucLNqD10fAt2hCiwZb3CjI8UKauU56eJgSWWDbUUOnO3IBPKJGSo+wEfQviGa0/ReRyH3glxeNWozURXWMllHiKTUqGF/SOImetPuML68PUxiIhm/62del1u9nuQjHu8ag8TTKtivbtZnGgCK3EEER9UT1kVItWVfPjG+ShKcfyH7W4J40wVCwVLGUqhe9Aem3TMgQOdoAeTFBjap8KXM6A1WiAWFqHOk/vqFrreep4zsfPieRAdNa+HqyGFrJm93Wh4jXR7GrrwxXh4gPxG/y+vjTJI8zGvU1iaRBhLSqseAnBtx5Je7XdQM3nKiXaIQYhb3UsUSNlgbexefL8u5jlCqJoNpj1inybLOBH6W1ToApThUayRmKUKRqq8ktrPYZcogMdAdTZcbDv++zh1/hrP+ZCoeNe7ef+5aHqIYzNpJA0sZSadLXMBAsinNUB+OrrJTOKwQWVRGoJzLDoQQcZzO6L7AAXwp9cLbxkzH1r3AV90sD1bWIXcOz9MVYsludiqTCiwUAUi2Xirywp1oW8s94a1U8nW838hXVH7FG7ErGA9HZpB0mk9AeA="
+      - secure: "HoND9u6TsC7DjshaHPwFbYFj3z7UyB4LdjVhLp/ILr2JD0c6ijOt+SDZOroeYgdipCHPFfK0mK95UCaNVHjdsMTutkE1k+W6VolhIbjPfZcfh9l+9BMp0RoLgDiwDBmRG99EwHfgmm2pBMDIuKMxE5wIpdfKNLlh+fM7MuStQ5bg7VxPUONg16rmeE+c1J1lwH68UufVMVc6bZLJcmi4YKXf6i0V0Mj9x7fWsGAEoTB9RNTZ2Mr3Wi8mjfz3paTT40OPwXqMq3Gx7tazIfjcggOsol3TMAeJC5k2EJ8UH42H/Y19JCspo0eDrl/n7lVdqLZrxj9yTkLhJU0DdVmAysSWsKmS7j3re+atspFqN2opoQP+rVQ2Y59ZNcbMaBMVi0BUedM9o6zkwsHeA+wxjU4db7kBAQoAe46Xv/S6C7PIPkkRchZFvPL8uceHFcH97YrPs6p4u1HMZX0Jz3643F3ENLASXgSpOVBQDMLV2/kGv9R2FA7TweVLkDqgagwN9pGQnNfZCaHSg7lcOmjs5fbMXPSpGTP7AbOeisC0N1En7hP/CYm2Vz95TC3hRoGbfvS9hAyhiimkuQ2D/GbqluEM4bey5DMU5Qja1IMtaB6VfwrtjDIGxJyTGLifRjFOuwwolOPx+wap7OczR+9Y6mM0lfrWVvv507AgpIjiXG8="
+
+    install:
+      # Install GCP SDK if not already cached
+      - if [ ! -d ${HOME}/google-cloud-sdk ]; then
+          curl https://sdk.cloud.google.com | bash;
+        fi
+      # Install kubectl
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
+      # Install helm
+      - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+    before_script:
+      - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
+      - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
+      - gcloud config set project dynatrace-gcp-extension
+      - gcloud --version
+      - gcloud pubsub topics create "$PUBSUB_TOPIC"
+      - gcloud pubsub subscriptions create "$PUBSUB_SUBSCRIPTION" --topic="$PUBSUB_TOPIC" --ack-deadline=120
+      - gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project dynatrace-gcp-extension
+    script:
+      - chmod +x ./tests/e2e/deployment-test.sh
+      - ./tests/e2e/deployment-test.sh
+    after_script:
+      - gcloud pubsub subscriptions delete "$PUBSUB_SUBSCRIPTION" --topic="$PUBSUB_TOPIC"
+      - gcloud pubsub topics delete "$PUBSUB_TOPIC"
