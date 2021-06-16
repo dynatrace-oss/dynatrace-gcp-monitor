@@ -100,5 +100,5 @@ jobs:
       - chmod +x ./tests/e2e/deployment-test.sh
       - ./tests/e2e/deployment-test.sh
     after_script:
-      - gcloud pubsub subscriptions delete "$PUBSUB_SUBSCRIPTION" --topic="$PUBSUB_TOPIC"
+      - gcloud pubsub subscriptions delete "$PUBSUB_SUBSCRIPTION"
       - gcloud pubsub topics delete "$PUBSUB_TOPIC"
