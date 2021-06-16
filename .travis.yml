@@ -92,9 +92,6 @@ jobs:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
       - gcloud config set project dynatrace-gcp-extension
-      - gcloud --version
-      - gcloud pubsub topics create "$PUBSUB_TOPIC"
-      - gcloud pubsub subscriptions create "$PUBSUB_SUBSCRIPTION" --topic="$PUBSUB_TOPIC" --ack-deadline=120
       - gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project dynatrace-gcp-extension
     script:
       - chmod +x ./tests/e2e/deployment-test.sh

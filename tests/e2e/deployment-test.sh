@@ -13,6 +13,18 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+if [[ $(gcloud pubsub topics list --filter=name:"${PUBSUB_TOPIC}" --format="value(name)") ]]; then
+    echo "Topic [${PUBSUB_TOPIC}] already exists, skipping"
+else
+    gcloud pubsub topics create "${PUBSUB_TOPIC}"
+fi
+
+if [[ $(gcloud pubsub subscriptions list --filter=name:"${PUBSUB_SUBSCRIPTION}" --format="value(name)") ]]; then
+    echo "Subscription [${PUBSUB_SUBSCRIPTION}] already exists, skipping"
+else
+    gcloud pubsub subscriptions create "${PUBSUB_SUBSCRIPTION}" --topic="${PUBSUB_TOPIC}" --ack-deadline=120
+fi
+
 rm -rf ./e2e_test
 mkdir ./e2e_test
 cp ./scripts/deploy-helm.sh ./e2e_test/deploy-helm.sh
