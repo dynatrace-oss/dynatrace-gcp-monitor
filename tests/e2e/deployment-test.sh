@@ -68,4 +68,4 @@ gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 
 
 chmod +x ./e2e_test/deploy-helm.sh
 cd e2e_test
-./deploy-helm.sh --service-account e2e-test-gcp-function-sa --role-name e2e_test_gcp_function
+./deploy-helm.sh --service-account e2e-test-gcp-function-sa --role-name e2e_test_gcp_function --quiet
