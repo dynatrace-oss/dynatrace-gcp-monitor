@@ -71,7 +71,8 @@ jobs:
       directories:
         - "$HOME/google-cloud-sdk/"
     env:
-      - PATH=$PATH:${HOME}/google-cloud-sdk/bin CLOUDSDK_CORE_DISABLE_PROMPTS=1
+      - PATH=$PATH:${HOME}/google-cloud-sdk/bin
+      - CLOUDSDK_CORE_DISABLE_PROMPTS=1
       - PUBSUB_TOPIC="e2e_test_topic_${TRAVIS_BRANCH}"
       - PUBSUB_SUBSCRIPTION="e2e_test_subscription_${TRAVIS_BRANCH}"
       - K8S_CLUSTER="e2e-test-master"
@@ -89,7 +90,12 @@ jobs:
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
     script:
       - chmod +x ./tests/e2e/deployment-test.sh
-      - ./tests/e2e/deployment-test.sh
+      - ./tests/e2e/deployment-test.sh --logs
+      - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
+      - ./tests/e2e/deployment-test.sh --metrics
+      - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
+      - ./tests/e2e/deployment-test.sh --all
+      - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
     after_script:
       - gcloud pubsub subscriptions delete "$PUBSUB_SUBSCRIPTION"
       - gcloud pubsub topics delete "$PUBSUB_TOPIC"

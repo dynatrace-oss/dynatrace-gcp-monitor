@@ -13,6 +13,42 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+check_container_state()
+{
+  CONTAINER=$1
+  CONTAINER_STATE=$(kubectl -n dynatrace get pods -o=jsonpath="{.items[*].status.containerStatuses[?(@.name==\"${CONTAINER}\")].state}")
+  if [[ "${CONTAINER_STATE}" != *"running"* ]]; then
+    return 1
+  fi
+  return 0
+}
+
+while (( "$#" )); do
+    case "$1" in
+            "--logs")
+                DEPLOYMENT_TYPE="logs"
+                shift
+            ;;
+
+            "--metrics")
+                DEPLOYMENT_TYPE="metrics"
+                shift
+            ;;
+
+            "--all")
+                DEPLOYMENT_TYPE="all"
+                shift
+            ;;
+
+            *)
+            echo "Unknown param $1"
+            print_help
+            exit 1
+    esac
+done
+
+
+
 # Install kubectl.
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
 
@@ -58,7 +94,7 @@ cp -r ./k8s/helm-chart/dynatrace-gcp-function/ ./e2e_test/dynatrace-gcp-function
 VALUES_FILE="./e2e_test/dynatrace-gcp-function/values.yaml"
 
 sed -i '/^gcpProjectId:/c\gcpProjectId: "'${GCP_PROJECT_ID}'"' ${VALUES_FILE}
-sed -i '/^deploymentType:/c\deploymentType: "logs"' ${VALUES_FILE}
+sed -i '/^deploymentType:/c\deploymentType: "'${DEPLOYMENT_TYPE}'"' ${VALUES_FILE}
 sed -i '/^dynatraceAccessKey:/c\dynatraceAccessKey: "'${TARGET_API_TOKEN}'"' ${VALUES_FILE}
 sed -i '/^dynatraceLogIngestUrl:/c\dynatraceLogIngestUrl: "'${DYNATRACE_LOG_INGEST_URL}'"' ${VALUES_FILE}
 sed -i '/^logsSubscriptionId:/c\logsSubscriptionId: "'${PUBSUB_SUBSCRIPTION}'"' ${VALUES_FILE}
@@ -66,6 +102,49 @@ sed -i '/^requireValidCertificate:/c\requireValidCertificate: "false"' ${VALUES_
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
 
-chmod +x ./e2e_test/deploy-helm.sh
-cd e2e_test
+cd ./e2e_test || exit
+chmod +x ./deploy-helm.sh
 ./deploy-helm.sh --service-account e2e-test-gcp-function-sa --role-name e2e_test_gcp_function --quiet
+
+# Verify containers running
+echo
+echo -n "Verifying deployment result"
+METRICS_CONTAINER_STATE=0
+LOGS_CONTAINER_STATE=0
+
+for i in {1..30}
+do
+  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+    check_container_state "dynatrace-gcp-function-metrics"
+    METRICS_CONTAINER_STATE=$?
+  fi
+
+  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
+    check_container_state "dynatrace-gcp-function-logs"
+    LOGS_CONTAINER_STATE=$?
+  fi
+
+  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+    break
+  fi
+
+  sleep 5
+  echo -n "."
+done
+
+echo
+kubectl -n dynatrace get pods
+
+if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+  echo "Deployment completed successfully"
+  exit 0
+else
+  echo "Deployment failed"
+  exit 1
+fi
+
+
+
+
+
+
