@@ -95,8 +95,9 @@ VALUES_FILE="./e2e_test/dynatrace-gcp-function/values.yaml"
 
 sed -i '/^gcpProjectId:/c\gcpProjectId: "'${GCP_PROJECT_ID}'"' ${VALUES_FILE}
 sed -i '/^deploymentType:/c\deploymentType: "'${DEPLOYMENT_TYPE}'"' ${VALUES_FILE}
-sed -i '/^dynatraceAccessKey:/c\dynatraceAccessKey: "'${TARGET_API_TOKEN}'"' ${VALUES_FILE}
+sed -i '/^dynatraceAccessKey:/c\dynatraceAccessKey: "'${DYNATRACE_ACCESS_KEY}'"' ${VALUES_FILE}
 sed -i '/^dynatraceLogIngestUrl:/c\dynatraceLogIngestUrl: "'${DYNATRACE_LOG_INGEST_URL}'"' ${VALUES_FILE}
+sed -i '/^dynatraceUrl:/c\dynatraceUrl: "'${DYNATRACE_URL}'"' ${VALUES_FILE}
 sed -i '/^logsSubscriptionId:/c\logsSubscriptionId: "'${PUBSUB_SUBSCRIPTION}'"' ${VALUES_FILE}
 sed -i '/^requireValidCertificate:/c\requireValidCertificate: "false"' ${VALUES_FILE}
 
