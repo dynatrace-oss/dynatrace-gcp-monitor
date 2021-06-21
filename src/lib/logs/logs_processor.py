@@ -76,6 +76,8 @@ def _do_process_message(context: LogsContext, message: PubsubMessage):
 
 
 def _create_dt_log_payload(context: LogsContext, message_data: str) -> Optional[Dict]:
+    if not message_data:
+        return None
     record = json.loads(message_data)
     parsed_record = {}
 
