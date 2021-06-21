@@ -139,7 +139,7 @@ check_if_parameter_is_empty()
   PARAMETER_NAME=$2
   if [ -z "$PARAMETER" ]
   then
-    echo "Missing required parameter: $PARAMETER_NAME. Please set proper value in activation-config.yaml"
+    echo "Missing required parameter: $PARAMETER_NAME. Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
     exit
   fi
 }
@@ -168,14 +168,14 @@ then
     exit
 fi
 
-check_if_parameter_is_empty "$GCP_PUBSUB_TOPIC" "GCP_PUBSUB_TOPIC"
-check_if_parameter_is_empty "$GCP_SCHEDULER_NAME" "GCP_SCHEDULER_NAME"
-check_if_parameter_is_empty "$DYNATRACE_URL_SECRET_NAME" "DYNATRACE_URL_SECRET_NAME"
-check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY_SECRET_NAME" "DYNATRACE_ACCESS_KEY_SECRET_NAME"
-check_if_parameter_is_empty "$GCP_FUNCTION_NAME" "GCP_FUNCTION_NAME"
-check_if_parameter_is_empty "$GCP_IAM_ROLE" "GCP_IAM_ROLE"
-check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "GCP_SERVICE_ACCOUNT"
-check_if_parameter_is_empty "$GCP_SCHEDULER_CRON" "GCP_SCHEDULER_CRON"
+check_if_parameter_is_empty "$GCP_PUBSUB_TOPIC" "'googleCloud.metrics.pubSubTopic'"
+check_if_parameter_is_empty "$GCP_SCHEDULER_NAME" "'googleCloud.metrics.scheduler'"
+check_if_parameter_is_empty "$DYNATRACE_URL_SECRET_NAME" "'googleCloud.common.dynatraceUrlSecretName'"
+check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY_SECRET_NAME" "'googleCloud.common.dynatraceAccessKeySecretName'"
+check_if_parameter_is_empty "$GCP_FUNCTION_NAME" 'googleCloud.metrics.function'
+check_if_parameter_is_empty "$GCP_IAM_ROLE" "'googleCloud.common.iamRole'"
+check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "'googleCloud.common.serviceAccount'"
+check_if_parameter_is_empty "$GCP_SCHEDULER_CRON" "'googleCloud.metrics.schedulerSchedule'"
 
 GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
@@ -247,13 +247,13 @@ fi
 
 echo -e
 echo "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]"
-if [[ $(gcloud secrets list --filter=name:$DYNATRACE_URL_SECRET_NAME --format="value(name)" ) ]]; then
+if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_URL_SECRET_NAME$" --format="value(name)" ) ]]; then
     echo "Secret [$DYNATRACE_URL_SECRET_NAME] already exists, skipping"
 else
     printf "$DYNATRACE_URL" | gcloud secrets create $DYNATRACE_URL_SECRET_NAME --data-file=- --replication-policy=automatic
 fi
 
-if [[ $(gcloud secrets list --filter=name:$DYNATRACE_ACCESS_KEY_SECRET_NAME --format="value(name)" ) ]]; then
+if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" ) ]]; then
     echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, skipping"
 else
     stty -echo
@@ -263,7 +263,7 @@ fi
 
 echo -e
 echo "- create GCP IAM Role"
-if [[ $(gcloud iam service-accounts list --filter=name:$GCP_IAM_ROLE --format="value(name)") ]]; then
+if [[ $(gcloud iam roles list --filter="name ~ $GCP_IAM_ROLE$" --format="value(name)" --project="$GCP_PROJECT") ]]; then
     echo "Role [$GCP_IAM_ROLE] already exists, skipping"
 else
     readonly GCP_IAM_ROLE_TITLE="Dynatrace GCP Metrics Function"
@@ -314,6 +314,7 @@ else
     gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
 fi
 
+IMPORTED_DASHBOARD_IDS=()
 if [[ "${IMPORT_DASHBOARDS,,}" =~ ^(yes|true)$ ]] ; then
   EXISTING_DASHBOARDS=$(dt_api "api/config/v1/dashboards" | jq -r '.dashboards[].name | select (. |contains("Google"))')
   if [ -n "${EXISTING_DASHBOARDS}" ]; then
@@ -330,13 +331,17 @@ if [[ "${IMPORT_DASHBOARDS,,}" =~ ^(yes|true)$ ]] ; then
             warn "Unable to create dashboard($?)\n$DASHBOARD_RESPONSE"
             continue
           fi
-          DASHBOARD_ID=$(jq -r .id <<< "$DASHBOARD_RESPONSE")
-          DASHBOARD_SHARE_RESPONSE=$(dt_api "api/config/v1/dashboards/${DASHBOARD_ID}/shareSettings" \
-            PUT "{ \"id\": \"${DASHBOARD_ID}\",\"published\": \"true\", \"enabled\" : \"true\", \"publicAccess\" : { \"managementZoneIds\": [], \"urls\": {}}, \"permissions\": [ { \"type\": \"ALL\", \"permission\": \"VIEW\"} ] }"\
-            ) || warn "Unable to set dashboard permissions($?)\n$DASHBOARD_SHARE_RESPONSE"
+          IMPORTED_DASHBOARD_IDS+=("$(jq -r .id <<< "$DASHBOARD_RESPONSE")")
     else
       echo "- Dashboard [$DASHBOARD_NAME] already exists on cluster, skipping"
     fi
+  done
+
+  for DASHBOARD_ID in "${IMPORTED_DASHBOARD_IDS[@]}"
+  do
+    DASHBOARD_SHARE_RESPONSE=$(dt_api "api/config/v1/dashboards/${DASHBOARD_ID}/shareSettings" \
+        PUT "{ \"id\": \"${DASHBOARD_ID}\",\"published\": \"true\", \"preset\": \"true\", \"enabled\" : \"true\", \"publicAccess\" : { \"managementZoneIds\": [], \"urls\": {}}, \"permissions\": [ { \"type\": \"ALL\", \"permission\": \"VIEW\"} ] }"\
+        ) || warn "Unable to set dashboard permissions($?)\n$DASHBOARD_SHARE_RESPONSE"
   done
 
 else
