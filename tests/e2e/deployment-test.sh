@@ -143,9 +143,3 @@ else
   echo "Deployment failed"
   exit 1
 fi
-
-
-
-
-
-
