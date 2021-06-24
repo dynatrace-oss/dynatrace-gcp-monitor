@@ -7,7 +7,7 @@ stages:
 - tests
 - docker-build
 - github-deploy
-- e2e-deployment-test-logs
+- e2e-deployment-test
 env:
   global:
   - TAG=$TRAVIS_TAG
@@ -62,7 +62,7 @@ jobs:
       on:
         tags: true
 
-  - stage: e2e-deployment-test-logs
+  - stage: e2e-deployment-test
     name: E2E GCP deployment test
     sudo: required
     language: minimal
