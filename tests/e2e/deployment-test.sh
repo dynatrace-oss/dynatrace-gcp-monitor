@@ -129,7 +129,7 @@ do
     break
   fi
 
-  sleep 5
+  sleep 10
   echo -n "."
 done
 
