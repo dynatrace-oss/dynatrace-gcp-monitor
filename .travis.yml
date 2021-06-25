@@ -66,7 +66,7 @@ jobs:
     name: E2E GCP deployment test
     sudo: required
     language: minimal
-    if: branch = master OR type = pull_request
+    if: (branch = master OR type = pull_request) AND fork = false
     cache:
       directories:
         - "$HOME/google-cloud-sdk/"
