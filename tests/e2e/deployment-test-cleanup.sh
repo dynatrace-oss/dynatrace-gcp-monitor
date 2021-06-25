@@ -15,6 +15,6 @@
 
 gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}"
 gcloud pubsub topics delete "${PUBSUB_TOPIC}"
-gcloud iam service-accounts delete "${IAM_SERVICE_ACCOUNT}"
-gcloud iam roles delete "${IAM_ROLE_PREFIX.logs}"
-gcloud iam roles delete "${IAM_ROLE_PREFIX.metrics}"
+gcloud iam service-accounts delete "${IAM_SERVICE_ACCOUNT}@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
+gcloud iam roles delete "${IAM_ROLE_PREFIX}.logs" --project="${GCP_PROJECT_ID}" > /dev/null
+gcloud iam roles delete "${IAM_ROLE_PREFIX}.metrics" --project="${GCP_PROJECT_ID}" > /dev/null
