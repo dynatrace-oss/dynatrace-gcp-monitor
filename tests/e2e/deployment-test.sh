@@ -105,7 +105,7 @@ gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 
 
 cd ./e2e_test || exit 1
 chmod +x ./deploy-helm.sh
-./deploy-helm.sh --service-account e2e-test-gcp-function-sa --role-name e2e_test_gcp_function --quiet || exit 1
+./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 
 # Verify containers running
 echo
