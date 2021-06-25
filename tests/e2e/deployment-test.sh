@@ -103,9 +103,9 @@ sed -i '/^requireValidCertificate:/c\requireValidCertificate: "false"' ${VALUES_
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
 
-cd ./e2e_test || exit
+cd ./e2e_test || exit 1
 chmod +x ./deploy-helm.sh
-./deploy-helm.sh --service-account e2e-test-gcp-function-sa --role-name e2e_test_gcp_function --quiet
+./deploy-helm.sh --service-account e2e-test-gcp-function-sa --role-name e2e_test_gcp_function --quiet || exit 1
 
 # Verify containers running
 echo
