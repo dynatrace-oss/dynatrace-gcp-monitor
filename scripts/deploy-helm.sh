@@ -43,6 +43,8 @@ arguments:
     --role-name ROLE_NAME
                             IAM role name prefix
                             By default 'dynatrace_function' will be used as prefix (e.g. dynatrace_function.metrics).
+     -q, --quiet
+                            Reduce output verbosity, progress messages and errors are still printed.
     "
 }
 
@@ -216,7 +218,7 @@ echo "- 7. Install dynatrace-gcp-function with helm chart."
 helm install ./dynatrace-gcp-function --generate-name --namespace dynatrace  > ${CMD_OUT_PIPE}
 
 echo
-echo "- Deployment complete, check if containers are running:"
+echo "- Deployment complete, check if containers are running:"  > ${CMD_OUT_PIPE}
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs"  > ${CMD_OUT_PIPE}
 fi
