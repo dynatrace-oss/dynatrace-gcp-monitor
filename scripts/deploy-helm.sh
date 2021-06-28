@@ -43,6 +43,8 @@ arguments:
     --role-name ROLE_NAME
                             IAM role name prefix
                             By default 'dynatrace_function' will be used as prefix (e.g. dynatrace_function.metrics).
+     -q, --quiet
+                            Reduce output verbosity, progress messages and errors are still printed.
     "
 }
 
@@ -79,6 +81,8 @@ then
     exit
 fi
 
+CMD_OUT_PIPE="/dev/stdout"
+
 while (( "$#" )); do
     case "$1" in
             "-h" | "--help")
@@ -94,6 +98,11 @@ while (( "$#" )); do
             "--role-name")
                 ROLE_NAME=$2
                 shift; shift
+            ;;
+
+            "-q" | "--quiet")
+                CMD_OUT_PIPE="/dev/null"
+                shift
             ;;
 
             *)
@@ -153,7 +162,7 @@ echo "- 1. Create dynatrace namespace in k8s cluster."
 if [[ $(kubectl get namespace dynatrace --ignore-not-found) ]]; then
   echo "namespace dynatrace already exists";
 else
-  kubectl create namespace dynatrace
+  kubectl create namespace dynatrace > ${CMD_OUT_PIPE}
 fi;
 
 echo
@@ -161,59 +170,59 @@ echo "- 2. Create IAM service account."
 if [[ $(gcloud iam service-accounts list --filter="name ~ serviceAccounts/$SA_NAME@" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     echo "Service Account [$SA_NAME] already exists, skipping"
 else
-    gcloud iam service-accounts create "$SA_NAME"
+    gcloud iam service-accounts create "$SA_NAME" > ${CMD_OUT_PIPE}
 fi
 
 echo
 echo "- 3. Configure the IAM service account for Workload Identity."
-gcloud iam service-accounts add-iam-policy-binding --role roles/iam.workloadIdentityUser --member "serviceAccount:$GCP_PROJECT.svc.id.goog[dynatrace/dynatrace-gcp-function-sa]" "$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com"
+gcloud iam service-accounts add-iam-policy-binding "$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role roles/iam.workloadIdentityUser --member "serviceAccount:$GCP_PROJECT.svc.id.goog[dynatrace/dynatrace-gcp-function-sa]"  > ${CMD_OUT_PIPE}
 
 echo
 echo "- 4. Create dynatrace-gcp-function IAM role(s)."
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml -O dynatrace-gcp-function-logs-role.yaml
+  wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml -O dynatrace-gcp-function-logs-role.yaml  > ${CMD_OUT_PIPE}
   if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.logs" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     echo "Updating existing IAM role $ROLE_NAME.logs"
-    gcloud iam roles update $ROLE_NAME.logs --project="$GCP_PROJECT" --file=dynatrace-gcp-function-logs-role.yaml --quiet
+    gcloud iam roles update $ROLE_NAME.logs --project="$GCP_PROJECT" --file=dynatrace-gcp-function-logs-role.yaml > ${CMD_OUT_PIPE}
   else
-    gcloud iam roles create $ROLE_NAME.logs --project="$GCP_PROJECT" --file=dynatrace-gcp-function-logs-role.yaml
+    gcloud iam roles create $ROLE_NAME.logs --project="$GCP_PROJECT" --file=dynatrace-gcp-function-logs-role.yaml > ${CMD_OUT_PIPE}
   fi
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml -O dynatrace-gcp-function-metrics-role.yaml
+  wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml -O dynatrace-gcp-function-metrics-role.yaml  > ${CMD_OUT_PIPE}
   if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.metrics" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     echo "Updating existing IAM role $ROLE_NAME.metrics"
-    gcloud iam roles update $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=dynatrace-gcp-function-metrics-role.yaml --quiet
+    gcloud iam roles update $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=dynatrace-gcp-function-metrics-role.yaml  > ${CMD_OUT_PIPE}
   else
-    gcloud iam roles create $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=dynatrace-gcp-function-metrics-role.yaml
+    gcloud iam roles create $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=dynatrace-gcp-function-metrics-role.yaml > ${CMD_OUT_PIPE}
   fi
 fi
 
 echo
 echo "- 5. Grant the required IAM policies to the service account."
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.logs"
+  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.logs"  > ${CMD_OUT_PIPE}
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.metrics"
+  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.metrics"  > ${CMD_OUT_PIPE}
 fi
 
 echo
 echo "- 6. Enable the APIs required for monitoring."
-gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com cloudresourcemanager.googleapis.com
+gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com cloudresourcemanager.googleapis.com  > ${CMD_OUT_PIPE}
 
 echo
 echo "- 7. Install dynatrace-gcp-function with helm chart."
-helm install ./dynatrace-gcp-function --generate-name --namespace dynatrace
+helm install ./dynatrace-gcp-function --generate-name --namespace dynatrace  > ${CMD_OUT_PIPE}
 
 echo
-echo "- Deployment complete, check if containers are running:"
+echo "- Deployment complete, check if containers are running:"  > ${CMD_OUT_PIPE}
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs"
+  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs"  > ${CMD_OUT_PIPE}
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics"
+  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics"  > ${CMD_OUT_PIPE}
 fi
