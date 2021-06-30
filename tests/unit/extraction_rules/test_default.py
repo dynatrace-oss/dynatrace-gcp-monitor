@@ -85,6 +85,11 @@ def test_extraction():
     assert actual_output == expected_output
 
 
+def test_extraction_empty_record():
+    actual_output = logs_processor._create_dt_log_payload(logs_context, "")
+    assert actual_output is None
+
+
 def test_trimming_attribute_values(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setattr(logs_processor, 'ATTRIBUTE_VALUE_LENGTH_LIMIT', 4)
     actual_output = logs_processor._create_dt_log_payload(logs_context, record_string)
