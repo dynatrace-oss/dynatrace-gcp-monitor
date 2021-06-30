@@ -32,7 +32,7 @@
 {{- define "imagePullSecret" }}
 {{- $name := (include "environmentID" .)}}
 {{- with .Values }}
-{{- printf  "{\"auths\":{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"auth\":\"%s\"}}}" .dynatraceUrl $name .dynatracePaasToken (printf "%s:%s" $name .dynatracePaasToken | b64enc) | b64enc }}
+{{- printf  "{\"auths\":{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"auth\":\"%s\"}}}" .dynatraceUrl $name .activeGate.dynatracePaasToken (printf "%s:%s" $name .activeGate.dynatracePaasToken | b64enc) | b64enc }}
 {{- end }}
 {{- end }}
 
