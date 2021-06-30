@@ -1,0 +1,108 @@
+# Copyright 2021 Dynatrace LLC
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+{{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
+  {{- if (.Values.activeGate.autoDeploy) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: dynatrace-activegate-gcpmon-router
+  namespace: dynatrace
+spec:
+  type: ClusterIP
+  selector:
+    app: dynatrace-ag-gcpmon
+  ports:
+    - protocol: TCP
+      port: {{ .Values.activeGate.autoDeployPort }}
+      targetPort: ag-https
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dynatrace-gcpmon-pullsecret
+  namespace: dynatrace
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: {{ template "imagePullSecret" . }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dynatrace-ag-gcpmon
+  labels:
+    app: dynatrace-ag-gcpmon
+  namespace: dynatrace
+spec:
+  selector:
+    matchLabels:
+      app: dynatrace-ag-gcpmon
+  replicas: 1
+  serviceName: dynatrace-ag-gcpmon
+  template:
+    metadata:
+      labels:
+        app: dynatrace-ag-gcpmon
+        envid: {{ template "environmentID" . }}
+      annotations:
+        "version": "1"
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: dynatrace-ag-gcpmon
+          image: {{ template "activeGateImage" . }}
+          imagePullPolicy: Always
+          ports:
+            - name: ag-https
+              containerPort: 9999
+          env:
+            - name: DT_CAPABILITIES
+              value: "log_analytics_collector"
+            - name: DT_ID_SEED_NAMESPACE
+              value: dynatrace
+            - name: DT_ID_SEED_PROJECT
+              value: {{ .Values.gcpProjectId }}
+            - name: DT_ID_SEED_ENV_ID
+              value: {{ template "environmentID" . }}
+            - name: DT_ID_SEED_CAPABILITIES
+              value: "gcp_monitoring"
+          resources:
+            requests:
+              memory: 1024Mi
+              cpu: 1
+            limits:
+              memory: 1024Mi
+              cpu: 1
+          livenessProbe:
+            httpGet:
+              path: /rest/state
+              port: 9999
+              scheme: HTTPS
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /rest/state
+              port: 9999
+              scheme: HTTPS
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 2
+      imagePullSecrets:
+        - name: dynatrace-gcpmon-pullsecret
+  updateStrategy:
+    type: RollingUpdate
+  {{- end }}
+{{- end }}

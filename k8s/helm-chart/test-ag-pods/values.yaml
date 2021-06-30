@@ -1,6 +1,0 @@
-dynatraceUrl: "https://example.com"
-#dynatracePaasToken is a PaaS token used when active gate is installed in a container
-dynatracePaasToken: ""
-
-k8s:
-  server: https://kubernetes-api-server-url:443

@@ -38,4 +38,5 @@ data:
   DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS: {{ .Values.logIngestRequestMaxEvents | quote }}
   DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
+  DYNATRACE_ACTIVE_GATE_AUTO_DEPLOY: {{ .Values.activeGate.autoDeploy | quote }}
   {{- end }}
