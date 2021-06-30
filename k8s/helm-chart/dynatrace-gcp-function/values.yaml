@@ -31,6 +31,18 @@ dynatraceAccessKey: ""
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
 
+#dynatraceLogIngestUrl ActiveGate endpoint used to ingest logs to Dynatrace, for example: https://environemnt-active-gate-url:9999/e/environment-id"
+#used ONLY when the activeGate.autoDeploy is false
+dynatraceLogIngestUrl: ""
+
+activeGate:
+  #autoDeploy if set to true the Active Gate will be deployed in k8s. In that case also the activeGate.dynatracePaasToken must be filled.
+  autoDeploy: true
+  #autoDeployPort port used by Active Gate pod on which AG is exposed.
+  autoDeployPort : 9999
+  #dynatracePaasToken PaaS token, generated in Dynatrace cluster.
+  dynatracePaasToken: ""
+
 # METRICS VALUES - REQUIRED for 'metrics' and 'all' deployment
 # Dynatrace environment endpoint, for example: https://environment-id.live.dynatrace.com
 dynatraceUrl: ""
