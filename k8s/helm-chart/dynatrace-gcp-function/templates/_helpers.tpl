@@ -55,7 +55,7 @@ activeGateUrl in case of the .Values.activeGate.autoDeploy is
 {{- define "activeGateUrl" }}
 {{- if .Values.activeGate.autoDeploy}}  
   {{- $envid := (include "environmentID" .)}}
-  {{- printf "https://dynatrace-activegate-gcpmon-router.dynatrace.svc.cluster.local:%d/e/%s"  (int .Values.activeGate.autoDeployPort) $envid | quote}}    
+  {{- printf "https://dynatrace-activegate-gcpmon-router.dynatrace.svc.cluster.local:%d/e/%s"  (int .Values.activeGate.autoDeployPort) $envid }}    
 {{- else -}}
   {{- printf "%s" .Values.dynatraceLogIngestUrl }}
 {{- end -}}
