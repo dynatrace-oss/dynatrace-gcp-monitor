@@ -35,7 +35,7 @@ log_record = {
     "k8s-pod/pod-template-hash": "a1b2c3d4"
   },
   "logName": "projects/dynatrace-gcp-extension/logs/stdout",
-  "receiveTimestamp": "2021-03-17T19:58:21.010751872Z",
+  "receiveTimestamp": timestamp,
   "resource": {
     "labels": {
       "cluster_name": "test-cluster",
