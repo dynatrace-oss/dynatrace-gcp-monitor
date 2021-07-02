@@ -19,6 +19,7 @@ from functools import partial
 from queue import Queue
 from typing import List
 
+from google.api_core.exceptions import Forbidden
 from google.cloud import pubsub
 from google.cloud.pubsub_v1 import SubscriberClient
 from google.pubsub_v1 import PullRequest, PullResponse
@@ -75,7 +76,12 @@ def run_ack_logs(worker_name: str, sfm_queue: Queue):
         try:
             perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path)
         except Exception as e:
-            logging_context.exception("Failed to pull messages")
+            if isinstance(e, Forbidden):
+                logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.")
+            else:
+                logging_context.exception("Failed to pull messages")
+            # Backoff for 1 minute to avoid spamming requests and logs
+            time.sleep(60)
 
 
 def perform_pull(worker_state: WorkerState,
