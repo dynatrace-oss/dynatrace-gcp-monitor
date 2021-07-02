@@ -122,6 +122,7 @@ class ConfigureDynatrace:
         available_dashboards = self.get_ext_resources("dashboards", "dashboard", lambda x: {
             'name': x.get("dashboardMetadata", {}).get("name", "")})
         dashboards_to_install = [dash for dash in available_dashboards if dash["name"] not in existing_dashboards]
+        installed_dashboards = []
 
         self.logging_context.log(f"Available dashboards: {[dash['name'] for dash in available_dashboards]}")
         if dashboards_to_install:
@@ -129,26 +130,33 @@ class ConfigureDynatrace:
             for dashboard in dashboards_to_install:
                 dashboard_id = await self.post_dashboard(dt_api, dashboard["path"], dashboard["name"], False)
                 if dashboard_id:
-                    try:
-                        response = await dt_api.call("PUT", f"/api/config/v1/dashboards/{dashboard_id}/shareSettings",
-                                                     {"id": f"{dashboard_id}",
-                                                      "published": "true",
-                                                      "enabled": "true",
-                                                      "publicAccess": {
-                                                          "managementZoneIds": [],
-                                                          "urls": {}
-                                                      }, "permissions": [
-                                                         {"type": "ALL", "permission": "VIEW"}
-                                                        ]
-                                                      }
-                                                     )
-                        response.raise_for_status()
-                    except Exception as e:
-                        self.logging_context.log(
-                            f"Unable to apply permissions for dashboard {dashboard_id}, details: {e}")
+                    installed_dashboards.append(dashboard_id)
         else:
             self.logging_context.log(
                 f"All dashboards already installed, skipping. (if you wish to upgrade a dashboard, please delete it first)")
+
+        if installed_dashboards:
+            for dashboard_id in installed_dashboards:
+                await self.post_dashboard_share_settings(dashboard_id, dt_api)
+
+    async def post_dashboard_share_settings(self, dashboard_id, dt_api):
+        try:
+            response = await dt_api.call("PUT", f"/api/config/v1/dashboards/{dashboard_id}/shareSettings",
+                                         {"id": f"{dashboard_id}",
+                                          "published": "true",
+                                          "preset": "true",
+                                          "enabled": "true",
+                                          "publicAccess": {
+                                              "managementZoneIds": [],
+                                              "urls": {}
+                                          }, "permissions": [
+                                             {"type": "ALL", "permission": "VIEW"}
+                                         ]
+                                          }
+                                         )
+            response.raise_for_status()
+        except Exception as e:
+            self.logging_context.log(f"Unable to apply permissions for dashboard {dashboard_id}, details: {e}")
 
     async def import_alerts(self, dt_api: DtApi):
         existing_alerts = await self.get_existing_alerts(dt_api)
