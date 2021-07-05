@@ -42,10 +42,10 @@ arguments:
     --role-name ROLE_NAME
                             IAM role name prefix
                             By default 'dynatrace_function' will be used as prefix (e.g. dynatrace_function.metrics).
-    --create-gke-cluster
+    --create-autopilot-cluster
                             Create new GKE Autopilot cluster and deploy dynatrace-gcp-function into it.
     --autopilot-cluster-name CLUSTER_NAME
-                            Name of new GKE Autopilot cluster to be created if '--create-gke-cluster option' was selected.
+                            Name of new GKE Autopilot cluster to be created if '--create-autopilot-cluster option' was selected.
                             By default 'dynatrace-gcp-function' will be used.
     -q, --quiet
                             Reduce output verbosity, progress messages and errors are still printed.
@@ -102,7 +102,7 @@ while (( "$#" )); do
                 shift; shift
             ;;
 
-            "--create-gke-cluster")
+            "--create-autopilot-cluster")
                 CREATE_AUTOPILOT_CLUSTER="Y"
                 shift
             ;;
