@@ -155,6 +155,35 @@ fi
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
+
+  readonly LOGS_SUBSCRIPTION_FULL_ID="projects/$GCP_PROJECT/subscriptions/$LOGS_SUBSCRIPTION_ID"
+
+  if ! [[ $(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(name)") ]];
+  then
+    echo "Pub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
+    exit 1
+  fi
+
+  INVALID_PUBSUB=false
+
+  readonly ACK_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(ackDeadlineSeconds)")
+  if [[ "$ACK_DEADLINE" != "120" ]];
+  then
+    echo "Invalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
+    INVALID_PUBSUB=true
+  fi
+
+  readonly MESSAGE_RETENTION_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(messageRetentionDuration)")
+  if [[ "$MESSAGE_RETENTION_DEADLINE" != "86400s" ]];
+  then
+    echo "Invalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
+    INVALID_PUBSUB=true
+  fi
+
+  if "$INVALID_PUBSUB";
+  then
+    exit 1
+  fi
 fi
 
 echo
