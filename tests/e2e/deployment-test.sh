@@ -50,10 +50,10 @@ done
 
 
 # Install kubectl.
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
+curl -sSLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
 
 # Install helm.
-wget https://get.helm.sh/helm-v3.5.3-linux-amd64.tar.gz
+wget --no-verbose https://get.helm.sh/helm-v3.5.3-linux-amd64.tar.gz
 FILE=./helm-v3.5.3-linux-amd64.tar.gz
 if [ ! -f "$FILE" ]; then
     echo "$FILE does not exist. Can't create helm chart."
