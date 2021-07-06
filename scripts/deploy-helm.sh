@@ -30,9 +30,42 @@ check_if_parameter_is_empty()
   fi
 }
 
-print_help()
+check_api_token()
 {
-   printf "
+  URL=$1
+  if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"); then
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
+    RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
+    if [ "$CODE" -ge 300 ]; then
+      echo "Failed to check Dynatrace API token permissions - please verify provided URL and API token. $RESPONSE"
+      exit 1
+    fi
+    for scope in "${API_TOKEN_SCOPES[@]}"; do
+      if ! grep -q "$scope" <<< "$RESPONSE"; then
+        echo "Missing permission for the API token: $scope."
+        echo "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: $DEPLOYMENT_TYPE"
+        exit 1
+      fi
+    done
+  else
+      echo "Failed to check Dynatrace API token permissions - please verify provided URL and API token."
+  fi
+}
+
+check_url()
+{
+    URL=$1
+    REGEX=$2
+    MESSAGE=$3
+    if ! [[ "$URL" =~ $REGEX ]]
+    then
+      echo "$MESSAGE"
+      exit 1
+    fi
+}
+
+print_help() {
+  printf "
 usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME]
 
 arguments:
@@ -112,12 +145,16 @@ while (( "$#" )); do
     esac
 done
 
+readonly DYNATRACE_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}$"
+readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[a-z0-9-]{1,36}$"
+
 readonly GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
 readonly DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
 readonly DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}")
 readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}")
 readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}")
 readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
+API_TOKEN_SCOPES=("metrics.ingest" "logs.ingest" "ReadConfig" "WriteConfig")
 
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
@@ -134,15 +171,17 @@ if [ -z "$ROLE_NAME" ]; then
   ROLE_NAME="dynatrace_function"
 fi
 
-check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
-
 if [ -z "$DEPLOYMENT_TYPE" ]; then
   DEPLOYMENT_TYPE="all"
   echo "Deploying metrics and logs ingest"
 elif [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "Deploying metrics and logs ingest"
-elif [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+elif [[ $DEPLOYMENT_TYPE == logs ]]; then
   echo "Deploying $DEPLOYMENT_TYPE ingest"
+  API_TOKEN_SCOPES=("logs.ingest")
+elif [[ $DEPLOYMENT_TYPE == metrics ]]; then
+  echo "Deploying $DEPLOYMENT_TYPE ingest"
+  API_TOKEN_SCOPES=("metrics.ingest" "ReadConfig" "WriteConfig")
 else
   echo "Invalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
   exit 1
@@ -150,11 +189,16 @@ fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
+  check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
+  check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://environment-id.live.dynatrace.com"
+  check_api_token "$DYNATRACE_URL"
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
+  check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://environemnt-active-gate-url:9999/e/environment-id"
+  check_api_token "$DYNATRACE_LOG_INGEST_URL"
 fi
 
 echo
