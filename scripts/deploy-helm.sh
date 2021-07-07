@@ -219,7 +219,7 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   SELECTED_REGION=$(gcloud config get-value compute/region 2>/dev/null)
   if [ -z "$SELECTED_REGION" ]; then
     echo
-    echo - e "\e[93mWARNING: \e[37mDefault region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
+    echo -e "\e[93mWARNING: \e[37mDefault region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
     exit 1
   fi
   echo
