@@ -18,3 +18,4 @@ gcloud pubsub topics delete "${PUBSUB_TOPIC}"
 gcloud iam service-accounts delete "${IAM_SERVICE_ACCOUNT}@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.logs" --project="${GCP_PROJECT_ID}" > /dev/null
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.metrics" --project="${GCP_PROJECT_ID}" > /dev/null
+gcloud container images delete "${GCR_NAME}:e2e-travis-test-${TAG}"

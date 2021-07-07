@@ -84,6 +84,10 @@ else
     gcloud pubsub subscriptions create "${PUBSUB_SUBSCRIPTION}" --topic="${PUBSUB_TOPIC}" --ack-deadline=120 --message-retention-duration=86400
 fi
 
+# Deploy docker image
+docker pull dynatrace/dynatrace-gcp-function:${TAG}
+docker tag dynatrace/dynatrace-gcp-function:${TAG} ${GCR_NAME}:e2e-travis-test-${TAG}
+docker push ${GCR_NAME}:e2e-travis-test-${TAG}
 
 # Run helm deployment.
 rm -rf ./e2e_test
@@ -100,6 +104,7 @@ sed -i '/^dynatraceLogIngestUrl:/c\dynatraceLogIngestUrl: "'${DYNATRACE_LOG_INGE
 sed -i '/^dynatraceUrl:/c\dynatraceUrl: "'${DYNATRACE_URL}'"' ${VALUES_FILE}
 sed -i '/^logsSubscriptionId:/c\logsSubscriptionId: "'${PUBSUB_SUBSCRIPTION}'"' ${VALUES_FILE}
 sed -i '/^requireValidCertificate:/c\requireValidCertificate: "false"' ${VALUES_FILE}
+sed -i '/^dockerImage:/c\dockerImage: "'${GCR_NAME}':e2e-travis-test-'$TAG'"' ${VALUES_FILE}
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
 
