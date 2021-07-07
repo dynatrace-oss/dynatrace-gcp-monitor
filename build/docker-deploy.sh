@@ -23,6 +23,6 @@ if [[ "${PUSH:-}" == "true" ]]; then
     docker push dynatrace/dynatrace-gcp-function:latest
 elif [[ "${PUSH:-}" != "true" && "${E2E:-}" == "true" ]]; then
     ./build/version.sh
-    docker tag dynatrace-gcp-function ${GCR_NAME}:e2e-travis-test-$TAG
-    docker push ${GCR_NAME}:e2e-travis-test-$TAG
+    docker tag dynatrace-gcp-function ${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}
+    docker push ${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}
 fi
