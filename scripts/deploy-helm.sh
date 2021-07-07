@@ -206,7 +206,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health") || ACTIVE_GATE_CONNECTIVITY=N
   if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]
   then
-        echo -e "\e[93mWARNING: \e[37mUnable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL. It can be ignored if ActiveGate host network configuration doeas not allow acces from outside of k8s cluster."
+        echo -e "\e[93mWARNING: \e[37mUnable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL. It can be ignored if ActiveGate host network configuration does not allow acces from outside of k8s cluster."
   fi
   if [[ "$ACTIVE_GATE_STATE" != "RUNNING" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]
   then
