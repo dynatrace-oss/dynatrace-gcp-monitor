@@ -14,7 +14,7 @@
 #     limitations under the License.
 
 onFailure() {
-    echo -e "- deployment failed, please examine error messages and run again"
+    echo -e "\e[91m- deployment failed, please examine error messages and run again"
     exit 2
 }
 trap onFailure ERR
@@ -59,7 +59,7 @@ check_url()
     MESSAGE=$3
     if ! [[ "$URL" =~ $REGEX ]]
     then
-      echo "$MESSAGE"
+      echo -e "\e[93mWARNING: \e[37m$MESSAGE"
       exit 1
     fi
 }
@@ -221,7 +221,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
   if ! [[ $(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(name)") ]];
   then
-    echo "Pub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
+    echo -e "\e[93mWARNING: \e[37mPub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
     exit 1
   fi
 
@@ -230,14 +230,14 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   readonly ACK_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(ackDeadlineSeconds)")
   if [[ "$ACK_DEADLINE" != "120" ]];
   then
-    echo "Invalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
+    echo -e "\e[93mWARNING: \e[37mInvalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
     INVALID_PUBSUB=true
   fi
 
   readonly MESSAGE_RETENTION_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(messageRetentionDuration)")
   if [[ "$MESSAGE_RETENTION_DEADLINE" != "86400s" ]];
   then
-    echo "Invalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
+    echo -e "\e[93mWARNING: \e[37mInvalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
     INVALID_PUBSUB=true
   fi
 
