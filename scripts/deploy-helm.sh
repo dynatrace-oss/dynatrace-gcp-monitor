@@ -32,7 +32,7 @@ check_if_parameter_is_empty()
 
 check_api_token()
 {
-  URL=$1
+  URL=$(echo "$1" | sed 's:/*$::')
   if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
@@ -162,8 +162,8 @@ while (( "$#" )); do
     esac
 done
 
-readonly DYNATRACE_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}$"
-readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[a-z0-9-]{1,36}$"
+readonly DYNATRACE_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=\/]{1,256}$"
+readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9\/]{1,36}$"
 
 readonly GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
 readonly DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
