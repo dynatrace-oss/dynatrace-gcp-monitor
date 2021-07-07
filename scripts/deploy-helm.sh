@@ -197,7 +197,7 @@ fi
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
-  check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://environemnt-active-gate-url:9999/e/environment-id"
+  check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://environment-active-gate-url:9999/e/environment-id"
   check_api_token "$DYNATRACE_LOG_INGEST_URL"
 fi
 
