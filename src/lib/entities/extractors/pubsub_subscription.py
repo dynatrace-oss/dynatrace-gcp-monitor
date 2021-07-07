@@ -67,13 +67,13 @@ def _cloud_function_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: G
             id=create_entity_id(cd, svc_def),
             display_name=_extract_label(cd.get("name", ""), 2),
             group=svc_def.technology_name,
-            ip_addresses=frozenset(),
-            listen_ports=frozenset(),
+            ip_addresses=[],
+            listen_ports=[],
             favicon_url="no-gcp-icon-available",
             dtype=svc_def.technology_name,
             properties=_get_properties(cd),
-            tags=frozenset(),
-            dns_names=frozenset()
+            tags=[],
+            dns_names=[]
         ) for cd in page.get("subscriptions", [])
     ]
 
