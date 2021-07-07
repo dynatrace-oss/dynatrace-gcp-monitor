@@ -69,15 +69,21 @@ print_help() {
 usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME]
 
 arguments:
-    -h, --help              Show this help message and exit
     --service-account SA_NAME
                             IAM service account name
                             By default 'dynatrace-gcp-function-sa' will be used.
     --role-name ROLE_NAME
                             IAM role name prefix
                             By default 'dynatrace_function' will be used as prefix (e.g. dynatrace_function.metrics).
-     -q, --quiet
+    --create-autopilot-cluster
+                            Create new GKE Autopilot cluster and deploy dynatrace-gcp-function into it.
+    --autopilot-cluster-name CLUSTER_NAME
+                            Name of new GKE Autopilot cluster to be created if '--create-autopilot-cluster option' was selected.
+                            By default 'dynatrace-gcp-function' will be used.
+    -q, --quiet
                             Reduce output verbosity, progress messages and errors are still printed.
+    -h, --help
+                            Show this help message and exit
     "
 }
 
@@ -115,14 +121,10 @@ then
 fi
 
 CMD_OUT_PIPE="/dev/stdout"
+AUTOPILOT_CLUSTER_NAME="dynatrace-gcp-function"
 
 while (( "$#" )); do
     case "$1" in
-            "-h" | "--help")
-                print_help
-                exit 0
-            ;;
-
             "--service-account")
                 SA_NAME=$2
                 shift; shift
@@ -133,9 +135,24 @@ while (( "$#" )); do
                 shift; shift
             ;;
 
+            "--create-autopilot-cluster")
+                CREATE_AUTOPILOT_CLUSTER="Y"
+                shift
+            ;;
+
+            "--autopilot-cluster-name")
+                AUTOPILOT_CLUSTER_NAME=$2
+                shift; shift
+            ;;
+
             "-q" | "--quiet")
                 CMD_OUT_PIPE="/dev/null"
                 shift
+            ;;
+
+            "-h" | "--help")
+                print_help
+                exit 0
             ;;
 
             *)
@@ -199,7 +216,50 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
   check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
   check_api_token "$DYNATRACE_LOG_INGEST_URL"
+
+  readonly LOGS_SUBSCRIPTION_FULL_ID="projects/$GCP_PROJECT/subscriptions/$LOGS_SUBSCRIPTION_ID"
+
+  if ! [[ $(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(name)") ]];
+  then
+    echo "Pub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
+    exit 1
+  fi
+
+  INVALID_PUBSUB=false
+
+  readonly ACK_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(ackDeadlineSeconds)")
+  if [[ "$ACK_DEADLINE" != "120" ]];
+  then
+    echo "Invalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
+    INVALID_PUBSUB=true
+  fi
+
+  readonly MESSAGE_RETENTION_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(messageRetentionDuration)")
+  if [[ "$MESSAGE_RETENTION_DEADLINE" != "86400s" ]];
+  then
+    echo "Invalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
+    INVALID_PUBSUB=true
+  fi
+
+  if "$INVALID_PUBSUB";
+  then
+    exit 1
+  fi
 fi
+
+if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
+  SELECTED_REGION=$(gcloud config get-value compute/region 2>/dev/null)
+  if [ -z "$SELECTED_REGION" ]; then
+    echo
+    echo "\e[93mWARNING: \e[37mDefault region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
+    exit 1
+  fi
+  echo
+  echo "- Create and connect GKE Autopilot k8s cluster ${AUTOPILOT_CLUSTER_NAME}."
+  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" > ${CMD_OUT_PIPE}
+  gcloud container clusters get-credentials "${AUTOPILOT_CLUSTER_NAME}" --project ${GCP_PROJECT} > ${CMD_OUT_PIPE}
+fi;
+
 
 echo
 echo "- 1. Create dynatrace namespace in k8s cluster."

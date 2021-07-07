@@ -71,7 +71,6 @@ jobs:
       directories:
         - "$HOME/google-cloud-sdk/"
     env:
-      - PATH=$PATH:${HOME}/google-cloud-sdk/bin
       - CLOUDSDK_CORE_DISABLE_PROMPTS=1
       - PUBSUB_TOPIC="e2e_test_topic_${TRAVIS_BUILD_ID}"
       - PUBSUB_SUBSCRIPTION="e2e_test_subscription_${TRAVIS_BUILD_ID}"
@@ -84,9 +83,9 @@ jobs:
       - secure: "lLtHDwhxPT9AbA6MxJr9/A2RCuw0S4OJY9WgVaEXrCCeqfEOMl371Il9M0LEwoNDJrJU9sC8Jp212FsnckkUjd0t94ozd02ppHSzEEhn1KNK5KA80/GfGGou4BN4+U0sYrLYOJmTTOnKPB/wVVGpzSVirfX4Q3c8iCOmBCNf5GxInzNZT4m9kUxSm/FQgU+1Qyj1THjpCZtVeriJ/A8cjIJcb//aUIJWnYdqtfDXuqhHXfUYJN9Upo0QJowu6TbSxrBA2zj8RPiutiqUiLGyFtvCJmNQ3uH9Cz74N5Wb6tfvLdqE+xYf4LVrH7GC/DbPAwm5pjwLEAPZ9SrR3GqcCN0FQuFSrBXHQRVqAqfc9n6Hdngtsn7O9CLxvB6XRXY/Lmx1pDH+pKChwBnxlgm6M5UAEutFknv5Df7BFUDsYQ/iXRmJTMbuPo6gxGeluIRjw00EKoKvZWGmUO0JKiOQ3vyjJYDRBG8sR2T9JH1xGPk8fUmP+sRuae0ezr+QFv7Bdu/NCWqGZGEFQA4svbhYQYcIEIrWAlGpk62KncNxq4/udRQWf/82rkb7Dpwwq0vMR20e6cv/0ReWiQ1pmxFBGWNSJ5c0LQgBQ+2d2ujqP+hDmXvDC2pRgZO3JNbIA1bUoDAchm0qoABzgXzGaXMLN0ALuRw8GGvqaRBMBjNaU80="
     install:
       # Install GCP SDK if not already cached
-      - if [ ! -d ${HOME}/google-cloud-sdk ]; then
-          curl https://sdk.cloud.google.com | bash;
-        fi
+      - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
+      - source $HOME/google-cloud-sdk/path.bash.inc
+      - gcloud version
     before_script:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
