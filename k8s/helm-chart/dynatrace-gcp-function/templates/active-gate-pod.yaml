@@ -12,25 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
-  {{- if (.Values.activeGate.autoDeploy) }}
+  {{- if eq .Values.activeGate.useExisting "false" }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: dynatrace-activegate-gcpmon-router
+  name: dynatrace-activegate-gcpmon-clusterip
   namespace: dynatrace
 spec:
   type: ClusterIP
   selector:
-    app: dynatrace-ag-gcpmon
+    app: dynatrace-activegate-gcpmon
   ports:
     - protocol: TCP
-      port: {{ .Values.activeGate.autoDeployPort }}
-      targetPort: ag-https
+      port: 9999
+      targetPort: 9999
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dynatrace-gcpmon-pullsecret
+  name: dynatrace-activegate-gcpmon-pullsecret
   namespace: dynatrace
 type: kubernetes.io/dockerconfigjson
 data:
@@ -39,20 +39,20 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dynatrace-ag-gcpmon
+  name: dynatrace-activegate-gcpmon
   labels:
-    app: dynatrace-ag-gcpmon
+    app: dynatrace-activegate-gcpmon
   namespace: dynatrace
 spec:
   selector:
     matchLabels:
-      app: dynatrace-ag-gcpmon
+      app: dynatrace-activegate-gcpmon
   replicas: 1
-  serviceName: dynatrace-ag-gcpmon
+  serviceName: dynatrace-activegate-gcpmon
   template:
     metadata:
       labels:
-        app: dynatrace-ag-gcpmon
+        app: dynatrace-activegate-gcpmon
         envid: {{ template "environmentID" . }}
       annotations:
         "version": "1"
@@ -60,23 +60,23 @@ spec:
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
       containers:
-        - name: dynatrace-ag-gcpmon
+        - name: dynatrace-activegate-gcpmon
           image: {{ template "activeGateImage" . }}
           imagePullPolicy: Always
           ports:
-            - name: ag-https
+            - name: ag-port
               containerPort: 9999
           env:
             - name: DT_CAPABILITIES
               value: "log_analytics_collector"
             - name: DT_ID_SEED_NAMESPACE
-              value: dynatrace
+              value: dynatrace 
             - name: DT_ID_SEED_PROJECT
               value: {{ .Values.gcpProjectId }}
             - name: DT_ID_SEED_ENV_ID
               value: {{ template "environmentID" . }}
-            - name: DT_ID_SEED_CAPABILITIES
-              value: "gcp_monitoring"
+            - name: DT_ID_SEED_CLUSTER_NAME
+              value: {{ .Values.activeGate.clusterName }}
           resources:
             requests:
               memory: 1024Mi
@@ -101,7 +101,7 @@ spec:
             periodSeconds: 30
             failureThreshold: 2
       imagePullSecrets:
-        - name: dynatrace-gcpmon-pullsecret
+        - name: dynatrace-activegate-gcpmon-pullsecret
   updateStrategy:
     type: RollingUpdate
   {{- end }}

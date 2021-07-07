@@ -48,14 +48,14 @@
 
 
 {{/*
-activeGateUrl in case of the .Values.activeGate.autoDeploy is
-     ON (true) -> the  .Values.dynatraceLogIngestUrl is NOT used as an Active Gate URL. For log ingest. The URL is pointing to autodeployed AG inside k8s cluster.
-     OFF (false) -> the  .Values.dynatraceLogIngestUrl IS used as an Active Gate URL. For log ingest. 
+activeGateUrl in case of the .Values.activeGate.useExisting is
+     false -> the  .Values.dynatraceLogIngestUrl is NOT used as an Active Gate URL. For log ingest. The URL is pointing to autodeployed AG inside k8s cluster.
+     true -> the  .Values.dynatraceLogIngestUrl IS used as an Active Gate URL. For log ingest.
 */}}
 {{- define "activeGateUrl" }}
-{{- if .Values.activeGate.autoDeploy}}  
+{{- if eq .Values.activeGate.useExisting "false"}}
   {{- $envid := (include "environmentID" .)}}
-  {{- printf "https://dynatrace-activegate-gcpmon-router.dynatrace.svc.cluster.local:%d/e/%s"  (int .Values.activeGate.autoDeployPort) $envid }}    
+  {{- printf "https://dynatrace-activegate-gcpmon-clusterip.dynatrace.svc.cluster.local:9999/e/%s"  $envid }}
 {{- else -}}
   {{- printf "%s" .Values.dynatraceLogIngestUrl }}
 {{- end -}}
