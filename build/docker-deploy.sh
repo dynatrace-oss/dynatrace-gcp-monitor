@@ -8,7 +8,7 @@ if [[ "${PUSH:-}" == "true" ]]; then
 fi
 
 #build contaienr
-docker build -f dockerfile -t dynatrace-gcp-function .        
+docker build -f dockerfile -t dynatrace-gcp-function .
 
 #tag contaienr
 if [[ "${PUSH:-}" == "true" ]]; then
@@ -21,4 +21,8 @@ if [[ "${PUSH:-}" == "true" ]]; then
     docker push dynatrace/dynatrace-gcp-function:$TAG
     docker tag dynatrace-gcp-function dynatrace/dynatrace-gcp-function:latest
     docker push dynatrace/dynatrace-gcp-function:latest
+elif [[ "${PUSH:-}" != "true" && "${E2E:-}" == "true" ]]; then
+    ./build/version.sh
+    docker tag dynatrace-gcp-function ${GCR_NAME}:e2e-travis-test-$TAG
+    docker push ${GCR_NAME}:e2e-travis-test-$TAG
 fi

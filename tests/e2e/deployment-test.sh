@@ -84,11 +84,6 @@ else
     gcloud pubsub subscriptions create "${PUBSUB_SUBSCRIPTION}" --topic="${PUBSUB_TOPIC}" --ack-deadline=120 --message-retention-duration=86400
 fi
 
-# Deploy docker image
-docker pull dynatrace/dynatrace-gcp-function:${TAG}
-docker tag dynatrace/dynatrace-gcp-function:${TAG} ${GCR_NAME}:e2e-travis-test-${TAG}
-docker push ${GCR_NAME}:e2e-travis-test-${TAG}
-
 # Run helm deployment.
 rm -rf ./e2e_test
 mkdir ./e2e_test
