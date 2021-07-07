@@ -37,7 +37,7 @@ check_api_token()
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
     if [ "$CODE" -ge 300 ]; then
-      echo "Failed to check Dynatrace API token permissions - please verify provided URL and API token. $RESPONSE"
+      echo "Failed to check Dynatrace API token permissions - please verify provided URL (${URL}) and API token. $RESPONSE"
       exit 1
     fi
     for scope in "${API_TOKEN_SCOPES[@]}"; do
@@ -48,7 +48,7 @@ check_api_token()
       fi
     done
   else
-      echo "Failed to check Dynatrace API token permissions - please verify provided URL and API token."
+      echo "Failed to check Dynatrace API token permissions - please verify provided URL (${URL})"
   fi
 }
 
@@ -154,7 +154,7 @@ readonly DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --json
 readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}")
 readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}")
 readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
-API_TOKEN_SCOPES=("metrics.ingest" "logs.ingest" "ReadConfig" "WriteConfig")
+API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"')
 
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
@@ -178,10 +178,10 @@ elif [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "Deploying metrics and logs ingest"
 elif [[ $DEPLOYMENT_TYPE == logs ]]; then
   echo "Deploying $DEPLOYMENT_TYPE ingest"
-  API_TOKEN_SCOPES=("logs.ingest")
+  API_TOKEN_SCOPES=('"logs.ingest"')
 elif [[ $DEPLOYMENT_TYPE == metrics ]]; then
   echo "Deploying $DEPLOYMENT_TYPE ingest"
-  API_TOKEN_SCOPES=("metrics.ingest" "ReadConfig" "WriteConfig")
+  API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"')
 else
   echo "Invalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
   exit 1
@@ -190,14 +190,14 @@ fi
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
   check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
-  check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://environment-id.live.dynatrace.com"
+  check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
   check_api_token "$DYNATRACE_URL"
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
-  check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://environment-active-gate-url:9999/e/environment-id"
+  check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
   check_api_token "$DYNATRACE_LOG_INGEST_URL"
 fi
 
