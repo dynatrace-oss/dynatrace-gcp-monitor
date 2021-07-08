@@ -79,7 +79,7 @@ spec:
               value: {{ .Values.clusterName }}
           resources:
             requests:
-              memory: 1024Mi
+              memory: 512Mi
               cpu: 1
             limits:
               memory: 1024Mi
