@@ -37,12 +37,11 @@ logsSubscriptionId: ""
 dynatraceLogIngestUrl: ""
 
 activeGate:
-  #useExisting if set to false the Active Gate will be deployed in k8s. In that case also the activeGate.dynatracePaasToken must be filled.
+  #useExisting if set to false (by default) the Active Gate will be deployed in k8s. In that case also the activeGate.dynatracePaasToken must be filled.
   useExisting: "false"
   #dynatracePaasToken PaaS token, generated in Dynatrace cluster.
   dynatracePaasToken: ""
-  #clusterName Cluster Name, should be empty as it's filed by setup.sh in case of new Active Gate being deployed in k8s.
-  clusterName: ""
+
 
 # METRICS VALUES - REQUIRED for 'metrics' and 'all' deployment
 
@@ -95,6 +94,8 @@ importDashboards: "true"
 # Import predefined alerting rules for selected services. Allowed values: "true"/"yes", "false"/"no"
 importAlerts: "true"
 # configuration file for GCP services - uncommented services will be monitored
+#clusterName Cluster Name, should be empty as it's filed by setup.sh.
+clusterName: ""
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax
   services:

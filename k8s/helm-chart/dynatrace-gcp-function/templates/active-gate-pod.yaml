@@ -76,7 +76,7 @@ spec:
             - name: DT_ID_SEED_ENV_ID
               value: {{ template "environmentID" . }}
             - name: DT_ID_SEED_CLUSTER_NAME
-              value: {{ .Values.activeGate.clusterName }}
+              value: {{ .Values.clusterName }}
           resources:
             requests:
               memory: 1024Mi
