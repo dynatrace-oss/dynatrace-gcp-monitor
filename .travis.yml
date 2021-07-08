@@ -37,6 +37,12 @@ jobs:
       - |
           cd tests/integration/metrics
           PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest -v
+  - stage: docker-deploy
+    name: Docker Hub deploy
+    if: tag =~ /^release-.*
+    language: minimal
+    script: "./build/docker-deploy.sh"
+    env: PUSH=true
   - stage: docker-build
     name: Deploy Docker to GCR
     if: (branch = master OR type = pull_request) AND fork = false
@@ -117,9 +123,3 @@ jobs:
     after_script:
       - chmod +x ./tests/e2e/deployment-test-cleanup.sh
       - ./tests/e2e/deployment-test-cleanup.sh
-  - stage: docker-deploy
-    name: Docker Hub deploy
-    if: tag =~ /^release-.*
-    language: minimal
-    script: "./build/docker-deploy.sh"
-    env: PUSH=true
