@@ -49,13 +49,13 @@ def _cloud_sql_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: GCPSer
             id=create_entity_id(cd, svc_def),
             display_name=cd.get("name", "N/A"),
             group=svc_def.technology_name,
-            ip_addresses=frozenset(x["ipAddress"] for x in cd.get("ipAddresses", [])),
-            listen_ports=frozenset(),
+            ip_addresses=[x["ipAddress"] for x in cd.get("ipAddresses", [])],
+            listen_ports=[],
             favicon_url="no-gcp-icon-available",
             dtype=svc_def.technology_name,
             properties=_get_properties(cd),
-            tags=frozenset(),
-            dns_names=frozenset()
+            tags=[],
+            dns_names=[]
         ) for cd in page.get("items", [])
     ]
 
