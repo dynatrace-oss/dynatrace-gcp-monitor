@@ -172,6 +172,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
+  echo " Using existing AG $USE_EXISTING_ACTIVE_GATE"
   if [[  $USE_EXISTING_ACTIVE_GATE == false ]]; then
     check_if_parameter_is_empty "$DYNATRACE_PASS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS Token in the Values file"
 
