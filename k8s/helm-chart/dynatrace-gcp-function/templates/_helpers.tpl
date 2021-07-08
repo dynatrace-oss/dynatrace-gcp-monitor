@@ -55,7 +55,7 @@ activeGateUrl in case of the .Values.activeGate.useExisting is
 {{- define "activeGateUrl" }}
 {{- if eq .Values.activeGate.useExisting "false"}}
   {{- $envid := (include "environmentID" .)}}
-  {{- printf "https://dynatrace-activegate-gcpmon-clusterip.dynatrace.svc.cluster.local:9999/e/%s"  $envid }}
+  {{- printf "https://dynatrace-activegate-gcpmon-clusterip:9999/e/%s"  $envid }}
 {{- else -}}
   {{- printf "%s" .Values.dynatraceLogIngestUrl }}
 {{- end -}}
