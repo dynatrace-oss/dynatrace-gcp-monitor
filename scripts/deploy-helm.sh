@@ -132,8 +132,8 @@ done
 readonly GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
 readonly DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
 readonly DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}")
-readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}")
-readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}")
+readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}" | sed 's:/*$::')
+readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}" | sed 's:/*$::')
 readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
 
 if [ -z "$GCP_PROJECT" ]; then
@@ -285,4 +285,14 @@ fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics"  > ${CMD_OUT_PIPE}
+fi
+
+if [[ $DEPLOYMENT_TYPE == all ]]; then
+  LOG_MONITORING_URL="${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
+fi
+
+if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
+  echo
+  echo "- Check if logs will appear in Dynatrace in 5 min. ${LOG_MONITORING_URL}" >${CMD_OUT_PIPE}
+  echo "If you won't see any GCP logs after that time make sure you configured all prerequisites: https://www.dynatrace.com/support/help/shortlink/deploy-k8#prerequisites"
 fi
