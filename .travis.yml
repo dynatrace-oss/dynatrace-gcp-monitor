@@ -8,6 +8,7 @@ stages:
 - docker-build
 - github-deploy
 - e2e-deployment-test
+- docker-deploy
 env:
   global:
   - TAG=$TRAVIS_TAG
@@ -36,12 +37,6 @@ jobs:
       - |
           cd tests/integration/metrics
           PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest -v
-  - stage: docker-deploy
-    name: Docker Hub deploy
-    if: tag =~ /^release-.*
-    language: minimal
-    script: "./build/docker-deploy.sh"
-    env: PUSH=true
   - stage: docker-build
     name: Deploy Docker to GCR
     if: (branch = master OR type = pull_request) AND fork = false
@@ -104,7 +99,7 @@ jobs:
       - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
       - K8S_CLUSTER="e2e-test-master"
       - GCP_PROJECT_ID="dynatrace-gcp-extension"
-      - GCR_NAME="gcr.io/dynatrace-gcp-extension/dynatrace-gcp-function"
+      - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-function"
       - secure: "muHGNxIK6fxTltIsGgms6v3dleuQ1LZyQmZIGQDSfQ5sfYDYEvR2xsabK237AipSSGppoVhc7S6ri8A/WNQautHUfdBOsVn1i7czzoPhELdOJkAiigXrI3kla68OTCiC0TPwWbIYOxzmiYDHZr+rYbA1773O0iyhWHiTVQerLMndn0wCFWUUnLbD1WfzdAxlfSo1rd7u81m8g4efLIUppo/fjfaxmVwvo1oIfensGVknyOE+gtSh/OpGdYfNeOqxoDGOoMe5bnCqibUoREXRzUZKGb6upxMMmW6E3hGG02kqle4jYjaC7Uiu2IVZsK38iAWNGwIRy21CIXNHn4R6we44n5JLH92aiRtVw8D/fDOnN2gWTtmdrvoB8YklbaYZBnDrGJxI6rESfeQjwD8ImWWKUJFUlwovKjNWhOw8RMhPVtPOuC00+F2UDq5NosrWYGUjLjaKFC/4nysOiK2DgsMBF/Mk1Ei1BDMYmcHQ7Jsrs8ys/kgPasV3Qs9xOuSJpF+AiwKPfI1R9bxYiORg70TNz62wPD7FlKWIVe0DvhrWcHCTpnrROabt6B0hUROfljCZe2H+j8HD9uCJCJHk5qP7llNVofVnz8w+s90wLEKpUNn2rVUH0fzffYM7YaLRPhzLEUJSQso3a7hXFfcoUow8OOPTmCgViGCfPjuy2zc="
       - secure: "tdw5iV7XGhQ+gVPw70n+/SeA2xfVAXL5uwhMrKjI6FgayQQB7cIFxGfhIGMMw17p9Td5KdpiuBvw1tZh8SRh7vJfx4dr8ZgkU3W3whjOt+gbuI/igzp4K5TYuEFajbuPRWPtJbDmRwS4a2VwkO9t5RyVUDZW1Pkj3d/SsaedUOxnKOBorSJLkXdlgNlijo1LS9jrsEbo47mVKsBpp6l7HsgvDurq8y32mgh+SNUuUhf20MYxBDtDmtf3qkhaGlIR4Pfz9MNFcMq/Qac9lpJAxRPNifN+frlkDMnyGRNlkpgv8aokZdf5ohURDhH1ff4lHJa9tORVPHf1GGyA5SW8ucplTq9PtMP30Zh2mO3E9YE6chtZ2QxOC1HT6GJL/5SXj2NCYe0nemiynTk8QHiPEnE5n0grKfLTdDHmZ6q3Gwa6rd6e/KvCGfNs/B8hAjkPOEkqM3zk8WUw2sD4DUq5YmyKTUSoz+z6zgueY//3ecgCvUz+GZ2BBtTEFybZtv0860FI8x79EFMdvEGbRa4mzsij2oWYbHmlT1LsvNuqMgzdjh4pD97pek3jl3JSPgNY6bDI6z2XA4bM5mbdCHr68+7CwNfNckM1Pi8gHt0H5dH9zjW5ehC7inMlSvBKGUR35af+OW64DevhY2/EHu7AVxcFFwKAK2ZMeXzeBVY1IE8="
       - secure: "lLtHDwhxPT9AbA6MxJr9/A2RCuw0S4OJY9WgVaEXrCCeqfEOMl371Il9M0LEwoNDJrJU9sC8Jp212FsnckkUjd0t94ozd02ppHSzEEhn1KNK5KA80/GfGGou4BN4+U0sYrLYOJmTTOnKPB/wVVGpzSVirfX4Q3c8iCOmBCNf5GxInzNZT4m9kUxSm/FQgU+1Qyj1THjpCZtVeriJ/A8cjIJcb//aUIJWnYdqtfDXuqhHXfUYJN9Upo0QJowu6TbSxrBA2zj8RPiutiqUiLGyFtvCJmNQ3uH9Cz74N5Wb6tfvLdqE+xYf4LVrH7GC/DbPAwm5pjwLEAPZ9SrR3GqcCN0FQuFSrBXHQRVqAqfc9n6Hdngtsn7O9CLxvB6XRXY/Lmx1pDH+pKChwBnxlgm6M5UAEutFknv5Df7BFUDsYQ/iXRmJTMbuPo6gxGeluIRjw00EKoKvZWGmUO0JKiOQ3vyjJYDRBG8sR2T9JH1xGPk8fUmP+sRuae0ezr+QFv7Bdu/NCWqGZGEFQA4svbhYQYcIEIrWAlGpk62KncNxq4/udRQWf/82rkb7Dpwwq0vMR20e6cv/0ReWiQ1pmxFBGWNSJ5c0LQgBQ+2d2ujqP+hDmXvDC2pRgZO3JNbIA1bUoDAchm0qoABzgXzGaXMLN0ALuRw8GGvqaRBMBjNaU80="
@@ -127,3 +122,9 @@ jobs:
     after_script:
       - chmod +x ./tests/e2e/deployment-test-cleanup.sh
       - ./tests/e2e/deployment-test-cleanup.sh
+  - stage: docker-deploy
+    name: Docker Hub deploy
+    if: tag =~ /^release-.*
+    language: minimal
+    script: "./build/docker-deploy.sh"
+    env: PUSH=true
