@@ -129,7 +129,7 @@ while (( "$#" )); do
     esac
 done
 
-readonly GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
+GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
 readonly DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
 readonly DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}")
 readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}")
@@ -219,13 +219,25 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   then
     exit 1
   fi
+
+  ACTIVE_GATE_CONNECTIVITY=Y
+  ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health") || ACTIVE_GATE_CONNECTIVITY=N
+  if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]
+  then
+        echo -e "\e[93mWARNING: \e[37mUnable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL. It can be ignored if ActiveGate host network configuration does not allow acces from outside of k8s cluster."
+  fi
+  if [[ "$ACTIVE_GATE_STATE" != "RUNNING" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]
+  then
+    echo "ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
+    exit 1
+  fi
 fi
 
 if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   SELECTED_REGION=$(gcloud config get-value compute/region 2>/dev/null)
   if [ -z "$SELECTED_REGION" ]; then
     echo
-    echo "\e[93mWARNING: \e[37mDefault region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
+    echo -e "\e[93mWARNING: \e[37mDefault region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
     exit 1
   fi
   echo

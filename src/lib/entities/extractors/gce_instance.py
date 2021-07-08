@@ -98,13 +98,13 @@ def _cloud_function_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: G
             id=get_func_create_entity_id(mappings)(cd, svc_def),
             display_name=cd.get("name", ""),
             group=svc_def.technology_name,
-            ip_addresses=frozenset(ips),
-            listen_ports=frozenset(),
+            ip_addresses=ips,
+            listen_ports=[],
             favicon_url="no-gcp-icon-available",
             dtype=svc_def.technology_name,
             properties=_get_properties(cd),
-            tags=frozenset(tags),
-            dns_names=frozenset()
+            tags=[],
+            dns_names=[]
         ))
 
     return entities
