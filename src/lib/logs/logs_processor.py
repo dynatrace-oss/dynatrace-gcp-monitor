@@ -43,6 +43,7 @@ class LogProcessingJob:
 def _process_message(sfm_queue: Queue, message: ReceivedMessage):
     context = LogsProcessingContext(
         scheduled_execution_id=str(message.ack_id.__hash__())[-8:],
+        message_publish_time=parse(str(message.message.publish_time)),
         sfm_queue=sfm_queue
     )
     try:
@@ -58,7 +59,7 @@ def _process_message(sfm_queue: Queue, message: ReceivedMessage):
         return None
 
 
-def _do_process_message(context: LogsContext, message: PubsubMessage):
+def _do_process_message(context: LogsProcessingContext, message: PubsubMessage):
     context.self_monitoring.processing_time_start = time.perf_counter()
     data = message.data.decode("UTF-8")
     # context.log(f"Data: {data}")
@@ -75,7 +76,7 @@ def _do_process_message(context: LogsContext, message: PubsubMessage):
         return job
 
 
-def _create_dt_log_payload(context: LogsContext, message_data: str) -> Optional[Dict]:
+def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) -> Optional[Dict]:
     if not message_data:
         context.log("Skipping empty message")
         return None

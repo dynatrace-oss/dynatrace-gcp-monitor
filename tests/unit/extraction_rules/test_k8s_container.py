@@ -21,6 +21,7 @@ from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RES
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
     ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_IDENTITY, \
     ATTRIBUTE_AUDIT_RESULT
+from tests.unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 timestamp = datetime.utcnow().isoformat() + "Z"
 
@@ -69,15 +70,6 @@ expected_output = {
 }
 
 
-logs_context = LogsContext(
-    project_id_owner="",
-    dynatrace_api_key="",
-    dynatrace_url="",
-    scheduled_execution_id="",
-    sfm_queue=Queue()
-)
-
-
 def test_extraction_debug_text():
-    actual_output = _create_dt_log_payload(logs_context, json.dumps(log_record))
+    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, json.dumps(log_record))
     assert actual_output == expected_output

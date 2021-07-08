@@ -21,6 +21,7 @@ from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
     ATTRIBUTE_DT_LOGPATH
+from tests.unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 
@@ -60,14 +61,6 @@ expected_output = {
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/run.googleapis.com%2Fstdout'
 }
 
-logs_context = LogsContext(
-    project_id_owner="",
-    dynatrace_api_key="",
-    dynatrace_url="",
-    scheduled_execution_id="",
-    sfm_queue=Queue()
-)
-
 expected_output_attribute_values_trimmed = {
     ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
     ATTRIBUTE_CLOUD_REGION: 'us-c',
@@ -81,16 +74,16 @@ expected_output_attribute_values_trimmed = {
 
 
 def test_extraction():
-    actual_output = logs_processor._create_dt_log_payload(logs_context, record_string)
+    actual_output = logs_processor._create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, record_string)
     assert actual_output == expected_output
 
 
 def test_extraction_empty_record():
-    actual_output = logs_processor._create_dt_log_payload(logs_context, "")
+    actual_output = logs_processor._create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, "")
     assert actual_output is None
 
 
 def test_trimming_attribute_values(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setattr(logs_processor, 'ATTRIBUTE_VALUE_LENGTH_LIMIT', 4)
-    actual_output = logs_processor._create_dt_log_payload(logs_context, record_string)
+    actual_output = logs_processor._create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, record_string)
     assert actual_output == expected_output_attribute_values_trimmed

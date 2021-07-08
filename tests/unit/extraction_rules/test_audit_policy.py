@@ -21,6 +21,7 @@ from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
     ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_IDENTITY, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_RESULT
+from tests.unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 
@@ -94,16 +95,8 @@ expected_output_list = [
     }
 ]
 
-logs_context = LogsContext(
-    project_id_owner="",
-    dynatrace_api_key="",
-    dynatrace_url="",
-    scheduled_execution_id="",
-    sfm_queue=Queue()
-)
-
 
 def test_extraction():
     for entry in expected_output_list:
-        actual_output = logs_processor._create_dt_log_payload(logs_context, entry[ATTRIBUTE_CONTENT])
+        actual_output = logs_processor._create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, entry[ATTRIBUTE_CONTENT])
         assert actual_output == entry

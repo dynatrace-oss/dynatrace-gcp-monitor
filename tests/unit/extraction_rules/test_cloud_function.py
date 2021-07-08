@@ -21,6 +21,7 @@ from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RES
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
     ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_IDENTITY, \
     ATTRIBUTE_AUDIT_RESULT
+from tests.unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 timestamp = datetime.utcnow().isoformat() + "Z"
 
@@ -154,25 +155,17 @@ error_proto_record_expected_output = {
     'faas.name': 'dynatrace-gcp-function'
 }
 
-logs_context = LogsContext(
-    project_id_owner="",
-    dynatrace_api_key="",
-    dynatrace_url="",
-    scheduled_execution_id="",
-    sfm_queue=Queue()
-)
-
 
 def test_extraction_debug_text():
-    actual_output = _create_dt_log_payload(logs_context, json.dumps(debug_text_record))
+    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, json.dumps(debug_text_record))
     assert actual_output == debug_text_record_expected_output
 
 
 def test_extraction_notice_json():
-    actual_output = _create_dt_log_payload(logs_context, json.dumps(notice_json_record))
+    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, json.dumps(notice_json_record))
     assert actual_output == notice_json_record_expected_output
 
 
 def test_extraction_error_proto():
-    actual_output = _create_dt_log_payload(logs_context, json.dumps(error_proto_record))
+    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, json.dumps(error_proto_record))
     assert actual_output == error_proto_record_expected_output
