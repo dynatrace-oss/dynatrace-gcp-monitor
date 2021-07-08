@@ -7,7 +7,7 @@
       "attributes": [
         {
           "key": "content",
-          "pattern": "@"
+          "pattern": "content || @"
         }
       ]
     }

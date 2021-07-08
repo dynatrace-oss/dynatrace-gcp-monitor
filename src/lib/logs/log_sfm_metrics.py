@@ -4,6 +4,7 @@ import time
 class LogSelfMonitoring:
     def __init__(self):
         self.too_old_records: int = 0
+        self.publish_time_fallback_records: int = 0
         self.parsing_errors: int = 0
         self.records_with_too_long_content: int = 0
         self.all_requests: int = 0

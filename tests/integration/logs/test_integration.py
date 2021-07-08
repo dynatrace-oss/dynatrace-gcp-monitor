@@ -36,7 +36,7 @@ from lib.logs.log_self_monitoring import LogSelfMonitoring
 from lib.logs.metadata_engine import ATTRIBUTE_TIMESTAMP, ATTRIBUTE_CONTENT, ATTRIBUTE_CLOUD_PROVIDER
 
 LOG_MESSAGE_DATA = '{"insertId":"000000-ff1a5bfd-b64a-442e-91b2-deba5557dbfe","labels":{"execution_id":"zh2htc8ax7y6"},"logName":"projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions","receiveTimestamp":"2021-03-29T10:25:15.862698697Z","resource":{"labels":{"function_name":"dynatrace-gcp-function","project_id":"dynatrace-gcp-extension","region":"us-central1"},"type":"not_cloud_function"},"severity":"INFO","textPayload":"2021-03-29 10:25:11.101768  : Access to following projects: dynatrace-gcp-extension","timestamp":"2021-03-29T10:25:11.101Z","trace":"projects/dynatrace-gcp-extension/traces/f748c1e106a134178afee611c90bf984"}'
-INVALID_LOG_MESSAGE_DATA = '{"insertId":"000000-ff1a5bfd-b64a-442e-91b2-deba5557dbfe","labels":{"execution_id":"zh2htc8ax7y6"},"logName":"projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions","receiveTimestamp":"2021-03-29T10:25:15.862698697Z","resource":{"labels":{"function_name":"dynatrace-gcp-function","project_id":"dynatrace-gcp-extension","region":"us-central1"},"type":"not_cloud_function"},"severity":"INFO","textPayload":"2021-03-29 10:25:11.101768  : Access to following projects: dynatrace-gcp-extension","timestamp":"INVALID_TIMESTAMP","trace":"projects/dynatrace-gcp-extension/traces/f748c1e106a134178afee611c90bf984"}'
+INVALID_TIMESTAMP_DATA = '{"insertId":"000000-ff1a5bfd-b64a-442e-91b2-deba5557dbfe","labels":{"execution_id":"zh2htc8ax7y6"},"logName":"projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions","receiveTimestamp":"2021-03-29T10:25:15.862698697Z","resource":{"labels":{"function_name":"dynatrace-gcp-function","project_id":"dynatrace-gcp-extension","region":"us-central1"},"type":"not_cloud_function"},"severity":"INFO","textPayload":"2021-03-29 10:25:11.101768  : Access to following projects: dynatrace-gcp-extension","timestamp":"INVALID_TIMESTAMP","trace":"projects/dynatrace-gcp-extension/traces/f748c1e106a134178afee611c90bf984"}'
 
 MOCKED_API_PORT = 9011
 ACCESS_KEY = 'abcdefjhij1234567890'
@@ -134,7 +134,7 @@ async def test_execution_successful():
     sfm_queue = Queue()
     mock_subscriber_client = MockSubscriberClient(ack_queue)
 
-    expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 13)]
+    expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 15)]
     expected_ack_ids_of_valid_messages = [f"ACK_ID_{i}" for i in range(0, 10)]
 
     message_data_json = json.loads(LOG_MESSAGE_DATA)
@@ -142,23 +142,23 @@ async def test_execution_successful():
     fresh_message_data = json.dumps(message_data_json)
 
     for ack_id in expected_ack_ids_of_valid_messages:
-        message = create_fake_message(ack_id=ack_id, message_data=fresh_message_data)
-        mock_subscriber_client.add_message(message)
+        mock_subscriber_client.add_message(create_fake_message(ack_id=ack_id, message_data=fresh_message_data))
 
-    message_data_json["content"] = "CONTENT"*100
+    message_data_json["content"] = "LOTS_OF_DATA "*100
     too_long_content_message_data = json.dumps(message_data_json)
-    message = create_fake_message(ack_id='ACK_ID_10', message_data=too_long_content_message_data)
-    mock_subscriber_client.add_message(message)
+    mock_subscriber_client.add_message(create_fake_message(ack_id='ACK_ID_10', message_data=too_long_content_message_data))
 
     message_data_json = json.loads(LOG_MESSAGE_DATA)
     too_old_message_data = json.dumps(message_data_json)
-    message = create_fake_message(ack_id='ACK_ID_11', message_data=too_old_message_data)
+    mock_subscriber_client.add_message(create_fake_message(ack_id='ACK_ID_11', message_data=too_old_message_data))
+
+    mock_subscriber_client.add_message(create_fake_message(ack_id='ACK_ID_12', message_data=INVALID_TIMESTAMP_DATA))
+
+    message = create_fake_message(ack_id='ACK_ID_13', message_data="")
+    message.message.data = b'\xc3\x28' # Invalid 2 Octet Sequence
     mock_subscriber_client.add_message(message)
 
-    invalid_message_data_json = json.loads(INVALID_LOG_MESSAGE_DATA)
-    invalid_message_data = json.dumps(invalid_message_data_json)
-    message = create_fake_message(ack_id='ACK_ID_12', message_data=invalid_message_data)
-    mock_subscriber_client.add_message(message)
+    mock_subscriber_client.add_message(create_fake_message(ack_id='ACK_ID_14', message_data="Simple Text message"))
 
     worker_state = WorkerState("TEST")
     perform_pull(worker_state, sfm_queue, mock_subscriber_client, "")
@@ -188,12 +188,13 @@ async def test_execution_successful():
     verify_requests(expected_cluster_response_code, 3)
 
     assert self_monitoring.too_old_records == 1
-    assert self_monitoring.parsing_errors == 1
     assert self_monitoring.records_with_too_long_content == 1
     assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 3}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
-    assert self_monitoring.sent_logs_entries == 11
+    assert self_monitoring.sent_logs_entries == 13
+    assert self_monitoring.parsing_errors == 1
+    assert self_monitoring.publish_time_fallback_records == 2  # Invalid timestamp and simple text messages
 
 
 @pytest.mark.asyncio
