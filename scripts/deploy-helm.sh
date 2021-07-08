@@ -289,10 +289,11 @@ fi
 
 if [[ $DEPLOYMENT_TYPE == all ]]; then
   LOG_MONITORING_URL="${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
+  LOG_VIEWER="Log Viewer: $LOG_MONITORING_URL"
 fi
 
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo
-  echo "- Check if logs will appear in Dynatrace in 5 min. ${LOG_MONITORING_URL}" >${CMD_OUT_PIPE}
+  echo "- Check logs in Dynatrace in 5 min. ${LOG_VIEWER}" >${CMD_OUT_PIPE}
   echo "If you won't see any GCP logs after that time make sure you configured all prerequisites: https://www.dynatrace.com/support/help/shortlink/deploy-k8#prerequisites"
 fi
