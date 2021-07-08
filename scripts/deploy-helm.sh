@@ -278,7 +278,7 @@ echo "- 7. Install dynatrace-gcp-function with helm chart."
 helm install ./dynatrace-gcp-function --generate-name --namespace dynatrace  > ${CMD_OUT_PIPE}
 
 echo
-echo "- Deployment complete, check if containers are running:"  > ${CMD_OUT_PIPE}
+echo -e "\e[92m- Deployment complete, check if containers are running:\e[37m"  > ${CMD_OUT_PIPE}
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs"  > ${CMD_OUT_PIPE}
 fi
@@ -288,12 +288,13 @@ if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]]; then
-  LOG_MONITORING_URL="${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
-  LOG_VIEWER="Log Viewer: $LOG_MONITORING_URL"
+  # To build Log viewer link we need Dynatrace url which is set only for 'metric' and 'all' deployment types.
+  # For 'logs' deployment type (where ActiveGate url is used) we are not able to build the link - LOG_VIEWER is empty then.
+  LOG_VIEWER="Log Viewer: ${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
 fi
 
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo
-  echo "- Check logs in Dynatrace in 5 min. ${LOG_VIEWER}" >${CMD_OUT_PIPE}
+  echo -e "\e[92m- Check logs in Dynatrace in 5 min. ${LOG_VIEWER}\e[37m" >${CMD_OUT_PIPE}
   echo "If you won't see any GCP logs after that time make sure you configured all prerequisites: https://www.dynatrace.com/support/help/shortlink/deploy-k8#prerequisites"
 fi
