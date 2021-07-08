@@ -250,14 +250,20 @@ def flatten_and_enrich_metric_results(
         for ingest_line in ingest_lines:
             entity = entity_id_map.get(ingest_line.entity_id, None)
             if entity:
-                for index, dns_name in enumerate(entity.dns_names):
-                    dim_name = "dns_name" if index == 0 else f"dns_name.{index}"
-                    dimension_value = create_dimension(name=entity_dimension_prefix + dim_name, value=dns_name, context=context)
+                if entity.dns_names:
+                    dimension_value = create_dimension(
+                        name=entity_dimension_prefix + "dns_name",
+                        value=entity.dns_names[0],
+                        context=context
+                    )
                     ingest_line.dimension_values.append(dimension_value)
 
-                for index, ip_address in enumerate(entity.ip_addresses):
-                    dim_name = "ip_address" if index == 0 else f"ip_address.{index}"
-                    dimension_value = create_dimension(name=entity_dimension_prefix + dim_name, value=ip_address, context=context)
+                if entity.ip_addresses:
+                    dimension_value = create_dimension(
+                        name=entity_dimension_prefix + "ip_address",
+                        value=entity.ip_addresses[0],
+                        context=context
+                    )
                     ingest_line.dimension_values.append(dimension_value)
 
                 for cd_property in entity.properties:

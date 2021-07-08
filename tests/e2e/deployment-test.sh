@@ -113,7 +113,7 @@ echo -n "Verifying deployment result"
 METRICS_CONTAINER_STATE=0
 LOGS_CONTAINER_STATE=0
 
-for i in {1..30}
+for i in {1..60}
 do
   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
     check_container_state "dynatrace-gcp-function-metrics"

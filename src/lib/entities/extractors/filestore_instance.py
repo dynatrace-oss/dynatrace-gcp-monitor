@@ -70,17 +70,13 @@ def _filestore_instance_resp_to_monitored_entities(page: Dict[Text, Any], svc_de
             id=create_entity_id(cd, svc_def),
             display_name=_extract_label(cd.get("name", ""), 3),
             group=svc_def.technology_name,
-            ip_addresses=frozenset(
-                itertools.chain.from_iterable([
-                    x.get("ipAddresses", []) for x in cd.get("networks", [])
-                ])
-            ),
-            listen_ports=frozenset(),
+            ip_addresses=[x.get("ipAddresses", []) for x in cd.get("networks", [])],
+            listen_ports=[],
             favicon_url="no-gcp-icon-available",
             dtype=svc_def.technology_name,
             properties=_get_properties(cd),
-            tags=frozenset(),
-            dns_names=frozenset()
+            tags=[],
+            dns_names=[]
         ) for cd in page.get("instances", [])
     ]
 
