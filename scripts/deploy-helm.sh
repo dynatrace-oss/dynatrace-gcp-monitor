@@ -14,7 +14,7 @@
 #     limitations under the License.
 
 onFailure() {
-    echo -e "- deployment failed, please examine error messages and run again"
+    echo -e "\e[91m- deployment failed, please examine error messages and run again"
     exit 2
 }
 trap onFailure ERR
@@ -30,10 +30,43 @@ check_if_parameter_is_empty()
   fi
 }
 
-print_help()
+check_api_token()
 {
-   printf "
-usage: deploy-helm.sh [OPTIONS]
+  URL=$(echo "$1" | sed 's:/*$::')
+  if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"); then
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
+    RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
+    if [ "$CODE" -ge 300 ]; then
+      echo -e "\e[93mWARNING: \e[37mFailed to check Dynatrace API token permissions - please verify provided URL (${URL}) and API token. $RESPONSE"
+      exit 1
+    fi
+    for scope in "${API_TOKEN_SCOPES[@]}"; do
+      if ! grep -q "$scope" <<< "$RESPONSE"; then
+        echo -e "\e[93mWARNING: \e[37mMissing permission for the API token: $scope."
+        echo "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: $DEPLOYMENT_TYPE"
+        exit 1
+      fi
+    done
+  else
+      echo -e "\e[93mWARNING: \e[37mFailed to connect to Dynatrace/ActiveGate endpoint $URL to check API token permissions. It can be ignored if Dynatrace/ActiveGate does not allow public access."
+  fi
+}
+
+check_url()
+{
+    URL=$1
+    REGEX=$2
+    MESSAGE=$3
+    if ! [[ "$URL" =~ $REGEX ]]
+    then
+      echo -e "\e[93mWARNING: \e[37m$MESSAGE"
+      exit 1
+    fi
+}
+
+print_help() {
+  printf "
+usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME]
 
 arguments:
     --service-account SA_NAME
@@ -129,6 +162,9 @@ while (( "$#" )); do
     esac
 done
 
+readonly DYNATRACE_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}[\/]{0,1}$"
+readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
+
 GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
 readonly DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
 readonly DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}")
@@ -137,6 +173,7 @@ readonly USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-function --
 readonly DYNATRACE_PASS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.dynatracePaasToken}")
 readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}")
 readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
+API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"')
 
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
@@ -153,15 +190,17 @@ if [ -z "$ROLE_NAME" ]; then
   ROLE_NAME="dynatrace_function"
 fi
 
-check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
-
 if [ -z "$DEPLOYMENT_TYPE" ]; then
   DEPLOYMENT_TYPE="all"
   echo "Deploying metrics and logs ingest"
 elif [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "Deploying metrics and logs ingest"
-elif [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+elif [[ $DEPLOYMENT_TYPE == logs ]]; then
   echo "Deploying $DEPLOYMENT_TYPE ingest"
+  API_TOKEN_SCOPES=('"logs.ingest"')
+elif [[ $DEPLOYMENT_TYPE == metrics ]]; then
+  echo "Deploying $DEPLOYMENT_TYPE ingest"
+  API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"')
 else
   echo "Invalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
   exit 1
@@ -169,6 +208,9 @@ fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
+  check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
+  check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
+  check_api_token "$DYNATRACE_URL"
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
@@ -192,12 +234,14 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   fi
 
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
+  check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
+  check_api_token "$DYNATRACE_LOG_INGEST_URL"
 
   readonly LOGS_SUBSCRIPTION_FULL_ID="projects/$GCP_PROJECT/subscriptions/$LOGS_SUBSCRIPTION_ID"
 
   if ! [[ $(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(name)") ]];
   then
-    echo "Pub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
+    echo -e "\e[93mWARNING: \e[37mPub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
     exit 1
   fi
 
@@ -206,14 +250,14 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   readonly ACK_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(ackDeadlineSeconds)")
   if [[ "$ACK_DEADLINE" != "120" ]];
   then
-    echo "Invalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
+    echo -e "\e[93mWARNING: \e[37mInvalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
     INVALID_PUBSUB=true
   fi
 
   readonly MESSAGE_RETENTION_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(messageRetentionDuration)")
   if [[ "$MESSAGE_RETENTION_DEADLINE" != "86400s" ]];
   then
-    echo "Invalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
+    echo -e "\e[93mWARNING: \e[37mInvalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
     INVALID_PUBSUB=true
   fi
 
