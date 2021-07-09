@@ -16,7 +16,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: dynatrace-gcp-function-sa
-  namespace: dynatrace
+  namespace: {{ .Release.Namespace }}
   "annotations": {
     "iam.gke.io/gcp-service-account" : dynatrace-gcp-function-sa@{{ .Values.gcpProjectId }}.iam.gserviceaccount.com
   }
@@ -28,7 +28,7 @@ metadata:
   name: dynatrace-gcp-function
   labels:
     app: dynatrace-gcp-function
-  namespace: dynatrace
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:

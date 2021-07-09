@@ -16,7 +16,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dynatrace-gcp-function-config
-  namespace: dynatrace
+  namespace: {{ .Release.Namespace }}
 data:
   GCP_PROJECT: {{ .Values.gcpProjectId | quote }}
   REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
