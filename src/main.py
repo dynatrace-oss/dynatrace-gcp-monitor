@@ -238,6 +238,11 @@ def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str,
     result = {}
     for result_set in fetch_topology_results:
         for entity in result_set:
+            # Ensure order of entries to avoid "flipping" when choosing the first one for dimension value
+            entity.dns_names.sort()
+            entity.ip_addresses.sort()
+            entity.tags.sort()
+            entity.listen_ports.sort()
             result[entity.id] = entity
     return result
 

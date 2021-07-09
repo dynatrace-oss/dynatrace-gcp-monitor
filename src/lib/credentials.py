@@ -51,7 +51,7 @@ def get_dynatrace_log_ingest_url_from_env():
     url = os.environ.get(_DYNATRACE_LOG_INGEST_URL_SECRET_NAME, None)
     if url is None:
         raise Exception("{env_var} environment variable is not set".format(env_var=_DYNATRACE_LOG_INGEST_URL_SECRET_NAME))
-    return url
+    return url.rstrip('/')
 
 
 async def fetch_secret(session: ClientSession, project_id: str, token: str, secret_name: str):
