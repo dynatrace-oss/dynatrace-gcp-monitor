@@ -206,33 +206,33 @@ else
   exit 1
 fi
 
-if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+
   check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
   check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
   check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
   check_api_token "$DYNATRACE_URL"
-fi
+
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
   if [[  $USE_EXISTING_ACTIVE_GATE == false ]]; then
-    check_if_parameter_is_empty "$DYNATRACE_PASS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS Token in the Values file"
+    check_if_parameter_is_empty "$DYNATRACE_PASS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
 
     DOCKER_LOGIN=$(helm template dynatest-gcp-test dynatrace-gcp-function --show-only templates/active-gate-pod.yaml  | grep "envid:" | awk  '{print $2}')
 
     if [[ $(echo "$DYNATRACE_PASS_KEY" | docker login -u "$DOCKER_LOGIN" "$DYNATRACE_URL" --password-stdin > ${CMD_OUT_PIPE} ) ]];
       then
         echo "Successfully logged to cluster registry"
+        echo "The Active Gate will be deployed in k8s cluster"
     else
       echo "Couldn't log to cluster registry. Is your PaaS token a valid one?"
       exit 1
     fi
-    echo "Active Gate will be deployed in k8s cluster"
   else
-    echo "Using existing Active Gate"
+    echo "Using an existing Active Gate"
+    check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
     check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
     check_api_token "$DYNATRACE_LOG_INGEST_URL"
-    check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
   fi
 
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
