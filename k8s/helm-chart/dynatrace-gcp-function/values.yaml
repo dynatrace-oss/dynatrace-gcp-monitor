@@ -26,6 +26,7 @@ deploymentType: "all"
 # 'Ingest metrics', 'Read configuration', 'Write configuration' for deployment type 'all' or 'metrics'
 dynatraceAccessKey: ""
 # Dynatrace environment endpoint, for example: https://environment-id.live.dynatrace.com
+# Needed for deployment type 'metrics'. For deployment 'all' and 'logs' in case when activeGate.useExisting is false
 dynatraceUrl: ""
 
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
