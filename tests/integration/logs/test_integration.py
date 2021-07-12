@@ -105,14 +105,17 @@ def response(status: int, status_message: str):
 
 class MockSubscriberClient:
     received_messages: List[ReceivedMessage]
-    ack_queue : Queue
+    ack_queue: Queue
 
-    def __init__(self, ack_queue: Queue):
-        self.received_messages = []
+    def __init__(self, ack_queue: Queue, messages: List[ReceivedMessage] = None):
+        self.received_messages = messages if messages else []
         self.ack_queue = ack_queue
 
     def add_message(self, message: ReceivedMessage):
         self.received_messages.append(message)
+
+    def add_all_messages(self, messages: List[ReceivedMessage]):
+        self.received_messages += messages
 
     def pull(self, pull_request: PullRequest) -> PullResponse:
         pull_response = PullResponse()
@@ -130,40 +133,201 @@ async def test_execution_successful():
 
     response(expected_cluster_response_code, "Success")
 
-    ack_queue = Queue()
-    sfm_queue = Queue()
-    mock_subscriber_client = MockSubscriberClient(ack_queue)
-
-    expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 15)]
-    expected_ack_ids_of_valid_messages = [f"ACK_ID_{i}" for i in range(0, 10)]
-
-    message_data_json = json.loads(LOG_MESSAGE_DATA)
-    message_data_json["timestamp"] = datetime.utcnow().isoformat() + "Z"
+    message_data_json = load_json_with_fresh_timestamp()
     fresh_message_data = json.dumps(message_data_json)
 
-    for ack_id in expected_ack_ids_of_valid_messages:
-        mock_subscriber_client.add_message(create_fake_message(ack_id=ack_id, message_data=fresh_message_data))
+    expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 10)]
+    messages = [
+        create_fake_message(ack_id=ack_id, message_data=fresh_message_data)
+        for ack_id
+        in expected_ack_ids
+    ]
 
+    self_monitoring = await run_worker_with_messages(messages, expected_ack_ids)
+
+    verify_requests(expected_cluster_response_code, 3)
+
+    assert self_monitoring.too_old_records == 0
+    assert self_monitoring.records_with_too_long_content == 0
+    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 3}
+    assert self_monitoring.processing_time > 0
+    assert self_monitoring.sending_time > 0
+    assert self_monitoring.sent_logs_entries == 10
+    assert self_monitoring.parsing_errors == 0
+    assert self_monitoring.publish_time_fallback_records == 0
+
+
+@pytest.mark.asyncio
+async def test_content_too_long():
+    expected_cluster_response_code = 200
+
+    response(expected_cluster_response_code, "Success")
+
+    ack_id = 'CONTENT_TOO_LONG'
+
+    message_data_json = load_json_with_fresh_timestamp()
     message_data_json["content"] = "LOTS_OF_DATA "*100
     too_long_content_message_data = json.dumps(message_data_json)
-    mock_subscriber_client.add_message(create_fake_message(ack_id='ACK_ID_10', message_data=too_long_content_message_data))
 
-    message_data_json = json.loads(LOG_MESSAGE_DATA)
-    too_old_message_data = json.dumps(message_data_json)
-    mock_subscriber_client.add_message(create_fake_message(ack_id='ACK_ID_11', message_data=too_old_message_data))
+    messages = [create_fake_message(ack_id=ack_id, message_data=too_long_content_message_data)]
+    expected_ack_ids = [ack_id]
 
-    mock_subscriber_client.add_message(create_fake_message(ack_id='ACK_ID_12', message_data=INVALID_TIMESTAMP_DATA))
+    self_monitoring = await run_worker_with_messages(messages, expected_ack_ids)
 
-    message = create_fake_message(ack_id='ACK_ID_13', message_data="")
-    message.message.data = b'\xc3\x28' # Invalid 2 Octet Sequence
-    mock_subscriber_client.add_message(message)
+    verify_requests(expected_cluster_response_code, 1)
 
-    mock_subscriber_client.add_message(create_fake_message(ack_id='ACK_ID_14', message_data="Simple Text message"))
+    assert self_monitoring.too_old_records == 0
+    assert self_monitoring.records_with_too_long_content == 1
+    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 1}
+    assert self_monitoring.processing_time > 0
+    assert self_monitoring.sending_time > 0
+    assert self_monitoring.sent_logs_entries == 1
+    assert self_monitoring.parsing_errors == 0
+    assert self_monitoring.publish_time_fallback_records == 0
 
-    worker_state = WorkerState("TEST")
-    perform_pull(worker_state, sfm_queue, mock_subscriber_client, "")
+
+@pytest.mark.asyncio
+async def test_too_old_message():
+    expected_cluster_response_code = 200
+
+    response(expected_cluster_response_code, "Success")
+
+    ack_id = 'TOO_OLD'
+
+    messages = [create_fake_message(ack_id=ack_id, message_data=LOG_MESSAGE_DATA)]
+    expected_ack_ids = [ack_id]
+
+    self_monitoring = await run_worker_with_messages(messages, expected_ack_ids)
+
+    verify_requests(expected_cluster_response_code, 0)
+
+    assert self_monitoring.too_old_records == 1
+    assert self_monitoring.records_with_too_long_content == 0
+    assert not self_monitoring.dynatrace_connectivity
+    assert self_monitoring.processing_time > 0
+    assert self_monitoring.sending_time == 0
+    assert self_monitoring.sent_logs_entries == 0
+    assert self_monitoring.parsing_errors == 0
+    assert self_monitoring.publish_time_fallback_records == 0
+
+
+@pytest.mark.asyncio
+async def test_invalid_timestamp():
+    expected_cluster_response_code = 200
+
+    response(expected_cluster_response_code, "Success")
+
+    ack_id = 'INVALID_TIMESTAMP'
+
+    messages = [create_fake_message(ack_id=ack_id, message_data=INVALID_TIMESTAMP_DATA)]
+    expected_ack_ids = [ack_id]
+
+    self_monitoring = await run_worker_with_messages(messages, expected_ack_ids)
+
+    verify_requests(expected_cluster_response_code, 1)
+
+    assert self_monitoring.too_old_records == 0
+    assert self_monitoring.records_with_too_long_content == 0
+    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 1}
+    assert self_monitoring.processing_time > 0
+    assert self_monitoring.sending_time > 0
+    assert self_monitoring.sent_logs_entries == 1
+    assert self_monitoring.parsing_errors == 0
+    assert self_monitoring.publish_time_fallback_records == 1
+
+
+@pytest.mark.asyncio
+async def test_binary_data():
+    expected_cluster_response_code = 200
+
+    response(expected_cluster_response_code, "Success")
+
+    ack_id = 'INVALID_TIMESTAMP'
+
+    binary_message = create_fake_message(ack_id=ack_id, message_data="")
+    binary_message.message.data = b'\xc3\x28'  # Invalid 2 Octet Sequence
+    messages = [binary_message]
+    expected_ack_ids = [ack_id]
+
+    self_monitoring = await run_worker_with_messages(messages, expected_ack_ids)
+
+    verify_requests(expected_cluster_response_code, 0)
+
+    assert self_monitoring.too_old_records == 0
+    assert self_monitoring.records_with_too_long_content == 0
+    assert not self_monitoring.dynatrace_connectivity
+    assert self_monitoring.processing_time > 0
+    assert self_monitoring.sending_time == 0
+    assert self_monitoring.sent_logs_entries == 0
+    assert self_monitoring.parsing_errors == 1
+    assert self_monitoring.publish_time_fallback_records == 0
+
+
+@pytest.mark.asyncio
+async def test_plain_text_message():
+    expected_cluster_response_code = 200
+
+    response(expected_cluster_response_code, "Success")
+
+    ack_id = 'PLAIN_TEXT'
+
+    messages = [create_fake_message(ack_id=ack_id, message_data="Plain Text message")]
+    expected_ack_ids = [ack_id]
+
+    self_monitoring = await run_worker_with_messages(messages, expected_ack_ids)
+
+    verify_requests(expected_cluster_response_code, 1)
+
+    assert self_monitoring.too_old_records == 0
+    assert self_monitoring.records_with_too_long_content == 0
+    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 1}
+    assert self_monitoring.processing_time > 0
+    assert self_monitoring.sending_time > 0
+    assert self_monitoring.sent_logs_entries == 1
+    assert self_monitoring.parsing_errors == 0
+    assert self_monitoring.publish_time_fallback_records == 1
+
+
+@pytest.mark.asyncio
+async def test_execution_expired_token():
+    expected_cluster_response_code = 401
+    expected_sent_requests = 3
+
+    response(expected_cluster_response_code, "Expired token")
+
+    message_data_json = load_json_with_fresh_timestamp()
+    fresh_message_data = json.dumps(message_data_json)
+
+    messages = [
+        create_fake_message(ack_id=ack_id, message_data=fresh_message_data)
+        for ack_id
+        in [f"ACK_ID_{i}" for i in range(0, 10)]
+    ]
+
+    self_monitoring = await run_worker_with_messages(messages, [])
+
+    verify_requests(expected_cluster_response_code, expected_sent_requests)
+
+    assert self_monitoring.too_old_records == 0
+    assert self_monitoring.parsing_errors == 0
+    assert self_monitoring.records_with_too_long_content == 0
+    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.ExpiredToken: 3}
+    assert self_monitoring.processing_time > 0
+    assert self_monitoring.sending_time > 0
+
+
+async def run_worker_with_messages(
+        messages: List[ReceivedMessage],
+        expected_ack_ids: List[str],
+) -> LogSelfMonitoring:
+    ack_queue = Queue()
+    sfm_queue = Queue()
+    mock_subscriber_client = MockSubscriberClient(ack_queue, messages)
+
+    test_worker_state = WorkerState("TEST")
+    perform_pull(test_worker_state, sfm_queue, mock_subscriber_client, "")
     # Flush down rest of messages
-    perform_flush(worker_state, sfm_queue, mock_subscriber_client, "")
+    perform_flush(test_worker_state, sfm_queue, mock_subscriber_client, "")
 
     metadata = InstanceMetadata(
         project_id="",
@@ -185,68 +349,15 @@ async def test_execution_successful():
         assert ack_id in expected_ack_ids
         expected_ack_ids.remove(ack_id)
 
-    verify_requests(expected_cluster_response_code, 3)
+    assert len(expected_ack_ids) == 0
 
-    assert self_monitoring.too_old_records == 1
-    assert self_monitoring.records_with_too_long_content == 1
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 3}
-    assert self_monitoring.processing_time > 0
-    assert self_monitoring.sending_time > 0
-    assert self_monitoring.sent_logs_entries == 13
-    assert self_monitoring.parsing_errors == 1
-    assert self_monitoring.publish_time_fallback_records == 2  # Invalid timestamp and simple text messages
+    return self_monitoring
 
 
-@pytest.mark.asyncio
-async def test_execution_expired_token():
-    expected_cluster_response_code = 401
-    expected_sent_requests = 3
-
-    response(expected_cluster_response_code, "Expired token")
-
-    ack_queue = Queue()
-    sfm_queue = Queue()
-    mock_subscriber_client = MockSubscriberClient(ack_queue)
-
-    expected_ack_ids = [f"ACK_ID_{i}" for i in range(0, 10)]
-
+def load_json_with_fresh_timestamp() -> Dict:
     message_data_json = json.loads(LOG_MESSAGE_DATA)
     message_data_json["timestamp"] = datetime.utcnow().isoformat() + "Z"
-    fresh_message_data = json.dumps(message_data_json)
-
-    for ack_id in expected_ack_ids:
-        message = create_fake_message(ack_id=ack_id, message_data=fresh_message_data)
-        mock_subscriber_client.add_message(message)
-
-    worker_state = WorkerState("TEST")
-    perform_pull(worker_state, sfm_queue, mock_subscriber_client, "")
-    # Flush down rest of messages
-    perform_flush(worker_state, sfm_queue, mock_subscriber_client, "")
-
-    metadata = InstanceMetadata(
-        project_id="",
-        container_name="",
-        token_scopes="",
-        service_account="",
-        audience="",
-        hostname="local deployment 2",
-        zone="us-east1"
-    )
-
-    self_monitoring = LogSelfMonitoring()
-    await log_self_monitoring._loop_single_period(self_monitoring, sfm_queue, LoggingContext("TEST"), metadata)
-    sfm_queue.join()
-
-    assert ack_queue.qsize() == 0
-
-    verify_requests(expected_cluster_response_code, expected_sent_requests)
-
-    assert self_monitoring.too_old_records == 0
-    assert self_monitoring.parsing_errors == 0
-    assert self_monitoring.records_with_too_long_content == 0
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.ExpiredToken: 3}
-    assert self_monitoring.processing_time > 0
-    assert self_monitoring.sending_time > 0
+    return message_data_json
 
 
 def verify_requests(expected_cluster_response_code, expected_sent_requests):
