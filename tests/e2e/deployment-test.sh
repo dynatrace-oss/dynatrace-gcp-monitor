@@ -68,6 +68,16 @@ fi
 
 sudo mv linux-amd64/helm /usr/local/bin/helm
 
+# Create E2E Sample App
+gcloud functions deploy sample_app \
+--runtime python37 \
+--trigger-http \
+--source sample_app/ \
+--allow-unauthenticated
+
+for i in {1..5}; do
+  curl "https://us-central1-$GCP_PROJECT_ID.cloudfunctions.net/sample_app"
+done
 
 # Create Pub/Sub topic and subscription.
 gcloud config set project dynatrace-gcp-extension
