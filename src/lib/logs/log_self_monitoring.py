@@ -32,7 +32,7 @@ from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNECTIVITY_
     LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE, LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE, \
     LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE, LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE, LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, \
-    LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE
+    LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE, LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE
 from lib.logs.log_sfm_metrics import LogSelfMonitoring
 from lib.self_monitoring import push_self_monitoring_time_series
 
@@ -228,6 +228,21 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 [{
                     "interval": interval,
                     "value": {"int64Value": sfm.records_with_too_long_content}
+                }]))
+
+    if sfm.publish_time_fallback_records:
+        time_series.append(
+            create_time_serie(
+                context,
+                LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE,
+                {
+                    "dynatrace_tenant_url": context.dynatrace_url,
+                    "logs_subscription_id": context.logs_subscription_id,
+                    "container_name": context.container_name
+                },
+                [{
+                    "interval": interval,
+                    "value": {"int64Value": sfm.publish_time_fallback_records}
                 }]))
 
     time_series.append(create_time_serie(
