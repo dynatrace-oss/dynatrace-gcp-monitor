@@ -48,7 +48,7 @@ while (( "$#" )); do
 done
 
 # Install YQ
-wget --no-verbose https://github.com/mikefarah/yq/releases/download/3.4.0/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
+curl -sSLo yq "https://github.com/mikefarah/yq/releases/download/3.4.0/yq_linux_amd64" && chmod +x yq && sudo mv yq /usr/local/bin/yq
 
 # Install kubectl.
 curl -sSLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
