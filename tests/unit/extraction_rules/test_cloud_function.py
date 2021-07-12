@@ -13,15 +13,13 @@
 #     limitations under the License.
 import json
 from datetime import datetime
-from queue import Queue
 
-from lib.context import LogsContext
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
     ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_IDENTITY, \
     ATTRIBUTE_AUDIT_RESULT
-from tests.unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
+from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 timestamp = datetime.utcnow().isoformat() + "Z"
 
