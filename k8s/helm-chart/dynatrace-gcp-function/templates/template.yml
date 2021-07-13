@@ -16,7 +16,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: dynatrace-gcp-function-sa
-  namespace: dynatrace
+  namespace: {{ .Release.Namespace }}
   "annotations": {
     "iam.gke.io/gcp-service-account" : dynatrace-gcp-function-sa@{{ .Values.gcpProjectId }}.iam.gserviceaccount.com
   }
@@ -26,9 +26,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dynatrace-gcp-function
+  namespace: {{ .Release.Namespace }}
   labels:
     app: dynatrace-gcp-function
-  namespace: dynatrace
 spec:
   selector:
     matchLabels:
@@ -228,4 +228,13 @@ spec:
             path: /health
             port: 8081
           initialDelaySeconds: 10
+      {{- if (eq .Values.activeGate.useExisting "false") }}
+      initContainers:
+        - name: init-active-gate-service
+          image: busybox:1.33.1
+          command: [ 'sh', '-c', "until nslookup dynatrace-activegate-gcpmon-clusterip; do echo waiting for AG service; sleep 2; done" ]
+        - name: init-active-gate
+          image: radial/busyboxplus:curl
+          command: [ 'sh', '-c', 'until [ $(curl  https://dynatrace-activegate-gcpmon-clusterip:9999/rest/state -k)  == "RUNNING" ];do echo "Checking for Running Status";echo "Response = $AG_RESPONE.";sleep 2;done;echo "AG running"' ]
+       {{- end }}
       {{- end }}
