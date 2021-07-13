@@ -73,10 +73,11 @@ gcloud functions deploy sample_app \
 --runtime python37 \
 --trigger-http \
 --source sample_app/ \
---allow-unauthenticated
+--quiet 2>/dev/null
 
 for i in {1..5}; do
-  curl "https://us-central1-$GCP_PROJECT_ID.cloudfunctions.net/sample_app"
+  curl "https://us-central1-$GCP_PROJECT_ID.cloudfunctions.net/sample_app" \
+  -H "Authorization: bearer $(gcloud auth print-identity-token)"
 done
 
 # Create Pub/Sub topic and subscription.
