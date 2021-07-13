@@ -95,13 +95,7 @@ fi
 gcloud functions deploy sample_app \
 --runtime python37 \
 --trigger-http \
---source sample_app/ \
---quiet 2>/dev/null
-
-for i in {1..5}; do
-  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/sample_app" \
-  -H "Authorization: bearer $(gcloud auth print-identity-token)"
-done
+--source sample_app/ 2>/dev/null
 
 # Run helm deployment.
 rm -rf ./e2e_test
