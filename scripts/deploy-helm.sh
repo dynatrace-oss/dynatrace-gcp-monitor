@@ -30,38 +30,61 @@ check_if_parameter_is_empty()
   fi
 }
 
-check_api_token()
-{
-  URL=$(echo "$1" | sed 's:/*$::')
+check_api_token() {
+  URL="$1"
   if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
     if [ "$CODE" -ge 300 ]; then
-      echo -e "\e[93mWARNING: \e[37mFailed to check Dynatrace API token permissions - please verify provided URL (${URL}) and API token. $RESPONSE"
+      echo -e "\e[91mERROR: \e[37mFailed to check Dynatrace API token permissions - please verify provided URL (${URL}) and API token. $RESPONSE"
       exit 1
     fi
     for scope in "${API_TOKEN_SCOPES[@]}"; do
       if ! grep -q "$scope" <<< "$RESPONSE"; then
-        echo -e "\e[93mWARNING: \e[37mMissing permission for the API token: $scope."
+        echo -e "\e[91mERROR: \e[37mMissing permission for the API token: $scope."
         echo "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: $DEPLOYMENT_TYPE"
         exit 1
       fi
     done
   else
-      echo -e "\e[93mWARNING: \e[37mFailed to connect to Dynatrace/ActiveGate endpoint $URL to check API token permissions. It can be ignored if Dynatrace/ActiveGate does not allow public access."
+      echo -e "\e[93mWARNING: \e[37mFailed to connect to Dynatrace/ActiveGate endpoint ($URL) to check API token permissions. It can be ignored if Dynatrace/ActiveGate does not allow public access."
   fi
 }
 
-check_url()
-{
-    URL=$1
-    REGEX=$2
-    MESSAGE=$3
-    if ! [[ "$URL" =~ $REGEX ]]
-    then
-      echo -e "\e[93mWARNING: \e[37m$MESSAGE"
+check_dynatrace_log_ingest_url() {
+  if RESPONSE=$(curl -k -s -X POST -d "$(generate_test_log)" "$DYNATRACE_LOG_INGEST_URL/api/v2/logs/ingest" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"); then
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
+    RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
+    if [ "$CODE" -ge 300 ]; then
+      echo -e "\e[91mERROR: \e[37mFailed to send a test log to Dynatrace - please verify provided log ingest url ($DYNATRACE_LOG_INGEST_URL) and API token. $RESPONSE"
       exit 1
     fi
+  else
+    echo -e "\e[93mWARNING: \e[37mFailed to connect with provided log ingest url ($DYNATRACE_LOG_INGEST_URL) to send a test log. It can be ignored if ActiveGate does not allow public access."
+  fi
+}
+
+generate_test_log()
+{
+  DATE=$(date --iso-8601=seconds)
+  cat <<EOF
+{
+"timestamp": "$DATE",
+"cloud.provider": "gcp",
+"content": "GCP Log Forwarder installation log",
+"severity": "INFO"
+}
+EOF
+}
+
+check_url() {
+  URL=$1
+  REGEX=$2
+  MESSAGE=$3
+  if ! [[ "$URL" =~ $REGEX ]]; then
+    echo -e "\e[91mERROR: \e[37m$MESSAGE"
+    exit 1
+  fi
 }
 
 print_help() {
@@ -90,7 +113,7 @@ arguments:
 if ! command -v gcloud &> /dev/null
 then
 
-    echo -e "\e[93mWARNING: \e[37mGoogle Cloud CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and download latest version of Cloud SDK:"
+    echo -e "\e[91mERROR: \e[37mGoogle Cloud CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and download latest version of Cloud SDK:"
     echo -e
     echo -e "https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version"
     echo -e
@@ -101,7 +124,7 @@ fi
 if ! command -v kubectl &> /dev/null
 then
 
-    echo -e "\e[93mWARNING: \e[37mKubernetes CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install kubectl in the most convenient way to you:"
+    echo -e "\e[91mERROR: \e[37mKubernetes CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install kubectl in the most convenient way to you:"
     echo -e
     echo -e "https://kubernetes.io/docs/tasks/tools/"
     echo -e
@@ -112,7 +135,7 @@ fi
 if ! command -v helm &> /dev/null
 then
 
-    echo -e "\e[93mWARNING: \e[37mHelm is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install Helm in the most convenient way to you:"
+    echo -e "\e[91mERROR: \e[37mHelm is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install Helm in the most convenient way to you:"
     echo -e
     echo -e "https://helm.sh/docs/intro/install/"
     echo -e
@@ -168,10 +191,10 @@ readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e
 GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
 readonly DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
 readonly DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}")
-readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}")
+readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}" | sed 's:/*$::')
+readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}" | sed 's:/*$::')
 readonly USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.useExisting}")
 readonly DYNATRACE_PASS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.dynatracePaasToken}")
-readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}")
 readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
 API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"')
 
@@ -202,7 +225,7 @@ elif [[ $DEPLOYMENT_TYPE == metrics ]]; then
   echo "Deploying $DEPLOYMENT_TYPE ingest"
   API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"')
 else
-  echo "Invalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
+  echo -e "\e[91mERROR: \e[37mInvalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
   exit 1
 fi
 
@@ -225,7 +248,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
         echo "Successfully logged to cluster registry"
         echo "The Active Gate will be deployed in k8s cluster"
     else
-      echo "Couldn't log to cluster registry. Is your PaaS token a valid one?"
+      echo -e "\e[91mERROR: \e[37mCouldn't log to cluster registry. Is your PaaS token a valid one?"
       exit 1
     fi
   else
@@ -233,6 +256,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
     check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
     check_api_token "$DYNATRACE_LOG_INGEST_URL"
+    check_dynatrace_log_ingest_url
   fi
 
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
@@ -242,7 +266,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
   if ! [[ $(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(name)") ]];
   then
-    echo -e "\e[93mWARNING: \e[37mPub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
+    echo -e "\e[91mERROR: \e[37mPub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
     exit 1
   fi
 
@@ -251,14 +275,14 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   readonly ACK_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(ackDeadlineSeconds)")
   if [[ "$ACK_DEADLINE" != "120" ]];
   then
-    echo -e "\e[93mWARNING: \e[37mInvalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
+    echo -e "\e[91mERROR: \e[37mInvalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
     INVALID_PUBSUB=true
   fi
 
   readonly MESSAGE_RETENTION_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(messageRetentionDuration)")
   if [[ "$MESSAGE_RETENTION_DEADLINE" != "86400s" ]];
   then
-    echo -e "\e[93mWARNING: \e[37mInvalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
+    echo -e "\e[91mERROR: \e[37mInvalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
     INVALID_PUBSUB=true
   fi
 
@@ -272,11 +296,11 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health") || ACTIVE_GATE_CONNECTIVITY=N
     if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]
     then
-          echo -e "\e[93mWARNING: \e[37mUnable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
+          echo -e "\e[93mWARNING: \e[37mUnable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL to check if ActiveGate is running. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
     fi
     if [[ "$ACTIVE_GATE_STATE" != "RUNNING" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]
     then
-      echo "ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
+      echo -e "\e[91mERROR: \e[37mActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
       exit 1
     fi
   fi
@@ -286,7 +310,7 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   SELECTED_REGION=$(gcloud config get-value compute/region 2>/dev/null)
   if [ -z "$SELECTED_REGION" ]; then
     echo
-    echo -e "\e[93mWARNING: \e[37mDefault region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
+    echo -e "\e[91mERROR: \e[37mDefault region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
     exit 1
   fi
   echo
