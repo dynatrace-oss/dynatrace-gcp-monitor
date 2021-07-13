@@ -16,7 +16,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dynatrace-gcp-function-config
-  namespace: dynatrace
+  namespace: {{ .Release.Namespace }}
 data:
   GCP_PROJECT: {{ .Values.gcpProjectId | quote }}
   REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
@@ -38,4 +38,5 @@ data:
   DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS: {{ .Values.logIngestRequestMaxEvents | quote }}
   DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
+  USE_EXISTING_ACTIVE_GATE: {{ .Values.activeGate.useExisting | quote }}
   {{- end }}

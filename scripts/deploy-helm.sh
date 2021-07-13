@@ -65,8 +65,8 @@ check_url()
 }
 
 print_help() {
-  printf "
-usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME]
+     printf "
+usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME]
 
 arguments:
     --service-account SA_NAME
@@ -169,6 +169,8 @@ GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProject
 readonly DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
 readonly DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}")
 readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}")
+readonly USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.useExisting}")
+readonly DYNATRACE_PASS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.dynatracePaasToken}")
 readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}")
 readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
 API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"')
@@ -204,7 +206,7 @@ else
   exit 1
 fi
 
-if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]] || [[ ($DEPLOYMENT_TYPE == logs && $USE_EXISTING_ACTIVE_GATE == false)]]; then
   check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
   check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
   check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
@@ -212,10 +214,29 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
-  check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
+
+  if [[  $USE_EXISTING_ACTIVE_GATE == false ]]; then
+    check_if_parameter_is_empty "$DYNATRACE_PASS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
+
+    DOCKER_LOGIN=$(helm template dynatest-gcp-test dynatrace-gcp-function --show-only templates/active-gate-pod.yaml  | grep "envid:" | awk  '{print $2}')
+
+    if [[ $(echo "$DYNATRACE_PASS_KEY" | docker login -u "$DOCKER_LOGIN" "$DYNATRACE_URL" --password-stdin > ${CMD_OUT_PIPE} ) ]];
+      then
+        echo "Successfully logged to cluster registry"
+        echo "The Active Gate will be deployed in k8s cluster"
+    else
+      echo "Couldn't log to cluster registry. Is your PaaS token a valid one?"
+      exit 1
+    fi
+  else
+    echo "Using an existing Active Gate"
+    check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
+    check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
+    check_api_token "$DYNATRACE_LOG_INGEST_URL"
+  fi
+
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
-  check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
-  check_api_token "$DYNATRACE_LOG_INGEST_URL"
+
 
   readonly LOGS_SUBSCRIPTION_FULL_ID="projects/$GCP_PROJECT/subscriptions/$LOGS_SUBSCRIPTION_ID"
 
@@ -246,16 +267,18 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     exit 1
   fi
 
+ if [[  $USE_EXISTING_ACTIVE_GATE == true ]]; then
   ACTIVE_GATE_CONNECTIVITY=Y
   ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health") || ACTIVE_GATE_CONNECTIVITY=N
-  if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]
-  then
-        echo -e "\e[93mWARNING: \e[37mUnable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL. It can be ignored if ActiveGate host network configuration does not allow acces from outside of k8s cluster."
-  fi
-  if [[ "$ACTIVE_GATE_STATE" != "RUNNING" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]
-  then
-    echo "ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
-    exit 1
+    if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]
+    then
+          echo -e "\e[93mWARNING: \e[37mUnable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
+    fi
+    if [[ "$ACTIVE_GATE_STATE" != "RUNNING" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]
+    then
+      echo "ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
+      exit 1
+    fi
   fi
 fi
 
@@ -329,9 +352,17 @@ echo
 echo "- 6. Enable the APIs required for monitoring."
 gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com cloudresourcemanager.googleapis.com  > ${CMD_OUT_PIPE}
 
+
+CLUSTER_NAME=""
+if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
+  CLUSTER_NAME="$AUTOPILOT_CLUSTER_NAME"
+else
+  CLUSTER_NAME=$(kubectl config current-context 2>${CMD_OUT_PIPE})
+fi
+
 echo
-echo "- 7. Install dynatrace-gcp-function with helm chart."
-helm install ./dynatrace-gcp-function --generate-name --namespace dynatrace  > ${CMD_OUT_PIPE}
+echo "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME"
+helm install ./dynatrace-gcp-function --generate-name --namespace dynatrace --set clusterName="$CLUSTER_NAME" > ${CMD_OUT_PIPE}
 
 echo
 echo "- Deployment complete, check if containers are running:"  > ${CMD_OUT_PIPE}

@@ -100,6 +100,7 @@ sed -i '/^dynatraceUrl:/c\dynatraceUrl: "'${DYNATRACE_URL}'"' ${VALUES_FILE}
 sed -i '/^logsSubscriptionId:/c\logsSubscriptionId: "'${PUBSUB_SUBSCRIPTION}'"' ${VALUES_FILE}
 sed -i '/^requireValidCertificate:/c\requireValidCertificate: "false"' ${VALUES_FILE}
 sed -i '/^dockerImage:/c\dockerImage: "'${GCR_NAME}':e2e-travis-test-'${TRAVIS_BUILD_ID}'"' ${VALUES_FILE}
+sed -i '/  useExisting:/c\  useExisting: "true"' ${VALUES_FILE}
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
 
