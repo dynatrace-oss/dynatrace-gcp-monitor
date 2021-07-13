@@ -74,6 +74,7 @@ jobs:
       - PUBSUB_TOPIC="e2e_test_topic_${TRAVIS_BUILD_ID}"
       - PUBSUB_SUBSCRIPTION="e2e_test_subscription_${TRAVIS_BUILD_ID}"
       - IAM_SERVICE_ACCOUNT="e2e-test-sa-${TRAVIS_BUILD_ID}"
+      - LOG_ROUTER="e2e_test_log_router_${TRAVIS_BUILD_ID}"
       - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
       - K8S_CLUSTER="e2e-test-master"
       - GCP_PROJECT_ID="dynatrace-gcp-extension"

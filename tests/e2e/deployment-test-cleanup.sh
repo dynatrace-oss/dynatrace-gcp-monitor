@@ -13,8 +13,9 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}"
-gcloud pubsub topics delete "${PUBSUB_TOPIC}"
+gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}" --quiet
+gcloud pubsub topics delete "${PUBSUB_TOPIC}" --quiet
+gcloud logging sinks delete "${LOG_ROUTER}" --quiet
 gcloud iam service-accounts delete "${IAM_SERVICE_ACCOUNT}@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.logs" --project="${GCP_PROJECT_ID}" > /dev/null
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.metrics" --project="${GCP_PROJECT_ID}" > /dev/null

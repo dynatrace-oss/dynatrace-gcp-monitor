@@ -68,20 +68,8 @@ fi
 
 sudo mv linux-amd64/helm /usr/local/bin/helm
 
-# Create E2E Sample App
-gcloud functions deploy sample_app \
---runtime python37 \
---trigger-http \
---source sample_app/ \
---quiet 2>/dev/null
-
-for i in {1..5}; do
-  curl "https://us-central1-$GCP_PROJECT_ID.cloudfunctions.net/sample_app" \
-  -H "Authorization: bearer $(gcloud auth print-identity-token)"
-done
-
 # Create Pub/Sub topic and subscription.
-gcloud config set project dynatrace-gcp-extension
+gcloud config set project "${GCP_PROJECT_ID}"
 
 if [[ $(gcloud pubsub topics list --filter=name:"${PUBSUB_TOPIC}" --format="value(name)") ]]; then
     echo "Topic [${PUBSUB_TOPIC}] already exists, skipping"
@@ -94,6 +82,26 @@ if [[ $(gcloud pubsub subscriptions list --filter=name:"${PUBSUB_SUBSCRIPTION}" 
 else
     gcloud pubsub subscriptions create "${PUBSUB_SUBSCRIPTION}" --topic="${PUBSUB_TOPIC}" --ack-deadline=120 --message-retention-duration=86400
 fi
+
+# Create Log Router Sink
+if [[ $(gcloud logging sinks  list --filter=name:"${LOG_ROUTER}" --format="value(name)") ]]; then
+    echo "Log Router [${LOG_ROUTER}] already exists, skipping"
+else
+  gcloud logging sinks create "${LOG_ROUTER}" "pubsub.googleapis.com/projects/${GCP_PROJECT_ID}/topics/${PUBSUB_TOPIC}" \
+    --log-filter='(resource.type="cloud_function" AND resource.labels.function_name="sample_app") OR resource.type="cloud_run_revision"' --description="Simple Sink for E2E tests"
+fi
+
+# Create E2E Sample App
+gcloud functions deploy sample_app \
+--runtime python37 \
+--trigger-http \
+--source sample_app/ \
+--quiet 2>/dev/null
+
+for i in {1..5}; do
+  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/sample_app" \
+  -H "Authorization: bearer $(gcloud auth print-identity-token)"
+done
 
 # Run helm deployment.
 rm -rf ./e2e_test
