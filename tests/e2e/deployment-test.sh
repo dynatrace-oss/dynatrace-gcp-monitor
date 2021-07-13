@@ -88,7 +88,7 @@ if [[ $(gcloud logging sinks  list --filter=name:"${LOG_ROUTER}" --format="value
     echo "Log Router [${LOG_ROUTER}] already exists, skipping"
 else
   gcloud logging sinks create "${LOG_ROUTER}" "pubsub.googleapis.com/projects/${GCP_PROJECT_ID}/topics/${PUBSUB_TOPIC}" \
-    --log-filter='(resource.type="cloud_function" AND resource.labels.function_name="sample_app") OR resource.type="cloud_run_revision"' --description="Simple Sink for E2E tests"
+    --log-filter='resource.type="cloud_function" AND resource.labels.function_name="sample_app"' --description="Simple Sink for E2E tests"
 fi
 
 # Create E2E Sample App
