@@ -91,6 +91,9 @@ else
     --log-filter='resource.type="cloud_function" AND resource.labels.function_name="sample_app"' --description="Simple Sink for E2E tests"
 fi
 
+writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | jq -r '.writerIdentity')
+gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher
+
 # Create E2E Sample App
 gcloud functions deploy sample_app \
 --runtime python37 \
