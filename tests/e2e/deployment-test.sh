@@ -102,6 +102,8 @@ dynatraceUrl: "${DYNATRACE_URL}"
 logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
 dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
+activeGate:
+  useExisting: "true"
 EOF
 yq m -i -x ${VALUES_FILE} values.e2e.yaml
 

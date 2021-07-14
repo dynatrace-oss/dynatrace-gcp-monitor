@@ -25,16 +25,27 @@ deploymentType: "all"
 # 'Ingest logs' for deployment type 'all' or'logs'
 # 'Ingest metrics', 'Read configuration', 'Write configuration' for deployment type 'all' or 'metrics'
 dynatraceAccessKey: ""
+# Dynatrace environment endpoint, for example: https://environment-id.live.dynatrace.com
+# Needed for deployment type 'metrics'. For deployment 'all' and 'logs' in case when activeGate.useExisting is false
+dynatraceUrl: ""
 
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
-# ActiveGate endpoint used to ingest logs to Dynatrace, for example: https://environemnt-active-gate-url:9999/e/environment-id"
-dynatraceLogIngestUrl: ""
+
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
+#dynatraceLogIngestUrl ActiveGate endpoint used to ingest logs to Dynatrace, for example: https://environemnt-active-gate-url:9999/e/environment-id"
+#used ONLY when the activeGate.useExisting is true
+dynatraceLogIngestUrl: ""
+
+activeGate:
+  #useExisting if set to false (by default) the Active Gate will be deployed in k8s. In that case also the activeGate.dynatracePaasToken must be filled.
+  useExisting: "false"
+  #dynatracePaasToken PaaS token, generated in Dynatrace cluster.
+  dynatracePaasToken: ""
+
 
 # METRICS VALUES - REQUIRED for 'metrics' and 'all' deployment
-# Dynatrace environment endpoint, for example: https://environment-id.live.dynatrace.com
-dynatraceUrl: ""
+
 
 # COMMON VALUES - DEFAULTS
 # requireValidCertificate: if true function requires valid SSL certificates when communicating with Dynatrace cluster
@@ -84,6 +95,8 @@ importDashboards: "true"
 # Import predefined alerting rules for selected services. Allowed values: "true"/"yes", "false"/"no"
 importAlerts: "true"
 # configuration file for GCP services - uncommented services will be monitored
+#clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh
+clusterName: ""
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax
   services:
