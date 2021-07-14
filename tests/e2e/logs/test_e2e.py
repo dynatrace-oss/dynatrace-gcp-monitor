@@ -20,8 +20,8 @@ from google.auth.transport.requests import Request
 from google.oauth2 import id_token
 
 ACCESS_KEY_FILE = 'tests/e2e/e2e-gcp-sa-key.json'
-DYNATRACE_URL = '' #os.environ['DYNATRACE_URL']
-DYNATRACE_ACCESS_KEY = '' #os.environ['DYNATRACE_ACCESS_KEY']
+DYNATRACE_URL = os.environ['DYNATRACE_URL']
+DYNATRACE_ACCESS_KEY = os.environ['DYNATRACE_ACCESS_KEY']
 GCP_PROJECT_ID = os.environ['GCP_PROJECT_ID']
 
 
