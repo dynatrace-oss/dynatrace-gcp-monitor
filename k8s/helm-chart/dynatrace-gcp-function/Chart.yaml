@@ -16,4 +16,4 @@ apiVersion: v2
 name: dynatrace-gcp-function
 description: A Helm chart for dynatrace-gcp-function which provides the mechanism to pull all Google Cloud metrics and/or Google Cloud logs into Dynatrace.
 type: application
-version: 0.2.0
+version: 0.3.0
