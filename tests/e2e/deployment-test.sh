@@ -98,7 +98,7 @@ gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerI
 gcloud functions deploy sample_app \
 --runtime python37 \
 --trigger-http \
---source sample_app/ 2>/dev/null
+--source ./tests/e2e/sample_app/ 2>/dev/null
 
 # Generate load on GC Function
 for i in {1..5}; do
