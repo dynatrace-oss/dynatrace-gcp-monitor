@@ -102,7 +102,7 @@ gcloud functions deploy sample_app \
 
 # Generate load on GC Function
 for i in {1..5}; do
-  curl "https://us-central1-$GCP_PROJECT_ID.cloudfunctions.net/sample_app" \
+  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/sample_app?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
   -H "Authorization: bearer $(gcloud auth print-identity-token)"
 done
 
