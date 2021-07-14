@@ -21,8 +21,8 @@ def test_environment_vars():
     assert "DYNATRACE_ACCESS_KEY" in os.environ
     assert "DEPLOYMENT_TYPE" in os.environ
     assert "TRAVIS_BUILD_ID" in os.environ
-    assert "START_TIME" in os.environ
-    assert "END_TIME" in os.environ
+    assert "START_LOAD_GENERATION" in os.environ
+    assert "END_LOAD_GENERATION" in os.environ
 
 @pytest.fixture
 def get_environments_values():
@@ -30,9 +30,9 @@ def get_environments_values():
         'DYNATRACE_URL': os.environ.get('DYNATRACE_URL'),
         'DYNATRACE_ACCESS_KEY': os.environ.get('DYNATRACE_ACCESS_KEY'),
         'DEPLOYMENT_TYPE': os.environ.get('DEPLOYMENT_TYPE'),
-        'TRAVIS_BUILD_ID': os.environ.get('TRAVIS_BUILD_ID'),
-        'START_TIME': os.environ.get('START_TIME'),
-        'END_TIME': os.environ.get('END_TIME'),
+        'BUILD_ID': os.environ.get('TRAVIS_BUILD_ID'),
+        'START_TIME': os.environ.get('START_LOAD_GENERATION'),
+        'END_TIME': os.environ.get('END_LOAD_GENERATION'),
     }
 
 def test_logs_on_dynatrace(get_environments_values):
@@ -40,7 +40,7 @@ def test_logs_on_dynatrace(get_environments_values):
     params = {
         'from': get_environments_values['START_TIME'],
         'to': get_environments_values['END_TIME'],
-        'query': f"content='TYPE: {get_environments_values['DEPLOYMENT_TYPE']}, BUILD: {get_environments_values['TRAVIS_BUILD_ID']}, INFO: This is sample app'"
+        'query': f"content='TYPE: {get_environments_values['DEPLOYMENT_TYPE']}, BUILD: {get_environments_values['BUILD_ID']}, INFO: This is sample app'"
     }
     headers = {
         'Authorization': f"Api-Token {get_environments_values['DYNATRACE_ACCESS_KEY']}"
