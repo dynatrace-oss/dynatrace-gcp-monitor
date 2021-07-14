@@ -95,12 +95,18 @@ jobs:
     script:
       - "./build/docker-deploy.sh"
       - chmod +x ./tests/e2e/deployment-test.sh
+      - export START_LOAD_GENERATION=$(date -u +%s)
       - ./tests/e2e/deployment-test.sh --logs
+      - export END_LOAD_GENERATION=$(date -u +%s)
       - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/e2e/logs -v
       - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
+      - export START_LOAD_GENERATION=$(date -u +%s)
       - ./tests/e2e/deployment-test.sh --metrics
+      - export END_LOAD_GENERATION=$(date -u +%s)
       - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
+      - export START_LOAD_GENERATION=$(date -u +%s)
       - ./tests/e2e/deployment-test.sh --all
+      - export END_LOAD_GENERATION=$(date -u +%s)
       - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/e2e/logs -v
       - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
     after_script:
