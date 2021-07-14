@@ -100,6 +100,12 @@ gcloud functions deploy sample_app \
 --trigger-http \
 --source sample_app/ 2>/dev/null
 
+# Generate load on GC Function
+for i in {1..5}; do
+  curl "https://us-central1-$GCP_PROJECT_ID.cloudfunctions.net/sample_app" \
+  -H "Authorization: bearer $(gcloud auth print-identity-token)"
+done
+
 # Run helm deployment.
 rm -rf ./e2e_test
 mkdir ./e2e_test
