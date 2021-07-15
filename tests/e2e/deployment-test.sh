@@ -88,11 +88,11 @@ if [[ $(gcloud logging sinks  list --filter=name:"${LOG_ROUTER}" --format="value
     echo "Log Router [${LOG_ROUTER}] already exists, skipping"
 else
   gcloud logging sinks create "${LOG_ROUTER}" "pubsub.googleapis.com/projects/${GCP_PROJECT_ID}/topics/${PUBSUB_TOPIC}" \
-    --log-filter='resource.type="cloud_function" AND resource.labels.function_name="sample_app"' --description="Simple Sink for E2E tests"
+    --log-filter='resource.type="cloud_function" AND resource.labels.function_name="sample_app"' --description="Simple Sink for E2E tests" > /dev/null 2>&1
 fi
 
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | jq -r '.writerIdentity')
-gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher
+gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher > /dev/null 2>&1
 
 # Create E2E Sample App
 gcloud functions deploy sample_app \
