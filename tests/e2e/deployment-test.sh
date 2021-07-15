@@ -98,13 +98,7 @@ gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerI
 gcloud functions deploy sample_app \
 --runtime python37 \
 --trigger-http \
---source ./tests/e2e/sample_app/ 2>/dev/null
-
-# Generate load on GC Function
-for i in {1..5}; do
-  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/sample_app?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
-  -H "Authorization: bearer $(gcloud auth print-identity-token)"
-done
+--source ./tests/e2e/sample_app/
 
 # Run helm deployment.
 rm -rf ./e2e_test
@@ -166,3 +160,9 @@ else
   echo "Deployment failed"
   exit 1
 fi
+
+# Generate load on GC Function
+for i in {1..5}; do
+  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/sample_app?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
+  -H "Authorization: bearer $(gcloud auth print-identity-token)"
+done
