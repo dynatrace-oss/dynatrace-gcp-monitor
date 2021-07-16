@@ -44,6 +44,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/snapshot/config_updates_count
     id: cloud.gcp.pubsub_googleapis_com.snapshot.config_updates_count
     type: count,delta
@@ -80,6 +83,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/snapshot/oldest_message_age
     id: cloud.gcp.pubsub_googleapis_com.snapshot.oldest_message_age
     type: gauge
@@ -103,3 +109,6 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region

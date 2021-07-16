@@ -70,6 +70,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/topic/num_unacked_messages_by_region
     id: cloud.gcp.pubsub_googleapis_com.topic.num_unacked_messages_by_region
     type: gauge
@@ -82,6 +85,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/topic/oldest_retained_acked_message_age_by_region
     id: cloud.gcp.pubsub_googleapis_com.topic.oldest_retained_acked_message_age_by_region
     type: gauge
@@ -94,6 +100,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/topic/oldest_unacked_message_age_by_region
     id: cloud.gcp.pubsub_googleapis_com.topic.oldest_unacked_message_age_by_region
     type: gauge
@@ -106,6 +115,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/topic/retained_acked_bytes_by_region
     id: cloud.gcp.pubsub_googleapis_com.topic.retained_acked_bytes_by_region
     type: gauge
@@ -118,6 +130,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/topic/send_message_operation_count
     id: cloud.gcp.pubsub_googleapis_com.topic.send_message_operation_count
     type: count,delta
@@ -155,5 +170,8 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
 dashboards:
   - dashboard: "dashboards/pubsub.json"

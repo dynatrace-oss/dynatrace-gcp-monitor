@@ -153,6 +153,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/num_unacked_messages_by_region
     id: cloud.gcp.pubsub_googleapis_com.subscription.num_unacked_messages_by_region
     type: gauge
@@ -165,6 +168,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/num_undelivered_messages
     id: cloud.gcp.pubsub_googleapis_com.subscription.num_undelivered_messages
     type: gauge
@@ -199,6 +205,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/oldest_unacked_message_age
     id: cloud.gcp.pubsub_googleapis_com.subscription.oldest_unacked_message_age
     type: gauge
@@ -222,6 +231,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/pull_ack_message_operation_count
     id: cloud.gcp.pubsub_googleapis_com.subscription.pull_ack_message_operation_count
     type: count,delta
@@ -322,6 +334,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/seek_request_count
     id: cloud.gcp.pubsub_googleapis_com.subscription.seek_request_count
     type: count,delta
@@ -433,5 +448,8 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityMode: true
+    - value: metric.labels.region
+      id: gcp.region
 dashboards:
   - dashboard: "dashboards/pubsub.json"
