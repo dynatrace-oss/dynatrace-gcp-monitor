@@ -31,6 +31,9 @@ gcp:
     id: broker_name
   - value: resource.labels.trigger_name
     id: trigger_name
+    compatibilityMode: true
+  - value: resource.labels.trigger_name
+    id: gcp.instance.name
   metrics:
   - value: knative.dev/eventing/trigger/event_count
     id: cloud.gcp.knative_dev.eventing.trigger.event_count

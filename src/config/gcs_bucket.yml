@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.bucket_name
     id: bucket_name
+    compatibilityMode: true
+  - value: resource.labels.bucket_name
+    id: gcp.instance.name
   - value: resource.labels.location
     id: location
     compatibilityMode: true

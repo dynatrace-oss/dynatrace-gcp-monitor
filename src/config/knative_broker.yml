@@ -29,6 +29,9 @@ gcp:
     id: namespace_name
   - value: resource.labels.broker_name
     id: broker_name
+    compatibilityMode: true
+  - value: resource.labels.broker_name
+    id: gcp.instance.name
   metrics: 
   - value: knative.dev/eventing/broker/event_count
     id: cloud.gcp.knative_dev.eventing.broker.event_count

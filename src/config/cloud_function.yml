@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.function_name
     id: function_name
+    compatibilityMode: true
+  - value: resource.labels.function_name
+    id: gcp.instance.name
   - value: resource.labels.region
     id: region
     compatibilityMode: true

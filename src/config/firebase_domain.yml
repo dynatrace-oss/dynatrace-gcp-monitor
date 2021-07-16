@@ -22,6 +22,9 @@ gcp:
     id: site_name
   - value: resource.labels.domain_name
     id: domain_name
+    compatibilityMode: true
+  - value: resource.labels.domain_name
+    id: gcp.instance.name
   metrics:
   - value: firebasehosting.googleapis.com/storage/limit
     id: cloud.gcp.firebasehosting_googleapis_com.storage.limit

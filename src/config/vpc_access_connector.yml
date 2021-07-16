@@ -25,6 +25,9 @@ gcp:
     id: gcp.region
   - value: resource.labels.connector_name
     id: connector_name
+    compatibilityMode: true
+  - value: resource.labels.connector_name
+    id: gcp.instance.name
   metrics:
   - value: vpcaccess.googleapis.com/connector/received_bytes_count
     id: cloud.gcp.vpcaccess_googleapis_com.connector.received_bytes_count

@@ -24,6 +24,9 @@ gcp:
     id: namespace_name
   - value: resource.labels.canonical_service_name
     id: canonical_service_name
+    compatibilityMode: true
+  - value: resource.labels.canonical_service_name
+    id: gcp.instance.name
   - value: resource.labels.location
     id: location
     compatibilityMode: true

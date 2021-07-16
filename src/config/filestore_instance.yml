@@ -25,6 +25,9 @@ gcp:
     id: gcp.region
   - value: resource.labels.instance_name
     id: instance_name
+    compatibilityMode: true
+  - value: resource.labels.instance_name
+    id: gcp.instance.name
   metrics:
   - value: file.googleapis.com/nfs/server/average_read_latency
     id: cloud.gcp.file_googleapis_com.nfs.server.average_read_latency

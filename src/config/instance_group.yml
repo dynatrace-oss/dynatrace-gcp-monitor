@@ -27,6 +27,9 @@ gcp:
     id: instance_group_id
   - value: resource.labels.instance_group_name
     id: instance_group_name
+    compatibilityMode: true
+  - value: resource.labels.instance_group_name
+    id: gcp.instance.name
   metrics:
   - value: compute.googleapis.com/instance_group/size
     id: cloud.gcp.compute_googleapis_com.instance_group.size

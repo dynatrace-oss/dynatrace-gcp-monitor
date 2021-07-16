@@ -27,6 +27,9 @@ gcp:
     id: autoscaler_id
   - value: resource.labels.autoscaler_name
     id: autoscaler_name
+    compatibilityMode: true
+  - value: resource.labels.autoscaler_name
+    id: gcp.instance.name
   - value: resource.labels.instance_group_manager_id
     id: instance_group_manager_id
   - value: resource.labels.instance_group_manager_name

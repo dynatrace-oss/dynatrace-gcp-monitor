@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.policy_name
     id: policy_name
+    compatibilityMode: true
+  - value: resource.labels.policy_name
+    id: gcp.instance.name
   metrics:
   - value: networksecurity.googleapis.com/https/previewed_request_count
     id: cloud.gcp.networksecurity_googleapis_com.https.previewed_request_count

@@ -27,6 +27,9 @@ gcp:
     id: router_id
   - value: resource.labels.gateway_name
     id: gateway_name
+    compatibilityMode: true
+  - value: resource.labels.gateway_name
+    id: gcp.instance.name
   metrics:
   - value: router.googleapis.com/nat/allocated_ports
     id: cloud.gcp.router_googleapis_com.nat.allocated_ports

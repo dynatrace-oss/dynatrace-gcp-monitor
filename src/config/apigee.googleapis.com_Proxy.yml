@@ -26,6 +26,9 @@ gcp:
     id: gcp.region
   - value: resource.labels.proxy_name
     id: proxy_name
+    compatibilityMode: true
+  - value: resource.labels.proxy_name
+    id: gcp.instance.name
   - value: resource.labels.revision
     id: revision
   - value: resource.labels.host

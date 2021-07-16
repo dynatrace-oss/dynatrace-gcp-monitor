@@ -25,6 +25,9 @@ gcp:
     id: gcp.region
   - value: resource.labels.environment_name
     id: environment_name
+    compatibilityMode: true
+  - value: resource.labels.environment_name
+    id: gcp.instance.name
   metrics:
   - value: composer.googleapis.com/environment/api/request_count
     id: cloud.gcp.composer_googleapis_com.environment.api.request_count
