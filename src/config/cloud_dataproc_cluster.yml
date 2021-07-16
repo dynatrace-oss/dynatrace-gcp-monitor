@@ -24,6 +24,9 @@ gcp:
     id: cluster_uuid
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: dataproc.googleapis.com/cluster/hdfs/datanodes
     id: cloud.gcp.dataproc_googleapis_com.cluster.hdfs.datanodes

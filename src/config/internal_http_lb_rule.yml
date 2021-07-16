@@ -22,6 +22,9 @@ gcp:
     id: network_name
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   - value: resource.labels.url_map_name
     id: url_map_name
   - value: resource.labels.forwarding_rule_name

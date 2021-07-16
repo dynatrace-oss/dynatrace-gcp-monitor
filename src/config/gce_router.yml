@@ -22,6 +22,9 @@ gcp:
     id: router_id
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: router.googleapis.com/best_received_routes_count
     id: cloud.gcp.router_googleapis_com.best_received_routes_count

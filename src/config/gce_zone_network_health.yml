@@ -22,6 +22,9 @@ gcp:
     id: zone
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: networking.googleapis.com/cloud_netslo/active_probing/probe_count
     id: cloud.gcp.networking_googleapis_com.cloud_netslo.active_probing.probe_count

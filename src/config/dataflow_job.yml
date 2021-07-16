@@ -22,6 +22,9 @@ gcp:
     id: job_name
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: dataflow.googleapis.com/job/billable_shuffle_data_processed
     id: cloud.gcp.dataflow_googleapis_com.job.billable_shuffle_data_processed

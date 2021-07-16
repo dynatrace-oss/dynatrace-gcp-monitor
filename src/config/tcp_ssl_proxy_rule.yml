@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   - value: resource.labels.backend_target_name
     id: backend_target_name
   - value: resource.labels.backend_target_type

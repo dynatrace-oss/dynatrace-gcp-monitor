@@ -22,6 +22,9 @@ gcp:
     id: job_id
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: ml.googleapis.com/training/accelerator/memory/utilization
     id: cloud.gcp.ml_googleapis_com.training.accelerator.memory.utilization

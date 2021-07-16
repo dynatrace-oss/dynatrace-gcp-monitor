@@ -24,6 +24,9 @@ gcp:
     id: interconnect
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   - value: resource.labels.interconnect_project
     id: interconnect_project
   metrics:

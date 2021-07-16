@@ -22,6 +22,9 @@ gcp:
     id: database_id
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: cloudsql.googleapis.com/database/auto_failover_request_count
     id: cloud.gcp.cloudsql_googleapis_com.database.auto_failover_request_count

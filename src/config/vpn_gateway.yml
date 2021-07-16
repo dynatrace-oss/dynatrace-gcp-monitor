@@ -22,6 +22,9 @@ gcp:
     id: gateway_id
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: vpn.googleapis.com/gateway/connections
     id: cloud.gcp.vpn_googleapis_com.gateway.connections

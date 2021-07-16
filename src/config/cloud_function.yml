@@ -22,6 +22,9 @@ gcp:
     id: function_name
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: cloudfunctions.googleapis.com/function/active_instances
     id: cloud.gcp.cloudfunctions_googleapis_com.function.active_instances

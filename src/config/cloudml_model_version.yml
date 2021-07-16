@@ -24,6 +24,9 @@ gcp:
     id: version_id
   - value: resource.labels.region
     id: region
+    compatibilityMode: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: ml.googleapis.com/prediction/error_count
     id: cloud.gcp.ml_googleapis_com.prediction.error_count
