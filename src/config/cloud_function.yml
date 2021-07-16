@@ -93,3 +93,4 @@ gcp:
     - value: metric.labels.trigger_type
 dashboards:
   - dashboard: "dashboards/cloud_function.json"
+  - dashboard: "dashboards/compatibilityMode/cloud_function.json"

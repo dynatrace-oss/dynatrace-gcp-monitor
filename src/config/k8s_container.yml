@@ -218,4 +218,5 @@ gcp:
     dimensions: []
 dashboards:
   - dashboard: "dashboards/k8s.json"
+  - dashboard: "dashboards/compatibilityMode/k8s.json"
 

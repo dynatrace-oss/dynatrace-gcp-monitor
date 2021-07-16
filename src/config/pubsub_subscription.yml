@@ -453,3 +453,4 @@ gcp:
       id: gcp.region
 dashboards:
   - dashboard: "dashboards/pubsub.json"
+  - dashboard: "dashboards/compatibilityMode/pubsub.json"

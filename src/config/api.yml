@@ -102,3 +102,4 @@ gcp:
     dimensions: []
 dashboards:
   - dashboard: "dashboards/api.json"
+  - dashboard: "dashboards/compatibilityMode/api.json"
