@@ -15,6 +15,9 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityMode: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.target_name
     id: target_name
   - value: resource.labels.location
