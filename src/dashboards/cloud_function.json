@@ -63,7 +63,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.active_instances",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"]
+            "splitBy": ["gcp.project.id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -192,7 +192,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.active_instances",
             "spaceAggregation": "SUM",
             "timeAggregation": "AVG",
-            "splitBy": ["region","project_id"]
+            "splitBy": ["region","gcp.project.id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -225,7 +225,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.active_instances",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["function_name","project_id"]
+            "splitBy": ["function_name","gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -258,7 +258,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.active_instances",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["function_name", "project_id"]
+            "splitBy": ["function_name", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -291,7 +291,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.execution_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["function_name", "project_id"]
+            "splitBy": ["function_name", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -324,7 +324,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.execution_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["function_name", "project_id"]
+            "splitBy": ["function_name", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -357,7 +357,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.execution_times",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["function_name", "project_id"]
+            "splitBy": ["function_name", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -390,7 +390,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.execution_times",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["function_name", "project_id"]
+            "splitBy": ["function_name", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -423,7 +423,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.user_memory_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["function_name", "project_id"]
+            "splitBy": ["function_name", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -456,7 +456,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.user_memory_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["function_name", "project_id"]
+            "splitBy": ["function_name", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -489,7 +489,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.execution_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["status", "function_name", "project_id"],
+            "splitBy": ["status", "function_name", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -534,7 +534,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.execution_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["status", "function_name", "project_id"],
+            "splitBy": ["status", "function_name", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{

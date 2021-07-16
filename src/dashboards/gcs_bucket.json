@@ -39,7 +39,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.storage.total_byte_seconds",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["storage_class", "project_id", "bucket_name"]
+            "splitBy": ["storage_class", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -79,7 +79,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.storage.total_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["storage_class", "project_id", "bucket_name"]
+            "splitBy": ["storage_class", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -107,7 +107,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.network.sent_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "project_id", "bucket_name"]
+            "splitBy": ["method", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -147,7 +147,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.network.sent_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id", "bucket_name"]
+            "splitBy": ["response_code", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -187,7 +187,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "project_id", "bucket_name"]
+            "splitBy": ["method", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -227,7 +227,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id", "bucket_name"]
+            "splitBy": ["response_code", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -267,7 +267,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.network.received_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "project_id", "bucket_name"]
+            "splitBy": ["method", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -307,7 +307,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.network.received_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id", "bucket_name"]
+            "splitBy": ["response_code", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -371,7 +371,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.authz.acl_operations_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["acl_operation", "project_id", "bucket_name"]
+            "splitBy": ["acl_operation", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -423,7 +423,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.storage.object_count.gauge",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["storage_class", "project_id", "bucket_name"]
+            "splitBy": ["storage_class", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -462,7 +462,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.storage.total_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["storage_class", "project_id", "bucket_name"]
+            "splitBy": ["storage_class", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -495,7 +495,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.network.received_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "project_id", "bucket_name"]
+            "splitBy": ["method", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -528,7 +528,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.network.sent_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "project_id", "bucket_name"]
+            "splitBy": ["method", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -561,7 +561,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.storage.total_byte_seconds",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["storage_class", "project_id", "bucket_name"]
+            "splitBy": ["storage_class", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -605,7 +605,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["method", "project_id", "bucket_name"]
+            "splitBy": ["method", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -649,7 +649,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.network.received_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id", "bucket_name"]
+            "splitBy": ["response_code", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -682,7 +682,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.network.sent_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id", "bucket_name"]
+            "splitBy": ["response_code", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -715,7 +715,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id", "bucket_name"]
+            "splitBy": ["response_code", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -781,7 +781,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.authn.authentication_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "bucket_name", "authentication_method"]
+            "splitBy": ["gcp.project.id", "bucket_name", "authentication_method"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -814,7 +814,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.authn.authentication_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "bucket_name", "authentication_method"]
+            "splitBy": ["gcp.project.id", "bucket_name", "authentication_method"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -842,7 +842,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.authn.authentication_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["access_id", "project_id", "bucket_name"]
+            "splitBy": ["access_id", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -870,7 +870,7 @@
             "metric": "cloud.gcp.storage_googleapis_com.authn.authentication_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["access_id", "project_id", "bucket_name"]
+            "splitBy": ["access_id", "gcp.project.id", "bucket_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",

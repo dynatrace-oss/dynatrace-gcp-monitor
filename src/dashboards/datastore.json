@@ -27,7 +27,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.write_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["op", "project_id"]
+            "splitBy": ["op", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -67,7 +67,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.read_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["type", "project_id"]
+            "splitBy": ["type", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -107,7 +107,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"]
+            "splitBy": ["gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -147,7 +147,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id"]
+            "splitBy": ["response_code", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -199,7 +199,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.read_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"]
+            "splitBy": ["gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -239,7 +239,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.write_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"]
+            "splitBy": ["gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -279,7 +279,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["api_method", "project_id"]
+            "splitBy": ["api_method", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -307,7 +307,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.write_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["op", "module_id", "project_id"]
+            "splitBy": ["op", "module_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -340,7 +340,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.entity.write_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"]
+            "splitBy": ["gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -397,7 +397,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id"]
+            "splitBy": ["response_code", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -454,7 +454,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["api_method", "project_id"]
+            "splitBy": ["api_method", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -487,7 +487,7 @@
             "metric": "cloud.gcp.datastore_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id"]
+            "splitBy": ["gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",

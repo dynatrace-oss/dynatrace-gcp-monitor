@@ -168,7 +168,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["protocol", "project_id", "forwarding_rule_name"]
+            "splitBy": ["protocol", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -213,7 +213,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -246,7 +246,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -279,7 +279,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -312,7 +312,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -345,7 +345,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -390,7 +390,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -423,7 +423,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -456,7 +456,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.response_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -489,7 +489,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.response_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -534,7 +534,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.response_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -567,7 +567,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.response_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -612,7 +612,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["client_country", "project_id", "forwarding_rule_name"]
+            "splitBy": ["client_country", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -645,7 +645,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -678,7 +678,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -723,7 +723,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -756,7 +756,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -789,7 +789,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_request_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -834,7 +834,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_request_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -879,7 +879,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_response_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -912,7 +912,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_response_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -945,7 +945,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_request_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -978,7 +978,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_response_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1011,7 +1011,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_request_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1044,7 +1044,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_response_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1077,7 +1077,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -1110,7 +1110,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.total_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -1143,7 +1143,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.frontend_tcp_rtt",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -1176,7 +1176,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -1209,7 +1209,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.total_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1242,7 +1242,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.frontend_tcp_rtt",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1275,7 +1275,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.backend_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "forwarding_rule_name"]
+            "splitBy": ["gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1320,7 +1320,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "response_code", "forwarding_rule_name", "project_id"]
+            "splitBy": ["backend_name", "response_code", "forwarding_rule_name", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TABLE",
@@ -1365,7 +1365,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "response_code", "project_id", "forwarding_rule_name"]
+            "splitBy": ["backend_name", "response_code", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -1398,7 +1398,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.https.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id", "forwarding_rule_name"]
+            "splitBy": ["response_code", "gcp.project.id", "forwarding_rule_name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
