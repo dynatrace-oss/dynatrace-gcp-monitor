@@ -24,6 +24,7 @@ import aiohttp
 from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
 from lib.logs.log_sfm_metrics import LogSelfMonitoring
 from lib.metric_descriptor import SELF_MONITORING_METRIC_MAP
+from operation_mode import OperationMode
 
 
 def get_int_environment_value(key: str, default_value: int) -> int:
@@ -122,6 +123,22 @@ class LogsProcessingContext(LogsContext):
             scheduled_execution_id=scheduled_execution_id,
             sfm_queue = sfm_queue
         )
+
+
+class SfmDashboardsContext(LoggingContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            token,
+            gcp_session: aiohttp.ClientSession,
+            operation_mode: OperationMode,
+            scheduled_execution_id: Optional[str]
+    ):
+        super().__init__(scheduled_execution_id)
+        self.project_id_owner = project_id_owner
+        self.token = token
+        self.gcp_session = gcp_session
+        self.operation_mode = operation_mode
 
 
 class SfmContext(ExecutionContext):

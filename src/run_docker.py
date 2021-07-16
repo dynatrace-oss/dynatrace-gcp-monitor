@@ -20,11 +20,12 @@ from aiohttp import web
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configure_dynatrace import ConfigureDynatrace
-from lib.context import LoggingContext, get_int_environment_value
+from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext
 from lib.credentials import create_token
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
+from lib.self_monitoring import import_self_monitoring_dashboard
 from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode
 
@@ -75,6 +76,19 @@ async def run_instance_metadata_check() -> Optional[InstanceMetadata]:
 async def try_configure_dynatrace():
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         dashboards_result = await ConfigureDynatrace(gcp_session=gcp_session, dt_session=dt_session, logging_context=logging_context)
+
+
+async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
+    if metadata:
+        async with init_gcp_client_session() as gcp_session:
+            token = await create_token(logging_context, gcp_session)
+            if token:
+                sfm_dashboards_context = SfmDashboardsContext(project_id_owner=metadata.project_id,
+                                                              token=token,
+                                                              gcp_session=gcp_session,
+                                                              operation_mode=OPERATION_MODE,
+                                                              scheduled_execution_id=None)
+                await import_self_monitoring_dashboard(context=sfm_dashboards_context)
 
 
 async def health(request):
@@ -143,6 +157,7 @@ site = web.TCPSite(runner, '0.0.0.0', HEALTH_CHECK_PORT)
 loop.run_until_complete(site.start())
 
 instance_metadata = loop.run_until_complete(run_instance_metadata_check())
+loop.run_until_complete(import_self_monitoring_dashboards())
 
 logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
 
