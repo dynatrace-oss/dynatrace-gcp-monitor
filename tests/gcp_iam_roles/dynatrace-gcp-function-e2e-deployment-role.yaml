@@ -1,0 +1,43 @@
+title: E2E tests dynatrace-gcp-function
+description: Role for Dynatrace GCP function E2E deployemnt
+stage: GA
+includedPermissions:
+  -  container.clusters.get
+  -  container.configMaps.create
+  -  container.configMaps.delete
+  -  container.configMaps.get
+  -  container.deployments.create
+  -  container.deployments.delete
+  -  container.deployments.get
+  -  container.namespaces.create
+  -  container.namespaces.get
+  -  container.pods.list
+  -  container.secrets.create
+  -  container.secrets.delete
+  -  container.secrets.get
+  -  container.secrets.list
+  -  container.secrets.update
+  -  container.serviceAccounts.create
+  -  container.serviceAccounts.delete
+  -  container.serviceAccounts.get
+  -  logging.sinks.create
+  -  logging.sinks.delete
+  -  logging.sinks.get
+  -  logging.sinks.list
+  -  pubsub.subscriptions.create
+  -  pubsub.subscriptions.delete
+  -  pubsub.subscriptions.get
+  -  pubsub.subscriptions.list
+  -  pubsub.topics.attachSubscription
+  -  pubsub.topics.create
+  -  pubsub.topics.delete
+  -  pubsub.topics.getIamPolicy
+  -  pubsub.topics.list
+  -  pubsub.topics.setIamPolicy
+  -  pubsub.topics.update
+  -  resourcemanager.projects.get
+  -  resourcemanager.projects.getIamPolicy
+  -  resourcemanager.projects.setIamPolicy
+  -  serviceusage.services.enable
+  -  serviceusage.services.get
+
