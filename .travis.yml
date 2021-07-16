@@ -101,15 +101,18 @@ jobs:
       - "./build/docker-deploy.sh"
       - export START_LOAD_GENERATION=$(date -u +%s)
       - ./tests/e2e/deployment-test.sh --logs
+      - sleep 300
       - export END_LOAD_GENERATION=$(date -u +%s)
       - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/e2e/logs -v
       - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
       - export START_LOAD_GENERATION=$(date -u +%s)
       - ./tests/e2e/deployment-test.sh --metrics
+      - sleep 300
       - export END_LOAD_GENERATION=$(date -u +%s)
       - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
       - export START_LOAD_GENERATION=$(date -u +%s)
       - ./tests/e2e/deployment-test.sh --all
+      - sleep 300
       - export END_LOAD_GENERATION=$(date -u +%s)
       - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/e2e/logs -v
       - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
