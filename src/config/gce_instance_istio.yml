@@ -22,6 +22,9 @@ gcp:
     id: instance_id
   - value: resource.labels.zone
     id: zone
+    compatibilityMode: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: istio.io/service/client/connection_close_count
     id: cloud.gcp.istio_io.service.client.connection_close_count

@@ -20,6 +20,9 @@ gcp:
     id: instance_id
   - value: resource.labels.zone
     id: zone
+    compatibilityMode: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: networking.googleapis.com/vm_flow/egress_bytes_count
     id: cloud.gcp.networking_googleapis_com.vm_flow.egress_bytes_count

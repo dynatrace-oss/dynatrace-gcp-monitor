@@ -24,6 +24,9 @@ gcp:
     id: cluster
   - value: resource.labels.zone
     id: zone
+    compatibilityMode: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: bigtable.googleapis.com/cluster/cpu_load
     id: cloud.gcp.bigtable_googleapis_com.cluster.cpu_load

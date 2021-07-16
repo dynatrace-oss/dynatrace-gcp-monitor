@@ -26,6 +26,9 @@ gcp:
     id: table
   - value: resource.labels.zone
     id: zone
+    compatibilityMode: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: bigtable.googleapis.com/replication/latency
     id: cloud.gcp.bigtable_googleapis_com.replication.latency

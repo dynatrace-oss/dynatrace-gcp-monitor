@@ -24,6 +24,9 @@ gcp:
     id: version_id
   - value: resource.labels.zone
     id: zone
+    compatibilityMode: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: monitoring.googleapis.com/uptime_check/check_passed
     id: cloud.gcp.monitoring_googleapis_com.uptime_check.check_passed

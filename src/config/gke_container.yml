@@ -30,6 +30,9 @@ gcp:
     id: container_name
   - value: resource.labels.zone
     id: zone
+    compatibilityMode: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: container.googleapis.com/container/accelerator/duty_cycle
     id: cloud.gcp.container_googleapis_com.container.accelerator.duty_cycle

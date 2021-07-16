@@ -22,6 +22,9 @@ gcp:
     id: instance_id
   - value: resource.labels.zone
     id: zone
+    compatibilityMode: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: firewallinsights.googleapis.com/vm/firewall_hit_count
     id: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_hit_count
