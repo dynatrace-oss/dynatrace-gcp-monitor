@@ -49,7 +49,7 @@
             "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["location","gcp.project.id"]
+            "splitBy": ["gcp.region","gcp.project.id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -368,7 +368,7 @@
             "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["location","gcp.project.id"]
+            "splitBy": ["gcp.region","gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -412,7 +412,7 @@
             "metric": "cloud.gcp.serviceruntime_googleapis_com.api.request_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["location","gcp.project.id"]
+            "splitBy": ["gcp.region","gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
