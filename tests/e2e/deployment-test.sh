@@ -119,7 +119,8 @@ logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
 dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 activeGate:
-  useExisting: "true"
+  useExisting: "false"
+  dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
 EOF
 yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
