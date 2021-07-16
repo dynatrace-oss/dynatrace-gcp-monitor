@@ -141,7 +141,7 @@
             "metric": "cloud.gcp.cloudsql_googleapis_com.database.up",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["database_id", "region","gcp.project.id"]
+            "splitBy": ["database_id", "gcp.region","gcp.project.id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",

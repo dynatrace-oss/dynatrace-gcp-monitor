@@ -192,7 +192,7 @@
             "metric": "cloud.gcp.cloudfunctions_googleapis_com.function.active_instances",
             "spaceAggregation": "SUM",
             "timeAggregation": "AVG",
-            "splitBy": ["region","gcp.project.id"]
+            "splitBy": ["gcp.region","gcp.project.id"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
