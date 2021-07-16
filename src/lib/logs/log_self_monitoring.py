@@ -32,7 +32,7 @@ from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNECTIVITY_
     LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE, LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE, \
     LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE, LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE, LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, \
-    LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE
+    LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE, LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE
 from lib.logs.log_sfm_metrics import LogSelfMonitoring
 from lib.self_monitoring import push_self_monitoring_time_series
 
@@ -41,6 +41,7 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
     for sfm in sfm_list:
         aggregated_sfm.all_requests += sfm.all_requests
         aggregated_sfm.too_old_records += sfm.too_old_records
+        aggregated_sfm.publish_time_fallback_records += sfm.publish_time_fallback_records
         aggregated_sfm.parsing_errors += sfm.parsing_errors
         aggregated_sfm.records_with_too_long_content += sfm.records_with_too_long_content
         aggregated_sfm.dynatrace_connectivity.extend(sfm.dynatrace_connectivity)
@@ -129,6 +130,7 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     dynatrace_connectivity = ", ".join(dynatrace_connectivity)
     logging_context.log("SFM", f"Number of all log ingest requests sent to Dynatrace: {self_monitoring.all_requests}")
     logging_context.log("SFM", f"Dynatrace connectivity: {dynatrace_connectivity}")
+    logging_context.log("SFM", f"Number of log records with missing/invalid timestamp (used publish time): {self_monitoring.publish_time_fallback_records}")
     logging_context.log("SFM", f"Number of invalid log records due to too old timestamp: {self_monitoring.too_old_records}")
     logging_context.log("SFM", f"Number of errors occurred during parsing logs: {self_monitoring.parsing_errors}")
     logging_context.log("SFM", f"Number of records with too long content: {self_monitoring.records_with_too_long_content}")
@@ -226,6 +228,21 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 [{
                     "interval": interval,
                     "value": {"int64Value": sfm.records_with_too_long_content}
+                }]))
+
+    if sfm.publish_time_fallback_records:
+        time_series.append(
+            create_time_serie(
+                context,
+                LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE,
+                {
+                    "dynatrace_tenant_url": context.dynatrace_url,
+                    "logs_subscription_id": context.logs_subscription_id,
+                    "container_name": context.container_name
+                },
+                [{
+                    "interval": interval,
+                    "value": {"int64Value": sfm.publish_time_fallback_records}
                 }]))
 
     time_series.append(create_time_serie(

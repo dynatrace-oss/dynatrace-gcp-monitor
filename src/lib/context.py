@@ -113,6 +113,7 @@ class LogsProcessingContext(LogsContext):
     def __init__(
             self,
             scheduled_execution_id: Optional[str],
+            message_publish_time: Optional[datetime],
             sfm_queue: Queue
     ):
         super().__init__(
@@ -122,6 +123,7 @@ class LogsProcessingContext(LogsContext):
             scheduled_execution_id=scheduled_execution_id,
             sfm_queue = sfm_queue
         )
+        self.message_publish_time = message_publish_time
 
 
 class SfmContext(ExecutionContext):
