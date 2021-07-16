@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.location
     id: location
+    compatibilityMode: true
+  - value: resource.labels.location
+    id: gcp.region
   metrics:
   - value: bigquery.googleapis.com/job/num_in_flight
     id: cloud.gcp.bigquery_googleapis_com.job.num_in_flight

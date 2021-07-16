@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.location
     id: location
+    compatibilityMode: true
+  - value: resource.labels.location
+    id: gcp.region
   - value: resource.labels.instance_group_id
     id: instance_group_id
   - value: resource.labels.instance_group_name

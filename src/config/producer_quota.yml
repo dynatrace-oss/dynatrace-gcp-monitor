@@ -22,6 +22,9 @@ gcp:
     id: service
   - value: resource.labels.location
     id: location
+    compatibilityMode: true
+  - value: resource.labels.location
+    id: gcp.region
   - value: resource.labels.consumer_resource_node
     id: consumer_resource_node
   metrics:

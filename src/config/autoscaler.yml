@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.location
     id: location
+    compatibilityMode: true
+  - value: resource.labels.location
+    id: gcp.region
   - value: resource.labels.autoscaler_id
     id: autoscaler_id
   - value: resource.labels.autoscaler_name

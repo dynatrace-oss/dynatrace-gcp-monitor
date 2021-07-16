@@ -22,6 +22,9 @@ gcp:
     id: fqdn
   - value: resource.labels.location
     id: location
+    compatibilityMode: true
+  - value: resource.labels.location
+    id: gcp.region
   metrics:
   - value: managedidentities.googleapis.com/microsoft_ad/domain/health
     id: cloud.gcp.managedidentities_googleapis_com.microsoft_ad.domain.health
