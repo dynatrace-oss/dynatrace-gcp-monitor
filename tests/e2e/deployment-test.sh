@@ -47,7 +47,8 @@ while (( "$#" )); do
     esac
 done
 
-
+# Install YQ
+curl -sSLo yq "https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64" && chmod +x yq && sudo mv yq /usr/local/bin/yq
 
 # Install kubectl.
 curl -sSLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
@@ -92,20 +93,23 @@ cp -r ./k8s/helm-chart/dynatrace-gcp-function/ ./e2e_test/dynatrace-gcp-function
 
 VALUES_FILE="./e2e_test/dynatrace-gcp-function/values.yaml"
 
-sed -i '/^gcpProjectId:/c\gcpProjectId: "'${GCP_PROJECT_ID}'"' ${VALUES_FILE}
-sed -i '/^deploymentType:/c\deploymentType: "'${DEPLOYMENT_TYPE}'"' ${VALUES_FILE}
-sed -i '/^dynatraceAccessKey:/c\dynatraceAccessKey: "'${DYNATRACE_ACCESS_KEY}'"' ${VALUES_FILE}
-sed -i '/^dynatraceLogIngestUrl:/c\dynatraceLogIngestUrl: "'${DYNATRACE_LOG_INGEST_URL}'"' ${VALUES_FILE}
-sed -i '/^dynatraceUrl:/c\dynatraceUrl: "'${DYNATRACE_URL}'"' ${VALUES_FILE}
-sed -i '/^logsSubscriptionId:/c\logsSubscriptionId: "'${PUBSUB_SUBSCRIPTION}'"' ${VALUES_FILE}
-sed -i '/^requireValidCertificate:/c\requireValidCertificate: "false"' ${VALUES_FILE}
-sed -i '/^dockerImage:/c\dockerImage: "'${GCR_NAME}':e2e-travis-test-'${TRAVIS_BUILD_ID}'"' ${VALUES_FILE}
-sed -i '/  useExisting:/c\  useExisting: "true"' ${VALUES_FILE}
+cat <<EOF > values.e2e.yaml
+gcpProjectId: "${GCP_PROJECT_ID}"
+deploymentType: "${DEPLOYMENT_TYPE}"
+dynatraceAccessKey: "${DYNATRACE_ACCESS_KEY}"
+dynatraceLogIngestUrl: "${DYNATRACE_LOG_INGEST_URL}"
+dynatraceUrl: "${DYNATRACE_URL}"
+logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
+requireValidCertificate: "false"
+dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
+activeGate:
+  useExisting: "true"
+EOF
+yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
 
 cd ./e2e_test || exit 1
-chmod +x ./deploy-helm.sh
 ./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 
 # Verify containers running
