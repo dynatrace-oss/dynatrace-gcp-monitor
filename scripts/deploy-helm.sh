@@ -194,7 +194,7 @@ readonly DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --json
 readonly DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}" | sed 's:/*$::')
 readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}" | sed 's:/*$::')
 readonly USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.useExisting}")
-readonly DYNATRACE_PASS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.dynatracePaasToken}")
+readonly DYNATRACE_PAAS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.dynatracePaasToken}")
 readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
 API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"')
 
@@ -239,11 +239,11 @@ fi
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
   if [[  $USE_EXISTING_ACTIVE_GATE == false ]]; then
-    check_if_parameter_is_empty "$DYNATRACE_PASS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
+    check_if_parameter_is_empty "$DYNATRACE_PAAS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
 
     DOCKER_LOGIN=$(helm template dynatest-gcp-test dynatrace-gcp-function --show-only templates/active-gate-pod.yaml  | grep "envid:" | awk  '{print $2}')
 
-    if [[ $(echo "$DYNATRACE_PASS_KEY" | docker login -u "$DOCKER_LOGIN" "$DYNATRACE_URL" --password-stdin) > ${CMD_OUT_PIPE} ]];
+    if [[ $(echo "$DYNATRACE_PAAS_KEY" | docker login -u "$DOCKER_LOGIN" "$DYNATRACE_URL" --password-stdin) > ${CMD_OUT_PIPE} ]];
       then
         echo "Successfully logged to cluster registry"
         echo "The Active Gate will be deployed in k8s cluster"
