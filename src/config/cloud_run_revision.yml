@@ -22,6 +22,9 @@ gcp:
     id: service_name
   - value: resource.labels.revision_name
     id: revision_name
+    compatibilityMode: true
+  - value: resource.labels.revision_name
+    id: gcp.instance.name
   - value: resource.labels.location
     id: location
     compatibilityMode: true

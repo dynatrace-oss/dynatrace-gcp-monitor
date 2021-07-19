@@ -33,6 +33,9 @@ gcp:
     id: backend_target_name
   - value: resource.labels.forwarding_rule_name
     id: forwarding_rule_name
+    compatibilityMode: true
+  - value: resource.labels.forwarding_rule_name
+    id: gcp.instance.name
   - value: resource.labels.forwarding_rule_network_tier
     id: forwarding_rule_network_tier
   - value: resource.labels.backend_name

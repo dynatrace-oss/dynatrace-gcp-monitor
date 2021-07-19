@@ -33,6 +33,9 @@ gcp:
     id: load_balancer_name
   - value: resource.labels.forwarding_rule_name
     id: forwarding_rule_name
+    compatibilityMode: true
+  - value: resource.labels.forwarding_rule_name
+    id: gcp.instance.name
   - value: resource.labels.backend_name
     id: backend_name
   - value: resource.labels.backend_type
@@ -43,6 +46,9 @@ gcp:
     id: backend_scope_type
   - value: resource.labels.backend_subnetwork_name
     id: backend_subnetwork_name
+    compatibilityMode: true
+  - value: resource.labels.backend_subnetwork_name
+    id: gcp.instance.name
   metrics:
   - value: loadbalancing.googleapis.com/l3/internal/egress_bytes_count
     id: cloud.gcp.loadbalancing_googleapis_com.l3.internal.egress_bytes_count

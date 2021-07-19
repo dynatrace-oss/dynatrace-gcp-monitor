@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.cluster_name
     id: cluster_name
+    compatibilityMode: false
+  - value: resource.labels.cluster_name
+    id: gcp.instance.name
   - value: resource.labels.cluster_uuid
     id: cluster_uuid
   - value: resource.labels.region

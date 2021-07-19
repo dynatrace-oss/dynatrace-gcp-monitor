@@ -33,6 +33,9 @@ gcp:
     id: load_balancer_name
   - value: resource.labels.forwarding_rule_name
     id: forwarding_rule_name
+    compatibilityMode: true
+  - value: resource.labels.forwarding_rule_name
+    id: gcp.instance.name
   - value: resource.labels.backend_name
     id: backend_name
   - value: resource.labels.backend_type
