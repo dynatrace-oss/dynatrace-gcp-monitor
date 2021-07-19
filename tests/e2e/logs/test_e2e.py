@@ -34,6 +34,6 @@ def test_logs_on_dynatrace():
         'Authorization': f"Api-Token {os.environ.get('DYNATRACE_ACCESS_KEY')}"
     }
     resp = requests.get(url, params=params, headers=headers)
-
+    print(params)
     assert resp.status_code == 200
     assert len(resp.json()['results']) == 5

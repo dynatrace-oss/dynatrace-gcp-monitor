@@ -104,7 +104,7 @@ jobs:
       - ./tests/e2e/deployment-test.sh --logs
       - sleep 300
       - export END_LOAD_GENERATION=$(date -u +%s%3N)
-      - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/e2e/logs -v
+      - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/e2e/logs -vv --capture=no
       - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
       - export START_LOAD_GENERATION=$(date -u +%s%3N)
       - export DEPLOYMENT_TYPE=metrics
@@ -117,7 +117,7 @@ jobs:
       - ./tests/e2e/deployment-test.sh --all
       - sleep 300
       - export END_LOAD_GENERATION=$(date -u +%s%3N)
-      - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/e2e/logs -v
+      - PYTHONPATH="$TRAVIS_BUILD_DIR/src" pytest tests/e2e -vv --capture=no
       - helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
