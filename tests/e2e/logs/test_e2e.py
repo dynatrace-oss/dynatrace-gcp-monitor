@@ -28,12 +28,12 @@ def test_logs_on_dynatrace():
     params = {
         'from': os.environ.get('START_LOAD_GENERATION'),
         'to': os.environ.get('END_LOAD_GENERATION'),
-        'query': f"content='TYPE: {os.environ.get('DEPLOYMENT_TYPE')}, BUILD: {os.environ.get('TRAVIS_BUILD_ID')}, INFO: This is sample app'"
+        'query': f"TYPE: {os.environ.get('DEPLOYMENT_TYPE')}, BUILD: {os.environ.get('TRAVIS_BUILD_ID')}, INFO: This is sample app"
     }
     headers = {
         'Authorization': f"Api-Token {os.environ.get('DYNATRACE_ACCESS_KEY')}"
     }
     resp = requests.get(url, params=params, headers=headers)
-    print(params)
+
     assert resp.status_code == 200
     assert len(resp.json()['results']) == 5
