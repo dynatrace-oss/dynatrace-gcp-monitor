@@ -2,13 +2,13 @@ title: E2E docker publish dynatrace-gcp-function
 description: Role for Dynatrace GCP function Docker Publish
 stage: GA
 includedPermissions:
-  -  storage.buckets.get
-  -  storage.buckets.list
-  -  storage.buckets.update
-  -  storage.multipartUploads.abort
-  -  storage.multipartUploads.create
-  -  storage.multipartUploads.listParts
-  -  storage.objects.create
-  -  storage.objects.delete
-  -  storage.objects.get
-  -  storage.objects.list
+  - storage.buckets.get
+  - storage.buckets.list
+  - storage.buckets.update
+  - storage.multipartUploads.abort
+  - storage.multipartUploads.create
+  - storage.multipartUploads.listParts
+  - storage.objects.create
+  - storage.objects.delete
+  - storage.objects.get
+  - storage.objects.list

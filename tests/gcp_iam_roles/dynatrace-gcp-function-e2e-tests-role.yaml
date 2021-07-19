@@ -20,7 +20,7 @@ includedPermissions:
   - iam.serviceAccounts.getIamPolicy
   - iam.serviceAccounts.list
   - iam.serviceAccounts.setIamPolicy
-  -  logging.sinks.create
-  -  logging.sinks.delete
-  -  logging.sinks.get
-  -  logging.sinks.list
+  - logging.sinks.create
+  - logging.sinks.delete
+  - logging.sinks.get
+  - logging.sinks.list
