@@ -31,6 +31,9 @@ gcp:
     id: pod_name
   - value: resource.labels.container_name
     id: container_name
+    compatibilityMode: false
+  - value: resource.labels.container_name
+    id: gcp.instance.name
   - value: metadata.system_labels.node_name
     id: node_name
   - value: metadata.system_labels.state 

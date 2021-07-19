@@ -31,6 +31,9 @@ gcp:
     id: pod_name
   - value: resource.labels.container_name
     id: container_name
+    compatibilityMode: false
+  - value: resource.labels.container_name
+    id: gcp.instance.name
   metrics:
   - value: istio.io/control/config_convergence_latencies
     id: cloud.gcp.istio_io.control.config_convergence_latencies

@@ -29,6 +29,9 @@ gcp:
     id: namespace_name
   - value: resource.labels.pod_name
     id: pod_name
+    compatibilityMode: false
+  - value: resource.labels.pod_name
+    id: gcp.instance.name
   metrics:
   - value: istio.io/service/client/connection_close_count
     id: cloud.gcp.istio_io.service.client.connection_close_count

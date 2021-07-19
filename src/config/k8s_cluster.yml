@@ -24,6 +24,9 @@ gcp:
     id: gcp.region
   - value: resource.labels.cluster_name
     id: cluster_name
+    compatibilityMode: false
+  - value: resource.labels.cluster_name
+    id: gcp.instance.name
   metrics:
   - value: logging.googleapis.com/log_entry_count
     id: cloud.gcp.logging.googleapis.com.log_entry_count

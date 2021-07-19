@@ -28,6 +28,9 @@ gcp:
     id: pod_id
   - value: resource.labels.container_name
     id: container_name
+    compatibilityMode: false
+  - value: resource.labels.container_name
+    id: gcp.instance.name
   - value: resource.labels.zone
     id: zone
     compatibilityMode: true

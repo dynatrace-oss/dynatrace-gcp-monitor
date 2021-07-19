@@ -27,6 +27,9 @@ gcp:
     id: cluster_name
   - value: resource.labels.node_name
     id: node_name
+    compatibilityMode: false
+  - value: resource.labels.node_name
+    id: gcp.instance.name
   metrics:
   - value: kubernetes.io/node/cpu/allocatable_cores
     id: cloud.gcp.kubernetes_io.node.cpu.allocatable_cores

@@ -29,6 +29,9 @@ gcp:
     id: namespace_name
   - value: resource.labels.pod_name
     id: pod_name
+    compatibilityMode: false
+  - value: resource.labels.pod_name
+    id: gcp.instance.name
   metrics:
   - value: kubernetes.io/pod/network/received_bytes_count
     id: cloud.gcp.kubernetes_io.pod.network.received_bytes_count

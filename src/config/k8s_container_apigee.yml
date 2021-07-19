@@ -31,6 +31,9 @@ gcp:
     id: pod_name
   - value: resource.labels.container_name
     id: container_name
+    compatibilityMode: false
+  - value: resource.labels.container_name
+    id: gcp.instance.name
   metrics:
   - value: apigee.googleapis.com/cassandra/clientrequest_latency
     id: cloud.gcp.apigee_googleapis_com.cassandra.clientrequest_latency
