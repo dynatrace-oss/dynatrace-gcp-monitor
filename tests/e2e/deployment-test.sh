@@ -96,7 +96,7 @@ writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | j
 gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher > /dev/null 2>&1
 
 # Create E2E Sample App
-gcloud functions deploy sample_app \
+gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
 --runtime python37 \
 --trigger-http \
 --source ./tests/e2e/sample_app/ > /dev/null 2>&1
