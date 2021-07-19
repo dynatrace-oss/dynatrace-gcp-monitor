@@ -1,7 +1,16 @@
-title: E2E tests dynatrace-gcp-function
-description: Role for Dynatrace GCP function E2E deployemnt
+# create with command:
+# gcloud iam roles create dynatrace_function.deployment --project={PROJECT_ID} --file=dynatrace-gcp-function-deployment-role.yaml
+title: Dynatrace GCP Function deployment role
+description: Role for Dynatrace GCP function helm and pubsub deployment
 stage: GA
 includedPermissions:
+  - pubsub.subscriptions.get
+  - pubsub.subscriptions.list
+  - pubsub.subscriptions.create
+  - pubsub.topics.list
+  - pubsub.topics.create
+  - pubsub.topics.update
+  - pubsub.topics.attachSubscription
   - container.clusters.get
   - container.configMaps.create
   - container.configMaps.delete
@@ -12,6 +21,7 @@ includedPermissions:
   - container.namespaces.create
   - container.namespaces.get
   - container.pods.list
+  - container.pods.get
   - container.secrets.create
   - container.secrets.delete
   - container.secrets.get
@@ -20,23 +30,15 @@ includedPermissions:
   - container.serviceAccounts.create
   - container.serviceAccounts.delete
   - container.serviceAccounts.get
-  - pubsub.subscriptions.create
-  - pubsub.subscriptions.delete
-  - pubsub.subscriptions.get
-  - pubsub.subscriptions.list
-  - pubsub.topics.attachSubscription
-  - pubsub.topics.create
-  - pubsub.topics.delete
-  - pubsub.topics.getIamPolicy
-  - pubsub.topics.list
-  - pubsub.topics.setIamPolicy
-  - pubsub.topics.update
   - resourcemanager.projects.get
   - resourcemanager.projects.getIamPolicy
   - resourcemanager.projects.setIamPolicy
   - serviceusage.services.enable
   - serviceusage.services.get
-  - iam.roles.create
-  - iam.roles.delete
+  - iam.serviceAccounts.list
+  - iam.serviceAccounts.create
+  - iam.serviceAccounts.getIamPolicy
+  - iam.serviceAccounts.setIamPolicy
   - iam.roles.list
+  - iam.roles.create
   - iam.roles.update
