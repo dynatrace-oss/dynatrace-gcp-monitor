@@ -84,7 +84,7 @@ else
     gcloud pubsub subscriptions create "${PUBSUB_SUBSCRIPTION}" --topic="${PUBSUB_TOPIC}" --ack-deadline=120 --message-retention-duration=86400
 fi
 
-# Create Log Router Sink
+# Create Log Router Sink.
 if [[ $(gcloud logging sinks  list --filter=name:"${LOG_ROUTER}" --format="value(name)") ]]; then
     echo "Log Router [${LOG_ROUTER}] already exists, skipping"
 else
