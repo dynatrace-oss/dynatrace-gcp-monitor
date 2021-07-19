@@ -12,5 +12,3 @@ includedPermissions:
   -  storage.objects.delete
   -  storage.objects.get
   -  storage.objects.list
-
-

@@ -20,10 +20,6 @@ includedPermissions:
   -  container.serviceAccounts.create
   -  container.serviceAccounts.delete
   -  container.serviceAccounts.get
-  -  logging.sinks.create
-  -  logging.sinks.delete
-  -  logging.sinks.get
-  -  logging.sinks.list
   -  pubsub.subscriptions.create
   -  pubsub.subscriptions.delete
   -  pubsub.subscriptions.get
@@ -40,4 +36,7 @@ includedPermissions:
   -  resourcemanager.projects.setIamPolicy
   -  serviceusage.services.enable
   -  serviceusage.services.get
-
+  - iam.roles.create
+  - iam.roles.delete
+  - iam.roles.list
+  - iam.roles.update
