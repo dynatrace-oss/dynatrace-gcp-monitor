@@ -134,6 +134,7 @@ echo
 echo -n "Verifying deployment result"
 METRICS_CONTAINER_STATE=0
 LOGS_CONTAINER_STATE=0
+ACTIVEGATE_CONTAINER_STATE=0
 
 for i in {1..60}
 do
@@ -145,9 +146,11 @@ do
   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     check_container_state "dynatrace-gcp-function-logs"
     LOGS_CONTAINER_STATE=$?
+    check_container_state "dynatrace-activegate-gcpmon"
+    ACTIVEGATE_CONTAINER_STATE=$?
   fi
 
-  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
     break
   fi
 
