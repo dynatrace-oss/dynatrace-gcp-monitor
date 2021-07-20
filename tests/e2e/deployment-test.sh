@@ -167,7 +167,7 @@ for i in {1..5}; do
   -H "Authorization: bearer $(gcloud auth print-identity-token)"
 done
 
-if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
   echo "Deployment completed successfully"
   exit 0
 else
