@@ -132,6 +132,9 @@ def perform_flush(worker_state: WorkerState,
                 context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
                 context.self_monitoring.log_ingest_payload_size += display_payload_size
                 send_batched_acks(subscriber_client, subscription_path, worker_state.ack_ids)
+        elif worker_state.ack_ids:
+            # Send ACKs if processing all messages has failed
+            send_batched_acks(subscriber_client, subscription_path, worker_state.ack_ids)
     except Exception:
         context.exception(worker_state.worker_name, "Failed to perform flush")
     finally:
