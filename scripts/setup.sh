@@ -198,7 +198,7 @@ check_if_parameter_is_empty "$GCP_IAM_ROLE" "'googleCloud.common.iamRole'"
 check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "'googleCloud.common.serviceAccount'"
 check_if_parameter_is_empty "$GCP_SCHEDULER_CRON" "'googleCloud.metrics.schedulerSchedule'"
 
-echo  "Logging to your account..."
+echo  "- Logging to your account..."
 GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
 echo
