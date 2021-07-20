@@ -84,7 +84,7 @@ else
     gcloud pubsub subscriptions create "${PUBSUB_SUBSCRIPTION}" --topic="${PUBSUB_TOPIC}" --ack-deadline=120 --message-retention-duration=86400
 fi
 
-# Create Log Router Sink
+# Create Log Router Sink.
 if [[ $(gcloud logging sinks  list --filter=name:"${LOG_ROUTER}" --format="value(name)") ]]; then
     echo "Log Router [${LOG_ROUTER}] already exists, skipping"
 else
@@ -119,7 +119,8 @@ logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
 dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 activeGate:
-  useExisting: "true"
+  useExisting: "false"
+  dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
 EOF
 yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
@@ -133,6 +134,7 @@ echo
 echo -n "Verifying deployment result"
 METRICS_CONTAINER_STATE=0
 LOGS_CONTAINER_STATE=0
+ACTIVEGATE_CONTAINER_STATE=0
 
 for i in {1..60}
 do
@@ -144,9 +146,11 @@ do
   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     check_container_state "dynatrace-gcp-function-logs"
     LOGS_CONTAINER_STATE=$?
+    check_container_state "dynatrace-activegate-gcpmon"
+    ACTIVEGATE_CONTAINER_STATE=$?
   fi
 
-  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
     break
   fi
 
@@ -163,7 +167,7 @@ for i in {1..5}; do
   -H "Authorization: bearer $(gcloud auth print-identity-token)"
 done
 
-if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
   echo "Deployment completed successfully"
   exit 0
 else
