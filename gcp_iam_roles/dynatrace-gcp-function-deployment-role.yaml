@@ -10,6 +10,8 @@ includedPermissions:
   - pubsub.topics.list
   - pubsub.topics.create
   - pubsub.topics.update
+  - pubsub.topics.getIamPolicy
+  - pubsub.topics.setIamPolicy
   - pubsub.topics.attachSubscription
   - container.clusters.get
   - container.configMaps.create
@@ -41,6 +43,7 @@ includedPermissions:
   - resourcemanager.projects.setIamPolicy
   - serviceusage.services.enable
   - serviceusage.services.get
+  - iam.serviceAccounts.actAs
   - iam.serviceAccounts.list
   - iam.serviceAccounts.create
   - iam.serviceAccounts.getIamPolicy

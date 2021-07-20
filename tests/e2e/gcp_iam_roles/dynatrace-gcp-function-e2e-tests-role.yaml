@@ -15,6 +15,7 @@ includedPermissions:
   - cloudfunctions.functions.sourceCodeGet
   - cloudfunctions.functions.sourceCodeSet
   - cloudfunctions.functions.update
+  - cloudfunctions.functions.getIamPolicy
   - cloudfunctions.locations.get
   - cloudfunctions.locations.list
   - cloudfunctions.operations.get
