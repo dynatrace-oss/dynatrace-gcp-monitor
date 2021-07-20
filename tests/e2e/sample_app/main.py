@@ -1,7 +1,7 @@
 from flask import escape
 import logging
 
-def sample_app(request):
+def e2e_test_sample_app(request):
 
     request_args = request.args
     deployment_type = 'None'
