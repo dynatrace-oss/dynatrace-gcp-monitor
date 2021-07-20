@@ -13,6 +13,8 @@
 #     limitations under the License.
 
 import os
+import time
+
 import requests
 
 def test_environment_vars():
@@ -24,6 +26,7 @@ def test_environment_vars():
     assert "END_LOAD_GENERATION" in os.environ
 
 def test_logs_on_dynatrace():
+    time.sleep(2 * 60)
     url = f"{os.environ.get('DYNATRACE_URL')}api/v2/logs/search"
     params = {
         'from': os.environ.get('START_LOAD_GENERATION'),
