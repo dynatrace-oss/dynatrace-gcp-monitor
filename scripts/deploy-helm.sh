@@ -399,7 +399,7 @@ if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]]; then
-  # To build Log viewer link we need Dynatrace url which is set only for 'metric' and 'all' deployment types.
+  # To build a Log viewer link we need a Dynatrace url which is set only for 'metrics' and 'all' deployment types.
   # For 'logs' deployment type (where ActiveGate url is used) we are not able to build the link - LOG_VIEWER is empty then.
   LOG_VIEWER="Log Viewer: ${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
 fi
@@ -407,5 +407,6 @@ fi
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo
   echo -e "\e[92m- Check logs in Dynatrace in 5 min. ${LOG_VIEWER}\e[37m" >${CMD_OUT_PIPE}
-  echo "If you won't see any GCP logs after that time make sure you configured all prerequisites: https://www.dynatrace.com/support/help/shortlink/deploy-k8#prerequisites"
+  echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/shortlink/deploy-k8#anchor_verify"
+  echo "Additionally you can enable self-monitoring for quick diagnosis: https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp#anchor_sfm"
 fi
