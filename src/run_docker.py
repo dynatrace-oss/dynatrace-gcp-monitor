@@ -157,7 +157,7 @@ site = web.TCPSite(runner, '0.0.0.0', HEALTH_CHECK_PORT)
 loop.run_until_complete(site.start())
 
 instance_metadata = loop.run_until_complete(run_instance_metadata_check())
-loop.run_until_complete(import_self_monitoring_dashboards())
+loop.run_until_complete(import_self_monitoring_dashboards(instance_metadata))
 
 logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
 

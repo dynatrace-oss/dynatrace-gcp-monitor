@@ -324,7 +324,7 @@ async def create_new_dashboard(context: SfmDashboardsContext, dashboard: Dict):
 
     if response.status > 202:
         response_body = await response.json()
-        context.log(f"Failed to create self monitoring dashboard for due to '{response_body}'")
+        context.log(f"Failed to create self monitoring dashboard due to '{response_body}'")
     else:
         context.log(f"The self monitoring dashboard '{dashboard.get('displayName')}' correctly imported")
 
@@ -338,7 +338,7 @@ async def import_self_monitoring_dashboard(context: SfmDashboardsContext):
         context.log(f"Lack of self monitoring dashboard for '{context.operation_mode}' operation mode")
         return
 
-    dashboard_file_path = os.path.dirname(os.path.realpath(__file__)).join("../config").join(dashboard_filename)
+    dashboard_file_path = os.path.dirname(os.path.realpath(__file__)).join("../dashboards").join(dashboard_filename)
     try:
         with open(dashboard_file_path, encoding="utf-8") as dashboard_file:
             dashboard = json.load(dashboard_file)
