@@ -243,7 +243,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
     DOCKER_LOGIN=$(helm template dynatest-gcp-test dynatrace-gcp-function --show-only templates/active-gate-pod.yaml  | grep "envid:" | awk  '{print $2}')
 
-    if [[ $(echo "$DYNATRACE_PAAS_KEY" | docker login -u "$DOCKER_LOGIN" "$DYNATRACE_URL" --password-stdin) > ${CMD_OUT_PIPE} ]];
+    if [[ $(curl -ksS -w "%{http_code}" -o /dev/null -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/") == "200" ]];
       then
         echo "Successfully logged to cluster registry"
         echo "The Active Gate will be deployed in k8s cluster"
