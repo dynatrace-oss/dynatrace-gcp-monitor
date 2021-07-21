@@ -32,7 +32,7 @@ check_if_parameter_is_empty()
 
 check_api_token() {
   URL="$1"
-  if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"); then
+  if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
     if [ "$CODE" -ge 300 ]; then
@@ -65,7 +65,7 @@ EOF
 }
 
 check_dynatrace_log_ingest_url() {
-  if RESPONSE=$(curl -k -s -X POST -d "$(generate_test_log)" "$DYNATRACE_LOG_INGEST_URL/api/v2/logs/ingest" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY"); then
+  if RESPONSE=$(curl -k -s -X POST -d "$(generate_test_log)" "$DYNATRACE_LOG_INGEST_URL/api/v2/logs/ingest" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
     if [ "$CODE" -ge 300 ]; then
@@ -293,7 +293,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
  if [[  $USE_EXISTING_ACTIVE_GATE == true ]]; then
   ACTIVE_GATE_CONNECTIVITY=Y
-  ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health") || ACTIVE_GATE_CONNECTIVITY=N
+  ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health" --connect-timeout 20) || ACTIVE_GATE_CONNECTIVITY=N
     if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]
     then
           echo -e "\e[93mWARNING: \e[37mUnable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL to check if ActiveGate is running. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
@@ -386,7 +386,7 @@ fi
 
 echo
 echo "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME"
-helm install ./dynatrace-gcp-function --generate-name --namespace dynatrace --set clusterName="$CLUSTER_NAME" > ${CMD_OUT_PIPE}
+helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace dynatrace --set clusterName="$CLUSTER_NAME" > ${CMD_OUT_PIPE}
 
 echo
 echo "- Deployment complete, check if containers are running:"  > ${CMD_OUT_PIPE}

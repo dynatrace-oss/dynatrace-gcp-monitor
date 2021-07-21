@@ -89,14 +89,14 @@ if [[ $(gcloud logging sinks  list --filter=name:"${LOG_ROUTER}" --format="value
     echo "Log Router [${LOG_ROUTER}] already exists, skipping"
 else
   gcloud logging sinks create "${LOG_ROUTER}" "pubsub.googleapis.com/projects/${GCP_PROJECT_ID}/topics/${PUBSUB_TOPIC}" \
-    --log-filter='resource.type="cloud_function" AND resource.labels.function_name="sample_app"' --description="Simple Sink for E2E tests" > /dev/null 2>&1
+    --log-filter="resource.type=\"cloud_function\" AND resource.labels.function_name=\"${CLOUD_FUNCTION_NAME}\"" --description="Simple Sink for E2E tests" > /dev/null 2>&1
 fi
 
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | jq -r '.writerIdentity')
 gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher > /dev/null 2>&1
 
 # Create E2E Sample App
-gcloud functions deploy sample_app \
+gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
 --runtime python37 \
 --trigger-http \
 --source ./tests/e2e/sample_app/ > /dev/null 2>&1
@@ -163,7 +163,7 @@ kubectl -n dynatrace get pods
 
 # Generate load on GC Function
 for i in {1..5}; do
-  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/sample_app?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
+  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
   -H "Authorization: bearer $(gcloud auth print-identity-token)"
 done
 
