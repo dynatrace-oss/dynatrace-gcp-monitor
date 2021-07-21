@@ -26,6 +26,7 @@ def test_environment_vars():
     assert "END_LOAD_GENERATION" in os.environ
 
 def test_logs_on_dynatrace():
+
     url = f"{os.environ.get('DYNATRACE_URL')}api/v2/logs/search"
     params = {
         'from': os.environ.get('START_LOAD_GENERATION'),
