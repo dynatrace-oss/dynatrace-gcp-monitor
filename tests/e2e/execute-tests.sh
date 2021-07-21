@@ -6,9 +6,8 @@ function run_deploy_and_tests() {
     export START_LOAD_GENERATION=$(date -u +%s%3N)
     export DEPLOYMENT_TYPE=$TEST_TYPE
 
-    ./tests/e2e/deployment-test.sh --logs
-    helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
-    
+    ./tests/e2e/deployment-test.sh "--${TEST_TYPE}"
+
     sleep 300
     export END_LOAD_GENERATION=$(date -u +%s%3N)
 
@@ -17,12 +16,13 @@ function run_deploy_and_tests() {
     fi
 
     pytest "tests/e2e/${TEST_TYPE}" -v
+
+    helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
 }
 
 if [[ $TRAVIS_EVENT_TYPE == 'cron' ]] || [[ $1 == 'separate' ]]; then
     run_deploy_and_tests 'logs'
-    # Uncomment after merge https://github.com/dynatrace-oss/dynatrace-gcp-function/pull/139
-    # run_deploy_and_tests 'metrics'
+    run_deploy_and_tests 'metrics'
 else
     run_deploy_and_tests 'all'
 fi
