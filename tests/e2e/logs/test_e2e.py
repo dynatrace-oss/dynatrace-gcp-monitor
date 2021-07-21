@@ -13,7 +13,9 @@
 #     limitations under the License.
 
 import os
+
 import requests
+
 
 def test_environment_vars():
     assert "DYNATRACE_URL" in os.environ
@@ -22,6 +24,7 @@ def test_environment_vars():
     assert "TRAVIS_BUILD_ID" in os.environ
     assert "START_LOAD_GENERATION" in os.environ
     assert "END_LOAD_GENERATION" in os.environ
+
 
 def test_logs_on_dynatrace():
     url = f"{os.environ.get('DYNATRACE_URL')}api/v2/logs/search"
