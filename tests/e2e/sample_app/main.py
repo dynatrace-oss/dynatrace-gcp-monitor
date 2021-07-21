@@ -1,4 +1,3 @@
-from flask import escape
 import logging
 
 def e2e_test_sample_app(request):
