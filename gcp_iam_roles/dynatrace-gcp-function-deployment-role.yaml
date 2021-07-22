@@ -1,0 +1,53 @@
+# create with command:
+# gcloud iam roles create dynatrace_function.deployment --project={PROJECT_ID} --file=dynatrace-gcp-function-deployment-role.yaml
+title: Dynatrace GCP Function deployment role
+description: Role for Dynatrace GCP function helm and pubsub deployment
+stage: GA
+includedPermissions:
+  - pubsub.subscriptions.get
+  - pubsub.subscriptions.list
+  - pubsub.subscriptions.create
+  - pubsub.topics.list
+  - pubsub.topics.create
+  - pubsub.topics.update
+  - pubsub.topics.getIamPolicy
+  - pubsub.topics.setIamPolicy
+  - pubsub.topics.attachSubscription
+  - container.clusters.get
+  - container.configMaps.create
+  - container.configMaps.delete
+  - container.configMaps.get
+  - container.deployments.create
+  - container.deployments.delete
+  - container.deployments.get
+  - container.namespaces.create
+  - container.namespaces.get
+  - container.pods.list
+  - container.pods.get
+  - container.secrets.create
+  - container.secrets.delete
+  - container.secrets.get
+  - container.secrets.list
+  - container.secrets.update
+  - container.serviceAccounts.create
+  - container.serviceAccounts.delete
+  - container.serviceAccounts.get
+  - container.services.create
+  - container.services.delete
+  - container.services.get
+  - container.statefulSets.create
+  - container.statefulSets.delete
+  - container.statefulSets.get
+  - resourcemanager.projects.get
+  - resourcemanager.projects.getIamPolicy
+  - resourcemanager.projects.setIamPolicy
+  - serviceusage.services.enable
+  - serviceusage.services.get
+  - iam.serviceAccounts.actAs
+  - iam.serviceAccounts.list
+  - iam.serviceAccounts.create
+  - iam.serviceAccounts.getIamPolicy
+  - iam.serviceAccounts.setIamPolicy
+  - iam.roles.list
+  - iam.roles.create
+  - iam.roles.update

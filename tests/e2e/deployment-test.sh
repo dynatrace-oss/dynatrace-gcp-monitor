@@ -84,19 +84,19 @@ else
     gcloud pubsub subscriptions create "${PUBSUB_SUBSCRIPTION}" --topic="${PUBSUB_TOPIC}" --ack-deadline=120 --message-retention-duration=86400
 fi
 
-# Create Log Router Sink
+# Create Log Router Sink.
 if [[ $(gcloud logging sinks  list --filter=name:"${LOG_ROUTER}" --format="value(name)") ]]; then
     echo "Log Router [${LOG_ROUTER}] already exists, skipping"
 else
   gcloud logging sinks create "${LOG_ROUTER}" "pubsub.googleapis.com/projects/${GCP_PROJECT_ID}/topics/${PUBSUB_TOPIC}" \
-    --log-filter='resource.type="cloud_function" AND resource.labels.function_name="sample_app"' --description="Simple Sink for E2E tests" > /dev/null 2>&1
+    --log-filter="resource.type=\"cloud_function\" AND resource.labels.function_name=\"${CLOUD_FUNCTION_NAME}\"" --description="Simple Sink for E2E tests" > /dev/null 2>&1
 fi
 
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | jq -r '.writerIdentity')
 gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher > /dev/null 2>&1
 
 # Create E2E Sample App
-gcloud functions deploy sample_app \
+gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
 --runtime python37 \
 --trigger-http \
 --source ./tests/e2e/sample_app/ > /dev/null 2>&1
@@ -119,7 +119,8 @@ logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
 dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 activeGate:
-  useExisting: "true"
+  useExisting: "false"
+  dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
 EOF
 yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
@@ -133,6 +134,7 @@ echo
 echo -n "Verifying deployment result"
 METRICS_CONTAINER_STATE=0
 LOGS_CONTAINER_STATE=0
+ACTIVEGATE_CONTAINER_STATE=0
 
 for i in {1..60}
 do
@@ -144,9 +146,11 @@ do
   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     check_container_state "dynatrace-gcp-function-logs"
     LOGS_CONTAINER_STATE=$?
+    check_container_state "dynatrace-activegate-gcpmon"
+    ACTIVEGATE_CONTAINER_STATE=$?
   fi
 
-  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
     break
   fi
 
@@ -159,11 +163,11 @@ kubectl -n dynatrace get pods
 
 # Generate load on GC Function
 for i in {1..5}; do
-  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/sample_app?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
+  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
   -H "Authorization: bearer $(gcloud auth print-identity-token)"
 done
 
-if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
   echo "Deployment completed successfully"
   exit 0
 else
