@@ -398,9 +398,9 @@ if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics"  > ${CMD_OUT_PIPE}
 fi
 
-if [[ $DEPLOYMENT_TYPE == all ]]; then
-  # To build a Log viewer link we need a Dynatrace url which is set only for 'metrics' and 'all' deployment types.
-  # For 'logs' deployment type (where ActiveGate url is used) we are not able to build the link - LOG_VIEWER is empty then.
+if [[ $DEPLOYMENT_TYPE != "metrics" ]] && [[ $USE_EXISTING_ACTIVE_GATE != "true" ]]; then
+  # We can build a Log viewer link only when a Dynatrace url is set (when the option with ActiveGate deployment is chosen)
+  # When an existing ActiveGate is used we are not able to build the link - LOG_VIEWER is empty then.
   LOG_VIEWER="Log Viewer: ${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
 fi
 
