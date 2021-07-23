@@ -94,9 +94,9 @@ httpsProxy: ""
 importDashboards: "true"
 # Import predefined alerting rules for selected services. Allowed values: "true"/"yes", "false"/"no"
 importAlerts: "true"
-# configuration file for GCP services - uncommented services will be monitored
 #clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh
 clusterName: ""
+# configuration file for GCP services - uncommented services will be monitored
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax
   services:
