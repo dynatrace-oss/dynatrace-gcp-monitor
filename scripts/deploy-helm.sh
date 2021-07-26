@@ -77,6 +77,24 @@ check_dynatrace_log_ingest_url() {
   fi
 }
 
+check_dynatrace_docker_login() {
+  check_if_parameter_is_empty "$DYNATRACE_PAAS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
+
+  DOCKER_LOGIN=$(helm template dynatrace-gcp-function --show-only templates/active-gate-pod.yaml  | grep "envid:" | awk  '{print $2}')
+
+  if RESPONSE=$(curl -ksS -w "%{http_code}" -o /dev/null -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/"); then
+    if [[ $RESPONSE == "200" ]]; then
+      echo "Successfully logged to Dynatrace cluster Docker registry"
+      echo "The ActiveGate will be deployed in k8s cluster"
+    else
+      echo -e "\e[91mERROR: \e[37mCouldn't log to Dynatrace cluster Docker registry. Is your PaaS token a valid one?"
+      exit 1
+    fi
+  else
+    echo -e "\e[93mWARNING: \e[37mFailed to connect to Dynatrace endpoint ($DYNATRACE_URL) to check Docker registry login. It can be ignored if Dynatrace does not allow public access."
+  fi
+}
+
 check_url() {
   URL=$1
   REGEX=$2
@@ -239,18 +257,7 @@ fi
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
   if [[  $USE_EXISTING_ACTIVE_GATE == false ]]; then
-    check_if_parameter_is_empty "$DYNATRACE_PAAS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
-
-    DOCKER_LOGIN=$(helm template dynatest-gcp-test dynatrace-gcp-function --show-only templates/active-gate-pod.yaml  | grep "envid:" | awk  '{print $2}')
-
-    if [[ $(curl -ksS -w "%{http_code}" -o /dev/null -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/") == "200" ]];
-      then
-        echo "Successfully logged to cluster registry"
-        echo "The Active Gate will be deployed in k8s cluster"
-    else
-      echo -e "\e[91mERROR: \e[37mCouldn't log to cluster registry. Is your PaaS token a valid one?"
-      exit 1
-    fi
+    check_dynatrace_docker_login
   else
     echo "Using an existing Active Gate"
     check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
