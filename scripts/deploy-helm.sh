@@ -80,7 +80,7 @@ check_dynatrace_log_ingest_url() {
 check_dynatrace_docker_login() {
   check_if_parameter_is_empty "$DYNATRACE_PAAS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
 
-  DOCKER_LOGIN=$(helm template dynatrace-gcp-function --show-only templates/active-gate-pod.yaml  | grep "envid:" | awk  '{print $2}')
+  DOCKER_LOGIN=$(helm template dynatrace-gcp-function --show-only templates/active-gate-pod.yaml  | tr '\015' '\n' | grep "envid:" | awk  '{print $2}')
 
   if RESPONSE=$(curl -ksS -w "%{http_code}" -o /dev/null -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/"); then
     if [[ $RESPONSE == "200" ]]; then
