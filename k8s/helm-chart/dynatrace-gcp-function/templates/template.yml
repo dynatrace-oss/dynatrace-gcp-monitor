@@ -77,11 +77,13 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SERVICE_USAGE_BOOKING
+
         - name: USE_PROXY
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: USE_PROXY
+        {{- if or (eq .Values.useProxy "ALL")  (eq .Values.useProxy "DT_ONLY") (eq .Values.useProxy "GCP_ONLY")}}
         - name: HTTP_PROXY
           valueFrom:
             configMapKeyRef:
@@ -92,6 +94,7 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: HTTPS_PROXY
+        {{- end }}
         - name: IMPORT_DASHBOARDS
           valueFrom:
             configMapKeyRef:
@@ -210,6 +213,18 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SELF_MONITORING_ENABLED
+      {{- if or (eq .Values.useProxy "ALL")  (eq .Values.useProxy "DT_ONLY") (eq .Values.useProxy "GCP_ONLY")}}
+        - name: HTTP_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: HTTP_PROXY
+        - name: HTTPS_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: HTTPS_PROXY
+        {{- end }}
         - name: HEALTH_CHECK_PORT
           value: "8081"
         resources:
