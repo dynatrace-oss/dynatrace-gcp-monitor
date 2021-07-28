@@ -38,13 +38,12 @@ log_record = {
   "receiveTimestamp": "2021-07-26T12:08:26.686970384Z"
 }
 expected_output = {
-    ATTRIBUTE_SEVERITY: 'INFO',
     ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
     ATTRIBUTE_CLOUD_REGION: 'europe-north1',
     ATTRIBUTE_GCP_REGION: 'europe-north1',
     ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloudsql_database',
-    ATTRIBUTE_GCP_INSTANCE_ID: 'test-001-mysql',
+    ATTRIBUTE_GCP_INSTANCE_ID: 'dynatrace-gcp-extension:test-001-mysql',
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: 'ON DUPLICATE KEY UPDATE master_time=UTC_TIMESTAMP(6);',
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudsql.googleapis.com%2Fmysql-slow.log'
