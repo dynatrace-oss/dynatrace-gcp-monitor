@@ -203,7 +203,7 @@ while (( "$#" )); do
     esac
 done
 
-readonly DYNATRACE_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}[\/]{0,1}$"
+readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
 readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
 
 GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
