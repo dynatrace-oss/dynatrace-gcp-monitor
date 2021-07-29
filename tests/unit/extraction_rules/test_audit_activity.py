@@ -226,13 +226,13 @@ record3 = {
         "methodName": "cloudsql.instances.connect",
         "authorizationInfo": [
             {
-                "resource": "instances/pawel-001-mysql",
+                "resource": "instances/test-001-mysql",
                 "permission": "cloudsql.instances.connect",
                 "granted": True,
                 "resourceAttributes": {}
             }
         ],
-        "resourceName": "instances/pawel-001-mysql",
+        "resourceName": "instances/test-001-mysql",
         "request": {
             "@type": "type.googleapis.com/google.cloud.sql.v1beta4.SqlInstancesCreateEphemeralCertRequest",
             "body": {},
