@@ -102,6 +102,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: IMPORT_ALERTS
+        - name: COMPATIBILITY_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: COMPATIBILITY_MODE
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
         - name: DYNATRACE_URL_SECRET_NAME

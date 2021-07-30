@@ -62,6 +62,7 @@ readonly HTTP_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.httpP
 readonly HTTPS_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.httpsProxy')
 readonly IMPORT_DASHBOARDS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importDashboards')
 readonly IMPORT_ALERTS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importAlerts')
+readonly COMPATIBILITY_MODE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.compatibilityMode')
 readonly GCP_IAM_ROLE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.iamRole')
 # Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
 readonly GCP_IAM_ROLE_PERMISSIONS=(

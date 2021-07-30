@@ -40,6 +40,11 @@ googleCloud:
     # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly.
     # Allowed values: true/yes, false/no
     selfMonitoringEnabled: false
+    # Compatibility mode - concerns the change in reported dimension names. Allowed values: "true"/"yes", "false"/"no".
+    # Should be false for all new setups. Meant to allow a gradual transition for setups that already have historical metrics data.
+    # If true, report deprecated metric dimensions (flagged as compatiblityMode=true) along their new equivalents:
+    # project_id > gcp.project.id | region, location, zone, metrics.label.region > gcp.region
+    compatibilityMode: false
   metrics:
     # Name of the Pub/Sub topic for metric function
     pubSubTopic: dynatrace-gcp-service-invocation
