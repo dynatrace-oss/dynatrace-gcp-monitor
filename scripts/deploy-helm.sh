@@ -105,6 +105,19 @@ check_url() {
   fi
 }
 
+check_proxy_settings() {
+    if [ -n "$USE_PROXY" ];
+    then
+      if [ -z "$HTTP_PROXY" ] && [ -z "$HTTPS_PROXY" ];
+        then
+        echo -e "\e[91mERROR: \e[37m The useProxy is set, please fill httpProxy or httpsProxy in your values file"
+        exit 1
+      fi
+    exit
+    fi
+
+}
+
 print_help() {
      printf "
 usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME]
@@ -214,6 +227,9 @@ readonly DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --
 readonly USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.useExisting}")
 readonly DYNATRACE_PAAS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.dynatracePaasToken}")
 readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
+readonly USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.useProxy}")
+readonly HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
+readonly HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
 API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"')
 
 if [ -z "$GCP_PROJECT" ]; then
@@ -246,6 +262,8 @@ else
   echo -e "\e[91mERROR: \e[37mInvalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
   exit 1
 fi
+
+  check_proxy_settings
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]] || [[ ($DEPLOYMENT_TYPE == logs && $USE_EXISTING_ACTIVE_GATE == false)]]; then
   check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"

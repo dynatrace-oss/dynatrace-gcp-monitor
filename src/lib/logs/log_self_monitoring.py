@@ -22,6 +22,7 @@ from typing import Dict, List
 
 import aiohttp
 
+from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity, LogsContext
 from lib.credentials import create_token, get_dynatrace_log_ingest_url_from_env
 from lib.instance_metadata import InstanceMetadata
@@ -75,7 +76,7 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Que
     try:
         sfm_list = _pull_sfm(sfm_queue)
         if sfm_list:
-            async with aiohttp.ClientSession() as gcp_session:
+            async with init_gcp_client_session() as gcp_session:
                 context = await _create_sfm_logs_context(sfm_queue, context, gcp_session, instance_metadata)
                 self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
                 _log_self_monitoring_data(self_monitoring, context)

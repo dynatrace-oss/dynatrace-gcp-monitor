@@ -77,6 +77,13 @@ spec:
               value: {{ template "environmentID" . }}
             - name: DT_ID_SEED_CLUSTER_NAME
               value: {{ .Values.clusterName }}
+            {{- if  or (eq .Values.useProxy "DT_ONLY") (eq .Values.useProxy "ALL") }}
+            - name: DT_INTERNAL_PROXY
+              valueFrom:
+                configMapKeyRef:
+                  name: dynatrace-gcp-function-config
+                  key: HTTP_PROXY
+            {{- end }}
           resources:
             requests:
               memory: 512Mi

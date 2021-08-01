@@ -32,6 +32,10 @@ from operation_mode import OperationMode
 OPERATION_MODE = OperationMode.from_environment_string(os.environ.get("OPERATION_MODE", None)) or OperationMode.Metrics
 HEALTH_CHECK_PORT = get_int_environment_value("HEALTH_CHECK_PORT", 8080)
 
+# USED TO TEST ON WINDOWS MACHINE
+# policy = asyncio.WindowsSelectorEventLoopPolicy()
+# asyncio.set_event_loop_policy(policy)
+
 loop = asyncio.get_event_loop()
 
 

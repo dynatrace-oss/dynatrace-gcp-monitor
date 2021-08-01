@@ -59,9 +59,12 @@ activeGateUrl in case of the .Values.activeGate.useExisting is
 {{- else -}}
   {{- printf "%s" .Values.dynatraceLogIngestUrl }}
 {{- end -}}
-   
-
-
 {{- end }}
+
+{{- define "activeGateHost" }}
+  {{- $agurl := (include "activeGateUrl" .)}}
+  {{- printf "%s" (split "/" (split "//" $agurl)._1)._0  }}
+{{- end }}
+
 
 
