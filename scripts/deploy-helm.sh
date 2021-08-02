@@ -105,19 +105,6 @@ check_url() {
   fi
 }
 
-check_proxy_settings() {
-    if [ -n "$USE_PROXY" ];
-    then
-      if [ -z "$HTTP_PROXY" ] && [ -z "$HTTPS_PROXY" ];
-        then
-        echo -e "\e[91mERROR: \e[37m The useProxy is set, please fill httpProxy or httpsProxy in your values file"
-        exit 1
-      fi
-    exit
-    fi
-
-}
-
 print_help() {
      printf "
 usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME]
@@ -263,7 +250,11 @@ else
   exit 1
 fi
 
-  check_proxy_settings
+if [ -n "$USE_PROXY" ]; then
+  if [ -z "$HTTP_PROXY" ] || [ -z "$HTTPS_PROXY" ]; then
+    echo -e "\e[91mERROR: \e[37mThe useProxy is set, please fill httpProxy or httpsProxy in your values file"
+  fi
+fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]] || [[ ($DEPLOYMENT_TYPE == logs && $USE_EXISTING_ACTIVE_GATE == false)]]; then
   check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
