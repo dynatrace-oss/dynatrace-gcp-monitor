@@ -26,6 +26,10 @@ from lib.logs.log_sfm_metrics import LogSelfMonitoring
 from lib.metric_descriptor import SELF_MONITORING_METRIC_MAP
 from operation_mode import OperationMode
 
+LOG_THROTTLING_LIMIT_PER_CALLER = 10
+
+log_call_count = dict()
+
 
 def get_int_environment_value(key: str, default_value: int) -> int:
     environment_value = os.environ.get(key, None)
@@ -36,28 +40,48 @@ def get_should_require_valid_certificate() -> bool:
     return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
 
 
+def check_if_caller_exceeded_limit(caller):
+    log_calls_performed = log_call_count.get(caller, 0)
+    log_calls_left = LOG_THROTTLING_LIMIT_PER_CALLER - log_calls_performed
+
+    if log_calls_left == 0:
+        log_call_count[caller] = log_calls_performed + 1
+        print(f"Logging calls from caller '{caller}' exceeded the throttling limit of",
+              f"{LOG_THROTTLING_LIMIT_PER_CALLER}. Further logs from this caller will be discarded")
+
+    caller_exceeded_limit = log_calls_left <= 0
+    if not caller_exceeded_limit:
+        log_call_count[caller] = log_calls_performed + 1
+
+    return caller_exceeded_limit
+
+
 class LoggingContext:
     def __init__(self, scheduled_execution_id: Optional[str]):
         self.scheduled_execution_id: str = scheduled_execution_id[0:8] if scheduled_execution_id else None
 
-    def error(self, *args):
-        self.log("ERROR", *args)
+    def error(self, caller, *args):
+        self.log("ERROR", caller, *args)
 
-    def exception(self, *args):
-        self.error(*args)
+    def exception(self, caller, *args):
+        self.error(caller, *args)
         traceback.print_exc()
 
-    def log(self, *args):
+    def log(self, caller, *args):
         """
         Prints message log with context data. Last argument is treated as a message, all arguments before that
         are context identifiers, printed in square brackets to easily identify which part of coroutine produced the log
         e.g. >>> LoggingContext("context").log("project_id", "Message")
         produces`2020-11-30 11:29:42.010732 [context] [project_id] : Message`
-        :param args:
+        :param args, caller:
         :return:
         """
         if not args:
             return
+
+        if check_if_caller_exceeded_limit(caller):
+            return
+
         message = args[-1]
 
         timestamp_utc = datetime.utcnow()
