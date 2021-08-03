@@ -77,9 +77,10 @@ def run_ack_logs(worker_name: str, sfm_queue: Queue):
             perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path)
         except Exception as e:
             if isinstance(e, Forbidden):
-                logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.")
+                logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.",
+                                      "pub-sub-fetch-permission-error")
             else:
-                logging_context.exception("Failed to pull messages")
+                logging_context.exception("Failed to pull messages", "message-pull-exception")
             # Backoff for 1 minute to avoid spamming requests and logs
             time.sleep(60)
 
@@ -127,7 +128,7 @@ def perform_flush(worker_state: WorkerState,
                 context.log(worker_state.worker_name, "Log ingest payload pushed successfully")
                 sent = True
             except Exception:
-                context.exception(worker_state.worker_name, "Failed to ingest logs")
+                context.exception(worker_state.worker_name, "Failed to ingest logs", "ingest-logs-worker-exception")
             if sent:
                 context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
                 context.self_monitoring.log_ingest_payload_size += display_payload_size
@@ -136,7 +137,7 @@ def perform_flush(worker_state: WorkerState,
             # Send ACKs if processing all messages has failed
             send_batched_acks(subscriber_client, subscription_path, worker_state.ack_ids)
     except Exception:
-        context.exception(worker_state.worker_name, "Failed to perform flush")
+        context.exception(worker_state.worker_name, "Failed to perform flush", "worker-flush-exception")
     finally:
         # reset state event if we failed to flush, to AVOID getting stuck in processing the same messages
         # over and over again and letting their acknowledgement deadline expire

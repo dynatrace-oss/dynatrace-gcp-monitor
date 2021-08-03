@@ -53,7 +53,8 @@ def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
             }
         )
         if status > 299:
-            context.error(f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"')
+            context.error(f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"',
+                          "log-ingest-status-error")
             if status == 400:
                 context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.InvalidInput)
             elif status == 401:

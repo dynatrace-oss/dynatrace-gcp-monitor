@@ -57,7 +57,8 @@ def put_sfm_into_queue(context: LogsContext):
         context.sfm_queue.put_nowait(context.self_monitoring)
     except Exception as exception:
         if isinstance(exception, queue.Full):
-            context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
+            context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm",
+                          "sfm-full-queue-error")
 
 
 async def create_sfm_worker_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
