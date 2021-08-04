@@ -56,8 +56,8 @@ spec:
         envid: {{ template "environmentID" . }}
       annotations:
         "version": "1"
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/function-config.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/function-secret.yaml") . | sha256sum }}
     spec:
       containers:
         - name: dynatrace-activegate-gcpmon

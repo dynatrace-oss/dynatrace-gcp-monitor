@@ -40,8 +40,8 @@ spec:
         app: dynatrace-gcp-function
       annotations:
         "version" : "1"
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/function-config.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/function-secret.yaml") . | sha256sum }}
     spec:
       serviceAccountName: dynatrace-gcp-function-sa
       automountServiceAccountToken: false
@@ -77,13 +77,13 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SERVICE_USAGE_BOOKING
-
+        {{- if and (.Values.useProxy) (ne .Values.useProxy "default")}}
         - name: USE_PROXY
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: USE_PROXY
-        {{- if  .Values.useProxy }}
+          {{- if  .Values.useProxy }}
         - name: HTTP_PROXY
           valueFrom:
             configMapKeyRef:
@@ -94,6 +94,7 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: HTTPS_PROXY
+          {{- end }}
         {{- end }}
         - name: IMPORT_DASHBOARDS
           valueFrom:
@@ -213,9 +214,14 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SELF_MONITORING_ENABLED
-      {{- if .Values.useProxy }}
+        {{- if and (.Values.useProxy) (ne .Values.useProxy "default")}}
+        - name: USE_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: USE_PROXY
       # the PubSub uses gPRC so both variables have to be set
-        {{- if .Values.httpProxy }}
+          {{- if .Values.httpProxy }}
         - name: HTTP_PROXY
           valueFrom:
             configMapKeyRef:
@@ -226,7 +232,7 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: HTTP_PROXY
-        {{- else if .Values.httpsProxy }}
+          {{- else if .Values.httpsProxy }}
         - name: HTTP_PROXY
           valueFrom:
             configMapKeyRef:
@@ -237,7 +243,7 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: HTTPS_PROXY
-        {{- end }}
+          {{- end }}
           {{- if  (eq .Values.activeGate.useExisting "false") }}
         # In a case the AG will be installed the communication between pods doesn't need a proxy.
         - name: NO_PROXY
@@ -252,9 +258,8 @@ spec:
         - name: NO_PROXY
           value: ".googleapis.com"
             {{- end }}
-
+          {{- end }}
         {{- end }}
-      {{- end }}
         - name: HEALTH_CHECK_PORT
           value: "8081"
         resources:

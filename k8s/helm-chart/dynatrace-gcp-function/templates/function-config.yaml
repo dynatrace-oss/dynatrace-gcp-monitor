@@ -21,9 +21,11 @@ data:
   GCP_PROJECT: {{ .Values.gcpProjectId | quote }}
   REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
   SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}
+  {{- if and (.Values.useProxy) (ne .Values.useProxy "default")}}
   USE_PROXY: {{ .Values.useProxy | quote }}
   HTTP_PROXY: {{ .Values.httpProxy | quote }}
   HTTPS_PROXY: {{ .Values.httpsProxy | quote }}
+  {{- end }}
   {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
   PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
   SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
