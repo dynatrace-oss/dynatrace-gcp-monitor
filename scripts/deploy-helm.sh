@@ -251,6 +251,7 @@ fi
 if [ -n "$USE_PROXY" ]; then
   if [ -z "$HTTP_PROXY" ] || [ -z "$HTTPS_PROXY" ]; then
     echo -e "\e[91mERROR: \e[37mThe useProxy is set, please fill httpProxy or httpsProxy in your values file"
+    exit 1
   fi
 fi
 
