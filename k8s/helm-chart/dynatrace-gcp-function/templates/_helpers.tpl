@@ -66,5 +66,22 @@ activeGateUrl in case of the .Values.activeGate.useExisting is
   {{- printf "%s" (split "/" (split "//" $agurl)._1)._0  }}
 {{- end }}
 
-
-
+{{/*
+noProxyUrls is used in case of the .Value.useProxy is set ALL, DT_ONLY or GCP_ONLY
+  In a case the AG will be installed the communication between pods doesn't need a proxy.
+  In a case we are using an existing AG and the proxy should be used only for GCP then the communication between Function and AG must not use the proxy.
+  In a case we are using an existing AG and the proxy should be used only for DT.
+*/}}
+{{- define "noProxyUrls"}}
+{{- if eq .Values.activeGate.useExisting "false" -}}
+  {{- printf "metadata.google.internal,%s" (include "activeGateHost" .) }}
+{{- else -}}
+  {{- if eq .Values.useProxy "GCP_ONLY" -}}
+    {{- printf "metadata.google.internal,%s" (include "activeGateHost" .) }}
+  {{- else if eq .Values.useProxy "DT_ONLY" }}
+    {{- printf "metadata.google.internal,.googleapis.com" }}
+  {{- else -}}
+    {{- printf "metadata.google.internal" }}
+  {{- end -}}
+{{- end -}}
+{{- end }}

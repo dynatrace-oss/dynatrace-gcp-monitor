@@ -42,3 +42,4 @@ data:
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
   USE_EXISTING_ACTIVE_GATE: {{ .Values.activeGate.useExisting | quote }}
   {{- end }}
+  

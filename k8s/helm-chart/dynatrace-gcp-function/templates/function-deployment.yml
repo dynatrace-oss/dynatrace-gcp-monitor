@@ -220,45 +220,27 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: USE_PROXY
-      # the PubSub uses gPRC so both variables have to be set
-          {{- if .Values.httpProxy }}
+        # the PubSub uses gPRC so both variables have to be set
         - name: HTTP_PROXY
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
+              {{- if .Values.httpProxy }}
               key: HTTP_PROXY
+              {{- else }}
+              key: HTTPS_PROXY
+              {{- end }}
         - name: HTTPS_PROXY
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
+              {{- if .Values.httpsProxy }}
+              key: HTTPS_PROXY
+              {{- else }}
               key: HTTP_PROXY
-          {{- else if .Values.httpsProxy }}
-        - name: HTTP_PROXY
-          valueFrom:
-            configMapKeyRef:
-              name: dynatrace-gcp-function-config
-              key: HTTPS_PROXY
-        - name: HTTPS_PROXY
-          valueFrom:
-            configMapKeyRef:
-              name: dynatrace-gcp-function-config
-              key: HTTPS_PROXY
-          {{- end }}
-          {{- if  (eq .Values.activeGate.useExisting "false") }}
-        # In a case the AG will be installed the communication between pods doesn't need a proxy.
+              {{- end }}
         - name: NO_PROXY
-          value: {{ template "activeGateHost" . }}
-          {{- else }}
-            {{- if eq .Values.useProxy "GCP_ONLY" }}
-           # In a case we are using an existing AG and the proxy should be used only for GCP then the communication between Function and AG must not use the proxy.
-        - name: NO_PROXY
-          value: {{ template "activeGateHost" . }}
-            {{- else if eq .Values.useProxy "DT_ONLY" }}
-          # In a case we are using an existing AG and the proxy should be used only for DT
-        - name: NO_PROXY
-          value: ".googleapis.com"
-            {{- end }}
-          {{- end }}
+          value: {{ template "noProxyUrls" . }}
         {{- end }}
         - name: HEALTH_CHECK_PORT
           value: "8081"
