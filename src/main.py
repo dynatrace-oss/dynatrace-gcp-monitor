@@ -276,13 +276,14 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
                     service_name=service_yaml.get("service", "None")
                     featureSet=service_yaml.get("featureSet", "None")
                     # If whitelist of services exists and current service is not present in it, skip
+                    whitelist_exists = selected_featuresets is not None and selected_featuresets.__len__() > 0
                     if activation_config:
                         activation_config_feature_sets = activation_config.get(service_name, {}).get("featureSets", [])
-                        should_skip = featureSet not in activation_config_feature_sets
+                        should_skip = whitelist_exists and featureSet not in activation_config_feature_sets
                         activation = activation_config.get(service_name)
                         gcp_service = GCPService(tech_name=technology_name, activation=activation, **service_yaml)
                     else:
-                        should_skip = f'{service_name}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets
+                        should_skip = whitelist_exists and f'{service_name}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets
                         gcp_service = GCPService(tech_name=technology_name, **service_yaml)
                     if should_skip:
                         continue
