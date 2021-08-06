@@ -150,7 +150,8 @@ async def fetch_metric(
     dt_dimensions_by_source_dimension = {}
     for dimension in all_dimensions:
         source = dimension.key_for_fetch_metric
-        dt_dimensions_by_source_dimension[dimension.key_for_fetch_metric] = dimension.key_for_send_to_dynatrace
+        if dimension.key_for_send_to_dynatrace:
+            dt_dimensions_by_source_dimension[dimension.key_for_fetch_metric] = dimension.key_for_send_to_dynatrace
 
         params.append(('aggregation.groupByFields', source))
 
