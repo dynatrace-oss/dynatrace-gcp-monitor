@@ -15,12 +15,12 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.policy_name
     id: policy_name
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.policy_name
     id: gcp.instance.name
   metrics:

@@ -15,19 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.location
     id: location
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.location
     id: gcp.region
   - value: resource.labels.autoscaler_id
     id: autoscaler_id
   - value: resource.labels.autoscaler_name
     id: autoscaler_name
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.autoscaler_name
     id: gcp.instance.name
   - value: resource.labels.instance_group_manager_id

@@ -15,7 +15,7 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.snapshot_id
@@ -44,7 +44,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/snapshot/config_updates_count
@@ -83,7 +83,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/snapshot/oldest_message_age
@@ -109,6 +109,6 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region

@@ -15,14 +15,14 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.site_name
     id: site_name
   - value: resource.labels.domain_name
     id: domain_name
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.domain_name
     id: gcp.instance.name
   metrics:

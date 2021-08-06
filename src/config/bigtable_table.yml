@@ -15,7 +15,7 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.instance
@@ -26,7 +26,7 @@ gcp:
     id: table
   - value: resource.labels.zone
     id: zone
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.zone
     id: gcp.region
   metrics:

@@ -15,7 +15,7 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.topic_id
@@ -70,7 +70,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/topic/num_unacked_messages_by_region
@@ -85,7 +85,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/topic/oldest_retained_acked_message_age_by_region
@@ -100,7 +100,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/topic/oldest_unacked_message_age_by_region
@@ -115,7 +115,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/topic/retained_acked_bytes_by_region
@@ -130,7 +130,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/topic/send_message_operation_count
@@ -170,7 +170,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
 dashboards:

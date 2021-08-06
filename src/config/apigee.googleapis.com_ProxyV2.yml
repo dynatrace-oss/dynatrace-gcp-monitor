@@ -21,12 +21,12 @@ gcp:
     id: env
   - value: resource.labels.location
     id: location
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.location
     id: gcp.region
   - value: resource.labels.proxy_name
     id: proxy_name
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.proxy_name
     id: gcp.instance.name
   - value: resource.labels.runtime_version

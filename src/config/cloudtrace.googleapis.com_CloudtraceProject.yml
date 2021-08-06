@@ -17,7 +17,7 @@ gcp:
     id: resource_container
   - value: resource.labels.location
     id: location
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.location
     id: gcp.region
   metrics:

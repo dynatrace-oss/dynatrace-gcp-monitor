@@ -15,7 +15,7 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.attachment
@@ -24,7 +24,7 @@ gcp:
     id: interconnect
   - value: resource.labels.region
     id: region
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.region
     id: gcp.region
   - value: resource.labels.interconnect_project

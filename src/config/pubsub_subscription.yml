@@ -15,7 +15,7 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.subscription_id
@@ -153,7 +153,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/subscription/num_unacked_messages_by_region
@@ -168,7 +168,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/subscription/num_undelivered_messages
@@ -205,7 +205,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/subscription/oldest_unacked_message_age
@@ -231,7 +231,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/subscription/pull_ack_message_operation_count
@@ -334,7 +334,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
   - value: pubsub.googleapis.com/subscription/seek_request_count
@@ -448,7 +448,7 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
-      compatibilityMode: true
+      compatibilityModeOnly: true
     - value: metric.labels.region
       id: gcp.region
 dashboards:

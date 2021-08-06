@@ -15,19 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.region
     id: region
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.region
     id: gcp.region
   - value: resource.labels.router_id
     id: router_id
   - value: resource.labels.gateway_name
     id: gateway_name
-    compatibilityMode: true
+    compatibilityModeOnly: true
   - value: resource.labels.gateway_name
     id: gcp.instance.name
   metrics:
