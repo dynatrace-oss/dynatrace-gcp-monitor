@@ -108,7 +108,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["load_balancer_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["load_balancer_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -153,7 +153,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["load_balancer_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["load_balancer_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -198,7 +198,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["client_country", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["client_country", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -231,7 +231,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_subnetwork_name", "backend_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -264,7 +264,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_subnetwork_name", "backend_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -297,7 +297,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_subnetwork_name", "backend_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -342,7 +342,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": [ "forwarding_rule_network_tier", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": [ "forwarding_rule_network_tier", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -375,7 +375,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -408,7 +408,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_subnetwork_name", "backend_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -441,7 +441,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_subnetwork_name", "backend_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -486,7 +486,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -519,7 +519,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -552,7 +552,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_subnetwork_name", "backend_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -585,7 +585,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_subnetwork_name", "backend_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -630,7 +630,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -663,7 +663,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -708,7 +708,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["network_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["network_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "PIE_CHART",
@@ -741,7 +741,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.rtt_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "backend_subnetwork_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_name", "backend_subnetwork_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -774,7 +774,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.rtt_latencies",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_name", "backend_subnetwork_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_name", "backend_subnetwork_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -807,7 +807,7 @@
             "metric": "cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["backend_subnetwork_name", "backend_name", "gcp.project.id", "gcp.instance.name"]
+            "splitBy": ["backend_subnetwork_name", "backend_name", "project_id", "gcp.project.id", "forwarding_rule_name","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",

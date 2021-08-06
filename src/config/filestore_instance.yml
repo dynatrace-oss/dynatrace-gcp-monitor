@@ -200,4 +200,3 @@ gcp:
     - value: metric.labels.file_share
 dashboards:
   - dashboard: "dashboards/filestore_instance.json"
-  - dashboard: "dashboards/compatibilityMode/filestore_instance.json"

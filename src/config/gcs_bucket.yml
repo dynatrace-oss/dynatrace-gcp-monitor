@@ -169,4 +169,3 @@ gcp:
     - value: metric.labels.storage_class
 dashboards:
   - dashboard: "dashboards/gcs_bucket.json"
-  - dashboard: "dashboards/compatibilityMode/gcs_bucket.json"

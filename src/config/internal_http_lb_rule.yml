@@ -126,4 +126,3 @@ gcp:
     - value: metric.labels.cache_result
 dashboards:
   - dashboard: "dashboards/lb_https.json"
-  - dashboard: "dashboards/compatibilityMode/lb_https.json"

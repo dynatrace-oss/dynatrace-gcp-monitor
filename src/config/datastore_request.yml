@@ -86,4 +86,3 @@ gcp:
     - value: metric.labels.response_code
 dashboards:
   - dashboard: "dashboards/datastore.json"
-  - dashboard: "dashboards/compatibilityMode/datastore.json"

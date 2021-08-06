@@ -161,7 +161,7 @@
             "metric": "cloud.gcp.logging.googleapis.com.log_entry_count.gauge",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["cluster_name", "gcp.project.id"]
+            "splitBy": ["cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -193,7 +193,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.cpu.allocatable_utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -225,7 +225,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.cpu.core_usage_time.count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -252,7 +252,7 @@
             "metric": "cloud.gcp.kubernetes_io.node_daemon.cpu.core_usage_time.count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -279,7 +279,7 @@
             "metric": "cloud.gcp.kubernetes_io.node_daemon.memory.used_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -306,7 +306,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.memory.used_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -333,7 +333,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.memory.allocatable_utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -365,7 +365,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.pid_used",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -392,7 +392,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.network.received_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -424,7 +424,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.network.sent_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -451,7 +451,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.cpu.allocatable_utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -483,7 +483,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.used_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -515,7 +515,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.used_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -547,7 +547,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.inodes_free",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -579,7 +579,7 @@
             "metric": "cloud.gcp.kubernetes_io.node.memory.allocatable_utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -611,13 +611,13 @@
             "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.inodes_total",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }, {
             "id": "B",
             "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.inodes_free",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TABLE",
@@ -649,13 +649,13 @@
             "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.total_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }, {
             "id": "B",
             "metric": "cloud.gcp.kubernetes_io.node.ephemeral_storage.allocatable_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TABLE",
@@ -692,13 +692,13 @@
             "metric": "cloud.gcp.kubernetes_io.node.memory.total_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }, {
             "id": "B",
             "metric": "cloud.gcp.kubernetes_io.node.memory.allocatable_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TABLE",
@@ -735,13 +735,13 @@
             "metric": "cloud.gcp.kubernetes_io.node.cpu.total_cores",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }, {
             "id": "B",
             "metric": "cloud.gcp.kubernetes_io.node.cpu.allocatable_cores",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TABLE",
@@ -773,13 +773,13 @@
             "metric": "cloud.gcp.kubernetes_io.node.pid_limit",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }, {
             "id": "B",
             "metric": "cloud.gcp.kubernetes_io.node.pid_used",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TABLE",
@@ -816,13 +816,13 @@
             "metric": "cloud.gcp.kubernetes_io.node.network.received_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }, {
             "id": "B",
             "metric": "cloud.gcp.kubernetes_io.node.network.sent_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["node_name", "cluster_name", "gcp.project.id"]
+            "splitBy": ["node_name", "cluster_name", "project_id", "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "TABLE",
@@ -1043,7 +1043,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.request_bytes",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1072,7 +1072,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.request_utilization",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1101,7 +1101,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.limit_bytes",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1130,7 +1130,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.limit_utilization",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1159,7 +1159,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.page_fault_count",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1229,7 +1229,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.request_bytes",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1258,7 +1258,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.used_bytes",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1287,7 +1287,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.limit_bytes",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1352,7 +1352,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.cpu.request_utilization",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1402,7 +1402,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.cpu.request_utilization",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1456,7 +1456,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.cpu.limit_utilization",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "node_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "node_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1505,7 +1505,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.cpu.limit_utilization",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "node_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "node_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1559,7 +1559,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.request_utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1608,7 +1608,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.request_utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1662,7 +1662,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.limit_utilization",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1711,7 +1711,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.limit_utilization",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1765,7 +1765,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.cpu.core_usage_time.count",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1814,7 +1814,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.page_fault_count",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1863,7 +1863,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.used_bytes",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -1912,7 +1912,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.ephemeral_storage.used_bytes",
             "spaceAggregation": "PERCENTILE_90",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -2065,7 +2065,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.restart_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id", "state"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id", "state"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -2093,7 +2093,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.uptime",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id", "state"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id", "state"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -2121,7 +2121,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.cpu.limit_utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id", "state"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id", "state"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
@@ -2149,7 +2149,7 @@
             "metric": "cloud.gcp.kubernetes_io.container.memory.limit_utilization",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "gcp.project.id", "state"],
+            "splitBy": ["container_name", "pod_name", "namespace_name", "cluster_name", "project_id", "gcp.project.id", "state"],
             "filterBy": {
                 "filterOperator": "AND",
                 "nestedFilters": [{
