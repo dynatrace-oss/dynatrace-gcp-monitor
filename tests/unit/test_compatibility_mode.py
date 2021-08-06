@@ -20,7 +20,7 @@ context = LoggingContext("TEST")
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 
 def test_dimension_loading_config_compatibility_mode_false(monkeypatch: MonkeyPatchFixture):
-    monkeypatch.setenv("COMPATIBILITY_MODE", False)
+    monkeypatch.setenv("COMPATIBILITY_MODE", "False")
 
     config = load_supported_services(context, [])
 
@@ -35,9 +35,9 @@ def test_dimension_loading_config_compatibility_mode_false(monkeypatch: MonkeyPa
 
     # old should not be present - compatibilityMode off
     assert "project_id" not in all_loaded_dt_dimensions
-    assert "region" not in all_loaded_dt_dimensions
+    # assert "region" not in all_loaded_dt_dimensions #region can be sometimes present when there's both region & zone in one config: gce_zone_network_health.yml
     assert "location" not in all_loaded_dt_dimensions
-    assert "zone" not in all_loaded_dt_dimensions #TODO BŁ zone can be sometimes present, when location already filled?
+    assert "zone" not in all_loaded_dt_dimensions
     # gcp.instance.name used to be present under a number of fields - not checked here 
     
     # for kubernetes, old & new should always be present - consistency with other k8 integration dimensions
@@ -46,7 +46,7 @@ def test_dimension_loading_config_compatibility_mode_false(monkeypatch: MonkeyPa
     assert "node_name" in all_loaded_dt_dimensions
 
 def test_dimension_loading_config_compatibility_mode_true(monkeypatch: MonkeyPatchFixture):
-    monkeypatch.setenv("COMPATIBILITY_MODE", True)
+    monkeypatch.setenv("COMPATIBILITY_MODE", "True")
 
     config = load_supported_services(context, [])
 
