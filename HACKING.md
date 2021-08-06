@@ -6,12 +6,24 @@ To run worker function locally you have to have Python dev environement installe
 
 to install all the dependencies run 
 ```shell script
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pip install -r src\requirements.txt
+pip install -r tests\requirements.txt
+pip install --only-binary :all: cryptography==3.4.7 #cryptography library in Windows env requires this special handling or rustup installed
 ```
 
-To run metrics ingest worker function run `local_test.py` script file.
+##Running single local run
+Run `local_test.py` with env_vars set according to the table below. 
+
+To run metrics ingest worker function run `local_test.py` script file. 
+This runs a single run, and then returns. Some expection may appear in Win env, and self-monitoring metrics query can fail. 
 
 To run logs ingest worker function run `local_test.py` script file with `OPERATION_MODE` set to `Logs` 
+
+##Running periodic local run
+Run `run_docker.py` with env_vars set according to the table below.
+
+As opposed to `local_test.py`, this runs continuously.
 
 ## Environment variables
 
