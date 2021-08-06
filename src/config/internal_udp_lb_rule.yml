@@ -46,9 +46,6 @@ gcp:
     id: backend_scope_type
   - value: resource.labels.backend_subnetwork_name
     id: backend_subnetwork_name
-    compatibilityModeOnly: true
-  - value: resource.labels.backend_subnetwork_name
-    id: gcp.instance.name
   metrics:
   - value: loadbalancing.googleapis.com/l3/internal/egress_bytes_count
     id: cloud.gcp.loadbalancing_googleapis_com.l3.internal.egress_bytes_count

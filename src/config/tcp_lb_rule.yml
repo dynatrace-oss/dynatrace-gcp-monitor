@@ -50,9 +50,6 @@ gcp:
     id: backend_failover_configuration
   - value: resource.labels.backend_subnetwork_name
     id: backend_subnetwork_name
-    compatibilityModeOnly: true
-  - value: resource.labels.backend_subnetwork_name
-    id: gcp.instance.name
   - value: resource.labels.endpoint_zone
     id: endpoint_zone
   metrics:
