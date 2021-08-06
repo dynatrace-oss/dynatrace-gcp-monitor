@@ -147,8 +147,11 @@ async def fetch_metric(
     ]
 
     all_dimensions = (service.dimensions + metric.dimensions)
+    dt_dimensions_by_source_dimension = {}
     for dimension in all_dimensions:
-        source = dimension.source or f'metric.labels.{dimension.dimension}'
+        source = dimension.key_for_fetch_metric
+        dt_dimensions_by_source_dimension[dimension.key_for_fetch_metric] = dimension.key_for_send_to_dynatrace
+
         params.append(('aggregation.groupByFields', source))
 
     headers = {
@@ -174,7 +177,7 @@ async def fetch_metric(
 
         for time_serie in page['timeSeries']:
             typed_value_key = extract_typed_value_key(time_serie)
-            dimensions = create_dimensions(context, time_serie)
+            dimensions = create_dimensions(context, time_serie, dt_dimensions_by_source_dimension)
             entity_id = create_entity_id(service, time_serie)
 
             for point in time_serie['points']:
@@ -225,15 +228,24 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
     return DimensionValue(name, string_value)
 
 
-def create_dimensions(context: MetricsContext, time_serie: Dict) -> List[DimensionValue]:
-    metric = time_serie.get('metric', {})
-    labels = metric.get('labels', {}).copy()
-    resource_labels = time_serie.get('resource', {}).get('labels', {})
-    labels.update(resource_labels)    
-    system_labels = time_serie.get('metadata', {}).get('systemLabels', {})
-    labels.update(system_labels)
+def create_dimensions(context: MetricsContext, time_serie: Dict, dt_dimensions_by_source_dimension: Dict) -> List[DimensionValue]:
+    metric_labels = time_serie.get('metric', {}).get('labels', {})
+    dt_labels = dict(
+        ( dt_dimensions_by_source_dimension.get(f"metric.labels.{label}", label),  value)
+        for label, value in metric_labels.items() )
 
-    dimension_values = [create_dimension(label, value, context) for label, value in labels.items()]
+    resource_labels = time_serie.get('resource', {}).get('labels', {})
+    dt_labels.update(
+        (dt_dimensions_by_source_dimension.get(f"resource.labels.{label}", label), value)
+        for label, value in resource_labels.items())
+
+    system_labels = time_serie.get('metadata', {}).get('systemLabels', {})
+    dt_labels.update(
+        (dt_dimensions_by_source_dimension.get(f"metadata.systemLabels.{label}", label), value)
+        for label, value in system_labels.items())
+
+    dimension_values = [ create_dimension( dt_label, value, context)
+                        for dt_label, value in dt_labels.items()]
 
     return dimension_values
 
@@ -284,7 +296,8 @@ def create_entity_id(service: GCPService, time_serie):
     resource_labels = resource.get('labels', {})
     parts = [service.name]
     for dimension in service.dimensions:
-        key = (dimension.source or dimension.dimension).replace("resource.labels.", "")
+        key = dimension.key_for_create_entity_id
+
         dimension_value = resource_labels.get(key)
         if dimension_value:
             parts.append(dimension_value)
