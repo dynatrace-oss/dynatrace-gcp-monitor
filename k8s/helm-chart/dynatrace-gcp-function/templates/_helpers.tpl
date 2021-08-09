@@ -74,13 +74,17 @@ noProxyUrls is used in case of the .Value.useProxy is set ALL, DT_ONLY or GCP_ON
 */}}
 {{- define "noProxyUrls"}}
 {{- if eq .Values.activeGate.useExisting "false" -}}
-  {{- printf "metadata.google.internal,%s" (include "activeGateHost" .) }}
+  {{- if eq .Values.useProxy "DT_ONLY" }}
+    {{- printf "metadata.google.internal,.googleapis.com,%s" (include "activeGateHost" .) }}
+  {{- else }}
+    {{- printf "metadata.google.internal,%s" (include "activeGateHost" .) }}
+  {{- end }}
 {{- else -}}
   {{- if eq .Values.useProxy "GCP_ONLY" -}}
     {{- printf "metadata.google.internal,%s" (include "activeGateHost" .) }}
   {{- else if eq .Values.useProxy "DT_ONLY" }}
     {{- printf "metadata.google.internal,.googleapis.com" }}
-  {{- else -}}
+  {{- else }}
     {{- printf "metadata.google.internal" }}
   {{- end -}}
 {{- end -}}

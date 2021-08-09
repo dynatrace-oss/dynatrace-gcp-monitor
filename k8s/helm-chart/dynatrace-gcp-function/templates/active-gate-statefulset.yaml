@@ -83,7 +83,11 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: dynatrace-gcp-function-config
+              {{- if .Values.httpsProxy }}
+                  key: HTTPS_PROXY
+              {{- else }}
                   key: HTTP_PROXY
+              {{- end }}
             {{- end }}
           resources:
             requests:
