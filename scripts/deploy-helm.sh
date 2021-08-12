@@ -121,6 +121,8 @@ arguments:
     --autopilot-cluster-name CLUSTER_NAME
                             Name of new GKE Autopilot cluster to be created if '--create-autopilot-cluster option' was selected.
                             By default 'dynatrace-gcp-function' will be used.
+    -y, --auto-yes
+                            By default 'yes' will be answer for all user input prompts from GCP.
     -q, --quiet
                             Reduce output verbosity, progress messages and errors are still printed.
     -h, --help
@@ -183,6 +185,11 @@ while (( "$#" )); do
 
             "--autopilot-cluster-name")
                 AUTOPILOT_CLUSTER_NAME=$2
+                shift; shift
+            ;;
+
+            "-y" | "--auto-yes")
+                export CLOUDSDK_CORE_DISABLE_PROMPTS=1
                 shift; shift
             ;;
 
