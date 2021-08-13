@@ -45,7 +45,7 @@ expected_output = {
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloudsql_database',
     ATTRIBUTE_GCP_INSTANCE_ID: 'dynatrace-gcp-extension:test-001-mysql',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: 'ON DUPLICATE KEY UPDATE master_time=UTC_TIMESTAMP(6);',
+    ATTRIBUTE_CONTENT: json.dumps(log_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudsql.googleapis.com%2Fmysql-slow.log',
     ATTRIBUTE_SEVERITY: "INFO"
 }

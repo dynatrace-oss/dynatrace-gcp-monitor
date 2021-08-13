@@ -58,7 +58,7 @@ expected_output = {
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'k8s_container',
     ATTRIBUTE_GCP_INSTANCE_NAME: 'test-app-api',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: '2021-03-17 19:58:17.890 DEBUG 1 --- [io-8080-exec-18] o.s.web.servlet.DispatcherServlet        : Completed 200 OK\n',
+    ATTRIBUTE_CONTENT: json.dumps(log_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/stdout',
     'container.name': 'test-app-api',
     'k8s.cluster.name': 'test-cluster',

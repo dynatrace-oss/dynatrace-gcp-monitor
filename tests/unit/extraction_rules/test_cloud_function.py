@@ -53,7 +53,7 @@ debug_text_record_expected_output = {
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
     ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-function',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: "Function execution started",
+    ATTRIBUTE_CONTENT: json.dumps(debug_text_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions',
     'faas.id': 'j22o0ucdhpop',
     'faas.name': 'dynatrace-gcp-function'
@@ -97,7 +97,7 @@ notice_json_record_expected_output = {
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
     ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-function',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: "Error detected in dynatrace-logs-ingest",
+    ATTRIBUTE_CONTENT: json.dumps(notice_json_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/clouderrorreporting.googleapis.com%2Finsights',
     'faas.name': 'dynatrace-gcp-function'
 }
