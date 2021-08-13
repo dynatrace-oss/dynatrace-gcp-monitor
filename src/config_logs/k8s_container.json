@@ -28,10 +28,6 @@
           "pattern": "resource.labels.pod_name"
         },
         {
-          "key": "content",
-          "pattern": "textPayload"
-        },
-        {
           "key": "gcp.instance.name",
           "pattern": "resource.labels.container_name"
         }

@@ -20,10 +20,6 @@
           "pattern": "resource.labels.function_name"
         },
         {
-          "key": "content",
-          "pattern": "textPayload || jsonPayload.message || jsonPayload.statusDetails || jsonPayload || protoPayload.status.message|| protoPayload"
-        },
-        {
           "key": "gcp.instance.name",
           "pattern": "resource.labels.function_name"
         }
