@@ -314,6 +314,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_IDENTITY: 'system:vpa-recommender',
         ATTRIBUTE_AUDIT_ACTION: 'io.k8s.core.v1.endpoints.update',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
+        ATTRIBUTE_SEVERITY: "INFO"
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',

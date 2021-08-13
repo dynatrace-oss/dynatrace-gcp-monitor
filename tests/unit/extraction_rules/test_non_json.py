@@ -16,7 +16,8 @@ from queue import Queue
 
 from lib.context import LogsProcessingContext
 from lib.logs import logs_processor
-from lib.logs.metadata_engine import ATTRIBUTE_TIMESTAMP, ATTRIBUTE_CONTENT, ATTRIBUTE_CLOUD_PROVIDER
+from lib.logs.metadata_engine import ATTRIBUTE_TIMESTAMP, ATTRIBUTE_CONTENT, ATTRIBUTE_CLOUD_PROVIDER, \
+    ATTRIBUTE_SEVERITY
 
 
 def test_extraction_non_json():
@@ -31,5 +32,6 @@ def test_extraction_non_json():
     assert actual_output == {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
         ATTRIBUTE_TIMESTAMP: publish_time.isoformat(),
-        ATTRIBUTE_CONTENT: "Hello World"
+        ATTRIBUTE_CONTENT: "Hello World",
+        ATTRIBUTE_SEVERITY: "INFO"
     }
