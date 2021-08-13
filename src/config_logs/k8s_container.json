@@ -30,6 +30,10 @@
         {
           "key": "gcp.instance.name",
           "pattern": "resource.labels.container_name"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
         }
       ]
     }

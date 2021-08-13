@@ -40,10 +40,6 @@
         {
           "key": "log.source",
           "pattern": "logName"
-        },
-        {
-          "key": "content",
-          "pattern": "@"
         }
       ]
     }
