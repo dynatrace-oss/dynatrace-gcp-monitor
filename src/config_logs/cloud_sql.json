@@ -12,12 +12,12 @@
       ],
       "attributes": [
         {
-          "key": "content",
-          "pattern": "textPayload || protoPayload.status.message|| protoPayload || jsonPayload.message || jsonPayload.statusDetails || jsonPayload"
-        },
-        {
           "key": "gcp.instance.id",
           "pattern": "resource.labels.database_id"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
         }
       ]
     }
