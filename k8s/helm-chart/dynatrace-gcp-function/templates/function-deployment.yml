@@ -82,13 +82,12 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SERVICE_USAGE_BOOKING
-        {{- if and (.Values.useProxy) (ne .Values.useProxy "")}}
+        {{- if and (.Values.useProxy) }}
         - name: USE_PROXY
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: USE_PROXY
-          {{- if  .Values.useProxy }}
         - name: HTTP_PROXY
           valueFrom:
             configMapKeyRef:
@@ -99,7 +98,6 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: HTTPS_PROXY
-          {{- end }}
         {{- end }}
         - name: IMPORT_DASHBOARDS
           valueFrom:
@@ -219,7 +217,7 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SELF_MONITORING_ENABLED
-        {{- if and (.Values.useProxy) (ne .Values.useProxy "")}}
+        {{- if and (.Values.useProxy) }}
         - name: USE_PROXY
           valueFrom:
             configMapKeyRef:
