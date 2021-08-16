@@ -21,7 +21,7 @@ from aiohttp import web
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configure_dynatrace import ConfigureDynatrace
 from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext
-from lib.credentials import create_token
+from lib.credentials import create_token, get_project_id_from_environment
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
@@ -87,7 +87,7 @@ async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
         async with init_gcp_client_session() as gcp_session:
             token = await create_token(logging_context, gcp_session)
             if token:
-                sfm_dashboards_context = SfmDashboardsContext(project_id_owner=metadata.project_id,
+                sfm_dashboards_context = SfmDashboardsContext(project_id_owner=get_project_id_from_environment(),
                                                               token=token,
                                                               gcp_session=gcp_session,
                                                               operation_mode=OPERATION_MODE,

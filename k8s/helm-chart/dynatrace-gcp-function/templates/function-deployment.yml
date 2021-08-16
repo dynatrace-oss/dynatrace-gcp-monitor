@@ -67,6 +67,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: PRINT_METRIC_INGEST_INPUT
+        - name: GCP_PROJECT
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: GCP_PROJECT
         - name: REQUIRE_VALID_CERTIFICATE
           valueFrom:
             configMapKeyRef:

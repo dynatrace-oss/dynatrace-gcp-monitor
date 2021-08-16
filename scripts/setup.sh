@@ -343,7 +343,7 @@ if [[ "${IMPORT_DASHBOARDS,,}" =~ ^(yes|true)$ ]] ; then
       warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_DASHBOARDS"
   fi
 
-  for DASHBOARD_PATH in $(get_ext_files 'dashboards[*].dashboard')
+  for DASHBOARD_PATH in $(get_ext_files 'dashboards[].dashboard')
   do
     DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
     DASHBOARD_NAME=$(jq -r .dashboardMetadata.name < "./$DASHBOARD_PATH")
@@ -377,7 +377,7 @@ if [[ "${IMPORT_ALERTS,,}" =~ ^(yes|true)$ ]]; then
       warn "Found existing Google alerts in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"
   fi
 
-  for ALERT_PATH in $(get_ext_files 'alerts[*].path')
+  for ALERT_PATH in $(get_ext_files 'alerts[].path')
   do
     ALERT_JSON=$(cat "./$ALERT_PATH")
     ALERT_ID=$(jq -r .id < "./$ALERT_PATH")

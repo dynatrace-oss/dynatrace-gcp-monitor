@@ -118,6 +118,8 @@ arguments:
     --autopilot-cluster-name CLUSTER_NAME
                             Name of new GKE Autopilot cluster to be created if '--create-autopilot-cluster option' was selected.
                             By default 'dynatrace-gcp-function' will be used.
+    -y, --auto-yes
+                            By default 'yes' will be answer for all user input prompts from GCP.
     -q, --quiet
                             Reduce output verbosity, progress messages and errors are still printed.
     -h, --help
@@ -158,47 +160,48 @@ fi
 CMD_OUT_PIPE="/dev/stdout"
 AUTOPILOT_CLUSTER_NAME="dynatrace-gcp-function"
 
-while (("$#")); do
-  case "$1" in
-  "--service-account")
-    SA_NAME=$2
-    shift
-    shift
-    ;;
+while (( "$#" )); do
+    case "$1" in
+            "--service-account")
+                SA_NAME=$2
+                shift; shift
+            ;;
 
-  "--role-name")
-    ROLE_NAME=$2
-    shift
-    shift
-    ;;
+            "--role-name")
+                ROLE_NAME=$2
+                shift; shift
+            ;;
 
-  "--create-autopilot-cluster")
-    CREATE_AUTOPILOT_CLUSTER="Y"
-    shift
-    ;;
+            "--create-autopilot-cluster")
+                CREATE_AUTOPILOT_CLUSTER="Y"
+                shift
+            ;;
 
-  "--autopilot-cluster-name")
-    AUTOPILOT_CLUSTER_NAME=$2
-    shift
-    shift
-    ;;
+            "--autopilot-cluster-name")
+                AUTOPILOT_CLUSTER_NAME=$2
+                shift; shift
+            ;;
 
-  "-q" | "--quiet")
-    CMD_OUT_PIPE="/dev/null"
-    shift
-    ;;
+            "-y" | "--auto-yes")
+                export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+                shift; shift
+            ;;
 
-  "-h" | "--help")
-    print_help
-    exit 0
-    ;;
+            "-q" | "--quiet")
+                CMD_OUT_PIPE="/dev/null"
+                shift
+            ;;
 
-  *)
-    echo "Unknown param $1"
-    print_help
-    exit 1
-    ;;
-  esac
+            "-h" | "--help")
+                print_help
+                exit 0
+            ;;
+
+            *)
+            echo "Unknown param $1"
+            print_help
+            exit 1
+    esac
 done
 
 readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
