@@ -82,7 +82,7 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SERVICE_USAGE_BOOKING
-        {{- if and (.Values.useProxy) }}
+        {{- if (.Values.useProxy) }}
         - name: USE_PROXY
           valueFrom:
             configMapKeyRef:
@@ -217,7 +217,7 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SELF_MONITORING_ENABLED
-        {{- if and (.Values.useProxy) }}
+        {{- if (.Values.useProxy) }}
         - name: USE_PROXY
           valueFrom:
             configMapKeyRef:
