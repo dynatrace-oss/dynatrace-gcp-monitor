@@ -21,7 +21,7 @@ data:
   GCP_PROJECT: {{ .Values.gcpProjectId | quote }}
   REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
   SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}
-  {{- if and (.Values.useProxy) (ne .Values.useProxy "default")}}
+  {{- if and (.Values.useProxy) (ne .Values.useProxy "")}}
   USE_PROXY: {{ .Values.useProxy | quote }}
   HTTP_PROXY: {{ .Values.httpProxy | quote }}
   HTTPS_PROXY: {{ .Values.httpsProxy | quote }}
