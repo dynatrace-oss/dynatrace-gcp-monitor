@@ -253,7 +253,8 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
         with open(activation_file_path, encoding="utf-8") as activation_file:
             activation_yaml = yaml.safe_load(activation_file)
     except Exception:
-        activation_yaml = yaml.safe_load(os.environ.get("ACTIVATION_CONFIG", ""))
+        with open(os.environ.get("ACTIVATION_CONFIG", ""), encoding="utf-8") as activation_file:
+            activation_yaml = yaml.safe_load(activation_file)
     activation_config = {service_activation.get('service'): service_activation for service_activation in activation_yaml['services']} if activation_yaml and activation_yaml['services'] else {}
 
     working_directory = os.path.dirname(os.path.realpath(__file__))
