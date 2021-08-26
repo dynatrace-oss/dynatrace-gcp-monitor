@@ -22,6 +22,9 @@ gcp:
     id: gcp.region
   - value: resource.labels.volume_id
     id: volume_id
+    compatibilityModeOnly: true
+  - value: resource.labels.volume_id
+    id: gcp.instance.name
   metrics:
   - value: cloudvolumesgcp-api.netapp.com/cloudvolume_so/logical_bytes_backed_up
     id: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.logical_bytes_backed_up
