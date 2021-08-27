@@ -12,8 +12,17 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+set -e
 
-mkdir ./helm-deployment-package
+mkdir -p artefacts
+mkdir -p ./helm-deployment-package
+mkdir -p ./helm-deployment-package/gcp_iam_roles
+
 cp -r ./k8s/helm-chart/dynatrace-gcp-function ./helm-deployment-package
+
 cp ./scripts/deploy-helm.sh ./helm-deployment-package
+
+cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./helm-deployment-package/gcp_iam_roles/
+cp ./gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml ./helm-deployment-package/gcp_iam_roles/
+
 tar -cf ./artefacts/helm-deployment-package.tar ./helm-deployment-package
