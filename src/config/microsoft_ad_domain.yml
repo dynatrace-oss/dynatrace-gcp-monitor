@@ -50,4 +50,8 @@ gcp:
     dimensions:
     - value: metric.labels.trust_direction
     - value: metric.labels.target_domain_name
+      id: target_domain_name
+      compatibilityModeOnly: true
+    - value: metric.labels.target_domain_name
+      id: gcp.instance.name
     - value: metric.labels.trust_type

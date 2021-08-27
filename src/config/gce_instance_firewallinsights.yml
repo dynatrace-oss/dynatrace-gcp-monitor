@@ -39,6 +39,10 @@ gcp:
     dimensions:
     - value: metric.labels.firewall_project_id
     - value: metric.labels.firewall_name
+      id: firewall_name
+      compatibilityModeOnly: true
+    - value: metric.labels.firewall_name
+      id: gcp.instance.name
   - value: firewallinsights.googleapis.com/vm/firewall_last_used_timestamp
     id: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_last_used_timestamp
     type: gauge
@@ -52,3 +56,8 @@ gcp:
     dimensions:
     - value: metric.labels.firewall_project_id
     - value: metric.labels.firewall_name
+      id: firewall_name
+      compatibilityModeOnly: true
+    - value: metric.labels.firewall_name
+      id: gcp.instance.name
+      

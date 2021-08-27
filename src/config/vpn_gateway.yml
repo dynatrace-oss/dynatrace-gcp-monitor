@@ -53,6 +53,10 @@ gcp:
     dimensions:
     - value: metric.labels.tunnel_name
     - value: metric.labels.gateway_name
+      id: gateway_name
+      compatibilityModeOnly: true
+    - value: metric.labels.gateway_name
+      id: gcp.instance.name
   - value: vpn.googleapis.com/network/dropped_sent_packets_count
     id: cloud.gcp.vpn_googleapis_com.network.dropped_sent_packets_count
     type: count,delta
@@ -66,6 +70,10 @@ gcp:
     dimensions:
     - value: metric.labels.tunnel_name
     - value: metric.labels.gateway_name
+      id: gateway_name
+      compatibilityModeOnly: true
+    - value: metric.labels.gateway_name
+      id: gcp.instance.name
   - value: vpn.googleapis.com/network/received_bytes_count
     id: cloud.gcp.vpn_googleapis_com.network.received_bytes_count
     type: count,delta
@@ -79,6 +87,10 @@ gcp:
     dimensions:
     - value: metric.labels.tunnel_name
     - value: metric.labels.gateway_name
+      id: gateway_name
+      compatibilityModeOnly: true
+    - value: metric.labels.gateway_name
+      id: gcp.instance.name
   - value: vpn.googleapis.com/network/received_packets_count
     id: cloud.gcp.vpn_googleapis_com.network.received_packets_count
     type: count,delta
@@ -105,6 +117,10 @@ gcp:
     dimensions:
     - value: metric.labels.tunnel_name
     - value: metric.labels.gateway_name
+      id: gateway_name
+      compatibilityModeOnly: true
+    - value: metric.labels.gateway_name
+      id: gcp.instance.name
   - value: vpn.googleapis.com/network/sent_packets_count
     id: cloud.gcp.vpn_googleapis_com.network.sent_packets_count
     type: count,delta
@@ -131,3 +147,7 @@ gcp:
     dimensions:
     - value: metric.labels.tunnel_name
     - value: metric.labels.gateway_name
+      id: gateway_name
+      compatibilityModeOnly: true
+    - value: metric.labels.gateway_name
+      id: gcp.instance.name
