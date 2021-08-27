@@ -15,7 +15,6 @@
 set -e
 
 mkdir -p artefacts
-mkdir -p ./helm-deployment-package
 mkdir -p ./helm-deployment-package/gcp_iam_roles
 
 cp -r ./k8s/helm-chart/dynatrace-gcp-function ./helm-deployment-package
