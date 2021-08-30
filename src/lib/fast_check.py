@@ -76,7 +76,7 @@ def valid_dynatrace_scopes(token_metadata: dict):
 async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:
         response = await dt_session.post(
-            url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
+            url=f"{dynatrace_url.rstrip('/')}/api/v2/apiTokens/lookup",
             headers={
                 "Authorization": f"Api-Token {dynatrace_api_key}",
                 "Content-Type": "application/json; charset=utf-8"
@@ -94,6 +94,25 @@ async def get_dynatrace_token_metadata(dt_session: ClientSession, context: Loggi
     except Exception as e:
         context.log(f'Unable to get Dynatrace token metadata. Error details: {e}')
         return {}
+
+
+async def check_dynatrace(logging_context: LoggingContext, project_id, dt_session: ClientSession, dynatrace_url, dynatrace_access_key):
+    try:
+
+        if not dynatrace_url or not dynatrace_access_key:
+            logging_context.log(f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
+                                     f'Add required secrets to Secret Manager.')
+            return None
+        logging_context.log(f"Using [DYNATRACE_URL] Dynatrace endpoint: {dynatrace_url}")
+        logging_context.log(f'Using [DYNATRACE_ACCESS_KEY]: {dynatrace_access_key[0:dynatrace_access_key.rfind(".")]}.')
+        token_metadata = await get_dynatrace_token_metadata(dt_session, logging_context, dynatrace_url, dynatrace_access_key)
+        logging_context.log(f'Token metadata: {token_metadata}.')
+        if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
+            logging_context.log(f'Dynatrace API Token for project: \'{project_id}\'is not valid. '
+                                     f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
+    except Exception as e:
+        logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
+
 
 
 class MetricsFastCheck:
@@ -133,26 +152,6 @@ class MetricsFastCheck:
             return None
         return service_names
 
-    async def _check_dynatrace(self, project_id):
-        try:
-            dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
-            dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
-            if not dynatrace_url or not dynatrace_access_key:
-                self.logging_context.log(f'No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
-                                         f'Add required secrets to Secret Manager.')
-                return None
-
-            token_metadata = await get_dynatrace_token_metadata(self.dt_session, self.logging_context, dynatrace_url, dynatrace_access_key)
-            if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
-                self.logging_context.log(f'Dynatrace API Token for project: \'{project_id}\'is not valid. '
-                                         f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
-                return None
-        except Exception as e:
-            self.logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
-            return None
-
-        return dynatrace_url, token_metadata
-
     async def execute(self) -> FastCheckResult:
         _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
         _check_version(self.logging_context)
@@ -167,8 +166,6 @@ class MetricsFastCheck:
 
             if all(result is not None for result in results):
                 ready_to_monitor.append(project_id)
-
-        await self._check_dynatrace(get_project_id_from_environment())
 
         return FastCheckResult(projects=ready_to_monitor)
 
