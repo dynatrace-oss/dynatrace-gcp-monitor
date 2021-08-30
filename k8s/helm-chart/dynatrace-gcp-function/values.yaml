@@ -94,7 +94,7 @@ serviceUsageBooking: "source"
 importDashboards: "true"
 # Import predefined alerting rules for selected services. Allowed values: "true"/"yes", "false"/"no"
 importAlerts: "true"
-# Metrics polling interval in minutes. Allowed values: 1 - 10
+# Metrics polling interval in minutes. Allowed values: 1 - 6
 queryInterval: 3
 #clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh
 clusterName: ""

@@ -38,7 +38,7 @@ Worker function execution can be tweaked with environment variables. In Google F
 | MAX_DIMENSION_NAME_LENGTH | The maximum length of the dimension name sent to the MINT API. Longer names are truncated to the value indicated. Allowed values: positive integers. | 100 |
 | MAX_DIMENSION_VALUE_LENGTH | The maximum length of the dimension value sent to the MINT API. Longer values are truncated to the value indicated. Allowed values: positive integers. | 250 |
 | SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. Allowed values: `true`/`yes`, `false`/`no` | `false` |
-| QUERY_INTERVAL | Metrics polling interval in minutes. Allowed values: 1 - 10 | 3 |
+| QUERY_INTERVAL | Metrics polling interval in minutes. Allowed values: 1 - 6 | 3 |
 | ACTIVATION_CONFIG | Dimension filtering config (see `gcpServicesYaml` property in [values.yaml](https://github.com/dynatrace-oss/dynatrace-gcp-function/blob/master/k8s/helm-chart/dynatrace-gcp-function/values.yaml) file) minified to single line json |  |
 
 ### Log processing configuration variables

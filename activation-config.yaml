@@ -47,7 +47,7 @@ googleCloud:
     function: dynatrace-gcp-function
     # Name of the metric forwarding Cloud Scheduler instance
     scheduler: dynatrace-gcp-schedule
-    # dynatrace-gcp-function execution interval in minutes (1-10)
+    # dynatrace-gcp-function execution interval in minutes (1 - 6)
     queryInterval: 3
 activation:
   metrics:
