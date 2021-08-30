@@ -92,7 +92,7 @@ readonly REQUIRE_VALID_CERTIFICATE=$(yq e '.googleCloud.common.requireValidCerti
 readonly GCP_PUBSUB_TOPIC=$(yq e '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_FUNCTION_NAME=$(yq e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_SCHEDULER_NAME=$(yq e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_SCHEDULER_CRON=$(yq e '.googleCloud.metrics.schedulerSchedule' $FUNCTION_ACTIVATION_CONFIG)
+readonly QUERY_INTERVAL=$(yq e '.googleCloud.metrics.queryInterval' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly FUNCTION_GCP_SERVICES=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq 'join(",")')
@@ -196,7 +196,7 @@ check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY_SECRET_NAME" "'googleCloud.co
 check_if_parameter_is_empty "$GCP_FUNCTION_NAME" 'googleCloud.metrics.function'
 check_if_parameter_is_empty "$GCP_IAM_ROLE" "'googleCloud.common.iamRole'"
 check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "'googleCloud.common.serviceAccount'"
-check_if_parameter_is_empty "$GCP_SCHEDULER_CRON" "'googleCloud.metrics.schedulerSchedule'"
+check_if_parameter_is_empty "$QUERY_INTERVAL" "'googleCloud.metrics.queryInterval'"
 
 echo  "- Logging to your account..."
 GCP_ACCOUNT=$(gcloud config get-value account)
@@ -324,6 +324,7 @@ echo "- schedule the runs"
 if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then
     echo "Scheduler [$GCP_SCHEDULER_NAME] already exists, skipping"
 else
+    GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL} * * * *"
     gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
 fi
 
