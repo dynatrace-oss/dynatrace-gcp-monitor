@@ -19,10 +19,10 @@ gcp:
   - value: resource.labels.project_id
     id: gcp.project.id
   - value: resource.labels.database_id
-     id: database_id
-     compatibilityModeOnly: true
+    id: database_id
+    compatibilityModeOnly: true
   - value: resource.labels.database_id
-     id: gcp.instance.name
+    id: gcp.instance.name
   - value: resource.labels.region
     id: region
     compatibilityModeOnly: true
