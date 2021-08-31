@@ -103,8 +103,10 @@ gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
 
 # Run helm deployment.
 rm -rf ./e2e_test
-mkdir ./e2e_test
+mkdir -p ./e2e_test/gcp_iam_roles
 cp ./scripts/deploy-helm.sh ./e2e_test/deploy-helm.sh
+cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./e2e_test/gcp_iam_roles/
+cp ./gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml ./e2e_test/gcp_iam_roles/
 cp -r ./k8s/helm-chart/dynatrace-gcp-function/ ./e2e_test/dynatrace-gcp-function/
 
 VALUES_FILE="./e2e_test/dynatrace-gcp-function/values.yaml"

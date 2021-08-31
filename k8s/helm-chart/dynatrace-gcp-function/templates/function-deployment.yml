@@ -40,8 +40,8 @@ spec:
         app: dynatrace-gcp-function
       annotations:
         "version" : "1"
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/function-config.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/function-secret.yaml") . | sha256sum }}
     spec:
       serviceAccountName: dynatrace-gcp-function-sa
       automountServiceAccountToken: false
@@ -67,6 +67,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: PRINT_METRIC_INGEST_INPUT
+        - name: GCP_PROJECT
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: GCP_PROJECT
         - name: REQUIRE_VALID_CERTIFICATE
           valueFrom:
             configMapKeyRef:
@@ -77,6 +82,7 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SERVICE_USAGE_BOOKING
+        {{- if (.Values.useProxy) }}
         - name: USE_PROXY
           valueFrom:
             configMapKeyRef:
@@ -92,6 +98,7 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: HTTPS_PROXY
+        {{- end }}
         - name: IMPORT_DASHBOARDS
           valueFrom:
             configMapKeyRef:
@@ -210,6 +217,34 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SELF_MONITORING_ENABLED
+        {{- if (.Values.useProxy) }}
+        - name: USE_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: USE_PROXY
+        # the PubSub uses gPRC so both variables have to be set
+        - name: HTTP_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              {{- if .Values.httpProxy }}
+              key: HTTP_PROXY
+              {{- else }}
+              key: HTTPS_PROXY
+              {{- end }}
+        - name: HTTPS_PROXY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              {{- if .Values.httpsProxy }}
+              key: HTTPS_PROXY
+              {{- else }}
+              key: HTTP_PROXY
+              {{- end }}
+        - name: NO_PROXY
+          value: {{ template "noProxyUrls" . }}
+        {{- end }}
         - name: HEALTH_CHECK_PORT
           value: "8081"
         resources:

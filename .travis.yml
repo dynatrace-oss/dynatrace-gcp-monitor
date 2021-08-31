@@ -50,7 +50,7 @@ jobs:
     install: skip
     language: minimal
     before_deploy:
-    - mkdir artefacts
+    - mkdir -p artefacts
     - ./build/version.sh
     - ./build/helm-package.sh
     - "(cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')"

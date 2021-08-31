@@ -338,7 +338,10 @@ async def import_self_monitoring_dashboard(context: SfmDashboardsContext):
         context.log(f"Lack of self monitoring dashboard for '{context.operation_mode}' operation mode")
         return
 
-    dashboard_file_path = os.path.dirname(os.path.realpath(__file__)).join("../dashboards").join(dashboard_filename)
+    working_directory = os.path.dirname(os.path.realpath(__file__))
+    dashboards_directory = os.path.join(working_directory, "../dashboards")
+    dashboard_file_path = os.path.join(dashboards_directory, dashboard_filename)
+
     try:
         with open(dashboard_file_path, encoding="utf-8") as dashboard_file:
             dashboard = json.load(dashboard_file)

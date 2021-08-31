@@ -20,8 +20,8 @@ from aiohttp import web
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configure_dynatrace import ConfigureDynatrace
-from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext
-from lib.credentials import create_token
+from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_selected_services
+from lib.credentials import create_token, get_project_id_from_environment
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
@@ -31,6 +31,10 @@ from operation_mode import OperationMode
 
 OPERATION_MODE = OperationMode.from_environment_string(os.environ.get("OPERATION_MODE", None)) or OperationMode.Metrics
 HEALTH_CHECK_PORT = get_int_environment_value("HEALTH_CHECK_PORT", 8080)
+
+# USED TO TEST ON WINDOWS MACHINE
+# policy = asyncio.WindowsSelectorEventLoopPolicy()
+# asyncio.set_event_loop_policy(policy)
 
 loop = asyncio.get_event_loop()
 
@@ -83,7 +87,7 @@ async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
         async with init_gcp_client_session() as gcp_session:
             token = await create_token(logging_context, gcp_session)
             if token:
-                sfm_dashboards_context = SfmDashboardsContext(project_id_owner=metadata.project_id,
+                sfm_dashboards_context = SfmDashboardsContext(project_id_owner=get_project_id_from_environment(),
                                                               token=token,
                                                               gcp_session=gcp_session,
                                                               operation_mode=OPERATION_MODE,
@@ -97,7 +101,7 @@ async def health(request):
 
 def run_metrics():
     if "GCP_SERVICES" in os.environ:
-        services = os.environ.get("GCP_SERVICES", "")
+        services = get_selected_services()
         logging_context.log(f"Running with configured services: {services}")
     loop.run_until_complete(try_configure_dynatrace())
     fast_check_result = loop.run_until_complete(metrics_initial_check())

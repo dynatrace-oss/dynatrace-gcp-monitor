@@ -40,6 +40,11 @@ def get_should_require_valid_certificate() -> bool:
     return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
 
 
+def get_selected_services() -> []:
+    selected_services_string = os.environ.get("GCP_SERVICES", "")
+    return selected_services_string.strip('"').split(",") if selected_services_string else []
+
+
 def check_if_caller_exceeded_limit(caller):
     log_calls_performed = log_call_count.get(caller, 0)
     log_calls_left = LOG_THROTTLING_LIMIT_PER_CALLER - log_calls_performed
