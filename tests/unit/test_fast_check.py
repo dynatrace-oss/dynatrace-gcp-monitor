@@ -9,8 +9,8 @@ def test_token_masking_old_format():
 
 def test_token_masking_new_format():
     assert_that(format_dynatrace_access_key(
-        "dt0c01.FAKEEU7QQ5KW7BZVN2XQFAKE.FAKEJFHLZKTOUTFZKAAZTRSM7HFKPHFRCJKJN5CWTHMFAKEFAKEFAKEPEFAKE7JY")).is_equal_to(
-        "dt0c01.FAK***********************************************************************************7JY")
+        "dt0c01.FAKE11.FAKEEU7QQ5KW7BZVN2XQFAKEFAKEJFHLZKTOUTFZKAAZTRSFR7JY")).is_equal_to(
+        "dt0c01.FAK*****************************************************7JY")
 
 
 def test_token_masking_invalid_format():
