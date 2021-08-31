@@ -137,7 +137,6 @@ class GCPService:
             Metric(**x)
             for x
             in kwargs.get("metrics", {})
-            if x.get("gcpOptions", {}).get("valueType", "").upper() != "STRING"
         ])
         object.__setattr__(self, "activation", kwargs.get("activation", {}))
         monitoring_filter = kwargs.get("gcp_monitoring_filter", "")
