@@ -76,7 +76,7 @@ def valid_dynatrace_scopes(token_metadata: dict):
 async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:
         response = await dt_session.post(
-            url=f"{dynatrace_url.rstrip('/')}/api/v2/apiTokens/lookup",
+            url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
             headers={
                 "Authorization": f"Api-Token {dynatrace_api_key}",
                 "Content-Type": "application/json; charset=utf-8"
@@ -96,6 +96,16 @@ async def get_dynatrace_token_metadata(dt_session: ClientSession, context: Loggi
         return {}
 
 
+def format_dynatrace_access_key(dynatrace_access_key :str):
+    if len(dynatrace_access_key) >= 7:
+        if dynatrace_access_key.startswith("dt0c01.") and len(dynatrace_access_key) >= 14:
+            return dynatrace_access_key[:10] + '*' * (len(dynatrace_access_key) - 13) + dynatrace_access_key[-3:]
+        else:
+            return dynatrace_access_key[:3] + '*' * (len(dynatrace_access_key)-6) + dynatrace_access_key[-3:]
+    else:
+        return "Invalid Token"
+
+
 async def check_dynatrace(logging_context: LoggingContext, project_id, dt_session: ClientSession, dynatrace_url, dynatrace_access_key):
     try:
 
@@ -104,9 +114,10 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
                                      f'Add required secrets to Secret Manager.')
             return None
         logging_context.log(f"Using [DYNATRACE_URL] Dynatrace endpoint: {dynatrace_url}")
-        logging_context.log(f'Using [DYNATRACE_ACCESS_KEY]: {dynatrace_access_key[0:dynatrace_access_key.rfind(".")]}.')
+        logging_context.log(f'Using [DYNATRACE_ACCESS_KEY]: {format_dynatrace_access_key(dynatrace_access_key)}.')
         token_metadata = await get_dynatrace_token_metadata(dt_session, logging_context, dynatrace_url, dynatrace_access_key)
-        logging_context.log(f'Token metadata: {token_metadata}.')
+        if token_metadata.get('name', None):
+            logging_context.log(f"Token name: {token_metadata.get('name')}.")
         if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
             logging_context.log(f'Dynatrace API Token for project: \'{project_id}\'is not valid. '
                                      f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
