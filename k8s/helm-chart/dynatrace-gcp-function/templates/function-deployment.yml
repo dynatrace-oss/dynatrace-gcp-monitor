@@ -128,11 +128,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SELF_MONITORING_ENABLED
-        - name: QUERY_INTERVAL
+        - name: QUERY_INTERVAL_MIN
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
-              key: QUERY_INTERVAL
+              key: QUERY_INTERVAL_MIN
         - name: HEALTH_CHECK_PORT
           value: "8080"
         volumeMounts:

@@ -31,7 +31,7 @@ data:
   SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
   IMPORT_DASHBOARDS: {{ .Values.importDashboards | quote }}
   IMPORT_ALERTS: {{ .Values.importAlerts | quote }}
-  QUERY_INTERVAL: {{ .Values.queryInterval | quote }}
+  QUERY_INTERVAL_MIN: {{ .Values.queryInterval | quote }}
   GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
   {{- end }}
   {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
