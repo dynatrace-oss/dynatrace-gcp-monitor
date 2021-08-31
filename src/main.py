@@ -25,7 +25,7 @@ from typing import Dict, List, Optional
 import yaml
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
-from lib.context import MetricsContext, LoggingContext
+from lib.context import MetricsContext, LoggingContext, get_selected_services
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
 from lib.entities import entities_extractors
@@ -75,8 +75,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
     selected_services = []
     if "GCP_SERVICES" in os.environ:
-        selected_services_string = os.environ.get("GCP_SERVICES", "")
-        selected_services = selected_services_string.split(",") if selected_services_string else []
+        selected_services = get_selected_services()
         # set default featureset if featureset not present in env variable
         for i, service in enumerate(selected_services):
             if "/" not in service:

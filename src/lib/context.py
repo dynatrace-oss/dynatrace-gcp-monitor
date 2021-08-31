@@ -36,6 +36,11 @@ def get_should_require_valid_certificate() -> bool:
     return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
 
 
+def get_selected_services() -> []:
+    selected_services_string = os.environ.get("GCP_SERVICES", "")
+    return selected_services_string.strip('"').split(",") if selected_services_string else []
+
+
 class LoggingContext:
     def __init__(self, scheduled_execution_id: Optional[str]):
         self.scheduled_execution_id: str = scheduled_execution_id[0:8] if scheduled_execution_id else None
