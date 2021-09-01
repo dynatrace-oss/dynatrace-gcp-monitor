@@ -120,7 +120,8 @@ async def log_invalid_lines(context: MetricsContext, ingest_response_json: Dict,
                 context.log(f"INVALID LINE: '{lines_batch[line_index].to_string()}', reason: '{invalid_line_error_message}'")
 
 class DtDimensionsMap:
-    dt_dimensions_set_by_source_dimension = {}
+    def __init__(self) -> None:
+            self.dt_dimensions_set_by_source_dimension = {}
 
     def add_label_mapping(self, source_dimension, dt_target_dimension):
         all_dt_dims_for_source_dim = self.dt_dimensions_set_by_source_dimension.get(source_dimension, set())
