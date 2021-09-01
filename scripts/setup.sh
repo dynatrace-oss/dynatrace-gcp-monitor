@@ -121,6 +121,8 @@ readonly GCP_IAM_ROLE_PERMISSIONS=(
   monitoring.metricDescriptors.delete
   monitoring.metricDescriptors.list
   monitoring.timeSeries.create
+  monitoring.dashboards.list
+  monitoring.dashboards.create
 )
 readonly SELF_MONITORING_ENABLED=$(yq e '.googleCloud.common.selfMonitoringEnabled' $FUNCTION_ACTIVATION_CONFIG)
 
