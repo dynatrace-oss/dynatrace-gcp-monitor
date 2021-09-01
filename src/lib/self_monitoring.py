@@ -300,18 +300,18 @@ def create_self_monitoring_time_series(context: MetricsContext) -> Dict:
 
 
 async def is_self_monitoring_dashboard_exists(context: SfmDashboardsContext, dashboard_display_name: str) -> bool:
-    try:
-        response = await context.gcp_session.request(
-            'GET',
-            url=f"https://monitoring.googleapis.com/v1/projects/{context.project_id_owner}/dashboards",
-            headers={"Authorization": f"Bearer {context.token}"}
-        )
-        if response.status <= 202:
-            response_json = await response.json()
-            return dashboard_display_name in [dashboard.get("displayName") for dashboard in response_json.get("dashboards")]
-    except Exception as e:
-        context.log(f"Failed to list self monitoring dashboards, because: {e}")
-    return False
+    response = await context.gcp_session.request(
+        'GET',
+        url=f"https://monitoring.googleapis.com/v1/projects/{context.project_id_owner}/dashboards",
+        headers={"Authorization": f"Bearer {context.token}"}
+    )
+    if response.status <= 202:
+        response_json = await response.json()
+        return dashboard_display_name in [dashboard.get("displayName") for dashboard in response_json.get("dashboards")]
+    elif response.status == 403:
+        raise PermissionError('Failed to list GCP monitoring dashboards due to missing permissions')
+    else:
+        raise Warning('Failed to list GCP monitoring dashboards')
 
 
 async def create_new_dashboard(context: SfmDashboardsContext, dashboard: Dict):
