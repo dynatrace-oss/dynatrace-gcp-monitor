@@ -49,7 +49,7 @@ def get_query_interval_minutes() -> int:
     else:
         # keep old query frequency for logs ingest or if cloud function code was updated without changing cloud scheduler (missing environment variable)
         query_interval_min = 1
-    if not 1 <= query_interval_min <= 6:
+    if query_interval_min not in range(1, 7):
         query_interval_min = default_query_interval
     return query_interval_min
 
