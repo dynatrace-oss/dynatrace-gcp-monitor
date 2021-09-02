@@ -97,12 +97,13 @@ async def get_dynatrace_token_metadata(dt_session: ClientSession, context: Loggi
         return {}
 
 
-def format_dynatrace_access_key(dynatrace_access_key :str):
+def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
     if len(dynatrace_access_key) >= 7:
-        if dynatrace_access_key.startswith("dt0c01.") and len(dynatrace_access_key) >= 14:
+        is_new_token = dynatrace_access_key.startswith("dt0c01.") and len(dynatrace_access_key) == 96
+        if is_new_token:
             return dynatrace_access_key[:10] + '*' * (len(dynatrace_access_key) - 13) + dynatrace_access_key[-3:]
         else:
-            return dynatrace_access_key[:3] + '*' * (len(dynatrace_access_key)-6) + dynatrace_access_key[-3:]
+            return dynatrace_access_key[:3] + '*' * (len(dynatrace_access_key) - 6) + dynatrace_access_key[-3:]
     else:
         return "Invalid Token"
 
@@ -115,7 +116,7 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
                                      f'Add required secrets to Secret Manager.')
             return None
         logging_context.log(f"Using [DYNATRACE_URL] Dynatrace endpoint: {dynatrace_url}")
-        logging_context.log(f'Using [DYNATRACE_ACCESS_KEY]: {format_dynatrace_access_key(dynatrace_access_key)}.')
+        logging_context.log(f'Using [DYNATRACE_ACCESS_KEY]: {obfuscate_dynatrace_access_key(dynatrace_access_key)}.')
         token_metadata = await get_dynatrace_token_metadata(dt_session, logging_context, dynatrace_url, dynatrace_access_key)
         if token_metadata.get('name', None):
             logging_context.log(f"Token name: {token_metadata.get('name')}.")
@@ -178,6 +179,14 @@ class MetricsFastCheck:
 
             if all(result is not None for result in results):
                 ready_to_monitor.append(project_id)
+
+            dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
+            dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
+            await check_dynatrace(logging_context=self.logging_context,
+                                  project_id=get_project_id_from_environment(),
+                                  dt_session=self.dt_session,
+                                  dynatrace_url=dynatrace_url,
+                                  dynatrace_access_key=dynatrace_access_key)
 
         return FastCheckResult(projects=ready_to_monitor)
 
