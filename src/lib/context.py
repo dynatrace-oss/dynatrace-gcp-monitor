@@ -41,6 +41,19 @@ def get_selected_services() -> []:
     return selected_services_string.strip('"').split(",") if selected_services_string else []
 
 
+def get_query_interval_minutes() -> int:
+    default_query_interval = 3
+    query_interval_env_var = os.environ.get('QUERY_INTERVAL_MIN', None)
+    if query_interval_env_var:
+        query_interval_min = int(query_interval_env_var) if query_interval_env_var.isdigit() else default_query_interval
+    else:
+        # keep old query frequency for logs ingest or if cloud function code was updated without changing cloud scheduler (missing environment variable)
+        query_interval_min = 1
+    if query_interval_min not in range(1, 7):
+        query_interval_min = default_query_interval
+    return query_interval_min
+
+
 class LoggingContext:
     def __init__(self, scheduled_execution_id: Optional[str]):
         self.scheduled_execution_id: str = scheduled_execution_id[0:8] if scheduled_execution_id else None
