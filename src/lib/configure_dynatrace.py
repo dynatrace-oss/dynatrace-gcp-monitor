@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Callable
 import yaml
 from aiohttp import ClientSession
 
-from lib.context import LoggingContext, get_should_require_valid_certificate
+from lib.context import LoggingContext, get_should_require_valid_certificate, get_selected_services
 from lib.credentials import fetch_dynatrace_url, fetch_dynatrace_api_key
 from lib.fast_check import get_dynatrace_token_metadata
 from main import is_yaml_file
@@ -79,8 +79,7 @@ class ConfigureDynatrace:
     def get_ext_resources(self, list_name: str, item_name: str, properties_extractor: Callable[[Dict], Dict]) -> List[Dict]:
         try:
             if "GCP_SERVICES" in os.environ:
-                selected_services_string = os.environ.get("GCP_SERVICES", "")
-                selected_services = selected_services_string.split(",") if selected_services_string else []
+                selected_services = get_selected_services()
                 working_directory = os.path.dirname(os.path.realpath(__file__))
                 config_directory = os.path.join(working_directory, "../config")
                 config_files = [

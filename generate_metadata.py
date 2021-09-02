@@ -32,7 +32,7 @@ _UNIT_MAPPING = {
     "d": "Day",
 
     "": "Unspecified",
-    "1": "Unspecified",
+    "1": "Count",
     "count": "Count",
     "1/s": "PerSecond",
 
