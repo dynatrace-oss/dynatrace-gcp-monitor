@@ -13,11 +13,42 @@
 #   limitations under the License.
 from typing import NewType, Any
 
+from lib import metrics
 from lib.context import LoggingContext
 from main import load_supported_services
 
 context = LoggingContext("TEST")
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
+
+
+def test_compatibility_mode_flag_from_env_var_true(monkeypatch: MonkeyPatchFixture):
+    monkeypatch.setenv("COMPATIBILITY_MODE", "False")
+    metrics.update_env_var_configuration()
+    assert metrics.ODIN_DIMENSIONS_COMPATIBILITY_MODE == False
+
+    monkeypatch.setenv("COMPATIBILITY_MODE", "trUe")
+    metrics.update_env_var_configuration()
+    assert metrics.ODIN_DIMENSIONS_COMPATIBILITY_MODE == True
+
+    monkeypatch.setenv("COMPATIBILITY_MODE", "False")
+    metrics.update_env_var_configuration()
+    assert metrics.ODIN_DIMENSIONS_COMPATIBILITY_MODE == False
+
+    monkeypatch.setenv("COMPATIBILITY_MODE", "YeS")
+    metrics.update_env_var_configuration()
+    assert metrics.ODIN_DIMENSIONS_COMPATIBILITY_MODE == True
+
+    monkeypatch.setenv("COMPATIBILITY_MODE", "somethingElse")
+    metrics.update_env_var_configuration()
+    assert metrics.ODIN_DIMENSIONS_COMPATIBILITY_MODE == False
+
+    monkeypatch.setenv("COMPATIBILITY_MODE", "yes")
+    metrics.update_env_var_configuration()
+    assert metrics.ODIN_DIMENSIONS_COMPATIBILITY_MODE == True
+
+    monkeypatch.delenv("COMPATIBILITY_MODE")
+    metrics.update_env_var_configuration()
+    assert metrics.ODIN_DIMENSIONS_COMPATIBILITY_MODE == False
 
 def test_dimension_loading_config_compatibility_mode_false(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("COMPATIBILITY_MODE", "False")

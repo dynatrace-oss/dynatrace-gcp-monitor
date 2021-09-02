@@ -22,12 +22,15 @@ from typing import List, Text, Any, Dict
 VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
 VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 
-# ODIN_DIMENSIONS_COMPATIBILITY_MODE = os.environ.get("COMPATIBILITY_MODE", "").upper() in ["TRUE", "YES"] #TODO BŁ
+ODIN_DIMENSIONS_COMPATIBILITY_MODE = False
+
+def update_env_var_configuration():
+    global ODIN_DIMENSIONS_COMPATIBILITY_MODE
+    ODIN_DIMENSIONS_COMPATIBILITY_MODE = os.environ.get("COMPATIBILITY_MODE", "").upper() in ["TRUE", "YES"]
 
 def include_dimension(dimension_config):
-    ODIN_DIMENSIONS_COMPATIBILITY_MODE = os.environ.get("COMPATIBILITY_MODE", "").upper() in ["TRUE", "YES"] #TODO Bł - perf, init this once only (had trouble with monkeyPatch not patching it right - init done before patching?)
     dimension_in_compatibility_mode_only = dimension_config.get("compatibilityModeOnly", False)
-    # in compatibilityMode, include all dimensions, else exclude compatibilityModeOnly dimensions
+    # in compatibilityMode, include all dimensions, else (in normal mode) exclude compatibilityModeOnly dimensions
     return ODIN_DIMENSIONS_COMPATIBILITY_MODE == True or not dimension_in_compatibility_mode_only
 
 @dataclass(frozen=True)
