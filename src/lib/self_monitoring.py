@@ -302,7 +302,7 @@ def create_self_monitoring_time_series(context: MetricsContext) -> Dict:
 async def is_self_monitoring_dashboard_exists(context: SfmDashboardsContext, dashboard_display_name: str) -> bool:
     response = await context.gcp_session.request(
         'GET',
-        url=f"https://monitoring.googleapis.com/v1/projects/dynatrace-gcp-extension/dashboards",
+        url=f"https://monitoring.googleapis.com/v1/projects/{context.project_id_owner}/dashboards",
         headers={"Authorization": f"Bearer {context.token}"}
     )
     if response.status <= 202:
