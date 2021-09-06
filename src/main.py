@@ -25,11 +25,12 @@ from typing import Dict, List, Optional
 import yaml
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
-from lib.context import MetricsContext, LoggingContext, get_selected_services
+from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes, get_selected_services
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
+from lib.fast_check import check_dynatrace
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
@@ -100,6 +101,13 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
         dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+        await check_dynatrace(logging_context=context,
+                              project_id=project_id_owner,
+                              dt_session=dt_session,
+                              dynatrace_url=dynatrace_url,
+                              dynatrace_access_key=dynatrace_api_key
+                              )
+        query_interval_min = get_query_interval_minutes()
 
         print_metric_ingest_input = os.environ.get("PRINT_METRIC_INGEST_INPUT", "FALSE").upper() in ["TRUE", "YES"]
         self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
@@ -110,7 +118,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
             project_id_owner=project_id_owner,
             token=token,
             execution_time=datetime.utcnow(),
-            execution_interval_seconds=60 * 1,
+            execution_interval_seconds=60 * query_interval_min,
             dynatrace_api_key=dynatrace_api_key,
             dynatrace_url=dynatrace_url,
             print_metric_ingest_input=print_metric_ingest_input,

@@ -20,7 +20,7 @@ from aiohttp import web
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configure_dynatrace import ConfigureDynatrace
-from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_selected_services
+from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes, get_selected_services
 from lib.credentials import create_token, get_project_id_from_environment
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
@@ -31,6 +31,7 @@ from operation_mode import OperationMode
 
 OPERATION_MODE = OperationMode.from_environment_string(os.environ.get("OPERATION_MODE", None)) or OperationMode.Metrics
 HEALTH_CHECK_PORT = get_int_environment_value("HEALTH_CHECK_PORT", 8080)
+QUERY_INTERVAL_MIN = get_query_interval_minutes()
 
 # USED TO TEST ON WINDOWS MACHINE
 # policy = asyncio.WindowsSelectorEventLoopPolicy()
@@ -42,7 +43,7 @@ loop = asyncio.get_event_loop()
 async def scheduling_loop(project_ids: Optional[List[str]] = None):
     while True:
         loop.create_task(async_dynatrace_gcp_extension(project_ids))
-        await asyncio.sleep(60)
+        await asyncio.sleep(60 * QUERY_INTERVAL_MIN)
 
 
 async def metrics_initial_check() -> Optional[FastCheckResult]:

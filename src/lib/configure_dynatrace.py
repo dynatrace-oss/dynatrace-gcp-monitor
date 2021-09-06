@@ -181,7 +181,6 @@ class ConfigureDynatrace:
 
     async def _init_(self):        
         dynatrace_url = await fetch_dynatrace_url(self.gcp_session, "", "")
-        self.logging_context.log(f"Using Dynatrace endpoint: {dynatrace_url}")
         dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session,"", "")
         dt_api = self.DtApi(self.dt_session, dynatrace_url, dynatrace_access_key)
 
