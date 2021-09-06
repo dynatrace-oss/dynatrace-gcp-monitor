@@ -13,14 +13,14 @@
 #     limitations under the License.
 import json
 from datetime import datetime
-from queue import Queue
 from typing import NewType, Any
 
-from lib.context import LogsContext
 from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
-    ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_IDENTITY, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_RESULT
+    ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_IDENTITY, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_RESULT, \
+    ATTRIBUTE_GCP_INSTANCE_ID
+from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 
@@ -226,13 +226,13 @@ record3 = {
         "methodName": "cloudsql.instances.connect",
         "authorizationInfo": [
             {
-                "resource": "instances/pawel-001-mysql",
+                "resource": "instances/test-001-mysql",
                 "permission": "cloudsql.instances.connect",
                 "granted": True,
                 "resourceAttributes": {}
             }
         ],
-        "resourceName": "instances/pawel-001-mysql",
+        "resourceName": "instances/test-001-mysql",
         "request": {
             "@type": "type.googleapis.com/google.cloud.sql.v1beta4.SqlInstancesCreateEphemeralCertRequest",
             "body": {},
@@ -314,6 +314,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_IDENTITY: 'system:vpa-recommender',
         ATTRIBUTE_AUDIT_ACTION: 'io.k8s.core.v1.endpoints.update',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
+        ATTRIBUTE_SEVERITY: "INFO"
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -333,6 +334,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_REGION: 'europe-north1',
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloudsql_database',
+        ATTRIBUTE_GCP_INSTANCE_ID: 'dynatrace-gcp-extension:pawel-001-mysql',
         ATTRIBUTE_TIMESTAMP: timestamp,
         ATTRIBUTE_CONTENT: json.dumps(record3),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
@@ -355,16 +357,8 @@ expected_output_list = [
     }
 ]
 
-logs_context = LogsContext(
-    project_id_owner="",
-    dynatrace_api_key="",
-    dynatrace_url="",
-    scheduled_execution_id="",
-    sfm_queue=Queue()
-)
-
 
 def test_extraction():
     for entry in expected_output_list:
-        actual_output = logs_processor._create_dt_log_payload(logs_context, entry[ATTRIBUTE_CONTENT])
+        actual_output = logs_processor._create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, entry[ATTRIBUTE_CONTENT])
         assert actual_output == entry

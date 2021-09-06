@@ -17,53 +17,37 @@ from datetime import datetime
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
-    ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH
+    ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_GCP_INSTANCE_ID
 from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 timestamp = datetime.utcnow().isoformat() + "Z"
 
 log_record = {
-  "insertId": "1a2b3c4d",
-  "labels": {
-    "compute.googleapis.com/resource_name": "resource-123",
-    "k8s-pod/app": "test-app",
-    "k8s-pod/app_kubernetes_io/managed-by": "",
-    "k8s-pod/app_kubernetes_io/name": "test-app-api",
-    "k8s-pod/namespace": "dynatrace",
-    "k8s-pod/pod-template-hash": "a1b2c3d4"
-  },
-  "logName": "projects/dynatrace-gcp-extension/logs/stdout",
-  "receiveTimestamp": timestamp,
+  "textPayload": "ON DUPLICATE KEY UPDATE master_time=UTC_TIMESTAMP(6);",
+  "insertId": "2#207603163766#5855464153465817469#slow#1627301304221698000#0000000000027311-0-0@a1",
   "resource": {
+    "type": "cloudsql_database",
     "labels": {
-      "cluster_name": "test-cluster",
-      "container_name": "test-app-api",
-      "location": "us-central1",
-      "namespace_name": "dynatrace",
-      "pod_name": "testpod",
-      "project_id": "dynatrace-gcp-extension"
-    },
-    "type": "k8s_container"
+      "project_id": "dynatrace-gcp-extension",
+      "region": "europe-north1",
+      "database_id": "dynatrace-gcp-extension:test-001-mysql"
+    }
   },
-  "severity": "INFO",
-  "textPayload": "2021-03-17 19:58:17.890 DEBUG 1 --- [io-8080-exec-18] o.s.web.servlet.DispatcherServlet        : Completed 200 OK\n",
-  "timestamp": timestamp
+  "timestamp": timestamp,
+  "logName": "projects/dynatrace-gcp-extension/logs/cloudsql.googleapis.com%2Fmysql-slow.log",
+  "receiveTimestamp": "2021-07-26T12:08:26.686970384Z"
 }
 expected_output = {
-    ATTRIBUTE_SEVERITY: 'INFO',
     ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
-    ATTRIBUTE_CLOUD_REGION: 'us-central1',
-    ATTRIBUTE_GCP_REGION: 'us-central1',
+    ATTRIBUTE_CLOUD_REGION: 'europe-north1',
+    ATTRIBUTE_GCP_REGION: 'europe-north1',
     ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
-    ATTRIBUTE_GCP_RESOURCE_TYPE: 'k8s_container',
-    ATTRIBUTE_GCP_INSTANCE_NAME: 'test-app-api',
+    ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloudsql_database',
+    ATTRIBUTE_GCP_INSTANCE_ID: 'dynatrace-gcp-extension:test-001-mysql',
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: json.dumps(log_record),
-    ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/stdout',
-    'container.name': 'test-app-api',
-    'k8s.cluster.name': 'test-cluster',
-    'k8s.namespace.name': 'dynatrace',
-    'k8s.pod.name': 'testpod'
+    ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudsql.googleapis.com%2Fmysql-slow.log',
+    ATTRIBUTE_SEVERITY: "INFO"
 }
 
 

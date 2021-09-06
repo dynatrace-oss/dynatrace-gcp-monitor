@@ -7,7 +7,7 @@
       "attributes": [
         {
           "key": "severity",
-          "pattern": "severity"
+          "pattern": "severity || 'INFO'"
         },
         {
           "key": "cloud.provider",

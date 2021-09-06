@@ -22,7 +22,7 @@ from typing import Optional, Dict
 from dateutil.parser import *
 from google.pubsub_v1 import ReceivedMessage, PubsubMessage
 
-from lib.context import LogsProcessingContext, LogsContext
+from lib.context import LogsProcessingContext, LogsContext, LoggingContext
 from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, CONTENT_LENGTH_LIMIT, ATTRIBUTE_VALUE_LENGTH_LIMIT
 from lib.logs.log_self_monitoring import LogSelfMonitoring, put_sfm_into_queue
 from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
@@ -40,25 +40,32 @@ class LogProcessingJob:
         self.bytes_size = len(payload.encode("UTF-8"))
 
 
-def _process_message(sfm_queue: Queue, message: ReceivedMessage):
-    context = LogsProcessingContext(
-        scheduled_execution_id=str(message.ack_id.__hash__())[-8:],
-        sfm_queue=sfm_queue
-    )
+def _process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[LogProcessingJob]:
+    context = None
     try:
+        context = LogsProcessingContext(
+            scheduled_execution_id=str(message.ack_id.__hash__())[-8:],
+            message_publish_time=message.message.publish_time,
+            sfm_queue=sfm_queue
+        )
         return _do_process_message(context, message.message)
     except Exception as exception:
+        if not context:
+            context = LogsProcessingContext(None, None, sfm_queue)
         if isinstance(exception, queue.Full):
             context.error(f"Failed to process message due full job queue, rejecting the message")
         else:
-            context.exception(f"Failed to process message due to {type(exception).__name__}")
+            if isinstance(exception, UnicodeDecodeError):
+                context.error(f"Failed to process message due to message data not being valid UTF-8. Binary data is not supported")
+            else:
+                context.exception(f"Failed to process message due to {type(exception).__name__}")
             context.self_monitoring.parsing_errors += 1
             context.self_monitoring.calculate_processing_time()
             put_sfm_into_queue(context)
         return None
 
 
-def _do_process_message(context: LogsContext, message: PubsubMessage):
+def _do_process_message(context: LogsProcessingContext, message: PubsubMessage) -> Optional[LogProcessingJob]:
     context.self_monitoring.processing_time_start = time.perf_counter()
     data = message.data.decode("UTF-8")
     # context.log(f"Data: {data}")
@@ -75,14 +82,12 @@ def _do_process_message(context: LogsContext, message: PubsubMessage):
         return job
 
 
-def _create_dt_log_payload(context: LogsContext, message_data: str) -> Optional[Dict]:
+def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) -> Optional[Dict]:
     if not message_data:
         context.log("Skipping empty message")
         return None
-    record = json.loads(message_data)
-    parsed_record = {}
 
-    _metadata_engine.apply(context, record, parsed_record)
+    parsed_record = _create_parsed_record(context, message_data)
 
     parsed_timestamp = parsed_record.get(ATTRIBUTE_TIMESTAMP, None)
     if _is_log_too_old(parsed_timestamp):
@@ -106,6 +111,31 @@ def _create_dt_log_payload(context: LogsContext, message_data: str) -> Optional[
             context.self_monitoring.records_with_too_long_content += 1
 
     return parsed_record
+
+
+def _create_parsed_record(context: LogsProcessingContext, message_data: str):
+    try:
+        record = json.loads(message_data)
+    except ValueError:
+        record = {
+            ATTRIBUTE_CONTENT: message_data
+        }
+    parsed_record = {}
+    _metadata_engine.apply(context, record, parsed_record)
+
+    if ATTRIBUTE_TIMESTAMP not in parsed_record.keys() or _is_invalid_datetime(parsed_record[ATTRIBUTE_TIMESTAMP]):
+        context.self_monitoring.publish_time_fallback_records += 1
+        parsed_record[ATTRIBUTE_TIMESTAMP] = context.message_publish_time.isoformat()
+
+    return parsed_record
+
+
+def _is_invalid_datetime(datetime_str: str) -> bool:
+    try:
+        parse(datetime_str)
+        return False
+    except ParserError:
+        return True
 
 
 def _is_log_too_old(timestamp: Optional[str]):

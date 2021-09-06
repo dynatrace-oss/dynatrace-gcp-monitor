@@ -25,16 +25,15 @@ if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
 fi
 
 
-readonly GCP_SERVICE_ACCOUNT=$(yq r activation-config.yaml 'googleCloud.common.serviceAccount')
-readonly GCP_PUBSUB_TOPIC=$(yq r activation-config.yaml 'googleCloud.metrics.pubSubTopic')
-readonly GCP_FUNCTION_NAME=$(yq r activation-config.yaml 'googleCloud.metrics.function')
-readonly GCP_SCHEDULER_NAME=$(yq r activation-config.yaml 'googleCloud.metrics.scheduler')
-readonly GCP_SCHEDULER_CRON=$(yq r activation-config.yaml 'googleCloud.metrics.schedulerSchedule')
-readonly DYNATRACE_URL_SECRET_NAME=$(yq r activation-config.yaml 'googleCloud.common.dynatraceUrlSecretName')
-readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq r activation-config.yaml 'googleCloud.common.dynatraceAccessKeySecretName')
-readonly ACTIVATION_SERVICES=$(yq r activation-config.yaml 'activation.metrics.services | join(",")') 
-readonly PRINT_METRIC_INGEST_INPUT=$(yq r activation-config.yaml 'debug.printMetricIngestInput')
-readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r activation-config.yaml 'googleCloud.common.cloudFunctionSize')
+readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_PUBSUB_TOPIC=$(yq e  '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_NAME=$(yq e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SCHEDULER_NAME=$(yq e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly ACTIVATION_SERVICES=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq 'join(",")')
+readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
+readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-function Self monitoring"
 
 

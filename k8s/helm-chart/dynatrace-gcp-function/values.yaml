@@ -25,16 +25,27 @@ deploymentType: "all"
 # 'Ingest logs' for deployment type 'all' or'logs'
 # 'Ingest metrics', 'Read configuration', 'Write configuration' for deployment type 'all' or 'metrics'
 dynatraceAccessKey: ""
+# Dynatrace environment endpoint, for example: https://environment-id.live.dynatrace.com
+# Needed for deployment type 'metrics'. For deployment 'all' and 'logs' in case when activeGate.useExisting is false
+dynatraceUrl: ""
 
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
-# ActiveGate endpoint used to ingest logs to Dynatrace, for example: https://environemnt-active-gate-url:9999/e/environment-id"
-dynatraceLogIngestUrl: ""
+
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
+#dynatraceLogIngestUrl ActiveGate endpoint used to ingest logs to Dynatrace, for example: https://environemnt-active-gate-url:9999/e/environment-id"
+#used ONLY when the activeGate.useExisting is true
+dynatraceLogIngestUrl: ""
+
+activeGate:
+  #useExisting if set to false (by default) the Active Gate will be deployed in k8s. In that case also the activeGate.dynatracePaasToken must be filled.
+  useExisting: "false"
+  #dynatracePaasToken PaaS token, generated in Dynatrace cluster.
+  dynatracePaasToken: ""
+
 
 # METRICS VALUES - REQUIRED for 'metrics' and 'all' deployment
-# Dynatrace environment endpoint, for example: https://environment-id.live.dynatrace.com
-dynatraceUrl: ""
+
 
 # COMMON VALUES - DEFAULTS
 # requireValidCertificate: if true function requires valid SSL certificates when communicating with Dynatrace cluster
@@ -47,6 +58,16 @@ selfMonitoringEnabled: "false"
 # Dynatrace GCP function docker image. Using default value is advised,
 # but can be changed if there is a need to use customized image or specific, tagged version
 dockerImage: "dynatrace/dynatrace-gcp-function"
+# useProxy: depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
+# if set to ALL: proxy settings will be used for requests to Dynatrace and GCP API
+# if set to DT_ONLY: proxy settings will be used only for requests to Dynatrace or to an existing Active Gate (activeGate.useExisting true)
+# if set to GCP_ONLY: proxy settings will be used only for requests to GCP API
+# if not set: default, proxy settings won't be used
+useProxy: ""
+# httpProxy: set the http proxy address. To be used in conjunction with USE_PROXY.
+httpProxy: ""
+# httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
+httpsProxy: ""
 
 # LOGS VALUES - DEFAULTS
 # max content length of log event. Should be the same or lower than on cluster
@@ -69,16 +90,6 @@ printMetricIngestInput: "false"
 # if set to destination: monitoring API calls are booked towards project which is monitored
 # REQUIRES serviceusage.services.use Permission granted for Service Account!
 serviceUsageBooking: "source"
-# useProxy: depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
-# if set to ALL: proxy settings will be used for requests to Dynatrace and GCP API
-# if set to DT_ONLY: proxy settings will be used only for requests to Dynatrace
-# if set to GCP_ONLY: proxy settings will be used only for requests to GCP API
-# if not set: default, proxy settings won't be used
-useProxy: ""
-# httpProxy: set the http proxy address. To be used in conjunction with USE_PROXY.
-httpProxy: ""
-# httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
-httpsProxy: ""
 # Import predefined dashboards for selected services. Allowed values: "true"/"yes", "false"/"no"
 importDashboards: "true"
 # Import predefined alerting rules for selected services. Allowed values: "true"/"yes", "false"/"no"
@@ -88,6 +99,10 @@ importAlerts: "true"
 # If true, report deprecated metric dimensions (flagged as compatiblityModeOnly=true) along their new equivalents:
 # project_id > gcp.project.id | region, location, zone, metrics.label.region > gcp.region
 compatibilityMode: "false"
+# Metrics polling interval in minutes. Allowed values: 1 - 6
+queryInterval: 3
+#clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh
+clusterName: ""
 # configuration file for GCP services - uncommented services will be monitored
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax

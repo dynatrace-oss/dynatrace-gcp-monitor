@@ -13,10 +13,17 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
-readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
-readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
-readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
+onFailure() {
+    echo -e "\e[91mERROR: - deployment failed, please examine error messages and run again"
+    exit 2
+}
+
+trap onFailure ERR
+
+
+versionNumber() {
+   echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
+}
 
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring"
 echo -e "\033[0;37m"
@@ -24,7 +31,7 @@ echo -e "\033[0;37m"
 if ! command -v yq &> /dev/null
 then
 
-    echo -e "\e[93mWARNING: \e[37m yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions"
+    echo -e "\e[91mERROR: \e[37m yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:"
     echo -e
     echo -e "YQ: https://github.com/mikefarah/yq"
     if ! command -v jq &> /dev/null
@@ -35,8 +42,44 @@ then
     echo -e "You may also try installing YQ with PIP: pip install yq"
     echo -e ""
     echo
+    exit 1
+else
+  VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
+  echo "Using yq version $VERSION_YQ"
+
+
+  if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
+      echo -e
+      echo -e "\e[91mERROR: \e[37m yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:"
+      echo -e "YQ: https://github.com/mikefarah/yq"
+      echo -e
+      exit 1
+  fi
+fi
+
+
+if ! command -v gcloud &> /dev/null
+then
+
+    echo -e "\e[91mERROR: \e[37mGoogle Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:"
+    echo -e
+    echo -e "https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version"
+    echo -e
+    echo
     exit
 fi
+
+if ! command -v unzip &> /dev/null
+then
+    echo -e "\e[91mERROR: \e[37munzip is required to install Dynatrace function"
+    echo
+    exit
+fi
+
+readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
+readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
+readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
+readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
@@ -44,26 +87,26 @@ if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo
 fi
 
-readonly GCP_SERVICE_ACCOUNT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.serviceAccount')
-readonly REQUIRE_VALID_CERTIFICATE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.requireValidCertificate')
-readonly GCP_PUBSUB_TOPIC=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.pubSubTopic')
-readonly GCP_FUNCTION_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.function')
-readonly GCP_SCHEDULER_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.scheduler')
-readonly GCP_SCHEDULER_CRON=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.metrics.schedulerSchedule')
-readonly DYNATRACE_URL_SECRET_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.dynatraceUrlSecretName')
-readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.dynatraceAccessKeySecretName')
-readonly FUNCTION_GCP_SERVICES=$(yq r -j -P $FUNCTION_ACTIVATION_CONFIG 'activation.metrics.services' | jq 'join(",")')
-readonly SERVICES_TO_ACTIVATE=$(yq r -j -P $FUNCTION_ACTIVATION_CONFIG 'activation.metrics.services' | jq -r .[] | sed 's/\/.*$//')
-readonly PRINT_METRIC_INGEST_INPUT=$(yq r $FUNCTION_ACTIVATION_CONFIG 'debug.printMetricIngestInput')
-readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.cloudFunctionSize')
-readonly SERVICE_USAGE_BOOKING=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.serviceUsageBooking')
-readonly USE_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.useProxy')
-readonly HTTP_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.httpProxy')
-readonly HTTPS_PROXY=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.httpsProxy')
-readonly IMPORT_DASHBOARDS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importDashboards')
-readonly IMPORT_ALERTS=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.importAlerts')
+readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
+readonly REQUIRE_VALID_CERTIFICATE=$(yq e '.googleCloud.common.requireValidCertificate' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_PUBSUB_TOPIC=$(yq e '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_NAME=$(yq e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SCHEDULER_NAME=$(yq e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
+readonly QUERY_INTERVAL_MIN=$(yq e '.googleCloud.metrics.queryInterval' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly FUNCTION_GCP_SERVICES=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq 'join(",")')
+readonly SERVICES_TO_ACTIVATE=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[] | sed 's/\/.*$//')
+readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
+readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
+readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
+readonly USE_PROXY=$(yq e '.googleCloud.common.useProxy' $FUNCTION_ACTIVATION_CONFIG)
+readonly HTTP_PROXY=$(yq e '.googleCloud.common.httpProxy' $FUNCTION_ACTIVATION_CONFIG)
+readonly HTTPS_PROXY=$(yq e '.googleCloud.common.httpsProxy' $FUNCTION_ACTIVATION_CONFIG)
+readonly IMPORT_DASHBOARDS=$(yq e '.googleCloud.common.importDashboards' $FUNCTION_ACTIVATION_CONFIG)
+readonly IMPORT_ALERTS=$(yq e '.googleCloud.common.importAlerts' $FUNCTION_ACTIVATION_CONFIG)
 readonly COMPATIBILITY_MODE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.compatibilityMode')
-readonly GCP_IAM_ROLE=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.iamRole')
+readonly GCP_IAM_ROLE=$(yq e '.googleCloud.common.iamRole' $FUNCTION_ACTIVATION_CONFIG)
 # Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
 readonly GCP_IAM_ROLE_PERMISSIONS=(
   resourcemanager.projects.get
@@ -79,8 +122,10 @@ readonly GCP_IAM_ROLE_PERMISSIONS=(
   monitoring.metricDescriptors.delete
   monitoring.metricDescriptors.list
   monitoring.timeSeries.create
+  monitoring.dashboards.list
+  monitoring.dashboards.create
 )
-readonly SELF_MONITORING_ENABLED=$(yq r $FUNCTION_ACTIVATION_CONFIG 'googleCloud.common.selfMonitoringEnabled')
+readonly SELF_MONITORING_ENABLED=$(yq e '.googleCloud.common.selfMonitoringEnabled' $FUNCTION_ACTIVATION_CONFIG)
 
 
 shopt -s nullglob
@@ -122,7 +167,7 @@ get_ext_files()
     if ! (grep -q "$SERVICE" <<< "$SERVICES_TO_ACTIVATE") ; then
       continue
     fi
-    for EXT_FILE in $(yq r -j "$FILEPATH" "$YAML_PATH" | tr -d '"')
+    for EXT_FILE in $(yq e -j ".$YAML_PATH"  "$FILEPATH"| tr -d '"')
     do
       if [ ! -f "./$EXT_FILE" ] ; then
         warn "Missing file $EXT_FILE"
@@ -145,29 +190,7 @@ check_if_parameter_is_empty()
   fi
 }
 
-onFailure() {
-    echo -e "- deployment failed, please examine error messages and run again"
-    exit 2
-}
-trap onFailure ERR
 
-if ! command -v gcloud &> /dev/null
-then
-
-    echo -e "\e[93mWARNING: \e[37mGoogle Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:"
-    echo -e
-    echo -e "https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version"
-    echo -e
-    echo
-    exit
-fi
-
-if ! command -v unzip &> /dev/null
-then
-    echo -e "\e[93mWARNING: \e[37munzip is required to install Dynatrace function"
-    echo
-    exit
-fi
 
 check_if_parameter_is_empty "$GCP_PUBSUB_TOPIC" "'googleCloud.metrics.pubSubTopic'"
 check_if_parameter_is_empty "$GCP_SCHEDULER_NAME" "'googleCloud.metrics.scheduler'"
@@ -176,8 +199,9 @@ check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY_SECRET_NAME" "'googleCloud.co
 check_if_parameter_is_empty "$GCP_FUNCTION_NAME" 'googleCloud.metrics.function'
 check_if_parameter_is_empty "$GCP_IAM_ROLE" "'googleCloud.common.iamRole'"
 check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "'googleCloud.common.serviceAccount'"
-check_if_parameter_is_empty "$GCP_SCHEDULER_CRON" "'googleCloud.metrics.schedulerSchedule'"
+check_if_parameter_is_empty "$QUERY_INTERVAL_MIN" "'googleCloud.metrics.queryInterval'"
 
+echo  "- Logging to your account..."
 GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
 echo
@@ -296,13 +320,15 @@ mkdir -p $GCP_FUNCTION_NAME
 unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME || exit
 echo "- deploy the function [$GCP_FUNCTION_NAME]"
 pushd ./$GCP_FUNCTION_NAME || exit
-gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED
+GCP_FUNCTION_TIMEOUT=$(( QUERY_INTERVAL_MIN*60 ))
+gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
 
 echo -e
 echo "- schedule the runs"
 if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then
     echo "Scheduler [$GCP_SCHEDULER_NAME] already exists, skipping"
 else
+    GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL_MIN} * * * *"
     gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
 fi
 
@@ -322,7 +348,7 @@ if [[ "${IMPORT_DASHBOARDS,,}" =~ ^(yes|true)$ ]] ; then
       warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_DASHBOARDS"
   fi
 
-  for DASHBOARD_PATH in $(get_ext_files 'dashboards[*].dashboard')
+  for DASHBOARD_PATH in $(get_ext_files 'dashboards[].dashboard')
   do
     DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
     DASHBOARD_NAME=$(jq -r .dashboardMetadata.name < "./$DASHBOARD_PATH")
@@ -350,12 +376,13 @@ else
 fi
 
 if [[ "${IMPORT_ALERTS,,}" =~ ^(yes|true)$ ]]; then
+  echo "- Importing alerts"
   EXISTING_ALERTS=$(dt_api "api/config/v1/anomalyDetection/metricEvents"| jq -r '.values[] | select (.id |startswith("cloud.gcp.")) | (.id + "\t" + .name )')
   if [ -n "${EXISTING_ALERTS}" ]; then
       warn "Found existing Google alerts in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"
   fi
 
-  for ALERT_PATH in $(get_ext_files 'alerts[*].path')
+  for ALERT_PATH in $(get_ext_files 'alerts[].path')
   do
     ALERT_JSON=$(cat "./$ALERT_PATH")
     ALERT_ID=$(jq -r .id < "./$ALERT_PATH")

@@ -1,0 +1,28 @@
+title: E2E tests dynatrace-gcp-function
+description: Role for Dynatrace GCP function E2E tests
+stage: GA
+includedPermissions:
+  - pubsub.subscriptions.delete
+  - pubsub.topics.delete
+  - pubsub.topics.getIamPolicy
+  - pubsub.topics.setIamPolicy
+  - cloudfunctions.functions.call
+  - cloudfunctions.functions.create
+  - cloudfunctions.functions.delete
+  - cloudfunctions.functions.get
+  - cloudfunctions.functions.invoke
+  - cloudfunctions.functions.list
+  - cloudfunctions.functions.sourceCodeGet
+  - cloudfunctions.functions.sourceCodeSet
+  - cloudfunctions.functions.update
+  - cloudfunctions.functions.getIamPolicy
+  - cloudfunctions.locations.get
+  - cloudfunctions.locations.list
+  - cloudfunctions.operations.get
+  - cloudfunctions.operations.list
+  - iam.serviceAccounts.delete
+  - logging.sinks.get
+  - logging.sinks.list
+  - logging.sinks.create
+  - logging.sinks.delete
+  - iam.roles.delete

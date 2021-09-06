@@ -16,20 +16,23 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dynatrace-gcp-function-config
-  namespace: dynatrace
+  namespace: {{ .Release.Namespace }}
 data:
   GCP_PROJECT: {{ .Values.gcpProjectId | quote }}
   REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
   SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}
-  {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
-  PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
-  SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
+  {{- if (.Values.useProxy) }}
   USE_PROXY: {{ .Values.useProxy | quote }}
   HTTP_PROXY: {{ .Values.httpProxy | quote }}
   HTTPS_PROXY: {{ .Values.httpsProxy | quote }}
+  {{- end }}
+  {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
+  PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
+  SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
   IMPORT_DASHBOARDS: {{ .Values.importDashboards | quote }}
   IMPORT_ALERTS: {{ .Values.importAlerts | quote }}
   COMPATIBILITY_MODE: {{ .Values.compatibilityMode | quote }}
+  QUERY_INTERVAL_MIN: {{ .Values.queryInterval | quote }}
   GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
   {{- end }}
   {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
@@ -39,4 +42,5 @@ data:
   DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS: {{ .Values.logIngestRequestMaxEvents | quote }}
   DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
+  USE_EXISTING_ACTIVE_GATE: {{ .Values.activeGate.useExisting | quote }}
   {{- end }}

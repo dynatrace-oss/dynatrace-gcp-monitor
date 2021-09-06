@@ -1,4 +1,4 @@
-id: gce_instance
+id: gce_instance_vm_flow
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
@@ -10,6 +10,7 @@ technology:
   name: Google VM Instance VM Flow
 gcp:
 - service: gce_instance_vm_flow
+  featureSet: default
   dimensions:
   - value: resource.labels.project_id
     id: project_id

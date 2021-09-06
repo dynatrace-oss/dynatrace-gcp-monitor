@@ -24,6 +24,7 @@ import aiohttp
 from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
 from lib.logs.log_sfm_metrics import LogSelfMonitoring
 from lib.metric_descriptor import SELF_MONITORING_METRIC_MAP
+from operation_mode import OperationMode
 
 
 def get_int_environment_value(key: str, default_value: int) -> int:
@@ -33,6 +34,24 @@ def get_int_environment_value(key: str, default_value: int) -> int:
 
 def get_should_require_valid_certificate() -> bool:
     return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
+
+
+def get_selected_services() -> []:
+    selected_services_string = os.environ.get("GCP_SERVICES", "")
+    return selected_services_string.strip('"').split(",") if selected_services_string else []
+
+
+def get_query_interval_minutes() -> int:
+    default_query_interval = 3
+    query_interval_env_var = os.environ.get('QUERY_INTERVAL_MIN', None)
+    if query_interval_env_var:
+        query_interval_min = int(query_interval_env_var) if query_interval_env_var.isdigit() else default_query_interval
+    else:
+        # keep old query frequency for logs ingest or if cloud function code was updated without changing cloud scheduler (missing environment variable)
+        query_interval_min = 1
+    if query_interval_min not in range(1, 7):
+        query_interval_min = default_query_interval
+    return query_interval_min
 
 
 class LoggingContext:
@@ -113,6 +132,7 @@ class LogsProcessingContext(LogsContext):
     def __init__(
             self,
             scheduled_execution_id: Optional[str],
+            message_publish_time: Optional[datetime],
             sfm_queue: Queue
     ):
         super().__init__(
@@ -122,6 +142,23 @@ class LogsProcessingContext(LogsContext):
             scheduled_execution_id=scheduled_execution_id,
             sfm_queue = sfm_queue
         )
+        self.message_publish_time = message_publish_time
+
+
+class SfmDashboardsContext(LoggingContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            token,
+            gcp_session: aiohttp.ClientSession,
+            operation_mode: OperationMode,
+            scheduled_execution_id: Optional[str]
+    ):
+        super().__init__(scheduled_execution_id)
+        self.project_id_owner = project_id_owner
+        self.token = token
+        self.gcp_session = gcp_session
+        self.operation_mode = operation_mode
 
 
 class SfmContext(ExecutionContext):

@@ -2,7 +2,7 @@
 
 ## Development environment setup
 
-To run worker function locally you have to have Python dev environement installed: `Python 3.7` with `pip` tool.
+To run worker function locally you have to have Python dev environment installed: `Python 3.8` with `pip` tool.
 
 to install all the dependencies run 
 ```shell script
@@ -51,6 +51,7 @@ Worker function execution can be tweaked with environment variables. In Google F
 | MAX_DIMENSION_NAME_LENGTH | The maximum length of the dimension name sent to the MINT API. Longer names are truncated to the value indicated. Allowed values: positive integers. | 100 |
 | MAX_DIMENSION_VALUE_LENGTH | The maximum length of the dimension value sent to the MINT API. Longer values are truncated to the value indicated. Allowed values: positive integers. | 250 |
 | SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. Allowed values: `true`/`yes`, `false`/`no` | `false` |
+| QUERY_INTERVAL_MIN | Metrics polling interval in minutes. Allowed values: 1 - 6 | 3 |
 | ACTIVATION_CONFIG | Dimension filtering config (see `gcpServicesYaml` property in [values.yaml](https://github.com/dynatrace-oss/dynatrace-gcp-function/blob/master/k8s/helm-chart/dynatrace-gcp-function/values.yaml) file) minified to single line json |  |
 
 ### Log processing configuration variables
@@ -67,6 +68,9 @@ Worker function execution can be tweaked with environment variables. In Google F
 | DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE | Max size in bytes of single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code | 1048576 (1 mb) |
 | DYNATRACE_LOG_INGEST_EVENT_MAX_AGE_SECONDS | Determines max age of forwarded log event. Should be the same or lower than on cluster | 1 day |
 | GCP_PROJECT | GCP project of log sink pubsub subscription | |
+| USE_PROXY | Depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
+| HTTP_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |  |
+| HTTPS_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |  |
 | LOGS_SUBSCRIPTION_ID | subscription id of log sink pubsub subscription | |
 | DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD | Period of sending batched logs to Dynatrace | 60 seconds |
 | DYNATRACE_TIMEOUT_SECONDS | Timeout of request to Dynatrace Log Ingest | 30 seconds |
