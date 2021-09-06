@@ -177,8 +177,8 @@ class MetadataEngine:
             no_rule_applied = not (any_rule_applied or any_audit_rule_applied)
             if no_rule_applied and self.default_rule:
                 _apply_rule(context, self.default_rule, record, parsed_record)
-        except Exception:
-            context.t_exception("Encountered exception when running Rule Engine")
+        except Exception as e:
+            context.t_exception(f"Encountered exception when running Rule Engine. {e}")
 
 
 def _check_if_rule_applies(rule: ConfigRule, record: Dict, parsed_record: Dict):
