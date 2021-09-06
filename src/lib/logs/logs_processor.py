@@ -53,13 +53,12 @@ def _process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[Log
         if not context:
             context = LogsProcessingContext(None, None, sfm_queue)
         if isinstance(exception, queue.Full):
-            context.error(f"Failed to process message due full job queue, rejecting the message", "full-job-queue-error")
+            context.error(f"Failed to process message due full job queue, rejecting the message")
         else:
             if isinstance(exception, UnicodeDecodeError):
-                context.error(f"Failed to process message due to message data not being valid UTF-8. Binary data is not supported",
-                              "invalid-utf8-message-error")
+                context.error(f"Failed to process message due to message data not being valid UTF-8. Binary data is not supported")
             else:
-                context.exception(f"Failed to process message due to {type(exception).__name__}", "message-processing-exception")
+                context.t_exception(f"Failed to process message due to {type(exception).__name__}")
             context.self_monitoring.parsing_errors += 1
             context.self_monitoring.calculate_processing_time()
             put_sfm_into_queue(context)

@@ -158,8 +158,7 @@ class MetadataEngine:
                     else:
                         self.rules.extend(_create_config_rules(context, config_json))
             except Exception as e:
-                context.exception(f"Failed to load configuration file: '{config_file_path}'",
-                                  "config-load-exception")
+                context.exception(f"Failed to load configuration file: '{config_file_path}'")
 
     @staticmethod
     def _apply_rules(context, rules: List[ConfigRule], record: Dict, parsed_record: Dict) -> bool:
@@ -181,8 +180,7 @@ class MetadataEngine:
             if no_rule_applied and self.default_rule:
                 _apply_rule(context, self.default_rule, record, parsed_record)
         except Exception:
-            context.exception("Encountered exception when running Rule Engine",
-                              "rule-engine-exception")
+            context.t_exception("Encountered exception when running Rule Engine")
 
 
 def _check_if_rule_applies(rule: ConfigRule, record: Dict, parsed_record: Dict):
@@ -196,8 +194,8 @@ def _apply_rule(context: LoggingContext, rule: ConfigRule, record: Dict, parsed_
             if value:
                 parsed_record[attribute.key] = value
         except Exception:
-            context.exception(f"Encountered exception when evaluating attribute {attribute} of rule for {rule.entity_type_name}",
-                              "rule-attribute-evaluation-exception")
+            context.t_exception(f"Encountered exception when evaluating attribute {attribute} of rule for {rule.entity_type_name}",
+                              f"rule-attribute-evaluation-{rule.entity_type_name}exception")
 
 
 def _create_sources(context: LoggingContext, sources_json: List[Dict]) -> List[SourceMatcher]:
