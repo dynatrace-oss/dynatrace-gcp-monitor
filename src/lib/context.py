@@ -65,7 +65,7 @@ class LoggingContext:
         self.log("ERROR", *args)
 
     def exception(self, *args):
-        self.log("ERROR", *args)
+        self.error(*args)
         traceback.print_exc()
 
     def t_error(self, *args):
