@@ -18,7 +18,7 @@ onFailure() {
     exit 2
 }
 
-#trap onFailure ERR
+trap onFailure ERR
 
 
 versionNumber() {
