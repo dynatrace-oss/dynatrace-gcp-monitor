@@ -26,6 +26,8 @@ from lib.logs.log_sfm_metrics import LogSelfMonitoring
 from lib.metric_descriptor import SELF_MONITORING_METRIC_MAP
 from operation_mode import OperationMode
 
+LOG_THROTTLING_LIMIT_PER_MESSAGE = 10
+
 
 def get_int_environment_value(key: str, default_value: int) -> int:
     environment_value = os.environ.get(key, None)
@@ -57,6 +59,7 @@ def get_query_interval_minutes() -> int:
 class LoggingContext:
     def __init__(self, scheduled_execution_id: Optional[str]):
         self.scheduled_execution_id: str = scheduled_execution_id[0:8] if scheduled_execution_id else None
+        self.throttled_log_call_count = dict()
 
     def error(self, *args):
         self.log("ERROR", *args)
@@ -64,6 +67,28 @@ class LoggingContext:
     def exception(self, *args):
         self.error(*args)
         traceback.print_exc()
+
+    def t_error(self, *args):
+        """
+        Prints error with throttling limit per message. Limit per message set in LOG_THROTTLING_LIMIT_PER_CALLER
+        Use for potentially frequent log.
+        :param args:
+        :return:
+        """
+        if args and self.__check_if_message_exceeded_limit(args[-1]):
+            return
+        self.error(*args)
+
+    def t_exception(self, *args):
+        """
+        Prints exception with throttling limit per message. Limit per message set in LOG_THROTTLING_LIMIT_PER_CALLER
+        Use for potentially frequent log.
+        :param args:
+        :return:
+        """
+        if args and self.__check_if_message_exceeded_limit(args[-1]):
+            return
+        self.exception(*args)
 
     def log(self, *args):
         """
@@ -76,6 +101,7 @@ class LoggingContext:
         """
         if not args:
             return
+
         message = args[-1]
 
         timestamp_utc = datetime.utcnow()
@@ -89,6 +115,21 @@ class LoggingContext:
         context_section = " ".join(context_strings)
 
         print(f"{timestamp_utc_iso} {context_section} : {message}")
+
+    def __check_if_message_exceeded_limit(self, message: str):
+        log_calls_performed = self.throttled_log_call_count.get(message, 0)
+        log_calls_left = LOG_THROTTLING_LIMIT_PER_MESSAGE - log_calls_performed
+
+        if log_calls_left == 0:
+            self.throttled_log_call_count[message] = log_calls_performed + 1
+            self.log(f"Logging calls for message '{message}' exceeded the throttling limit of"
+                     f" {LOG_THROTTLING_LIMIT_PER_MESSAGE}. Further logs from this caller will be discarded")
+
+        message_exceeded_limit = log_calls_left <= 0
+        if not message_exceeded_limit:
+            self.throttled_log_call_count[message] = log_calls_performed + 1
+
+        return message_exceeded_limit
 
 
 class ExecutionContext(LoggingContext):
