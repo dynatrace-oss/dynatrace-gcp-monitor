@@ -194,7 +194,7 @@ async def fetch_metric(
 
         for time_serie in page['timeSeries']:
             typed_value_key = extract_typed_value_key(time_serie)
-            dimensions = create_dimensions(context, time_serie, dt_dimensions_mapping)
+            dimensions = create_dimensions(context, service.name, time_serie, dt_dimensions_mapping)
             entity_id = create_entity_id(service, time_serie)
 
             for point in time_serie['points']:
@@ -246,8 +246,10 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
 
 
 
-def create_dimensions(context: MetricsContext, time_serie: Dict, dt_dimensions_mapping: DtDimensionsMap) -> List[DimensionValue]:
+def create_dimensions(context: MetricsContext, service_name: str, time_serie: Dict, dt_dimensions_mapping: DtDimensionsMap) -> List[DimensionValue]:
     dt_dimensions = []
+
+    dt_dimensions.append(create_dimension("gcp.resource.type", service_name, context))
 
     metric_labels = time_serie.get('metric', {}).get('labels', {})
     for short_source_label, dim_value in metric_labels.items():
