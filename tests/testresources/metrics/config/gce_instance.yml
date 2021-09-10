@@ -15,6 +15,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.instance_id
     id: instance_id
+    compatibilityModeOnly: true
+  - value: resource.labels.instance_id
+    id: gcp.instance.id
   - value: resource.labels.zone
     id: zone
     compatibilityModeOnly: true
