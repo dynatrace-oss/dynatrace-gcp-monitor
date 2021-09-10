@@ -128,16 +128,14 @@ class DtDimensionsMap:
         all_dt_dims_for_source_dim.add(dt_target_dimension)
         self.dt_dimensions_set_by_source_dimension[source_dimension] = all_dt_dims_for_source_dim
 
-    def create_dimensions(self, target_dimension_list: List, dt_label_if_unmapped: str, source_label: str, dim_value, context):
+    def get_dt_dimensions(self, source_dimension, dt_dimension_if_unmapped) -> List:
         # dt_label_if_unmapped - shouldn't happen, but if we get dimension back that we didn't query for (=not defined in map), it would be unsafe to discard it
         # (could result in duplicate metric entries for remaining dim label+value set):
         # report it to Dt under dt_label_if_unmapped - this is expected to be last part for full source dimension label, e.g.:
         # resource.label.unrequestedDimensionLabel > unrequestedDimensionLabel
-
-        mapped_dt_dim_labels = sorted( self.dt_dimensions_set_by_source_dimension.get(source_label, {dt_label_if_unmapped}) )
-
-        for dt_dim_label in mapped_dt_dim_labels:
-            target_dimension_list.append( create_dimension(dt_dim_label, dim_value, context) )
+        dt_dimensions_set = self.dt_dimensions_set_by_source_dimension.get(source_dimension, {dt_dimension_if_unmapped})
+        dt_dimension_sorted_list = sorted(dt_dimensions_set)
+        return dt_dimension_sorted_list
 
 async def fetch_metric(
         context: MetricsContext,
@@ -252,16 +250,22 @@ def create_dimensions(context: MetricsContext, time_serie: Dict, dt_dimensions_m
     dt_dimensions = []
 
     metric_labels = time_serie.get('metric', {}).get('labels', {})
-    for short_source_label, value in metric_labels.items():
-        dt_dimensions_mapping.create_dimensions(dt_dimensions, short_source_label, f"metric.labels.{short_source_label}", value, context)
+    for short_source_label, dim_value in metric_labels.items():
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metric.labels.{short_source_label}", short_source_label)
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
     resource_labels = time_serie.get('resource', {}).get('labels', {})
-    for short_source_label, value in resource_labels.items():
-        dt_dimensions_mapping.create_dimensions(dt_dimensions, short_source_label, f"resource.labels.{short_source_label}", value, context)
+    for short_source_label, dim_value in resource_labels.items():
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"resource.labels.{short_source_label}", short_source_label)
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
     system_labels = time_serie.get('metadata', {}).get('systemLabels', {})
-    for short_source_label, value in system_labels.items():
-        dt_dimensions_mapping.create_dimensions(dt_dimensions, short_source_label, f"metadata.systemLabels.{short_source_label}", value, context)
+    for short_source_label, dim_value in system_labels.items():
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metadata.systemLabels.{short_source_label}", short_source_label)
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
     return dt_dimensions
 
