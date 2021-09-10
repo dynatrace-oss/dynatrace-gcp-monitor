@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.fqdn
     id: fqdn
+    compatibilityModeOnly: true
+  - value: resource.labels.fqdn
+    id: gcp.instance.name
   - value: resource.labels.location
     id: location
     compatibilityModeOnly: true
