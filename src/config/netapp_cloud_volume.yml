@@ -27,7 +27,7 @@ gcp:
     id: volume_id
     compatibilityModeOnly: true
   - value: resource.labels.volume_id
-    id: gcp.instance.name
+    id: gcp.instance.id
   metrics:
   - value: netapp.com/cloudvolume/inode_allocation
     id: cloud.gcp.netapp_com.cloudvolume.inode_allocation

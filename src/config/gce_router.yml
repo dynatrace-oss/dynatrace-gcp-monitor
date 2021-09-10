@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.router_id
     id: router_id
+    compatibilityModeOnly: true
+  - value: resource.labels.router_id
+    id: gcp.instance.id
   - value: resource.labels.region
     id: region
     compatibilityModeOnly: true

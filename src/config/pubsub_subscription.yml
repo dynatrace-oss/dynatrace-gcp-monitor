@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.subscription_id
     id: subscription_id
+    compatibilityModeOnly: true
+  - value: resource.labels.subscription_id
+    id: gcp.instance.id
   metrics:
   - value: pubsub.googleapis.com/subscription/ack_message_count
     id: cloud.gcp.pubsub_googleapis_com.subscription.ack_message_count

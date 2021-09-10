@@ -22,6 +22,9 @@ gcp:
     id: model_id
   - value: resource.labels.version_id
     id: version_id
+    compatibilityModeOnly: true
+  - value: resource.labels.version_id
+    id: gcp.instance.id
   - value: resource.labels.region
     id: region
     compatibilityModeOnly: true

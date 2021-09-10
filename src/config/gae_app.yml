@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.module_id
     id: module_id
+    compatibilityModeOnly: true
+  - value: resource.labels.module_id
+    id: gcp.instance.id
   - value: resource.labels.version_id
     id: version_id
   - value: resource.labels.zone

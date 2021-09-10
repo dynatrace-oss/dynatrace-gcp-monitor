@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.queue_id
     id: queue_id
+    compatibilityModeOnly: true
+  - value: resource.labels.queue_id
+    id: gcp.instance.id
   - value: resource.labels.target_type
     id: target_type
   metrics:

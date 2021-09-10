@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.topic_id
     id: topic_id
+    compatibilityModeOnly: true
+  - value: resource.labels.topic_id
+    id: gcp.instance.id
   metrics:
   - value: pubsub.googleapis.com/topic/byte_cost
     id: cloud.gcp.pubsub_googleapis_com.topic.byte_cost

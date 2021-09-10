@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.snapshot_id
     id: snapshot_id
+    compatibilityModeOnly: true
+  - value: resource.labels.snapshot_id
+    id: gcp.instance.id
   metrics:
   - value: pubsub.googleapis.com/snapshot/backlog_bytes
     id: cloud.gcp.pubsub_googleapis_com.snapshot.backlog_bytes

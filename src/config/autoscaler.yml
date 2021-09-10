@@ -25,6 +25,9 @@ gcp:
     id: gcp.region
   - value: resource.labels.autoscaler_id
     id: autoscaler_id
+    compatibilityModeOnly: true
+  - value: resource.labels.autoscaler_id
+    id: gcp.instance.id
   - value: resource.labels.autoscaler_name
     id: autoscaler_name
     compatibilityModeOnly: true

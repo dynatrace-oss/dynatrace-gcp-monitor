@@ -27,6 +27,9 @@ gcp:
     id: node_id
   - value: resource.labels.worker_id
     id: worker_id
+    compatibilityModeOnly: true
+  - value: resource.labels.worker_id
+    id: gcp.instance.id
   metrics:
   - value: tpu.googleapis.com/container/cpu/utilization
     id: cloud.gcp.tpu_googleapis_com.container.cpu.utilization

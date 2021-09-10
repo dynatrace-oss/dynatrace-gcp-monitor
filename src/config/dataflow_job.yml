@@ -41,6 +41,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/current_num_vcpus
     id: cloud.gcp.dataflow_googleapis_com.job.current_num_vcpus
     type: gauge
@@ -53,6 +57,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/current_shuffle_slots
     id: cloud.gcp.dataflow_googleapis_com.job.current_shuffle_slots
     type: gauge
@@ -65,6 +73,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/data_watermark_age
     id: cloud.gcp.dataflow_googleapis_com.job.data_watermark_age
     type: gauge
@@ -77,6 +89,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/elapsed_time
     id: cloud.gcp.dataflow_googleapis_com.job.elapsed_time
     type: gauge
@@ -89,6 +105,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/element_count
     id: cloud.gcp.dataflow_googleapis_com.job.element_count
     type: gauge
@@ -101,6 +121,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.pcollection
   - value: dataflow.googleapis.com/job/elements_produced_count
     id: cloud.gcp.dataflow_googleapis_com.job.elements_produced_count
@@ -114,6 +138,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.pcollection
     - value: metric.labels.ptransform
   - value: dataflow.googleapis.com/job/estimated_byte_count
@@ -128,6 +156,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.pcollection
   - value: dataflow.googleapis.com/job/estimated_bytes_produced_count
     id: cloud.gcp.dataflow_googleapis_com.job.estimated_bytes_produced_count
@@ -141,6 +173,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.pcollection
     - value: metric.labels.ptransform
   - value: dataflow.googleapis.com/job/is_failed
@@ -166,6 +202,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.stage
   - value: dataflow.googleapis.com/job/per_stage_system_lag
     id: cloud.gcp.dataflow_googleapis_com.job.per_stage_system_lag
@@ -179,6 +219,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.stage
   - value: dataflow.googleapis.com/job/pubsub/read_count
     id: cloud.gcp.dataflow_googleapis_com.job.pubsub.read_count
@@ -193,6 +237,10 @@ gcp:
     dimensions:
     - value: metric.labels.status
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.ptransform
     - value: metric.labels.subscription_project_id
     - value: metric.labels.subscription_id
@@ -210,6 +258,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.ptransform
     - value: metric.labels.subscription_project_id
     - value: metric.labels.subscription_id
@@ -228,6 +280,10 @@ gcp:
     dimensions:
     - value: metric.labels.status
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.ptransform
     - value: metric.labels.topic_project_id
     - value: metric.labels.topic_id
@@ -243,6 +299,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.ptransform
     - value: metric.labels.topic_project_id
     - value: metric.labels.topic_id
@@ -258,6 +318,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/system_lag
     id: cloud.gcp.dataflow_googleapis_com.job.system_lag
     type: gauge
@@ -270,6 +334,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/total_memory_usage_time
     id: cloud.gcp.dataflow_googleapis_com.job.total_memory_usage_time
     type: gauge
@@ -282,6 +350,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/total_pd_usage_time
     id: cloud.gcp.dataflow_googleapis_com.job.total_pd_usage_time
     type: gauge
@@ -294,6 +366,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.storage_type
   - value: dataflow.googleapis.com/job/total_shuffle_data_processed
     id: cloud.gcp.dataflow_googleapis_com.job.total_shuffle_data_processed
@@ -307,6 +383,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/total_streaming_data_processed
     id: cloud.gcp.dataflow_googleapis_com.job.total_streaming_data_processed
     type: gauge
@@ -319,6 +399,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/total_vcpu_time
     id: cloud.gcp.dataflow_googleapis_com.job.total_vcpu_time
     type: gauge
@@ -331,6 +415,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
   - value: dataflow.googleapis.com/job/user_counter
     id: cloud.gcp.dataflow_googleapis_com.job.user_counter
     type: gauge
@@ -344,4 +432,8 @@ gcp:
     dimensions:
     - value: metric.labels.metric_name
     - value: metric.labels.job_id
+      id: job_id
+      compatibilityModeOnly: true
+    - value: metric.labels.job_id
+      id: gcp.instance.id
     - value: metric.labels.ptransform

@@ -22,7 +22,7 @@ gcp:
     id: database_id
     compatibilityModeOnly: true
   - value: resource.labels.database_id
-    id: gcp.instance.name
+    id: gcp.instance.id
   - value: resource.labels.region
     id: region
     compatibilityModeOnly: true

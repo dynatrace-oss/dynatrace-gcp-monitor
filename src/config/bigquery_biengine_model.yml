@@ -25,6 +25,9 @@ gcp:
     id: gcp.region
   - value: resource.labels.model_id
     id: model_id
+    compatibilityModeOnly: true
+  - value: resource.labels.model_id
+    id: gcp.instance.id
   metrics:
   - value: bigquerybiengine.googleapis.com/model/inflight_requests
     id: cloud.gcp.bigquerybiengine_googleapis_com.model.inflight_requests

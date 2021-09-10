@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.attachment
     id: attachment
+    compatibilityModeOnly: true
+  - value: resource.labels.attachment
+    id: gcp.instance.id
   - value: resource.labels.interconnect
     id: interconnect
   - value: resource.labels.region

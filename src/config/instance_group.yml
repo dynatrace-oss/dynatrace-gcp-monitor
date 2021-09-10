@@ -25,6 +25,9 @@ gcp:
     id: gcp.region
   - value: resource.labels.instance_group_id
     id: instance_group_id
+    compatibilityModeOnly: true
+  - value: resource.labels.instance_group_id
+    id: gcp.instance.id
   - value: resource.labels.instance_group_name
     id: instance_group_name
     compatibilityModeOnly: true
