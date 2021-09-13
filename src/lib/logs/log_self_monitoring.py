@@ -68,8 +68,7 @@ async def create_sfm_worker_loop(sfm_queue: Queue, logging_context: LoggingConte
             self_monitoring = LogSelfMonitoring()
             asyncio.get_event_loop().create_task(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
         except Exception:
-            print("Logs Self Monitoring Worker Loop Exception:")
-            traceback.print_exc()
+            logging_context.exception("Logs Self Monitoring Worker Loop Exception:")
 
 
 async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Queue, context: LoggingContext, instance_metadata: InstanceMetadata):
@@ -92,8 +91,7 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Que
                 for _ in sfm_list:
                     sfm_queue.task_done()
     except Exception:
-        print("Log SFM Loop Exception:")
-        traceback.print_exc()
+        context.exception("Log SFM Loop Exception:")
 
 
 async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_session: aiohttp.ClientSession(), instance_metadata: InstanceMetadata):
