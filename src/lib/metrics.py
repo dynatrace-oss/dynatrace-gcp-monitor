@@ -68,10 +68,6 @@ class IngestLine:
 class Dimension:
     """Represents singular dimension."""
 
-    id: Text
-    value: Text
-    dimension: Text
-    source: Text
     key_for_get_func_create_entity_id: Text
     key_for_create_entity_id: Text
     key_for_fetch_metric: Text
@@ -80,24 +76,10 @@ class Dimension:
     def __init__(self, **kwargs):
         id = kwargs.get("id", "")
         value = kwargs.get("value", "")
-
-        object.__setattr__(self, "id", id)
-        object.__setattr__(self, "value", value)
-
-        if "value" in kwargs:
-            dimension=value
-        else:
-            dimension=id
-        object.__setattr__(self, "dimension", dimension)
-
-        source=value
-        object.__setattr__(self, "source", source)
-
-        object.__setattr__(self, "key_for_get_func_create_entity_id", source)
-        object.__setattr__(self, "key_for_create_entity_id", (source or dimension).replace("resource.labels.", ""))
-        object.__setattr__(self, "key_for_fetch_metric", source or f'metric.labels.{dimension}')
-        object.__setattr__(self, "key_for_send_to_dynatrace", id) # if not given, lib.metric_ingest.create_dimensions will use last part of source/value, as this is how this worked before - no breaking changes allowed
-
+        object.__setattr__(self, "key_for_get_func_create_entity_id", value)
+        object.__setattr__(self, "key_for_create_entity_id", (value.replace("resource.labels.", "") or id))
+        object.__setattr__(self, "key_for_fetch_metric", value or f'metric.labels.{id}')
+        object.__setattr__(self, "key_for_send_to_dynatrace", id) # or 'resource|metric.labels.{id}' from response used by lib.metric_ingest.create_dimensions will use last part of source/value, as this is how this worked before - no breaking changes allowed
 
 
 @dataclass(frozen=True)
