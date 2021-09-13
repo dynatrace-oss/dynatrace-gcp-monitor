@@ -20,6 +20,9 @@ gcp:
     id: gcp.project.id
   - value: resource.labels.load_balancer_name
     id: load_balancer_name
+    compatibilityModeOnly: true
+  - value: resource.labels.load_balancer_name
+    id: gcp.instance.name
   - value: resource.labels.region
     id: region
     compatibilityModeOnly: true
@@ -33,9 +36,6 @@ gcp:
     id: backend_target_name
   - value: resource.labels.forwarding_rule_name
     id: forwarding_rule_name
-    compatibilityModeOnly: true
-  - value: resource.labels.forwarding_rule_name
-    id: gcp.instance.name
   - value: resource.labels.forwarding_rule_network_tier
     id: forwarding_rule_network_tier
   - value: resource.labels.backend_name
