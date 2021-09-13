@@ -371,6 +371,7 @@ if [[ "${IMPORT_DASHBOARDS,,}" =~ ^(yes|true)$ ]] ; then
     fi
   done
 
+  sleep 5s  # can be removed after APM-323370
   for DASHBOARD_ID in "${IMPORTED_DASHBOARD_IDS[@]}"
   do
     DASHBOARD_SHARE_RESPONSE=$(dt_api "api/config/v1/dashboards/${DASHBOARD_ID}/shareSettings" \
