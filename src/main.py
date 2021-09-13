@@ -162,8 +162,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
         await push_ingest_lines(context, project_id, ingest_lines)
     except Exception as e:
-        context.log(f"Failed to finish processing due to {e}")
-        traceback.print_exc()
+        context.t_exception(f"Failed to finish processing due to {e}")
 
 
 async def check_x_goog_user_project_header_permissions(context: MetricsContext, project_id: str):

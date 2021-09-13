@@ -182,9 +182,9 @@ check_if_parameter_is_empty()
 {
   PARAMETER=$1
   PARAMETER_NAME=$2
-  if [ -z "$PARAMETER" ]
+  if [ "$PARAMETER" == "null" ] || [ -z "$PARAMETER" ]
   then
-    echo "Missing required parameter: $PARAMETER_NAME. Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
+    warn "Missing required parameter: $PARAMETER_NAME. Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
     exit
   fi
 }
@@ -330,25 +330,30 @@ echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 mkdir -p $GCP_FUNCTION_NAME
 unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME || exit
 pushd ./$GCP_FUNCTION_NAME || exit
-GCP_FUNCTION_TIMEOUT=$(( QUERY_INTERVAL_MIN*60 ))
-
-if [ "$INSTALL" == true ]; then
-  echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
+if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
+  echo "Invalid value of 'googleCloud.metrics.queryInterval', defaulting to 3"
+  GCP_FUNCTION_TIMEOUT=180
+  GCP_SCHEDULER_CRON="*/3 * * * *"
 else
-  echo -e "- updating the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only
+  GCP_FUNCTION_TIMEOUT=$(( QUERY_INTERVAL_MIN*60 ))
+  GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL_MIN} * * * *"
 fi
 
 if [ "$INSTALL" == true ]; then
-  echo -e
-  echo "- schedule the runs"
-  if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then
-      echo "Scheduler [$GCP_SCHEDULER_NAME] already exists, skipping"
-  else
-      GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL_MIN} * * * *"
-      gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
-  fi
+  echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
+else
+  echo -e "- updating the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
+fi
+gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
+
+echo -e
+echo "- schedule the runs"
+if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then
+    echo "Recreating Cloud Scheduler [$GCP_SCHEDULER_NAME]"
+    gcloud -q scheduler jobs delete "$GCP_SCHEDULER_NAME"
+fi
+gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
+
 
   echo -e
   echo "- create self monitoring dashboard"
@@ -416,7 +421,7 @@ if [ "$INSTALL" == true ]; then
   else
     echo "Alerts import disabled"
   fi
-fi
+
 
 echo "- cleaning up"
 
