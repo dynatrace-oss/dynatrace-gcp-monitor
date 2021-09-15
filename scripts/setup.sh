@@ -345,7 +345,7 @@ if [ "$INSTALL" == true ]; then
 else
 
   while true; do
-    read -p "- your Environment variables will be updated, do you want to continue? [y/n]" yn
+    read -p "- your Cloud Function will be updated - any manual changes made to Cloud Function environment variables will be replaced with values from 'activation-config.yaml' file, do you want to continue? [y/n]" yn
     case $yn in
         [Yy]* ) echo -e "- updating the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m";  break;;
         [Nn]* ) echo -e "Update aborted" ; exit;;
