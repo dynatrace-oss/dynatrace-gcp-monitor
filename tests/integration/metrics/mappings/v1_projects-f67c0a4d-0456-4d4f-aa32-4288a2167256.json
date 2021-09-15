@@ -2,7 +2,7 @@
   "id": "f67c0a4d-0456-4d4f-aa32-4288a2167256",
   "name": "v1_projects",
   "request": {
-    "url": "/v1/projects",
+    "url": "/v1/projects?filter=lifecycleState%3AACTIVE",
     "method": "GET"
   },
   "response": {
