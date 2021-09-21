@@ -94,12 +94,18 @@ check_dynatrace_docker_login() {
 
 check_url() {
   URL=$1
-  REGEX=$2
-  MESSAGE=$3
-  if ! [[ "$URL" =~ $REGEX ]]; then
-    echo -e "\e[91mERROR: \e[37m$MESSAGE"
-    exit 1
-  fi
+  REGEXES=${@:2:$#-2} # all arguments except first and last
+  MESSAGE=${@: -1} # last argument
+
+  for REGEX in $REGEXES
+  do
+    if [[ "$URL" =~ $REGEX ]]; then
+      return 0
+    fi
+  done
+
+  echo -e "\e[91mERROR: \e[37m$MESSAGE"
+  exit 1
 }
 
 print_help() {
@@ -272,7 +278,10 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   else
     echo "Using an existing Active Gate"
     check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
-    check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
+    check_url "$DYNATRACE_LOG_INGEST_URL" "$DYNATRACE_URL_REGEX" "$ACTIVE_GATE_TARGET_URL_REGEX" \
+      "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace:\n
+        - for Public ActiveGate: https://<your_environment_ID>.live.dynatrace.com\n
+        - for Environment ActiveGate: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
     check_api_token "$DYNATRACE_LOG_INGEST_URL"
     check_dynatrace_log_ingest_url
   fi
