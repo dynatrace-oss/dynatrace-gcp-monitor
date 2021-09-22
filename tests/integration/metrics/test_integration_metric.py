@@ -26,6 +26,7 @@ from wiremock.resources.requests.resource import Requests
 from wiremock.server import WireMockServer
 
 import lib.credentials
+import lib.gcp_apis
 import lib.entities.extractors.cloud_sql
 import lib.entities.extractors.gce_instance
 import lib.entities.google_api
@@ -41,7 +42,7 @@ MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 system_variables: Dict = {
     'DYNATRACE_URL': 'http://localhost:' + str(MOCKED_API_PORT),
     'REQUIRE_VALID_CERTIFICATE': 'False',
-    'GCP_SERVICES': "gce_instance/default,api/default,gce_instance/default,cloudsql_database/default"
+    'GCP_SERVICES': "gce_instance/default,api/default,gce_instance/default,cloudsql_database/default,apigee.googleapis.com/Environment/default"
     # 'DYNATRACE_ACCESS_KEY': ACCESS_KEY, this one is encoded in mocks files
 }
 
@@ -51,6 +52,7 @@ def setup_test_variables(resource_path_root):
     lib.credentials._CLOUD_RESOURCE_MANAGER_ROOT = f"http://localhost:{MOCKED_API_PORT}/v1"
     lib.credentials._SECRET_ROOT = f"http://localhost:{MOCKED_API_PORT}/v1"
     lib.metric_ingest._MONITORING_ROOT = f"http://localhost:{MOCKED_API_PORT}/v3"
+    lib.gcp_apis._SERVICE_USAGE_ROOT = f"http://localhost:{MOCKED_API_PORT}/v4"
     lib.entities.extractors.cloud_sql._SQL_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
     lib.entities.google_api._GCP_COMPUTE_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
     lib.entities.extractors.gce_instance._GCP_COMPUTE_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
@@ -113,6 +115,12 @@ async def test_metric_authorization_header():
 @pytest.mark.asyncio
 async def test_ingest_lines_output(resource_path_root):
     await async_dynatrace_gcp_extension()
+
+    sent_requests = Requests.get_all_received_requests().get_json_data().get('requests')
+    urls = {sent_request["request"]["url"] for sent_request in sent_requests}
+    apigee_url_prefix = "/v3/projects/dynatrace-gcp-extension/timeSeries?filter=metric.type+%3D+%22apigee.googleapis.com/environment/anomaly_count"
+    request_for_apigee_metric_was_sent = any(url.startswith(apigee_url_prefix) for url in urls)
+    assert not request_for_apigee_metric_was_sent
 
     request = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
                                           method="POST")
