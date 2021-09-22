@@ -78,6 +78,8 @@ logIngestAttributeValueMaxLength: 250
 logIngestRequestMaxEvents: 5000
 # max size in bytes of single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code
 logIngestRequestMaxSize: 1048576
+# max period (in seconds) of sending batched logs to Dynatrace
+logIngestSendingWorkerExecutionPeriod: 60
 # Determines max age of forwarded log event. Should be the same or lower than on cluster
 logIngestEventMaxAgeSeconds: 86400
 

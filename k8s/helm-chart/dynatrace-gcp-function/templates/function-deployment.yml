@@ -193,6 +193,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE
+        - name: DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD
         - name: DYNATRACE_TIMEOUT_SECONDS
           valueFrom:
             configMapKeyRef:
