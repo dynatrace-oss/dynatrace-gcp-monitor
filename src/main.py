@@ -31,7 +31,7 @@ from lib.credentials import create_token, get_project_id_from_environment, fetch
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace
-from lib.gcp_apis import get_all_disabled_services
+from lib.gcp_apis import get_all_disabled_apis
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
@@ -132,7 +132,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
         disabled_apis = {}
         for project_id in projects_ids:
-            disabled_apis = {project_id: await get_all_disabled_services(context, gcp_session, token, project_id)}
+            disabled_apis = {project_id: await get_all_disabled_apis(context, gcp_session, token, project_id)}
 
         setup_time = (time.time() - setup_start_time)
         context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}
@@ -248,7 +248,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         context.log(project_id, f"Skipped fetching metrics for {skipped_services_string} due to no instances detected")
     if skipped_disabled_apis:
         skipped_disabled_apis_string = ", ".join(skipped_disabled_apis)
-        context.log(project_id, f"Skipped fetching metrics for disabled apis: {skipped_disabled_apis_string}")
+        context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
     entity_id_map = build_entity_id_map(fetch_topology_results)
