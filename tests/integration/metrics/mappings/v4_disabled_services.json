@@ -2,7 +2,7 @@
   "id": "f67c0a4d-0456-4d4f-aa32-4288a2167257",
   "name": "v4_disabled_services",
   "request": {
-    "url": "/v4/projects/dynatrace-gcp-extension/services?filter=state:DISABLED",
+    "url": "/v4/dynatrace-gcp-extension/services?filter=state:DISABLED",
     "method": "GET"
   },
   "response": {

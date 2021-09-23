@@ -132,7 +132,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
         disabled_apis = {}
         for project_id in projects_ids:
-            disabled_apis = {project_id: await get_all_disabled_apis(context, gcp_session, token, project_id)}
+            disabled_apis = {project_id: await get_all_disabled_apis(context, token, project_id)}
 
         setup_time = (time.time() - setup_start_time)
         context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}

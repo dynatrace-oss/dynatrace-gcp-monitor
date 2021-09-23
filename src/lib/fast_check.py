@@ -12,6 +12,7 @@ from aiohttp import ClientSession
 from lib.context import LoggingContext, get_should_require_valid_certificate
 from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fetch_dynatrace_api_key, \
     get_project_id_from_environment
+from lib.gcp_apis import GCP_SERVICE_USAGE_URL
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder import create_logs_context
@@ -49,8 +50,6 @@ LOGS_CONFIGURATION_FLAGS = [
     "USE_EXISTING_ACTIVE_GATE",
     "USE_PROXY"
 ]
-
-GCP_SERVICE_USAGE_URL = 'https://serviceusage.googleapis.com/v1/projects/'
 
 REQUIRED_SERVICES = [
     'monitoring.googleapis.com',
