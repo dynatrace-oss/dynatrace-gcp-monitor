@@ -25,13 +25,13 @@ gcp:
     id: gcp.region
   - value: resource.labels.backend_target_name
     id: backend_target_name
+    compatibilityModeOnly: true
+  - value: resource.labels.backend_target_name
+    id: gcp.instance.name
   - value: resource.labels.backend_target_type
     id: backend_target_type
   - value: resource.labels.forwarding_rule_name
     id: forwarding_rule_name
-    compatibilityModeOnly: true
-  - value: resource.labels.forwarding_rule_name
-    id: gcp.instance.name
   - value: resource.labels.target_proxy_name
     id: target_proxy_name
   - value: resource.labels.backend_name
