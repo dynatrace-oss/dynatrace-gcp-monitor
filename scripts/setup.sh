@@ -45,7 +45,7 @@ then
 else
   VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
   echo "Using yq version $VERSION_YQ"
-
+  
   if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
       echo -e
       echo -e "\e[91mERROR: \e[37m yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:"
@@ -184,7 +184,6 @@ get_extensions_zip_packages() {
   do 
     (cd ./extensions && curl -s -O "$EXTENSION_S3_URL/$EXTENSION_FILE_NAME")
   done
-  exit
 }
 
 check_if_parameter_is_empty()
@@ -194,6 +193,40 @@ check_if_parameter_is_empty()
   if [ "$PARAMETER" == "null" ] || [ -z "$PARAMETER" ]; then
     warn "Missing required parameter: $PARAMETER_NAME. Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
     exit
+  fi
+}
+
+check_api_token() {
+  DYNATRACE_URL=$1
+  DYNATRACE_ACCESS_KEY=$2
+  V1_API_REQUIREMENTS=("ReadConfig" "WriteConfig")
+  V2_API_REQUIREMENTS=("extensions.read" "extensions.write" "extensionConfigurations.read" "extensionConfigurations.write" "extensionEnvironment.read" "extensionEnvironment.write")
+  
+  if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$DYNATRACE_URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
+    RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
+    
+    if [ "$CODE" -ge 300 ]; then
+      echo -e "\e[91mERROR: \e[37mFailed to check Dynatrace API token permissions - please verify provided values for parameters: --target-url (${DYNATRACE_URL}) and --target-api-token. $RESPONSE"
+      exit 1
+    fi
+
+    for REQUIRED in "${V1_API_REQUIREMENTS[@]}"; do
+      if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
+        echo -e "\e[91mERROR: \e[37mMissing $REQUIRED permission (v1) for the API token"
+        exit 1
+      fi
+    done
+
+    for REQUIRED in "${V2_API_REQUIREMENTS[@]}"; do
+      if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
+        echo -e "\e[91mERROR: \e[37mMissing $REQUIRED permission (v2) for the API token"
+        exit 1
+      fi
+    done
+
+  else
+      echo -e "\e[93mWARNING: \e[37mFailed to connect to endpoint $DYNATRACE_URL to check API token permissions. It can be ignored if Dynatrace/ActiveGate does not allow public access."
   fi
 }
 
@@ -325,6 +358,8 @@ if [ "$INSTALL" == true ]; then
   fi
 
 fi
+
+check_api_token "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
 echo -e
 echo "- downloading extensions"
