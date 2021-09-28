@@ -95,7 +95,8 @@ def setup_wiremock():
 
 
 @pytest.mark.asyncio
-async def test_metric_authorization_header():
+async def test_metric_authorization_header(monkeypatch):
+    monkeypatch.setenv('COMPATIBILITY_MODE', None)
     await async_dynatrace_gcp_extension()
 
     request = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
@@ -111,7 +112,18 @@ async def test_metric_authorization_header():
 
 
 @pytest.mark.asyncio
-async def test_ingest_lines_output(resource_path_root):
+async def test_ingest_lines_output_compatibility_mode_false(resource_path_root, monkeypatch):
+    monkeypatch.setenv('COMPATIBILITY_MODE', 'False')
+    await ingest_lines_output(os.path.join(resource_path_root, "metrics/ingest_input.dat"))
+
+
+@pytest.mark.asyncio
+async def test_ingest_lines_output_compatibility_mode_true(resource_path_root, monkeypatch):
+    monkeypatch.setenv('COMPATIBILITY_MODE', 'True')
+    await ingest_lines_output(os.path.join(resource_path_root, "metrics/ingest_input_compatibility_mode.dat"))
+
+
+async def ingest_lines_output(expected_ingest_output_file):
     await async_dynatrace_gcp_extension()
 
     request = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
@@ -124,7 +136,7 @@ async def test_ingest_lines_output(resource_path_root):
 
     body = result.body
 
-    with open(os.path.join(resource_path_root, "metrics/ingest_input.dat")) as ingest:
+    with open(expected_ingest_output_file) as ingest:
         recorded_ingest = ingest.read()
 
         assert_that(body.split("\n")).is_length(289)

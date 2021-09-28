@@ -36,7 +36,12 @@ def test_filtering_config_blank_when_activation_config_missing():
     assert any(elem.name == "pubsub_subscription" and elem.monitoring_filter == '' for elem in config)
     assert any(elem.name == "pubsub_snapshot" and elem.monitoring_filter == '' for elem in config)
 
-
-def test_filtering_missing_configs():
+def test_filtering_missing_configs(monkeypatch: MonkeyPatchFixture):
+    monkeypatch.setenv("ACTIVATION_CONFIG", "{services: []}")
     config = load_supported_services(context, [])
     assert len(config) == 0
+
+def test_all_configs_when_activation_config_missing():
+    config = load_supported_services(context, [])
+    assert len(config) != 0
+    assert len(config) == 87

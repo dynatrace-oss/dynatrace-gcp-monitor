@@ -13,6 +13,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import os
 import re
 from dataclasses import dataclass
 from datetime import timedelta
@@ -21,6 +22,16 @@ from typing import List, Text, Any, Dict
 VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
 VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 
+ODIN_DIMENSIONS_COMPATIBILITY_MODE = False
+
+def update_env_var_configuration():
+    global ODIN_DIMENSIONS_COMPATIBILITY_MODE
+    ODIN_DIMENSIONS_COMPATIBILITY_MODE = os.environ.get("COMPATIBILITY_MODE", "").upper() in ["TRUE", "YES"]
+
+def include_dimension(dimension_config):
+    dimension_in_compatibility_mode_only = dimension_config.get("compatibilityModeOnly", False)
+    # in compatibilityMode, include all dimensions, else (in normal mode) exclude compatibilityModeOnly dimensions
+    return ODIN_DIMENSIONS_COMPATIBILITY_MODE == True or not dimension_in_compatibility_mode_only
 
 @dataclass(frozen=True)
 class DimensionValue:
@@ -57,16 +68,18 @@ class IngestLine:
 class Dimension:
     """Represents singular dimension."""
 
-    dimension: Text
-    source: Text
+    key_for_get_func_create_entity_id: Text
+    key_for_create_entity_id: Text
+    key_for_fetch_metric: Text
+    key_for_send_to_dynatrace: Text
 
     def __init__(self, **kwargs):
-        if "value" in kwargs:
-            object.__setattr__(self, "dimension", kwargs.get("value", ""))
-        else:
-            object.__setattr__(self, "dimension", kwargs.get("id", ""))
-
-        object.__setattr__(self, "source", kwargs.get("value", ""))
+        id = kwargs.get("id", "")
+        value = kwargs.get("value", "")
+        object.__setattr__(self, "key_for_get_func_create_entity_id", value)
+        object.__setattr__(self, "key_for_create_entity_id", (value.replace("resource.labels.", "") or id))
+        object.__setattr__(self, "key_for_fetch_metric", value or f'metric.labels.{id}')
+        object.__setattr__(self, "key_for_send_to_dynatrace", id) # or 'resource|metric.labels.{id}' from response used by lib.metric_ingest.create_dimensions will use last part of source/value, as this is how this worked before - no breaking changes allowed
 
 
 @dataclass(frozen=True)
@@ -95,9 +108,9 @@ class Metric:
         object.__setattr__(self, "dynatrace_metric_type", kwargs.get("type", ""))
         object.__setattr__(self, "unit", kwargs.get("unit", ""))
         object.__setattr__(self, "value_type", gcp_options.get("valueType", ""))
-        object.__setattr__(self, "dimensions", [
-            Dimension(**x) for x in kwargs.get("dimensions", {})
-        ])
+
+        dimensions_ = [Dimension(**x) for x in kwargs.get("dimensions", {}) if include_dimension(x)]
+        object.__setattr__(self, "dimensions", dimensions_)
 
         ingest_delay = kwargs.get("gcpOptions", {}).get("ingestDelay", None)
         if ingest_delay:
@@ -130,9 +143,10 @@ class GCPService:
         object.__setattr__(self, "name", kwargs.get("service", ""))
         object.__setattr__(self, "feature_set", kwargs.get("featureSet", ""))
         object.__setattr__(self, "technology_name", kwargs.get("tech_name", "N/A"))
-        object.__setattr__(self, "dimensions", [
-            Dimension(**x) for x in kwargs.get("dimensions", {})
-        ])
+
+        dimensions_ = [Dimension(**x) for x in kwargs.get("dimensions", {}) if include_dimension(x)]
+        object.__setattr__(self, "dimensions", dimensions_)
+
         object.__setattr__(self, "metrics", [
             Metric(**x)
             for x

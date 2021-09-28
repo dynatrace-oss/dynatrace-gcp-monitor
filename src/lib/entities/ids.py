@@ -40,7 +40,7 @@ def get_func_create_entity_id(
         cd_id_components: List[Text] = [svc_def.name]
 
         for quasi_label in svc_def.dimensions:
-            lbl = quasi_label.source
+            lbl = quasi_label.key_for_get_func_create_entity_id
             component = ""
 
             if lbl not in label_to_api_response_mapping:

@@ -15,8 +15,14 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.agent_id
     id: agent_id
+    compatibilityModeOnly: true
+  - value: resource.labels.agent_id
+    id: gcp.instance.id
   metrics:
   - value: storagetransfer.googleapis.com/agent/connected
     id: cloud.gcp.storagetransfer_googleapis_com.agent.connected

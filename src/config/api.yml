@@ -15,6 +15,9 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.service
     id: service
   - value: resource.labels.method
@@ -23,6 +26,9 @@ gcp:
     id: version
   - value: resource.labels.location
     id: location
+    compatibilityModeOnly: true
+  - value: resource.labels.location
+    id: gcp.region
   metrics:
   - value: serviceruntime.googleapis.com/api/request_count
     id: cloud.gcp.serviceruntime_googleapis_com.api.request_count

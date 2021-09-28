@@ -15,8 +15,14 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.region
     id: region
+    compatibilityModeOnly: true
+  - value: resource.labels.region
+    id: gcp.region
   - value: resource.labels.network_name
     id: network_name
   - value: resource.labels.backend_target_type
@@ -25,6 +31,9 @@ gcp:
     id: backend_target_name
   - value: resource.labels.load_balancer_name
     id: load_balancer_name
+    compatibilityModeOnly: true
+  - value: resource.labels.load_balancer_name
+    id: gcp.instance.name
   - value: resource.labels.forwarding_rule_name
     id: forwarding_rule_name
   - value: resource.labels.backend_name

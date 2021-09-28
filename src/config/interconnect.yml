@@ -15,8 +15,14 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.interconnect
     id: interconnect
+    compatibilityModeOnly: true
+  - value: resource.labels.interconnect
+    id: gcp.instance.id
   metrics:
   - value: interconnect.googleapis.com/network/interconnect/capacity
     id: cloud.gcp.interconnect_googleapis_com.network.interconnect.capacity

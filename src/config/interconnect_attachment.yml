@@ -15,12 +15,21 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.attachment
     id: attachment
+    compatibilityModeOnly: true
+  - value: resource.labels.attachment
+    id: gcp.instance.id
   - value: resource.labels.interconnect
     id: interconnect
   - value: resource.labels.region
     id: region
+    compatibilityModeOnly: true
+  - value: resource.labels.region
+    id: gcp.region
   - value: resource.labels.interconnect_project
     id: interconnect_project
   metrics:
