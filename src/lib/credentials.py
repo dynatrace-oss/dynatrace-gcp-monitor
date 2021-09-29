@@ -94,7 +94,7 @@ async def create_default_service_account_token(context: LoggingContext, session:
 
 
 def get_project_id_from_environment():
-    return os.environ.get("GCP_PROJECT", "dynatrace-gcp-extension")
+    return os.environ.get("GCP_PROJECT")
 
 
 async def create_token(context: LoggingContext, session: ClientSession):

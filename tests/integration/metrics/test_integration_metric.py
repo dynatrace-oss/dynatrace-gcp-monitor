@@ -41,7 +41,8 @@ MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 system_variables: Dict = {
     'DYNATRACE_URL': 'http://localhost:' + str(MOCKED_API_PORT),
     'REQUIRE_VALID_CERTIFICATE': 'False',
-    'GCP_SERVICES': "gce_instance/default,api/default,gce_instance/default,cloudsql_database/default,apigee.googleapis.com/Environment/default"
+    'GCP_SERVICES': "gce_instance/default,api/default,gce_instance/default,cloudsql_database/default,apigee.googleapis.com/Environment/default",
+    'GCP_PROJECT': 'dynatrace-gcp-extension'
     # 'DYNATRACE_ACCESS_KEY': ACCESS_KEY, this one is encoded in mocks files
 }
 
