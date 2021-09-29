@@ -28,6 +28,36 @@ check_if_parameter_is_empty() {
   fi
 }
 
+warn()
+{
+  MESSAGE=$1
+  echo -e >&2
+  echo -e "\e[93mWARNING: \e[37m$MESSAGE" >&2
+  echo -e >&2
+}
+
+dt_api()
+{
+  URL=$1
+  if [ $# -eq 3 ]; then
+    METHOD="$2"
+    DATA=("-d" "$3")
+  else
+    METHOD="GET"
+  fi
+  if RESPONSE=$(curl -k -s -X $METHOD "${DYNATRACE_URL}/${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}"); then
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<< "$RESPONSE")
+    sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<< "$RESPONSE"
+    if [ "$CODE" -ge 400 ]; then
+      warn "Received ${CODE} response from ${DYNATRACE_URL}/${URL}"
+      return 1
+    fi
+  else
+    warn "Unable to connect to ${DYNATRACE_URL}"
+    return 2
+  fi
+}
+
 check_api_token() {
   URL="$1"
   if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
@@ -45,7 +75,7 @@ check_api_token() {
       fi
     done
   else
-    echo -e "\e[93mWARNING: \e[37mFailed to connect to Dynatrace/ActiveGate endpoint ($URL) to check API token permissions. It can be ignored if Dynatrace/ActiveGate does not allow public access."
+    warn "Failed to connect to Dynatrace/ActiveGate endpoint ($URL) to check API token permissions. It can be ignored if Dynatrace/ActiveGate does not allow public access."
   fi
 }
 
@@ -70,7 +100,7 @@ check_dynatrace_log_ingest_url() {
       exit 1
     fi
   else
-    echo -e "\e[93mWARNING: \e[37mFailed to connect with provided log ingest url ($DYNATRACE_LOG_INGEST_URL) to send a test log. It can be ignored if ActiveGate does not allow public access."
+    warn "Failed to connect with provided log ingest url ($DYNATRACE_LOG_INGEST_URL) to send a test log. It can be ignored if ActiveGate does not allow public access."
   fi
 }
 
@@ -88,7 +118,7 @@ check_dynatrace_docker_login() {
       exit 1
     fi
   else
-    echo -e "\e[93mWARNING: \e[37mFailed to connect to Dynatrace endpoint ($DYNATRACE_URL) to check Docker registry login. It can be ignored if Dynatrace does not allow public access."
+    warn "Failed to connect to Dynatrace endpoint ($DYNATRACE_URL) to check Docker registry login. It can be ignored if Dynatrace does not allow public access."
   fi
 }
 
@@ -265,6 +295,16 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]] || [[ ($DE
   check_api_token "$DYNATRACE_URL"
 fi
 
+if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+  if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "api/v2/extensions/schemas"); then
+    GCP_EXTENSIONS_SCHEMA_PRESENT=$(echo "${EXTENSIONS_SCHEMA_RESPONSE}" | jq -r '.versions[] | select(.=="1.229.0")')
+    if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
+      echo -e "\e[91mERROR: \e[37mDynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.229 or higher to complete installation."
+      exit 1
+    fi
+  fi
+fi
+
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
   if [[ $USE_EXISTING_ACTIVE_GATE == false ]]; then
@@ -308,7 +348,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     ACTIVE_GATE_CONNECTIVITY=Y
     ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health" --connect-timeout 20) || ACTIVE_GATE_CONNECTIVITY=N
     if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]; then
-      echo -e "\e[93mWARNING: \e[37mUnable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL to check if ActiveGate is running. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
+      warn "Unable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL to check if ActiveGate is running. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
     fi
     if [[ "$ACTIVE_GATE_STATE" != "RUNNING" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]; then
       echo -e "\e[91mERROR: \e[37mActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
