@@ -184,13 +184,17 @@ dt_api()
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<< "$RESPONSE")
     sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<< "$RESPONSE"
     if [ "$CODE" -ge 400 ]; then
-      return 255
+      warn "Received ${CODE} response from ${DYNATRACE_URL}${URL}"
+      return 1
     fi
+  else
+    warn "Unable to connect to ${DYNATRACE_URL}"
+    return 2
   fi
-
 }
 
-get_ext_files() {
+get_ext_files()
+{
   YAML_PATH=$1
   for FILEPATH in ./config/*.yaml ./config/*.yml
   do
@@ -401,11 +405,20 @@ if [ "$INSTALL" == true ]; then
   done
   echo ""
 
-  echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'API v2 Ingest metrics', 'API v1 Read configuration' and 'WriteConfig' scope"
+  echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)."
+  echo "The token requires grant of 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read configuration (API v1)',  and 'Write configuration (API v1)' scope"
   while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
       read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
   done
   echo ""
+
+  if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "api/v2/extensions/schemas"); then
+    GCP_EXTENSIONS_SCHEMA_PRESENT=$(echo "${EXTENSIONS_SCHEMA_RESPONSE}" | jq -r '.versions[] | select(.=="1.229.0")')
+    if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
+      echo -e "\e[91mERROR: \e[37mDynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.229 or higher to complete installation."
+      exit 1
+    fi
+  fi
 
   echo -e
   echo "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com]"
