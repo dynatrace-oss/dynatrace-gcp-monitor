@@ -510,6 +510,3 @@ rm ./$FUNCTION_ZIP_PACKAGE
 
 echo "- removing temporary directory [$FUNCTION_ZIP_PACKAGE]"
 rm -r ./$GCP_FUNCTION_NAME
-
-echo "- removing extensions files"
-rm -rf ./extensions $EXTENSION_MANIFEST_FILE
