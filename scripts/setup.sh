@@ -20,13 +20,24 @@ onFailure() {
 
 trap onFailure ERR
 
-
 versionNumber() {
    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; 
 }
 
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring"
 echo -e "\033[0;37m"
+
+print_help() {
+  printf "
+usage: setup.sh [--upgrade-extensions]
+
+arguments:
+    --upgrade-extensions
+                            Upgrade all extensions into dynatrace cluster
+    -h, --help
+                            Show this help message and exit
+    "
+}
 
 if ! command -v yq &> /dev/null
 then
@@ -47,7 +58,6 @@ else
   VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
   echo "Using yq version $VERSION_YQ"
   
-
   if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
       echo -e
       echo -e "\e[91mERROR: \e[37m yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:"
@@ -75,6 +85,25 @@ then
     echo
     exit
 fi
+
+while (( "$#" )); do
+    case "$1" in
+            "--upgrade-extensions")
+                UPGRADE_EXTENSIONS="Y"
+                shift
+            ;;
+
+            "-h" | "--help")
+                print_help
+                exit 0
+            ;;
+
+            *)
+            echo "Unknown param $1"
+            print_help
+            exit 1
+    esac
+done
 
 readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
 readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
@@ -129,7 +158,6 @@ readonly SELF_MONITORING_ENABLED=$(yq e '.googleCloud.common.selfMonitoringEnabl
 
 shopt -s nullglob
 
-
 dt_api()
 {
   URL=$1
@@ -149,16 +177,14 @@ dt_api()
 
 }
 
-warn()
-{
+warn() {
   MESSAGE=$1
   echo -e >&2
   echo -e "\e[93mWARNING: \e[37m$MESSAGE" >&2
   echo -e >&2
 }
 
-get_ext_files()
-{
+get_ext_files() {
   YAML_PATH=$1
   for FILEPATH in ./config/*.yaml ./config/*.yml
   do
@@ -178,18 +204,57 @@ get_ext_files()
   done
 }
 
+get_extensions_zip_packages() {
+  curl -s -O $EXTENSION_S3_URL/$EXTENSION_MANIFEST_FILE
+  mkdir -p ./extensions
+
+  grep -v '^ *#' < "$EXTENSION_MANIFEST_FILE" | while IFS= read -r EXTENSION_FILE_NAME
+  do 
+    (cd ./extensions && curl -s -O "$EXTENSION_S3_URL/$EXTENSION_FILE_NAME")
+  done
+}
+
+get_activated_extensions_on_cluster() {
+  DYNATRACE_URL=$1
+  DYNATRACE_ACCESS_KEY=$2
+
+  if RESPONSE=$(curl -k -s "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
+    ENTNSION_FROM_CLUSTER=$(echo "$RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
+
+    for EXTENSION_ZIP in $(ls ./extensions | grep .zip); do
+      EXTENSION_NAME=${EXTENSION_ZIP//-[0-9]\.[0-9]\.[0-9].zip/}
+      EXTENSION_VERSION=${EXTENSION_ZIP//[a-z-]/}
+      EXTENSION_IN_DT=$(echo "${ENTNSION_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
+
+      if [ -z "$EXTENSION_IN_DT" ]; then
+        # missing extension in cluster installing it
+        UPLOADED_EXTENSION=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@extensions/$EXTENSION_ZIP;type=application/zip" | jq -r '.extensionName')
+        curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION:0:5}\"}" "$DYNATRACE_URL/api/v2/extensions/$UPLOADED_EXTENSION/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
+      elif [ "$(versionNumber ${EXTENSION_VERSION:0:5})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+        # cluster has never version warning and install if flag was set
+        if [ -n "$UPGRADE_EXTENSIONS" ]; then
+          UPLOADED_EXTENSION=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@extensions/$EXTENSION_ZIP;type=application/zip" | jq -r '.extensionName')
+          curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION:0:5}\"}" "$DYNATRACE_URL/api/v2/extensions/com.dynatrace.extension.$EXTENSION_NAME/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
+        else
+          warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION:0:5}"
+        fi
+      elif [ "$(versionNumber ${EXTENSION_VERSION:0:5})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+        warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is never then ${EXTENSION_NAME}:${EXTENSION_VERSION:0:5}"
+      fi
+    done
+  fi
+}
+
 check_if_parameter_is_empty()
 {
   PARAMETER=$1
   PARAMETER_NAME=$2
-  if [ "$PARAMETER" == "null" ] || [ -z "$PARAMETER" ]
-  then
+  if [ "$PARAMETER" == "null" ] || [ -z "$PARAMETER" ]; then
     warn "Missing required parameter: $PARAMETER_NAME. Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
     exit
   fi
 }
-
-
 
 check_if_parameter_is_empty "$GCP_PUBSUB_TOPIC" "'googleCloud.metrics.pubSubTopic'"
 check_if_parameter_is_empty "$GCP_SCHEDULER_NAME" "'googleCloud.metrics.scheduler'"
@@ -266,7 +331,6 @@ if [ "$INSTALL" == true ]; then
   done
   echo ""
 
-
   echo -e
   echo "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com]"
   gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com
@@ -322,6 +386,10 @@ if [ "$INSTALL" == true ]; then
 fi
 
 echo -e
+echo "- activating extensions in Dynatrace"
+get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
+
+echo -e
 echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
 wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
 
@@ -363,7 +431,6 @@ if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="v
     gcloud -q scheduler jobs delete "$GCP_SCHEDULER_NAME"
 fi
 gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
-
 
   echo -e
   echo "- create self monitoring dashboard"
@@ -441,3 +508,6 @@ rm ./$FUNCTION_ZIP_PACKAGE
 
 echo "- removing temporary directory [$FUNCTION_ZIP_PACKAGE]"
 rm -r ./$GCP_FUNCTION_NAME
+
+echo "- removing extensions files"
+rm -rf ./extensions $EXTENSION_MANIFEST_FILE
