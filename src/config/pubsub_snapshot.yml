@@ -15,8 +15,14 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.snapshot_id
     id: snapshot_id
+    compatibilityModeOnly: true
+  - value: resource.labels.snapshot_id
+    id: gcp.instance.id
   metrics:
   - value: pubsub.googleapis.com/snapshot/backlog_bytes
     id: cloud.gcp.pubsub_googleapis_com.snapshot.backlog_bytes
@@ -41,6 +47,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityModeOnly: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/snapshot/config_updates_count
     id: cloud.gcp.pubsub_googleapis_com.snapshot.config_updates_count
     type: count,delta
@@ -77,6 +86,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityModeOnly: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/snapshot/oldest_message_age
     id: cloud.gcp.pubsub_googleapis_com.snapshot.oldest_message_age
     type: gauge
@@ -100,3 +112,6 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityModeOnly: true
+    - value: metric.labels.region
+      id: gcp.region

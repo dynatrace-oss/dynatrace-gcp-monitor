@@ -1,5 +1,6 @@
 import json
 import os
+from asyncio import sleep
 from os import listdir
 from os.path import isfile
 from typing import List, Optional, Dict, Callable
@@ -135,6 +136,7 @@ class ConfigureDynatrace:
                 f"All dashboards already installed, skipping. (if you wish to upgrade a dashboard, please delete it first)")
 
         if installed_dashboards:
+            await sleep(5) # can be removed after APM-323370
             for dashboard_id in installed_dashboards:
                 await self.post_dashboard_share_settings(dashboard_id, dt_api)
 

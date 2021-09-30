@@ -15,12 +15,21 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.cluster_name
     id: cluster_name
+    compatibilityModeOnly: false
+  - value: resource.labels.cluster_name
+    id: gcp.instance.name
   - value: resource.labels.cluster_uuid
     id: cluster_uuid
   - value: resource.labels.region
     id: region
+    compatibilityModeOnly: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: dataproc.googleapis.com/cluster/hdfs/datanodes
     id: cloud.gcp.dataproc_googleapis_com.cluster.hdfs.datanodes

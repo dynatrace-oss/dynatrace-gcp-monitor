@@ -15,8 +15,14 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.subscription_id
     id: subscription_id
+    compatibilityModeOnly: true
+  - value: resource.labels.subscription_id
+    id: gcp.instance.id
   metrics:
   - value: pubsub.googleapis.com/subscription/ack_message_count
     id: cloud.gcp.pubsub_googleapis_com.subscription.ack_message_count
@@ -150,6 +156,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityModeOnly: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/num_unacked_messages_by_region
     id: cloud.gcp.pubsub_googleapis_com.subscription.num_unacked_messages_by_region
     type: gauge
@@ -162,6 +171,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityModeOnly: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/num_undelivered_messages
     id: cloud.gcp.pubsub_googleapis_com.subscription.num_undelivered_messages
     type: gauge
@@ -196,6 +208,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityModeOnly: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/oldest_unacked_message_age
     id: cloud.gcp.pubsub_googleapis_com.subscription.oldest_unacked_message_age
     type: gauge
@@ -219,6 +234,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityModeOnly: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/pull_ack_message_operation_count
     id: cloud.gcp.pubsub_googleapis_com.subscription.pull_ack_message_operation_count
     type: count,delta
@@ -319,6 +337,9 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityModeOnly: true
+    - value: metric.labels.region
+      id: gcp.region
   - value: pubsub.googleapis.com/subscription/seek_request_count
     id: cloud.gcp.pubsub_googleapis_com.subscription.seek_request_count
     type: count,delta
@@ -430,5 +451,8 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.region
+      compatibilityModeOnly: true
+    - value: metric.labels.region
+      id: gcp.region
 dashboards:
   - dashboard: "dashboards/pubsub.json"

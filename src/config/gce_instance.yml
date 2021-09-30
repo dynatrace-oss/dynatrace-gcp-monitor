@@ -15,10 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.instance_id
     id: instance_id
+    compatibilityModeOnly: true
+  - value: resource.labels.instance_id
+    id: gcp.instance.id
   - value: resource.labels.zone
     id: zone
+    compatibilityModeOnly: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: compute.googleapis.com/firewall/dropped_bytes_count
     id: cloud.gcp.compute_googleapis_com.firewall.dropped_bytes_count
@@ -32,6 +41,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/firewall/dropped_packets_count
     id: cloud.gcp.compute_googleapis_com.firewall.dropped_packets_count
     type: count,delta
@@ -44,6 +57,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/guest/cpu/runnable_task_count
     id: cloud.gcp.compute_googleapis_com.guest.cpu.runnable_task_count
     type: gauge
@@ -56,6 +73,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/guest/cpu/usage_time
     id: cloud.gcp.compute_googleapis_com.guest.cpu.usage_time
     type: count,delta
@@ -68,6 +89,10 @@ gcp:
       metricKind: CUMULATIVE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/disk/bytes_used
     id: cloud.gcp.compute_googleapis_com.guest.disk.bytes_used
@@ -81,6 +106,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/disk/io_time
@@ -95,6 +124,10 @@ gcp:
       metricKind: CUMULATIVE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
   - value: compute.googleapis.com/guest/disk/merged_operation_count
     id: cloud.gcp.compute_googleapis_com.guest.disk.merged_operation_count
@@ -108,6 +141,10 @@ gcp:
       metricKind: CUMULATIVE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.direction
   - value: compute.googleapis.com/guest/disk/operation_bytes_count
@@ -122,6 +159,10 @@ gcp:
       metricKind: CUMULATIVE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.direction
   - value: compute.googleapis.com/guest/disk/operation_count
@@ -136,6 +177,10 @@ gcp:
       metricKind: CUMULATIVE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.direction
   - value: compute.googleapis.com/guest/disk/operation_time
@@ -150,6 +195,10 @@ gcp:
       metricKind: CUMULATIVE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.direction
   - value: compute.googleapis.com/guest/disk/queue_length
@@ -164,6 +213,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
   - value: compute.googleapis.com/guest/disk/weighted_io_time
     id: cloud.gcp.compute_googleapis_com.guest.disk.weighted_io_time
@@ -177,6 +230,10 @@ gcp:
       metricKind: CUMULATIVE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
   - value: compute.googleapis.com/guest/memory/anonymous_used
     id: cloud.gcp.compute_googleapis_com.guest.memory.anonymous_used
@@ -190,6 +247,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/memory/bytes_used
     id: cloud.gcp.compute_googleapis_com.guest.memory.bytes_used
@@ -203,6 +264,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/memory/dirty_used
     id: cloud.gcp.compute_googleapis_com.guest.memory.dirty_used
@@ -216,6 +281,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/memory/page_cache_used
     id: cloud.gcp.compute_googleapis_com.guest.memory.page_cache_used
@@ -229,6 +298,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/memory/unevictable_used
     id: cloud.gcp.compute_googleapis_com.guest.memory.unevictable_used
@@ -242,6 +315,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/guest/system/problem_count
     id: cloud.gcp.compute_googleapis_com.guest.system.problem_count
     type: count,delta
@@ -254,6 +331,10 @@ gcp:
       metricKind: CUMULATIVE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.reason
   - value: compute.googleapis.com/guest/system/problem_state
     id: cloud.gcp.compute_googleapis_com.guest.system.problem_state
@@ -267,6 +348,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.reason
     - value: metric.labels.type
   - value: compute.googleapis.com/guest/system/uptime
@@ -281,6 +366,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.kernel_version
     - value: metric.labels.os_version
   - value: compute.googleapis.com/instance/cpu/reserved_cores
@@ -295,6 +384,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/instance/cpu/scheduler_wait_time
     id: cloud.gcp.compute_googleapis_com.instance.cpu.scheduler_wait_time
     type: count,delta
@@ -307,6 +400,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/instance/cpu/usage_time
     id: cloud.gcp.compute_googleapis_com.instance.cpu.usage_time
     type: count,delta
@@ -319,6 +416,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/instance/cpu/utilization
     id: cloud.gcp.compute_googleapis_com.instance.cpu.utilization
     type: gauge
@@ -331,6 +432,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/instance/disk/max_read_bytes_count
     id: cloud.gcp.compute_googleapis_com.instance.disk.max_read_bytes_count
     type: gauge
@@ -399,6 +504,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
@@ -414,6 +523,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
@@ -429,6 +542,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
@@ -445,6 +562,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
@@ -461,6 +582,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
@@ -477,6 +602,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
@@ -493,6 +622,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
@@ -508,6 +641,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
@@ -523,6 +660,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.status
   - value: compute.googleapis.com/instance/integrity/late_boot_validation_status
     id: cloud.gcp.compute_googleapis_com.instance.integrity.late_boot_validation_status
@@ -536,6 +677,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.status
   - value: compute.googleapis.com/instance/memory/balloon/ram_size
     id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_size
@@ -549,6 +694,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/instance/memory/balloon/ram_used
     id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_used
     type: gauge
@@ -561,6 +710,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/instance/memory/balloon/swap_in_bytes_count
     id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_in_bytes_count
     type: count,delta
@@ -573,6 +726,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/instance/memory/balloon/swap_out_bytes_count
     id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_out_bytes_count
     type: count,delta
@@ -585,6 +742,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/instance/network/received_bytes_count
     id: cloud.gcp.compute_googleapis_com.instance.network.received_bytes_count
     type: count,delta
@@ -597,6 +758,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.loadbalanced
   - value: compute.googleapis.com/instance/network/received_packets_count
     id: cloud.gcp.compute_googleapis_com.instance.network.received_packets_count
@@ -610,6 +775,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.loadbalanced
   - value: compute.googleapis.com/instance/network/sent_bytes_count
     id: cloud.gcp.compute_googleapis_com.instance.network.sent_bytes_count
@@ -623,6 +792,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.loadbalanced
   - value: compute.googleapis.com/instance/network/sent_packets_count
     id: cloud.gcp.compute_googleapis_com.instance.network.sent_packets_count
@@ -636,6 +809,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
     - value: metric.labels.loadbalanced
   - value: compute.googleapis.com/instance/uptime
     id: cloud.gcp.compute_googleapis_com.instance.uptime
@@ -649,6 +826,10 @@ gcp:
       metricKind: DELTA
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/instance/uptime_total
     id: cloud.gcp.compute_googleapis_com.instance.uptime_total
     type: gauge
@@ -661,6 +842,10 @@ gcp:
       metricKind: GAUGE
     dimensions:
     - value: metric.labels.instance_name
+      id: instance_name
+      compatibilityModeOnly: true
+    - value: metric.labels.instance_name
+      id: gcp.instance.name
   - value: compute.googleapis.com/mirroring/dropped_packets_count
     id: cloud.gcp.compute_googleapis_com.mirroring.dropped_packets_count
     type: count,delta

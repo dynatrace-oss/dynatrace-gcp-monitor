@@ -15,10 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.location
     id: location
+    compatibilityModeOnly: true
+  - value: resource.labels.location
+    id: gcp.region
   - value: resource.labels.volume_id
     id: volume_id
+    compatibilityModeOnly: true
+  - value: resource.labels.volume_id
+    id: gcp.instance.id
   metrics:
   - value: netapp.com/cloudvolume/inode_allocation
     id: cloud.gcp.netapp_com.cloudvolume.inode_allocation

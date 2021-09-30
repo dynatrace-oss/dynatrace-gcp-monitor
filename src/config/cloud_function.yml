@@ -15,10 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.function_name
     id: function_name
+    compatibilityModeOnly: true
+  - value: resource.labels.function_name
+    id: gcp.instance.name
   - value: resource.labels.region
     id: region
+    compatibilityModeOnly: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: cloudfunctions.googleapis.com/function/active_instances
     id: cloud.gcp.cloudfunctions_googleapis_com.function.active_instances
