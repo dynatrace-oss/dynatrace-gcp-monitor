@@ -33,8 +33,8 @@ dynatraceUrl: ""
 
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
-#dynatraceLogIngestUrl endpoint used to ingest logs to Dynatrace:
-#  - for direct ingest through the Cluster API: https://<your_environment_ID>.live.dynatrace.com
+#dynatraceLogIngestUrl ActiveGate endpoint used to ingest logs to Dynatrace:
+#  - for Public ActiveGate: https://<your_environment_ID>.live.dynatrace.com
 #  - for Environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
 #used ONLY when the activeGate.useExisting is true
 dynatraceLogIngestUrl: ""
