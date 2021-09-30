@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 #     Copyright 2020 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,6 +97,7 @@ readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecre
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly FUNCTION_GCP_SERVICES=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq 'join(",")')
 readonly SERVICES_TO_ACTIVATE=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[] | sed 's/\/.*$//')
+readonly FEATURE_SETS_TO_ACTIVATE=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[])
 readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
@@ -339,6 +340,34 @@ else
   GCP_FUNCTION_TIMEOUT=$(( QUERY_INTERVAL_MIN*60 ))
   GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL_MIN} * * * *"
 fi
+
+cd ../extensions || exit
+echo "- choosing extensions to upload to Dynatrace"
+for EXTENSION_ZIP in *.zip; do
+  EXTENSION_NAME="$(basename "$EXTENSION_ZIP" .zip)"
+  unzip -j -q "$EXTENSION_ZIP" "extension.zip"
+  unzip -p -q "extension.zip" "extension.yaml" > "$EXTENSION_NAME".yaml
+  EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_NAME".yaml)
+  SERVICES=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"')
+  REMOVE_EXTENSION=true
+  for SERVICE in $SERVICES; do
+    SERVICE="${SERVICE/null/default}"
+    if [[ "$FUNCTION_GCP_SERVICES" == *"$SERVICE"* ]]; then
+      REMOVE_EXTENSION=false
+      CONFIG_NAME=$(yq e '.name' "$EXTENSION_NAME".yaml)
+      if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
+        echo "gcp:" > ../dynatrace-gcp-function/config/"${BASH_REMATCH[1]}".yaml
+        echo "$EXTENSION_GCP_CONFIG" >> ../dynatrace-gcp-function/config/"${BASH_REMATCH[1]}".yaml
+      fi
+      break
+    fi
+  done
+  rm extension.zip
+  rm "$EXTENSION_NAME".yaml
+  if $REMOVE_EXTENSION; then rm "$EXTENSION_ZIP"; fi
+done
+
+cd ../$GCP_FUNCTION_NAME || exit
 
 if [ "$INSTALL" == true ]; then
   echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
