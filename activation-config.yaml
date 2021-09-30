@@ -231,4 +231,4 @@ activation:
     # Google VPC Access Connector
     #- vpc_access_connector/default
     # Google Cloud VPN Tunnel
-    #- vpn_gatewayv/None
+    #- vpn_gateway/default
