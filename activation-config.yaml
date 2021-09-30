@@ -139,7 +139,7 @@ activation:
     # Google VM Instance Uptime Checks
     #- gce_instance/uptime_check
     # Google VM Instance VM Flow
-    #- gce_instance_vm_flow/None
+    #- gce_instance_vm_flow/default
     # Google Cloud Router
     #- gce_router/default
     # Google Zone Network Health
