@@ -48,10 +48,10 @@ system_variables = {
     'DYNATRACE_LOG_INGEST_URL': 'http://localhost:' + str(MOCKED_API_PORT),
     'DYNATRACE_ACCESS_KEY': ACCESS_KEY,
     'REQUIRE_VALID_CERTIFICATE': 'False',
+    'GCP_PROJECT': 'dynatrace-gcp-extension'
     # Set below-mentioned environment variables to push custom metrics to GCP Monitor
     # 'SELF_MONITORING_ENABLED': 'True',
     # 'GOOGLE_APPLICATION_CREDENTIALS': '',
-    # 'GCP_PROJECT': '',
     # 'LOGS_SUBSCRIPTION_ID': ''
 }
 

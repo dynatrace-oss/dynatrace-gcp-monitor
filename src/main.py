@@ -37,15 +37,21 @@ from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
 
 
-def dynatrace_gcp_extension(event, context, project_id: Optional[str] = None):
+def dynatrace_gcp_extension(event, context):
+    """
+    Starting point for installation as a GCP function. See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
+    """
     try:
-        asyncio.run(handle_event(event, context, project_id))
+        asyncio.run(handle_event(event, context))
     except Exception as e:
         traceback.print_exc()
         raise e
 
 
 async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None):
+    """
+    Used in docker or for tests
+    """
     timestamp_utc = datetime.utcnow()
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
@@ -60,7 +66,7 @@ async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None)
     data = {'data': '', 'publishTime': timestamp_utc_iso}
 
     start_time = time.time()
-    await handle_event(data, event_context, "dynatrace-gcp-extension", project_ids)
+    await handle_event(data, event_context, project_ids)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
@@ -69,8 +75,9 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, event_context, project_id_owner: Optional[str], projects_ids: Optional[List[str]] = None):
+async def handle_event(event: Dict, event_context, projects_ids: Optional[List[str]] = None):
     if isinstance(event_context, Dict):
+        # for k8s installation
         context = LoggingContext(event_context.get("execution_id", None))
     else:
         context = LoggingContext(None)
@@ -97,8 +104,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
         context.log("Successfully obtained access token")
 
-        if not project_id_owner:
-            project_id_owner = get_project_id_from_environment()
+        project_id_owner = get_project_id_from_environment()
 
         dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
