@@ -15,10 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.instance_id
     id: instance_id
+    compatibilityModeOnly: true
+  - value: resource.labels.instance_id
+    id: gcp.instance.id
   - value: resource.labels.zone
     id: zone
+    compatibilityModeOnly: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: agent.googleapis.com/agent/api_request_count
     id: cloud.gcp.agent_googleapis_com.agent.api_request_count

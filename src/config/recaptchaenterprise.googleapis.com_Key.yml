@@ -17,8 +17,14 @@ gcp:
     id: resource_container
   - value: resource.labels.location
     id: location
+    compatibilityModeOnly: true
+  - value: resource.labels.location
+    id: gcp.region
   - value: resource.labels.key_id
     id: key_id
+    compatibilityModeOnly: true
+  - value: resource.labels.key_id
+    id: gcp.instance.id
   metrics: 
   - value: recaptchaenterprise.googleapis.com/score_counts
     id: cloud.gcp.recaptchaenterprise_googleapis_com.score_counts

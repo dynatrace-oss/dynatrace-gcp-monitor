@@ -15,12 +15,18 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.module_id
     id: module_id
   - value: resource.labels.version_id
     id: version_id
   - value: resource.labels.zone
     id: zone
+    compatibilityModeOnly: true
+  - value: resource.labels.zone
+    id: gcp.region
   metrics:
   - value: monitoring.googleapis.com/uptime_check/check_passed
     id: cloud.gcp.monitoring_googleapis_com.uptime_check.check_passed

@@ -15,10 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.region
     id: region
+    compatibilityModeOnly: true
+  - value: resource.labels.region
+    id: gcp.region
   - value: resource.labels.url_map_name
     id: url_map_name
+    compatibilityModeOnly: true
+  - value: resource.labels.url_map_name
+    id: gcp.instance.name
   - value: resource.labels.forwarding_rule_name
     id: forwarding_rule_name
   - value: resource.labels.target_proxy_name

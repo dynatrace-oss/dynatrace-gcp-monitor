@@ -15,10 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.router_id
     id: router_id
+    compatibilityModeOnly: true
+  - value: resource.labels.router_id
+    id: gcp.instance.id
   - value: resource.labels.region
     id: region
+    compatibilityModeOnly: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: router.googleapis.com/best_received_routes_count
     id: cloud.gcp.router_googleapis_com.best_received_routes_count

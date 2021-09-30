@@ -94,6 +94,11 @@ serviceUsageBooking: "source"
 importDashboards: "true"
 # Import predefined alerting rules for selected services. Allowed values: "true"/"yes", "false"/"no"
 importAlerts: "true"
+# Compatibility mode - concerns the change in reported dimension names. Allowed values: "true"/"yes", "false"/"no".
+# Should be false for all new setups. Meant to allow a gradual transition for setups that already have historical metrics data.
+# If true, report deprecated metric dimensions (flagged as compatiblityModeOnly=true) along their new equivalents:
+# project_id > gcp.project.id | region, location, zone, metrics.label.region > gcp.region
+compatibilityMode: "false"
 # Metrics polling interval in minutes. Allowed values: 1 - 6
 queryInterval: 3
 #clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh

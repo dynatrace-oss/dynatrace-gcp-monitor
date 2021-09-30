@@ -6,12 +6,24 @@ To run worker function locally you have to have Python dev environment installed
 
 to install all the dependencies run 
 ```shell script
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pip install -r src\requirements.txt
+pip install -r tests\requirements.txt
+pip install --only-binary :all: cryptography==3.4.7 #cryptography library in Windows env requires this special handling or rustup installed
 ```
 
-To run metrics ingest worker function run `local_test.py` script file.
+##Running single local run
+Run `local_test.py` with env_vars set according to the table below. 
+
+To run metrics ingest worker function run `local_test.py` script file. 
+This runs a single run, and then returns. Some expection may appear in Win env, and self-monitoring metrics query can fail. 
 
 To run logs ingest worker function run `local_test.py` script file with `OPERATION_MODE` set to `Logs` 
+
+##Running periodic local run
+Run `run_docker.py` with env_vars set according to the table below.
+
+As opposed to `local_test.py`, this runs continuously.
 
 ## Environment variables
 
@@ -35,6 +47,7 @@ Worker function execution can be tweaked with environment variables. In Google F
 | HTTPS_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |  |
 | IMPORT_DASHBOARDS | Import predefined dashboards for selected services. Allowed values: `true`/`yes`, `false`/`no` | `true` |
 | IMPORT_ALERTS | Import predefined alerting rules for selected services. Allowed values: `true`/`yes`, `false`/`no` | `true` |
+| COMPATIBILITY_MODE | Concerns the change in reported dimension names. Allowed values: `true`/`yes`, `false`/`no` Should be false for all new setups. Meant to allow a gradual transition for setups that already have historical metrics data. If true, report deprecated metric dimensions | `false` 
 | MAX_DIMENSION_NAME_LENGTH | The maximum length of the dimension name sent to the MINT API. Longer names are truncated to the value indicated. Allowed values: positive integers. | 100 |
 | MAX_DIMENSION_VALUE_LENGTH | The maximum length of the dimension value sent to the MINT API. Longer values are truncated to the value indicated. Allowed values: positive integers. | 250 |
 | SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. Allowed values: `true`/`yes`, `false`/`no` | `false` |

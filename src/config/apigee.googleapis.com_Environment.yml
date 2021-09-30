@@ -21,6 +21,9 @@ gcp:
     id: env
   - value: resource.labels.location
     id: location
+    compatibilityModeOnly: true
+  - value: resource.labels.location
+    id: gcp.region
   metrics:
   - value: apigee.googleapis.com/environment/anomaly_count
     id: cloud.gcp.apigee_googleapis_com.environment.anomaly_count

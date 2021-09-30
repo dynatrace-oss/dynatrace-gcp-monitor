@@ -15,10 +15,16 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.site_name
     id: site_name
   - value: resource.labels.domain_name
     id: domain_name
+    compatibilityModeOnly: true
+  - value: resource.labels.domain_name
+    id: gcp.instance.name
   metrics:
   - value: firebasehosting.googleapis.com/storage/limit
     id: cloud.gcp.firebasehosting_googleapis_com.storage.limit

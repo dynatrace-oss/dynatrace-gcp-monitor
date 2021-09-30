@@ -86,7 +86,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.num_retained_acked_messages_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "topic_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -126,7 +126,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.message_sizes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "topic_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -166,7 +166,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.config_updates_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "topic_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -218,7 +218,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.unacked_bytes_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -258,7 +258,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.sent_message_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -298,7 +298,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.seek_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -362,7 +362,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.retained_acked_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -402,7 +402,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.push_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -442,7 +442,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.pull_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -482,7 +482,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.pull_message_operation_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -534,7 +534,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.pull_ack_message_operation_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -670,7 +670,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.num_outstanding_messages",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -710,7 +710,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.backlog_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -750,7 +750,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.ack_message_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -790,7 +790,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.byte_cost.count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -830,7 +830,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.unacked_bytes_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["topic_id", "project_id"]
+            "splitBy": ["gcp.instance.id",  "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -858,7 +858,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.send_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["topic_id", "project_id"]
+            "splitBy": ["gcp.instance.id",  "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -886,7 +886,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.send_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id", "topic_id"]
+            "splitBy": ["response_code",  "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -914,7 +914,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.send_message_operation_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["topic_id", "project_id"]
+            "splitBy": ["gcp.instance.id",  "gcp.project.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -942,7 +942,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.send_message_operation_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["response_code", "project_id", "topic_id"]
+            "splitBy": ["response_code",  "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1084,7 +1084,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.retained_acked_bytes_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "topic_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1112,7 +1112,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.byte_cost.count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "topic_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1140,7 +1140,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.oldest_unacked_message_age_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "topic_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1168,7 +1168,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.oldest_retained_acked_message_age_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "topic_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1196,7 +1196,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.topic.num_unacked_messages_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "topic_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1224,7 +1224,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.oldest_retained_acked_message_age",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1252,7 +1252,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.num_undelivered_messages",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1280,7 +1280,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.pull_ack_request_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1308,7 +1308,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.retained_acked_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1336,7 +1336,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.retained_acked_bytes_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1364,7 +1364,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.oldest_unacked_message_age_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1392,7 +1392,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.num_unacked_messages_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1420,7 +1420,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.num_retained_acked_messages_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1448,7 +1448,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.num_retained_acked_messages",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1476,7 +1476,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.oldest_unacked_message_age",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -1504,7 +1504,7 @@
             "metric": "cloud.gcp.pubsub_googleapis_com.subscription.oldest_retained_acked_message_age_by_region",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["project_id", "subscription_id"]
+            "splitBy": [ "gcp.project.id", "gcp.instance.id"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",

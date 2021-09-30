@@ -15,6 +15,9 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   metrics:
   - value: actions.googleapis.com/smarthome_action/num_active_users
     id: cloud.gcp.actions_googleapis_com.smarthome_action.num_active_users
