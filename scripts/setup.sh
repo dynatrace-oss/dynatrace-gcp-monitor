@@ -96,8 +96,8 @@ readonly QUERY_INTERVAL_MIN=$(yq e '.googleCloud.metrics.queryInterval' $FUNCTIO
 readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly FUNCTION_GCP_SERVICES=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq 'join(",")')
+readonly SERVICES_LIST=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[] )
 readonly SERVICES_TO_ACTIVATE=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[] | sed 's/\/.*$//')
-readonly FEATURE_SETS_TO_ACTIVATE=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[])
 readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
@@ -351,8 +351,11 @@ for EXTENSION_ZIP in *.zip; do
   SERVICES=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"')
   REMOVE_EXTENSION=true
   for SERVICE in $SERVICES; do
-    SERVICE="${SERVICE/null/default}"
-    if [[ "$FUNCTION_GCP_SERVICES" == *"$SERVICE"* ]]; then
+    SERVICE_WITH_FEATURE_SET="${SERVICE/null/default}"
+    if [[ "$SERVICE_WITH_FEATURE_SET" =~ ^(.*)\/default$ ]]; then
+      SERVICE="${BASH_REMATCH[1]}"
+    fi
+    if [[ "$SERVICES_LIST" =~ (^|[[:space:]])$SERVICE_WITH_FEATURE_SET($|[[:space:]]) ]] || [[ "$SERVICES_LIST" =~ (^|[[:space:]])$SERVICE($|[[:space:]]) ]]; then
       REMOVE_EXTENSION=false
       CONFIG_NAME=$(yq e '.name' "$EXTENSION_NAME".yaml)
       if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
