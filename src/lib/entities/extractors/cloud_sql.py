@@ -66,4 +66,4 @@ async def get_cloud_sql_entity(ctx: MetricsContext, project_id: str, svc_def: GC
 
     url = f"{_SQL_ENDPOINT}/sql/v1beta4/projects/{project_id}/instances"
     mapper_func = partial(_cloud_sql_resp_to_monitored_entities, svc_def=svc_def)
-    return await generic_paging(url, ctx, mapper_func)
+    return await generic_paging(project_id, url, ctx, mapper_func)
