@@ -58,13 +58,13 @@ else
   VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
   echo "Using yq version $VERSION_YQ"
 
-  if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
-      echo -e
-      echo -e "\e[91mERROR: \e[37m yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:"
-      echo -e "YQ: https://github.com/mikefarah/yq"
-      echo -e
-      exit 1
-  fi
+  # if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
+  #     echo -e
+  #     echo -e "\e[91mERROR: \e[37m yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:"
+  #     echo -e "YQ: https://github.com/mikefarah/yq"
+  #     echo -e
+  #     exit 1
+  # fi
 fi
 
 
@@ -155,7 +155,7 @@ readonly GCP_IAM_ROLE_PERMISSIONS=(
   monitoring.dashboards.create
 )
 readonly SELF_MONITORING_ENABLED=$(yq e '.googleCloud.common.selfMonitoringEnabled' $FUNCTION_ACTIVATION_CONFIG)
-
+EXTENSIONS_FROM_CLUSTER=""
 
 shopt -s nullglob
 
@@ -205,43 +205,41 @@ get_ext_files() {
   done
 }
 
-get_extensions_zip_packages() {
-  curl -s -O $EXTENSION_S3_URL/$EXTENSION_MANIFEST_FILE
-  mkdir -p ./extensions
-
-  grep -v '^ *#' < "$EXTENSION_MANIFEST_FILE" | while IFS= read -r EXTENSION_FILE_NAME
-  do 
-    (cd ./extensions && curl -s -O "$EXTENSION_S3_URL/$EXTENSION_FILE_NAME")
-  done
-}
-
 get_activated_extensions_on_cluster() {
   DYNATRACE_URL=$1
   DYNATRACE_ACCESS_KEY=$2
 
   if RESPONSE=$(curl -k -s "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
-    ENTNSION_FROM_CLUSTER=$(echo "$RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
+    EXTENSIONS_FROM_CLUSTER=$(echo "$RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
+  fi  
+}
 
-    for EXTENSION_ZIP in $(ls ./extensions | grep .zip); do
-      EXTENSION_NAME=${EXTENSION_ZIP//-[0-9]\.[0-9]\.[0-9].zip/}
-      EXTENSION_VERSION=${EXTENSION_ZIP//[a-z-]/}
-      EXTENSION_IN_DT=$(echo "${ENTNSION_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
+activate_extension_on_cluster() {
+  DYNATRACE_URL=$1
+  DYNATRACE_ACCESS_KEY=$2
+  EXTENSIONS_FROM_CLUSTER=$3
+
+  if [ -z "$EXTENSIONS_FROM_CLUSTER" ]; then
+    for EXTENSION_ZIP in ./extensions/*.zip*; do
+      EXTENSION_NAME=${EXTENSION_ZIP:13:${#EXTENSION_ZIP}-23}
+      EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
+      EXTENSION_IN_DT=$(echo "${EXTENSIONS_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
 
       if [ -z "$EXTENSION_IN_DT" ]; then
         # missing extension in cluster installing it
         UPLOADED_EXTENSION=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@extensions/$EXTENSION_ZIP;type=application/zip" | jq -r '.extensionName')
-        curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION:0:5}\"}" "$DYNATRACE_URL/api/v2/extensions/$UPLOADED_EXTENSION/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
-      elif [ "$(versionNumber ${EXTENSION_VERSION:0:5})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+        curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}" "$DYNATRACE_URL/api/v2/extensions/$UPLOADED_EXTENSION/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
+      elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
         # cluster has never version warning and install if flag was set
         if [ -n "$UPGRADE_EXTENSIONS" ]; then
           UPLOADED_EXTENSION=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@extensions/$EXTENSION_ZIP;type=application/zip" | jq -r '.extensionName')
-          curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION:0:5}\"}" "$DYNATRACE_URL/api/v2/extensions/com.dynatrace.extension.$EXTENSION_NAME/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
+          curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}" "$DYNATRACE_URL/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
         else
-          warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION:0:5}"
+          warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
         fi
-      elif [ "$(versionNumber ${EXTENSION_VERSION:0:5})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-        warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is never then ${EXTENSION_NAME}:${EXTENSION_VERSION:0:5}"
+      elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+        warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is never then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
       fi
     done
   fi
@@ -387,8 +385,12 @@ if [ "$INSTALL" == true ]; then
 fi
 
 echo -e
-echo "- activating extensions in Dynatrace"
+echo "- checking activated extensions in Dynatrace"
 get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
+
+echo -e
+echo "- activating extensions in Dynatrace"
+activate_extension_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSIONS_FROM_CLUSTER"
 
 echo -e
 echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
