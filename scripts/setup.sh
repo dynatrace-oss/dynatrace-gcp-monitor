@@ -96,8 +96,8 @@ readonly QUERY_INTERVAL_MIN=$(yq e '.googleCloud.metrics.queryInterval' $FUNCTIO
 readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly FUNCTION_GCP_SERVICES=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq 'join(",")')
-readonly SERVICES_LIST=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[] )
 readonly SERVICES_TO_ACTIVATE=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[] | sed 's/\/.*$//')
+SERVICES_FROM_ACTIVATION_CONFIG=($(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[] ))
 readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
@@ -341,6 +341,13 @@ else
   GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL_MIN} * * * *"
 fi
 
+for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
+  if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]];then
+    SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default"
+  fi
+done
+SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
+
 cd ../extensions || exit
 echo "- choosing extensions to upload to Dynatrace"
 for EXTENSION_ZIP in *.zip; do
@@ -348,14 +355,11 @@ for EXTENSION_ZIP in *.zip; do
   unzip -j -q "$EXTENSION_ZIP" "extension.zip"
   unzip -p -q "extension.zip" "extension.yaml" > "$EXTENSION_NAME".yaml
   EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_NAME".yaml)
-  SERVICES=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"')
+  SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"')
   REMOVE_EXTENSION=true
-  for SERVICE in $SERVICES; do
-    SERVICE_WITH_FEATURE_SET="${SERVICE/null/default}"
-    if [[ "$SERVICE_WITH_FEATURE_SET" =~ ^(.*)\/default$ ]]; then
-      SERVICE="${BASH_REMATCH[1]}"
-    fi
-    if [[ "$SERVICES_LIST" =~ (^|[[:space:]])$SERVICE_WITH_FEATURE_SET($|[[:space:]]) ]] || [[ "$SERVICES_LIST" =~ (^|[[:space:]])$SERVICE($|[[:space:]]) ]]; then
+  for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
+    SERVICE_FROM_EXTENSION="${SERVICE_FROM_EXTENSION/null/default}"
+    if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
       REMOVE_EXTENSION=false
       CONFIG_NAME=$(yq e '.name' "$EXTENSION_NAME".yaml)
       if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
