@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/usr/bin/env bash 
 #     Copyright 2020 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,22 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+warn() {
+  MESSAGE=$1
+  echo -e >&2
+  echo -e "\e[93mWARNING: \e[37m$MESSAGE" >&2
+  echo -e >&2
+}
+
+err() {
+  MESSAGE=$1
+  echo -e >&2
+  echo -e "\e[91mERROR: \e[37m$MESSAGE" >&2
+  echo -e >&2
+}
+
 onFailure() {
-    echo -e "\e[91mERROR: - deployment failed, please examine error messages and run again"
+    err " - deployment failed, please examine error messages and run again"
     exit 2
 }
 
@@ -42,27 +56,27 @@ arguments:
 if ! command -v yq &> /dev/null
 then
 
-    echo -e "\e[91mERROR: \e[37m yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:"
-    echo -e
-    echo -e "YQ: https://github.com/mikefarah/yq"
+    err 'yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
+    YQ: https://github.com/mikefarah/yq'
     if ! command -v jq &> /dev/null
     then
         echo -e "JQ: https://stedolan.github.io/jq/download/"
     fi
-    echo -e
-    echo -e "You may also try installing YQ with PIP: pip install yq"
-    echo -e ""
-    echo
+    err 'You may also try installing YQ with PIP: pip install yq'
     exit 1
 else
   VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
+
+  if [ "$VERSION_YQ" == "version" ]; then
+    VERSION_YQ=$(yq --version | cut -d' ' -f4 | tr -d '"')
+  fi
+
   echo "Using yq version $VERSION_YQ"
 
-  if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
-      echo -e
-      echo -e "\e[91mERROR: \e[37m yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:"
-      echo -e "YQ: https://github.com/mikefarah/yq"
-      echo -e
+  if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.0.0')" ]; then
+
+      err 'yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
+      YQ: https://github.com/mikefarah/yq'
       exit 1
   fi
 fi
@@ -71,18 +85,14 @@ fi
 if ! command -v gcloud &> /dev/null
 then
 
-    echo -e "\e[91mERROR: \e[37mGoogle Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:"
-    echo -e
-    echo -e "https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version"
-    echo -e
-    echo
+    err 'Google Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:'
+    err 'https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version'
     exit
 fi
 
 if ! command -v unzip &> /dev/null
 then
-    echo -e "\e[91mERROR: \e[37munzip is required to install Dynatrace function"
-    echo
+    err 'unzip is required to install Dynatrace function'
     exit
 fi
 
@@ -178,13 +188,6 @@ dt_api()
 
 }
 
-warn() {
-  MESSAGE=$1
-  echo -e >&2
-  echo -e "\e[93mWARNING: \e[37m$MESSAGE" >&2
-  echo -e >&2
-}
-
 get_ext_files() {
   YAML_PATH=$1
   for FILEPATH in ./config/*.yaml ./config/*.yml
@@ -211,7 +214,17 @@ get_activated_extensions_on_cluster() {
 
   if RESPONSE=$(curl -k -s "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
+    CODE="404"
+    
+    if [ "$CODE" -gt "400" ]; then
+      err "- Dynatrace Cluster at: $DYNATRACE_URL/api/v2/extensions response with code: $CODE"
+      exit
+    fi
+    
     EXTENSIONS_FROM_CLUSTER=$(echo "$RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
+  else
+    err "- Dynatrace Cluster at: $DYNATRACE_URL/api/v2/extensions timeouted."
+    exit
   fi  
 }
 
@@ -220,29 +233,27 @@ activate_extension_on_cluster() {
   DYNATRACE_ACCESS_KEY=$2
   EXTENSIONS_FROM_CLUSTER=$3
 
-  if [ -z "$EXTENSIONS_FROM_CLUSTER" ]; then
-    for EXTENSION_ZIP in ./extensions/*.zip*; do
-      EXTENSION_NAME=${EXTENSION_ZIP:13:${#EXTENSION_ZIP}-23}
-      EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
-      EXTENSION_IN_DT=$(echo "${EXTENSIONS_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
+  for EXTENSION_ZIP in ./extensions/*.zip*; do
+    EXTENSION_NAME=${EXTENSION_ZIP:13:${#EXTENSION_ZIP}-23}
+    EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
+    EXTENSION_IN_DT=$(echo "${EXTENSIONS_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
 
-      if [ -z "$EXTENSION_IN_DT" ]; then
-        # missing extension in cluster installing it
+    if [ -z "$EXTENSION_IN_DT" ]; then
+      # missing extension in cluster installing it
+      UPLOADED_EXTENSION=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@extensions/$EXTENSION_ZIP;type=application/zip" | jq -r '.extensionName')
+      curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}" "$DYNATRACE_URL/api/v2/extensions/$UPLOADED_EXTENSION/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
+    elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+      # cluster has never version warning and install if flag was set
+      if [ -n "$UPGRADE_EXTENSIONS" ]; then
         UPLOADED_EXTENSION=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@extensions/$EXTENSION_ZIP;type=application/zip" | jq -r '.extensionName')
-        curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}" "$DYNATRACE_URL/api/v2/extensions/$UPLOADED_EXTENSION/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
-      elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-        # cluster has never version warning and install if flag was set
-        if [ -n "$UPGRADE_EXTENSIONS" ]; then
-          UPLOADED_EXTENSION=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@extensions/$EXTENSION_ZIP;type=application/zip" | jq -r '.extensionName')
-          curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}" "$DYNATRACE_URL/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
-        else
-          warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
-        fi
-      elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-        warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is never then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+        curl -s -k -X PUT --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}" "$DYNATRACE_URL/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" >/dev/null
+      else
+        warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
       fi
-    done
-  fi
+    elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+      warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is never then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+    fi
+  done
 }
 
 check_if_parameter_is_empty()
