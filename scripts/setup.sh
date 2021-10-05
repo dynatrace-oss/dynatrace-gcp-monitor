@@ -208,26 +208,26 @@ check_api_token() {
     RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
     
     if [ "$CODE" -ge 300 ]; then
-      echo -e "\e[91mERROR: \e[37mFailed to check Dynatrace API token permissions - please verify provided values for parameters: --target-url (${DYNATRACE_URL}) and --target-api-token. $RESPONSE"
+      err "Failed to check Dynatrace API token permissions - please verify provided values for parameters: --target-url (${DYNATRACE_URL}) and --target-api-token. $RESPONSE"
       exit 1
     fi
 
     for REQUIRED in "${V1_API_REQUIREMENTS[@]}"; do
       if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
-        echo -e "\e[91mERROR: \e[37mMissing $REQUIRED permission (v1) for the API token"
+        err "Missing $REQUIRED permission (v1) for the API token"
         exit 1
       fi
     done
 
     for REQUIRED in "${V2_API_REQUIREMENTS[@]}"; do
       if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
-        echo -e "\e[91mERROR: \e[37mMissing $REQUIRED permission (v2) for the API token"
+        err "Missing $REQUIRED permission (v2) for the API token"
         exit 1
       fi
     done
 
   else
-      echo -e "\e[93mWARNING: \e[37mFailed to connect to endpoint $DYNATRACE_URL to check API token permissions. It can be ignored if Dynatrace/ActiveGate does not allow public access."
+      warn "Failed to connect to endpoint $DYNATRACE_URL to check API token permissions. It can be ignored if Dynatrace does not allow public access."
   fi
 }
 
