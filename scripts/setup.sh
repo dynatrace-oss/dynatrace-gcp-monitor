@@ -341,6 +341,28 @@ else
   GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL_MIN} * * * *"
 fi
 
+# If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
+if [[ "$UPGRADE_EXTENSIONS" != "Y" ]]; then
+  echo "- downloading active extensions from Dynatrace"
+  mkdir -p ../extensions_from_cluster
+  cd ../extensions_from_cluster || exit
+  EXTENSIONS_TO_DOWNLOAD="com.dynatrace.extension.google"
+  readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$( echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD" )"
+  for i in "${!EXTENSIONS_FROM_CLUSTER_ARRAY[@]}"; do
+    EXTENSION_NAME="$(cut -d':' -f1 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
+    EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
+    curl -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${API_TOKEN}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+  done
+
+  for EXTENSION_FROM_CLUSTER_ZIP in *.zip; do
+    if [[ "$EXTENSION_FROM_CLUSTER_ZIP" =~ ^($EXTENSIONS_TO_DOWNLOAD.*)-.*$ ]]; then
+      find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+      mv "$EXTENSION_FROM_CLUSTER_ZIP" ../extensions
+    fi
+  done
+fi
+
+# Add '/default' to service name when featureSet is missing
 for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
   if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]];then
     SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default"
@@ -355,10 +377,12 @@ for EXTENSION_ZIP in *.zip; do
   unzip -j -q "$EXTENSION_ZIP" "extension.zip"
   unzip -p -q "extension.zip" "extension.yaml" > "$EXTENSION_NAME".yaml
   EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_NAME".yaml)
+  #Get all service/featureSet pairs defined in extensions
   SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"')
   REMOVE_EXTENSION=true
   for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
     SERVICE_FROM_EXTENSION="${SERVICE_FROM_EXTENSION/null/default}"
+    #Check if service should be monitored
     if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
       REMOVE_EXTENSION=false
       CONFIG_NAME=$(yq e '.name' "$EXTENSION_NAME".yaml)
@@ -373,6 +397,7 @@ for EXTENSION_ZIP in *.zip; do
   rm "$EXTENSION_NAME".yaml
   if $REMOVE_EXTENSION; then rm "$EXTENSION_ZIP"; fi
 done
+rm -r ../extensions_from_cluster
 
 cd ../$GCP_FUNCTION_NAME || exit
 
