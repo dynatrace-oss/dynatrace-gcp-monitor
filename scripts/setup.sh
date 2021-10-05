@@ -251,7 +251,7 @@ activate_extension_on_cluster() {
         warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
       fi
     elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-      warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is never then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+      warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is newer then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
     fi
   done
 }
