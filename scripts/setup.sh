@@ -58,13 +58,13 @@ else
   VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
   echo "Using yq version $VERSION_YQ"
 
-  # if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
-  #     echo -e
-  #     echo -e "\e[91mERROR: \e[37m yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:"
-  #     echo -e "YQ: https://github.com/mikefarah/yq"
-  #     echo -e
-  #     exit 1
-  # fi
+  if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
+      echo -e
+      echo -e "\e[91mERROR: \e[37m yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:"
+      echo -e "YQ: https://github.com/mikefarah/yq"
+      echo -e
+      exit 1
+  fi
 fi
 
 
