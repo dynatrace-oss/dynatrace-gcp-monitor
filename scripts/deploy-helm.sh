@@ -248,7 +248,7 @@ readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --json
 readonly USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.useProxy}")
 readonly HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
 readonly HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
-API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig" "extensions.read" "extensions.write"')
+API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"')
 
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
