@@ -11,59 +11,59 @@ technology:
 gcp:
 - service: bigquery_biengine_model
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.location
-    id: location
+    key: location
     compatibilityModeOnly: true
   - value: resource.labels.location
-    id: gcp.region
+    key: gcp.region
   - value: resource.labels.model_id
-    id: model_id
+    key: model_id
     compatibilityModeOnly: true
   - value: resource.labels.model_id
-    id: gcp.instance.id
+    key: gcp.instance.id
   metrics:
   - value: bigquerybiengine.googleapis.com/model/inflight_requests
-    id: cloud.gcp.bigquerybiengine_googleapis_com.model.inflight_requests
+    key: cloud.gcp.bigquerybiengine_googleapis_com.model.inflight_requests
     type: gauge
     name: Inflight requests
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
   - value: bigquerybiengine.googleapis.com/model/request_count
-    id: cloud.gcp.bigquerybiengine_googleapis_com.model.request_count
+    key: cloud.gcp.bigquerybiengine_googleapis_com.model.request_count
     type: count,delta
     name: Request count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.cache_miss
     - value: metric.labels.status
     - value: metric.labels.execution_mode
   - value: bigquerybiengine.googleapis.com/model/request_latencies
-    id: cloud.gcp.bigquerybiengine_googleapis_com.model.request_latencies
+    key: cloud.gcp.bigquerybiengine_googleapis_com.model.request_latencies
     type: gauge
     name: Request execution times
-    unit: ms
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: GAUGE
+      unit: ms
     dimensions:
     - value: metric.labels.cache_miss
     - value: metric.labels.status

@@ -11,76 +11,76 @@ technology:
 gcp:
 - service: datastore_request
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.module_id
-    id: module_id
+    key: module_id
   - value: resource.labels.version_id
-    id: version_id
+    key: version_id
   metrics:
   - value: datastore.googleapis.com/api/request_count
-    id: cloud.gcp.datastore_googleapis_com.api.request_count
+    key: cloud.gcp.datastore_googleapis_com.api.request_count
     type: count,delta
     name: Requests
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.api_method
     - value: metric.labels.response_code
   - value: datastore.googleapis.com/entity/read_sizes
-    id: cloud.gcp.datastore_googleapis_com.entity.read_sizes
+    key: cloud.gcp.datastore_googleapis_com.entity.read_sizes
     type: gauge
     name: Sizes of read entities
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.type
   - value: datastore.googleapis.com/entity/write_sizes
-    id: cloud.gcp.datastore_googleapis_com.entity.write_sizes
+    key: cloud.gcp.datastore_googleapis_com.entity.write_sizes
     type: gauge
     name: Sizes of written entities
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.op
   - value: datastore.googleapis.com/index/write_count
-    id: cloud.gcp.datastore_googleapis_com.index.write_count
+    key: cloud.gcp.datastore_googleapis_com.index.write_count
     type: count,delta
     name: Index writes
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions: []
   - value: firestore.googleapis.com/api/request_count
-    id: cloud.gcp.firestore_googleapis_com.api.request_count
+    key: cloud.gcp.firestore_googleapis_com.api.request_count
     type: count,delta
     name: Requests
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.api_method
     - value: metric.labels.response_code

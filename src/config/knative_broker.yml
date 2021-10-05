@@ -11,52 +11,52 @@ technology:
 gcp:
 - service: knative_broker
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.location
-    id: location
+    key: location
     compatibilityModeOnly: true
   - value: resource.labels.location
-    id: gcp.region
+    key: gcp.region
   - value: resource.labels.cluster_name
-    id: cluster_name
+    key: cluster_name
   - value: resource.labels.namespace_name
-    id: namespace_name
+    key: namespace_name
   - value: resource.labels.broker_name
-    id: broker_name
+    key: broker_name
     compatibilityModeOnly: true
   - value: resource.labels.broker_name
-    id: gcp.instance.name
-  metrics: 
+    key: gcp.instance.name
+  metrics:
   - value: knative.dev/eventing/broker/event_count
-    id: cloud.gcp.knative_dev.eventing.broker.event_count
+    key: cloud.gcp.knative_dev.eventing.broker.event_count
     type: count,delta
     name: Broker Event Count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.response_code_class
     - value: metric.labels.response_code
     - value: metric.labels.event_type
   - value: knative.dev/internal/eventing/broker/event_count
-    id: cloud.gcp.knative_dev.internal.eventing.broker.event_count
+    key: cloud.gcp.knative_dev.internal.eventing.broker.event_count
     type: count,delta
     name: Write Only Broker Event Count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: '1'
     dimensions:
     - value: metric.labels.container_name
     - value: metric.labels.pod_name

@@ -11,51 +11,51 @@ technology:
 gcp:
 - service: logging_sink
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.name
-    id: name
+    key: name
     compatibilityModeOnly: true
   - value: resource.labels.name
-    id: gcp.instance.name
+    key: gcp.instance.name
   - value: resource.labels.destination
-    id: destination
+    key: destination
   metrics:
   - value: logging.googleapis.com/exports/byte_count
-    id: cloud.gcp.logging_googleapis_com.exports.byte_count
+    key: cloud.gcp.logging_googleapis_com.exports.byte_count
     type: count,delta
     name: Exported log bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 420s
-      samplePeriod: 60s
+      ingestDelay: 420
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: logging.googleapis.com/exports/error_count
-    id: cloud.gcp.logging_googleapis_com.exports.error_count
+    key: cloud.gcp.logging_googleapis_com.exports.error_count
     type: count,delta
     name: Exported log entries failures
-    unit: '1'
     gcpOptions:
-      ingestDelay: 420s
-      samplePeriod: 60s
+      ingestDelay: 420
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions: []
   - value: logging.googleapis.com/exports/log_entry_count
-    id: cloud.gcp.logging_googleapis_com.exports.log_entry_count
+    key: cloud.gcp.logging_googleapis_com.exports.log_entry_count
     type: count,delta
     name: Exported log entries
-    unit: '1'
     gcpOptions:
-      ingestDelay: 420s
-      samplePeriod: 60s
+      ingestDelay: 420
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions: []

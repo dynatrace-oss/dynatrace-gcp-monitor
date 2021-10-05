@@ -11,37 +11,37 @@ technology:
 gcp:
 - service: instance_group
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.location
-    id: location
+    key: location
     compatibilityModeOnly: true
   - value: resource.labels.location
-    id: gcp.region
+    key: gcp.region
   - value: resource.labels.instance_group_id
-    id: instance_group_id
+    key: instance_group_id
     compatibilityModeOnly: true
   - value: resource.labels.instance_group_id
-    id: gcp.instance.id
+    key: gcp.instance.id
   - value: resource.labels.instance_group_name
-    id: instance_group_name
+    key: instance_group_name
     compatibilityModeOnly: true
   - value: resource.labels.instance_group_name
-    id: gcp.instance.name
+    key: gcp.instance.name
   metrics:
   - value: compute.googleapis.com/instance_group/size
-    id: cloud.gcp.compute_googleapis_com.instance_group.size
+    key: cloud.gcp.compute_googleapis_com.instance_group.size
     type: gauge
     name: Instance group size
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions: []

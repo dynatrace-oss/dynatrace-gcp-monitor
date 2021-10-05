@@ -11,34 +11,34 @@ technology:
 gcp:
 - service: gce_instance
   featureSet: istio
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.instance_id
-    id: instance_id
+    key: instance_id
     compatibilityModeOnly: true
   - value: resource.labels.instance_id
-    id: gcp.instance.id
+    key: gcp.instance.id
   - value: resource.labels.zone
-    id: zone
+    key: zone
     compatibilityModeOnly: true
   - value: resource.labels.zone
-    id: gcp.region
+    key: gcp.region
   metrics:
   - value: istio.io/service/client/connection_close_count
-    id: cloud.gcp.istio_io.service.client.connection_close_count
+    key: cloud.gcp.istio_io.service.client.connection_close_count
     type: count,delta
     name: Client Connection Close Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -61,15 +61,15 @@ gcp:
     - value: metric.labels.source_canonical_revision
     - value: metric.labels.destination_canonical_revision
   - value: istio.io/service/client/connection_open_count
-    id: cloud.gcp.istio_io.service.client.connection_open_count
+    key: cloud.gcp.istio_io.service.client.connection_open_count
     type: count,delta
     name: Client Connection Open Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -92,15 +92,15 @@ gcp:
     - value: metric.labels.source_canonical_revision
     - value: metric.labels.destination_canonical_revision
   - value: istio.io/service/client/received_bytes_count
-    id: cloud.gcp.istio_io.service.client.received_bytes_count
+    key: cloud.gcp.istio_io.service.client.received_bytes_count
     type: count,delta
     name: Client Received Bytes Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -123,15 +123,15 @@ gcp:
     - value: metric.labels.source_canonical_revision
     - value: metric.labels.destination_canonical_revision
   - value: istio.io/service/client/request_bytes
-    id: cloud.gcp.istio_io.service.client.request_bytes
+    key: cloud.gcp.istio_io.service.client.request_bytes
     type: gauge
     name: Client Request Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -158,15 +158,15 @@ gcp:
     - value: metric.labels.response_code
     - value: metric.labels.api_name
   - value: istio.io/service/client/request_count
-    id: cloud.gcp.istio_io.service.client.request_count
+    key: cloud.gcp.istio_io.service.client.request_count
     type: count,delta
     name: Client Request Count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -193,15 +193,15 @@ gcp:
     - value: metric.labels.response_code
     - value: metric.labels.api_name
   - value: istio.io/service/client/response_bytes
-    id: cloud.gcp.istio_io.service.client.response_bytes
+    key: cloud.gcp.istio_io.service.client.response_bytes
     type: gauge
     name: Client Response Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -228,15 +228,15 @@ gcp:
     - value: metric.labels.response_code
     - value: metric.labels.api_name
   - value: istio.io/service/client/roundtrip_latencies
-    id: cloud.gcp.istio_io.service.client.roundtrip_latencies
+    key: cloud.gcp.istio_io.service.client.roundtrip_latencies
     type: gauge
     name: Client Roundtrip Latencies
-    unit: ms
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: ms
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -263,15 +263,15 @@ gcp:
     - value: metric.labels.response_code
     - value: metric.labels.api_name
   - value: istio.io/service/client/sent_bytes_count
-    id: cloud.gcp.istio_io.service.client.sent_bytes_count
+    key: cloud.gcp.istio_io.service.client.sent_bytes_count
     type: count,delta
     name: Client Sent Bytes Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -294,15 +294,15 @@ gcp:
     - value: metric.labels.source_canonical_revision
     - value: metric.labels.destination_canonical_revision
   - value: istio.io/service/server/connection_close_count
-    id: cloud.gcp.istio_io.service.server.connection_close_count
+    key: cloud.gcp.istio_io.service.server.connection_close_count
     type: count,delta
     name: Server Connection Close Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -325,15 +325,15 @@ gcp:
     - value: metric.labels.source_canonical_revision
     - value: metric.labels.destination_canonical_revision
   - value: istio.io/service/server/connection_open_count
-    id: cloud.gcp.istio_io.service.server.connection_open_count
+    key: cloud.gcp.istio_io.service.server.connection_open_count
     type: count,delta
     name: Server Connection Open Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -356,15 +356,15 @@ gcp:
     - value: metric.labels.source_canonical_revision
     - value: metric.labels.destination_canonical_revision
   - value: istio.io/service/server/received_bytes_count
-    id: cloud.gcp.istio_io.service.server.received_bytes_count
+    key: cloud.gcp.istio_io.service.server.received_bytes_count
     type: count,delta
     name: Server Received Bytes Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -387,15 +387,15 @@ gcp:
     - value: metric.labels.source_canonical_revision
     - value: metric.labels.destination_canonical_revision
   - value: istio.io/service/server/request_bytes
-    id: cloud.gcp.istio_io.service.server.request_bytes
+    key: cloud.gcp.istio_io.service.server.request_bytes
     type: gauge
     name: Server Request Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -422,15 +422,15 @@ gcp:
     - value: metric.labels.response_code
     - value: metric.labels.api_name
   - value: istio.io/service/server/request_count
-    id: cloud.gcp.istio_io.service.server.request_count
+    key: cloud.gcp.istio_io.service.server.request_count
     type: count,delta
     name: Server Request Count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -457,15 +457,15 @@ gcp:
     - value: metric.labels.response_code
     - value: metric.labels.api_name
   - value: istio.io/service/server/response_bytes
-    id: cloud.gcp.istio_io.service.server.response_bytes
+    key: cloud.gcp.istio_io.service.server.response_bytes
     type: gauge
     name: Server Response Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -492,15 +492,15 @@ gcp:
     - value: metric.labels.response_code
     - value: metric.labels.api_name
   - value: istio.io/service/server/response_latencies
-    id: cloud.gcp.istio_io.service.server.response_latencies
+    key: cloud.gcp.istio_io.service.server.response_latencies
     type: gauge
     name: Server Response Latencies
-    unit: ms
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: ms
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy
@@ -527,15 +527,15 @@ gcp:
     - value: metric.labels.response_code
     - value: metric.labels.api_name
   - value: istio.io/service/server/sent_bytes_count
-    id: cloud.gcp.istio_io.service.server.sent_bytes_count
+    key: cloud.gcp.istio_io.service.server.sent_bytes_count
     type: count,delta
     name: Server Sent Bytes Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: By
     dimensions:
     - value: metric.labels.request_protocol
     - value: metric.labels.service_authentication_policy

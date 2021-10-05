@@ -11,89 +11,89 @@ technology:
 gcp:
 - service: pubsublite_subscription_partition
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.subscription_id
-    id: subscription_id
+    key: subscription_id
     compatibilityModeOnly: true
   - value: resource.labels.subscription_id
-    id: gcp.instance.id
+    key: gcp.instance.id
   - value: resource.labels.partition
-    id: partition
+    key: partition
   - value: resource.labels.location
-    id: location
+    key: location
     compatibilityModeOnly: true
   - value: resource.labels.location
-    id: gcp.region
+    key: gcp.region
   metrics:
   - value: pubsublite.googleapis.com/subscription/backlog_message_count
-    id: cloud.gcp.pubsublite_googleapis_com.subscription.backlog_message_count
+    key: cloud.gcp.pubsublite_googleapis_com.subscription.backlog_message_count
     type: gauge
     name: Backlog message count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
   - value: pubsublite.googleapis.com/subscription/backlog_quota_bytes
-    id: cloud.gcp.pubsublite_googleapis_com.subscription.backlog_quota_bytes
+    key: cloud.gcp.pubsublite_googleapis_com.subscription.backlog_quota_bytes
     type: gauge
     name: Backlog quota bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
   - value: pubsublite.googleapis.com/subscription/oldest_unacked_message_age
-    id: cloud.gcp.pubsublite_googleapis_com.subscription.oldest_unacked_message_age
+    key: cloud.gcp.pubsublite_googleapis_com.subscription.oldest_unacked_message_age
     type: gauge
     name: Oldest unacked message age
-    unit: s
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: s
     dimensions: []
   - value: pubsublite.googleapis.com/subscription/sent_message_count
-    id: cloud.gcp.pubsublite_googleapis_com.subscription.sent_message_count
+    key: cloud.gcp.pubsublite_googleapis_com.subscription.sent_message_count
     type: count,delta
     name: Subscription sent message count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 210s
-      samplePeriod: 60s
+      ingestDelay: 210
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions: []
   - value: pubsublite.googleapis.com/subscription/sent_quota_bytes
-    id: cloud.gcp.pubsublite_googleapis_com.subscription.sent_quota_bytes
+    key: cloud.gcp.pubsublite_googleapis_com.subscription.sent_quota_bytes
     type: count,delta
     name: Subscription sent quota bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 210s
-      samplePeriod: 60s
+      ingestDelay: 210
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: pubsublite.googleapis.com/subscription/sent_raw_bytes
-    id: cloud.gcp.pubsublite_googleapis_com.subscription.sent_raw_bytes
+    key: cloud.gcp.pubsublite_googleapis_com.subscription.sent_raw_bytes
     type: count,delta
     name: Subscription sent raw bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 210s
-      samplePeriod: 60s
+      ingestDelay: 210
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []

@@ -11,56 +11,55 @@ technology:
 gcp:
 - service: gce_instance
   featureSet: firewallinsights
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.instance_id
-    id: instance_id
+    key: instance_id
     compatibilityModeOnly: true
   - value: resource.labels.instance_id
-    id: gcp.instance.id
+    key: gcp.instance.id
   - value: resource.labels.zone
-    id: zone
+    key: zone
     compatibilityModeOnly: true
   - value: resource.labels.zone
-    id: gcp.region
+    key: gcp.region
   metrics:
   - value: firewallinsights.googleapis.com/vm/firewall_hit_count
-    id: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_hit_count
+    key: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_hit_count
     type: count,delta
     name: VM Firewall Hit Counts
-    unit: '1'
     gcpOptions:
-      ingestDelay: 150s
-      samplePeriod: 600s
+      ingestDelay: 150
+      samplePeriod: 600
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.firewall_project_id
     - value: metric.labels.firewall_name
-      id: firewall_name
+      key: firewall_name
       compatibilityModeOnly: true
     - value: metric.labels.firewall_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: firewallinsights.googleapis.com/vm/firewall_last_used_timestamp
-    id: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_last_used_timestamp
+    key: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_last_used_timestamp
     type: gauge
     name: VM Firewall Last Used Timestamp
-    unit: '1'
     gcpOptions:
-      ingestDelay: 210s
-      samplePeriod: 600s
+      ingestDelay: 210
+      samplePeriod: 600
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.firewall_project_id
     - value: metric.labels.firewall_name
-      id: firewall_name
+      key: firewall_name
       compatibilityModeOnly: true
     - value: metric.labels.firewall_name
-      id: gcp.instance.name
-      
+      key: gcp.instance.name

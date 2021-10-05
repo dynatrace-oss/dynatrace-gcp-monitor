@@ -11,42 +11,42 @@ technology:
 gcp:
 - service: network_security_policy
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.policy_name
-    id: policy_name
+    key: policy_name
     compatibilityModeOnly: true
   - value: resource.labels.policy_name
-    id: gcp.instance.name
+    key: gcp.instance.name
   metrics:
   - value: networksecurity.googleapis.com/https/previewed_request_count
-    id: cloud.gcp.networksecurity_googleapis_com.https.previewed_request_count
+    key: cloud.gcp.networksecurity_googleapis_com.https.previewed_request_count
     type: count,delta
     name: Previewed request count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.blocked
     - value: metric.labels.backend_target_name
   - value: networksecurity.googleapis.com/https/request_count
-    id: cloud.gcp.networksecurity_googleapis_com.https.request_count
+    key: cloud.gcp.networksecurity_googleapis_com.https.request_count
     type: count,delta
     name: Request count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.blocked
     - value: metric.labels.backend_target_name

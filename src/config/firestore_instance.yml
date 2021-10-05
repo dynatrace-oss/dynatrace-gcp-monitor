@@ -11,91 +11,91 @@ technology:
 gcp:
 - service: firestore_instance
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   metrics:
   - value: firestore.googleapis.com/document/delete_count
-    id: cloud.gcp.firestore_googleapis_com.document.delete_count
+    key: cloud.gcp.firestore_googleapis_com.document.delete_count
     type: count,delta
     name: Document Deletes
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.module
     - value: metric.labels.version
   - value: firestore.googleapis.com/document/read_count
-    id: cloud.gcp.firestore_googleapis_com.document.read_count
+    key: cloud.gcp.firestore_googleapis_com.document.read_count
     type: count,delta
     name: Document Reads
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.module
     - value: metric.labels.version
     - value: metric.labels.type
   - value: firestore.googleapis.com/document/write_count
-    id: cloud.gcp.firestore_googleapis_com.document.write_count
+    key: cloud.gcp.firestore_googleapis_com.document.write_count
     type: count,delta
     name: Document Writes
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.module
     - value: metric.labels.version
     - value: metric.labels.op
   - value: firestore.googleapis.com/network/active_connections
-    id: cloud.gcp.firestore_googleapis_com.network.active_connections
+    key: cloud.gcp.firestore_googleapis_com.network.active_connections
     type: gauge
     name: Connected Clients
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.module
     - value: metric.labels.version
   - value: firestore.googleapis.com/network/snapshot_listeners
-    id: cloud.gcp.firestore_googleapis_com.network.snapshot_listeners
+    key: cloud.gcp.firestore_googleapis_com.network.snapshot_listeners
     type: gauge
     name: Snapshot Listeners
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.module
     - value: metric.labels.version
   - value: firestore.googleapis.com/rules/evaluation_count
-    id: cloud.gcp.firestore_googleapis_com.rules.evaluation_count
+    key: cloud.gcp.firestore_googleapis_com.rules.evaluation_count
     type: count,delta
     name: Rule Evaluations
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.request_method
     - value: metric.labels.ruleset_label

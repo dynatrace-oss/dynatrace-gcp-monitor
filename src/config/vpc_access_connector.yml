@@ -11,65 +11,65 @@ technology:
 gcp:
 - service: vpc_access_connector
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.location
-    id: location
+    key: location
     compatibilityModeOnly: true
   - value: resource.labels.location
-    id: gcp.region
+    key: gcp.region
   - value: resource.labels.connector_name
-    id: connector_name
+    key: connector_name
     compatibilityModeOnly: true
   - value: resource.labels.connector_name
-    id: gcp.instance.name
+    key: gcp.instance.name
   metrics:
   - value: vpcaccess.googleapis.com/connector/received_bytes_count
-    id: cloud.gcp.vpcaccess_googleapis_com.connector.received_bytes_count
+    key: cloud.gcp.vpcaccess_googleapis_com.connector.received_bytes_count
     type: count,delta
     name: Bytes received delta
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: vpcaccess.googleapis.com/connector/received_packets_count
-    id: cloud.gcp.vpcaccess_googleapis_com.connector.received_packets_count
+    key: cloud.gcp.vpcaccess_googleapis_com.connector.received_packets_count
     type: count,delta
     name: Packets received delta
-    unit: '{packet}'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '{packet}'
     dimensions: []
   - value: vpcaccess.googleapis.com/connector/sent_bytes_count
-    id: cloud.gcp.vpcaccess_googleapis_com.connector.sent_bytes_count
+    key: cloud.gcp.vpcaccess_googleapis_com.connector.sent_bytes_count
     type: count,delta
     name: Bytes sent delta
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: vpcaccess.googleapis.com/connector/sent_packets_count
-    id: cloud.gcp.vpcaccess_googleapis_com.connector.sent_packets_count
+    key: cloud.gcp.vpcaccess_googleapis_com.connector.sent_packets_count
     type: count,delta
     name: Packets sent delta
-    unit: '{packet}'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '{packet}'
     dimensions: []

@@ -11,33 +11,33 @@ technology:
 gcp:
 - service: gae_app_uptime_check
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.module_id
-    id: module_id
+    key: module_id
   - value: resource.labels.version_id
-    id: version_id
+    key: version_id
   - value: resource.labels.zone
-    id: zone
+    key: zone
     compatibilityModeOnly: true
   - value: resource.labels.zone
-    id: gcp.region
+    key: gcp.region
   metrics:
   - value: monitoring.googleapis.com/uptime_check/check_passed
-    id: cloud.gcp.monitoring_googleapis_com.uptime_check.check_passed
+    key: cloud.gcp.monitoring_googleapis_com.uptime_check.check_passed
     type: gauge
     name: Check passed
-    unit: ''
     gcpOptions:
-      ingestDelay: 35s
+      ingestDelay: 35
       samplePeriod: ''
       valueType: BOOL
       metricKind: GAUGE
+      unit: ''
     dimensions:
     - value: metric.labels.check_id
     - value: metric.labels.checker_location
@@ -46,15 +46,15 @@ gcp:
     - value: metric.labels.checker_zone
     - value: metric.labels.checked_resource_id
   - value: monitoring.googleapis.com/uptime_check/content_mismatch
-    id: cloud.gcp.monitoring_googleapis_com.uptime_check.content_mismatch
+    key: cloud.gcp.monitoring_googleapis_com.uptime_check.content_mismatch
     type: gauge
     name: Content mismatch
-    unit: ''
     gcpOptions:
-      ingestDelay: 35s
+      ingestDelay: 35
       samplePeriod: ''
       valueType: BOOL
       metricKind: GAUGE
+      unit: ''
     dimensions:
     - value: metric.labels.check_id
     - value: metric.labels.checker_location
@@ -63,15 +63,15 @@ gcp:
     - value: metric.labels.checker_zone
     - value: metric.labels.checked_resource_id
   - value: monitoring.googleapis.com/uptime_check/error_code
-    id: cloud.gcp.monitoring_googleapis_com.uptime_check.error_code
+    key: cloud.gcp.monitoring_googleapis_com.uptime_check.error_code
     type: gauge
     name: Error code
-    unit: ''
     gcpOptions:
-      ingestDelay: 35s
+      ingestDelay: 35
       samplePeriod: ''
       valueType: STRING
       metricKind: GAUGE
+      unit: ''
     dimensions:
     - value: metric.labels.check_id
     - value: metric.labels.checker_location
@@ -80,15 +80,15 @@ gcp:
     - value: metric.labels.checker_zone
     - value: metric.labels.checked_resource_id
   - value: monitoring.googleapis.com/uptime_check/http_status
-    id: cloud.gcp.monitoring_googleapis_com.uptime_check.http_status
+    key: cloud.gcp.monitoring_googleapis_com.uptime_check.http_status
     type: gauge
     name: HTTP status
-    unit: ''
     gcpOptions:
-      ingestDelay: 35s
+      ingestDelay: 35
       samplePeriod: ''
       valueType: STRING
       metricKind: GAUGE
+      unit: ''
     dimensions:
     - value: metric.labels.check_id
     - value: metric.labels.checker_location
@@ -97,15 +97,15 @@ gcp:
     - value: metric.labels.checker_zone
     - value: metric.labels.checked_resource_id
   - value: monitoring.googleapis.com/uptime_check/request_latency
-    id: cloud.gcp.monitoring_googleapis_com.uptime_check.request_latency
+    key: cloud.gcp.monitoring_googleapis_com.uptime_check.request_latency
     type: gauge
     name: Request latency
-    unit: ms
     gcpOptions:
-      ingestDelay: 35s
+      ingestDelay: 35
       samplePeriod: ''
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: ms
     dimensions:
     - value: metric.labels.check_id
     - value: metric.labels.checker_location
@@ -114,15 +114,15 @@ gcp:
     - value: metric.labels.checker_zone
     - value: metric.labels.checked_resource_id
   - value: monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires
-    id: cloud.gcp.monitoring_googleapis_com.uptime_check.time_until_ssl_cert_expires
+    key: cloud.gcp.monitoring_googleapis_com.uptime_check.time_until_ssl_cert_expires
     type: gauge
     name: Time until SSL certificate expires
-    unit: d
     gcpOptions:
-      ingestDelay: 35s
+      ingestDelay: 35
       samplePeriod: ''
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: d
     dimensions:
     - value: metric.labels.check_id
     - value: metric.labels.checker_location

@@ -11,203 +11,203 @@ technology:
 gcp:
 - service: firebase_namespace
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.table_name
-    id: table_name
+    key: table_name
     compatibilityModeOnly: true
   - value: resource.labels.table_name
-    id: gcp.instance.name
+    key: gcp.instance.name
   - value: resource.labels.location
-    id: location
+    key: location
     compatibilityModeOnly: true
   - value: resource.labels.location
-    id: gcp.region
+    key: gcp.region
   metrics:
   - value: firebasedatabase.googleapis.com/io/database_load
-    id: cloud.gcp.firebasedatabase_googleapis_com.io.database_load
+    key: cloud.gcp.firebasedatabase_googleapis_com.io.database_load
     type: gauge
     name: Database Load
-    unit: '1'
     gcpOptions:
-      ingestDelay: 1800s
-      samplePeriod: 60s
+      ingestDelay: 1800
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.type
   - value: firebasedatabase.googleapis.com/io/persisted_bytes_count
-    id: cloud.gcp.firebasedatabase_googleapis_com.io.persisted_bytes_count
+    key: cloud.gcp.firebasedatabase_googleapis_com.io.persisted_bytes_count
     type: count,delta
     name: Saved Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 1920s
-      samplePeriod: 60s
+      ingestDelay: 1920
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: firebasedatabase.googleapis.com/io/sent_responses_count
-    id: cloud.gcp.firebasedatabase_googleapis_com.io.sent_responses_count
+    key: cloud.gcp.firebasedatabase_googleapis_com.io.sent_responses_count
     type: count,delta
     name: Responses sent
-    unit: '1'
     gcpOptions:
-      ingestDelay: 1920s
-      samplePeriod: 60s
+      ingestDelay: 1920
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions: []
   - value: firebasedatabase.googleapis.com/io/utilization
-    id: cloud.gcp.firebasedatabase_googleapis_com.io.utilization
+    key: cloud.gcp.firebasedatabase_googleapis_com.io.utilization
     type: gauge
     name: I/O utilization
-    unit: '1'
     gcpOptions:
-      ingestDelay: 1800s
-      samplePeriod: 60s
+      ingestDelay: 1800
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
   - value: firebasedatabase.googleapis.com/network/active_connections
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.active_connections
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.active_connections
     type: gauge
     name: Connections
-    unit: '1'
     gcpOptions:
-      ingestDelay: 1800s
-      samplePeriod: 60s
+      ingestDelay: 1800
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
   - value: firebasedatabase.googleapis.com/network/api_hits_count
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.api_hits_count
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.api_hits_count
     type: count,delta
     name: API Hits
-    unit: '1'
     gcpOptions:
-      ingestDelay: 1920s
-      samplePeriod: 60s
+      ingestDelay: 1920
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.operation_type
   - value: firebasedatabase.googleapis.com/network/broadcast_load
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.broadcast_load
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.broadcast_load
     type: gauge
     name: Broadcast Load
-    unit: '1'
     gcpOptions:
-      ingestDelay: 1800s
-      samplePeriod: 60s
+      ingestDelay: 1800
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
   - value: firebasedatabase.googleapis.com/network/disabled_for_overages
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.disabled_for_overages
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.disabled_for_overages
     type: gauge
     name: Disabled for network
-    unit: ''
     gcpOptions:
-      ingestDelay: 1800s
-      samplePeriod: 900s
+      ingestDelay: 1800
+      samplePeriod: 900
       valueType: BOOL
       metricKind: GAUGE
+      unit: ''
     dimensions: []
   - value: firebasedatabase.googleapis.com/network/https_requests_count
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.https_requests_count
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.https_requests_count
     type: count,delta
     name: HTTPS Requests Received
-    unit: '1'
     gcpOptions:
-      ingestDelay: 1920s
-      samplePeriod: 60s
+      ingestDelay: 1920
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.reused_ssl_session
   - value: firebasedatabase.googleapis.com/network/monthly_sent
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.monthly_sent
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.monthly_sent
     type: gauge
     name: Bytes sent monthly
-    unit: By
     gcpOptions:
-      ingestDelay: 1800s
-      samplePeriod: 900s
+      ingestDelay: 1800
+      samplePeriod: 900
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
   - value: firebasedatabase.googleapis.com/network/monthly_sent_limit
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.monthly_sent_limit
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.monthly_sent_limit
     type: gauge
     name: Bytes sent limit
-    unit: By
     gcpOptions:
-      ingestDelay: 1800s
-      samplePeriod: 900s
+      ingestDelay: 1800
+      samplePeriod: 900
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
   - value: firebasedatabase.googleapis.com/network/sent_bytes_count
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.sent_bytes_count
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.sent_bytes_count
     type: count,delta
     name: Total billed bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 1920s
-      samplePeriod: 60s
+      ingestDelay: 1920
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: firebasedatabase.googleapis.com/network/sent_payload_and_protocol_bytes_count
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.sent_payload_and_protocol_bytes_count
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.sent_payload_and_protocol_bytes_count
     type: count,delta
     name: Payload and Protocol Bytes sent
-    unit: By
     gcpOptions:
-      ingestDelay: 1920s
-      samplePeriod: 60s
+      ingestDelay: 1920
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: firebasedatabase.googleapis.com/network/sent_payload_bytes_count
-    id: cloud.gcp.firebasedatabase_googleapis_com.network.sent_payload_bytes_count
+    key: cloud.gcp.firebasedatabase_googleapis_com.network.sent_payload_bytes_count
     type: count,delta
     name: Payload Bytes Sent
-    unit: By
     gcpOptions:
-      ingestDelay: 1920s
-      samplePeriod: 60s
+      ingestDelay: 1920
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: firebasedatabase.googleapis.com/rules/evaluation_count
-    id: cloud.gcp.firebasedatabase_googleapis_com.rules.evaluation_count
+    key: cloud.gcp.firebasedatabase_googleapis_com.rules.evaluation_count
     type: count,delta
     name: Rule evaluations
-    unit: '1'
     gcpOptions:
-      ingestDelay: 1920s
-      samplePeriod: 60s
+      ingestDelay: 1920
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.request_method
     - value: metric.labels.ruleset_label
     - value: metric.labels.result
   - value: firebasedatabase.googleapis.com/storage/limit
-    id: cloud.gcp.firebasedatabase_googleapis_com.storage.limit
+    key: cloud.gcp.firebasedatabase_googleapis_com.storage.limit
     type: gauge
     name: Bytes stored limit
-    unit: By
     gcpOptions:
-      ingestDelay: 1800s
-      samplePeriod: 900s
+      ingestDelay: 1800
+      samplePeriod: 900
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []

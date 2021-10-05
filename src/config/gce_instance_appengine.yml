@@ -11,58 +11,58 @@ technology:
 gcp:
 - service: gce_instance
   featureSet: appenginee
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.instance_id
-    id: instance_id
+    key: instance_id
     compatibilityModeOnly: true
   - value: resource.labels.instance_id
-    id: gcp.instance.id
+    key: gcp.instance.id
   - value: resource.labels.zone
-    id: zone
+    key: zone
     compatibilityModeOnly: true
   - value: resource.labels.zone
-    id: gcp.region
+    key: gcp.region
   metrics:
   - value: appengine.googleapis.com/flex/autoscaler/connections/current
-    id: cloud.gcp.appengine_googleapis_com.flex.autoscaler.connections.current
+    key: cloud.gcp.appengine_googleapis_com.flex.autoscaler.connections.current
     type: gauge
     name: Writing and reading connections
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.service_id
     - value: metric.labels.state
     - value: metric.labels.version_id
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: appengine.googleapis.com/flex/autoscaler/server/request_count
-    id: cloud.gcp.appengine_googleapis_com.flex.autoscaler.server.request_count
+    key: cloud.gcp.appengine_googleapis_com.flex.autoscaler.server.request_count
     type: count,delta
     name: Request counts
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.service_id
     - value: metric.labels.version_id
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name

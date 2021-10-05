@@ -11,930 +11,930 @@ technology:
 gcp:
 - service: gce_instance
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.instance_id
-    id: instance_id
+    key: instance_id
     compatibilityModeOnly: true
   - value: resource.labels.instance_id
-    id: gcp.instance.id
+    key: gcp.instance.id
   - value: resource.labels.zone
-    id: zone
+    key: zone
     compatibilityModeOnly: true
   - value: resource.labels.zone
-    id: gcp.region
+    key: gcp.region
   metrics:
   - value: compute.googleapis.com/firewall/dropped_bytes_count
-    id: cloud.gcp.compute_googleapis_com.firewall.dropped_bytes_count
+    key: cloud.gcp.compute_googleapis_com.firewall.dropped_bytes_count
     type: count,delta
     name: Dropped bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/firewall/dropped_packets_count
-    id: cloud.gcp.compute_googleapis_com.firewall.dropped_packets_count
+    key: cloud.gcp.compute_googleapis_com.firewall.dropped_packets_count
     type: count,delta
     name: Dropped packets
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/guest/cpu/runnable_task_count
-    id: cloud.gcp.compute_googleapis_com.guest.cpu.runnable_task_count
+    key: cloud.gcp.compute_googleapis_com.guest.cpu.runnable_task_count
     type: gauge
     name: Runnable task count.
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/guest/cpu/usage_time
-    id: cloud.gcp.compute_googleapis_com.guest.cpu.usage_time
+    key: cloud.gcp.compute_googleapis_com.guest.cpu.usage_time
     type: count,delta
     name: CPU usage
-    unit: s{CPU}
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: CUMULATIVE
+      unit: s{CPU}
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/disk/bytes_used
-    id: cloud.gcp.compute_googleapis_com.guest.disk.bytes_used
+    key: cloud.gcp.compute_googleapis_com.guest.disk.bytes_used
     type: gauge
     name: Disk usage in Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/disk/io_time
-    id: cloud.gcp.compute_googleapis_com.guest.disk.io_time
+    key: cloud.gcp.compute_googleapis_com.guest.disk.io_time
     type: count,delta
     name: IO Time
-    unit: ms
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: ms
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
   - value: compute.googleapis.com/guest/disk/merged_operation_count
-    id: cloud.gcp.compute_googleapis_com.guest.disk.merged_operation_count
+    key: cloud.gcp.compute_googleapis_com.guest.disk.merged_operation_count
     type: count,delta
     name: Merged disk operations
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.direction
   - value: compute.googleapis.com/guest/disk/operation_bytes_count
-    id: cloud.gcp.compute_googleapis_com.guest.disk.operation_bytes_count
+    key: cloud.gcp.compute_googleapis_com.guest.disk.operation_bytes_count
     type: count,delta
     name: Disk bytes transferred
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.direction
   - value: compute.googleapis.com/guest/disk/operation_count
-    id: cloud.gcp.compute_googleapis_com.guest.disk.operation_count
+    key: cloud.gcp.compute_googleapis_com.guest.disk.operation_count
     type: count,delta
     name: Disk operations
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.direction
   - value: compute.googleapis.com/guest/disk/operation_time
-    id: cloud.gcp.compute_googleapis_com.guest.disk.operation_time
+    key: cloud.gcp.compute_googleapis_com.guest.disk.operation_time
     type: count,delta
     name: Disk operation time
-    unit: ms
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: ms
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.direction
   - value: compute.googleapis.com/guest/disk/queue_length
-    id: cloud.gcp.compute_googleapis_com.guest.disk.queue_length
+    key: cloud.gcp.compute_googleapis_com.guest.disk.queue_length
     type: gauge
     name: Queue Length
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
   - value: compute.googleapis.com/guest/disk/weighted_io_time
-    id: cloud.gcp.compute_googleapis_com.guest.disk.weighted_io_time
+    key: cloud.gcp.compute_googleapis_com.guest.disk.weighted_io_time
     type: count,delta
     name: IO Time
-    unit: ms
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: ms
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
   - value: compute.googleapis.com/guest/memory/anonymous_used
-    id: cloud.gcp.compute_googleapis_com.guest.memory.anonymous_used
+    key: cloud.gcp.compute_googleapis_com.guest.memory.anonymous_used
     type: gauge
     name: Anonymous memory usage in Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/memory/bytes_used
-    id: cloud.gcp.compute_googleapis_com.guest.memory.bytes_used
+    key: cloud.gcp.compute_googleapis_com.guest.memory.bytes_used
     type: gauge
     name: Memory usage in Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/memory/dirty_used
-    id: cloud.gcp.compute_googleapis_com.guest.memory.dirty_used
+    key: cloud.gcp.compute_googleapis_com.guest.memory.dirty_used
     type: gauge
     name: Dirty pages usage in Bytes.
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/memory/page_cache_used
-    id: cloud.gcp.compute_googleapis_com.guest.memory.page_cache_used
+    key: cloud.gcp.compute_googleapis_com.guest.memory.page_cache_used
     type: gauge
     name: Page cache memory usage in Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.state
   - value: compute.googleapis.com/guest/memory/unevictable_used
-    id: cloud.gcp.compute_googleapis_com.guest.memory.unevictable_used
+    key: cloud.gcp.compute_googleapis_com.guest.memory.unevictable_used
     type: gauge
     name: Unevictable memory usage in Bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/guest/system/problem_count
-    id: cloud.gcp.compute_googleapis_com.guest.system.problem_count
+    key: cloud.gcp.compute_googleapis_com.guest.system.problem_count
     type: count,delta
     name: Problem Count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.reason
   - value: compute.googleapis.com/guest/system/problem_state
-    id: cloud.gcp.compute_googleapis_com.guest.system.problem_state
+    key: cloud.gcp.compute_googleapis_com.guest.system.problem_state
     type: gauge
     name: Problem State
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.reason
     - value: metric.labels.type
   - value: compute.googleapis.com/guest/system/uptime
-    id: cloud.gcp.compute_googleapis_com.guest.system.uptime
+    key: cloud.gcp.compute_googleapis_com.guest.system.uptime
     type: gauge
     name: Uptime
-    unit: s
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: s
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.kernel_version
     - value: metric.labels.os_version
   - value: compute.googleapis.com/instance/cpu/reserved_cores
-    id: cloud.gcp.compute_googleapis_com.instance.cpu.reserved_cores
+    key: cloud.gcp.compute_googleapis_com.instance.cpu.reserved_cores
     type: gauge
     name: Reserved vCPUs
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/instance/cpu/scheduler_wait_time
-    id: cloud.gcp.compute_googleapis_com.instance.cpu.scheduler_wait_time
+    key: cloud.gcp.compute_googleapis_com.instance.cpu.scheduler_wait_time
     type: count,delta
     name: Scheduler Wait Time
-    unit: s{idle}
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: DELTA
+      unit: s{idle}
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/instance/cpu/usage_time
-    id: cloud.gcp.compute_googleapis_com.instance.cpu.usage_time
+    key: cloud.gcp.compute_googleapis_com.instance.cpu.usage_time
     type: count,delta
     name: CPU usage
-    unit: s{CPU}
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: DELTA
+      unit: s{CPU}
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/instance/cpu/utilization
-    id: cloud.gcp.compute_googleapis_com.instance.cpu.utilization
+    key: cloud.gcp.compute_googleapis_com.instance.cpu.utilization
     type: gauge
     name: CPU utilization
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/instance/disk/max_read_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.max_read_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.max_read_bytes_count
     type: gauge
     name: Peak disk read bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
   - value: compute.googleapis.com/instance/disk/max_read_ops_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.max_read_ops_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.max_read_ops_count
     type: gauge
     name: Peak disk read ops
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
   - value: compute.googleapis.com/instance/disk/max_write_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.max_write_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.max_write_bytes_count
     type: gauge
     name: Peak disk write bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
   - value: compute.googleapis.com/instance/disk/max_write_ops_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.max_write_ops_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.max_write_ops_count
     type: gauge
     name: Peak disk write ops
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
   - value: compute.googleapis.com/instance/disk/read_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.read_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.read_bytes_count
     type: count,delta
     name: Disk read bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
   - value: compute.googleapis.com/instance/disk/read_ops_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.read_ops_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.read_ops_count
     type: count,delta
     name: Disk read operations
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
   - value: compute.googleapis.com/instance/disk/throttled_read_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.throttled_read_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.throttled_read_bytes_count
     type: count,delta
     name: Throttled read bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
     - value: metric.labels.throttle_reason
   - value: compute.googleapis.com/instance/disk/throttled_read_ops_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.throttled_read_ops_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.throttled_read_ops_count
     type: count,delta
     name: Throttled read operations
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
     - value: metric.labels.throttle_reason
   - value: compute.googleapis.com/instance/disk/throttled_write_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.throttled_write_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.throttled_write_bytes_count
     type: count,delta
     name: Throttled write bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
     - value: metric.labels.throttle_reason
   - value: compute.googleapis.com/instance/disk/throttled_write_ops_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.throttled_write_ops_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.throttled_write_ops_count
     type: count,delta
     name: Throttled write operations
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
     - value: metric.labels.throttle_reason
   - value: compute.googleapis.com/instance/disk/write_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.write_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.write_bytes_count
     type: count,delta
     name: Disk write bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
   - value: compute.googleapis.com/instance/disk/write_ops_count
-    id: cloud.gcp.compute_googleapis_com.instance.disk.write_ops_count
+    key: cloud.gcp.compute_googleapis_com.instance.disk.write_ops_count
     type: count,delta
     name: Disk write operations
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.storage_type
     - value: metric.labels.device_type
   - value: compute.googleapis.com/instance/integrity/early_boot_validation_status
-    id: cloud.gcp.compute_googleapis_com.instance.integrity.early_boot_validation_status
+    key: cloud.gcp.compute_googleapis_com.instance.integrity.early_boot_validation_status
     type: gauge
     name: Early Boot Validation
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.status
   - value: compute.googleapis.com/instance/integrity/late_boot_validation_status
-    id: cloud.gcp.compute_googleapis_com.instance.integrity.late_boot_validation_status
+    key: cloud.gcp.compute_googleapis_com.instance.integrity.late_boot_validation_status
     type: gauge
     name: Late Boot Validation
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.status
   - value: compute.googleapis.com/instance/memory/balloon/ram_size
-    id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_size
+    key: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_size
     type: gauge
     name: VM Memory Total
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/instance/memory/balloon/ram_used
-    id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_used
+    key: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_used
     type: gauge
     name: VM Memory Used
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/instance/memory/balloon/swap_in_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_in_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_in_bytes_count
     type: count,delta
     name: VM Swap In
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/instance/memory/balloon/swap_out_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_out_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_out_bytes_count
     type: count,delta
     name: VM Swap Out
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/instance/network/received_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.network.received_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.network.received_bytes_count
     type: count,delta
     name: Received bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.loadbalanced
   - value: compute.googleapis.com/instance/network/received_packets_count
-    id: cloud.gcp.compute_googleapis_com.instance.network.received_packets_count
+    key: cloud.gcp.compute_googleapis_com.instance.network.received_packets_count
     type: count,delta
     name: Received packets
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.loadbalanced
   - value: compute.googleapis.com/instance/network/sent_bytes_count
-    id: cloud.gcp.compute_googleapis_com.instance.network.sent_bytes_count
+    key: cloud.gcp.compute_googleapis_com.instance.network.sent_bytes_count
     type: count,delta
     name: Sent bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.loadbalanced
   - value: compute.googleapis.com/instance/network/sent_packets_count
-    id: cloud.gcp.compute_googleapis_com.instance.network.sent_packets_count
+    key: cloud.gcp.compute_googleapis_com.instance.network.sent_packets_count
     type: count,delta
     name: Sent packets
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
     - value: metric.labels.loadbalanced
   - value: compute.googleapis.com/instance/uptime
-    id: cloud.gcp.compute_googleapis_com.instance.uptime
+    key: cloud.gcp.compute_googleapis_com.instance.uptime
     type: count,delta
     name: Uptime
-    unit: s{uptime}
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: DELTA
+      unit: s{uptime}
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/instance/uptime_total
-    id: cloud.gcp.compute_googleapis_com.instance.uptime_total
+    key: cloud.gcp.compute_googleapis_com.instance.uptime_total
     type: gauge
     name: Uptime Total
-    unit: s
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: s
     dimensions:
     - value: metric.labels.instance_name
-      id: instance_name
+      key: instance_name
       compatibilityModeOnly: true
     - value: metric.labels.instance_name
-      id: gcp.instance.name
+      key: gcp.instance.name
   - value: compute.googleapis.com/mirroring/dropped_packets_count
-    id: cloud.gcp.compute_googleapis_com.mirroring.dropped_packets_count
+    key: cloud.gcp.compute_googleapis_com.mirroring.dropped_packets_count
     type: count,delta
     name: Dropped packets
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
     - value: metric.labels.reason
   - value: compute.googleapis.com/mirroring/mirrored_bytes_count
-    id: cloud.gcp.compute_googleapis_com.mirroring.mirrored_bytes_count
+    key: cloud.gcp.compute_googleapis_com.mirroring.mirrored_bytes_count
     type: count,delta
     name: Mirrored bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: compute.googleapis.com/mirroring/mirrored_packets_count
-    id: cloud.gcp.compute_googleapis_com.mirroring.mirrored_packets_count
+    key: cloud.gcp.compute_googleapis_com.mirroring.mirrored_packets_count
     type: count,delta
     name: Mirrored packets
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions: []
   - value: compute.googleapis.com/nat/allocated_ports
-    id: cloud.gcp.compute_googleapis_com.nat.allocated_ports
+    key: cloud.gcp.compute_googleapis_com.nat.allocated_ports
     type: gauge
     name: Allocated ports
-    unit: '{port}'
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '{port}'
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.nat_ip
   - value: compute.googleapis.com/nat/closed_connections_count
-    id: cloud.gcp.compute_googleapis_com.nat.closed_connections_count
+    key: cloud.gcp.compute_googleapis_com.nat.closed_connections_count
     type: count,delta
     name: Closed connections count
-    unit: '{connection}'
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '{connection}'
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.ip_protocol
   - value: compute.googleapis.com/nat/dropped_received_packets_count
-    id: cloud.gcp.compute_googleapis_com.nat.dropped_received_packets_count
+    key: cloud.gcp.compute_googleapis_com.nat.dropped_received_packets_count
     type: count,delta
     name: Received packets dropped count
-    unit: '{packet}'
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '{packet}'
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.ip_protocol
   - value: compute.googleapis.com/nat/dropped_sent_packets_count
-    id: cloud.gcp.compute_googleapis_com.nat.dropped_sent_packets_count
+    key: cloud.gcp.compute_googleapis_com.nat.dropped_sent_packets_count
     type: count,delta
     name: Sent packets dropped count
-    unit: '{packet}'
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '{packet}'
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
@@ -942,105 +942,105 @@ gcp:
     - value: metric.labels.ip_protocol
     - value: metric.labels.reason
   - value: compute.googleapis.com/nat/new_connections_count
-    id: cloud.gcp.compute_googleapis_com.nat.new_connections_count
+    key: cloud.gcp.compute_googleapis_com.nat.new_connections_count
     type: count,delta
     name: New connections count
-    unit: '{connection}'
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '{connection}'
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.ip_protocol
   - value: compute.googleapis.com/nat/open_connections
-    id: cloud.gcp.compute_googleapis_com.nat.open_connections
+    key: cloud.gcp.compute_googleapis_com.nat.open_connections
     type: gauge
     name: Open connections
-    unit: '{connection}'
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '{connection}'
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.ip_protocol
   - value: compute.googleapis.com/nat/port_usage
-    id: cloud.gcp.compute_googleapis_com.nat.port_usage
+    key: cloud.gcp.compute_googleapis_com.nat.port_usage
     type: gauge
     name: Port usage
-    unit: '{port}'
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '{port}'
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.ip_protocol
   - value: compute.googleapis.com/nat/received_bytes_count
-    id: cloud.gcp.compute_googleapis_com.nat.received_bytes_count
+    key: cloud.gcp.compute_googleapis_com.nat.received_bytes_count
     type: count,delta
     name: Received bytes count
-    unit: By
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.ip_protocol
   - value: compute.googleapis.com/nat/received_packets_count
-    id: cloud.gcp.compute_googleapis_com.nat.received_packets_count
+    key: cloud.gcp.compute_googleapis_com.nat.received_packets_count
     type: count,delta
     name: Received packets count
-    unit: '{packet}'
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '{packet}'
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.ip_protocol
   - value: compute.googleapis.com/nat/sent_bytes_count
-    id: cloud.gcp.compute_googleapis_com.nat.sent_bytes_count
+    key: cloud.gcp.compute_googleapis_com.nat.sent_bytes_count
     type: count,delta
     name: Sent bytes count
-    unit: By
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id
     - value: metric.labels.nat_gateway_name
     - value: metric.labels.ip_protocol
   - value: compute.googleapis.com/nat/sent_packets_count
-    id: cloud.gcp.compute_googleapis_com.nat.sent_packets_count
+    key: cloud.gcp.compute_googleapis_com.nat.sent_packets_count
     type: count,delta
     name: Sent packets count
-    unit: '{packet}'
     gcpOptions:
-      ingestDelay: 165s
-      samplePeriod: 60s
+      ingestDelay: 165
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '{packet}'
     dimensions:
     - value: metric.labels.nat_project_number
     - value: metric.labels.router_id

@@ -11,40 +11,40 @@ technology:
 gcp:
 - service: firebase_domain
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.site_name
-    id: site_name
+    key: site_name
   - value: resource.labels.domain_name
-    id: domain_name
+    key: domain_name
     compatibilityModeOnly: true
   - value: resource.labels.domain_name
-    id: gcp.instance.name
+    key: gcp.instance.name
   metrics:
   - value: firebasehosting.googleapis.com/storage/limit
-    id: cloud.gcp.firebasehosting_googleapis_com.storage.limit
+    key: cloud.gcp.firebasehosting_googleapis_com.storage.limit
     type: gauge
     name: Bytes stored limit
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 28800s
+      ingestDelay: 0
+      samplePeriod: 28800
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
   - value: firebasehosting.googleapis.com/storage/total_bytes
-    id: cloud.gcp.firebasehosting_googleapis_com.storage.total_bytes
+    key: cloud.gcp.firebasehosting_googleapis_com.storage.total_bytes
     type: gauge
     name: Bytes stored
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 28800s
+      ingestDelay: 0
+      samplePeriod: 28800
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []

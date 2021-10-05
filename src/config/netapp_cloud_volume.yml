@@ -11,113 +11,113 @@ technology:
 gcp:
 - service: netapp_cloud_volume
   featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
   - value: resource.labels.project_id
-    id: project_id
+    key: project_id
     compatibilityModeOnly: true
   - value: resource.labels.project_id
-    id: gcp.project.id
+    key: gcp.project.id
   - value: resource.labels.location
-    id: location
+    key: location
     compatibilityModeOnly: true
   - value: resource.labels.location
-    id: gcp.region
+    key: gcp.region
   - value: resource.labels.volume_id
-    id: volume_id
+    key: volume_id
     compatibilityModeOnly: true
   - value: resource.labels.volume_id
-    id: gcp.instance.id
+    key: gcp.instance.id
   metrics:
   - value: netapp.com/cloudvolume/inode_allocation
-    id: cloud.gcp.netapp_com.cloudvolume.inode_allocation
+    key: cloud.gcp.netapp_com.cloudvolume.inode_allocation
     type: gauge
     name: Volume inode allocation
-    unit: '{inode}'
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 300s
+      ingestDelay: 0
+      samplePeriod: 300
       valueType: INT64
       metricKind: GAUGE
+      unit: '{inode}'
     dimensions: []
   - value: netapp.com/cloudvolume/inode_usage
-    id: cloud.gcp.netapp_com.cloudvolume.inode_usage
+    key: cloud.gcp.netapp_com.cloudvolume.inode_usage
     type: gauge
     name: Volume inode usage
-    unit: '{inode}'
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 300s
+      ingestDelay: 0
+      samplePeriod: 300
       valueType: INT64
       metricKind: GAUGE
+      unit: '{inode}'
     dimensions:
     - value: metric.labels.type
   - value: netapp.com/cloudvolume/operation_count
-    id: cloud.gcp.netapp_com.cloudvolume.operation_count
+    key: cloud.gcp.netapp_com.cloudvolume.operation_count
     type: count,delta
     name: Operations count
-    unit: count
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: count
     dimensions:
     - value: metric.labels.type
   - value: netapp.com/cloudvolume/read_bytes_count
-    id: cloud.gcp.netapp_com.cloudvolume.read_bytes_count
+    key: cloud.gcp.netapp_com.cloudvolume.read_bytes_count
     type: count,delta
     name: Bytes read
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
   - value: netapp.com/cloudvolume/request_latencies
-    id: cloud.gcp.netapp_com.cloudvolume.request_latencies
+    key: cloud.gcp.netapp_com.cloudvolume.request_latencies
     type: gauge
     name: Volume IO operation latency
-    unit: ms
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: ms
     dimensions:
     - value: metric.labels.method
   - value: netapp.com/cloudvolume/volume_size
-    id: cloud.gcp.netapp_com.cloudvolume.volume_size
+    key: cloud.gcp.netapp_com.cloudvolume.volume_size
     type: gauge
     name: Volume space allocation
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
   - value: netapp.com/cloudvolume/volume_usage
-    id: cloud.gcp.netapp_com.cloudvolume.volume_usage
+    key: cloud.gcp.netapp_com.cloudvolume.volume_usage
     type: gauge
     name: Volume space usage
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
     - value: metric.labels.type
   - value: netapp.com/cloudvolume/write_bytes_count
-    id: cloud.gcp.netapp_com.cloudvolume.write_bytes_count
+    key: cloud.gcp.netapp_com.cloudvolume.write_bytes_count
     type: count,delta
     name: Bytes written
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
