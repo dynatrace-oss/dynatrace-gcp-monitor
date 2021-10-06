@@ -351,13 +351,10 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" ]]; then
   for i in "${!EXTENSIONS_FROM_CLUSTER_ARRAY[@]}"; do
     EXTENSION_NAME="$(cut -d':' -f1 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
     EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
-    curl -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${API_TOKEN}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
-  done
-
-  for EXTENSION_FROM_CLUSTER_ZIP in *.zip; do
-    if [[ "$EXTENSION_FROM_CLUSTER_ZIP" =~ ^($EXTENSIONS_TO_DOWNLOAD.*)-.*$ ]]; then
+    curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${API_TOKEN}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+    if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
       find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
-      mv "$EXTENSION_FROM_CLUSTER_ZIP" ../extensions
+      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
     fi
   done
 fi
@@ -397,7 +394,7 @@ for EXTENSION_ZIP in *.zip; do
   rm "$EXTENSION_NAME".yaml
   if $REMOVE_EXTENSION; then rm "$EXTENSION_ZIP"; fi
 done
-rm -r ../extensions_from_cluster
+rm -rf ../extensions_from_cluster
 
 cd ../$GCP_FUNCTION_NAME || exit
 
