@@ -86,4 +86,4 @@ async def get_filestore_instance_entity(ctx: MetricsContext, project_id: str, sv
     """ Retrieve entity info on GCP filestore instance from google api. """
     url = f"https://file.googleapis.com/v1/projects/{project_id}/locations/-/instances"
     mapper_func = partial(_filestore_instance_resp_to_monitored_entities, svc_def=svc_def)
-    return await generic_paging(url, ctx, mapper_func)
+    return await generic_paging(project_id, url, ctx, mapper_func)
