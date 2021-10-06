@@ -217,18 +217,17 @@ upload_extension_to_cluster() {
   UPLOAD_RESPONSE=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@extensions/$EXTENSION_ZIP;type=application/zip")
   CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$UPLOAD_RESPONSE")
   if [ "$CODE" -gt "310" ]; then
-    err "- Extension $EXTENSION_ZIP upload failed with error code: $CODE"
-    exit
-  fi
-
-  UPLOADED_EXTENSION=$(echo "$UPLOAD_RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensionName')
-  ACTIVATION_RESPONSE=$(curl -s -k -X PUT "$DYNATRACE_URL/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}")
-  CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$ACTIVATION_RESPONSE")
-  if [ "$CODE" -gt "310" ]; then
-    err "- Activation $UPLOADED_EXTENSION:$EXTENSION_VERSION failed with error code: $CODE"
-    exit
+    warn "- Extension $EXTENSION_ZIP upload failed with error code: $CODE"
   else
-    echo "- Extension $UPLOADED_EXTENSION:$EXTENSION_VERSION activated."
+    UPLOADED_EXTENSION=$(echo "$UPLOAD_RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensionName')
+    ACTIVATION_RESPONSE=$(curl -s -k -X PUT "$DYNATRACE_URL/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}")
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$ACTIVATION_RESPONSE")
+    
+    if [ "$CODE" -gt "310" ]; then
+      warn "- Activation $UPLOADED_EXTENSION:$EXTENSION_VERSION failed with error code: $CODE"
+    else
+      echo "- Extension $UPLOADED_EXTENSION:$EXTENSION_VERSION activated."
+    fi
   fi
 }
 
