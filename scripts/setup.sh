@@ -214,7 +214,6 @@ get_activated_extensions_on_cluster() {
 
   if RESPONSE=$(curl -k -s "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
-    CODE="404"
     
     if [ "$CODE" -gt "400" ]; then
       err "- Dynatrace Cluster at: $DYNATRACE_URL/api/v2/extensions response with code: $CODE"
@@ -223,7 +222,7 @@ get_activated_extensions_on_cluster() {
     
     EXTENSIONS_FROM_CLUSTER=$(echo "$RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
   else
-    err "- Dynatrace Cluster at: $DYNATRACE_URL/api/v2/extensions timeouted."
+    err "- Dynatrace Cluster time out at: $DYNATRACE_URL/api/v2/extensions."
     exit
   fi  
 }
