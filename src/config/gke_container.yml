@@ -3,41 +3,40 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google GKE Container
 gcp:
 - service: gke_container
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.cluster_name
+  - value: label:resource.labels.cluster_name
     key: cluster_name
-  - value: resource.labels.namespace_id
+  - value: label:resource.labels.namespace_id
     key: namespace_id
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: instance_id
-  - value: resource.labels.pod_id
+  - value: label:resource.labels.pod_id
     key: pod_id
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: container_name
     compatibilityModeOnly: false
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: gcp.instance.name
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: gcp.region
   metrics:
-  - value: container.googleapis.com/container/accelerator/duty_cycle
+  - value: metric:container.googleapis.com/container/accelerator/duty_cycle
     key: cloud.gcp.container_googleapis_com.container.accelerator.duty_cycle
     type: gauge
     name: Accelerator duty cycle
@@ -48,10 +47,13 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.make
-    - value: metric.labels.accelerator_id
-    - value: metric.labels.model
-  - value: container.googleapis.com/container/accelerator/memory_total
+    - value: label:metric.labels.make
+      key: make
+    - value: label:metric.labels.accelerator_id
+      key: accelerator_id
+    - value: label:metric.labels.model
+      key: model
+  - value: metric:container.googleapis.com/container/accelerator/memory_total
     key: cloud.gcp.container_googleapis_com.container.accelerator.memory_total
     type: gauge
     name: Accelerator memory total
@@ -62,10 +64,13 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.make
-    - value: metric.labels.accelerator_id
-    - value: metric.labels.model
-  - value: container.googleapis.com/container/accelerator/memory_used
+    - value: label:metric.labels.make
+      key: make
+    - value: label:metric.labels.accelerator_id
+      key: accelerator_id
+    - value: label:metric.labels.model
+      key: model
+  - value: metric:container.googleapis.com/container/accelerator/memory_used
     key: cloud.gcp.container_googleapis_com.container.accelerator.memory_used
     type: gauge
     name: Accelerator memory used
@@ -76,10 +81,13 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.make
-    - value: metric.labels.accelerator_id
-    - value: metric.labels.model
-  - value: container.googleapis.com/container/accelerator/request
+    - value: label:metric.labels.make
+      key: make
+    - value: label:metric.labels.accelerator_id
+      key: accelerator_id
+    - value: label:metric.labels.model
+      key: model
+  - value: metric:container.googleapis.com/container/accelerator/request
     key: cloud.gcp.container_googleapis_com.container.accelerator.request
     type: gauge
     name: Request accelerators
@@ -90,8 +98,9 @@ gcp:
       metricKind: GAUGE
       unit: '{devices}'
     dimensions:
-    - value: metric.labels.resource_name
-  - value: container.googleapis.com/container/cpu/reserved_cores
+    - value: label:metric.labels.resource_name
+      key: resource_name
+  - value: metric:container.googleapis.com/container/cpu/reserved_cores
     key: cloud.gcp.container_googleapis_com.container.cpu.reserved_cores
     type: gauge
     name: Reserved cores
@@ -102,7 +111,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: container.googleapis.com/container/cpu/usage_time
+  - value: metric:container.googleapis.com/container/cpu/usage_time
     key: cloud.gcp.container_googleapis_com.container.cpu.usage_time
     type: count,delta
     name: CPU usage
@@ -113,7 +122,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: s{CPU}
     dimensions: []
-  - value: container.googleapis.com/container/cpu/utilization
+  - value: metric:container.googleapis.com/container/cpu/utilization
     key: cloud.gcp.container_googleapis_com.container.cpu.utilization
     type: gauge
     name: CPU utilization
@@ -124,7 +133,7 @@ gcp:
       metricKind: GAUGE
       unit: 10^2.%
     dimensions: []
-  - value: container.googleapis.com/container/disk/bytes_total
+  - value: metric:container.googleapis.com/container/disk/bytes_total
     key: cloud.gcp.container_googleapis_com.container.disk.bytes_total
     type: gauge
     name: Disk capacity
@@ -135,8 +144,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.device_name
-  - value: container.googleapis.com/container/disk/bytes_used
+    - value: label:metric.labels.device_name
+      key: device_name
+  - value: metric:container.googleapis.com/container/disk/bytes_used
     key: cloud.gcp.container_googleapis_com.container.disk.bytes_used
     type: gauge
     name: Disk usage
@@ -147,8 +157,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.device_name
-  - value: container.googleapis.com/container/disk/inodes_free
+    - value: label:metric.labels.device_name
+      key: device_name
+  - value: metric:container.googleapis.com/container/disk/inodes_free
     key: cloud.gcp.container_googleapis_com.container.disk.inodes_free
     type: gauge
     name: Inode free
@@ -159,8 +170,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.device_name
-  - value: container.googleapis.com/container/disk/inodes_total
+    - value: label:metric.labels.device_name
+      key: device_name
+  - value: metric:container.googleapis.com/container/disk/inodes_total
     key: cloud.gcp.container_googleapis_com.container.disk.inodes_total
     type: gauge
     name: Inode capacity
@@ -171,8 +183,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.device_name
-  - value: container.googleapis.com/container/memory/bytes_total
+    - value: label:metric.labels.device_name
+      key: device_name
+  - value: metric:container.googleapis.com/container/memory/bytes_total
     key: cloud.gcp.container_googleapis_com.container.memory.bytes_total
     type: gauge
     name: Memory limit
@@ -183,7 +196,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: container.googleapis.com/container/memory/bytes_used
+  - value: metric:container.googleapis.com/container/memory/bytes_used
     key: cloud.gcp.container_googleapis_com.container.memory.bytes_used
     type: gauge
     name: Memory usage
@@ -194,8 +207,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.memory_type
-  - value: container.googleapis.com/container/memory/page_fault_count
+    - value: label:metric.labels.memory_type
+      key: memory_type
+  - value: metric:container.googleapis.com/container/memory/page_fault_count
     key: cloud.gcp.container_googleapis_com.container.memory.page_fault_count
     type: count,delta
     name: Page faults
@@ -206,8 +220,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.fault_type
-  - value: container.googleapis.com/container/pid_limit
+    - value: label:metric.labels.fault_type
+      key: fault_type
+  - value: metric:container.googleapis.com/container/pid_limit
     key: cloud.gcp.container_googleapis_com.container.pid_limit
     type: gauge
     name: PID capacity
@@ -218,7 +233,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: container.googleapis.com/container/pid_used
+  - value: metric:container.googleapis.com/container/pid_used
     key: cloud.gcp.container_googleapis_com.container.pid_used
     type: gauge
     name: PID usage
@@ -229,7 +244,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: container.googleapis.com/container/uptime
+  - value: metric:container.googleapis.com/container/uptime
     key: cloud.gcp.container_googleapis_com.container.uptime
     type: count,delta
     name: Uptime
@@ -241,4 +256,4 @@ gcp:
       unit: s
     dimensions: []
 alerts:
-  - path: alerts/gke_container/cpu.utilization.json
+- path: alerts/gke_container/cpu.utilization.json

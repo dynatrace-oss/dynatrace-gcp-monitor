@@ -10,22 +10,21 @@ vars:
    type: variables
 gcp:
 - service: apigee.googleapis.com_Environment
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.resource_container
+  - value: label:resource.labels.resource_container
     key: resource_container
-  - value: resource.labels.org
+  - value: label:resource.labels.org
     key: org
-  - value: resource.labels.env
+  - value: label:resource.labels.env
     key: env
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
   metrics:
-  - value: apigee.googleapis.com/environment/anomaly_count
+  - value: metric:apigee.googleapis.com/environment/anomaly_count
     key: cloud.gcp.apigee_googleapis_com.environment.anomaly_count
     type: count,delta
     name: Apigee anomaly event count
@@ -36,6 +35,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.severity
-    - value: metric.labels.direction
-    - value: metric.labels.anomaly_type
+    - value: label:metric.labels.severity
+      key: severity
+    - value: label:metric.labels.direction
+      key: direction
+    - value: label:metric.labels.anomaly_type
+      key: anomaly_type

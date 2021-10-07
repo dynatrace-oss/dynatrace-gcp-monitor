@@ -3,9 +3,9 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google VM Instance Uptime Checks
 gcp:
@@ -13,23 +13,23 @@ gcp:
   featureSet: uptime_check
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: instance_id
     compatibilityModeOnly: true
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: gcp.instance.id
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: gcp.region
   metrics:
-  - value: monitoring.googleapis.com/uptime_check/content_mismatch
+  - value: metric:monitoring.googleapis.com/uptime_check/content_mismatch
     key: cloud.gcp.monitoring_googleapis_com.uptime_check.content_mismatch
     type: gauge
     name: Content mismatch
@@ -40,13 +40,19 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.check_id
-    - value: metric.labels.checker_location
-    - value: metric.labels.checker_project_id
-    - value: metric.labels.checker_network
-    - value: metric.labels.checker_zone
-    - value: metric.labels.checked_resource_id
-  - value: monitoring.googleapis.com/uptime_check/error_code
+    - value: label:metric.labels.check_id
+      key: check_id
+    - value: label:metric.labels.checker_location
+      key: checker_location
+    - value: label:metric.labels.checker_project_id
+      key: checker_project_id
+    - value: label:metric.labels.checker_network
+      key: checker_network
+    - value: label:metric.labels.checker_zone
+      key: checker_zone
+    - value: label:metric.labels.checked_resource_id
+      key: checked_resource_id
+  - value: metric:monitoring.googleapis.com/uptime_check/error_code
     key: cloud.gcp.monitoring_googleapis_com.uptime_check.error_code
     type: gauge
     name: Error code
@@ -57,13 +63,19 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.check_id
-    - value: metric.labels.checker_location
-    - value: metric.labels.checker_project_id
-    - value: metric.labels.checker_network
-    - value: metric.labels.checker_zone
-    - value: metric.labels.checked_resource_id
-  - value: monitoring.googleapis.com/uptime_check/http_status
+    - value: label:metric.labels.check_id
+      key: check_id
+    - value: label:metric.labels.checker_location
+      key: checker_location
+    - value: label:metric.labels.checker_project_id
+      key: checker_project_id
+    - value: label:metric.labels.checker_network
+      key: checker_network
+    - value: label:metric.labels.checker_zone
+      key: checker_zone
+    - value: label:metric.labels.checked_resource_id
+      key: checked_resource_id
+  - value: metric:monitoring.googleapis.com/uptime_check/http_status
     key: cloud.gcp.monitoring_googleapis_com.uptime_check.http_status
     type: gauge
     name: HTTP status
@@ -74,13 +86,19 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.check_id
-    - value: metric.labels.checker_location
-    - value: metric.labels.checker_project_id
-    - value: metric.labels.checker_network
-    - value: metric.labels.checker_zone
-    - value: metric.labels.checked_resource_id
-  - value: monitoring.googleapis.com/uptime_check/request_latency
+    - value: label:metric.labels.check_id
+      key: check_id
+    - value: label:metric.labels.checker_location
+      key: checker_location
+    - value: label:metric.labels.checker_project_id
+      key: checker_project_id
+    - value: label:metric.labels.checker_network
+      key: checker_network
+    - value: label:metric.labels.checker_zone
+      key: checker_zone
+    - value: label:metric.labels.checked_resource_id
+      key: checked_resource_id
+  - value: metric:monitoring.googleapis.com/uptime_check/request_latency
     key: cloud.gcp.monitoring_googleapis_com.uptime_check.request_latency
     type: gauge
     name: Request latency
@@ -91,13 +109,19 @@ gcp:
       metricKind: GAUGE
       unit: ms
     dimensions:
-    - value: metric.labels.check_id
-    - value: metric.labels.checker_location
-    - value: metric.labels.checker_project_id
-    - value: metric.labels.checker_network
-    - value: metric.labels.checker_zone
-    - value: metric.labels.checked_resource_id
-  - value: monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires
+    - value: label:metric.labels.check_id
+      key: check_id
+    - value: label:metric.labels.checker_location
+      key: checker_location
+    - value: label:metric.labels.checker_project_id
+      key: checker_project_id
+    - value: label:metric.labels.checker_network
+      key: checker_network
+    - value: label:metric.labels.checker_zone
+      key: checker_zone
+    - value: label:metric.labels.checked_resource_id
+      key: checked_resource_id
+  - value: metric:monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires
     key: cloud.gcp.monitoring_googleapis_com.uptime_check.time_until_ssl_cert_expires
     type: gauge
     name: Time until SSL certificate expires
@@ -108,9 +132,15 @@ gcp:
       metricKind: GAUGE
       unit: d
     dimensions:
-    - value: metric.labels.check_id
-    - value: metric.labels.checker_location
-    - value: metric.labels.checker_project_id
-    - value: metric.labels.checker_network
-    - value: metric.labels.checker_zone
-    - value: metric.labels.checked_resource_id
+    - value: label:metric.labels.check_id
+      key: check_id
+    - value: label:metric.labels.checker_location
+      key: checker_location
+    - value: label:metric.labels.checker_project_id
+      key: checker_project_id
+    - value: label:metric.labels.checker_network
+      key: checker_network
+    - value: label:metric.labels.checker_zone
+      key: checker_zone
+    - value: label:metric.labels.checked_resource_id
+      key: checked_resource_id

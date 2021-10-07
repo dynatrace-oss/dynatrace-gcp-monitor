@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google VPC Access Connector
 gcp:
 - service: vpc_access_connector
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.connector_name
+  - value: label:resource.labels.connector_name
     key: connector_name
     compatibilityModeOnly: true
-  - value: resource.labels.connector_name
+  - value: label:resource.labels.connector_name
     key: gcp.instance.name
   metrics:
-  - value: vpcaccess.googleapis.com/connector/received_bytes_count
+  - value: metric:vpcaccess.googleapis.com/connector/received_bytes_count
     key: cloud.gcp.vpcaccess_googleapis_com.connector.received_bytes_count
     type: count,delta
     name: Bytes received delta
@@ -40,7 +39,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: vpcaccess.googleapis.com/connector/received_packets_count
+  - value: metric:vpcaccess.googleapis.com/connector/received_packets_count
     key: cloud.gcp.vpcaccess_googleapis_com.connector.received_packets_count
     type: count,delta
     name: Packets received delta
@@ -51,7 +50,7 @@ gcp:
       metricKind: DELTA
       unit: '{packet}'
     dimensions: []
-  - value: vpcaccess.googleapis.com/connector/sent_bytes_count
+  - value: metric:vpcaccess.googleapis.com/connector/sent_bytes_count
     key: cloud.gcp.vpcaccess_googleapis_com.connector.sent_bytes_count
     type: count,delta
     name: Bytes sent delta
@@ -62,7 +61,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: vpcaccess.googleapis.com/connector/sent_packets_count
+  - value: metric:vpcaccess.googleapis.com/connector/sent_packets_count
     key: cloud.gcp.vpcaccess_googleapis_com.connector.sent_packets_count
     type: count,delta
     name: Packets sent delta

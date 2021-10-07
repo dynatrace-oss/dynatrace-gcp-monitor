@@ -3,30 +3,29 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Logging export sink
 gcp:
 - service: logging_sink
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.name
+  - value: label:resource.labels.name
     key: name
     compatibilityModeOnly: true
-  - value: resource.labels.name
+  - value: label:resource.labels.name
     key: gcp.instance.name
-  - value: resource.labels.destination
+  - value: label:resource.labels.destination
     key: destination
   metrics:
-  - value: logging.googleapis.com/exports/byte_count
+  - value: metric:logging.googleapis.com/exports/byte_count
     key: cloud.gcp.logging_googleapis_com.exports.byte_count
     type: count,delta
     name: Exported log bytes
@@ -37,7 +36,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: logging.googleapis.com/exports/error_count
+  - value: metric:logging.googleapis.com/exports/error_count
     key: cloud.gcp.logging_googleapis_com.exports.error_count
     type: count,delta
     name: Exported log entries failures
@@ -48,7 +47,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: logging.googleapis.com/exports/log_entry_count
+  - value: metric:logging.googleapis.com/exports/log_entry_count
     key: cloud.gcp.logging_googleapis_com.exports.log_entry_count
     type: count,delta
     name: Exported log entries

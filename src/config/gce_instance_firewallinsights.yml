@@ -3,9 +3,9 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google VM Instance Firewall Insights
 gcp:
@@ -13,23 +13,23 @@ gcp:
   featureSet: firewallinsights
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: instance_id
     compatibilityModeOnly: true
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: gcp.instance.id
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: gcp.region
   metrics:
-  - value: firewallinsights.googleapis.com/vm/firewall_hit_count
+  - value: metric:firewallinsights.googleapis.com/vm/firewall_hit_count
     key: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_hit_count
     type: count,delta
     name: VM Firewall Hit Counts
@@ -40,13 +40,14 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.firewall_project_id
-    - value: metric.labels.firewall_name
+    - value: label:metric.labels.firewall_project_id
+      key: firewall_project_id
+    - value: label:metric.labels.firewall_name
       key: firewall_name
       compatibilityModeOnly: true
-    - value: metric.labels.firewall_name
-      key: gcp.instance.name
-  - value: firewallinsights.googleapis.com/vm/firewall_last_used_timestamp
+    - value: label:metric.labels.firewall_name
+      key: firewall_name
+  - value: metric:firewallinsights.googleapis.com/vm/firewall_last_used_timestamp
     key: cloud.gcp.firewallinsights_googleapis_com.vm.firewall_last_used_timestamp
     type: gauge
     name: VM Firewall Last Used Timestamp
@@ -57,9 +58,10 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.firewall_project_id
-    - value: metric.labels.firewall_name
+    - value: label:metric.labels.firewall_project_id
+      key: firewall_project_id
+    - value: label:metric.labels.firewall_name
       key: firewall_name
       compatibilityModeOnly: true
-    - value: metric.labels.firewall_name
-      key: gcp.instance.name
+    - value: label:metric.labels.firewall_name
+      key: firewall_name

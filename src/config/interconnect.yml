@@ -3,28 +3,27 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Interconnect
 gcp:
 - service: interconnect
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.interconnect
+  - value: label:resource.labels.interconnect
     key: interconnect
     compatibilityModeOnly: true
-  - value: resource.labels.interconnect
+  - value: label:resource.labels.interconnect
     key: gcp.instance.id
   metrics:
-  - value: interconnect.googleapis.com/network/interconnect/capacity
+  - value: metric:interconnect.googleapis.com/network/interconnect/capacity
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.capacity
     type: gauge
     name: Network Capacity
@@ -35,7 +34,7 @@ gcp:
       metricKind: GAUGE
       unit: By/s
     dimensions: []
-  - value: interconnect.googleapis.com/network/interconnect/dropped_packets_count
+  - value: metric:interconnect.googleapis.com/network/interconnect/dropped_packets_count
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.dropped_packets_count
     type: count,delta
     name: Dropped Packets
@@ -46,7 +45,7 @@ gcp:
       metricKind: DELTA
       unit: '{packets}'
     dimensions: []
-  - value: interconnect.googleapis.com/network/interconnect/link/operational
+  - value: metric:interconnect.googleapis.com/network/interconnect/link/operational
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.link.operational
     type: gauge
     name: Circuit Operational Status
@@ -57,8 +56,9 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.link_id
-  - value: interconnect.googleapis.com/network/interconnect/link/rx_power
+    - value: label:metric.labels.link_id
+      key: link_id
+  - value: metric:interconnect.googleapis.com/network/interconnect/link/rx_power
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.link.rx_power
     type: gauge
     name: Circuit Receive Power
@@ -69,9 +69,11 @@ gcp:
       metricKind: GAUGE
       unit: '{dBm}'
     dimensions:
-    - value: metric.labels.link_id
-    - value: metric.labels.laser_index
-  - value: interconnect.googleapis.com/network/interconnect/link/tx_power
+    - value: label:metric.labels.link_id
+      key: link_id
+    - value: label:metric.labels.laser_index
+      key: laser_index
+  - value: metric:interconnect.googleapis.com/network/interconnect/link/tx_power
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.link.tx_power
     type: gauge
     name: Circuit Transmit Power
@@ -82,9 +84,11 @@ gcp:
       metricKind: GAUGE
       unit: '{dBm}'
     dimensions:
-    - value: metric.labels.link_id
-    - value: metric.labels.laser_index
-  - value: interconnect.googleapis.com/network/interconnect/operational
+    - value: label:metric.labels.link_id
+      key: link_id
+    - value: label:metric.labels.laser_index
+      key: laser_index
+  - value: metric:interconnect.googleapis.com/network/interconnect/operational
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.operational
     type: gauge
     name: Operational Status
@@ -95,7 +99,7 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions: []
-  - value: interconnect.googleapis.com/network/interconnect/receive_errors_count
+  - value: metric:interconnect.googleapis.com/network/interconnect/receive_errors_count
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.receive_errors_count
     type: count,delta
     name: Ingress Errors
@@ -106,7 +110,7 @@ gcp:
       metricKind: DELTA
       unit: '{errors}'
     dimensions: []
-  - value: interconnect.googleapis.com/network/interconnect/received_bytes_count
+  - value: metric:interconnect.googleapis.com/network/interconnect/received_bytes_count
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.received_bytes_count
     type: count,delta
     name: Ingress Bytes
@@ -117,7 +121,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: interconnect.googleapis.com/network/interconnect/received_unicast_packets_count
+  - value: metric:interconnect.googleapis.com/network/interconnect/received_unicast_packets_count
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.received_unicast_packets_count
     type: count,delta
     name: Ingress Unicast Packets
@@ -128,7 +132,7 @@ gcp:
       metricKind: DELTA
       unit: '{packets}'
     dimensions: []
-  - value: interconnect.googleapis.com/network/interconnect/send_errors_count
+  - value: metric:interconnect.googleapis.com/network/interconnect/send_errors_count
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.send_errors_count
     type: count,delta
     name: Egress Errors
@@ -139,7 +143,7 @@ gcp:
       metricKind: DELTA
       unit: '{errors}'
     dimensions: []
-  - value: interconnect.googleapis.com/network/interconnect/sent_bytes_count
+  - value: metric:interconnect.googleapis.com/network/interconnect/sent_bytes_count
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.sent_bytes_count
     type: count,delta
     name: Egress Bytes
@@ -150,7 +154,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: interconnect.googleapis.com/network/interconnect/sent_unicast_packets_count
+  - value: metric:interconnect.googleapis.com/network/interconnect/sent_unicast_packets_count
     key: cloud.gcp.interconnect_googleapis_com.network.interconnect.sent_unicast_packets_count
     type: count,delta
     name: Egress Unicast Packets

@@ -3,35 +3,34 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud NAT Gateway
 gcp:
 - service: nat_gateway
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: gcp.region
-  - value: resource.labels.router_id
+  - value: label:resource.labels.router_id
     key: router_id
-  - value: resource.labels.gateway_name
+  - value: label:resource.labels.gateway_name
     key: gateway_name
     compatibilityModeOnly: true
-  - value: resource.labels.gateway_name
+  - value: label:resource.labels.gateway_name
     key: gcp.instance.name
   metrics:
-  - value: router.googleapis.com/nat/allocated_ports
+  - value: metric:router.googleapis.com/nat/allocated_ports
     key: cloud.gcp.router_googleapis_com.nat.allocated_ports
     type: gauge
     name: Allocated ports
@@ -42,8 +41,9 @@ gcp:
       metricKind: GAUGE
       unit: '{port}'
     dimensions:
-    - value: metric.labels.nat_ip
-  - value: router.googleapis.com/nat/closed_connections_count
+    - value: label:metric.labels.nat_ip
+      key: nat_ip
+  - value: metric:router.googleapis.com/nat/closed_connections_count
     key: cloud.gcp.router_googleapis_com.nat.closed_connections_count
     type: count,delta
     name: Closed connections count
@@ -54,8 +54,9 @@ gcp:
       metricKind: DELTA
       unit: '{connection}'
     dimensions:
-    - value: metric.labels.ip_protocol
-  - value: router.googleapis.com/nat/dropped_received_packets_count
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:router.googleapis.com/nat/dropped_received_packets_count
     key: cloud.gcp.router_googleapis_com.nat.dropped_received_packets_count
     type: count,delta
     name: Received packets dropped count
@@ -66,8 +67,9 @@ gcp:
       metricKind: DELTA
       unit: '{packet}'
     dimensions:
-    - value: metric.labels.ip_protocol
-  - value: router.googleapis.com/nat/dropped_sent_packets_count
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:router.googleapis.com/nat/dropped_sent_packets_count
     key: cloud.gcp.router_googleapis_com.nat.dropped_sent_packets_count
     type: count,delta
     name: Sent packets dropped count
@@ -78,9 +80,11 @@ gcp:
       metricKind: DELTA
       unit: '{packet}'
     dimensions:
-    - value: metric.labels.ip_protocol
-    - value: metric.labels.reason
-  - value: router.googleapis.com/nat/nat_allocation_failed
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+    - value: label:metric.labels.reason
+      key: reason
+  - value: metric:router.googleapis.com/nat/nat_allocation_failed
     key: cloud.gcp.router_googleapis_com.nat.nat_allocation_failed
     type: gauge
     name: NAT allocation failed
@@ -91,7 +95,7 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions: []
-  - value: router.googleapis.com/nat/new_connections_count
+  - value: metric:router.googleapis.com/nat/new_connections_count
     key: cloud.gcp.router_googleapis_com.nat.new_connections_count
     type: count,delta
     name: New connections count
@@ -102,8 +106,9 @@ gcp:
       metricKind: DELTA
       unit: '{connection}'
     dimensions:
-    - value: metric.labels.ip_protocol
-  - value: router.googleapis.com/nat/open_connections
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:router.googleapis.com/nat/open_connections
     key: cloud.gcp.router_googleapis_com.nat.open_connections
     type: gauge
     name: Open connections
@@ -114,8 +119,9 @@ gcp:
       metricKind: GAUGE
       unit: '{connection}'
     dimensions:
-    - value: metric.labels.ip_protocol
-  - value: router.googleapis.com/nat/port_usage
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:router.googleapis.com/nat/port_usage
     key: cloud.gcp.router_googleapis_com.nat.port_usage
     type: gauge
     name: Port usage
@@ -126,8 +132,9 @@ gcp:
       metricKind: GAUGE
       unit: '{port}'
     dimensions:
-    - value: metric.labels.ip_protocol
-  - value: router.googleapis.com/nat/received_bytes_count
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:router.googleapis.com/nat/received_bytes_count
     key: cloud.gcp.router_googleapis_com.nat.received_bytes_count
     type: count,delta
     name: Received bytes count
@@ -138,8 +145,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.ip_protocol
-  - value: router.googleapis.com/nat/received_packets_count
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:router.googleapis.com/nat/received_packets_count
     key: cloud.gcp.router_googleapis_com.nat.received_packets_count
     type: count,delta
     name: Received packets count
@@ -150,8 +158,9 @@ gcp:
       metricKind: DELTA
       unit: '{packet}'
     dimensions:
-    - value: metric.labels.ip_protocol
-  - value: router.googleapis.com/nat/sent_bytes_count
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:router.googleapis.com/nat/sent_bytes_count
     key: cloud.gcp.router_googleapis_com.nat.sent_bytes_count
     type: count,delta
     name: Sent bytes count
@@ -162,8 +171,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.ip_protocol
-  - value: router.googleapis.com/nat/sent_packets_count
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:router.googleapis.com/nat/sent_packets_count
     key: cloud.gcp.router_googleapis_com.nat.sent_packets_count
     type: count,delta
     name: Sent packets count
@@ -174,4 +184,5 @@ gcp:
       metricKind: DELTA
       unit: '{packet}'
     dimensions:
-    - value: metric.labels.ip_protocol
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol

@@ -3,43 +3,42 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Kubernetes Container
 gcp:
 - service: k8s_container
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.cluster_name
+  - value: label:resource.labels.cluster_name
     key: cluster_name
-  - value: resource.labels.namespace_name
+  - value: label:resource.labels.namespace_name
     key: namespace_name
-  - value: resource.labels.pod_name
+  - value: label:resource.labels.pod_name
     key: pod_name
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: container_name
     compatibilityModeOnly: false
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: gcp.instance.name
-  - value: metadata.system_labels.node_name
+  - value: label:metadata.system_labels.node_name
     key: node_name
-  - value: metadata.system_labels.state
+  - value: label:metadata.system_labels.state
     key: state
   metrics:
-  - value: kubernetes.io/container/cpu/core_usage_time
+  - value: metric:kubernetes.io/container/cpu/core_usage_time
     key: cloud.gcp.kubernetes_io.container.cpu.core_usage_time
     type: count,delta
     name: CPU usage time
@@ -50,7 +49,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: s{CPU}
     dimensions: []
-  - value: kubernetes.io/container/cpu/limit_cores
+  - value: metric:kubernetes.io/container/cpu/limit_cores
     key: cloud.gcp.kubernetes_io.container.cpu.limit_cores
     type: gauge
     name: Limit cores
@@ -61,7 +60,7 @@ gcp:
       metricKind: GAUGE
       unit: '{cpu}'
     dimensions: []
-  - value: kubernetes.io/container/cpu/limit_utilization
+  - value: metric:kubernetes.io/container/cpu/limit_utilization
     key: cloud.gcp.kubernetes_io.container.cpu.limit_utilization
     type: gauge
     name: CPU limit utilization
@@ -72,7 +71,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: kubernetes.io/container/cpu/request_cores
+  - value: metric:kubernetes.io/container/cpu/request_cores
     key: cloud.gcp.kubernetes_io.container.cpu.request_cores
     type: gauge
     name: Request cores
@@ -83,7 +82,7 @@ gcp:
       metricKind: GAUGE
       unit: '{cpu}'
     dimensions: []
-  - value: kubernetes.io/container/cpu/request_utilization
+  - value: metric:kubernetes.io/container/cpu/request_utilization
     key: cloud.gcp.kubernetes_io.container.cpu.request_utilization
     type: gauge
     name: CPU request utilization
@@ -94,7 +93,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: kubernetes.io/container/ephemeral_storage/limit_bytes
+  - value: metric:kubernetes.io/container/ephemeral_storage/limit_bytes
     key: cloud.gcp.kubernetes_io.container.ephemeral_storage.limit_bytes
     type: gauge
     name: Ephemeral storage limit
@@ -105,7 +104,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/container/ephemeral_storage/request_bytes
+  - value: metric:kubernetes.io/container/ephemeral_storage/request_bytes
     key: cloud.gcp.kubernetes_io.container.ephemeral_storage.request_bytes
     type: gauge
     name: Ephemeral storage request
@@ -116,7 +115,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/container/ephemeral_storage/used_bytes
+  - value: metric:kubernetes.io/container/ephemeral_storage/used_bytes
     key: cloud.gcp.kubernetes_io.container.ephemeral_storage.used_bytes
     type: gauge
     name: Ephemeral storage usage
@@ -127,7 +126,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/container/memory/limit_bytes
+  - value: metric:kubernetes.io/container/memory/limit_bytes
     key: cloud.gcp.kubernetes_io.container.memory.limit_bytes
     type: gauge
     name: Memory limit
@@ -138,7 +137,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/container/memory/limit_utilization
+  - value: metric:kubernetes.io/container/memory/limit_utilization
     key: cloud.gcp.kubernetes_io.container.memory.limit_utilization
     type: gauge
     name: Memory limit utilization
@@ -149,8 +148,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.memory_type
-  - value: kubernetes.io/container/memory/page_fault_count
+    - value: label:metric.labels.memory_type
+      key: memory_type
+  - value: metric:kubernetes.io/container/memory/page_fault_count
     key: cloud.gcp.kubernetes_io.container.memory.page_fault_count
     type: count,delta
     name: Page faults
@@ -161,8 +161,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.fault_type
-  - value: kubernetes.io/container/memory/request_bytes
+    - value: label:metric.labels.fault_type
+      key: fault_type
+  - value: metric:kubernetes.io/container/memory/request_bytes
     key: cloud.gcp.kubernetes_io.container.memory.request_bytes
     type: gauge
     name: Memory request
@@ -173,7 +174,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/container/memory/request_utilization
+  - value: metric:kubernetes.io/container/memory/request_utilization
     key: cloud.gcp.kubernetes_io.container.memory.request_utilization
     type: gauge
     name: Memory request utilization
@@ -184,8 +185,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.memory_type
-  - value: kubernetes.io/container/memory/used_bytes
+    - value: label:metric.labels.memory_type
+      key: memory_type
+  - value: metric:kubernetes.io/container/memory/used_bytes
     key: cloud.gcp.kubernetes_io.container.memory.used_bytes
     type: gauge
     name: Memory usage
@@ -196,8 +198,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.memory_type
-  - value: kubernetes.io/container/restart_count
+    - value: label:metric.labels.memory_type
+      key: memory_type
+  - value: metric:kubernetes.io/container/restart_count
     key: cloud.gcp.kubernetes_io.container.restart_count
     type: count,delta
     name: Restart count
@@ -208,7 +211,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions: []
-  - value: kubernetes.io/container/uptime
+  - value: metric:kubernetes.io/container/uptime
     key: cloud.gcp.kubernetes_io.container.uptime
     type: gauge
     name: Uptime
@@ -220,5 +223,4 @@ gcp:
       unit: s
     dimensions: []
 dashboards:
-  - dashboard: "dashboards/k8s.json"
-
+- dashboard: dashboards/k8s.json

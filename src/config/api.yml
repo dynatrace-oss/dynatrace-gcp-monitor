@@ -10,27 +10,26 @@ vars:
    type: variables
 gcp:
 - service: api
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.service
+  - value: label:resource.labels.service
     key: service
-  - value: resource.labels.method
+  - value: label:resource.labels.method
     key: method
-  - value: resource.labels.version
+  - value: label:resource.labels.version
     key: version
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
   metrics:
-  - value: serviceruntime.googleapis.com/api/request_count
+  - value: metric:serviceruntime.googleapis.com/api/request_count
     key: cloud.gcp.serviceruntime_googleapis_com.api.request_count
     type: count,delta
     name: Request count
@@ -41,11 +40,15 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.protocol
-    - value: metric.labels.response_code
-    - value: metric.labels.response_code_class
-    - value: metric.labels.grpc_status_code
-  - value: serviceruntime.googleapis.com/api/request_latencies
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.response_code_class
+      key: response_code_class
+    - value: label:metric.labels.grpc_status_code
+      key: grpc_status_code
+  - value: metric:serviceruntime.googleapis.com/api/request_latencies
     key: cloud.gcp.serviceruntime_googleapis_com.api.request_latencies
     type: gauge
     name: Request latencies
@@ -56,7 +59,7 @@ gcp:
       metricKind: DELTA
       unit: s
     dimensions: []
-  - value: serviceruntime.googleapis.com/api/request_latencies_backend
+  - value: metric:serviceruntime.googleapis.com/api/request_latencies_backend
     key: cloud.gcp.serviceruntime_googleapis_com.api.request_latencies_backend
     type: gauge
     name: Request backend latencies
@@ -67,7 +70,7 @@ gcp:
       metricKind: DELTA
       unit: s
     dimensions: []
-  - value: serviceruntime.googleapis.com/api/request_latencies_overhead
+  - value: metric:serviceruntime.googleapis.com/api/request_latencies_overhead
     key: cloud.gcp.serviceruntime_googleapis_com.api.request_latencies_overhead
     type: gauge
     name: Request overhead latencies
@@ -78,7 +81,7 @@ gcp:
       metricKind: DELTA
       unit: s
     dimensions: []
-  - value: serviceruntime.googleapis.com/api/request_sizes
+  - value: metric:serviceruntime.googleapis.com/api/request_sizes
     key: cloud.gcp.serviceruntime_googleapis_com.api.request_sizes
     type: gauge
     name: Request sizes
@@ -89,7 +92,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: serviceruntime.googleapis.com/api/response_sizes
+  - value: metric:serviceruntime.googleapis.com/api/response_sizes
     key: cloud.gcp.serviceruntime_googleapis_com.api.response_sizes
     type: gauge
     name: Response sizes

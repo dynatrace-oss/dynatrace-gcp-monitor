@@ -3,32 +3,31 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Bigtable Cluster
 gcp:
 - service: bigtable_cluster
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.instance
+  - value: label:resource.labels.instance
     key: instance
-  - value: resource.labels.cluster
+  - value: label:resource.labels.cluster
     key: cluster
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: gcp.region
   metrics:
-  - value: bigtable.googleapis.com/cluster/cpu_load
+  - value: metric:bigtable.googleapis.com/cluster/cpu_load
     key: cloud.gcp.bigtable_googleapis_com.cluster.cpu_load
     type: gauge
     name: CPU load
@@ -39,7 +38,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: bigtable.googleapis.com/cluster/cpu_load_hottest_node
+  - value: metric:bigtable.googleapis.com/cluster/cpu_load_hottest_node
     key: cloud.gcp.bigtable_googleapis_com.cluster.cpu_load_hottest_node
     type: gauge
     name: CPU load (hottest node)
@@ -50,7 +49,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: bigtable.googleapis.com/cluster/disk_load
+  - value: metric:bigtable.googleapis.com/cluster/disk_load
     key: cloud.gcp.bigtable_googleapis_com.cluster.disk_load
     type: gauge
     name: Disk load
@@ -61,7 +60,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: bigtable.googleapis.com/cluster/node_count
+  - value: metric:bigtable.googleapis.com/cluster/node_count
     key: cloud.gcp.bigtable_googleapis_com.cluster.node_count
     type: gauge
     name: Nodes
@@ -72,8 +71,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.storage_type
-  - value: bigtable.googleapis.com/cluster/storage_utilization
+    - value: label:metric.labels.storage_type
+      key: storage_type
+  - value: metric:bigtable.googleapis.com/cluster/storage_utilization
     key: cloud.gcp.bigtable_googleapis_com.cluster.storage_utilization
     type: gauge
     name: Storage utilization
@@ -84,8 +84,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.storage_type
-  - value: bigtable.googleapis.com/disk/bytes_used
+    - value: label:metric.labels.storage_type
+      key: storage_type
+  - value: metric:bigtable.googleapis.com/disk/bytes_used
     key: cloud.gcp.bigtable_googleapis_com.disk.bytes_used
     type: gauge
     name: Data stored
@@ -96,8 +97,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.storage_type
-  - value: bigtable.googleapis.com/disk/per_node_storage_capacity
+    - value: label:metric.labels.storage_type
+      key: storage_type
+  - value: metric:bigtable.googleapis.com/disk/per_node_storage_capacity
     key: cloud.gcp.bigtable_googleapis_com.disk.per_node_storage_capacity
     type: gauge
     name: Storage capacity per node
@@ -108,8 +110,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.storage_type
-  - value: bigtable.googleapis.com/disk/storage_capacity
+    - value: label:metric.labels.storage_type
+      key: storage_type
+  - value: metric:bigtable.googleapis.com/disk/storage_capacity
     key: cloud.gcp.bigtable_googleapis_com.disk.storage_capacity
     type: gauge
     name: Storage capacity
@@ -120,4 +123,5 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.storage_type
+    - value: label:metric.labels.storage_type
+      key: storage_type

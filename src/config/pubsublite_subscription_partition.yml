@@ -3,35 +3,34 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Pub/Sub Lite Subscription Partition
 gcp:
 - service: pubsublite_subscription_partition
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.subscription_id
+  - value: label:resource.labels.subscription_id
     key: subscription_id
     compatibilityModeOnly: true
-  - value: resource.labels.subscription_id
+  - value: label:resource.labels.subscription_id
     key: gcp.instance.id
-  - value: resource.labels.partition
+  - value: label:resource.labels.partition
     key: partition
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
   metrics:
-  - value: pubsublite.googleapis.com/subscription/backlog_message_count
+  - value: metric:pubsublite.googleapis.com/subscription/backlog_message_count
     key: cloud.gcp.pubsublite_googleapis_com.subscription.backlog_message_count
     type: gauge
     name: Backlog message count
@@ -42,7 +41,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: pubsublite.googleapis.com/subscription/backlog_quota_bytes
+  - value: metric:pubsublite.googleapis.com/subscription/backlog_quota_bytes
     key: cloud.gcp.pubsublite_googleapis_com.subscription.backlog_quota_bytes
     type: gauge
     name: Backlog quota bytes
@@ -53,7 +52,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: pubsublite.googleapis.com/subscription/oldest_unacked_message_age
+  - value: metric:pubsublite.googleapis.com/subscription/oldest_unacked_message_age
     key: cloud.gcp.pubsublite_googleapis_com.subscription.oldest_unacked_message_age
     type: gauge
     name: Oldest unacked message age
@@ -64,7 +63,7 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions: []
-  - value: pubsublite.googleapis.com/subscription/sent_message_count
+  - value: metric:pubsublite.googleapis.com/subscription/sent_message_count
     key: cloud.gcp.pubsublite_googleapis_com.subscription.sent_message_count
     type: count,delta
     name: Subscription sent message count
@@ -75,7 +74,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: pubsublite.googleapis.com/subscription/sent_quota_bytes
+  - value: metric:pubsublite.googleapis.com/subscription/sent_quota_bytes
     key: cloud.gcp.pubsublite_googleapis_com.subscription.sent_quota_bytes
     type: count,delta
     name: Subscription sent quota bytes
@@ -86,7 +85,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: pubsublite.googleapis.com/subscription/sent_raw_bytes
+  - value: metric:pubsublite.googleapis.com/subscription/sent_raw_bytes
     key: cloud.gcp.pubsublite_googleapis_com.subscription.sent_raw_bytes
     type: count,delta
     name: Subscription sent raw bytes

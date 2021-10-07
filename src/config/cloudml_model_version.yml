@@ -3,35 +3,34 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud ML Model Version
 gcp:
 - service: cloudml_model_version
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.model_id
+  - value: label:resource.labels.model_id
     key: model_id
-  - value: resource.labels.version_id
+  - value: label:resource.labels.version_id
     key: version_id
     compatibilityModeOnly: true
-  - value: resource.labels.version_id
+  - value: label:resource.labels.version_id
     key: gcp.instance.id
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: gcp.region
   metrics:
-  - value: ml.googleapis.com/prediction/error_count
+  - value: metric:ml.googleapis.com/prediction/error_count
     key: cloud.gcp.ml_googleapis_com.prediction.error_count
     type: count,delta
     name: Error count
@@ -42,8 +41,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.prediction_type
-  - value: ml.googleapis.com/prediction/latencies
+    - value: label:metric.labels.prediction_type
+      key: prediction_type
+  - value: metric:ml.googleapis.com/prediction/latencies
     key: cloud.gcp.ml_googleapis_com.prediction.latencies
     type: gauge
     name: Latency
@@ -54,8 +54,9 @@ gcp:
       metricKind: DELTA
       unit: us
     dimensions:
-    - value: metric.labels.latency_type
-  - value: ml.googleapis.com/prediction/online/accelerator/duty_cycle
+    - value: label:metric.labels.latency_type
+      key: latency_type
+  - value: metric:ml.googleapis.com/prediction/online/accelerator/duty_cycle
     key: cloud.gcp.ml_googleapis_com.prediction.online.accelerator.duty_cycle
     type: gauge
     name: Accelerator duty cycle
@@ -66,8 +67,9 @@ gcp:
       metricKind: GAUGE
       unit: 10^2.%
     dimensions:
-    - value: metric.labels.replica_id
-  - value: ml.googleapis.com/prediction/online/accelerator/memory/bytes_used
+    - value: label:metric.labels.replica_id
+      key: replica_id
+  - value: metric:ml.googleapis.com/prediction/online/accelerator/memory/bytes_used
     key: cloud.gcp.ml_googleapis_com.prediction.online.accelerator.memory.bytes_used
     type: gauge
     name: Accelerator memory usage
@@ -78,8 +80,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.replica_id
-  - value: ml.googleapis.com/prediction/online/cpu/utilization
+    - value: label:metric.labels.replica_id
+      key: replica_id
+  - value: metric:ml.googleapis.com/prediction/online/cpu/utilization
     key: cloud.gcp.ml_googleapis_com.prediction.online.cpu.utilization
     type: gauge
     name: CPU usage
@@ -90,8 +93,9 @@ gcp:
       metricKind: GAUGE
       unit: 10^2.%
     dimensions:
-    - value: metric.labels.replica_id
-  - value: ml.googleapis.com/prediction/online/memory/bytes_used
+    - value: label:metric.labels.replica_id
+      key: replica_id
+  - value: metric:ml.googleapis.com/prediction/online/memory/bytes_used
     key: cloud.gcp.ml_googleapis_com.prediction.online.memory.bytes_used
     type: gauge
     name: Memory usage
@@ -102,8 +106,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.replica_id
-  - value: ml.googleapis.com/prediction/online/network/bytes_received
+    - value: label:metric.labels.replica_id
+      key: replica_id
+  - value: metric:ml.googleapis.com/prediction/online/network/bytes_received
     key: cloud.gcp.ml_googleapis_com.prediction.online.network.bytes_received
     type: count,delta
     name: Network bytes received
@@ -114,8 +119,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.replica_id
-  - value: ml.googleapis.com/prediction/online/network/bytes_sent
+    - value: label:metric.labels.replica_id
+      key: replica_id
+  - value: metric:ml.googleapis.com/prediction/online/network/bytes_sent
     key: cloud.gcp.ml_googleapis_com.prediction.online.network.bytes_sent
     type: count,delta
     name: Network bytes sent
@@ -126,8 +132,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.replica_id
-  - value: ml.googleapis.com/prediction/online/replicas
+    - value: label:metric.labels.replica_id
+      key: replica_id
+  - value: metric:ml.googleapis.com/prediction/online/replicas
     key: cloud.gcp.ml_googleapis_com.prediction.online.replicas
     type: gauge
     name: Replica count
@@ -138,7 +145,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: ml.googleapis.com/prediction/online/target_replicas
+  - value: metric:ml.googleapis.com/prediction/online/target_replicas
     key: cloud.gcp.ml_googleapis_com.prediction.online.target_replicas
     type: gauge
     name: Replica target
@@ -149,7 +156,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: ml.googleapis.com/prediction/prediction_count
+  - value: metric:ml.googleapis.com/prediction/prediction_count
     key: cloud.gcp.ml_googleapis_com.prediction.prediction_count
     type: count,delta
     name: Prediction count
@@ -160,8 +167,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.prediction_type
-  - value: ml.googleapis.com/prediction/response_count
+    - value: label:metric.labels.prediction_type
+      key: prediction_type
+  - value: metric:ml.googleapis.com/prediction/response_count
     key: cloud.gcp.ml_googleapis_com.prediction.response_count
     type: count,delta
     name: Response count
@@ -172,5 +180,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.prediction_type
-    - value: metric.labels.response_code
+    - value: label:metric.labels.prediction_type
+      key: prediction_type
+    - value: label:metric.labels.response_code
+      key: response_code

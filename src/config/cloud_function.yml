@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Function
 gcp:
 - service: cloud_function
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.function_name
+  - value: label:resource.labels.function_name
     key: function_name
     compatibilityModeOnly: true
-  - value: resource.labels.function_name
+  - value: label:resource.labels.function_name
     key: gcp.instance.name
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: gcp.region
   metrics:
-  - value: cloudfunctions.googleapis.com/function/active_instances
+  - value: metric:cloudfunctions.googleapis.com/function/active_instances
     key: cloud.gcp.cloudfunctions_googleapis_com.function.active_instances
     type: gauge
     name: Active instances
@@ -40,7 +39,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudfunctions.googleapis.com/function/execution_count
+  - value: metric:cloudfunctions.googleapis.com/function/execution_count
     key: cloud.gcp.cloudfunctions_googleapis_com.function.execution_count
     type: count,delta
     name: Executions
@@ -51,10 +50,13 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.memory
-    - value: metric.labels.status
-    - value: metric.labels.trigger_type
-  - value: cloudfunctions.googleapis.com/function/execution_times
+    - value: label:metric.labels.memory
+      key: memory
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.trigger_type
+      key: trigger_type
+  - value: metric:cloudfunctions.googleapis.com/function/execution_times
     key: cloud.gcp.cloudfunctions_googleapis_com.function.execution_times
     type: gauge
     name: Execution times
@@ -65,10 +67,13 @@ gcp:
       metricKind: DELTA
       unit: ns
     dimensions:
-    - value: metric.labels.memory
-    - value: metric.labels.status
-    - value: metric.labels.trigger_type
-  - value: cloudfunctions.googleapis.com/function/network_egress
+    - value: label:metric.labels.memory
+      key: memory
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.trigger_type
+      key: trigger_type
+  - value: metric:cloudfunctions.googleapis.com/function/network_egress
     key: cloud.gcp.cloudfunctions_googleapis_com.function.network_egress
     type: count,delta
     name: Network egress
@@ -79,9 +84,11 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.memory
-    - value: metric.labels.trigger_type
-  - value: cloudfunctions.googleapis.com/function/user_memory_bytes
+    - value: label:metric.labels.memory
+      key: memory
+    - value: label:metric.labels.trigger_type
+      key: trigger_type
+  - value: metric:cloudfunctions.googleapis.com/function/user_memory_bytes
     key: cloud.gcp.cloudfunctions_googleapis_com.function.user_memory_bytes
     type: gauge
     name: Memory usage
@@ -92,7 +99,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.memory
-    - value: metric.labels.trigger_type
+    - value: label:metric.labels.memory
+      key: memory
+    - value: label:metric.labels.trigger_type
+      key: trigger_type
 dashboards:
-  - dashboard: "dashboards/cloud_function.json"
+- dashboard: dashboards/cloud_function.json

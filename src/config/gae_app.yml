@@ -3,32 +3,31 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google App Engine Application
 gcp:
 - service: gae_app
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.module_id
+  - value: label:resource.labels.module_id
     key: module_id
-  - value: resource.labels.version_id
+  - value: label:resource.labels.version_id
     key: version_id
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: gcp.region
   metrics:
-  - value: agent.googleapis.com/agent/api_request_count
+  - value: metric:agent.googleapis.com/agent/api_request_count
     key: cloud.gcp.agent_googleapis_com.agent.api_request_count
     type: count,delta
     name: Monitoring Agent API Request Count
@@ -39,8 +38,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.state
-  - value: agent.googleapis.com/agent/log_entry_count
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:agent.googleapis.com/agent/log_entry_count
     key: cloud.gcp.agent_googleapis_com.agent.log_entry_count
     type: count,delta
     name: Logging Agent Log Entry Count
@@ -51,8 +51,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: agent.googleapis.com/agent/log_entry_retry_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:agent.googleapis.com/agent/log_entry_retry_count
     key: cloud.gcp.agent_googleapis_com.agent.log_entry_retry_count
     type: count,delta
     name: Logging Agent Retried Log Entry Writes Count
@@ -63,8 +64,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: agent.googleapis.com/agent/memory_usage
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:agent.googleapis.com/agent/memory_usage
     key: cloud.gcp.agent_googleapis_com.agent.memory_usage
     type: gauge
     name: Monitoring Agent Memory Usage
@@ -75,7 +77,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: agent.googleapis.com/agent/monitoring/point_count
+  - value: metric:agent.googleapis.com/agent/monitoring/point_count
     key: cloud.gcp.agent_googleapis_com.agent.monitoring.point_count
     type: count,delta
     name: Monitoring Agent Metric Point Count
@@ -86,8 +88,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.status
-  - value: agent.googleapis.com/agent/request_count
+    - value: label:metric.labels.status
+      key: status
+  - value: metric:agent.googleapis.com/agent/request_count
     key: cloud.gcp.agent_googleapis_com.agent.request_count
     type: count,delta
     name: Logging Agent API Request Count
@@ -98,8 +101,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: agent.googleapis.com/agent/streamspace_size
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:agent.googleapis.com/agent/streamspace_size
     key: cloud.gcp.agent_googleapis_com.agent.streamspace_size
     type: gauge
     name: Monitoring Agent Process Labels Size
@@ -110,7 +114,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: agent.googleapis.com/agent/streamspace_size_throttling
+  - value: metric:agent.googleapis.com/agent/streamspace_size_throttling
     key: cloud.gcp.agent_googleapis_com.agent.streamspace_size_throttling
     type: gauge
     name: Monitoring Agent is Throttling Processes
@@ -121,7 +125,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: agent.googleapis.com/agent/uptime
+  - value: metric:agent.googleapis.com/agent/uptime
     key: cloud.gcp.agent_googleapis_com.agent.uptime
     type: count,delta
     name: Monitoring/Logging Agent Uptime
@@ -132,8 +136,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: s
     dimensions:
-    - value: metric.labels.version
-  - value: appengine.googleapis.com/flex/autoscaler/capacity
+    - value: label:metric.labels.version
+      key: version
+  - value: metric:appengine.googleapis.com/flex/autoscaler/capacity
     key: cloud.gcp.appengine_googleapis_com.flex.autoscaler.capacity
     type: gauge
     name: Autoscaling Metrics Utilization Capacity
@@ -144,7 +149,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: appengine.googleapis.com/flex/autoscaler/current_utilization
+  - value: metric:appengine.googleapis.com/flex/autoscaler/current_utilization
     key: cloud.gcp.appengine_googleapis_com.flex.autoscaler.current_utilization
     type: gauge
     name: Autoscaling Metrics Current Utilization
@@ -155,8 +160,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.metric_type
-  - value: appengine.googleapis.com/flex/connections/current
+    - value: label:metric.labels.metric_type
+      key: metric_type
+  - value: metric:appengine.googleapis.com/flex/connections/current
     key: cloud.gcp.appengine_googleapis_com.flex.connections.current
     type: gauge
     name: Connections
@@ -167,7 +173,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: appengine.googleapis.com/flex/cpu/reserved_cores
+  - value: metric:appengine.googleapis.com/flex/cpu/reserved_cores
     key: cloud.gcp.appengine_googleapis_com.flex.cpu.reserved_cores
     type: gauge
     name: Reserved cores
@@ -178,7 +184,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: appengine.googleapis.com/flex/cpu/utilization
+  - value: metric:appengine.googleapis.com/flex/cpu/utilization
     key: cloud.gcp.appengine_googleapis_com.flex.cpu.utilization
     type: gauge
     name: CPU utilization
@@ -189,7 +195,7 @@ gcp:
       metricKind: GAUGE
       unit: 10^2.%
     dimensions: []
-  - value: appengine.googleapis.com/flex/disk/read_bytes_count
+  - value: metric:appengine.googleapis.com/flex/disk/read_bytes_count
     key: cloud.gcp.appengine_googleapis_com.flex.disk.read_bytes_count
     type: count,delta
     name: Disk bytes read
@@ -200,7 +206,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: appengine.googleapis.com/flex/disk/write_bytes_count
+  - value: metric:appengine.googleapis.com/flex/disk/write_bytes_count
     key: cloud.gcp.appengine_googleapis_com.flex.disk.write_bytes_count
     type: count,delta
     name: Disk bytes written
@@ -211,7 +217,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: appengine.googleapis.com/flex/network/received_bytes_count
+  - value: metric:appengine.googleapis.com/flex/network/received_bytes_count
     key: cloud.gcp.appengine_googleapis_com.flex.network.received_bytes_count
     type: count,delta
     name: Network bytes received.
@@ -222,7 +228,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: appengine.googleapis.com/flex/network/sent_bytes_count
+  - value: metric:appengine.googleapis.com/flex/network/sent_bytes_count
     key: cloud.gcp.appengine_googleapis_com.flex.network.sent_bytes_count
     type: count,delta
     name: Network bytes sent.
@@ -233,7 +239,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: appengine.googleapis.com/http/server/dos_intercept_count
+  - value: metric:appengine.googleapis.com/http/server/dos_intercept_count
     key: cloud.gcp.appengine_googleapis_com.http.server.dos_intercept_count
     type: count,delta
     name: Interception count
@@ -244,7 +250,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: appengine.googleapis.com/http/server/quota_denial_count
+  - value: metric:appengine.googleapis.com/http/server/quota_denial_count
     key: cloud.gcp.appengine_googleapis_com.http.server.quota_denial_count
     type: count,delta
     name: Quota denial count
@@ -255,7 +261,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: appengine.googleapis.com/http/server/response_count
+  - value: metric:appengine.googleapis.com/http/server/response_count
     key: cloud.gcp.appengine_googleapis_com.http.server.response_count
     type: count,delta
     name: Response count
@@ -266,9 +272,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.loading
-    - value: metric.labels.response_code
-  - value: appengine.googleapis.com/http/server/response_latencies
+    - value: label:metric.labels.loading
+      key: loading
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:appengine.googleapis.com/http/server/response_latencies
     key: cloud.gcp.appengine_googleapis_com.http.server.response_latencies
     type: gauge
     name: Response latency
@@ -279,9 +287,11 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.loading
-    - value: metric.labels.response_code
-  - value: appengine.googleapis.com/http/server/response_style_count
+    - value: label:metric.labels.loading
+      key: loading
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:appengine.googleapis.com/http/server/response_style_count
     key: cloud.gcp.appengine_googleapis_com.http.server.response_style_count
     type: count,delta
     name: Response count by style
@@ -292,9 +302,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.dynamic
-    - value: metric.labels.cached
-  - value: appengine.googleapis.com/memcache/centi_mcu_count
+    - value: label:metric.labels.dynamic
+      key: dynamic
+    - value: label:metric.labels.cached
+      key: cached
+  - value: metric:appengine.googleapis.com/memcache/centi_mcu_count
     key: cloud.gcp.appengine_googleapis_com.memcache.centi_mcu_count
     type: count,delta
     name: Memcache utilization
@@ -305,8 +317,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.command
-  - value: appengine.googleapis.com/memcache/hit_ratio
+    - value: label:metric.labels.command
+      key: command
+  - value: metric:appengine.googleapis.com/memcache/hit_ratio
     key: cloud.gcp.appengine_googleapis_com.memcache.hit_ratio
     type: gauge
     name: Hit ratio
@@ -317,7 +330,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: appengine.googleapis.com/memcache/operation_count
+  - value: metric:appengine.googleapis.com/memcache/operation_count
     key: cloud.gcp.appengine_googleapis_com.memcache.operation_count
     type: count,delta
     name: Memcache operations
@@ -328,9 +341,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.command
-    - value: metric.labels.status
-  - value: appengine.googleapis.com/memcache/received_bytes_count
+    - value: label:metric.labels.command
+      key: command
+    - value: label:metric.labels.status
+      key: status
+  - value: metric:appengine.googleapis.com/memcache/received_bytes_count
     key: cloud.gcp.appengine_googleapis_com.memcache.received_bytes_count
     type: count,delta
     name: Memcache received bytes
@@ -341,9 +356,11 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.status
-    - value: metric.labels.command
-  - value: appengine.googleapis.com/memcache/sent_bytes_count
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.command
+      key: command
+  - value: metric:appengine.googleapis.com/memcache/sent_bytes_count
     key: cloud.gcp.appengine_googleapis_com.memcache.sent_bytes_count
     type: count,delta
     name: Memcache sent bytes
@@ -354,8 +371,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.command
-  - value: appengine.googleapis.com/memcache/used_cache_size
+    - value: label:metric.labels.command
+      key: command
+  - value: metric:appengine.googleapis.com/memcache/used_cache_size
     key: cloud.gcp.appengine_googleapis_com.memcache.used_cache_size
     type: gauge
     name: Used Cache Size
@@ -366,7 +384,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: appengine.googleapis.com/system/billed_instance_estimate_count
+  - value: metric:appengine.googleapis.com/system/billed_instance_estimate_count
     key: cloud.gcp.appengine_googleapis_com.system.billed_instance_estimate_count
     type: gauge
     name: Estimated instance count
@@ -377,7 +395,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: appengine.googleapis.com/system/cpu/usage
+  - value: metric:appengine.googleapis.com/system/cpu/usage
     key: cloud.gcp.appengine_googleapis_com.system.cpu.usage
     type: gauge
     name: CPU megacycles
@@ -388,8 +406,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.source
-  - value: appengine.googleapis.com/system/instance_count
+    - value: label:metric.labels.source
+      key: source
+  - value: metric:appengine.googleapis.com/system/instance_count
     key: cloud.gcp.appengine_googleapis_com.system.instance_count
     type: gauge
     name: Instance count
@@ -400,8 +419,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.state
-  - value: appengine.googleapis.com/system/memory/usage
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:appengine.googleapis.com/system/memory/usage
     key: cloud.gcp.appengine_googleapis_com.system.memory.usage
     type: gauge
     name: Memory usage
@@ -412,7 +432,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: appengine.googleapis.com/system/network/received_bytes_count
+  - value: metric:appengine.googleapis.com/system/network/received_bytes_count
     key: cloud.gcp.appengine_googleapis_com.system.network.received_bytes_count
     type: count,delta
     name: Received bytes
@@ -423,8 +443,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.cached
-  - value: appengine.googleapis.com/system/network/sent_bytes_count
+    - value: label:metric.labels.cached
+      key: cached
+  - value: metric:appengine.googleapis.com/system/network/sent_bytes_count
     key: cloud.gcp.appengine_googleapis_com.system.network.sent_bytes_count
     type: count,delta
     name: Sent bytes
@@ -435,6 +456,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.cached
+    - value: label:metric.labels.cached
+      key: cached
 alerts:
-  - path: alerts/gae_app/cpu.utilization.json
+- path: alerts/gae_app/cpu.utilization.json

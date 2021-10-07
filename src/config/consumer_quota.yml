@@ -3,30 +3,29 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Consumer Quota
 gcp:
 - service: consumer_quota
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.service
+  - value: label:resource.labels.service
     key: service
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
   metrics:
-  - value: serviceruntime.googleapis.com/quota/allocation/usage
+  - value: metric:serviceruntime.googleapis.com/quota/allocation/usage
     key: cloud.gcp.serviceruntime_googleapis_com.quota.allocation.usage
     type: gauge
     name: Allocation quota usage
@@ -37,8 +36,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.quota_metric
-  - value: serviceruntime.googleapis.com/quota/exceeded
+    - value: label:metric.labels.quota_metric
+      key: quota_metric
+  - value: metric:serviceruntime.googleapis.com/quota/exceeded
     key: cloud.gcp.serviceruntime_googleapis_com.quota.exceeded
     type: gauge
     name: Quota exceeded error
@@ -49,9 +49,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.limit_name
-    - value: metric.labels.quota_metric
-  - value: serviceruntime.googleapis.com/quota/limit
+    - value: label:metric.labels.limit_name
+      key: limit_name
+    - value: label:metric.labels.quota_metric
+      key: quota_metric
+  - value: metric:serviceruntime.googleapis.com/quota/limit
     key: cloud.gcp.serviceruntime_googleapis_com.quota.limit
     type: gauge
     name: Quota limit
@@ -62,9 +64,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.limit_name
-    - value: metric.labels.quota_metric
-  - value: serviceruntime.googleapis.com/quota/rate/net_usage
+    - value: label:metric.labels.limit_name
+      key: limit_name
+    - value: label:metric.labels.quota_metric
+      key: quota_metric
+  - value: metric:serviceruntime.googleapis.com/quota/rate/net_usage
     key: cloud.gcp.serviceruntime_googleapis_com.quota.rate.net_usage
     type: count,delta
     name: Rate quota usage
@@ -75,5 +79,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.quota_metric
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.quota_metric
+      key: quota_metric

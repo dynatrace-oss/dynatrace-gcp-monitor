@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google NetApp Cloud Volume
 gcp:
 - service: netapp_cloud_volume
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.volume_id
+  - value: label:resource.labels.volume_id
     key: volume_id
     compatibilityModeOnly: true
-  - value: resource.labels.volume_id
+  - value: label:resource.labels.volume_id
     key: gcp.instance.id
   metrics:
-  - value: netapp.com/cloudvolume/inode_allocation
+  - value: metric:netapp.com/cloudvolume/inode_allocation
     key: cloud.gcp.netapp_com.cloudvolume.inode_allocation
     type: gauge
     name: Volume inode allocation
@@ -40,7 +39,7 @@ gcp:
       metricKind: GAUGE
       unit: '{inode}'
     dimensions: []
-  - value: netapp.com/cloudvolume/inode_usage
+  - value: metric:netapp.com/cloudvolume/inode_usage
     key: cloud.gcp.netapp_com.cloudvolume.inode_usage
     type: gauge
     name: Volume inode usage
@@ -51,8 +50,9 @@ gcp:
       metricKind: GAUGE
       unit: '{inode}'
     dimensions:
-    - value: metric.labels.type
-  - value: netapp.com/cloudvolume/operation_count
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:netapp.com/cloudvolume/operation_count
     key: cloud.gcp.netapp_com.cloudvolume.operation_count
     type: count,delta
     name: Operations count
@@ -63,8 +63,9 @@ gcp:
       metricKind: DELTA
       unit: count
     dimensions:
-    - value: metric.labels.type
-  - value: netapp.com/cloudvolume/read_bytes_count
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:netapp.com/cloudvolume/read_bytes_count
     key: cloud.gcp.netapp_com.cloudvolume.read_bytes_count
     type: count,delta
     name: Bytes read
@@ -75,7 +76,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: netapp.com/cloudvolume/request_latencies
+  - value: metric:netapp.com/cloudvolume/request_latencies
     key: cloud.gcp.netapp_com.cloudvolume.request_latencies
     type: gauge
     name: Volume IO operation latency
@@ -86,8 +87,9 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.method
-  - value: netapp.com/cloudvolume/volume_size
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:netapp.com/cloudvolume/volume_size
     key: cloud.gcp.netapp_com.cloudvolume.volume_size
     type: gauge
     name: Volume space allocation
@@ -98,7 +100,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: netapp.com/cloudvolume/volume_usage
+  - value: metric:netapp.com/cloudvolume/volume_usage
     key: cloud.gcp.netapp_com.cloudvolume.volume_usage
     type: gauge
     name: Volume space usage
@@ -109,8 +111,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.type
-  - value: netapp.com/cloudvolume/write_bytes_count
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:netapp.com/cloudvolume/write_bytes_count
     key: cloud.gcp.netapp_com.cloudvolume.write_bytes_count
     type: count,delta
     name: Bytes written

@@ -3,9 +3,9 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Kubernetes Container Apigee
 gcp:
@@ -13,29 +13,29 @@ gcp:
   featureSet: apigee
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.cluster_name
+  - value: label:resource.labels.cluster_name
     key: cluster_name
-  - value: resource.labels.namespace_name
+  - value: label:resource.labels.namespace_name
     key: namespace_name
-  - value: resource.labels.pod_name
+  - value: label:resource.labels.pod_name
     key: pod_name
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: container_name
     compatibilityModeOnly: false
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: gcp.instance.name
   metrics:
-  - value: apigee.googleapis.com/cassandra/clientrequest_latency
+  - value: metric:apigee.googleapis.com/cassandra/clientrequest_latency
     key: cloud.gcp.apigee_googleapis_com.cassandra.clientrequest_latency
     type: gauge
     name: Apigee Cassandra client request latency
@@ -46,9 +46,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.scope
-    - value: metric.labels.unit
-  - value: apigee.googleapis.com/cassandra/compaction_pendingtasks
+    - value: label:metric.labels.scope
+      key: scope
+    - value: label:metric.labels.unit
+      key: unit
+  - value: metric:apigee.googleapis.com/cassandra/compaction_pendingtasks
     key: cloud.gcp.apigee_googleapis_com.cassandra.compaction_pendingtasks
     type: gauge
     name: Apigee Cassandra pending compaction tasks
@@ -59,8 +61,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.unit
-  - value: apigee.googleapis.com/cassandra/jvm_memory_bytes_committed
+    - value: label:metric.labels.unit
+      key: unit
+  - value: metric:apigee.googleapis.com/cassandra/jvm_memory_bytes_committed
     key: cloud.gcp.apigee_googleapis_com.cassandra.jvm_memory_bytes_committed
     type: gauge
     name: Apigee Cassandra bytes committed per area
@@ -71,8 +74,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.area
-  - value: apigee.googleapis.com/cassandra/jvm_memory_bytes_init
+    - value: label:metric.labels.area
+      key: area
+  - value: metric:apigee.googleapis.com/cassandra/jvm_memory_bytes_init
     key: cloud.gcp.apigee_googleapis_com.cassandra.jvm_memory_bytes_init
     type: gauge
     name: Apigee Cassandra initial memory bytes
@@ -83,8 +87,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.area
-  - value: apigee.googleapis.com/cassandra/jvm_memory_bytes_max
+    - value: label:metric.labels.area
+      key: area
+  - value: metric:apigee.googleapis.com/cassandra/jvm_memory_bytes_max
     key: cloud.gcp.apigee_googleapis_com.cassandra.jvm_memory_bytes_max
     type: gauge
     name: Apigee Cassandra max bytes of memory
@@ -95,8 +100,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.area
-  - value: apigee.googleapis.com/cassandra/jvm_memory_bytes_used
+    - value: label:metric.labels.area
+      key: area
+  - value: metric:apigee.googleapis.com/cassandra/jvm_memory_bytes_used
     key: cloud.gcp.apigee_googleapis_com.cassandra.jvm_memory_bytes_used
     type: gauge
     name: Apigee Cassandra used JVM memory bytes
@@ -107,8 +113,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.area
-  - value: apigee.googleapis.com/cassandra/jvm_memory_pool_bytes_committed
+    - value: label:metric.labels.area
+      key: area
+  - value: metric:apigee.googleapis.com/cassandra/jvm_memory_pool_bytes_committed
     key: cloud.gcp.apigee_googleapis_com.cassandra.jvm_memory_pool_bytes_committed
     type: gauge
     name: Apigee Cassandra bytes committed per memory pool
@@ -119,8 +126,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.pool
-  - value: apigee.googleapis.com/cassandra/jvm_memory_pool_bytes_init
+    - value: label:metric.labels.pool
+      key: pool
+  - value: metric:apigee.googleapis.com/cassandra/jvm_memory_pool_bytes_init
     key: cloud.gcp.apigee_googleapis_com.cassandra.jvm_memory_pool_bytes_init
     type: gauge
     name: Apigee Cassandra initial bytes of JVM memory pool
@@ -131,8 +139,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.pool
-  - value: apigee.googleapis.com/cassandra/jvm_memory_pool_bytes_max
+    - value: label:metric.labels.pool
+      key: pool
+  - value: metric:apigee.googleapis.com/cassandra/jvm_memory_pool_bytes_max
     key: cloud.gcp.apigee_googleapis_com.cassandra.jvm_memory_pool_bytes_max
     type: gauge
     name: Apigee Cassandra JVM memory pool bytes max
@@ -143,8 +152,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.pool
-  - value: apigee.googleapis.com/cassandra/jvm_memory_pool_bytes_used
+    - value: label:metric.labels.pool
+      key: pool
+  - value: metric:apigee.googleapis.com/cassandra/jvm_memory_pool_bytes_used
     key: cloud.gcp.apigee_googleapis_com.cassandra.jvm_memory_pool_bytes_used
     type: gauge
     name: Apigee Cassandra bytes per memory pool
@@ -155,8 +165,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.pool
-  - value: apigee.googleapis.com/cassandra/process_cpu_seconds_total
+    - value: label:metric.labels.pool
+      key: pool
+  - value: metric:apigee.googleapis.com/cassandra/process_cpu_seconds_total
     key: cloud.gcp.apigee_googleapis_com.cassandra.process_cpu_seconds_total
     type: count,delta
     name: Apigee Cassandra user and system CPU in seconds
@@ -167,7 +178,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: s
     dimensions: []
-  - value: apigee.googleapis.com/cassandra/process_max_fds
+  - value: metric:apigee.googleapis.com/cassandra/process_max_fds
     key: cloud.gcp.apigee_googleapis_com.cassandra.process_max_fds
     type: gauge
     name: Apigee Cassandra process max file descriptors
@@ -178,7 +189,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: apigee.googleapis.com/cassandra/process_open_fds
+  - value: metric:apigee.googleapis.com/cassandra/process_open_fds
     key: cloud.gcp.apigee_googleapis_com.cassandra.process_open_fds
     type: gauge
     name: Apigee Cassandra process open file descriptors
@@ -189,7 +200,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: apigee.googleapis.com/server/fault_count
+  - value: metric:apigee.googleapis.com/server/fault_count
     key: cloud.gcp.apigee_googleapis_com.server.fault_count
     type: count,delta
     name: Apigee server fault count
@@ -200,8 +211,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.source
-  - value: apigee.googleapis.com/server/latencies
+    - value: label:metric.labels.source
+      key: source
+  - value: metric:apigee.googleapis.com/server/latencies
     key: cloud.gcp.apigee_googleapis_com.server.latencies
     type: count,delta
     name: Apigee server latencies
@@ -212,10 +224,13 @@ gcp:
       metricKind: CUMULATIVE
       unit: ms
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.response_code
-    - value: metric.labels.type
-  - value: apigee.googleapis.com/server/nio
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:apigee.googleapis.com/server/nio
     key: cloud.gcp.apigee_googleapis_com.server.nio
     type: gauge
     name: Apigee server nio
@@ -226,8 +241,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.state
-  - value: apigee.googleapis.com/server/num_threads
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:apigee.googleapis.com/server/num_threads
     key: cloud.gcp.apigee_googleapis_com.server.num_threads
     type: gauge
     name: Apigee server thread count
@@ -238,7 +254,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: apigee.googleapis.com/server/request_count
+  - value: metric:apigee.googleapis.com/server/request_count
     key: cloud.gcp.apigee_googleapis_com.server.request_count
     type: count,delta
     name: Apigee server request count
@@ -249,9 +265,11 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.type
-  - value: apigee.googleapis.com/server/response_count
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:apigee.googleapis.com/server/response_count
     key: cloud.gcp.apigee_googleapis_com.server.response_count
     type: count,delta
     name: Apigee server response count
@@ -262,10 +280,13 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.response_code
-    - value: metric.labels.type
-  - value: apigee.googleapis.com/udca/disk/used_bytes
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:apigee.googleapis.com/udca/disk/used_bytes
     key: cloud.gcp.apigee_googleapis_com.udca.disk.used_bytes
     type: gauge
     name: Apigee UDCA disk used bytes
@@ -276,9 +297,11 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.dataset
-    - value: metric.labels.state
-  - value: apigee.googleapis.com/udca/server/local_file_count
+    - value: label:metric.labels.dataset
+      key: dataset
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:apigee.googleapis.com/udca/server/local_file_count
     key: cloud.gcp.apigee_googleapis_com.udca.server.local_file_count
     type: gauge
     name: Apigee UDCA server local file count
@@ -289,9 +312,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.dataset
-    - value: metric.labels.state
-  - value: apigee.googleapis.com/udca/server/local_file_latest_ts
+    - value: label:metric.labels.dataset
+      key: dataset
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:apigee.googleapis.com/udca/server/local_file_latest_ts
     key: cloud.gcp.apigee_googleapis_com.udca.server.local_file_latest_ts
     type: gauge
     name: Apigee UDCA server timestamp difference between current time and latest
@@ -303,9 +328,11 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.dataset
-    - value: metric.labels.state
-  - value: apigee.googleapis.com/udca/server/local_file_oldest_ts
+    - value: label:metric.labels.dataset
+      key: dataset
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:apigee.googleapis.com/udca/server/local_file_oldest_ts
     key: cloud.gcp.apigee_googleapis_com.udca.server.local_file_oldest_ts
     type: gauge
     name: Apigee UDCA server timestamp difference between current time and oldest
@@ -317,9 +344,11 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.dataset
-    - value: metric.labels.state
-  - value: apigee.googleapis.com/udca/server/pruned_file_count
+    - value: label:metric.labels.dataset
+      key: dataset
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:apigee.googleapis.com/udca/server/pruned_file_count
     key: cloud.gcp.apigee_googleapis_com.udca.server.pruned_file_count
     type: count,delta
     name: Apigee UDCA pruned file count
@@ -330,9 +359,11 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.dataset
-    - value: metric.labels.state
-  - value: apigee.googleapis.com/udca/server/retry_cache_size
+    - value: label:metric.labels.dataset
+      key: dataset
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:apigee.googleapis.com/udca/server/retry_cache_size
     key: cloud.gcp.apigee_googleapis_com.udca.server.retry_cache_size
     type: gauge
     name: Apigee UDCA outstanding number of entries in retry cache
@@ -343,8 +374,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.dataset
-  - value: apigee.googleapis.com/udca/server/total_latencies
+    - value: label:metric.labels.dataset
+      key: dataset
+  - value: metric:apigee.googleapis.com/udca/server/total_latencies
     key: cloud.gcp.apigee_googleapis_com.udca.server.total_latencies
     type: count,delta
     name: Apigee UDCA server total latencies
@@ -355,8 +387,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: s
     dimensions:
-    - value: metric.labels.dataset
-  - value: apigee.googleapis.com/udca/server/upload_latencies
+    - value: label:metric.labels.dataset
+      key: dataset
+  - value: metric:apigee.googleapis.com/udca/server/upload_latencies
     key: cloud.gcp.apigee_googleapis_com.udca.server.upload_latencies
     type: count,delta
     name: Apigee UDCA server upload latencies
@@ -367,8 +400,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: s
     dimensions:
-    - value: metric.labels.dataset
-  - value: apigee.googleapis.com/udca/upstream/http_error_count
+    - value: label:metric.labels.dataset
+      key: dataset
+  - value: metric:apigee.googleapis.com/udca/upstream/http_error_count
     key: cloud.gcp.apigee_googleapis_com.udca.upstream.http_error_count
     type: count,delta
     name: Apigee UDCA server HTTP error count
@@ -379,10 +413,13 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.dataset
-    - value: metric.labels.service
-    - value: metric.labels.response_code
-  - value: apigee.googleapis.com/udca/upstream/http_latencies
+    - value: label:metric.labels.dataset
+      key: dataset
+    - value: label:metric.labels.service
+      key: service
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:apigee.googleapis.com/udca/upstream/http_latencies
     key: cloud.gcp.apigee_googleapis_com.udca.upstream.http_latencies
     type: count,delta
     name: Apigee UDCA server HTTP latencies
@@ -393,9 +430,11 @@ gcp:
       metricKind: CUMULATIVE
       unit: s
     dimensions:
-    - value: metric.labels.dataset
-    - value: metric.labels.service
-  - value: apigee.googleapis.com/udca/upstream/uploaded_file_count
+    - value: label:metric.labels.dataset
+      key: dataset
+    - value: label:metric.labels.service
+      key: service
+  - value: metric:apigee.googleapis.com/udca/upstream/uploaded_file_count
     key: cloud.gcp.apigee_googleapis_com.udca.upstream.uploaded_file_count
     type: count,delta
     name: Apigee UDCA uploaded file count
@@ -406,8 +445,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.dataset
-  - value: apigee.googleapis.com/udca/upstream/uploaded_file_sizes
+    - value: label:metric.labels.dataset
+      key: dataset
+  - value: metric:apigee.googleapis.com/udca/upstream/uploaded_file_sizes
     key: cloud.gcp.apigee_googleapis_com.udca.upstream.uploaded_file_sizes
     type: count,delta
     name: Apigee UDCA uploaded file size distribution
@@ -418,8 +458,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.dataset
-  - value: apigee.googleapis.com/upstream/latencies
+    - value: label:metric.labels.dataset
+      key: dataset
+  - value: metric:apigee.googleapis.com/upstream/latencies
     key: cloud.gcp.apigee_googleapis_com.upstream.latencies
     type: count,delta
     name: Apigee upstream latencies
@@ -430,10 +471,13 @@ gcp:
       metricKind: CUMULATIVE
       unit: ms
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.response_code
-    - value: metric.labels.type
-  - value: apigee.googleapis.com/upstream/request_count
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:apigee.googleapis.com/upstream/request_count
     key: cloud.gcp.apigee_googleapis_com.upstream.request_count
     type: count,delta
     name: Apigee upstream request count
@@ -444,9 +488,11 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.type
-  - value: apigee.googleapis.com/upstream/response_count
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:apigee.googleapis.com/upstream/response_count
     key: cloud.gcp.apigee_googleapis_com.upstream.response_count
     type: count,delta
     name: Apigee upstream response count
@@ -457,6 +503,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.response_code
-    - value: metric.labels.type
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.type
+      key: type

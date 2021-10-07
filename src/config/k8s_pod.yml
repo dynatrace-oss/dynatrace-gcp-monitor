@@ -3,37 +3,36 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Kubernetes Pod
 gcp:
 - service: k8s_pod
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.cluster_name
+  - value: label:resource.labels.cluster_name
     key: cluster_name
-  - value: resource.labels.namespace_name
+  - value: label:resource.labels.namespace_name
     key: namespace_name
-  - value: resource.labels.pod_name
+  - value: label:resource.labels.pod_name
     key: pod_name
     compatibilityModeOnly: false
-  - value: resource.labels.pod_name
+  - value: label:resource.labels.pod_name
     key: gcp.instance.name
   metrics:
-  - value: kubernetes.io/pod/network/received_bytes_count
+  - value: metric:kubernetes.io/pod/network/received_bytes_count
     key: cloud.gcp.kubernetes_io.pod.network.received_bytes_count
     type: count,delta
     name: Bytes received
@@ -44,7 +43,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions: []
-  - value: kubernetes.io/pod/network/sent_bytes_count
+  - value: metric:kubernetes.io/pod/network/sent_bytes_count
     key: cloud.gcp.kubernetes_io.pod.network.sent_bytes_count
     type: count,delta
     name: Bytes transmitted
@@ -55,7 +54,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions: []
-  - value: kubernetes.io/pod/volume/total_bytes
+  - value: metric:kubernetes.io/pod/volume/total_bytes
     key: cloud.gcp.kubernetes_io.pod.volume.total_bytes
     type: gauge
     name: Volume capacity
@@ -66,8 +65,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.volume_name
-  - value: kubernetes.io/pod/volume/used_bytes
+    - value: label:metric.labels.volume_name
+      key: volume_name
+  - value: metric:kubernetes.io/pod/volume/used_bytes
     key: cloud.gcp.kubernetes_io.pod.volume.used_bytes
     type: gauge
     name: Volume usage
@@ -78,8 +78,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.volume_name
-  - value: kubernetes.io/pod/volume/utilization
+    - value: label:metric.labels.volume_name
+      key: volume_name
+  - value: metric:kubernetes.io/pod/volume/utilization
     key: cloud.gcp.kubernetes_io.pod.volume.utilization
     type: gauge
     name: Volume utilization
@@ -90,4 +91,5 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.volume_name
+    - value: label:metric.labels.volume_name
+      key: volume_name

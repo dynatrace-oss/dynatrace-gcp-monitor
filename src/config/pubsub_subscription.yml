@@ -3,28 +3,27 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Pub/Sub Subscription
 gcp:
 - service: pubsub_subscription
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.subscription_id
+  - value: label:resource.labels.subscription_id
     key: subscription_id
     compatibilityModeOnly: true
-  - value: resource.labels.subscription_id
+  - value: label:resource.labels.subscription_id
     key: gcp.instance.id
   metrics:
-  - value: pubsub.googleapis.com/subscription/ack_message_count
+  - value: metric:pubsub.googleapis.com/subscription/ack_message_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.ack_message_count
     type: count,delta
     name: Ack message count
@@ -35,8 +34,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.delivery_type
-  - value: pubsub.googleapis.com/subscription/backlog_bytes
+    - value: label:metric.labels.delivery_type
+      key: delivery_type
+  - value: metric:pubsub.googleapis.com/subscription/backlog_bytes
     key: cloud.gcp.pubsub_googleapis_com.subscription.backlog_bytes
     type: gauge
     name: Backlog size
@@ -47,7 +47,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: pubsub.googleapis.com/subscription/byte_cost
+  - value: metric:pubsub.googleapis.com/subscription/byte_cost
     key: cloud.gcp.pubsub_googleapis_com.subscription.byte_cost
     type: count,delta
     name: Subscription byte cost
@@ -58,9 +58,11 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.operation_type
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/config_updates_count
+    - value: label:metric.labels.operation_type
+      key: operation_type
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/config_updates_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.config_updates_count
     type: count,delta
     name: Subscription updates
@@ -71,9 +73,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-    - value: metric.labels.operation_type
-  - value: pubsub.googleapis.com/subscription/dead_letter_message_count
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.operation_type
+      key: operation_type
+  - value: metric:pubsub.googleapis.com/subscription/dead_letter_message_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.dead_letter_message_count
     type: count,delta
     name: Dead letter message count
@@ -84,8 +88,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/mod_ack_deadline_message_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/mod_ack_deadline_message_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.mod_ack_deadline_message_count
     type: count,delta
     name: Mod ack deadline message count
@@ -96,8 +101,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.delivery_type
-  - value: pubsub.googleapis.com/subscription/mod_ack_deadline_message_operation_count
+    - value: label:metric.labels.delivery_type
+      key: delivery_type
+  - value: metric:pubsub.googleapis.com/subscription/mod_ack_deadline_message_operation_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.mod_ack_deadline_message_operation_count
     type: count,delta
     name: ModifyAckDeadline message operations
@@ -108,8 +114,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/mod_ack_deadline_request_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/mod_ack_deadline_request_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.mod_ack_deadline_request_count
     type: count,delta
     name: ModifyAckDeadline requests
@@ -120,9 +127,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_class
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/num_outstanding_messages
+    - value: label:metric.labels.response_class
+      key: response_class
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/num_outstanding_messages
     key: cloud.gcp.pubsub_googleapis_com.subscription.num_outstanding_messages
     type: gauge
     name: Outstanding push messages
@@ -133,7 +142,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: pubsub.googleapis.com/subscription/num_retained_acked_messages
+  - value: metric:pubsub.googleapis.com/subscription/num_retained_acked_messages
     key: cloud.gcp.pubsub_googleapis_com.subscription.num_retained_acked_messages
     type: gauge
     name: Retained acked messages
@@ -144,7 +153,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: pubsub.googleapis.com/subscription/num_retained_acked_messages_by_region
+  - value: metric:pubsub.googleapis.com/subscription/num_retained_acked_messages_by_region
     key: cloud.gcp.pubsub_googleapis_com.subscription.num_retained_acked_messages_by_region
     type: gauge
     name: Retained acked messages by region
@@ -155,11 +164,12 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/subscription/num_unacked_messages_by_region
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/subscription/num_unacked_messages_by_region
     key: cloud.gcp.pubsub_googleapis_com.subscription.num_unacked_messages_by_region
     type: gauge
     name: Unacked messages by region
@@ -170,11 +180,12 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/subscription/num_undelivered_messages
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/subscription/num_undelivered_messages
     key: cloud.gcp.pubsub_googleapis_com.subscription.num_undelivered_messages
     type: gauge
     name: Unacked messages
@@ -185,7 +196,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: pubsub.googleapis.com/subscription/oldest_retained_acked_message_age
+  - value: metric:pubsub.googleapis.com/subscription/oldest_retained_acked_message_age
     key: cloud.gcp.pubsub_googleapis_com.subscription.oldest_retained_acked_message_age
     type: gauge
     name: Oldest retained acked message age
@@ -196,7 +207,7 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions: []
-  - value: pubsub.googleapis.com/subscription/oldest_retained_acked_message_age_by_region
+  - value: metric:pubsub.googleapis.com/subscription/oldest_retained_acked_message_age_by_region
     key: cloud.gcp.pubsub_googleapis_com.subscription.oldest_retained_acked_message_age_by_region
     type: gauge
     name: Oldest retained acked message age by region
@@ -207,11 +218,12 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/subscription/oldest_unacked_message_age
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/subscription/oldest_unacked_message_age
     key: cloud.gcp.pubsub_googleapis_com.subscription.oldest_unacked_message_age
     type: gauge
     name: Oldest unacked message age
@@ -222,7 +234,7 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions: []
-  - value: pubsub.googleapis.com/subscription/oldest_unacked_message_age_by_region
+  - value: metric:pubsub.googleapis.com/subscription/oldest_unacked_message_age_by_region
     key: cloud.gcp.pubsub_googleapis_com.subscription.oldest_unacked_message_age_by_region
     type: gauge
     name: Oldest unacked message age by region
@@ -233,11 +245,12 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/subscription/pull_ack_message_operation_count
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/subscription/pull_ack_message_operation_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.pull_ack_message_operation_count
     type: count,delta
     name: Acknowledge message operations
@@ -248,8 +261,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/pull_ack_request_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/pull_ack_request_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.pull_ack_request_count
     type: count,delta
     name: Acknowledge requests
@@ -260,9 +274,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_class
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/pull_message_operation_count
+    - value: label:metric.labels.response_class
+      key: response_class
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/pull_message_operation_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.pull_message_operation_count
     type: count,delta
     name: Pull operations
@@ -273,8 +289,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/pull_request_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/pull_request_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.pull_request_count
     type: count,delta
     name: Pull requests
@@ -285,9 +302,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_class
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/push_request_count
+    - value: label:metric.labels.response_class
+      key: response_class
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/push_request_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.push_request_count
     type: count,delta
     name: Push requests
@@ -298,10 +317,13 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_class
-    - value: metric.labels.response_code
-    - value: metric.labels.delivery_type
-  - value: pubsub.googleapis.com/subscription/push_request_latencies
+    - value: label:metric.labels.response_class
+      key: response_class
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.delivery_type
+      key: delivery_type
+  - value: metric:pubsub.googleapis.com/subscription/push_request_latencies
     key: cloud.gcp.pubsub_googleapis_com.subscription.push_request_latencies
     type: gauge
     name: Push latency
@@ -312,9 +334,11 @@ gcp:
       metricKind: DELTA
       unit: us
     dimensions:
-    - value: metric.labels.response_code
-    - value: metric.labels.delivery_type
-  - value: pubsub.googleapis.com/subscription/retained_acked_bytes
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.delivery_type
+      key: delivery_type
+  - value: metric:pubsub.googleapis.com/subscription/retained_acked_bytes
     key: cloud.gcp.pubsub_googleapis_com.subscription.retained_acked_bytes
     type: gauge
     name: Retained acked bytes
@@ -325,7 +349,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: pubsub.googleapis.com/subscription/retained_acked_bytes_by_region
+  - value: metric:pubsub.googleapis.com/subscription/retained_acked_bytes_by_region
     key: cloud.gcp.pubsub_googleapis_com.subscription.retained_acked_bytes_by_region
     type: gauge
     name: Retained acked bytes by region
@@ -336,11 +360,12 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/subscription/seek_request_count
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/subscription/seek_request_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.seek_request_count
     type: count,delta
     name: Seek requests
@@ -351,8 +376,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/sent_message_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/sent_message_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.sent_message_count
     type: count,delta
     name: Sent message count
@@ -363,8 +389,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.delivery_type
-  - value: pubsub.googleapis.com/subscription/streaming_pull_ack_message_operation_count
+    - value: label:metric.labels.delivery_type
+      key: delivery_type
+  - value: metric:pubsub.googleapis.com/subscription/streaming_pull_ack_message_operation_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.streaming_pull_ack_message_operation_count
     type: count,delta
     name: StreamingPull Acknowledge message operations
@@ -375,8 +402,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/streaming_pull_ack_request_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/streaming_pull_ack_request_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.streaming_pull_ack_request_count
     type: count,delta
     name: StreamingPull Acknowledge requests
@@ -387,9 +415,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_class
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/streaming_pull_message_operation_count
+    - value: label:metric.labels.response_class
+      key: response_class
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/streaming_pull_message_operation_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.streaming_pull_message_operation_count
     type: count,delta
     name: StreamingPull message operations
@@ -400,8 +430,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/streaming_pull_mod_ack_deadline_message_operation_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/streaming_pull_mod_ack_deadline_message_operation_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.streaming_pull_mod_ack_deadline_message_operation_count
     type: count,delta
     name: StreamingPull ModifyAckDeadline message operations
@@ -412,8 +443,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/streaming_pull_mod_ack_deadline_request_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/streaming_pull_mod_ack_deadline_request_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.streaming_pull_mod_ack_deadline_request_count
     type: count,delta
     name: StreamingPull ModifyAckDeadline requests
@@ -424,9 +456,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_class
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/streaming_pull_response_count
+    - value: label:metric.labels.response_class
+      key: response_class
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/streaming_pull_response_count
     key: cloud.gcp.pubsub_googleapis_com.subscription.streaming_pull_response_count
     type: count,delta
     name: StreamingPull responses
@@ -437,9 +471,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_class
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/subscription/unacked_bytes_by_region
+    - value: label:metric.labels.response_class
+      key: response_class
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/subscription/unacked_bytes_by_region
     key: cloud.gcp.pubsub_googleapis_com.subscription.unacked_bytes_by_region
     type: gauge
     name: Unacked bytes by region
@@ -450,9 +486,10 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
+      key: region
+    - value: label:metric.labels.region
+      key: region
 dashboards:
-  - dashboard: "dashboards/pubsub.json"
+- dashboard: dashboards/pubsub.json

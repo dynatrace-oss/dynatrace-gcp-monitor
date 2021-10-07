@@ -3,28 +3,27 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Network Security Policy
 gcp:
 - service: network_security_policy
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.policy_name
+  - value: label:resource.labels.policy_name
     key: policy_name
     compatibilityModeOnly: true
-  - value: resource.labels.policy_name
+  - value: label:resource.labels.policy_name
     key: gcp.instance.name
   metrics:
-  - value: networksecurity.googleapis.com/https/previewed_request_count
+  - value: metric:networksecurity.googleapis.com/https/previewed_request_count
     key: cloud.gcp.networksecurity_googleapis_com.https.previewed_request_count
     type: count,delta
     name: Previewed request count
@@ -35,9 +34,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.blocked
-    - value: metric.labels.backend_target_name
-  - value: networksecurity.googleapis.com/https/request_count
+    - value: label:metric.labels.blocked
+      key: blocked
+    - value: label:metric.labels.backend_target_name
+      key: backend_target_name
+  - value: metric:networksecurity.googleapis.com/https/request_count
     key: cloud.gcp.networksecurity_googleapis_com.https.request_count
     type: count,delta
     name: Request count
@@ -48,5 +49,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.blocked
-    - value: metric.labels.backend_target_name
+    - value: label:metric.labels.blocked
+      key: blocked
+    - value: label:metric.labels.backend_target_name
+      key: backend_target_name

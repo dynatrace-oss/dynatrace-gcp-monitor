@@ -3,28 +3,27 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Pub/Sub Topic
 gcp:
 - service: pubsub_topic
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.topic_id
+  - value: label:resource.labels.topic_id
     key: topic_id
     compatibilityModeOnly: true
-  - value: resource.labels.topic_id
+  - value: label:resource.labels.topic_id
     key: gcp.instance.id
   metrics:
-  - value: pubsub.googleapis.com/topic/byte_cost
+  - value: metric:pubsub.googleapis.com/topic/byte_cost
     key: cloud.gcp.pubsub_googleapis_com.topic.byte_cost
     type: count,delta
     name: Topic byte cost
@@ -35,9 +34,11 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.operation_type
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/topic/config_updates_count
+    - value: label:metric.labels.operation_type
+      key: operation_type
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/topic/config_updates_count
     key: cloud.gcp.pubsub_googleapis_com.topic.config_updates_count
     type: count,delta
     name: Topic updates
@@ -48,9 +49,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-    - value: metric.labels.operation_type
-  - value: pubsub.googleapis.com/topic/message_sizes
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.operation_type
+      key: operation_type
+  - value: metric:pubsub.googleapis.com/topic/message_sizes
     key: cloud.gcp.pubsub_googleapis_com.topic.message_sizes
     type: gauge
     name: Publish message size
@@ -61,7 +64,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: pubsub.googleapis.com/topic/num_retained_acked_messages_by_region
+  - value: metric:pubsub.googleapis.com/topic/num_retained_acked_messages_by_region
     key: cloud.gcp.pubsub_googleapis_com.topic.num_retained_acked_messages_by_region
     type: gauge
     name: Retained acked messages by region
@@ -72,11 +75,12 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/topic/num_unacked_messages_by_region
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/topic/num_unacked_messages_by_region
     key: cloud.gcp.pubsub_googleapis_com.topic.num_unacked_messages_by_region
     type: gauge
     name: Unacked messages by region
@@ -87,11 +91,12 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/topic/oldest_retained_acked_message_age_by_region
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/topic/oldest_retained_acked_message_age_by_region
     key: cloud.gcp.pubsub_googleapis_com.topic.oldest_retained_acked_message_age_by_region
     type: gauge
     name: Oldest retained acked message age by region
@@ -102,11 +107,12 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/topic/oldest_unacked_message_age_by_region
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/topic/oldest_unacked_message_age_by_region
     key: cloud.gcp.pubsub_googleapis_com.topic.oldest_unacked_message_age_by_region
     type: gauge
     name: Oldest unacked message age by region
@@ -117,11 +123,12 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/topic/retained_acked_bytes_by_region
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/topic/retained_acked_bytes_by_region
     key: cloud.gcp.pubsub_googleapis_com.topic.retained_acked_bytes_by_region
     type: gauge
     name: Retained acked bytes by region
@@ -132,11 +139,12 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/topic/send_message_operation_count
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/topic/send_message_operation_count
     key: cloud.gcp.pubsub_googleapis_com.topic.send_message_operation_count
     type: count,delta
     name: Publish message operations
@@ -147,8 +155,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/topic/send_request_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/topic/send_request_count
     key: cloud.gcp.pubsub_googleapis_com.topic.send_request_count
     type: count,delta
     name: Publish requests
@@ -159,9 +168,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_class
-    - value: metric.labels.response_code
-  - value: pubsub.googleapis.com/topic/unacked_bytes_by_region
+    - value: label:metric.labels.response_class
+      key: response_class
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:pubsub.googleapis.com/topic/unacked_bytes_by_region
     key: cloud.gcp.pubsub_googleapis_com.topic.unacked_bytes_by_region
     type: gauge
     name: Unacked bytes by region
@@ -172,9 +183,10 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
+      key: region
+    - value: label:metric.labels.region
+      key: region
 dashboards:
-  - dashboard: "dashboards/pubsub.json"
+- dashboard: dashboards/pubsub.json

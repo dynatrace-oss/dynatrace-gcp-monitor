@@ -3,42 +3,41 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Autoscaler
 gcp:
 - service: autoscaler
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.autoscaler_id
+  - value: label:resource.labels.autoscaler_id
     key: autoscaler_id
     compatibilityModeOnly: true
-  - value: resource.labels.autoscaler_id
+  - value: label:resource.labels.autoscaler_id
     key: gcp.instance.id
-  - value: resource.labels.autoscaler_name
+  - value: label:resource.labels.autoscaler_name
     key: autoscaler_name
     compatibilityModeOnly: true
-  - value: resource.labels.autoscaler_name
+  - value: label:resource.labels.autoscaler_name
     key: gcp.instance.name
-  - value: resource.labels.instance_group_manager_id
+  - value: label:resource.labels.instance_group_manager_id
     key: instance_group_manager_id
-  - value: resource.labels.instance_group_manager_name
+  - value: label:resource.labels.instance_group_manager_name
     key: instance_group_manager_name
   metrics:
-  - value: autoscaler.googleapis.com/capacity
+  - value: metric:autoscaler.googleapis.com/capacity
     key: cloud.gcp.autoscaler_googleapis_com.capacity
     type: gauge
     name: Serving capacity
@@ -49,8 +48,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.metric_type
-  - value: autoscaler.googleapis.com/current_utilization
+    - value: label:metric.labels.metric_type
+      key: metric_type
+  - value: metric:autoscaler.googleapis.com/current_utilization
     key: cloud.gcp.autoscaler_googleapis_com.current_utilization
     type: gauge
     name: Current Autoscaler utilization
@@ -61,4 +61,5 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.metric_type
+    - value: label:metric.labels.metric_type
+      key: metric_type

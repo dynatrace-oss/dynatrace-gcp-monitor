@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Cloud SQL Database
 gcp:
 - service: cloudsql_database
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.database_id
+  - value: label:resource.labels.database_id
     key: database_id
     compatibilityModeOnly: true
-  - value: resource.labels.database_id
+  - value: label:resource.labels.database_id
     key: gcp.instance.id
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: gcp.region
   metrics:
-  - value: cloudsql.googleapis.com/database/auto_failover_request_count
+  - value: metric:cloudsql.googleapis.com/database/auto_failover_request_count
     key: cloud.gcp.cloudsql_googleapis_com.database.auto_failover_request_count
     type: count,delta
     name: Auto-failover Requests
@@ -40,7 +39,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/available_for_failover
+  - value: metric:cloudsql.googleapis.com/database/available_for_failover
     key: cloud.gcp.cloudsql_googleapis_com.database.available_for_failover
     type: gauge
     name: Available for failover
@@ -51,7 +50,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/cpu/reserved_cores
+  - value: metric:cloudsql.googleapis.com/database/cpu/reserved_cores
     key: cloud.gcp.cloudsql_googleapis_com.database.cpu.reserved_cores
     type: gauge
     name: CPU reserved cores
@@ -62,7 +61,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/cpu/usage_time
+  - value: metric:cloudsql.googleapis.com/database/cpu/usage_time
     key: cloud.gcp.cloudsql_googleapis_com.database.cpu.usage_time
     type: count,delta
     name: CPU usage
@@ -73,7 +72,7 @@ gcp:
       metricKind: DELTA
       unit: s{CPU}
     dimensions: []
-  - value: cloudsql.googleapis.com/database/cpu/utilization
+  - value: metric:cloudsql.googleapis.com/database/cpu/utilization
     key: cloud.gcp.cloudsql_googleapis_com.database.cpu.utilization
     type: gauge
     name: CPU utilization
@@ -84,7 +83,7 @@ gcp:
       metricKind: GAUGE
       unit: 10^2.%
     dimensions: []
-  - value: cloudsql.googleapis.com/database/disk/bytes_used
+  - value: metric:cloudsql.googleapis.com/database/disk/bytes_used
     key: cloud.gcp.cloudsql_googleapis_com.database.disk.bytes_used
     type: gauge
     name: Bytes used
@@ -95,7 +94,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: cloudsql.googleapis.com/database/disk/quota
+  - value: metric:cloudsql.googleapis.com/database/disk/quota
     key: cloud.gcp.cloudsql_googleapis_com.database.disk.quota
     type: gauge
     name: Disk quota
@@ -106,7 +105,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: cloudsql.googleapis.com/database/disk/read_ops_count
+  - value: metric:cloudsql.googleapis.com/database/disk/read_ops_count
     key: cloud.gcp.cloudsql_googleapis_com.database.disk.read_ops_count
     type: count,delta
     name: Disk read IO
@@ -117,7 +116,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/disk/utilization
+  - value: metric:cloudsql.googleapis.com/database/disk/utilization
     key: cloud.gcp.cloudsql_googleapis_com.database.disk.utilization
     type: gauge
     name: Disk utilization
@@ -128,7 +127,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/disk/write_ops_count
+  - value: metric:cloudsql.googleapis.com/database/disk/write_ops_count
     key: cloud.gcp.cloudsql_googleapis_com.database.disk.write_ops_count
     type: count,delta
     name: Disk write IO
@@ -139,7 +138,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/instance_state
+  - value: metric:cloudsql.googleapis.com/database/instance_state
     key: cloud.gcp.cloudsql_googleapis_com.database.instance_state
     type: gauge
     name: Instance state
@@ -150,8 +149,9 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.state
-  - value: cloudsql.googleapis.com/database/memory/quota
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:cloudsql.googleapis.com/database/memory/quota
     key: cloud.gcp.cloudsql_googleapis_com.database.memory.quota
     type: gauge
     name: Memory quota
@@ -162,7 +162,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: cloudsql.googleapis.com/database/memory/usage
+  - value: metric:cloudsql.googleapis.com/database/memory/usage
     key: cloud.gcp.cloudsql_googleapis_com.database.memory.usage
     type: gauge
     name: Memory usage
@@ -173,7 +173,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: cloudsql.googleapis.com/database/memory/utilization
+  - value: metric:cloudsql.googleapis.com/database/memory/utilization
     key: cloud.gcp.cloudsql_googleapis_com.database.memory.utilization
     type: gauge
     name: Memory utilization
@@ -184,7 +184,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/innodb_buffer_pool_pages_dirty
+  - value: metric:cloudsql.googleapis.com/database/mysql/innodb_buffer_pool_pages_dirty
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.innodb_buffer_pool_pages_dirty
     type: gauge
     name: InnoDB dirty pages
@@ -195,7 +195,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/innodb_buffer_pool_pages_free
+  - value: metric:cloudsql.googleapis.com/database/mysql/innodb_buffer_pool_pages_free
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.innodb_buffer_pool_pages_free
     type: gauge
     name: InnoDB free pages
@@ -206,7 +206,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/innodb_buffer_pool_pages_total
+  - value: metric:cloudsql.googleapis.com/database/mysql/innodb_buffer_pool_pages_total
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.innodb_buffer_pool_pages_total
     type: gauge
     name: InnoDB total pages
@@ -217,7 +217,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/innodb_data_fsyncs
+  - value: metric:cloudsql.googleapis.com/database/mysql/innodb_data_fsyncs
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.innodb_data_fsyncs
     type: count,delta
     name: InnoDB fsync calls
@@ -228,7 +228,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/innodb_os_log_fsyncs
+  - value: metric:cloudsql.googleapis.com/database/mysql/innodb_os_log_fsyncs
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.innodb_os_log_fsyncs
     type: count,delta
     name: InnoDB log fsync calls
@@ -239,7 +239,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/innodb_pages_read
+  - value: metric:cloudsql.googleapis.com/database/mysql/innodb_pages_read
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.innodb_pages_read
     type: count,delta
     name: InnoDB pages read
@@ -250,7 +250,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/innodb_pages_written
+  - value: metric:cloudsql.googleapis.com/database/mysql/innodb_pages_written
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.innodb_pages_written
     type: count,delta
     name: InnoDB pages written
@@ -261,7 +261,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/queries
+  - value: metric:cloudsql.googleapis.com/database/mysql/queries
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.queries
     type: count,delta
     name: Queries
@@ -272,7 +272,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/questions
+  - value: metric:cloudsql.googleapis.com/database/mysql/questions
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.questions
     type: count,delta
     name: Questions
@@ -283,7 +283,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/received_bytes_count
+  - value: metric:cloudsql.googleapis.com/database/mysql/received_bytes_count
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.received_bytes_count
     type: count,delta
     name: Network bytes received by MySQL
@@ -294,7 +294,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/replication/available_for_failover
+  - value: metric:cloudsql.googleapis.com/database/mysql/replication/available_for_failover
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.replication.available_for_failover
     type: gauge
     name: Available for failover (Deprecated)
@@ -305,7 +305,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/replication/last_io_errno
+  - value: metric:cloudsql.googleapis.com/database/mysql/replication/last_io_errno
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.replication.last_io_errno
     type: gauge
     name: Last I/O thread error number.
@@ -316,7 +316,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/replication/last_sql_errno
+  - value: metric:cloudsql.googleapis.com/database/mysql/replication/last_sql_errno
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.replication.last_sql_errno
     type: gauge
     name: Last SQL thread error number.
@@ -327,7 +327,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/replication/seconds_behind_master
+  - value: metric:cloudsql.googleapis.com/database/mysql/replication/seconds_behind_master
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.replication.seconds_behind_master
     type: gauge
     name: Replica lag
@@ -338,7 +338,7 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/replication/slave_io_running
+  - value: metric:cloudsql.googleapis.com/database/mysql/replication/slave_io_running
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.replication.slave_io_running
     type: gauge
     name: Slave I/O thread running
@@ -349,7 +349,7 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/replication/slave_io_running_state
+  - value: metric:cloudsql.googleapis.com/database/mysql/replication/slave_io_running_state
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.replication.slave_io_running_state
     type: gauge
     name: Slave I/O thread running state
@@ -360,8 +360,9 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.state
-  - value: cloudsql.googleapis.com/database/mysql/replication/slave_sql_running
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:cloudsql.googleapis.com/database/mysql/replication/slave_sql_running
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.replication.slave_sql_running
     type: gauge
     name: Slave SQL thread running
@@ -372,7 +373,7 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions: []
-  - value: cloudsql.googleapis.com/database/mysql/replication/slave_sql_running_state
+  - value: metric:cloudsql.googleapis.com/database/mysql/replication/slave_sql_running_state
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.replication.slave_sql_running_state
     type: gauge
     name: Slave SQL thread running state
@@ -383,8 +384,9 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.state
-  - value: cloudsql.googleapis.com/database/mysql/sent_bytes_count
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:cloudsql.googleapis.com/database/mysql/sent_bytes_count
     key: cloud.gcp.cloudsql_googleapis_com.database.mysql.sent_bytes_count
     type: count,delta
     name: Network bytes sent by MySQL
@@ -395,7 +397,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: cloudsql.googleapis.com/database/network/connections
+  - value: metric:cloudsql.googleapis.com/database/network/connections
     key: cloud.gcp.cloudsql_googleapis_com.database.network.connections
     type: gauge
     name: Cloud SQL Connections
@@ -406,7 +408,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/network/received_bytes_count
+  - value: metric:cloudsql.googleapis.com/database/network/received_bytes_count
     key: cloud.gcp.cloudsql_googleapis_com.database.network.received_bytes_count
     type: count,delta
     name: Received bytes
@@ -417,7 +419,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: cloudsql.googleapis.com/database/network/sent_bytes_count
+  - value: metric:cloudsql.googleapis.com/database/network/sent_bytes_count
     key: cloud.gcp.cloudsql_googleapis_com.database.network.sent_bytes_count
     type: count,delta
     name: Sent bytes
@@ -428,8 +430,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.destination
-  - value: cloudsql.googleapis.com/database/postgresql/num_backends
+    - value: label:metric.labels.destination
+      key: destination
+  - value: metric:cloudsql.googleapis.com/database/postgresql/num_backends
     key: cloud.gcp.cloudsql_googleapis_com.database.postgresql.num_backends
     type: gauge
     name: PostgreSQL Connections
@@ -440,8 +443,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.database
-  - value: cloudsql.googleapis.com/database/postgresql/replication/replica_byte_lag
+    - value: label:metric.labels.database
+      key: database
+  - value: metric:cloudsql.googleapis.com/database/postgresql/replication/replica_byte_lag
     key: cloud.gcp.cloudsql_googleapis_com.database.postgresql.replication.replica_byte_lag
     type: gauge
     name: Lag bytes
@@ -452,9 +456,11 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.replica_name
-    - value: metric.labels.replica_lag_type
-  - value: cloudsql.googleapis.com/database/postgresql/transaction_count
+    - value: label:metric.labels.replica_name
+      key: replica_name
+    - value: label:metric.labels.replica_lag_type
+      key: replica_lag_type
+  - value: metric:cloudsql.googleapis.com/database/postgresql/transaction_count
     key: cloud.gcp.cloudsql_googleapis_com.database.postgresql.transaction_count
     type: count,delta
     name: Number of transactions
@@ -465,9 +471,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.transaction_type
-  - value: cloudsql.googleapis.com/database/replication/replica_lag
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.transaction_type
+      key: transaction_type
+  - value: metric:cloudsql.googleapis.com/database/replication/replica_lag
     key: cloud.gcp.cloudsql_googleapis_com.database.replication.replica_lag
     type: gauge
     name: Replica lag
@@ -478,7 +486,7 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions: []
-  - value: cloudsql.googleapis.com/database/state
+  - value: metric:cloudsql.googleapis.com/database/state
     key: cloud.gcp.cloudsql_googleapis_com.database.state
     type: gauge
     name: State
@@ -489,7 +497,7 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions: []
-  - value: cloudsql.googleapis.com/database/up
+  - value: metric:cloudsql.googleapis.com/database/up
     key: cloud.gcp.cloudsql_googleapis_com.database.up
     type: gauge
     name: Server up
@@ -500,7 +508,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudsql.googleapis.com/database/uptime
+  - value: metric:cloudsql.googleapis.com/database/uptime
     key: cloud.gcp.cloudsql_googleapis_com.database.uptime
     type: count,delta
     name: Uptime
@@ -512,6 +520,6 @@ gcp:
       unit: s
     dimensions: []
 dashboards:
-  - dashboard: "dashboards/cloudsql_database.json"
+- dashboard: dashboards/cloudsql_database.json
 alerts:
-  - path: "alerts/cloudsql_database/cpu.utilization.json"
+- path: alerts/cloudsql_database/cpu.utilization.json

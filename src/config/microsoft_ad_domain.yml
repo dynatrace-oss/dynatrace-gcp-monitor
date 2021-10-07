@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Microsoft Active Directory Domain
 gcp:
 - service: microsoft_ad_domain
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.fqdn
+  - value: label:resource.labels.fqdn
     key: fqdn
     compatibilityModeOnly: true
-  - value: resource.labels.fqdn
+  - value: label:resource.labels.fqdn
     key: gcp.instance.name
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
   metrics:
-  - value: managedidentities.googleapis.com/microsoft_ad/domain/health
+  - value: metric:managedidentities.googleapis.com/microsoft_ad/domain/health
     key: cloud.gcp.managedidentities_googleapis_com.microsoft_ad.domain.health
     type: gauge
     name: AD Domain Health
@@ -40,7 +39,7 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions: []
-  - value: managedidentities.googleapis.com/microsoft_ad/domain/trust/state
+  - value: metric:managedidentities.googleapis.com/microsoft_ad/domain/trust/state
     key: cloud.gcp.managedidentities_googleapis_com.microsoft_ad.domain.trust.state
     type: gauge
     name: AD Domain Trust Health
@@ -51,10 +50,12 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.trust_direction
-    - value: metric.labels.target_domain_name
+    - value: label:metric.labels.trust_direction
+      key: trust_direction
+    - value: label:metric.labels.target_domain_name
       key: target_domain_name
       compatibilityModeOnly: true
-    - value: metric.labels.target_domain_name
-      key: gcp.instance.name
-    - value: metric.labels.trust_type
+    - value: label:metric.labels.target_domain_name
+      key: target_domain_name
+    - value: label:metric.labels.trust_type
+      key: trust_type

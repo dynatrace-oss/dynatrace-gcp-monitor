@@ -5,36 +5,35 @@ technology:
   name: Google Apigee Proxy
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 gcp:
 - service: apigee.googleapis.com_Proxy
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.resource_container
+  - value: label:resource.labels.resource_container
     key: resource_container
-  - value: resource.labels.org
+  - value: label:resource.labels.org
     key: org
-  - value: resource.labels.env
+  - value: label:resource.labels.env
     key: env
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.proxy_name
+  - value: label:resource.labels.proxy_name
     key: proxy_name
     compatibilityModeOnly: true
-  - value: resource.labels.proxy_name
+  - value: label:resource.labels.proxy_name
     key: gcp.instance.name
-  - value: resource.labels.revision
+  - value: label:resource.labels.revision
     key: revision
-  - value: resource.labels.host
+  - value: label:resource.labels.host
     key: host
   metrics:
-  - value: apigee.googleapis.com/policy/latencies
+  - value: metric:apigee.googleapis.com/policy/latencies
     key: cloud.gcp.apigee_googleapis_com.policy.latencies
     type: count,delta
     name: Apigee policy response latencies
@@ -45,8 +44,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: ms
     dimensions:
-    - value: metric.labels.policy_name
-  - value: apigee.googleapis.com/proxy/latencies
+    - value: label:metric.labels.policy_name
+      key: policy_name
+  - value: metric:apigee.googleapis.com/proxy/latencies
     key: cloud.gcp.apigee_googleapis_com.proxy.latencies
     type: count,delta
     name: Apigee proxy response latencies
@@ -57,8 +57,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: ms
     dimensions:
-    - value: metric.labels.method
-  - value: apigee.googleapis.com/proxy/request_count
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:apigee.googleapis.com/proxy/request_count
     key: cloud.gcp.apigee_googleapis_com.proxy.request_count
     type: count,delta
     name: Apigee proxy request cumulative count
@@ -69,8 +70,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.method
-  - value: apigee.googleapis.com/proxy/response_count
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:apigee.googleapis.com/proxy/response_count
     key: cloud.gcp.apigee_googleapis_com.proxy.response_count
     type: count,delta
     name: Apigee proxy response cumulative count
@@ -81,9 +83,11 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.response_code
-  - value: apigee.googleapis.com/target/latencies
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:apigee.googleapis.com/target/latencies
     key: cloud.gcp.apigee_googleapis_com.target.latencies
     type: count,delta
     name: Apigee target response latencies
@@ -94,11 +98,15 @@ gcp:
       metricKind: CUMULATIVE
       unit: ms
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.target_type
-    - value: metric.labels.target_endpoint
-    - value: metric.labels.response_code
-  - value: apigee.googleapis.com/target/request_count
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.target_type
+      key: target_type
+    - value: label:metric.labels.target_endpoint
+      key: target_endpoint
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:apigee.googleapis.com/target/request_count
     key: cloud.gcp.apigee_googleapis_com.target.request_count
     type: count,delta
     name: Apigee target request cumulative count
@@ -109,10 +117,13 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.target_type
-    - value: metric.labels.target_endpoint
-  - value: apigee.googleapis.com/target/response_count
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.target_type
+      key: target_type
+    - value: label:metric.labels.target_endpoint
+      key: target_endpoint
+  - value: metric:apigee.googleapis.com/target/response_count
     key: cloud.gcp.apigee_googleapis_com.target.response_count
     type: count,delta
     name: Apigee target response cumulative count
@@ -123,7 +134,11 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.method
-    - value: metric.labels.target_type
-    - value: metric.labels.target_endpoint
-    - value: metric.labels.response_code
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.target_type
+      key: target_type
+    - value: label:metric.labels.target_endpoint
+      key: target_endpoint
+    - value: label:metric.labels.response_code
+      key: response_code

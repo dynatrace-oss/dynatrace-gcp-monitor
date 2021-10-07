@@ -3,35 +3,34 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud TPU Worker
 gcp:
 - service: tpu_worker
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: gcp.region
-  - value: resource.labels.node_id
+  - value: label:resource.labels.node_id
     key: node_id
-  - value: resource.labels.worker_id
+  - value: label:resource.labels.worker_id
     key: worker_id
     compatibilityModeOnly: true
-  - value: resource.labels.worker_id
+  - value: label:resource.labels.worker_id
     key: gcp.instance.id
   metrics:
-  - value: tpu.googleapis.com/container/cpu/utilization
+  - value: metric:tpu.googleapis.com/container/cpu/utilization
     key: cloud.gcp.tpu_googleapis_com.container.cpu.utilization
     type: gauge
     name: Container CPU utilization
@@ -42,8 +41,9 @@ gcp:
       metricKind: GAUGE
       unit: '%'
     dimensions:
-    - value: metric.labels.container_name
-  - value: tpu.googleapis.com/container/memory/usage
+    - value: label:metric.labels.container_name
+      key: container_name
+  - value: metric:tpu.googleapis.com/container/memory/usage
     key: cloud.gcp.tpu_googleapis_com.container.memory.usage
     type: gauge
     name: Container memory usage
@@ -54,8 +54,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.container_name
-  - value: tpu.googleapis.com/cpu/utilization
+    - value: label:metric.labels.container_name
+      key: container_name
+  - value: metric:tpu.googleapis.com/cpu/utilization
     key: cloud.gcp.tpu_googleapis_com.cpu.utilization
     type: gauge
     name: CPU utilization
@@ -66,8 +67,9 @@ gcp:
       metricKind: GAUGE
       unit: '%'
     dimensions:
-    - value: metric.labels.core
-  - value: tpu.googleapis.com/memory/usage
+    - value: label:metric.labels.core
+      key: core
+  - value: metric:tpu.googleapis.com/memory/usage
     key: cloud.gcp.tpu_googleapis_com.memory.usage
     type: gauge
     name: Memory usage
@@ -78,7 +80,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: tpu.googleapis.com/network/received_bytes_count
+  - value: metric:tpu.googleapis.com/network/received_bytes_count
     key: cloud.gcp.tpu_googleapis_com.network.received_bytes_count
     type: count,delta
     name: Network bytes received
@@ -89,7 +91,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: tpu.googleapis.com/network/sent_bytes_count
+  - value: metric:tpu.googleapis.com/network/sent_bytes_count
     key: cloud.gcp.tpu_googleapis_com.network.sent_bytes_count
     type: count,delta
     name: Network bytes sent
@@ -100,7 +102,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: tpu.googleapis.com/tpu/mxu/utilization
+  - value: metric:tpu.googleapis.com/tpu/mxu/utilization
     key: cloud.gcp.tpu_googleapis_com.tpu.mxu.utilization
     type: gauge
     name: MXU utilization

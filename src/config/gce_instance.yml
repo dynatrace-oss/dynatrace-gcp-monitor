@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google VM Instance
 gcp:
 - service: gce_instance
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: instance_id
     compatibilityModeOnly: true
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: gcp.instance.id
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: gcp.region
   metrics:
-  - value: compute.googleapis.com/firewall/dropped_bytes_count
+  - value: metric:compute.googleapis.com/firewall/dropped_bytes_count
     key: cloud.gcp.compute_googleapis_com.firewall.dropped_bytes_count
     type: count,delta
     name: Dropped bytes
@@ -40,12 +39,12 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/firewall/dropped_packets_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/firewall/dropped_packets_count
     key: cloud.gcp.compute_googleapis_com.firewall.dropped_packets_count
     type: count,delta
     name: Dropped packets
@@ -56,12 +55,12 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/guest/cpu/runnable_task_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/guest/cpu/runnable_task_count
     key: cloud.gcp.compute_googleapis_com.guest.cpu.runnable_task_count
     type: gauge
     name: Runnable task count.
@@ -72,12 +71,12 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/guest/cpu/usage_time
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/guest/cpu/usage_time
     key: cloud.gcp.compute_googleapis_com.guest.cpu.usage_time
     type: count,delta
     name: CPU usage
@@ -88,13 +87,14 @@ gcp:
       metricKind: CUMULATIVE
       unit: s{CPU}
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.state
-  - value: compute.googleapis.com/guest/disk/bytes_used
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:compute.googleapis.com/guest/disk/bytes_used
     key: cloud.gcp.compute_googleapis_com.guest.disk.bytes_used
     type: gauge
     name: Disk usage in Bytes
@@ -105,14 +105,16 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.state
-  - value: compute.googleapis.com/guest/disk/io_time
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:compute.googleapis.com/guest/disk/io_time
     key: cloud.gcp.compute_googleapis_com.guest.disk.io_time
     type: count,delta
     name: IO Time
@@ -123,13 +125,14 @@ gcp:
       metricKind: CUMULATIVE
       unit: ms
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-  - value: compute.googleapis.com/guest/disk/merged_operation_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+  - value: metric:compute.googleapis.com/guest/disk/merged_operation_count
     key: cloud.gcp.compute_googleapis_com.guest.disk.merged_operation_count
     type: count,delta
     name: Merged disk operations
@@ -140,14 +143,16 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.direction
-  - value: compute.googleapis.com/guest/disk/operation_bytes_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.direction
+      key: direction
+  - value: metric:compute.googleapis.com/guest/disk/operation_bytes_count
     key: cloud.gcp.compute_googleapis_com.guest.disk.operation_bytes_count
     type: count,delta
     name: Disk bytes transferred
@@ -158,14 +163,16 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.direction
-  - value: compute.googleapis.com/guest/disk/operation_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.direction
+      key: direction
+  - value: metric:compute.googleapis.com/guest/disk/operation_count
     key: cloud.gcp.compute_googleapis_com.guest.disk.operation_count
     type: count,delta
     name: Disk operations
@@ -176,14 +183,16 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.direction
-  - value: compute.googleapis.com/guest/disk/operation_time
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.direction
+      key: direction
+  - value: metric:compute.googleapis.com/guest/disk/operation_time
     key: cloud.gcp.compute_googleapis_com.guest.disk.operation_time
     type: count,delta
     name: Disk operation time
@@ -194,14 +203,16 @@ gcp:
       metricKind: CUMULATIVE
       unit: ms
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.direction
-  - value: compute.googleapis.com/guest/disk/queue_length
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.direction
+      key: direction
+  - value: metric:compute.googleapis.com/guest/disk/queue_length
     key: cloud.gcp.compute_googleapis_com.guest.disk.queue_length
     type: gauge
     name: Queue Length
@@ -212,13 +223,14 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-  - value: compute.googleapis.com/guest/disk/weighted_io_time
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+  - value: metric:compute.googleapis.com/guest/disk/weighted_io_time
     key: cloud.gcp.compute_googleapis_com.guest.disk.weighted_io_time
     type: count,delta
     name: IO Time
@@ -229,13 +241,14 @@ gcp:
       metricKind: CUMULATIVE
       unit: ms
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-  - value: compute.googleapis.com/guest/memory/anonymous_used
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+  - value: metric:compute.googleapis.com/guest/memory/anonymous_used
     key: cloud.gcp.compute_googleapis_com.guest.memory.anonymous_used
     type: gauge
     name: Anonymous memory usage in Bytes
@@ -246,13 +259,14 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.state
-  - value: compute.googleapis.com/guest/memory/bytes_used
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:compute.googleapis.com/guest/memory/bytes_used
     key: cloud.gcp.compute_googleapis_com.guest.memory.bytes_used
     type: gauge
     name: Memory usage in Bytes
@@ -263,13 +277,14 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.state
-  - value: compute.googleapis.com/guest/memory/dirty_used
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:compute.googleapis.com/guest/memory/dirty_used
     key: cloud.gcp.compute_googleapis_com.guest.memory.dirty_used
     type: gauge
     name: Dirty pages usage in Bytes.
@@ -280,13 +295,14 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.state
-  - value: compute.googleapis.com/guest/memory/page_cache_used
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:compute.googleapis.com/guest/memory/page_cache_used
     key: cloud.gcp.compute_googleapis_com.guest.memory.page_cache_used
     type: gauge
     name: Page cache memory usage in Bytes
@@ -297,13 +313,14 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.state
-  - value: compute.googleapis.com/guest/memory/unevictable_used
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:compute.googleapis.com/guest/memory/unevictable_used
     key: cloud.gcp.compute_googleapis_com.guest.memory.unevictable_used
     type: gauge
     name: Unevictable memory usage in Bytes
@@ -314,12 +331,12 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/guest/system/problem_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/guest/system/problem_count
     key: cloud.gcp.compute_googleapis_com.guest.system.problem_count
     type: count,delta
     name: Problem Count
@@ -330,13 +347,14 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.reason
-  - value: compute.googleapis.com/guest/system/problem_state
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.reason
+      key: reason
+  - value: metric:compute.googleapis.com/guest/system/problem_state
     key: cloud.gcp.compute_googleapis_com.guest.system.problem_state
     type: gauge
     name: Problem State
@@ -347,14 +365,16 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.reason
-    - value: metric.labels.type
-  - value: compute.googleapis.com/guest/system/uptime
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.reason
+      key: reason
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:compute.googleapis.com/guest/system/uptime
     key: cloud.gcp.compute_googleapis_com.guest.system.uptime
     type: gauge
     name: Uptime
@@ -365,14 +385,16 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.kernel_version
-    - value: metric.labels.os_version
-  - value: compute.googleapis.com/instance/cpu/reserved_cores
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.kernel_version
+      key: kernel_version
+    - value: label:metric.labels.os_version
+      key: os_version
+  - value: metric:compute.googleapis.com/instance/cpu/reserved_cores
     key: cloud.gcp.compute_googleapis_com.instance.cpu.reserved_cores
     type: gauge
     name: Reserved vCPUs
@@ -383,12 +405,12 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/instance/cpu/scheduler_wait_time
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/instance/cpu/scheduler_wait_time
     key: cloud.gcp.compute_googleapis_com.instance.cpu.scheduler_wait_time
     type: count,delta
     name: Scheduler Wait Time
@@ -399,12 +421,12 @@ gcp:
       metricKind: DELTA
       unit: s{idle}
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/instance/cpu/usage_time
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/instance/cpu/usage_time
     key: cloud.gcp.compute_googleapis_com.instance.cpu.usage_time
     type: count,delta
     name: CPU usage
@@ -415,12 +437,12 @@ gcp:
       metricKind: DELTA
       unit: s{CPU}
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/instance/cpu/utilization
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/instance/cpu/utilization
     key: cloud.gcp.compute_googleapis_com.instance.cpu.utilization
     type: gauge
     name: CPU utilization
@@ -431,12 +453,12 @@ gcp:
       metricKind: GAUGE
       unit: 10^2.%
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/instance/disk/max_read_bytes_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/instance/disk/max_read_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.max_read_bytes_count
     type: gauge
     name: Peak disk read bytes
@@ -447,10 +469,13 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-  - value: compute.googleapis.com/instance/disk/max_read_ops_count
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+  - value: metric:compute.googleapis.com/instance/disk/max_read_ops_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.max_read_ops_count
     type: gauge
     name: Peak disk read ops
@@ -461,10 +486,13 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-  - value: compute.googleapis.com/instance/disk/max_write_bytes_count
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+  - value: metric:compute.googleapis.com/instance/disk/max_write_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.max_write_bytes_count
     type: gauge
     name: Peak disk write bytes
@@ -475,10 +503,13 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-  - value: compute.googleapis.com/instance/disk/max_write_ops_count
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+  - value: metric:compute.googleapis.com/instance/disk/max_write_ops_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.max_write_ops_count
     type: gauge
     name: Peak disk write ops
@@ -489,10 +520,13 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-  - value: compute.googleapis.com/instance/disk/read_bytes_count
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+  - value: metric:compute.googleapis.com/instance/disk/read_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.read_bytes_count
     type: count,delta
     name: Disk read bytes
@@ -503,15 +537,18 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-  - value: compute.googleapis.com/instance/disk/read_ops_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+  - value: metric:compute.googleapis.com/instance/disk/read_ops_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.read_ops_count
     type: count,delta
     name: Disk read operations
@@ -522,15 +559,18 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-  - value: compute.googleapis.com/instance/disk/throttled_read_bytes_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+  - value: metric:compute.googleapis.com/instance/disk/throttled_read_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.throttled_read_bytes_count
     type: count,delta
     name: Throttled read bytes
@@ -541,16 +581,20 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-    - value: metric.labels.throttle_reason
-  - value: compute.googleapis.com/instance/disk/throttled_read_ops_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+    - value: label:metric.labels.throttle_reason
+      key: throttle_reason
+  - value: metric:compute.googleapis.com/instance/disk/throttled_read_ops_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.throttled_read_ops_count
     type: count,delta
     name: Throttled read operations
@@ -561,16 +605,20 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-    - value: metric.labels.throttle_reason
-  - value: compute.googleapis.com/instance/disk/throttled_write_bytes_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+    - value: label:metric.labels.throttle_reason
+      key: throttle_reason
+  - value: metric:compute.googleapis.com/instance/disk/throttled_write_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.throttled_write_bytes_count
     type: count,delta
     name: Throttled write bytes
@@ -581,16 +629,20 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-    - value: metric.labels.throttle_reason
-  - value: compute.googleapis.com/instance/disk/throttled_write_ops_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+    - value: label:metric.labels.throttle_reason
+      key: throttle_reason
+  - value: metric:compute.googleapis.com/instance/disk/throttled_write_ops_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.throttled_write_ops_count
     type: count,delta
     name: Throttled write operations
@@ -601,16 +653,20 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-    - value: metric.labels.throttle_reason
-  - value: compute.googleapis.com/instance/disk/write_bytes_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+    - value: label:metric.labels.throttle_reason
+      key: throttle_reason
+  - value: metric:compute.googleapis.com/instance/disk/write_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.write_bytes_count
     type: count,delta
     name: Disk write bytes
@@ -621,15 +677,18 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-  - value: compute.googleapis.com/instance/disk/write_ops_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+  - value: metric:compute.googleapis.com/instance/disk/write_ops_count
     key: cloud.gcp.compute_googleapis_com.instance.disk.write_ops_count
     type: count,delta
     name: Disk write operations
@@ -640,15 +699,18 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.device_name
-    - value: metric.labels.storage_type
-    - value: metric.labels.device_type
-  - value: compute.googleapis.com/instance/integrity/early_boot_validation_status
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.device_name
+      key: device_name
+    - value: label:metric.labels.storage_type
+      key: storage_type
+    - value: label:metric.labels.device_type
+      key: device_type
+  - value: metric:compute.googleapis.com/instance/integrity/early_boot_validation_status
     key: cloud.gcp.compute_googleapis_com.instance.integrity.early_boot_validation_status
     type: gauge
     name: Early Boot Validation
@@ -659,13 +721,14 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.status
-  - value: compute.googleapis.com/instance/integrity/late_boot_validation_status
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.status
+      key: status
+  - value: metric:compute.googleapis.com/instance/integrity/late_boot_validation_status
     key: cloud.gcp.compute_googleapis_com.instance.integrity.late_boot_validation_status
     type: gauge
     name: Late Boot Validation
@@ -676,13 +739,14 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.status
-  - value: compute.googleapis.com/instance/memory/balloon/ram_size
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.status
+      key: status
+  - value: metric:compute.googleapis.com/instance/memory/balloon/ram_size
     key: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_size
     type: gauge
     name: VM Memory Total
@@ -693,12 +757,12 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/instance/memory/balloon/ram_used
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/instance/memory/balloon/ram_used
     key: cloud.gcp.compute_googleapis_com.instance.memory.balloon.ram_used
     type: gauge
     name: VM Memory Used
@@ -709,12 +773,12 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/instance/memory/balloon/swap_in_bytes_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/instance/memory/balloon/swap_in_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_in_bytes_count
     type: count,delta
     name: VM Swap In
@@ -725,12 +789,12 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/instance/memory/balloon/swap_out_bytes_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/instance/memory/balloon/swap_out_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.memory.balloon.swap_out_bytes_count
     type: count,delta
     name: VM Swap Out
@@ -741,12 +805,12 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/instance/network/received_bytes_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/instance/network/received_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.network.received_bytes_count
     type: count,delta
     name: Received bytes
@@ -757,13 +821,14 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.loadbalanced
-  - value: compute.googleapis.com/instance/network/received_packets_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.loadbalanced
+      key: loadbalanced
+  - value: metric:compute.googleapis.com/instance/network/received_packets_count
     key: cloud.gcp.compute_googleapis_com.instance.network.received_packets_count
     type: count,delta
     name: Received packets
@@ -774,13 +839,14 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.loadbalanced
-  - value: compute.googleapis.com/instance/network/sent_bytes_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.loadbalanced
+      key: loadbalanced
+  - value: metric:compute.googleapis.com/instance/network/sent_bytes_count
     key: cloud.gcp.compute_googleapis_com.instance.network.sent_bytes_count
     type: count,delta
     name: Sent bytes
@@ -791,13 +857,14 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.loadbalanced
-  - value: compute.googleapis.com/instance/network/sent_packets_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.loadbalanced
+      key: loadbalanced
+  - value: metric:compute.googleapis.com/instance/network/sent_packets_count
     key: cloud.gcp.compute_googleapis_com.instance.network.sent_packets_count
     type: count,delta
     name: Sent packets
@@ -808,13 +875,14 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-    - value: metric.labels.loadbalanced
-  - value: compute.googleapis.com/instance/uptime
+    - value: label:metric.labels.instance_name
+      key: instance_name
+    - value: label:metric.labels.loadbalanced
+      key: loadbalanced
+  - value: metric:compute.googleapis.com/instance/uptime
     key: cloud.gcp.compute_googleapis_com.instance.uptime
     type: count,delta
     name: Uptime
@@ -825,12 +893,12 @@ gcp:
       metricKind: DELTA
       unit: s{uptime}
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/instance/uptime_total
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/instance/uptime_total
     key: cloud.gcp.compute_googleapis_com.instance.uptime_total
     type: gauge
     name: Uptime Total
@@ -841,12 +909,12 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.instance_name
+    - value: label:metric.labels.instance_name
       key: instance_name
       compatibilityModeOnly: true
-    - value: metric.labels.instance_name
-      key: gcp.instance.name
-  - value: compute.googleapis.com/mirroring/dropped_packets_count
+    - value: label:metric.labels.instance_name
+      key: instance_name
+  - value: metric:compute.googleapis.com/mirroring/dropped_packets_count
     key: cloud.gcp.compute_googleapis_com.mirroring.dropped_packets_count
     type: count,delta
     name: Dropped packets
@@ -857,8 +925,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.reason
-  - value: compute.googleapis.com/mirroring/mirrored_bytes_count
+    - value: label:metric.labels.reason
+      key: reason
+  - value: metric:compute.googleapis.com/mirroring/mirrored_bytes_count
     key: cloud.gcp.compute_googleapis_com.mirroring.mirrored_bytes_count
     type: count,delta
     name: Mirrored bytes
@@ -869,7 +938,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: compute.googleapis.com/mirroring/mirrored_packets_count
+  - value: metric:compute.googleapis.com/mirroring/mirrored_packets_count
     key: cloud.gcp.compute_googleapis_com.mirroring.mirrored_packets_count
     type: count,delta
     name: Mirrored packets
@@ -880,7 +949,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions: []
-  - value: compute.googleapis.com/nat/allocated_ports
+  - value: metric:compute.googleapis.com/nat/allocated_ports
     key: cloud.gcp.compute_googleapis_com.nat.allocated_ports
     type: gauge
     name: Allocated ports
@@ -891,11 +960,15 @@ gcp:
       metricKind: GAUGE
       unit: '{port}'
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.nat_ip
-  - value: compute.googleapis.com/nat/closed_connections_count
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.nat_ip
+      key: nat_ip
+  - value: metric:compute.googleapis.com/nat/closed_connections_count
     key: cloud.gcp.compute_googleapis_com.nat.closed_connections_count
     type: count,delta
     name: Closed connections count
@@ -906,11 +979,15 @@ gcp:
       metricKind: DELTA
       unit: '{connection}'
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
-  - value: compute.googleapis.com/nat/dropped_received_packets_count
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:compute.googleapis.com/nat/dropped_received_packets_count
     key: cloud.gcp.compute_googleapis_com.nat.dropped_received_packets_count
     type: count,delta
     name: Received packets dropped count
@@ -921,11 +998,15 @@ gcp:
       metricKind: DELTA
       unit: '{packet}'
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
-  - value: compute.googleapis.com/nat/dropped_sent_packets_count
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:compute.googleapis.com/nat/dropped_sent_packets_count
     key: cloud.gcp.compute_googleapis_com.nat.dropped_sent_packets_count
     type: count,delta
     name: Sent packets dropped count
@@ -936,12 +1017,17 @@ gcp:
       metricKind: DELTA
       unit: '{packet}'
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
-    - value: metric.labels.reason
-  - value: compute.googleapis.com/nat/new_connections_count
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+    - value: label:metric.labels.reason
+      key: reason
+  - value: metric:compute.googleapis.com/nat/new_connections_count
     key: cloud.gcp.compute_googleapis_com.nat.new_connections_count
     type: count,delta
     name: New connections count
@@ -952,11 +1038,15 @@ gcp:
       metricKind: DELTA
       unit: '{connection}'
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
-  - value: compute.googleapis.com/nat/open_connections
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:compute.googleapis.com/nat/open_connections
     key: cloud.gcp.compute_googleapis_com.nat.open_connections
     type: gauge
     name: Open connections
@@ -967,11 +1057,15 @@ gcp:
       metricKind: GAUGE
       unit: '{connection}'
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
-  - value: compute.googleapis.com/nat/port_usage
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:compute.googleapis.com/nat/port_usage
     key: cloud.gcp.compute_googleapis_com.nat.port_usage
     type: gauge
     name: Port usage
@@ -982,11 +1076,15 @@ gcp:
       metricKind: GAUGE
       unit: '{port}'
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
-  - value: compute.googleapis.com/nat/received_bytes_count
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:compute.googleapis.com/nat/received_bytes_count
     key: cloud.gcp.compute_googleapis_com.nat.received_bytes_count
     type: count,delta
     name: Received bytes count
@@ -997,11 +1095,15 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
-  - value: compute.googleapis.com/nat/received_packets_count
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:compute.googleapis.com/nat/received_packets_count
     key: cloud.gcp.compute_googleapis_com.nat.received_packets_count
     type: count,delta
     name: Received packets count
@@ -1012,11 +1114,15 @@ gcp:
       metricKind: DELTA
       unit: '{packet}'
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
-  - value: compute.googleapis.com/nat/sent_bytes_count
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:compute.googleapis.com/nat/sent_bytes_count
     key: cloud.gcp.compute_googleapis_com.nat.sent_bytes_count
     type: count,delta
     name: Sent bytes count
@@ -1027,11 +1133,15 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
-  - value: compute.googleapis.com/nat/sent_packets_count
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
+  - value: metric:compute.googleapis.com/nat/sent_packets_count
     key: cloud.gcp.compute_googleapis_com.nat.sent_packets_count
     type: count,delta
     name: Sent packets count
@@ -1042,9 +1152,13 @@ gcp:
       metricKind: DELTA
       unit: '{packet}'
     dimensions:
-    - value: metric.labels.nat_project_number
-    - value: metric.labels.router_id
-    - value: metric.labels.nat_gateway_name
-    - value: metric.labels.ip_protocol
+    - value: label:metric.labels.nat_project_number
+      key: nat_project_number
+    - value: label:metric.labels.router_id
+      key: router_id
+    - value: label:metric.labels.nat_gateway_name
+      key: nat_gateway_name
+    - value: label:metric.labels.ip_protocol
+      key: ip_protocol
 alerts:
-  - path: alerts/gce_instance/cpu.utilization.json
+- path: alerts/gce_instance/cpu.utilization.json

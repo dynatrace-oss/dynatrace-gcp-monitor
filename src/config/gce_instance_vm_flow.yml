@@ -3,32 +3,31 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google VM Instance VM Flow
 gcp:
 - service: gce_instance_vm_flow
-  featureSet: default
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: instance_id
     compatibilityModeOnly: true
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: gcp.instance.id
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: gcp.region
   metrics:
-  - value: networking.googleapis.com/vm_flow/egress_bytes_count
+  - value: metric:networking.googleapis.com/vm_flow/egress_bytes_count
     key: cloud.gcp.networking_googleapis_com.vm_flow.egress_bytes_count
     type: count,delta
     name: Egress bytes
@@ -39,19 +38,31 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.local_network
-    - value: metric.labels.local_subnetwork
-    - value: metric.labels.local_network_interface
-    - value: metric.labels.remote_country
-    - value: metric.labels.remote_continent
-    - value: metric.labels.remote_zone
-    - value: metric.labels.remote_location_type
-    - value: metric.labels.remote_network
-    - value: metric.labels.remote_subnetwork
-    - value: metric.labels.protocol
-    - value: metric.labels.network_topology_remote_label
-    - value: metric.labels.remote_vpn_tunnel
-  - value: networking.googleapis.com/vm_flow/ingress_bytes_count
+    - value: label:metric.labels.local_network
+      key: local_network
+    - value: label:metric.labels.local_subnetwork
+      key: local_subnetwork
+    - value: label:metric.labels.local_network_interface
+      key: local_network_interface
+    - value: label:metric.labels.remote_country
+      key: remote_country
+    - value: label:metric.labels.remote_continent
+      key: remote_continent
+    - value: label:metric.labels.remote_zone
+      key: remote_zone
+    - value: label:metric.labels.remote_location_type
+      key: remote_location_type
+    - value: label:metric.labels.remote_network
+      key: remote_network
+    - value: label:metric.labels.remote_subnetwork
+      key: remote_subnetwork
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.network_topology_remote_label
+      key: network_topology_remote_label
+    - value: label:metric.labels.remote_vpn_tunnel
+      key: remote_vpn_tunnel
+  - value: metric:networking.googleapis.com/vm_flow/ingress_bytes_count
     key: cloud.gcp.networking_googleapis_com.vm_flow.ingress_bytes_count
     type: count,delta
     name: Ingress bytes
@@ -62,19 +73,31 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.local_network
-    - value: metric.labels.local_subnetwork
-    - value: metric.labels.local_network_interface
-    - value: metric.labels.remote_country
-    - value: metric.labels.remote_continent
-    - value: metric.labels.remote_zone
-    - value: metric.labels.remote_location_type
-    - value: metric.labels.remote_network
-    - value: metric.labels.remote_subnetwork
-    - value: metric.labels.protocol
-    - value: metric.labels.network_topology_remote_label
-    - value: metric.labels.remote_vpn_tunnel
-  - value: networking.googleapis.com/vm_flow/rtt
+    - value: label:metric.labels.local_network
+      key: local_network
+    - value: label:metric.labels.local_subnetwork
+      key: local_subnetwork
+    - value: label:metric.labels.local_network_interface
+      key: local_network_interface
+    - value: label:metric.labels.remote_country
+      key: remote_country
+    - value: label:metric.labels.remote_continent
+      key: remote_continent
+    - value: label:metric.labels.remote_zone
+      key: remote_zone
+    - value: label:metric.labels.remote_location_type
+      key: remote_location_type
+    - value: label:metric.labels.remote_network
+      key: remote_network
+    - value: label:metric.labels.remote_subnetwork
+      key: remote_subnetwork
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.network_topology_remote_label
+      key: network_topology_remote_label
+    - value: label:metric.labels.remote_vpn_tunnel
+      key: remote_vpn_tunnel
+  - value: metric:networking.googleapis.com/vm_flow/rtt
     key: cloud.gcp.networking_googleapis_com.vm_flow.rtt
     type: gauge
     name: RTT latencies
@@ -85,15 +108,27 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.local_network
-    - value: metric.labels.local_subnetwork
-    - value: metric.labels.local_network_interface
-    - value: metric.labels.remote_country
-    - value: metric.labels.remote_continent
-    - value: metric.labels.remote_zone
-    - value: metric.labels.remote_location_type
-    - value: metric.labels.remote_network
-    - value: metric.labels.remote_subnetwork
-    - value: metric.labels.protocol
-    - value: metric.labels.network_topology_remote_label
-    - value: metric.labels.remote_vpn_tunnel
+    - value: label:metric.labels.local_network
+      key: local_network
+    - value: label:metric.labels.local_subnetwork
+      key: local_subnetwork
+    - value: label:metric.labels.local_network_interface
+      key: local_network_interface
+    - value: label:metric.labels.remote_country
+      key: remote_country
+    - value: label:metric.labels.remote_continent
+      key: remote_continent
+    - value: label:metric.labels.remote_zone
+      key: remote_zone
+    - value: label:metric.labels.remote_location_type
+      key: remote_location_type
+    - value: label:metric.labels.remote_network
+      key: remote_network
+    - value: label:metric.labels.remote_subnetwork
+      key: remote_subnetwork
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.network_topology_remote_label
+      key: network_topology_remote_label
+    - value: label:metric.labels.remote_vpn_tunnel
+      key: remote_vpn_tunnel

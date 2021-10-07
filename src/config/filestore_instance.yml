@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Filestore Instance
 gcp:
 - service: filestore_instance
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.instance_name
+  - value: label:resource.labels.instance_name
     key: instance_name
     compatibilityModeOnly: true
-  - value: resource.labels.instance_name
+  - value: label:resource.labels.instance_name
     key: gcp.instance.name
   metrics:
-  - value: file.googleapis.com/nfs/server/average_read_latency
+  - value: metric:file.googleapis.com/nfs/server/average_read_latency
     key: cloud.gcp.file_googleapis_com.nfs.server.average_read_latency
     type: gauge
     name: Average read latency
@@ -40,8 +39,9 @@ gcp:
       metricKind: GAUGE
       unit: ms
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/average_write_latency
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/average_write_latency
     key: cloud.gcp.file_googleapis_com.nfs.server.average_write_latency
     type: gauge
     name: Average write latency
@@ -52,8 +52,9 @@ gcp:
       metricKind: GAUGE
       unit: ms
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/free_bytes
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/free_bytes
     key: cloud.gcp.file_googleapis_com.nfs.server.free_bytes
     type: gauge
     name: Free disk bytes
@@ -64,8 +65,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/free_bytes_percent
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/free_bytes_percent
     key: cloud.gcp.file_googleapis_com.nfs.server.free_bytes_percent
     type: gauge
     name: Free disk space percent
@@ -76,8 +78,9 @@ gcp:
       metricKind: GAUGE
       unit: '%'
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/metadata_ops_count
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/metadata_ops_count
     key: cloud.gcp.file_googleapis_com.nfs.server.metadata_ops_count
     type: count,delta
     name: Metadata operation count
@@ -88,8 +91,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/procedure_call_count
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/procedure_call_count
     key: cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count
     type: count,delta
     name: Procedure call count
@@ -100,9 +104,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.name
-    - value: metric.labels.version
-  - value: file.googleapis.com/nfs/server/read_bytes_count
+    - value: label:metric.labels.name
+      key: name
+    - value: label:metric.labels.version
+      key: version
+  - value: metric:file.googleapis.com/nfs/server/read_bytes_count
     key: cloud.gcp.file_googleapis_com.nfs.server.read_bytes_count
     type: count,delta
     name: Bytes read
@@ -113,8 +119,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/read_milliseconds_count
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/read_milliseconds_count
     key: cloud.gcp.file_googleapis_com.nfs.server.read_milliseconds_count
     type: count,delta
     name: Time (in milliseconds) spent on read operations
@@ -125,8 +132,9 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/read_ops_count
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/read_ops_count
     key: cloud.gcp.file_googleapis_com.nfs.server.read_ops_count
     type: count,delta
     name: Disk read operation count
@@ -137,8 +145,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/used_bytes
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/used_bytes
     key: cloud.gcp.file_googleapis_com.nfs.server.used_bytes
     type: gauge
     name: Used disk bytes
@@ -149,8 +158,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/used_bytes_percent
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/used_bytes_percent
     key: cloud.gcp.file_googleapis_com.nfs.server.used_bytes_percent
     type: gauge
     name: Used disk space percent
@@ -161,8 +171,9 @@ gcp:
       metricKind: GAUGE
       unit: '%'
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/write_bytes_count
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/write_bytes_count
     key: cloud.gcp.file_googleapis_com.nfs.server.write_bytes_count
     type: count,delta
     name: Bytes written
@@ -173,8 +184,9 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/write_milliseconds_count
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/write_milliseconds_count
     key: cloud.gcp.file_googleapis_com.nfs.server.write_milliseconds_count
     type: count,delta
     name: Time (in milliseconds) spent on write operations
@@ -185,8 +197,9 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.file_share
-  - value: file.googleapis.com/nfs/server/write_ops_count
+    - value: label:metric.labels.file_share
+      key: file_share
+  - value: metric:file.googleapis.com/nfs/server/write_ops_count
     key: cloud.gcp.file_googleapis_com.nfs.server.write_ops_count
     type: count,delta
     name: Disk write operation count
@@ -197,6 +210,7 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.file_share
+    - value: label:metric.labels.file_share
+      key: file_share
 dashboards:
-  - dashboard: "dashboards/filestore_instance.json"
+- dashboard: dashboards/filestore_instance.json

@@ -3,9 +3,9 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Kubernetes Container Nginx
 gcp:
@@ -13,29 +13,29 @@ gcp:
   featureSet: nginx
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.cluster_name
+  - value: label:resource.labels.cluster_name
     key: cluster_name
-  - value: resource.labels.namespace_name
+  - value: label:resource.labels.namespace_name
     key: namespace_name
-  - value: resource.labels.pod_name
+  - value: label:resource.labels.pod_name
     key: pod_name
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: container_name
     compatibilityModeOnly: false
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: gcp.instance.name
   metrics:
-  - value: kubernetes.io/nginx/connections_accepted
+  - value: metric:kubernetes.io/nginx/connections_accepted
     key: cloud.gcp.kubernetes_io.nginx.connections_accepted
     type: count,delta
     name: Nginx connections_accepted
@@ -46,7 +46,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: '{connection}'
     dimensions: []
-  - value: kubernetes.io/nginx/connections_active
+  - value: metric:kubernetes.io/nginx/connections_active
     key: cloud.gcp.kubernetes_io.nginx.connections_active
     type: gauge
     name: Nginx connections_active
@@ -57,7 +57,7 @@ gcp:
       metricKind: GAUGE
       unit: '{connection}'
     dimensions: []
-  - value: kubernetes.io/nginx/connections_handled
+  - value: metric:kubernetes.io/nginx/connections_handled
     key: cloud.gcp.kubernetes_io.nginx.connections_handled
     type: count,delta
     name: Nginx connections_handled
@@ -68,7 +68,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: '{connection}'
     dimensions: []
-  - value: kubernetes.io/nginx/connections_reading
+  - value: metric:kubernetes.io/nginx/connections_reading
     key: cloud.gcp.kubernetes_io.nginx.connections_reading
     type: gauge
     name: Nginx connections_reading
@@ -79,7 +79,7 @@ gcp:
       metricKind: GAUGE
       unit: '{connection}'
     dimensions: []
-  - value: kubernetes.io/nginx/connections_waiting
+  - value: metric:kubernetes.io/nginx/connections_waiting
     key: cloud.gcp.kubernetes_io.nginx.connections_waiting
     type: gauge
     name: Nginx connections_waiting
@@ -90,7 +90,7 @@ gcp:
       metricKind: GAUGE
       unit: '{connection}'
     dimensions: []
-  - value: kubernetes.io/nginx/connections_writing
+  - value: metric:kubernetes.io/nginx/connections_writing
     key: cloud.gcp.kubernetes_io.nginx.connections_writing
     type: gauge
     name: Nginx connections_writing
@@ -101,7 +101,7 @@ gcp:
       metricKind: GAUGE
       unit: '{connection}'
     dimensions: []
-  - value: kubernetes.io/nginx/http_requests_total
+  - value: metric:kubernetes.io/nginx/http_requests_total
     key: cloud.gcp.kubernetes_io.nginx.http_requests_total
     type: count,delta
     name: Nginx http_requests_total
@@ -112,7 +112,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: '{request}'
     dimensions: []
-  - value: kubernetes.io/nginx/nginxexporter_build_info
+  - value: metric:kubernetes.io/nginx/nginxexporter_build_info
     key: cloud.gcp.kubernetes_io.nginx.nginxexporter_build_info
     type: gauge
     name: Nginx nginxexporter_build_info
@@ -123,9 +123,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.gitCommit
-    - value: metric.labels.version
-  - value: kubernetes.io/nginx/up
+    - value: label:metric.labels.gitCommit
+      key: gitCommit
+    - value: label:metric.labels.version
+      key: version
+  - value: metric:kubernetes.io/nginx/up
     key: cloud.gcp.kubernetes_io.nginx.up
     type: gauge
     name: Nginx up

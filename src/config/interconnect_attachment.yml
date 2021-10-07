@@ -3,37 +3,36 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Interconnect Attachment
 gcp:
 - service: interconnect_attachment
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.attachment
+  - value: label:resource.labels.attachment
     key: attachment
     compatibilityModeOnly: true
-  - value: resource.labels.attachment
+  - value: label:resource.labels.attachment
     key: gcp.instance.id
-  - value: resource.labels.interconnect
+  - value: label:resource.labels.interconnect
     key: interconnect
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: gcp.region
-  - value: resource.labels.interconnect_project
+  - value: label:resource.labels.interconnect_project
     key: interconnect_project
   metrics:
-  - value: interconnect.googleapis.com/network/attachment/capacity
+  - value: metric:interconnect.googleapis.com/network/attachment/capacity
     key: cloud.gcp.interconnect_googleapis_com.network.attachment.capacity
     type: gauge
     name: Network Capacity
@@ -44,7 +43,7 @@ gcp:
       metricKind: GAUGE
       unit: By/s
     dimensions: []
-  - value: interconnect.googleapis.com/network/attachment/received_bytes_count
+  - value: metric:interconnect.googleapis.com/network/attachment/received_bytes_count
     key: cloud.gcp.interconnect_googleapis_com.network.attachment.received_bytes_count
     type: count,delta
     name: Ingress Bytes
@@ -55,7 +54,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: interconnect.googleapis.com/network/attachment/received_packets_count
+  - value: metric:interconnect.googleapis.com/network/attachment/received_packets_count
     key: cloud.gcp.interconnect_googleapis_com.network.attachment.received_packets_count
     type: count,delta
     name: Ingress Packets
@@ -66,7 +65,7 @@ gcp:
       metricKind: DELTA
       unit: '{packets}'
     dimensions: []
-  - value: interconnect.googleapis.com/network/attachment/sent_bytes_count
+  - value: metric:interconnect.googleapis.com/network/attachment/sent_bytes_count
     key: cloud.gcp.interconnect_googleapis_com.network.attachment.sent_bytes_count
     type: count,delta
     name: Egress Bytes
@@ -77,7 +76,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: interconnect.googleapis.com/network/attachment/sent_packets_count
+  - value: metric:interconnect.googleapis.com/network/attachment/sent_packets_count
     key: cloud.gcp.interconnect_googleapis_com.network.attachment.sent_packets_count
     type: count,delta
     name: Egress Packets

@@ -3,34 +3,33 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud DNS Query
 gcp:
 - service: dns_query
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.target_name
+  - value: label:resource.labels.target_name
     key: target_name
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.target_type
+  - value: label:resource.labels.target_type
     key: target_type
-  - value: resource.labels.source_type
+  - value: label:resource.labels.source_type
     key: source_type
   metrics:
-  - value: dns.googleapis.com/query/response_count
+  - value: metric:dns.googleapis.com/query/response_count
     key: cloud.gcp.dns_googleapis_com.query.response_count
     type: count,delta
     name: DNS response counts
@@ -41,4 +40,5 @@ gcp:
       metricKind: DELTA
       unit: '{requests}'
     dimensions:
-    - value: metric.labels.response_code
+    - value: label:metric.labels.response_code
+      key: response_code

@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud BigQuery BI Engine Model
 gcp:
 - service: bigquery_biengine_model
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.model_id
+  - value: label:resource.labels.model_id
     key: model_id
     compatibilityModeOnly: true
-  - value: resource.labels.model_id
+  - value: label:resource.labels.model_id
     key: gcp.instance.id
   metrics:
-  - value: bigquerybiengine.googleapis.com/model/inflight_requests
+  - value: metric:bigquerybiengine.googleapis.com/model/inflight_requests
     key: cloud.gcp.bigquerybiengine_googleapis_com.model.inflight_requests
     type: gauge
     name: Inflight requests
@@ -40,7 +39,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: bigquerybiengine.googleapis.com/model/request_count
+  - value: metric:bigquerybiengine.googleapis.com/model/request_count
     key: cloud.gcp.bigquerybiengine_googleapis_com.model.request_count
     type: count,delta
     name: Request count
@@ -51,10 +50,13 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.cache_miss
-    - value: metric.labels.status
-    - value: metric.labels.execution_mode
-  - value: bigquerybiengine.googleapis.com/model/request_latencies
+    - value: label:metric.labels.cache_miss
+      key: cache_miss
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.execution_mode
+      key: execution_mode
+  - value: metric:bigquerybiengine.googleapis.com/model/request_latencies
     key: cloud.gcp.bigquerybiengine_googleapis_com.model.request_latencies
     type: gauge
     name: Request execution times
@@ -65,6 +67,9 @@ gcp:
       metricKind: GAUGE
       unit: ms
     dimensions:
-    - value: metric.labels.cache_miss
-    - value: metric.labels.status
-    - value: metric.labels.execution_mode
+    - value: label:metric.labels.cache_miss
+      key: cache_miss
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.execution_mode
+      key: execution_mode

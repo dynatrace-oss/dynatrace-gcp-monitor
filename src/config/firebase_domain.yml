@@ -3,30 +3,29 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Firebase Hosting Site Domain
 gcp:
 - service: firebase_domain
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.site_name
+  - value: label:resource.labels.site_name
     key: site_name
-  - value: resource.labels.domain_name
+  - value: label:resource.labels.domain_name
     key: domain_name
     compatibilityModeOnly: true
-  - value: resource.labels.domain_name
+  - value: label:resource.labels.domain_name
     key: gcp.instance.name
   metrics:
-  - value: firebasehosting.googleapis.com/storage/limit
+  - value: metric:firebasehosting.googleapis.com/storage/limit
     key: cloud.gcp.firebasehosting_googleapis_com.storage.limit
     type: gauge
     name: Bytes stored limit
@@ -37,7 +36,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: firebasehosting.googleapis.com/storage/total_bytes
+  - value: metric:firebasehosting.googleapis.com/storage/total_bytes
     key: cloud.gcp.firebasehosting_googleapis_com.storage.total_bytes
     type: gauge
     name: Bytes stored

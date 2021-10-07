@@ -3,28 +3,27 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Pub/Sub Snapshot
 gcp:
 - service: pubsub_snapshot
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.snapshot_id
+  - value: label:resource.labels.snapshot_id
     key: snapshot_id
     compatibilityModeOnly: true
-  - value: resource.labels.snapshot_id
+  - value: label:resource.labels.snapshot_id
     key: gcp.instance.id
   metrics:
-  - value: pubsub.googleapis.com/snapshot/backlog_bytes
+  - value: metric:pubsub.googleapis.com/snapshot/backlog_bytes
     key: cloud.gcp.pubsub_googleapis_com.snapshot.backlog_bytes
     type: gauge
     name: Snapshot backlog bytes
@@ -35,7 +34,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: pubsub.googleapis.com/snapshot/backlog_bytes_by_region
+  - value: metric:pubsub.googleapis.com/snapshot/backlog_bytes_by_region
     key: cloud.gcp.pubsub_googleapis_com.snapshot.backlog_bytes_by_region
     type: gauge
     name: Snapshot backlog bytes by region
@@ -46,11 +45,12 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/snapshot/config_updates_count
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/snapshot/config_updates_count
     key: cloud.gcp.pubsub_googleapis_com.snapshot.config_updates_count
     type: count,delta
     name: Snapshot updates
@@ -61,9 +61,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-    - value: metric.labels.operation_type
-  - value: pubsub.googleapis.com/snapshot/num_messages
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.operation_type
+      key: operation_type
+  - value: metric:pubsub.googleapis.com/snapshot/num_messages
     key: cloud.gcp.pubsub_googleapis_com.snapshot.num_messages
     type: gauge
     name: Snapshot messages
@@ -74,7 +76,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: pubsub.googleapis.com/snapshot/num_messages_by_region
+  - value: metric:pubsub.googleapis.com/snapshot/num_messages_by_region
     key: cloud.gcp.pubsub_googleapis_com.snapshot.num_messages_by_region
     type: gauge
     name: Snapshot messages by region
@@ -85,11 +87,12 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
-  - value: pubsub.googleapis.com/snapshot/oldest_message_age
+      key: region
+    - value: label:metric.labels.region
+      key: region
+  - value: metric:pubsub.googleapis.com/snapshot/oldest_message_age
     key: cloud.gcp.pubsub_googleapis_com.snapshot.oldest_message_age
     type: gauge
     name: Oldest snapshot message age
@@ -100,7 +103,7 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions: []
-  - value: pubsub.googleapis.com/snapshot/oldest_message_age_by_region
+  - value: metric:pubsub.googleapis.com/snapshot/oldest_message_age_by_region
     key: cloud.gcp.pubsub_googleapis_com.snapshot.oldest_message_age_by_region
     type: gauge
     name: Oldest snapshot message age by region
@@ -111,7 +114,8 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.region
+    - value: label:metric.labels.region
       compatibilityModeOnly: true
-    - value: metric.labels.region
-      key: gcp.region
+      key: region
+    - value: label:metric.labels.region
+      key: region

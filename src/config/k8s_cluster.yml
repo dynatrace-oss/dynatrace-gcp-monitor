@@ -2,33 +2,32 @@ id: k8s_cluster
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Kubernetes Cluster
 gcp:
 - service: k8s_cluster
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.cluster_name
+  - value: label:resource.labels.cluster_name
     key: cluster_name
     compatibilityModeOnly: false
-  - value: resource.labels.cluster_name
+  - value: label:resource.labels.cluster_name
     key: gcp.instance.name
   metrics:
-  - value: logging.googleapis.com/log_entry_count
+  - value: metric:logging.googleapis.com/log_entry_count
     key: cloud.gcp.logging.googleapis.com.log_entry_count
     type: gauge
     name: Log entries
@@ -39,5 +38,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.log
-    - value: metric.labels.severity
+    - value: label:metric.labels.log
+      key: log
+    - value: label:metric.labels.severity
+      key: severity

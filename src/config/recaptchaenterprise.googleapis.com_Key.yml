@@ -3,30 +3,29 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google reCAPTCHA Key
 gcp:
 - service: recaptchaenterprise.googleapis.com/Key
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.resource_container
+  - value: label:resource.labels.resource_container
     key: resource_container
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.key_id
+  - value: label:resource.labels.key_id
     key: key_id
     compatibilityModeOnly: true
-  - value: resource.labels.key_id
+  - value: label:resource.labels.key_id
     key: gcp.instance.id
   metrics:
-  - value: recaptchaenterprise.googleapis.com/score_counts
+  - value: metric:recaptchaenterprise.googleapis.com/score_counts
     key: cloud.gcp.recaptchaenterprise_googleapis_com.score_counts
     type: gauge
     name: Score counts
@@ -37,4 +36,5 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.action
+    - value: label:metric.labels.action
+      key: action

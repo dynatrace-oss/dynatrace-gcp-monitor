@@ -3,35 +3,34 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Kubernetes Node
 gcp:
 - service: k8s_node
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.cluster_name
+  - value: label:resource.labels.cluster_name
     key: cluster_name
-  - value: resource.labels.node_name
+  - value: label:resource.labels.node_name
     key: node_name
     compatibilityModeOnly: false
-  - value: resource.labels.node_name
+  - value: label:resource.labels.node_name
     key: gcp.instance.name
   metrics:
-  - value: kubernetes.io/node/cpu/allocatable_cores
+  - value: metric:kubernetes.io/node/cpu/allocatable_cores
     key: cloud.gcp.kubernetes_io.node.cpu.allocatable_cores
     type: gauge
     name: Allocatable cores
@@ -42,7 +41,7 @@ gcp:
       metricKind: GAUGE
       unit: '{cpu}'
     dimensions: []
-  - value: kubernetes.io/node/cpu/allocatable_utilization
+  - value: metric:kubernetes.io/node/cpu/allocatable_utilization
     key: cloud.gcp.kubernetes_io.node.cpu.allocatable_utilization
     type: gauge
     name: CPU allocatable utilization
@@ -53,7 +52,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: kubernetes.io/node/cpu/core_usage_time
+  - value: metric:kubernetes.io/node/cpu/core_usage_time
     key: cloud.gcp.kubernetes_io.node.cpu.core_usage_time
     type: count,delta
     name: CPU usage time
@@ -64,7 +63,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: s{CPU}
     dimensions: []
-  - value: kubernetes.io/node/cpu/total_cores
+  - value: metric:kubernetes.io/node/cpu/total_cores
     key: cloud.gcp.kubernetes_io.node.cpu.total_cores
     type: gauge
     name: Total cores
@@ -75,7 +74,7 @@ gcp:
       metricKind: GAUGE
       unit: '{cpu}'
     dimensions: []
-  - value: kubernetes.io/node/ephemeral_storage/allocatable_bytes
+  - value: metric:kubernetes.io/node/ephemeral_storage/allocatable_bytes
     key: cloud.gcp.kubernetes_io.node.ephemeral_storage.allocatable_bytes
     type: gauge
     name: Allocatable ephemeral storage
@@ -86,7 +85,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/node/ephemeral_storage/inodes_free
+  - value: metric:kubernetes.io/node/ephemeral_storage/inodes_free
     key: cloud.gcp.kubernetes_io.node.ephemeral_storage.inodes_free
     type: gauge
     name: Free inodes
@@ -97,7 +96,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: kubernetes.io/node/ephemeral_storage/inodes_total
+  - value: metric:kubernetes.io/node/ephemeral_storage/inodes_total
     key: cloud.gcp.kubernetes_io.node.ephemeral_storage.inodes_total
     type: gauge
     name: Total inodes
@@ -108,7 +107,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: kubernetes.io/node/ephemeral_storage/total_bytes
+  - value: metric:kubernetes.io/node/ephemeral_storage/total_bytes
     key: cloud.gcp.kubernetes_io.node.ephemeral_storage.total_bytes
     type: gauge
     name: Total ephemeral storage
@@ -119,7 +118,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/node/ephemeral_storage/used_bytes
+  - value: metric:kubernetes.io/node/ephemeral_storage/used_bytes
     key: cloud.gcp.kubernetes_io.node.ephemeral_storage.used_bytes
     type: gauge
     name: Ephemeral storage usage
@@ -130,7 +129,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/node/memory/allocatable_bytes
+  - value: metric:kubernetes.io/node/memory/allocatable_bytes
     key: cloud.gcp.kubernetes_io.node.memory.allocatable_bytes
     type: gauge
     name: Allocatable memory
@@ -141,7 +140,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/node/memory/allocatable_utilization
+  - value: metric:kubernetes.io/node/memory/allocatable_utilization
     key: cloud.gcp.kubernetes_io.node.memory.allocatable_utilization
     type: gauge
     name: Memory allocatable utilization
@@ -152,9 +151,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.memory_type
-    - value: metric.labels.component
-  - value: kubernetes.io/node/memory/total_bytes
+    - value: label:metric.labels.memory_type
+      key: memory_type
+    - value: label:metric.labels.component
+      key: component
+  - value: metric:kubernetes.io/node/memory/total_bytes
     key: cloud.gcp.kubernetes_io.node.memory.total_bytes
     type: gauge
     name: Total memory
@@ -165,7 +166,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: kubernetes.io/node/memory/used_bytes
+  - value: metric:kubernetes.io/node/memory/used_bytes
     key: cloud.gcp.kubernetes_io.node.memory.used_bytes
     type: gauge
     name: Memory usage
@@ -176,8 +177,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.memory_type
-  - value: kubernetes.io/node/network/received_bytes_count
+    - value: label:metric.labels.memory_type
+      key: memory_type
+  - value: metric:kubernetes.io/node/network/received_bytes_count
     key: cloud.gcp.kubernetes_io.node.network.received_bytes_count
     type: count,delta
     name: Bytes received
@@ -188,7 +190,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions: []
-  - value: kubernetes.io/node/network/sent_bytes_count
+  - value: metric:kubernetes.io/node/network/sent_bytes_count
     key: cloud.gcp.kubernetes_io.node.network.sent_bytes_count
     type: count,delta
     name: Bytes transmitted
@@ -199,7 +201,7 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions: []
-  - value: kubernetes.io/node/pid_limit
+  - value: metric:kubernetes.io/node/pid_limit
     key: cloud.gcp.kubernetes_io.node.pid_limit
     type: gauge
     name: PID capacity
@@ -210,7 +212,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: kubernetes.io/node/pid_used
+  - value: metric:kubernetes.io/node/pid_used
     key: cloud.gcp.kubernetes_io.node.pid_used
     type: gauge
     name: PID usage
@@ -221,7 +223,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: kubernetes.io/node_daemon/cpu/core_usage_time
+  - value: metric:kubernetes.io/node_daemon/cpu/core_usage_time
     key: cloud.gcp.kubernetes_io.node_daemon.cpu.core_usage_time
     type: count,delta
     name: CPU usage time
@@ -232,8 +234,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: s{CPU}
     dimensions:
-    - value: metric.labels.component
-  - value: kubernetes.io/node_daemon/memory/used_bytes
+    - value: label:metric.labels.component
+      key: component
+  - value: metric:kubernetes.io/node_daemon/memory/used_bytes
     key: cloud.gcp.kubernetes_io.node_daemon.memory.used_bytes
     type: gauge
     name: Memory usage
@@ -244,5 +247,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.component
-    - value: metric.labels.memory_type
+    - value: label:metric.labels.component
+      key: component
+    - value: label:metric.labels.memory_type
+      key: memory_type

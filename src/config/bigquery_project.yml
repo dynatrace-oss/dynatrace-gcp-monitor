@@ -3,28 +3,27 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud BigQuery Project
 gcp:
 - service: bigquery_project
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
   metrics:
-  - value: bigquery.googleapis.com/job/num_in_flight
+  - value: metric:bigquery.googleapis.com/job/num_in_flight
     key: cloud.gcp.bigquery_googleapis_com.job.num_in_flight
     type: gauge
     name: Job count
@@ -35,10 +34,13 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.priority
-    - value: metric.labels.job_type
-    - value: metric.labels.state
-  - value: bigquery.googleapis.com/query/count
+    - value: label:metric.labels.priority
+      key: priority
+    - value: label:metric.labels.job_type
+      key: job_type
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:bigquery.googleapis.com/query/count
     key: cloud.gcp.bigquery_googleapis_com.query.count
     type: gauge
     name: Query count
@@ -49,8 +51,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.priority
-  - value: bigquery.googleapis.com/query/execution_times
+    - value: label:metric.labels.priority
+      key: priority
+  - value: metric:bigquery.googleapis.com/query/execution_times
     key: cloud.gcp.bigquery_googleapis_com.query.execution_times
     type: gauge
     name: Query execution times
@@ -61,8 +64,9 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.priority
-  - value: bigquery.googleapis.com/slots/allocated
+    - value: label:metric.labels.priority
+      key: priority
+  - value: metric:bigquery.googleapis.com/slots/allocated
     key: cloud.gcp.bigquery_googleapis_com.slots.allocated
     type: gauge
     name: Slots used by project, reservation, and job type
@@ -73,9 +77,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.reservation
-    - value: metric.labels.job_type
-  - value: bigquery.googleapis.com/slots/assigned
+    - value: label:metric.labels.reservation
+      key: reservation
+    - value: label:metric.labels.job_type
+      key: job_type
+  - value: metric:bigquery.googleapis.com/slots/assigned
     key: cloud.gcp.bigquery_googleapis_com.slots.assigned
     type: gauge
     name: Slots assigned
@@ -86,9 +92,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.job_type
-    - value: metric.labels.reservation
-  - value: bigquery.googleapis.com/slots/capacity_committed
+    - value: label:metric.labels.job_type
+      key: job_type
+    - value: label:metric.labels.reservation
+      key: reservation
+  - value: metric:bigquery.googleapis.com/slots/capacity_committed
     key: cloud.gcp.bigquery_googleapis_com.slots.capacity_committed
     type: gauge
     name: Slots capacity committed
@@ -99,8 +107,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.plan
-  - value: bigquery.googleapis.com/slots/max_assigned
+    - value: label:metric.labels.plan
+      key: plan
+  - value: metric:bigquery.googleapis.com/slots/max_assigned
     key: cloud.gcp.bigquery_googleapis_com.slots.max_assigned
     type: gauge
     name: Slots max assigned
@@ -111,9 +120,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.job_type
-    - value: metric.labels.reservation
-  - value: bigquery.googleapis.com/slots/total_allocated_for_reservation
+    - value: label:metric.labels.job_type
+      key: job_type
+    - value: label:metric.labels.reservation
+      key: reservation
+  - value: metric:bigquery.googleapis.com/slots/total_allocated_for_reservation
     key: cloud.gcp.bigquery_googleapis_com.slots.total_allocated_for_reservation
     type: gauge
     name: Slots used across projects in reservation
@@ -124,7 +135,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: bigquery.googleapis.com/slots/total_available
+  - value: metric:bigquery.googleapis.com/slots/total_available
     key: cloud.gcp.bigquery_googleapis_com.slots.total_available
     type: gauge
     name: Total slots
@@ -135,7 +146,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: bigquerybiengine.googleapis.com/reservation/total_bytes
+  - value: metric:bigquerybiengine.googleapis.com/reservation/total_bytes
     key: cloud.gcp.bigquerybiengine_googleapis_com.reservation.total_bytes
     type: gauge
     name: Reservation total bytes
@@ -146,7 +157,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: bigquerybiengine.googleapis.com/reservation/used_bytes
+  - value: metric:bigquerybiengine.googleapis.com/reservation/used_bytes
     key: cloud.gcp.bigquerybiengine_googleapis_com.reservation.used_bytes
     type: gauge
     name: Reservation used bytes

@@ -3,35 +3,34 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Memorystore
 gcp:
 - service: redis_instance
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: gcp.region
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: instance_id
     compatibilityModeOnly: true
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: gcp.instance.id
-  - value: resource.labels.node_id
+  - value: label:resource.labels.node_id
     key: node_id
   metrics:
-  - value: redis.googleapis.com/clients/blocked
+  - value: metric:redis.googleapis.com/clients/blocked
     key: cloud.gcp.redis_googleapis_com.clients.blocked
     type: gauge
     name: Blocked Clients
@@ -42,8 +41,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/clients/connected
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/clients/connected
     key: cloud.gcp.redis_googleapis_com.clients.connected
     type: gauge
     name: Connected Clients
@@ -54,8 +54,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/commands/calls
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/commands/calls
     key: cloud.gcp.redis_googleapis_com.commands.calls
     type: count,delta
     name: Calls
@@ -66,9 +67,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.cmd
-  - value: redis.googleapis.com/commands/total_time
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.cmd
+      key: cmd
+  - value: metric:redis.googleapis.com/commands/total_time
     key: cloud.gcp.redis_googleapis_com.commands.total_time
     type: count,delta
     name: Total Time of Calls
@@ -79,9 +82,11 @@ gcp:
       metricKind: DELTA
       unit: us
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.cmd
-  - value: redis.googleapis.com/commands/usec_per_call
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.cmd
+      key: cmd
+  - value: metric:redis.googleapis.com/commands/usec_per_call
     key: cloud.gcp.redis_googleapis_com.commands.usec_per_call
     type: gauge
     name: Time per Call
@@ -92,9 +97,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.cmd
-  - value: redis.googleapis.com/keyspace/avg_ttl
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.cmd
+      key: cmd
+  - value: metric:redis.googleapis.com/keyspace/avg_ttl
     key: cloud.gcp.redis_googleapis_com.keyspace.avg_ttl
     type: gauge
     name: Average TTL
@@ -105,9 +112,11 @@ gcp:
       metricKind: GAUGE
       unit: ms
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.db
-  - value: redis.googleapis.com/keyspace/keys
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.db
+      key: db
+  - value: metric:redis.googleapis.com/keyspace/keys
     key: cloud.gcp.redis_googleapis_com.keyspace.keys
     type: gauge
     name: Keys
@@ -118,9 +127,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.db
-  - value: redis.googleapis.com/keyspace/keys_with_expiration
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.db
+      key: db
+  - value: metric:redis.googleapis.com/keyspace/keys_with_expiration
     key: cloud.gcp.redis_googleapis_com.keyspace.keys_with_expiration
     type: gauge
     name: Expirable Keys
@@ -131,9 +142,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.db
-  - value: redis.googleapis.com/persistence/rdb/bgsave_in_progress
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.db
+      key: db
+  - value: metric:redis.googleapis.com/persistence/rdb/bgsave_in_progress
     key: cloud.gcp.redis_googleapis_com.persistence.rdb.bgsave_in_progress
     type: gauge
     name: Persisting RDB
@@ -144,8 +157,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/replication/master/slaves/lag
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/replication/master/slaves/lag
     key: cloud.gcp.redis_googleapis_com.replication.master.slaves.lag
     type: gauge
     name: Bytes lagging
@@ -156,9 +170,11 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.slave
-  - value: redis.googleapis.com/replication/master/slaves/offset
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.slave
+      key: slave
+  - value: metric:redis.googleapis.com/replication/master/slaves/offset
     key: cloud.gcp.redis_googleapis_com.replication.master.slaves.offset
     type: gauge
     name: Replication byte offset (Replica)
@@ -169,9 +185,11 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.slave
-  - value: redis.googleapis.com/replication/master_repl_offset
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.slave
+      key: slave
+  - value: metric:redis.googleapis.com/replication/master_repl_offset
     key: cloud.gcp.redis_googleapis_com.replication.master_repl_offset
     type: gauge
     name: Replication byte offset (Master)
@@ -182,8 +200,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/replication/offset_diff
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/replication/offset_diff
     key: cloud.gcp.redis_googleapis_com.replication.offset_diff
     type: gauge
     name: Bytes pending replication
@@ -194,8 +213,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/replication/role
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/replication/role
     key: cloud.gcp.redis_googleapis_com.replication.role
     type: gauge
     name: Node Role
@@ -206,7 +226,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: redis.googleapis.com/server/uptime
+  - value: metric:redis.googleapis.com/server/uptime
     key: cloud.gcp.redis_googleapis_com.server.uptime
     type: gauge
     name: Uptime
@@ -217,8 +237,9 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/cache_hit_ratio
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/cache_hit_ratio
     key: cloud.gcp.redis_googleapis_com.stats.cache_hit_ratio
     type: gauge
     name: Cache Hit ratio
@@ -229,8 +250,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/connections/total
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/connections/total
     key: cloud.gcp.redis_googleapis_com.stats.connections.total
     type: count,delta
     name: Total Connections Received
@@ -241,8 +263,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/cpu_utilization
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/cpu_utilization
     key: cloud.gcp.redis_googleapis_com.stats.cpu_utilization
     type: count,delta
     name: CPU seconds
@@ -253,10 +276,13 @@ gcp:
       metricKind: DELTA
       unit: s{CPU}
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.space
-    - value: metric.labels.relationship
-  - value: redis.googleapis.com/stats/evicted_keys
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.space
+      key: space
+    - value: label:metric.labels.relationship
+      key: relationship
+  - value: metric:redis.googleapis.com/stats/evicted_keys
     key: cloud.gcp.redis_googleapis_com.stats.evicted_keys
     type: count,delta
     name: Evicted Keys
@@ -267,8 +293,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/expired_keys
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/expired_keys
     key: cloud.gcp.redis_googleapis_com.stats.expired_keys
     type: count,delta
     name: Expired Keys
@@ -279,8 +306,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/keyspace_hits
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/keyspace_hits
     key: cloud.gcp.redis_googleapis_com.stats.keyspace_hits
     type: count,delta
     name: Hits
@@ -291,8 +319,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/keyspace_misses
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/keyspace_misses
     key: cloud.gcp.redis_googleapis_com.stats.keyspace_misses
     type: count,delta
     name: Misses
@@ -303,8 +332,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/memory/maxmemory
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/memory/maxmemory
     key: cloud.gcp.redis_googleapis_com.stats.memory.maxmemory
     type: gauge
     name: Maximum Memory
@@ -315,8 +345,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/memory/system_memory_overload_duration
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/memory/system_memory_overload_duration
     key: cloud.gcp.redis_googleapis_com.stats.memory.system_memory_overload_duration
     type: count,delta
     name: Time in system memory overload
@@ -327,8 +358,9 @@ gcp:
       metricKind: DELTA
       unit: us
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/memory/system_memory_usage_ratio
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/memory/system_memory_usage_ratio
     key: cloud.gcp.redis_googleapis_com.stats.memory.system_memory_usage_ratio
     type: gauge
     name: System Memory Usage Ratio
@@ -339,8 +371,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/memory/usage
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/memory/usage
     key: cloud.gcp.redis_googleapis_com.stats.memory.usage
     type: gauge
     name: Used Memory
@@ -351,8 +384,9 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/memory/usage_ratio
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/memory/usage_ratio
     key: cloud.gcp.redis_googleapis_com.stats.memory.usage_ratio
     type: gauge
     name: Memory Usage Ratio
@@ -363,8 +397,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/network_traffic
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/network_traffic
     key: cloud.gcp.redis_googleapis_com.stats.network_traffic
     type: count,delta
     name: Total traffic to Redis
@@ -375,9 +410,11 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.role
-    - value: metric.labels.direction
-  - value: redis.googleapis.com/stats/pubsub/channels
+    - value: label:metric.labels.role
+      key: role
+    - value: label:metric.labels.direction
+      key: direction
+  - value: metric:redis.googleapis.com/stats/pubsub/channels
     key: cloud.gcp.redis_googleapis_com.stats.pubsub.channels
     type: gauge
     name: Pubsub Channels
@@ -388,8 +425,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/pubsub/patterns
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/pubsub/patterns
     key: cloud.gcp.redis_googleapis_com.stats.pubsub.patterns
     type: gauge
     name: Pubsub Patterns
@@ -400,8 +438,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.role
-  - value: redis.googleapis.com/stats/reject_connections_count
+    - value: label:metric.labels.role
+      key: role
+  - value: metric:redis.googleapis.com/stats/reject_connections_count
     key: cloud.gcp.redis_googleapis_com.stats.reject_connections_count
     type: count,delta
     name: Rejected Connections
@@ -412,4 +451,5 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.role
+    - value: label:metric.labels.role
+      key: role

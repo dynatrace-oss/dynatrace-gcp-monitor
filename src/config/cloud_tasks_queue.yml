@@ -3,30 +3,29 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Amazon EC2 Instance (via GCP)
 gcp:
 - service: cloud_tasks_queue
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.queue_id
+  - value: label:resource.labels.queue_id
     key: queue_id
     compatibilityModeOnly: true
-  - value: resource.labels.queue_id
+  - value: label:resource.labels.queue_id
     key: gcp.instance.id
-  - value: resource.labels.target_type
+  - value: label:resource.labels.target_type
     key: target_type
   metrics:
-  - value: cloudtasks.googleapis.com/api/request_count
+  - value: metric:cloudtasks.googleapis.com/api/request_count
     key: cloud.gcp.cloudtasks_googleapis_com.api.request_count
     type: count,delta
     name: API requests
@@ -37,9 +36,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.api_method
-    - value: metric.labels.response_code
-  - value: cloudtasks.googleapis.com/queue/depth
+    - value: label:metric.labels.api_method
+      key: api_method
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:cloudtasks.googleapis.com/queue/depth
     key: cloud.gcp.cloudtasks_googleapis_com.queue.depth
     type: gauge
     name: Queue depth
@@ -50,7 +51,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: cloudtasks.googleapis.com/queue/task_attempt_count
+  - value: metric:cloudtasks.googleapis.com/queue/task_attempt_count
     key: cloud.gcp.cloudtasks_googleapis_com.queue.task_attempt_count
     type: count,delta
     name: Task attempt count
@@ -61,8 +62,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: cloudtasks.googleapis.com/queue/task_attempt_delays
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:cloudtasks.googleapis.com/queue/task_attempt_delays
     key: cloud.gcp.cloudtasks_googleapis_com.queue.task_attempt_delays
     type: gauge
     name: Task attempt delays

@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Composer Environment
 gcp:
 - service: cloud_composer_environment
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.environment_name
+  - value: label:resource.labels.environment_name
     key: environment_name
     compatibilityModeOnly: true
-  - value: resource.labels.environment_name
+  - value: label:resource.labels.environment_name
     key: gcp.instance.name
   metrics:
-  - value: composer.googleapis.com/environment/api/request_count
+  - value: metric:composer.googleapis.com/environment/api/request_count
     key: cloud.gcp.composer_googleapis_com.environment.api.request_count
     type: count,delta
     name: API Requests
@@ -40,10 +39,13 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.status
-    - value: metric.labels.api_version
-    - value: metric.labels.api_method
-  - value: composer.googleapis.com/environment/api/request_latencies
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.api_method
+      key: api_method
+  - value: metric:composer.googleapis.com/environment/api/request_latencies
     key: cloud.gcp.composer_googleapis_com.environment.api.request_latencies
     type: gauge
     name: API Latency
@@ -54,10 +56,13 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.status
-    - value: metric.labels.api_version
-    - value: metric.labels.api_method
-  - value: composer.googleapis.com/environment/dag_processing/parse_error_count
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.api_method
+      key: api_method
+  - value: metric:composer.googleapis.com/environment/dag_processing/parse_error_count
     key: cloud.gcp.composer_googleapis_com.environment.dag_processing.parse_error_count
     type: count,delta
     name: Parse Error Count
@@ -68,8 +73,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/dag_processing/processes
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/dag_processing/processes
     key: cloud.gcp.composer_googleapis_com.environment.dag_processing.processes
     type: gauge
     name: DAG parsing processes
@@ -80,8 +86,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/dag_processing/processor_timeout_count
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/dag_processing/processor_timeout_count
     key: cloud.gcp.composer_googleapis_com.environment.dag_processing.processor_timeout_count
     type: count,delta
     name: Processors Timeout Count
@@ -92,8 +99,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/dag_processing/total_parse_time
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/dag_processing/total_parse_time
     key: cloud.gcp.composer_googleapis_com.environment.dag_processing.total_parse_time
     type: gauge
     name: Total Parse Time
@@ -104,8 +112,9 @@ gcp:
       metricKind: GAUGE
       unit: s
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/dagbag_size
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/dagbag_size
     key: cloud.gcp.composer_googleapis_com.environment.dagbag_size
     type: gauge
     name: Dag Bag Size
@@ -116,8 +125,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/database_health
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/database_health
     key: cloud.gcp.composer_googleapis_com.environment.database_health
     type: gauge
     name: Database Healthy
@@ -128,9 +138,11 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.image_version
-    - value: metric.labels.environment_type
-  - value: composer.googleapis.com/environment/executor/open_slots
+    - value: label:metric.labels.image_version
+      key: image_version
+    - value: label:metric.labels.environment_type
+      key: environment_type
+  - value: metric:composer.googleapis.com/environment/executor/open_slots
     key: cloud.gcp.composer_googleapis_com.environment.executor.open_slots
     type: gauge
     name: Executor Open Slots
@@ -141,8 +153,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/executor/running_tasks
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/executor/running_tasks
     key: cloud.gcp.composer_googleapis_com.environment.executor.running_tasks
     type: gauge
     name: Executor Running Tasks
@@ -153,8 +166,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/finished_task_instance_count
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/finished_task_instance_count
     key: cloud.gcp.composer_googleapis_com.environment.finished_task_instance_count
     type: count,delta
     name: Task Instance Count
@@ -165,9 +179,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.state
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/healthy
+    - value: label:metric.labels.state
+      key: state
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/healthy
     key: cloud.gcp.composer_googleapis_com.environment.healthy
     type: gauge
     name: Healthy
@@ -178,8 +194,9 @@ gcp:
       metricKind: GAUGE
       unit: ''
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/num_celery_workers
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/num_celery_workers
     key: cloud.gcp.composer_googleapis_com.environment.num_celery_workers
     type: gauge
     name: Celery Workers
@@ -190,8 +207,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/scheduler_heartbeat_count
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/scheduler_heartbeat_count
     key: cloud.gcp.composer_googleapis_com.environment.scheduler_heartbeat_count
     type: count,delta
     name: Scheduler Heartbeats
@@ -202,8 +220,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/task_queue_length
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/task_queue_length
     key: cloud.gcp.composer_googleapis_com.environment.task_queue_length
     type: gauge
     name: Task Queue Length
@@ -214,9 +233,11 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-    - value: metric.labels.queue_name
-  - value: composer.googleapis.com/environment/worker/pod_eviction_count
+    - value: label:metric.labels.image_version
+      key: image_version
+    - value: label:metric.labels.queue_name
+      key: queue_name
+  - value: metric:composer.googleapis.com/environment/worker/pod_eviction_count
     key: cloud.gcp.composer_googleapis_com.environment.worker.pod_eviction_count
     type: count,delta
     name: Worker Pod Eviction Count
@@ -227,8 +248,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
-  - value: composer.googleapis.com/environment/zombie_task_killed_count
+    - value: label:metric.labels.image_version
+      key: image_version
+  - value: metric:composer.googleapis.com/environment/zombie_task_killed_count
     key: cloud.gcp.composer_googleapis_com.environment.zombie_task_killed_count
     type: count,delta
     name: Zombie Tasks Killed
@@ -239,4 +261,5 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.image_version
+    - value: label:metric.labels.image_version
+      key: image_version

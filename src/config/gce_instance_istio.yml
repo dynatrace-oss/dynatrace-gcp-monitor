@@ -3,9 +3,9 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google VM Instance Istio
 gcp:
@@ -13,23 +13,23 @@ gcp:
   featureSet: istio
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: instance_id
     compatibilityModeOnly: true
-  - value: resource.labels.instance_id
+  - value: label:resource.labels.instance_id
     key: gcp.instance.id
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
+  - value: label:resource.labels.zone
     key: gcp.region
   metrics:
-  - value: istio.io/service/client/connection_close_count
+  - value: metric:istio.io/service/client/connection_close_count
     key: cloud.gcp.istio_io.service.client.connection_close_count
     type: count,delta
     name: Client Connection Close Count
@@ -40,27 +40,47 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-  - value: istio.io/service/client/connection_open_count
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+  - value: metric:istio.io/service/client/connection_open_count
     key: cloud.gcp.istio_io.service.client.connection_open_count
     type: count,delta
     name: Client Connection Open Count
@@ -71,27 +91,47 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-  - value: istio.io/service/client/received_bytes_count
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+  - value: metric:istio.io/service/client/received_bytes_count
     key: cloud.gcp.istio_io.service.client.received_bytes_count
     type: count,delta
     name: Client Received Bytes Count
@@ -102,27 +142,47 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-  - value: istio.io/service/client/request_bytes
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+  - value: metric:istio.io/service/client/request_bytes
     key: cloud.gcp.istio_io.service.client.request_bytes
     type: gauge
     name: Client Request Bytes
@@ -133,31 +193,55 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-    - value: metric.labels.request_operation
-    - value: metric.labels.api_version
-    - value: metric.labels.response_code
-    - value: metric.labels.api_name
-  - value: istio.io/service/client/request_count
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+    - value: label:metric.labels.request_operation
+      key: request_operation
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.api_name
+      key: api_name
+  - value: metric:istio.io/service/client/request_count
     key: cloud.gcp.istio_io.service.client.request_count
     type: count,delta
     name: Client Request Count
@@ -168,31 +252,55 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-    - value: metric.labels.request_operation
-    - value: metric.labels.api_version
-    - value: metric.labels.response_code
-    - value: metric.labels.api_name
-  - value: istio.io/service/client/response_bytes
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+    - value: label:metric.labels.request_operation
+      key: request_operation
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.api_name
+      key: api_name
+  - value: metric:istio.io/service/client/response_bytes
     key: cloud.gcp.istio_io.service.client.response_bytes
     type: gauge
     name: Client Response Bytes
@@ -203,31 +311,55 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-    - value: metric.labels.request_operation
-    - value: metric.labels.api_version
-    - value: metric.labels.response_code
-    - value: metric.labels.api_name
-  - value: istio.io/service/client/roundtrip_latencies
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+    - value: label:metric.labels.request_operation
+      key: request_operation
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.api_name
+      key: api_name
+  - value: metric:istio.io/service/client/roundtrip_latencies
     key: cloud.gcp.istio_io.service.client.roundtrip_latencies
     type: gauge
     name: Client Roundtrip Latencies
@@ -238,31 +370,55 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-    - value: metric.labels.request_operation
-    - value: metric.labels.api_version
-    - value: metric.labels.response_code
-    - value: metric.labels.api_name
-  - value: istio.io/service/client/sent_bytes_count
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+    - value: label:metric.labels.request_operation
+      key: request_operation
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.api_name
+      key: api_name
+  - value: metric:istio.io/service/client/sent_bytes_count
     key: cloud.gcp.istio_io.service.client.sent_bytes_count
     type: count,delta
     name: Client Sent Bytes Count
@@ -273,27 +429,47 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-  - value: istio.io/service/server/connection_close_count
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+  - value: metric:istio.io/service/server/connection_close_count
     key: cloud.gcp.istio_io.service.server.connection_close_count
     type: count,delta
     name: Server Connection Close Count
@@ -304,27 +480,47 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-  - value: istio.io/service/server/connection_open_count
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+  - value: metric:istio.io/service/server/connection_open_count
     key: cloud.gcp.istio_io.service.server.connection_open_count
     type: count,delta
     name: Server Connection Open Count
@@ -335,27 +531,47 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-  - value: istio.io/service/server/received_bytes_count
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+  - value: metric:istio.io/service/server/received_bytes_count
     key: cloud.gcp.istio_io.service.server.received_bytes_count
     type: count,delta
     name: Server Received Bytes Count
@@ -366,27 +582,47 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-  - value: istio.io/service/server/request_bytes
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+  - value: metric:istio.io/service/server/request_bytes
     key: cloud.gcp.istio_io.service.server.request_bytes
     type: gauge
     name: Server Request Bytes
@@ -397,31 +633,55 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-    - value: metric.labels.request_operation
-    - value: metric.labels.api_version
-    - value: metric.labels.response_code
-    - value: metric.labels.api_name
-  - value: istio.io/service/server/request_count
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+    - value: label:metric.labels.request_operation
+      key: request_operation
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.api_name
+      key: api_name
+  - value: metric:istio.io/service/server/request_count
     key: cloud.gcp.istio_io.service.server.request_count
     type: count,delta
     name: Server Request Count
@@ -432,31 +692,55 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-    - value: metric.labels.request_operation
-    - value: metric.labels.api_version
-    - value: metric.labels.response_code
-    - value: metric.labels.api_name
-  - value: istio.io/service/server/response_bytes
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+    - value: label:metric.labels.request_operation
+      key: request_operation
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.api_name
+      key: api_name
+  - value: metric:istio.io/service/server/response_bytes
     key: cloud.gcp.istio_io.service.server.response_bytes
     type: gauge
     name: Server Response Bytes
@@ -467,31 +751,55 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-    - value: metric.labels.request_operation
-    - value: metric.labels.api_version
-    - value: metric.labels.response_code
-    - value: metric.labels.api_name
-  - value: istio.io/service/server/response_latencies
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+    - value: label:metric.labels.request_operation
+      key: request_operation
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.api_name
+      key: api_name
+  - value: metric:istio.io/service/server/response_latencies
     key: cloud.gcp.istio_io.service.server.response_latencies
     type: gauge
     name: Server Response Latencies
@@ -502,31 +810,55 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
-    - value: metric.labels.request_operation
-    - value: metric.labels.api_version
-    - value: metric.labels.response_code
-    - value: metric.labels.api_name
-  - value: istio.io/service/server/sent_bytes_count
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision
+    - value: label:metric.labels.request_operation
+      key: request_operation
+    - value: label:metric.labels.api_version
+      key: api_version
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.api_name
+      key: api_name
+  - value: metric:istio.io/service/server/sent_bytes_count
     key: cloud.gcp.istio_io.service.server.sent_bytes_count
     type: count,delta
     name: Server Sent Bytes Count
@@ -537,23 +869,43 @@ gcp:
       metricKind: CUMULATIVE
       unit: By
     dimensions:
-    - value: metric.labels.request_protocol
-    - value: metric.labels.service_authentication_policy
-    - value: metric.labels.mesh_uid
-    - value: metric.labels.destination_service_name
-    - value: metric.labels.destination_service_namespace
-    - value: metric.labels.destination_port
-    - value: metric.labels.source_principal
-    - value: metric.labels.source_workload_name
-    - value: metric.labels.source_workload_namespace
-    - value: metric.labels.source_owner
-    - value: metric.labels.destination_principal
-    - value: metric.labels.destination_workload_name
-    - value: metric.labels.destination_workload_namespace
-    - value: metric.labels.destination_owner
-    - value: metric.labels.source_canonical_service_name
-    - value: metric.labels.destination_canonical_service_name
-    - value: metric.labels.source_canonical_service_namespace
-    - value: metric.labels.destination_canonical_service_namespace
-    - value: metric.labels.source_canonical_revision
-    - value: metric.labels.destination_canonical_revision
+    - value: label:metric.labels.request_protocol
+      key: request_protocol
+    - value: label:metric.labels.service_authentication_policy
+      key: service_authentication_policy
+    - value: label:metric.labels.mesh_uid
+      key: mesh_uid
+    - value: label:metric.labels.destination_service_name
+      key: destination_service_name
+    - value: label:metric.labels.destination_service_namespace
+      key: destination_service_namespace
+    - value: label:metric.labels.destination_port
+      key: destination_port
+    - value: label:metric.labels.source_principal
+      key: source_principal
+    - value: label:metric.labels.source_workload_name
+      key: source_workload_name
+    - value: label:metric.labels.source_workload_namespace
+      key: source_workload_namespace
+    - value: label:metric.labels.source_owner
+      key: source_owner
+    - value: label:metric.labels.destination_principal
+      key: destination_principal
+    - value: label:metric.labels.destination_workload_name
+      key: destination_workload_name
+    - value: label:metric.labels.destination_workload_namespace
+      key: destination_workload_namespace
+    - value: label:metric.labels.destination_owner
+      key: destination_owner
+    - value: label:metric.labels.source_canonical_service_name
+      key: source_canonical_service_name
+    - value: label:metric.labels.destination_canonical_service_name
+      key: destination_canonical_service_name
+    - value: label:metric.labels.source_canonical_service_namespace
+      key: source_canonical_service_namespace
+    - value: label:metric.labels.destination_canonical_service_namespace
+      key: destination_canonical_service_namespace
+    - value: label:metric.labels.source_canonical_revision
+      key: source_canonical_revision
+    - value: label:metric.labels.destination_canonical_revision
+      key: destination_canonical_revision

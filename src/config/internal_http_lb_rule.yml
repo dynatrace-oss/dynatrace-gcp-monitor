@@ -3,53 +3,52 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Internal HTTP/S Load Balancing Rule
 gcp:
 - service: internal_http_lb_rule
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.network_name
+  - value: label:resource.labels.network_name
     key: network_name
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
+  - value: label:resource.labels.region
     key: gcp.region
-  - value: resource.labels.url_map_name
+  - value: label:resource.labels.url_map_name
     key: url_map_name
     compatibilityModeOnly: true
-  - value: resource.labels.url_map_name
+  - value: label:resource.labels.url_map_name
     key: gcp.instance.name
-  - value: resource.labels.forwarding_rule_name
+  - value: label:resource.labels.forwarding_rule_name
     key: forwarding_rule_name
-  - value: resource.labels.target_proxy_name
+  - value: label:resource.labels.target_proxy_name
     key: target_proxy_name
-  - value: resource.labels.matched_url_path_rule
+  - value: label:resource.labels.matched_url_path_rule
     key: matched_url_path_rule
-  - value: resource.labels.backend_target_name
+  - value: label:resource.labels.backend_target_name
     key: backend_target_name
-  - value: resource.labels.backend_target_type
+  - value: label:resource.labels.backend_target_type
     key: backend_target_type
-  - value: resource.labels.backend_name
+  - value: label:resource.labels.backend_name
     key: backend_name
-  - value: resource.labels.backend_type
+  - value: label:resource.labels.backend_type
     key: backend_type
-  - value: resource.labels.backend_scope
+  - value: label:resource.labels.backend_scope
     key: backend_scope
-  - value: resource.labels.backend_scope_type
+  - value: label:resource.labels.backend_scope_type
     key: backend_scope_type
   metrics:
-  - value: loadbalancing.googleapis.com/https/internal/backend_latencies
+  - value: metric:loadbalancing.googleapis.com/https/internal/backend_latencies
     key: cloud.gcp.loadbalancing_googleapis_com.https.internal.backend_latencies
     type: gauge
     name: Backend latencies
@@ -60,11 +59,15 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.protocol
-    - value: metric.labels.response_code
-    - value: metric.labels.response_code_class
-    - value: metric.labels.cache_result
-  - value: loadbalancing.googleapis.com/https/internal/request_bytes_count
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.response_code_class
+      key: response_code_class
+    - value: label:metric.labels.cache_result
+      key: cache_result
+  - value: metric:loadbalancing.googleapis.com/https/internal/request_bytes_count
     key: cloud.gcp.loadbalancing_googleapis_com.https.internal.request_bytes_count
     type: count,delta
     name: Request bytes
@@ -75,11 +78,15 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.protocol
-    - value: metric.labels.response_code
-    - value: metric.labels.response_code_class
-    - value: metric.labels.cache_result
-  - value: loadbalancing.googleapis.com/https/internal/request_count
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.response_code_class
+      key: response_code_class
+    - value: label:metric.labels.cache_result
+      key: cache_result
+  - value: metric:loadbalancing.googleapis.com/https/internal/request_count
     key: cloud.gcp.loadbalancing_googleapis_com.https.internal.request_count
     type: count,delta
     name: Request count
@@ -90,11 +97,15 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.protocol
-    - value: metric.labels.response_code
-    - value: metric.labels.response_code_class
-    - value: metric.labels.cache_result
-  - value: loadbalancing.googleapis.com/https/internal/response_bytes_count
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.response_code_class
+      key: response_code_class
+    - value: label:metric.labels.cache_result
+      key: cache_result
+  - value: metric:loadbalancing.googleapis.com/https/internal/response_bytes_count
     key: cloud.gcp.loadbalancing_googleapis_com.https.internal.response_bytes_count
     type: count,delta
     name: Response bytes
@@ -105,11 +116,15 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions:
-    - value: metric.labels.protocol
-    - value: metric.labels.response_code
-    - value: metric.labels.response_code_class
-    - value: metric.labels.cache_result
-  - value: loadbalancing.googleapis.com/https/internal/total_latencies
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.response_code_class
+      key: response_code_class
+    - value: label:metric.labels.cache_result
+      key: cache_result
+  - value: metric:loadbalancing.googleapis.com/https/internal/total_latencies
     key: cloud.gcp.loadbalancing_googleapis_com.https.internal.total_latencies
     type: gauge
     name: Total latencies
@@ -120,9 +135,13 @@ gcp:
       metricKind: DELTA
       unit: ms
     dimensions:
-    - value: metric.labels.protocol
-    - value: metric.labels.response_code
-    - value: metric.labels.response_code_class
-    - value: metric.labels.cache_result
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.response_code_class
+      key: response_code_class
+    - value: label:metric.labels.cache_result
+      key: cache_result
 dashboards:
-  - dashboard: "dashboards/lb_https.json"
+- dashboard: dashboards/lb_https.json

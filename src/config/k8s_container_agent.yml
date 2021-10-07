@@ -3,9 +3,9 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Kubernetes Container Agent
 gcp:
@@ -13,29 +13,29 @@ gcp:
   featureSet: agent
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
-  - value: resource.labels.cluster_name
+  - value: label:resource.labels.cluster_name
     key: cluster_name
-  - value: resource.labels.namespace_name
+  - value: label:resource.labels.namespace_name
     key: namespace_name
-  - value: resource.labels.pod_name
+  - value: label:resource.labels.pod_name
     key: pod_name
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: container_name
     compatibilityModeOnly: false
-  - value: resource.labels.container_name
+  - value: label:resource.labels.container_name
     key: gcp.instance.name
   metrics:
-  - value: agent.googleapis.com/agent/api_request_count
+  - value: metric:agent.googleapis.com/agent/api_request_count
     key: cloud.gcp.agent_googleapis_com.agent.api_request_count
     type: count,delta
     name: Monitoring Agent API Request Count
@@ -46,8 +46,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.state
-  - value: agent.googleapis.com/agent/log_entry_count
+    - value: label:metric.labels.state
+      key: state
+  - value: metric:agent.googleapis.com/agent/log_entry_count
     key: cloud.gcp.agent_googleapis_com.agent.log_entry_count
     type: count,delta
     name: Logging Agent Log Entry Count
@@ -58,8 +59,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: agent.googleapis.com/agent/log_entry_retry_count
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:agent.googleapis.com/agent/log_entry_retry_count
     key: cloud.gcp.agent_googleapis_com.agent.log_entry_retry_count
     type: count,delta
     name: Logging Agent Retried Log Entry Writes Count
@@ -70,8 +72,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: agent.googleapis.com/agent/memory_usage
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:agent.googleapis.com/agent/memory_usage
     key: cloud.gcp.agent_googleapis_com.agent.memory_usage
     type: gauge
     name: Monitoring Agent Memory Usage
@@ -82,7 +85,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: agent.googleapis.com/agent/monitoring/point_count
+  - value: metric:agent.googleapis.com/agent/monitoring/point_count
     key: cloud.gcp.agent_googleapis_com.agent.monitoring.point_count
     type: count,delta
     name: Monitoring Agent Metric Point Count
@@ -93,8 +96,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.status
-  - value: agent.googleapis.com/agent/request_count
+    - value: label:metric.labels.status
+      key: status
+  - value: metric:agent.googleapis.com/agent/request_count
     key: cloud.gcp.agent_googleapis_com.agent.request_count
     type: count,delta
     name: Logging Agent API Request Count
@@ -105,8 +109,9 @@ gcp:
       metricKind: CUMULATIVE
       unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-  - value: agent.googleapis.com/agent/streamspace_size
+    - value: label:metric.labels.response_code
+      key: response_code
+  - value: metric:agent.googleapis.com/agent/streamspace_size
     key: cloud.gcp.agent_googleapis_com.agent.streamspace_size
     type: gauge
     name: Monitoring Agent Process Labels Size
@@ -117,7 +122,7 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions: []
-  - value: agent.googleapis.com/agent/streamspace_size_throttling
+  - value: metric:agent.googleapis.com/agent/streamspace_size_throttling
     key: cloud.gcp.agent_googleapis_com.agent.streamspace_size_throttling
     type: gauge
     name: Monitoring Agent is Throttling Processes
@@ -128,7 +133,7 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions: []
-  - value: agent.googleapis.com/agent/uptime
+  - value: metric:agent.googleapis.com/agent/uptime
     key: cloud.gcp.agent_googleapis_com.agent.uptime
     type: count,delta
     name: Monitoring/Logging Agent Uptime
@@ -139,4 +144,5 @@ gcp:
       metricKind: CUMULATIVE
       unit: s
     dimensions:
-    - value: metric.labels.version
+    - value: label:metric.labels.version
+      key: version

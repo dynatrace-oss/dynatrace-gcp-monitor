@@ -3,33 +3,32 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud IoT Registry
 gcp:
 - service: cloudiot_device_registry
-  featureSet: default
   gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
+  - value: label:resource.labels.project_id
     key: gcp.project.id
-  - value: resource.labels.device_registry_id
+  - value: label:resource.labels.device_registry_id
     key: device_registry_id
     compatibilityModeOnly: true
-  - value: resource.labels.device_registry_id
+  - value: label:resource.labels.device_registry_id
     key: gcp.instance.id
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
+  - value: label:resource.labels.location
     key: gcp.region
   metrics:
-  - value: cloudiot.googleapis.com/device/active_devices
+  - value: metric:cloudiot.googleapis.com/device/active_devices
     key: cloud.gcp.cloudiot_googleapis_com.device.active_devices
     type: gauge
     name: Active devices
@@ -40,8 +39,9 @@ gcp:
       metricKind: GAUGE
       unit: '1'
     dimensions:
-    - value: metric.labels.protocol
-  - value: cloudiot.googleapis.com/device/billing_bytes_count
+    - value: label:metric.labels.protocol
+      key: protocol
+  - value: metric:cloudiot.googleapis.com/device/billing_bytes_count
     key: cloud.gcp.cloudiot_googleapis_com.device.billing_bytes_count
     type: gauge
     name: Billable bytes transferred
@@ -52,9 +52,11 @@ gcp:
       metricKind: GAUGE
       unit: By
     dimensions:
-    - value: metric.labels.protocol
-    - value: metric.labels.direction
-  - value: cloudiot.googleapis.com/device/error_count
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.direction
+      key: direction
+  - value: metric:cloudiot.googleapis.com/device/error_count
     key: cloud.gcp.cloudiot_googleapis_com.device.error_count
     type: count,delta
     name: Errors communicating with devices
@@ -65,9 +67,11 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.error
-    - value: metric.labels.protocol
-  - value: cloudiot.googleapis.com/device/operation_count
+    - value: label:metric.labels.error
+      key: error
+    - value: label:metric.labels.protocol
+      key: protocol
+  - value: metric:cloudiot.googleapis.com/device/operation_count
     key: cloud.gcp.cloudiot_googleapis_com.device.operation_count
     type: count,delta
     name: Operations
@@ -78,8 +82,9 @@ gcp:
       metricKind: DELTA
       unit: '1'
     dimensions:
-    - value: metric.labels.operation_type
-  - value: cloudiot.googleapis.com/device/received_bytes_count
+    - value: label:metric.labels.operation_type
+      key: operation_type
+  - value: metric:cloudiot.googleapis.com/device/received_bytes_count
     key: cloud.gcp.cloudiot_googleapis_com.device.received_bytes_count
     type: count,delta
     name: Bytes received by devices
@@ -90,7 +95,7 @@ gcp:
       metricKind: DELTA
       unit: By
     dimensions: []
-  - value: cloudiot.googleapis.com/device/sent_bytes_count
+  - value: metric:cloudiot.googleapis.com/device/sent_bytes_count
     key: cloud.gcp.cloudiot_googleapis_com.device.sent_bytes_count
     type: count,delta
     name: Bytes sent to devices
