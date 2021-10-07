@@ -188,7 +188,6 @@ dt_api()
       return 255
     fi
   fi
-
 }
 
 get_ext_files() {
@@ -230,15 +229,13 @@ upload_extension_to_cluster() {
   UPLOAD_RESPONSE=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@$EXTENSION_ZIP;type=application/zip")
   CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$UPLOAD_RESPONSE")
 
-  if [[ "$CODE" -gt "310" ]]; then
+  if [[ "$CODE" -ge "400" ]]; then
     warn "- Extension $EXTENSION_ZIP upload failed with error code: $CODE"
   else
     UPLOADED_EXTENSION=$(echo "$UPLOAD_RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensionName')
-    ACTIVATION_RESPONSE=$(curl -s -k -X PUT "$DYNATRACE_URL/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}")
-    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$ACTIVATION_RESPONSE")
 
-    if [[ "$CODE" -gt "310" ]]; then
-      warn "- Activation $UPLOADED_EXTENSION:$EXTENSION_VERSION failed with error code: $CODE"
+    if ! RESPONSE=$(dt_api "api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" "PUT" "{\"version\": \"${EXTENSION_VERSION}\"}"); then
+      warn "- Activation $UPLOADED_EXTENSION:$EXTENSION_VERSION failed."
     else
       echo "- Extension $UPLOADED_EXTENSION:$EXTENSION_VERSION activated."
     fi
@@ -249,17 +246,10 @@ get_activated_extensions_on_cluster() {
   DYNATRACE_URL=$1
   DYNATRACE_ACCESS_KEY=$2
 
-  if RESPONSE=$(curl -k -s "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
-    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
-
-    if [[ "$CODE" -gt "310" ]]; then
-      err "- Dynatrace Cluster at: $DYNATRACE_URL/api/v2/extensions response with code: $CODE"
-      exit
-    fi
-
+  if RESPONSE=$(dt_api "api/v2/extensions"); then
     EXTENSIONS_FROM_CLUSTER=$(echo "$RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
   else
-    err "- Dynatrace Cluster time out at: $DYNATRACE_URL/api/v2/extensions."
+    err "- Dynatrace Cluster failed on ${DYNATRACE_URL}api/v2/extensions endpoint."
     exit
   fi
 }
@@ -282,10 +272,10 @@ activate_extension_on_cluster() {
       if [ -n "$UPGRADE_EXTENSIONS" ]; then
         upload_extension_to_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSION_ZIP" "$EXTENSION_VERSION"
       else
-        warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+        warn "Actual installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
       fi
     elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-      warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is newer then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+      warn "Actual installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is newer then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
     fi
   done
 }
@@ -306,15 +296,7 @@ check_api_token() {
   V1_API_REQUIREMENTS=("ReadConfig" "WriteConfig")
   V2_API_REQUIREMENTS=("extensions.read" "extensions.write" "extensionConfigurations.read" "extensionConfigurations.write" "extensionEnvironment.read" "extensionEnvironment.write")
 
-  if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$DYNATRACE_URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
-    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
-    RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
-
-    if [ "$CODE" -ge 300 ]; then
-      err "Failed to check Dynatrace API token permissions - please verify provided values for parameters: --target-url (${DYNATRACE_URL}) and --target-api-token. $RESPONSE"
-      exit 1
-    fi
-
+  if RESPONSE=$(dt_api "api/v2/apiTokens/lookup" "POST" "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}"); then
     for REQUIRED in "${V1_API_REQUIREMENTS[@]}"; do
       if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
         err "Missing $REQUIRED permission (v1) for the API token"
@@ -328,9 +310,8 @@ check_api_token() {
         exit 1
       fi
     done
-
   else
-      warn "Failed to connect to endpoint $DYNATRACE_URL to check API token permissions. It can be ignored if Dynatrace does not allow public access."
+    warn "Failed to connect to endpoint $DYNATRACE_URL to check API token permissions. It can be ignored if Dynatrace does not allow public access."
   fi
 }
 
