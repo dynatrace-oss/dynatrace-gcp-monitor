@@ -1,4 +1,4 @@
-#!/usr/bin/env bash 
+#!/usr/bin/env bash
 #     Copyright 2020 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -119,6 +119,8 @@ readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos
 readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
+readonly EXTENSION_S3_URL=https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com
+readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
@@ -208,6 +210,16 @@ get_ext_files() {
   done
 }
 
+get_extensions_zip_packages() {
+  curl -s -O $EXTENSION_S3_URL/$EXTENSION_MANIFEST_FILE
+  mkdir -p ./extensions
+
+  grep -v '^ *#' < "$EXTENSION_MANIFEST_FILE" | while IFS= read -r EXTENSION_FILE_NAME
+  do
+    (cd ./extensions && curl -s -O "$EXTENSION_S3_URL/$EXTENSION_FILE_NAME")
+  done
+}
+
 upload_extension_to_cluster() {
   DYNATRACE_URL=$1
   DYNATRACE_ACCESS_KEY=$2
@@ -222,7 +234,7 @@ upload_extension_to_cluster() {
     UPLOADED_EXTENSION=$(echo "$UPLOAD_RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensionName')
     ACTIVATION_RESPONSE=$(curl -s -k -X PUT "$DYNATRACE_URL/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}")
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$ACTIVATION_RESPONSE")
-    
+
     if [ "$CODE" -gt "310" ]; then
       warn "- Activation $UPLOADED_EXTENSION:$EXTENSION_VERSION failed with error code: $CODE"
     else
@@ -237,17 +249,17 @@ get_activated_extensions_on_cluster() {
 
   if RESPONSE=$(curl -k -s "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
-    
+
     if [ "$CODE" -gt "310" ]; then
       err "- Dynatrace Cluster at: $DYNATRACE_URL/api/v2/extensions response with code: $CODE"
       exit
     fi
-    
+
     EXTENSIONS_FROM_CLUSTER=$(echo "$RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
   else
     err "- Dynatrace Cluster time out at: $DYNATRACE_URL/api/v2/extensions."
     exit
-  fi  
+  fi
 }
 
 activate_extension_on_cluster() {
@@ -283,6 +295,40 @@ check_if_parameter_is_empty()
   if [ "$PARAMETER" == "null" ] || [ -z "$PARAMETER" ]; then
     warn "Missing required parameter: $PARAMETER_NAME. Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
     exit
+  fi
+}
+
+check_api_token() {
+  DYNATRACE_URL=$1
+  DYNATRACE_ACCESS_KEY=$2
+  V1_API_REQUIREMENTS=("ReadConfig" "WriteConfig")
+  V2_API_REQUIREMENTS=("extensions.read" "extensions.write" "extensionConfigurations.read" "extensionConfigurations.write" "extensionEnvironment.read" "extensionEnvironment.write")
+
+  if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$DYNATRACE_URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
+    RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
+
+    if [ "$CODE" -ge 300 ]; then
+      err "Failed to check Dynatrace API token permissions - please verify provided values for parameters: --target-url (${DYNATRACE_URL}) and --target-api-token. $RESPONSE"
+      exit 1
+    fi
+
+    for REQUIRED in "${V1_API_REQUIREMENTS[@]}"; do
+      if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
+        err "Missing $REQUIRED permission (v1) for the API token"
+        exit 1
+      fi
+    done
+
+    for REQUIRED in "${V2_API_REQUIREMENTS[@]}"; do
+      if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
+        err "Missing $REQUIRED permission (v2) for the API token"
+        exit 1
+      fi
+    done
+
+  else
+      warn "Failed to connect to endpoint $DYNATRACE_URL to check API token permissions. It can be ignored if Dynatrace does not allow public access."
   fi
 }
 
@@ -415,6 +461,12 @@ if [ "$INSTALL" == true ]; then
 
 fi
 
+check_api_token "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
+
+echo -e
+echo "- downloading extensions"
+get_extensions_zip_packages
+
 echo -e
 echo "- checking activated extensions in Dynatrace"
 get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
@@ -543,3 +595,6 @@ rm ./$FUNCTION_ZIP_PACKAGE
 
 echo "- removing temporary directory [$FUNCTION_ZIP_PACKAGE]"
 rm -r ./$GCP_FUNCTION_NAME
+
+echo "- removing extensions files"
+rm -rf ./extensions $EXTENSION_MANIFEST_FILE
