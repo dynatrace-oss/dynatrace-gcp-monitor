@@ -48,6 +48,8 @@ usage: setup.sh [--upgrade-extensions]
 arguments:
     --upgrade-extensions
                             Upgrade all extensions into dynatrace cluster
+    --s3-url
+                            Custome S3 url with extensions
     -h, --help
                             Show this help message and exit
     "
@@ -103,6 +105,11 @@ while (( "$#" )); do
                 shift
             ;;
 
+            "--s3-url")
+                EXTENSION_S3_URL=$2
+                shift; shift
+            ;;
+
             "-h" | "--help")
                 print_help
                 exit 0
@@ -119,8 +126,11 @@ readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos
 readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
-readonly EXTENSION_S3_URL=https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
+
+if [ -z "$EXTENSION_S3_URL" ]; then
+  EXTENSION_S3_URL="https://dynatrace-gcp-extensions.s3.amazonaws.com"
+fi
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
