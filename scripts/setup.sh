@@ -272,10 +272,10 @@ activate_extension_on_cluster() {
     if [ -n "$UPGRADE_EXTENSIONS" ]; then
       upload_extension_to_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSION_ZIP" "$EXTENSION_VERSION"
     else
-      warn "Actual installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+      warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} installed on the cluster, use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
     fi
   elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-    warn "Actual installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is newer then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+    warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} installed on the cluster is newer than ${EXTENSION_NAME}:${EXTENSION_VERSION}"
   fi
 }
 
