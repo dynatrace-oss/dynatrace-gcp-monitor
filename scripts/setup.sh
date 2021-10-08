@@ -258,26 +258,25 @@ activate_extension_on_cluster() {
   DYNATRACE_URL=$1
   DYNATRACE_ACCESS_KEY=$2
   EXTENSIONS_FROM_CLUSTER=$3
+  EXTENSION_ZIP=$4
 
-  for EXTENSION_ZIP in *.zip*; do
-    EXTENSION_NAME=${EXTENSION_ZIP:0:${#EXTENSION_ZIP}-10}
-    EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
-    EXTENSION_IN_DT=$(echo "${EXTENSIONS_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
+  EXTENSION_NAME=${EXTENSION_ZIP:0:${#EXTENSION_ZIP}-10}
+  EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
+  EXTENSION_IN_DT=$(echo "${EXTENSIONS_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
 
-    if [ -z "$EXTENSION_IN_DT" ]; then
-      # missing extension in cluster installing it
+  if [ -z "$EXTENSION_IN_DT" ]; then
+    # missing extension in cluster installing it
+    upload_extension_to_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSION_ZIP" "$EXTENSION_VERSION"
+  elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+    # cluster has never version warning and install if flag was set
+    if [ -n "$UPGRADE_EXTENSIONS" ]; then
       upload_extension_to_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSION_ZIP" "$EXTENSION_VERSION"
-    elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-      # cluster has never version warning and install if flag was set
-      if [ -n "$UPGRADE_EXTENSIONS" ]; then
-        upload_extension_to_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSION_ZIP" "$EXTENSION_VERSION"
-      else
-        warn "Actual installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
-      fi
-    elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-      warn "Actual installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is newer then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+    else
+      warn "Actual installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
     fi
-  done
+  elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+    warn "Actual installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is newer then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+  fi
 }
 
 check_if_parameter_is_empty()
@@ -474,6 +473,7 @@ fi
 
 # If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
 if [[ "$UPGRADE_EXTENSIONS" != "Y" ]]; then
+  echo -e
   echo "- downloading active extensions from Dynatrace"
   mkdir -p ../extensions_from_cluster
   cd ../extensions_from_cluster || exit
@@ -482,7 +482,7 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" ]]; then
   for i in "${!EXTENSIONS_FROM_CLUSTER_ARRAY[@]}"; do
     EXTENSION_NAME="$(cut -d':' -f1 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
     EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
-    curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${API_TOKEN}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+    curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
       find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
       mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
@@ -499,37 +499,33 @@ done
 SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 
 cd ../extensions || exit
-echo "- choosing extensions to upload to Dynatrace"
+echo -e
+echo "- choosing and uploading extensions to Dynatrace"
 for EXTENSION_ZIP in *.zip; do
-  EXTENSION_NAME="$(basename "$EXTENSION_ZIP" .zip)"
+  EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"
   unzip -j -q "$EXTENSION_ZIP" "extension.zip"
-  unzip -p -q "extension.zip" "extension.yaml" > "$EXTENSION_NAME".yaml
-  EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_NAME".yaml)
+  unzip -p -q "extension.zip" "extension.yaml" >"$EXTENSION_FILE_NAME".yaml
+  EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_FILE_NAME".yaml)
   #Get all service/featureSet pairs defined in extensions
   SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"')
-  REMOVE_EXTENSION=true
   for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
     SERVICE_FROM_EXTENSION="${SERVICE_FROM_EXTENSION/null/default}"
     #Check if service should be monitored
     if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
-      REMOVE_EXTENSION=false
-      CONFIG_NAME=$(yq e '.name' "$EXTENSION_NAME".yaml)
+      CONFIG_NAME=$(yq e '.name' "$EXTENSION_FILE_NAME".yaml)
       if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
-        echo "gcp:" > ../dynatrace-gcp-function/config/"${BASH_REMATCH[1]}".yaml
-        echo "$EXTENSION_GCP_CONFIG" >> ../dynatrace-gcp-function/config/"${BASH_REMATCH[1]}".yaml
+        echo "gcp:" >../dynatrace-gcp-function/config/"${BASH_REMATCH[1]}".yaml
+        echo "$EXTENSION_GCP_CONFIG" >>../dynatrace-gcp-function/config/"${BASH_REMATCH[1]}".yaml
       fi
+      activate_extension_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
       break
     fi
   done
   rm extension.zip
-  rm "$EXTENSION_NAME".yaml
-  if $REMOVE_EXTENSION; then rm "$EXTENSION_ZIP"; fi
+  rm "$EXTENSION_FILE_NAME".yaml
+  rm "$EXTENSION_ZIP"
 done
 rm -rf ../extensions_from_cluster
-
-echo -e
-echo "- activating extensions in Dynatrace"
-activate_extension_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSIONS_FROM_CLUSTER"
 
 cd ../$GCP_FUNCTION_NAME || exit
 
