@@ -48,8 +48,6 @@ usage: setup.sh [--upgrade-extensions]
 arguments:
     --upgrade-extensions
                             Upgrade all extensions into dynatrace cluster
-    --s3-url
-                            Custome S3 url with extensions
     -h, --help
                             Show this help message and exit
     "
@@ -130,6 +128,8 @@ readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
 
 if [ -z "$EXTENSION_S3_URL" ]; then
   EXTENSION_S3_URL="https://dynatrace-gcp-extensions.s3.amazonaws.com"
+else
+  warn "Development mode on: custom S3 url link."
 fi
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
