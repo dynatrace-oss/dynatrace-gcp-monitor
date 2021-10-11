@@ -19,7 +19,6 @@ from typing import Optional, List
 from aiohttp import web
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
-from lib.configure_dynatrace import ConfigureDynatrace
 from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes, get_selected_services
 from lib.credentials import create_token, get_project_id_from_environment
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
@@ -78,11 +77,6 @@ async def run_instance_metadata_check() -> Optional[InstanceMetadata]:
     return None
 
 
-async def try_configure_dynatrace():
-    async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
-        dashboards_result = await ConfigureDynatrace(gcp_session=gcp_session, dt_session=dt_session, logging_context=logging_context)
-
-
 async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
     if metadata:
         async with init_gcp_client_session() as gcp_session:
@@ -104,7 +98,6 @@ def run_metrics():
     if "GCP_SERVICES" in os.environ:
         services = get_selected_services()
         logging_context.log(f"Running with configured services: {services}")
-    loop.run_until_complete(try_configure_dynatrace())
     fast_check_result = loop.run_until_complete(metrics_initial_check())
     if fast_check_result:
         loop.create_task(scheduling_loop(fast_check_result.projects))
