@@ -48,7 +48,7 @@ def dynatrace_gcp_extension(event, context):
         raise e
 
 
-async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None):
+async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
     """
     Used in docker or for tests
     """
@@ -66,7 +66,7 @@ async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None)
     data = {'data': '', 'publishTime': timestamp_utc_iso}
 
     start_time = time.time()
-    await handle_event(data, event_context, project_ids)
+    await handle_event(data, event_context, project_ids, services)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
@@ -75,22 +75,23 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, event_context, projects_ids: Optional[List[str]] = None):
+async def handle_event(event: Dict, event_context, projects_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
     if isinstance(event_context, Dict):
         # for k8s installation
         context = LoggingContext(event_context.get("execution_id", None))
     else:
         context = LoggingContext(None)
 
-    selected_services = []
-    if "GCP_SERVICES" in os.environ:
-        selected_services = get_selected_services()
-        # set default featureset if featureset not present in env variable
-        for i, service in enumerate(selected_services):
-            if "/" not in service:
-                selected_services[i] = f"{service}/default"
-
-    services = load_supported_services(context, selected_services)
+    if not services:
+        # load services for GCP Function
+        selected_services = []
+        if "GCP_SERVICES" in os.environ:
+            selected_services = get_selected_services()
+            # set default featureset if featureset not present in env variable
+            for i, service in enumerate(selected_services):
+                if "/" not in service:
+                    selected_services[i] = f"{service}/default"
+        services = load_supported_services(context, selected_services)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         setup_start_time = time.time()
