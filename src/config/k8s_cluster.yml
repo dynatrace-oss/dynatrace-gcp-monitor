@@ -14,10 +14,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.location
     id: location
+    compatibilityModeOnly: true
+  - value: resource.labels.location
+    id: gcp.region
   - value: resource.labels.cluster_name
     id: cluster_name
+    compatibilityModeOnly: false
+  - value: resource.labels.cluster_name
+    id: gcp.instance.name
   metrics:
   - value: logging.googleapis.com/log_entry_count
     id: cloud.gcp.logging.googleapis.com.log_entry_count

@@ -15,8 +15,14 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.location
     id: location
+    compatibilityModeOnly: true
+  - value: resource.labels.location
+    id: gcp.region
   - value: resource.labels.cluster_name
     id: cluster_name
   - value: resource.labels.namespace_name
@@ -25,6 +31,9 @@ gcp:
     id: pod_name
   - value: resource.labels.container_name
     id: container_name
+    compatibilityModeOnly: false
+  - value: resource.labels.container_name
+    id: gcp.instance.name
   metrics:
   - value: agent.googleapis.com/agent/api_request_count
     id: cloud.gcp.agent_googleapis_com.agent.api_request_count

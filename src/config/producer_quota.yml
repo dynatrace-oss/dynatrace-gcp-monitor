@@ -15,10 +15,16 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.service
     id: service
   - value: resource.labels.location
     id: location
+    compatibilityModeOnly: true
+  - value: resource.labels.location
+    id: gcp.region
   - value: resource.labels.consumer_resource_node
     id: consumer_resource_node
   metrics:

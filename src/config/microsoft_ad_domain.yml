@@ -15,10 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.fqdn
     id: fqdn
+    compatibilityModeOnly: true
+  - value: resource.labels.fqdn
+    id: gcp.instance.name
   - value: resource.labels.location
     id: location
+    compatibilityModeOnly: true
+  - value: resource.labels.location
+    id: gcp.region
   metrics:
   - value: managedidentities.googleapis.com/microsoft_ad/domain/health
     id: cloud.gcp.managedidentities_googleapis_com.microsoft_ad.domain.health
@@ -44,4 +53,8 @@ gcp:
     dimensions:
     - value: metric.labels.trust_direction
     - value: metric.labels.target_domain_name
+      id: target_domain_name
+      compatibilityModeOnly: true
+    - value: metric.labels.target_domain_name
+      id: gcp.instance.name
     - value: metric.labels.trust_type

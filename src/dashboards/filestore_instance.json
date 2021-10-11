@@ -63,7 +63,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["name","project_id","instance_name"]
+            "splitBy": ["name", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -115,7 +115,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["version","project_id","instance_name"]
+            "splitBy": ["version", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -215,7 +215,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -243,7 +243,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_milliseconds_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -271,7 +271,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -299,7 +299,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_milliseconds_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -327,7 +327,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -377,7 +377,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -416,7 +416,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["name","project_id","instance_name"]
+            "splitBy": ["name", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -473,7 +473,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -518,7 +518,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -551,7 +551,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.procedure_call_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["version","project_id","instance_name"]
+            "splitBy": ["version", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -608,7 +608,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_ops_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -653,7 +653,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_bytes_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -686,7 +686,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.free_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -719,7 +719,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.free_bytes_percent",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -764,7 +764,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.used_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -797,7 +797,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.used_bytes",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "GRAPH_CHART",
@@ -854,7 +854,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.read_milliseconds_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",
@@ -887,7 +887,7 @@
             "metric": "cloud.gcp.file_googleapis_com.nfs.server.write_milliseconds_count",
             "spaceAggregation": "AVG",
             "timeAggregation": "DEFAULT",
-            "splitBy": ["file_share","project_id","instance_name"]
+            "splitBy": ["file_share", "gcp.project.id","gcp.instance.name"]
         }],
         "visualConfig": {
             "type": "TOP_LIST",

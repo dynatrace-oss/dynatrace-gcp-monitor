@@ -15,10 +15,19 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.database_id
     id: database_id
+    compatibilityModeOnly: true
+  - value: resource.labels.database_id
+    id: gcp.instance.id
   - value: resource.labels.region
     id: region
+    compatibilityModeOnly: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: cloudsql.googleapis.com/database/auto_failover_request_count
     id: cloud.gcp.cloudsql_googleapis_com.database.auto_failover_request_count

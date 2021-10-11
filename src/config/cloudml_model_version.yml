@@ -15,12 +15,21 @@ gcp:
   dimensions:
   - value: resource.labels.project_id
     id: project_id
+    compatibilityModeOnly: true
+  - value: resource.labels.project_id
+    id: gcp.project.id
   - value: resource.labels.model_id
     id: model_id
   - value: resource.labels.version_id
     id: version_id
+    compatibilityModeOnly: true
+  - value: resource.labels.version_id
+    id: gcp.instance.id
   - value: resource.labels.region
     id: region
+    compatibilityModeOnly: true
+  - value: resource.labels.region
+    id: gcp.region
   metrics:
   - value: ml.googleapis.com/prediction/error_count
     id: cloud.gcp.ml_googleapis_com.prediction.error_count

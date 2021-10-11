@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Set
 
 import yaml
 
+from lib import metrics
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes, get_selected_services
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
@@ -276,7 +277,7 @@ def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str,
     return result
 
 
-def load_supported_services(context: LoggingContext, selected_featuresets: List[str]) -> List[GCPService]:
+def load_supported_services(context: LoggingContext, selected_services: List[str]) -> List[GCPService]:
     activation_file_path = '/code/config/activation/gcp_services.yaml'
     try:
         with open(activation_file_path, encoding="utf-8") as activation_file:
@@ -293,6 +294,7 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
         if isfile(os.path.join(config_directory, file)) and is_yaml_file(file)
     ]
 
+    metrics.update_env_var_configuration()
     services = []
     for file in config_files:
         config_file_path = os.path.join(config_directory, file)
@@ -304,14 +306,18 @@ def load_supported_services(context: LoggingContext, selected_featuresets: List[
                 for service_yaml in config_yaml.get("gcp", {}):
                     service_name=service_yaml.get("service", "None")
                     featureSet=service_yaml.get("featureSet", "None")
-                    # If whitelist of services exists and current service is not present in it, skip
-                    if activation_config:
+
+                    if activation_yaml is not None:
                         activation_config_feature_sets = activation_config.get(service_name, {}).get("featureSets", [])
                         should_skip = featureSet not in activation_config_feature_sets
                         activation = activation_config.get(service_name)
                         gcp_service = GCPService(tech_name=technology_name, activation=activation, **service_yaml)
                     else:
-                        should_skip = f'{service_name}/{service_yaml.get("featureSet", "None")}' not in selected_featuresets
+                        # If activation_config yaml not given, using passed selected_services param as whitelist
+                        # If whitelist of services exists and current service is not present in it, skip
+                        # If whitelist is empty - no services explicitly selected - load all available
+                        whitelist_exists = selected_services is not None and selected_services.__len__() > 0
+                        should_skip = whitelist_exists and f'{service_name}/{service_yaml.get("featureSet", "None")}' not in selected_services
                         gcp_service = GCPService(tech_name=technology_name, **service_yaml)
                     if should_skip:
                         continue
