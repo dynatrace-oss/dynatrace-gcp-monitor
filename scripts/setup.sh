@@ -236,7 +236,7 @@ upload_extension_to_cluster() {
   EXTENSION_ZIP=$3
   EXTENSION_VERSION=$4
 
-  UPLOAD_RESPONSE=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@$EXTENSION_ZIP;type=application/zip")
+  UPLOAD_RESPONSE=$(curl -s -k -X POST "${DYNATRACE_URL}api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@$EXTENSION_ZIP;type=application/zip")
   CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$UPLOAD_RESPONSE")
 
   if [[ "$CODE" -ge "400" ]]; then
@@ -245,7 +245,7 @@ upload_extension_to_cluster() {
     UPLOADED_EXTENSION=$(echo "$UPLOAD_RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensionName')
 
     if ! RESPONSE=$(dt_api "api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" "PUT" "{\"version\": \"${EXTENSION_VERSION}\"}"); then
-      warn "- Activation $UPLOADED_EXTENSION:$EXTENSION_VERSION failed."
+      warn "- Activation $EXTENSION_ZIP failed."
     else
       echo "- Extension $UPLOADED_EXTENSION:$EXTENSION_VERSION activated."
     fi
@@ -492,7 +492,7 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" ]]; then
   for i in "${!EXTENSIONS_FROM_CLUSTER_ARRAY[@]}"; do
     EXTENSION_NAME="$(cut -d':' -f1 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
     EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
-    curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+    curl -k -s -X GET "${DYNATRACE_URL}api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
       find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
       mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
@@ -509,7 +509,6 @@ done
 SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 
 cd ../extensions || exit
-echo -e
 echo "- choosing and uploading extensions to Dynatrace"
 for EXTENSION_ZIP in *.zip; do
   EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"
@@ -524,8 +523,8 @@ for EXTENSION_ZIP in *.zip; do
     if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
       CONFIG_NAME=$(yq e '.name' "$EXTENSION_FILE_NAME".yaml)
       if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
-        echo "gcp:" >../dynatrace-gcp-function/config/"${BASH_REMATCH[1]}".yaml
-        echo "$EXTENSION_GCP_CONFIG" >>../dynatrace-gcp-function/config/"${BASH_REMATCH[1]}".yaml
+        echo "gcp:" >../"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
+        echo "$EXTENSION_GCP_CONFIG" >>../"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
       fi
       activate_extension_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
       break
@@ -632,7 +631,7 @@ gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_T
     echo "Alerts import disabled"
   fi
 
-
+echo -e
 echo "- cleaning up"
 
 popd || exit 1
