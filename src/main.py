@@ -282,7 +282,7 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
 
                 for service_yaml in config_yaml.get("gcp", {}):
                     service_name=service_yaml.get("service", "None")
-                    featureSet=service_yaml.get("featureSet", "None")
+                    featureSet=service_yaml.get("featureSet", "default")
 
                     if activation_yaml is not None:
                         activation_config_feature_sets = activation_config.get(service_name, {}).get("featureSets", [])
@@ -294,7 +294,7 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
                         # If whitelist of services exists and current service is not present in it, skip
                         # If whitelist is empty - no services explicitly selected - load all available
                         whitelist_exists = selected_services is not None and selected_services.__len__() > 0
-                        should_skip = whitelist_exists and f'{service_name}/{service_yaml.get("featureSet", "None")}' not in selected_services
+                        should_skip = whitelist_exists and f'{service_name}/{featureSet}' not in selected_services
                         gcp_service = GCPService(tech_name=technology_name, **service_yaml)
                     if should_skip:
                         continue

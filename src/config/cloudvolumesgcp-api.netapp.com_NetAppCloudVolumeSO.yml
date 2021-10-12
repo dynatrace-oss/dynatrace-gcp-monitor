@@ -1,108 +1,110 @@
-id: cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO
+id: cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google NetApp CVS-SO
 gcp:
-- service: cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+- service: cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.resource_container
-    id: resource_container
-  - value: resource.labels.location
-    id: location
+  - value: label:resource.labels.resource_container
+    key: resource_container
+  - value: label:resource.labels.location
+    key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
-    id: gcp.region
-  - value: resource.labels.volume_id
-    id: volume_id
+  - value: label:resource.labels.location
+    key: gcp.region
+  - value: label:resource.labels.volume_id
+    key: volume_id
     compatibilityModeOnly: true
-  - value: resource.labels.volume_id
-    id: gcp.instance.id
+  - value: label:resource.labels.volume_id
+    key: gcp.instance.id
   metrics:
-  - value: cloudvolumesgcp-api.netapp.com/cloudvolume_so/logical_bytes_backed_up
-    id: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.logical_bytes_backed_up
+  - value: metric:cloudvolumesgcp-api.netapp.com/cloudvolume_so/logical_bytes_backed_up
+    key: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.logical_bytes_backed_up
     type: gauge
     name: NetApp CVS-SO Logical Bytes Backed Up
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
-  - value: cloudvolumesgcp-api.netapp.com/cloudvolume_so/operation_count
-    id: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.operation_count
+  - value: metric:cloudvolumesgcp-api.netapp.com/cloudvolume_so/operation_count
+    key: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.operation_count
     type: count,delta
     name: NetApp CVS-SO Operation Count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.type
-  - value: cloudvolumesgcp-api.netapp.com/cloudvolume_so/read_bytes_count
-    id: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.read_bytes_count
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:cloudvolumesgcp-api.netapp.com/cloudvolume_so/read_bytes_count
+    key: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.read_bytes_count
     type: count,delta
     name: NetApp CVS-SO Read Bytes Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
-  - value: cloudvolumesgcp-api.netapp.com/cloudvolume_so/request_latencies
-    id: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.request_latencies
+  - value: metric:cloudvolumesgcp-api.netapp.com/cloudvolume_so/request_latencies
+    key: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.request_latencies
     type: gauge
     name: NetApp CVS-SO Request Latencies
-    unit: ms
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: ms
     dimensions:
-    - value: metric.labels.method
-  - value: cloudvolumesgcp-api.netapp.com/cloudvolume_so/volume_size
-    id: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.volume_size
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:cloudvolumesgcp-api.netapp.com/cloudvolume_so/volume_size
+    key: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.volume_size
     type: gauge
     name: NetApp CVS-SO Volume Size
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
-  - value: cloudvolumesgcp-api.netapp.com/cloudvolume_so/volume_usage
-    id: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.volume_usage
+  - value: metric:cloudvolumesgcp-api.netapp.com/cloudvolume_so/volume_usage
+    key: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.volume_usage
     type: gauge
     name: NetApp CVS-SO Volume Usage
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.type
-  - value: cloudvolumesgcp-api.netapp.com/cloudvolume_so/write_bytes_count
-    id: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.write_bytes_count
+    - value: label:metric.labels.type
+      key: type
+  - value: metric:cloudvolumesgcp-api.netapp.com/cloudvolume_so/write_bytes_count
+    key: cloud.gcp.cloudvolumesgcp-api_netapp_com.cloudvolume_so.write_bytes_count
     type: count,delta
     name: NetApp CVS-SO Write Bytes Count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []

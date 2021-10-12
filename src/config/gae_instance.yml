@@ -3,90 +3,89 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google App Engine Instance
 gcp:
 - service: gae_instance
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
-    id: project_id
+  - value: label:resource.labels.project_id
+    key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
-    id: gcp.project.id
-  - value: resource.labels.module_id
-    id: module_id
-  - value: resource.labels.version_id
-    id: version_id
-  - value: resource.labels.instance_id
-    id: instance_id
+  - value: label:resource.labels.project_id
+    key: gcp.project.id
+  - value: label:resource.labels.module_id
+    key: module_id
+  - value: label:resource.labels.version_id
+    key: version_id
+  - value: label:resource.labels.instance_id
+    key: instance_id
     compatibilityModeOnly: true
-  - value: resource.labels.instance_id
-    id: gcp.instance.id
-  - value: resource.labels.location
-    id: location
+  - value: label:resource.labels.instance_id
+    key: gcp.instance.id
+  - value: label:resource.labels.location
+    key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
-    id: gcp.region
+  - value: label:resource.labels.location
+    key: gcp.region
   metrics:
-  - value: appengine.googleapis.com/flex/instance/connections/current
-    id: cloud.gcp.appengine_googleapis_com.flex.instance.connections.current
+  - value: metric:appengine.googleapis.com/flex/instance/connections/current
+    key: cloud.gcp.appengine_googleapis_com.flex.instance.connections.current
     type: gauge
     name: Connections
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
-  - value: appengine.googleapis.com/flex/instance/cpu/utilization
-    id: cloud.gcp.appengine_googleapis_com.flex.instance.cpu.utilization
+  - value: metric:appengine.googleapis.com/flex/instance/cpu/utilization
+    key: cloud.gcp.appengine_googleapis_com.flex.instance.cpu.utilization
     type: gauge
     name: CPU Utilization
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions: []
-  - value: appengine.googleapis.com/flex/instance/network/received_bytes_count
-    id: cloud.gcp.appengine_googleapis_com.flex.instance.network.received_bytes_count
+  - value: metric:appengine.googleapis.com/flex/instance/network/received_bytes_count
+    key: cloud.gcp.appengine_googleapis_com.flex.instance.network.received_bytes_count
     type: count,delta
     name: Network bytes received
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
-  - value: appengine.googleapis.com/flex/instance/network/sent_bytes_count
-    id: cloud.gcp.appengine_googleapis_com.flex.instance.network.sent_bytes_count
+  - value: metric:appengine.googleapis.com/flex/instance/network/sent_bytes_count
+    key: cloud.gcp.appengine_googleapis_com.flex.instance.network.sent_bytes_count
     type: count,delta
     name: Network bytes sent
-    unit: By
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
-  - value: appengine.googleapis.com/flex/instance/ws/avg_duration
-    id: cloud.gcp.appengine_googleapis_com.flex.instance.ws.avg_duration
+  - value: metric:appengine.googleapis.com/flex/instance/ws/avg_duration
+    key: cloud.gcp.appengine_googleapis_com.flex.instance.ws.avg_duration
     type: gauge
     name: Websocket average duration
-    unit: s
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: s
     dimensions: []
 alerts:
-  - path: alerts/gae_instance/cpu.utilization.json
+- path: alerts/gae_instance/cpu.utilization.json
