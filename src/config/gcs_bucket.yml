@@ -3,169 +3,185 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Storage bucket
 gcp:
 - service: gcs_bucket
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
-    id: project_id
+  - value: label:resource.labels.project_id
+    key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
-    id: gcp.project.id
-  - value: resource.labels.bucket_name
-    id: bucket_name
+  - value: label:resource.labels.project_id
+    key: gcp.project.id
+  - value: label:resource.labels.bucket_name
+    key: bucket_name
     compatibilityModeOnly: true
-  - value: resource.labels.bucket_name
-    id: gcp.instance.name
-  - value: resource.labels.location
-    id: location
+  - value: label:resource.labels.bucket_name
+    key: gcp.instance.name
+  - value: label:resource.labels.location
+    key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
-    id: gcp.region
+  - value: label:resource.labels.location
+    key: gcp.region
   metrics:
-  - value: firebasestorage.googleapis.com/rules/evaluation_count
-    id: cloud.gcp.firebasestorage_googleapis_com.rules.evaluation_count
+  - value: metric:firebasestorage.googleapis.com/rules/evaluation_count
+    key: cloud.gcp.firebasestorage_googleapis_com.rules.evaluation_count
     type: count,delta
     name: Rule evaluations
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.request_method
-    - value: metric.labels.ruleset_label
-    - value: metric.labels.result
-  - value: storage.googleapis.com/api/request_count
-    id: cloud.gcp.storage_googleapis_com.api.request_count
+    - value: label:metric.labels.request_method
+      key: request_method
+    - value: label:metric.labels.ruleset_label
+      key: ruleset_label
+    - value: label:metric.labels.result
+      key: result
+  - value: metric:storage.googleapis.com/api/request_count
+    key: cloud.gcp.storage_googleapis_com.api.request_count
     type: count,delta
     name: Request count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.response_code
-    - value: metric.labels.method
-  - value: storage.googleapis.com/authn/authentication_count
-    id: cloud.gcp.storage_googleapis_com.authn.authentication_count
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:storage.googleapis.com/authn/authentication_count
+    key: cloud.gcp.storage_googleapis_com.authn.authentication_count
     type: count,delta
     name: Authentication count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.authentication_method
-    - value: metric.labels.response_code
-    - value: metric.labels.method
-    - value: metric.labels.access_id
-  - value: storage.googleapis.com/authz/acl_based_object_access_count
-    id: cloud.gcp.storage_googleapis_com.authz.acl_based_object_access_count
+    - value: label:metric.labels.authentication_method
+      key: authentication_method
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.method
+      key: method
+    - value: label:metric.labels.access_id
+      key: access_id
+  - value: metric:storage.googleapis.com/authz/acl_based_object_access_count
+    key: cloud.gcp.storage_googleapis_com.authz.acl_based_object_access_count
     type: count,delta
     name: Object-ACL based access count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions: []
-  - value: storage.googleapis.com/authz/acl_operations_count
-    id: cloud.gcp.storage_googleapis_com.authz.acl_operations_count
+  - value: metric:storage.googleapis.com/authz/acl_operations_count
+    key: cloud.gcp.storage_googleapis_com.authz.acl_operations_count
     type: count,delta
     name: ACLs usage
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.acl_operation
-  - value: storage.googleapis.com/authz/object_specific_acl_mutation_count
-    id: cloud.gcp.storage_googleapis_com.authz.object_specific_acl_mutation_count
+    - value: label:metric.labels.acl_operation
+      key: acl_operation
+  - value: metric:storage.googleapis.com/authz/object_specific_acl_mutation_count
+    key: cloud.gcp.storage_googleapis_com.authz.object_specific_acl_mutation_count
     type: count,delta
     name: Object ACL changes
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions: []
-  - value: storage.googleapis.com/network/received_bytes_count
-    id: cloud.gcp.storage_googleapis_com.network.received_bytes_count
+  - value: metric:storage.googleapis.com/network/received_bytes_count
+    key: cloud.gcp.storage_googleapis_com.network.received_bytes_count
     type: count,delta
     name: Received bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
-    - value: metric.labels.response_code
-    - value: metric.labels.method
-  - value: storage.googleapis.com/network/sent_bytes_count
-    id: cloud.gcp.storage_googleapis_com.network.sent_bytes_count
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:storage.googleapis.com/network/sent_bytes_count
+    key: cloud.gcp.storage_googleapis_com.network.sent_bytes_count
     type: count,delta
     name: Sent bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
-    - value: metric.labels.response_code
-    - value: metric.labels.method
-  - value: storage.googleapis.com/storage/object_count
-    id: cloud.gcp.storage_googleapis_com.storage.object_count
+    - value: label:metric.labels.response_code
+      key: response_code
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:storage.googleapis.com/storage/object_count
+    key: cloud.gcp.storage_googleapis_com.storage.object_count
     type: gauge
     name: Object count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 600s
-      samplePeriod: 300s
+      ingestDelay: 600
+      samplePeriod: 300
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
-    - value: metric.labels.storage_class
-  - value: storage.googleapis.com/storage/total_byte_seconds
-    id: cloud.gcp.storage_googleapis_com.storage.total_byte_seconds
+    - value: label:metric.labels.storage_class
+      key: storage_class
+  - value: metric:storage.googleapis.com/storage/total_byte_seconds
+    key: cloud.gcp.storage_googleapis_com.storage.total_byte_seconds
     type: gauge
     name: Total byte seconds
-    unit: By.s
     gcpOptions:
-      ingestDelay: 600s
-      samplePeriod: 300s
+      ingestDelay: 600
+      samplePeriod: 300
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: By.s
     dimensions:
-    - value: metric.labels.storage_class
-  - value: storage.googleapis.com/storage/total_bytes
-    id: cloud.gcp.storage_googleapis_com.storage.total_bytes
+    - value: label:metric.labels.storage_class
+      key: storage_class
+  - value: metric:storage.googleapis.com/storage/total_bytes
+    key: cloud.gcp.storage_googleapis_com.storage.total_bytes
     type: gauge
     name: Total bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 600s
-      samplePeriod: 300s
+      ingestDelay: 600
+      samplePeriod: 300
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.storage_class
+    - value: label:metric.labels.storage_class
+      key: storage_class
 dashboards:
-  - dashboard: "dashboards/gcs_bucket.json"
+- dashboard: dashboards/gcs_bucket.json

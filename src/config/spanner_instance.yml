@@ -3,227 +3,254 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Spanner Instance
 gcp:
 - service: spanner_instance
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
-    id: project_id
+  - value: label:resource.labels.project_id
+    key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
-    id: gcp.project.id
-  - value: resource.labels.instance_id
-    id: instance_id
+  - value: label:resource.labels.project_id
+    key: gcp.project.id
+  - value: label:resource.labels.instance_id
+    key: instance_id
     compatibilityModeOnly: true
-  - value: resource.labels.instance_id
-    id: gcp.instance.id
-  - value: resource.labels.location
-    id: location
+  - value: label:resource.labels.instance_id
+    key: gcp.instance.id
+  - value: label:resource.labels.location
+    key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
-    id: gcp.region
-  - value: resource.labels.instance_config
-    id: instance_config
+  - value: label:resource.labels.location
+    key: gcp.region
+  - value: label:resource.labels.instance_config
+    key: instance_config
   metrics:
-  - value: spanner.googleapis.com/api/api_request_count
-    id: cloud.gcp.spanner_googleapis_com.api.api_request_count
+  - value: metric:spanner.googleapis.com/api/api_request_count
+    key: cloud.gcp.spanner_googleapis_com.api.api_request_count
     type: count,delta
     name: API requests
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.status
-    - value: metric.labels.method
-  - value: spanner.googleapis.com/api/received_bytes_count
-    id: cloud.gcp.spanner_googleapis_com.api.received_bytes_count
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:spanner.googleapis.com/api/received_bytes_count
+    key: cloud.gcp.spanner_googleapis_com.api.received_bytes_count
     type: count,delta
     name: Bytes received by Cloud Spanner.
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.method
-  - value: spanner.googleapis.com/api/request_count
-    id: cloud.gcp.spanner_googleapis_com.api.request_count
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:spanner.googleapis.com/api/request_count
+    key: cloud.gcp.spanner_googleapis_com.api.request_count
     type: gauge
     name: API request rate
-    unit: 1/s
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 1/s
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.status
-    - value: metric.labels.method
-  - value: spanner.googleapis.com/api/request_latencies
-    id: cloud.gcp.spanner_googleapis_com.api.request_latencies
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:spanner.googleapis.com/api/request_latencies
+    key: cloud.gcp.spanner_googleapis_com.api.request_latencies
     type: gauge
     name: Request latencies
-    unit: s
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: s
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.method
-  - value: spanner.googleapis.com/api/sent_bytes_count
-    id: cloud.gcp.spanner_googleapis_com.api.sent_bytes_count
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:spanner.googleapis.com/api/sent_bytes_count
+    key: cloud.gcp.spanner_googleapis_com.api.sent_bytes_count
     type: count,delta
     name: Bytes sent by Cloud Spanner.
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.method
-  - value: spanner.googleapis.com/instance/backup/used_bytes
-    id: cloud.gcp.spanner_googleapis_com.instance.backup.used_bytes
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.method
+      key: method
+  - value: metric:spanner.googleapis.com/instance/backup/used_bytes
+    key: cloud.gcp.spanner_googleapis_com.instance.backup.used_bytes
     type: gauge
     name: Backup storage used.
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.backup
-  - value: spanner.googleapis.com/instance/cpu/smoothed_utilization
-    id: cloud.gcp.spanner_googleapis_com.instance.cpu.smoothed_utilization
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.backup
+      key: backup
+  - value: metric:spanner.googleapis.com/instance/cpu/smoothed_utilization
+    key: cloud.gcp.spanner_googleapis_com.instance.cpu.smoothed_utilization
     type: gauge
     name: Smoothed CPU utilization
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions:
-    - value: metric.labels.database
-  - value: spanner.googleapis.com/instance/cpu/utilization
-    id: cloud.gcp.spanner_googleapis_com.instance.cpu.utilization
+    - value: label:metric.labels.database
+      key: database
+  - value: metric:spanner.googleapis.com/instance/cpu/utilization
+    key: cloud.gcp.spanner_googleapis_com.instance.cpu.utilization
     type: gauge
     name: CPU utilization
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions:
-    - value: metric.labels.database
-  - value: spanner.googleapis.com/instance/cpu/utilization_by_priority
-    id: cloud.gcp.spanner_googleapis_com.instance.cpu.utilization_by_priority
+    - value: label:metric.labels.database
+      key: database
+  - value: metric:spanner.googleapis.com/instance/cpu/utilization_by_priority
+    key: cloud.gcp.spanner_googleapis_com.instance.cpu.utilization_by_priority
     type: gauge
     name: CPU utilization by priority
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.is_system
-    - value: metric.labels.priority
-  - value: spanner.googleapis.com/instance/node_count
-    id: cloud.gcp.spanner_googleapis_com.instance.node_count
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.is_system
+      key: is_system
+    - value: label:metric.labels.priority
+      key: priority
+  - value: metric:spanner.googleapis.com/instance/node_count
+    key: cloud.gcp.spanner_googleapis_com.instance.node_count
     type: gauge
     name: Nodes
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
-  - value: spanner.googleapis.com/instance/session_count
-    id: cloud.gcp.spanner_googleapis_com.instance.session_count
+  - value: metric:spanner.googleapis.com/instance/session_count
+    key: cloud.gcp.spanner_googleapis_com.instance.session_count
     type: gauge
     name: Sessions
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
-    - value: metric.labels.database
-  - value: spanner.googleapis.com/instance/storage/limit_bytes
-    id: cloud.gcp.spanner_googleapis_com.instance.storage.limit_bytes
+    - value: label:metric.labels.database
+      key: database
+  - value: metric:spanner.googleapis.com/instance/storage/limit_bytes
+    key: cloud.gcp.spanner_googleapis_com.instance.storage.limit_bytes
     type: gauge
     name: Storage limit
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.storage_class
-  - value: spanner.googleapis.com/instance/storage/used_bytes
-    id: cloud.gcp.spanner_googleapis_com.instance.storage.used_bytes
+    - value: label:metric.labels.storage_class
+      key: storage_class
+  - value: metric:spanner.googleapis.com/instance/storage/used_bytes
+    key: cloud.gcp.spanner_googleapis_com.instance.storage.used_bytes
     type: gauge
     name: Storage used.
-    unit: By
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.storage_class
-  - value: spanner.googleapis.com/instance/storage/utilization
-    id: cloud.gcp.spanner_googleapis_com.instance.storage.utilization
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.storage_class
+      key: storage_class
+  - value: metric:spanner.googleapis.com/instance/storage/utilization
+    key: cloud.gcp.spanner_googleapis_com.instance.storage.utilization
     type: gauge
     name: Storage utilization
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions:
-    - value: metric.labels.storage_class
-  - value: spanner.googleapis.com/query_count
-    id: cloud.gcp.spanner_googleapis_com.query_count
+    - value: label:metric.labels.storage_class
+      key: storage_class
+  - value: metric:spanner.googleapis.com/query_count
+    key: cloud.gcp.spanner_googleapis_com.query_count
     type: count,delta
     name: Count of queries
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.database
-    - value: metric.labels.status
-    - value: metric.labels.query_type
-    - value: metric.labels.optimizer_version
+    - value: label:metric.labels.database
+      key: database
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.query_type
+      key: query_type
+    - value: label:metric.labels.optimizer_version
+      key: optimizer_version
 alerts:
-  - path: "alerts/spanner_instance/cpu.utilization.json"
-  - path: "alerts/spanner_instance/storage.utilization.json"
+- path: alerts/spanner_instance/cpu.utilization.json
+- path: alerts/spanner_instance/storage.utilization.json

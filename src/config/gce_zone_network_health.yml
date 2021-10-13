@@ -3,42 +3,46 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Zone Network Health
 gcp:
 - service: gce_zone_network_health
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
-    id: project_id
+  - value: label:resource.labels.project_id
+    key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
-    id: gcp.project.id
-  - value: resource.labels.zone
-    id: zone
+  - value: label:resource.labels.project_id
+    key: gcp.project.id
+  - value: label:resource.labels.zone
+    key: zone
     compatibilityModeOnly: true
-  - value: resource.labels.zone
-    id: gcp.region
-  - value: resource.labels.region
-    id: region
+  - value: label:resource.labels.zone
+    key: gcp.region
+  - value: label:resource.labels.region
+    key: region
   metrics:
-  - value: networking.googleapis.com/cloud_netslo/active_probing/probe_count
-    id: cloud.gcp.networking_googleapis_com.cloud_netslo.active_probing.probe_count
+  - value: metric:networking.googleapis.com/cloud_netslo/active_probing/probe_count
+    key: cloud.gcp.networking_googleapis_com.cloud_netslo.active_probing.probe_count
     type: count,delta
     name: Number of probes
-    unit: '1'
     gcpOptions:
-      ingestDelay: 420s
-      samplePeriod: 60s
+      ingestDelay: 420
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.remote_zone
-    - value: metric.labels.remote_region
-    - value: metric.labels.remote_location_type
-    - value: metric.labels.protocol
-    - value: metric.labels.result
+    - value: label:metric.labels.remote_zone
+      key: remote_zone
+    - value: label:metric.labels.remote_region
+      key: remote_region
+    - value: label:metric.labels.remote_location_type
+      key: remote_location_type
+    - value: label:metric.labels.protocol
+      key: protocol
+    - value: label:metric.labels.result
+      key: result

@@ -3,437 +3,465 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Dataflow Job
 gcp:
 - service: dataflow_job
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
-    id: project_id
+  - value: label:resource.labels.project_id
+    key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
-    id: gcp.project.id
-  - value: resource.labels.job_name
-    id: job_name
+  - value: label:resource.labels.project_id
+    key: gcp.project.id
+  - value: label:resource.labels.job_name
+    key: job_name
     compatibilityModeOnly: true
-  - value: resource.labels.job_name
-    id: gcp.instance.name
-  - value: resource.labels.region
-    id: region
+  - value: label:resource.labels.job_name
+    key: gcp.instance.name
+  - value: label:resource.labels.region
+    key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
-    id: gcp.region
+  - value: label:resource.labels.region
+    key: gcp.region
   metrics:
-  - value: dataflow.googleapis.com/job/billable_shuffle_data_processed
-    id: cloud.gcp.dataflow_googleapis_com.job.billable_shuffle_data_processed
+  - value: metric:dataflow.googleapis.com/job/billable_shuffle_data_processed
+    key: cloud.gcp.dataflow_googleapis_com.job.billable_shuffle_data_processed
     type: gauge
     name: Billable shuffle data processed
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/current_num_vcpus
-    id: cloud.gcp.dataflow_googleapis_com.job.current_num_vcpus
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/current_num_vcpus
+    key: cloud.gcp.dataflow_googleapis_com.job.current_num_vcpus
     type: gauge
     name: Current number of vCPUs in use
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/current_shuffle_slots
-    id: cloud.gcp.dataflow_googleapis_com.job.current_shuffle_slots
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/current_shuffle_slots
+    key: cloud.gcp.dataflow_googleapis_com.job.current_shuffle_slots
     type: gauge
     name: Current shuffle slots in use
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/data_watermark_age
-    id: cloud.gcp.dataflow_googleapis_com.job.data_watermark_age
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/data_watermark_age
+    key: cloud.gcp.dataflow_googleapis_com.job.data_watermark_age
     type: gauge
     name: Data watermark lag
-    unit: s
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: s
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/elapsed_time
-    id: cloud.gcp.dataflow_googleapis_com.job.elapsed_time
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/elapsed_time
+    key: cloud.gcp.dataflow_googleapis_com.job.elapsed_time
     type: gauge
     name: Elapsed time
-    unit: s
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: s
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/element_count
-    id: cloud.gcp.dataflow_googleapis_com.job.element_count
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/element_count
+    key: cloud.gcp.dataflow_googleapis_com.job.element_count
     type: gauge
     name: Element count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.pcollection
-  - value: dataflow.googleapis.com/job/elements_produced_count
-    id: cloud.gcp.dataflow_googleapis_com.job.elements_produced_count
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.pcollection
+      key: pcollection
+  - value: metric:dataflow.googleapis.com/job/elements_produced_count
+    key: cloud.gcp.dataflow_googleapis_com.job.elements_produced_count
     type: count,delta
     name: Elements Produced
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.pcollection
-    - value: metric.labels.ptransform
-  - value: dataflow.googleapis.com/job/estimated_byte_count
-    id: cloud.gcp.dataflow_googleapis_com.job.estimated_byte_count
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.pcollection
+      key: pcollection
+    - value: label:metric.labels.ptransform
+      key: ptransform
+  - value: metric:dataflow.googleapis.com/job/estimated_byte_count
+    key: cloud.gcp.dataflow_googleapis_com.job.estimated_byte_count
     type: gauge
     name: Estimated byte count
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.pcollection
-  - value: dataflow.googleapis.com/job/estimated_bytes_produced_count
-    id: cloud.gcp.dataflow_googleapis_com.job.estimated_bytes_produced_count
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.pcollection
+      key: pcollection
+  - value: metric:dataflow.googleapis.com/job/estimated_bytes_produced_count
+    key: cloud.gcp.dataflow_googleapis_com.job.estimated_bytes_produced_count
     type: count,delta
     name: Estimated Bytes Produced
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.pcollection
-    - value: metric.labels.ptransform
-  - value: dataflow.googleapis.com/job/is_failed
-    id: cloud.gcp.dataflow_googleapis_com.job.is_failed
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.pcollection
+      key: pcollection
+    - value: label:metric.labels.ptransform
+      key: ptransform
+  - value: metric:dataflow.googleapis.com/job/is_failed
+    key: cloud.gcp.dataflow_googleapis_com.job.is_failed
     type: gauge
     name: Failed
-    unit: '1'
     gcpOptions:
-      ingestDelay: 60s
-      samplePeriod: 60s
+      ingestDelay: 60
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
-  - value: dataflow.googleapis.com/job/per_stage_data_watermark_age
-    id: cloud.gcp.dataflow_googleapis_com.job.per_stage_data_watermark_age
+  - value: metric:dataflow.googleapis.com/job/per_stage_data_watermark_age
+    key: cloud.gcp.dataflow_googleapis_com.job.per_stage_data_watermark_age
     type: gauge
     name: Per-stage data watermark lag
-    unit: s
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: s
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.stage
-  - value: dataflow.googleapis.com/job/per_stage_system_lag
-    id: cloud.gcp.dataflow_googleapis_com.job.per_stage_system_lag
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.stage
+      key: stage
+  - value: metric:dataflow.googleapis.com/job/per_stage_system_lag
+    key: cloud.gcp.dataflow_googleapis_com.job.per_stage_system_lag
     type: gauge
     name: Per-stage system lag
-    unit: s
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: s
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.stage
-  - value: dataflow.googleapis.com/job/pubsub/read_count
-    id: cloud.gcp.dataflow_googleapis_com.job.pubsub.read_count
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.stage
+      key: stage
+  - value: metric:dataflow.googleapis.com/job/pubsub/read_count
+    key: cloud.gcp.dataflow_googleapis_com.job.pubsub.read_count
     type: count,delta
     name: PubsubIO.Read requests from Dataflow jobs
-    unit: '1'
     gcpOptions:
-      ingestDelay: 60s
-      samplePeriod: 60s
+      ingestDelay: 60
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.status
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.ptransform
-    - value: metric.labels.subscription_project_id
-    - value: metric.labels.subscription_id
-    - value: metric.labels.topic_project_id
-    - value: metric.labels.topic_id
-  - value: dataflow.googleapis.com/job/pubsub/read_latencies
-    id: cloud.gcp.dataflow_googleapis_com.job.pubsub.read_latencies
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.ptransform
+      key: ptransform
+    - value: label:metric.labels.subscription_project_id
+      key: subscription_project_id
+    - value: label:metric.labels.subscription_id
+      key: subscription_id
+    - value: label:metric.labels.topic_project_id
+      key: topic_project_id
+    - value: label:metric.labels.topic_id
+      key: topic_id
+  - value: metric:dataflow.googleapis.com/job/pubsub/read_latencies
+    key: cloud.gcp.dataflow_googleapis_com.job.pubsub.read_latencies
     type: gauge
     name: Pub/Sub Pull Request Latencies
-    unit: ms
     gcpOptions:
-      ingestDelay: 60s
-      samplePeriod: 60s
+      ingestDelay: 60
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: ms
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.ptransform
-    - value: metric.labels.subscription_project_id
-    - value: metric.labels.subscription_id
-    - value: metric.labels.topic_project_id
-    - value: metric.labels.topic_id
-  - value: dataflow.googleapis.com/job/pubsub/write_count
-    id: cloud.gcp.dataflow_googleapis_com.job.pubsub.write_count
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.ptransform
+      key: ptransform
+    - value: label:metric.labels.subscription_project_id
+      key: subscription_project_id
+    - value: label:metric.labels.subscription_id
+      key: subscription_id
+    - value: label:metric.labels.topic_project_id
+      key: topic_project_id
+    - value: label:metric.labels.topic_id
+      key: topic_id
+  - value: metric:dataflow.googleapis.com/job/pubsub/write_count
+    key: cloud.gcp.dataflow_googleapis_com.job.pubsub.write_count
     type: count,delta
     name: Pub/Sub Publish Requests
-    unit: '1'
     gcpOptions:
-      ingestDelay: 60s
-      samplePeriod: 60s
+      ingestDelay: 60
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.status
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.ptransform
-    - value: metric.labels.topic_project_id
-    - value: metric.labels.topic_id
-  - value: dataflow.googleapis.com/job/pubsub/write_latencies
-    id: cloud.gcp.dataflow_googleapis_com.job.pubsub.write_latencies
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.ptransform
+      key: ptransform
+    - value: label:metric.labels.topic_project_id
+      key: topic_project_id
+    - value: label:metric.labels.topic_id
+      key: topic_id
+  - value: metric:dataflow.googleapis.com/job/pubsub/write_latencies
+    key: cloud.gcp.dataflow_googleapis_com.job.pubsub.write_latencies
     type: gauge
     name: Pub/Sub Publish Request Latencies
-    unit: ms
     gcpOptions:
-      ingestDelay: 60s
-      samplePeriod: 60s
+      ingestDelay: 60
+      samplePeriod: 60
       valueType: DISTRIBUTION
       metricKind: DELTA
+      unit: ms
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.ptransform
-    - value: metric.labels.topic_project_id
-    - value: metric.labels.topic_id
-  - value: dataflow.googleapis.com/job/status
-    id: cloud.gcp.dataflow_googleapis_com.job.status
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.ptransform
+      key: ptransform
+    - value: label:metric.labels.topic_project_id
+      key: topic_project_id
+    - value: label:metric.labels.topic_id
+      key: topic_id
+  - value: metric:dataflow.googleapis.com/job/status
+    key: cloud.gcp.dataflow_googleapis_com.job.status
     type: gauge
     name: Status
-    unit: ''
     gcpOptions:
-      ingestDelay: 60s
-      samplePeriod: 60s
+      ingestDelay: 60
+      samplePeriod: 60
       valueType: STRING
       metricKind: GAUGE
+      unit: ''
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/system_lag
-    id: cloud.gcp.dataflow_googleapis_com.job.system_lag
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/system_lag
+    key: cloud.gcp.dataflow_googleapis_com.job.system_lag
     type: gauge
     name: System lag
-    unit: s
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: s
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/total_memory_usage_time
-    id: cloud.gcp.dataflow_googleapis_com.job.total_memory_usage_time
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/total_memory_usage_time
+    key: cloud.gcp.dataflow_googleapis_com.job.total_memory_usage_time
     type: gauge
     name: Total memory usage time
-    unit: GBy.s
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: GBy.s
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/total_pd_usage_time
-    id: cloud.gcp.dataflow_googleapis_com.job.total_pd_usage_time
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/total_pd_usage_time
+    key: cloud.gcp.dataflow_googleapis_com.job.total_pd_usage_time
     type: gauge
     name: Total PD usage time
-    unit: GBy.s
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: GBy.s
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.storage_type
-  - value: dataflow.googleapis.com/job/total_shuffle_data_processed
-    id: cloud.gcp.dataflow_googleapis_com.job.total_shuffle_data_processed
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.storage_type
+      key: storage_type
+  - value: metric:dataflow.googleapis.com/job/total_shuffle_data_processed
+    key: cloud.gcp.dataflow_googleapis_com.job.total_shuffle_data_processed
     type: gauge
     name: Total shuffle data processed
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/total_streaming_data_processed
-    id: cloud.gcp.dataflow_googleapis_com.job.total_streaming_data_processed
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/total_streaming_data_processed
+    key: cloud.gcp.dataflow_googleapis_com.job.total_streaming_data_processed
     type: gauge
     name: Total streaming data processed
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/total_vcpu_time
-    id: cloud.gcp.dataflow_googleapis_com.job.total_vcpu_time
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/total_vcpu_time
+    key: cloud.gcp.dataflow_googleapis_com.job.total_vcpu_time
     type: gauge
     name: Total vCPU time
-    unit: s
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: s
     dimensions:
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-  - value: dataflow.googleapis.com/job/user_counter
-    id: cloud.gcp.dataflow_googleapis_com.job.user_counter
+    - value: label:metric.labels.job_id
+      key: job_id
+  - value: metric:dataflow.googleapis.com/job/user_counter
+    key: cloud.gcp.dataflow_googleapis_com.job.user_counter
     type: gauge
     name: User Counter
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions:
-    - value: metric.labels.metric_name
-    - value: metric.labels.job_id
-      id: job_id
+    - value: label:metric.labels.metric_name
+      key: metric_name
+    - value: label:metric.labels.job_id
+      key: job_id
       compatibilityModeOnly: true
-    - value: metric.labels.job_id
-      id: gcp.instance.id
-    - value: metric.labels.ptransform
+    - value: label:metric.labels.job_id
+      key: job_id
+    - value: label:metric.labels.ptransform
+      key: ptransform

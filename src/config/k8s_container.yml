@@ -3,222 +3,224 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Kubernetes Container
 gcp:
 - service: k8s_container
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
-    id: project_id
+  - value: label:resource.labels.project_id
+    key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
-    id: gcp.project.id
-  - value: resource.labels.location
-    id: location
+  - value: label:resource.labels.project_id
+    key: gcp.project.id
+  - value: label:resource.labels.location
+    key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
-    id: gcp.region
-  - value: resource.labels.cluster_name
-    id: cluster_name
-  - value: resource.labels.namespace_name
-    id: namespace_name
-  - value: resource.labels.pod_name
-    id: pod_name
-  - value: resource.labels.container_name
-    id: container_name
+  - value: label:resource.labels.location
+    key: gcp.region
+  - value: label:resource.labels.cluster_name
+    key: cluster_name
+  - value: label:resource.labels.namespace_name
+    key: namespace_name
+  - value: label:resource.labels.pod_name
+    key: pod_name
+  - value: label:resource.labels.container_name
+    key: container_name
     compatibilityModeOnly: false
-  - value: resource.labels.container_name
-    id: gcp.instance.name
-  - value: metadata.system_labels.node_name
-    id: node_name
-  - value: metadata.system_labels.state 
-    id: state
-  metrics: 
-  - value: kubernetes.io/container/cpu/core_usage_time
-    id: cloud.gcp.kubernetes_io.container.cpu.core_usage_time
+  - value: label:resource.labels.container_name
+    key: gcp.instance.name
+  - value: label:metadata.system_labels.node_name
+    key: node_name
+  - value: label:metadata.system_labels.state
+    key: state
+  metrics:
+  - value: metric:kubernetes.io/container/cpu/core_usage_time
+    key: cloud.gcp.kubernetes_io.container.cpu.core_usage_time
     type: count,delta
     name: CPU usage time
-    unit: s{CPU}
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: CUMULATIVE
+      unit: s{CPU}
     dimensions: []
-  - value: kubernetes.io/container/cpu/limit_cores
-    id: cloud.gcp.kubernetes_io.container.cpu.limit_cores
+  - value: metric:kubernetes.io/container/cpu/limit_cores
+    key: cloud.gcp.kubernetes_io.container.cpu.limit_cores
     type: gauge
     name: Limit cores
-    unit: '{cpu}'
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '{cpu}'
     dimensions: []
-  - value: kubernetes.io/container/cpu/limit_utilization
-    id: cloud.gcp.kubernetes_io.container.cpu.limit_utilization
+  - value: metric:kubernetes.io/container/cpu/limit_utilization
+    key: cloud.gcp.kubernetes_io.container.cpu.limit_utilization
     type: gauge
     name: CPU limit utilization
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
-  - value: kubernetes.io/container/cpu/request_cores
-    id: cloud.gcp.kubernetes_io.container.cpu.request_cores
+  - value: metric:kubernetes.io/container/cpu/request_cores
+    key: cloud.gcp.kubernetes_io.container.cpu.request_cores
     type: gauge
     name: Request cores
-    unit: '{cpu}'
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '{cpu}'
     dimensions: []
-  - value: kubernetes.io/container/cpu/request_utilization
-    id: cloud.gcp.kubernetes_io.container.cpu.request_utilization
+  - value: metric:kubernetes.io/container/cpu/request_utilization
+    key: cloud.gcp.kubernetes_io.container.cpu.request_utilization
     type: gauge
     name: CPU request utilization
-    unit: '1'
     gcpOptions:
-      ingestDelay: 240s
-      samplePeriod: 60s
+      ingestDelay: 240
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions: []
-  - value: kubernetes.io/container/ephemeral_storage/limit_bytes
-    id: cloud.gcp.kubernetes_io.container.ephemeral_storage.limit_bytes
+  - value: metric:kubernetes.io/container/ephemeral_storage/limit_bytes
+    key: cloud.gcp.kubernetes_io.container.ephemeral_storage.limit_bytes
     type: gauge
     name: Ephemeral storage limit
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
-  - value: kubernetes.io/container/ephemeral_storage/request_bytes
-    id: cloud.gcp.kubernetes_io.container.ephemeral_storage.request_bytes
+  - value: metric:kubernetes.io/container/ephemeral_storage/request_bytes
+    key: cloud.gcp.kubernetes_io.container.ephemeral_storage.request_bytes
     type: gauge
     name: Ephemeral storage request
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
-  - value: kubernetes.io/container/ephemeral_storage/used_bytes
-    id: cloud.gcp.kubernetes_io.container.ephemeral_storage.used_bytes
+  - value: metric:kubernetes.io/container/ephemeral_storage/used_bytes
+    key: cloud.gcp.kubernetes_io.container.ephemeral_storage.used_bytes
     type: gauge
     name: Ephemeral storage usage
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
-  - value: kubernetes.io/container/memory/limit_bytes
-    id: cloud.gcp.kubernetes_io.container.memory.limit_bytes
+  - value: metric:kubernetes.io/container/memory/limit_bytes
+    key: cloud.gcp.kubernetes_io.container.memory.limit_bytes
     type: gauge
     name: Memory limit
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
-  - value: kubernetes.io/container/memory/limit_utilization
-    id: cloud.gcp.kubernetes_io.container.memory.limit_utilization
+  - value: metric:kubernetes.io/container/memory/limit_utilization
+    key: cloud.gcp.kubernetes_io.container.memory.limit_utilization
     type: gauge
     name: Memory limit utilization
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions:
-    - value: metric.labels.memory_type
-  - value: kubernetes.io/container/memory/page_fault_count
-    id: cloud.gcp.kubernetes_io.container.memory.page_fault_count
+    - value: label:metric.labels.memory_type
+      key: memory_type
+  - value: metric:kubernetes.io/container/memory/page_fault_count
+    key: cloud.gcp.kubernetes_io.container.memory.page_fault_count
     type: count,delta
     name: Page faults
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: '1'
     dimensions:
-    - value: metric.labels.fault_type
-  - value: kubernetes.io/container/memory/request_bytes
-    id: cloud.gcp.kubernetes_io.container.memory.request_bytes
+    - value: label:metric.labels.fault_type
+      key: fault_type
+  - value: metric:kubernetes.io/container/memory/request_bytes
+    key: cloud.gcp.kubernetes_io.container.memory.request_bytes
     type: gauge
     name: Memory request
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions: []
-  - value: kubernetes.io/container/memory/request_utilization
-    id: cloud.gcp.kubernetes_io.container.memory.request_utilization
+  - value: metric:kubernetes.io/container/memory/request_utilization
+    key: cloud.gcp.kubernetes_io.container.memory.request_utilization
     type: gauge
     name: Memory request utilization
-    unit: '1'
     gcpOptions:
-      ingestDelay: 120s
-      samplePeriod: 60s
+      ingestDelay: 120
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: '1'
     dimensions:
-    - value: metric.labels.memory_type
-  - value: kubernetes.io/container/memory/used_bytes
-    id: cloud.gcp.kubernetes_io.container.memory.used_bytes
+    - value: label:metric.labels.memory_type
+      key: memory_type
+  - value: metric:kubernetes.io/container/memory/used_bytes
+    key: cloud.gcp.kubernetes_io.container.memory.used_bytes
     type: gauge
     name: Memory usage
-    unit: By
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: GAUGE
+      unit: By
     dimensions:
-    - value: metric.labels.memory_type
-  - value: kubernetes.io/container/restart_count
-    id: cloud.gcp.kubernetes_io.container.restart_count
+    - value: label:metric.labels.memory_type
+      key: memory_type
+  - value: metric:kubernetes.io/container/restart_count
+    key: cloud.gcp.kubernetes_io.container.restart_count
     type: count,delta
     name: Restart count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: '1'
     dimensions: []
-  - value: kubernetes.io/container/uptime
-    id: cloud.gcp.kubernetes_io.container.uptime
+  - value: metric:kubernetes.io/container/uptime
+    key: cloud.gcp.kubernetes_io.container.uptime
     type: gauge
     name: Uptime
-    unit: s
     gcpOptions:
-      ingestDelay: 0s
-      samplePeriod: 60s
+      ingestDelay: 0
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: s
     dimensions: []
 dashboards:
-  - dashboard: "dashboards/k8s.json"
-
+- dashboard: dashboards/k8s.json

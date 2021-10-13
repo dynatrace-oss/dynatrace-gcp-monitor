@@ -114,19 +114,19 @@ gcpServicesYaml: |
       vars:
         filter_conditions: ""
     # Google Apigee Environment
-    #- service: apigee.googleapis.com/Environment
+    #- service: apigee.googleapis.com_Environment
     #  featureSets:
     #    - default
     #  vars:
     #    filter_conditions: ""
     # Google Apigee Proxy
-    #- service: apigee.googleapis.com/Proxy
+    #- service: apigee.googleapis.com_Proxy
     #  featureSets:
     #    - default
     #  vars:
     #    filter_conditions: ""
     # Google Apigee Proxy (v2)
-    #- service: apigee.googleapis.com/ProxyV2
+    #- service: apigee.googleapis.com_ProxyV2
     #  featureSets:
     #    - default
     #  vars:
@@ -192,13 +192,13 @@ gcpServicesYaml: |
       vars:
         filter_conditions: ""
     # Google Cloud Trace
-    #- service: cloudtrace.googleapis.com/CloudtraceProject
+    #- service: cloudtrace.googleapis.com_CloudtraceProject
     #  featureSets:
     #    - default
     #  vars:
     #    filter_conditions: ""
     # Google NetApp CVS-SO
-    #- service: cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO
+    #- service: cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO
     #  featureSets:
     #    - default
     #  vars:
