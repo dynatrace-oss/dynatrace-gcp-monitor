@@ -520,8 +520,11 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" ]]; then
     EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
     curl -k -s -X GET "${DYNATRACE_URL}api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
-      find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
-      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
+      check_gcp_config_in_extension "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+      if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ]; then
+        find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+        mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
+      fi
     fi
   done
 fi
