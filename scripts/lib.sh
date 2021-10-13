@@ -270,4 +270,6 @@ upload_correct_extension_to_dynatrace() {
     rm "$EXTENSION_FILE_NAME".yaml
     rm "$EXTENSION_ZIP"
   done
+
+  cd ../ || exit
 }
