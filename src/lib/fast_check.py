@@ -60,6 +60,7 @@ REQUIRED_SERVICES = [
 
 DYNATRACE_REQUIRED_TOKEN_SCOPES = [
     'metrics.ingest',
+    'extensions.read'
 ]
 
 FastCheckResult = NamedTuple('FastCheckResult', [('projects', List[str])])
