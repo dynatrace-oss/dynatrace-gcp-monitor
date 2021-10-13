@@ -40,6 +40,59 @@ versionNumber() {
    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
 }
 
+test_req_yq() {
+  if ! command -v yq &> /dev/null
+  then
+      err 'yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
+      YQ: https://github.com/mikefarah/yq'
+      if ! command -v jq &> /dev/null
+      then
+          echo -e "JQ: https://stedolan.github.io/jq/download/"
+      fi
+      err 'You may also try installing YQ with PIP: pip install yq'
+      exit 1
+  else
+    VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
+
+    if [ "$VERSION_YQ" == "version" ]; then
+      VERSION_YQ=$(yq --version | cut -d' ' -f4 | tr -d '"')
+    fi
+
+    echo "Using yq version $VERSION_YQ"
+
+    if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.0.0')" ]; then
+        err 'yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
+        YQ: https://github.com/mikefarah/yq'
+        exit 1
+    fi
+  fi
+}
+
+test_req_gcloud() {
+  if ! command -v gcloud &> /dev/null
+  then
+      err 'Google Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:
+      https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version'
+      exit
+  fi
+}
+
+test_req_kubectl() {
+  if ! command -v kubectl &>/dev/null; then
+    err 'Kubernetes CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install kubectl in the most convenient way to you:
+    https://kubernetes.io/docs/tasks/tools/'
+    exit
+  fi
+}
+
+test_req_helm() {
+  if ! command -v helm &>/dev/null; then
+    err 'Helm is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install Helm in the most convenient way to you:
+    https://helm.sh/docs/intro/install/'
+    exit
+  fi
+}
+
 dt_api()
 {
   URL=$1

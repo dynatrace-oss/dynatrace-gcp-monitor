@@ -87,32 +87,11 @@ arguments:
     "
 }
 
-if ! command -v gcloud &>/dev/null; then
-
-  err "Google Cloud CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and download latest version of Cloud SDK:"
-  echo -e "https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version"
-  echo -e
-  echo
-  exit
-fi
-
-if ! command -v kubectl &>/dev/null; then
-
-  err "Kubernetes CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install kubectl in the most convenient way to you:"
-  echo -e "https://kubernetes.io/docs/tasks/tools/"
-  echo -e
-  echo
-  exit
-fi
-
-if ! command -v helm &>/dev/null; then
-
-  err "Helm is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install Helm in the most convenient way to you:"
-  echo -e "https://helm.sh/docs/intro/install/"
-  echo -e
-  echo
-  exit
-fi
+# test pre-requirements
+test_req_yq
+test_req_gcloud
+test_req_kubectl
+test_req_helm
 
 CMD_OUT_PIPE="/dev/stdout"
 AUTOPILOT_CLUSTER_NAME="dynatrace-gcp-function"
