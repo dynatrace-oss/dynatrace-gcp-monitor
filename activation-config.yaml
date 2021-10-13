@@ -33,10 +33,6 @@ googleCloud:
     # Set the proxy addresses. To be used in conjunction with USE_PROXY.
     httpProxy: ""
     httpsProxy: ""
-    # Import predefined dashboards for selected services. Allowed values: true/yes, false/no
-    importDashboards: true
-    # Import predefined alerts for selected services. Allowed values: true/yes, false/no
-    importAlerts: true
     # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly.
     # Allowed values: true/yes, false/no
     selfMonitoringEnabled: false
@@ -49,11 +45,11 @@ googleCloud:
     scheduler: dynatrace-gcp-schedule
     # dynatrace-gcp-function execution interval in minutes (1 - 6)
     queryInterval: 3
-      # Compatibility mode - concerns the change in reported dimension names. Allowed values: "true"/"yes", "false"/"no".
-      # Should be false for all new setups. Meant to allow a gradual transition for setups that already have historical metrics data.
-      # If true, report deprecated metric dimensions (flagged as compatiblityModeOnly=true) along with their new equivalents:
-      # project_id > gcp.project.id | region, location, zone, metrics.label.region > gcp.region
-      compatibilityMode: false
+    # Compatibility mode - concerns the change in reported dimension names. Allowed values: "true"/"yes", "false"/"no".
+    # Should be false for all new setups. Meant to allow a gradual transition for setups that already have historical metrics data.
+    # If true, report deprecated metric dimensions (flagged as compatiblityModeOnly=true) along with their new equivalents:
+    # project_id > gcp.project.id | region, location, zone, metrics.label.region > gcp.region
+    compatibilityMode: false
 activation:
   metrics:
     # List of services to forward Google Monitoring Metrics to Dynatrace
