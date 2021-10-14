@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 #     Copyright 2020 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@ trap onFailure ERR
 
 
 versionNumber() {
-   echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; 
+   echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
 }
 
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring"
@@ -46,7 +46,7 @@ then
 else
   VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
   echo "Using yq version $VERSION_YQ"
-  
+
 
   if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
       echo -e
@@ -55,7 +55,7 @@ else
       echo -e
       exit 1
   fi
-fi  
+fi
 
 
 if ! command -v gcloud &> /dev/null
@@ -253,20 +253,21 @@ if [ "$INSTALL" == true ]; then
       exit 1
       ;;
   esac
+fi
 
-  echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
-  while ! [[ "${DYNATRACE_URL}" =~ ^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/)(e\/[a-z0-9-]{36}\/)?$ ]]; do
-      read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
-  done
-  echo ""
+echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
+while ! [[ "${DYNATRACE_URL}" =~ ^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/)(e\/[a-z0-9-]{36}\/)?$ ]]; do
+  read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
+done
+echo ""
 
-  echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'API v2 Ingest metrics', 'API v1 Read configuration' and 'WriteConfig' scope"
-  while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
-      read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
-  done
-  echo ""
+echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API). The token requires grant of 'API v2 Ingest metrics', 'API v1 Read configuration' and 'WriteConfig' scope"
+while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
+  read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
+done
+echo ""
 
-
+if [ "$INSTALL" == true ]; then
   echo -e
   echo "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com]"
   gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com
@@ -318,7 +319,6 @@ if [ "$INSTALL" == true ]; then
       gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
       gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer
   fi
-
 fi
 
 echo -e
