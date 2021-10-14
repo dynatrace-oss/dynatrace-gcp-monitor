@@ -22,8 +22,8 @@ class ExtensionsFetcher:
     async def execute(self) -> ExtensionsFetchResult:
         extension_name_to_version_dict = await self._get_extensions_dict_from_dynatrace_cluster()
         services = []
-        for extension_name in extension_name_to_version_dict.keys():
-            services_for_extension = await self._get_service_configs_for_extension(extension_name, extension_name_to_version_dict[extension_name])
+        for extension_name, extension_version in extension_name_to_version_dict.items():
+            services_for_extension = await self._get_service_configs_for_extension(extension_name, extension_version)
             services.extend(services_for_extension)
         configured_services = self._filter_out_not_configured_services(services) if services else []
         return ExtensionsFetchResult(services=configured_services)
