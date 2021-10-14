@@ -3,105 +3,108 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Data Loss Prevention Project
 gcp:
 - service: cloud_dlp_project
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
-    id: project_id
+  - value: label:resource.labels.project_id
+    key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
-    id: gcp.project.id
-  - value: resource.labels.location
-    id: location
+  - value: label:resource.labels.project_id
+    key: gcp.project.id
+  - value: label:resource.labels.location
+    key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
-    id: gcp.region
+  - value: label:resource.labels.location
+    key: gcp.region
   metrics:
-  - value: dlp.googleapis.com/content_bytes_inspected_count
-    id: cloud.gcp.dlp_googleapis_com.content_bytes_inspected_count
+  - value: metric:dlp.googleapis.com/content_bytes_inspected_count
+    key: cloud.gcp.dlp_googleapis_com.content_bytes_inspected_count
     type: count,delta
     name: Content bytes inspected
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
-  - value: dlp.googleapis.com/content_bytes_transformed_count
-    id: cloud.gcp.dlp_googleapis_com.content_bytes_transformed_count
+  - value: metric:dlp.googleapis.com/content_bytes_transformed_count
+    key: cloud.gcp.dlp_googleapis_com.content_bytes_transformed_count
     type: count,delta
     name: Content bytes transformed
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
-  - value: dlp.googleapis.com/finding_count
-    id: cloud.gcp.dlp_googleapis_com.finding_count
+  - value: metric:dlp.googleapis.com/finding_count
+    key: cloud.gcp.dlp_googleapis_com.finding_count
     type: count,delta
     name: Findings
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.info_type
-  - value: dlp.googleapis.com/job_result_count
-    id: cloud.gcp.dlp_googleapis_com.job_result_count
+    - value: label:metric.labels.info_type
+      key: info_type
+  - value: metric:dlp.googleapis.com/job_result_count
+    key: cloud.gcp.dlp_googleapis_com.job_result_count
     type: count,delta
     name: Job results
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.success
-  - value: dlp.googleapis.com/job_trigger_run_count
-    id: cloud.gcp.dlp_googleapis_com.job_trigger_run_count
+    - value: label:metric.labels.success
+      key: success
+  - value: metric:dlp.googleapis.com/job_trigger_run_count
+    key: cloud.gcp.dlp_googleapis_com.job_trigger_run_count
     type: count,delta
     name: Job trigger runs
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.status
-    - value: metric.labels.job_type
-  - value: dlp.googleapis.com/storage_bytes_inspected_count
-    id: cloud.gcp.dlp_googleapis_com.storage_bytes_inspected_count
+    - value: label:metric.labels.status
+      key: status
+    - value: label:metric.labels.job_type
+      key: job_type
+  - value: metric:dlp.googleapis.com/storage_bytes_inspected_count
+    key: cloud.gcp.dlp_googleapis_com.storage_bytes_inspected_count
     type: count,delta
     name: Storage bytes inspected
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []
-  - value: dlp.googleapis.com/storage_bytes_transformed_count
-    id: cloud.gcp.dlp_googleapis_com.storage_bytes_transformed_count
+  - value: metric:dlp.googleapis.com/storage_bytes_transformed_count
+    key: cloud.gcp.dlp_googleapis_com.storage_bytes_transformed_count
     type: count,delta
     name: Storage bytes transformed
-    unit: By
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions: []

@@ -103,6 +103,11 @@ while (( "$#" )); do
                 shift
             ;;
 
+            "--s3-url")
+                EXTENSION_S3_URL=$2
+                shift; shift
+            ;;
+
             "-h" | "--help")
                 print_help
                 exit 0
@@ -119,8 +124,13 @@ readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos
 readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
-readonly EXTENSION_S3_URL=https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
+
+if [ -z "$EXTENSION_S3_URL" ]; then
+  EXTENSION_S3_URL="https://dynatrace-gcp-extensions.s3.amazonaws.com"
+else
+  warn "Development mode on: custom S3 url link."
+fi
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
@@ -138,14 +148,13 @@ readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecre
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly FUNCTION_GCP_SERVICES=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq 'join(",")')
 readonly SERVICES_TO_ACTIVATE=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[] | sed 's/\/.*$//')
+SERVICES_FROM_ACTIVATION_CONFIG=($(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[] ))
 readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
 readonly USE_PROXY=$(yq e '.googleCloud.common.useProxy' $FUNCTION_ACTIVATION_CONFIG)
 readonly HTTP_PROXY=$(yq e '.googleCloud.common.httpProxy' $FUNCTION_ACTIVATION_CONFIG)
 readonly HTTPS_PROXY=$(yq e '.googleCloud.common.httpsProxy' $FUNCTION_ACTIVATION_CONFIG)
-readonly IMPORT_DASHBOARDS=$(yq e '.googleCloud.common.importDashboards' $FUNCTION_ACTIVATION_CONFIG)
-readonly IMPORT_ALERTS=$(yq e '.googleCloud.common.importAlerts' $FUNCTION_ACTIVATION_CONFIG)
 readonly COMPATIBILITY_MODE=$(yq e '.googleCloud.common.compatibilityMode' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_IAM_ROLE=$(yq e '.googleCloud.common.iamRole' $FUNCTION_ACTIVATION_CONFIG)
 # Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
@@ -187,7 +196,6 @@ dt_api()
       return 255
     fi
   fi
-
 }
 
 get_ext_files() {
@@ -212,9 +220,14 @@ get_ext_files() {
 
 get_extensions_zip_packages() {
   curl -s -O $EXTENSION_S3_URL/$EXTENSION_MANIFEST_FILE
-  mkdir -p ./extensions
+  EXTENSIONS_LIST=$(grep "^google.*\.zip" < "$EXTENSION_MANIFEST_FILE" 2>/dev/null)
+  if [ -z "$EXTENSIONS_LIST" ]; then
+    err "Empty extensions manifest file downloaded"
+    exit 1
+  fi
 
-  grep -v '^ *#' < "$EXTENSION_MANIFEST_FILE" | while IFS= read -r EXTENSION_FILE_NAME
+  mkdir -p ./extensions
+  echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME
   do
     (cd ./extensions && curl -s -O "$EXTENSION_S3_URL/$EXTENSION_FILE_NAME")
   done
@@ -226,17 +239,16 @@ upload_extension_to_cluster() {
   EXTENSION_ZIP=$3
   EXTENSION_VERSION=$4
 
-  UPLOAD_RESPONSE=$(curl -s -k -X POST "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@extensions/$EXTENSION_ZIP;type=application/zip")
+  UPLOAD_RESPONSE=$(curl -s -k -X POST "${DYNATRACE_URL}api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: multipart/form-data" -F "file=@$EXTENSION_ZIP;type=application/zip")
   CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$UPLOAD_RESPONSE")
-  if [ "$CODE" -gt "310" ]; then
+
+  if [[ "$CODE" -ge "400" ]]; then
     warn "- Extension $EXTENSION_ZIP upload failed with error code: $CODE"
   else
     UPLOADED_EXTENSION=$(echo "$UPLOAD_RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensionName')
-    ACTIVATION_RESPONSE=$(curl -s -k -X PUT "$DYNATRACE_URL/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" -H "Content-Type: application/json" --data-raw "{\"version\": \"${EXTENSION_VERSION}\"}")
-    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$ACTIVATION_RESPONSE")
 
-    if [ "$CODE" -gt "310" ]; then
-      warn "- Activation $UPLOADED_EXTENSION:$EXTENSION_VERSION failed with error code: $CODE"
+    if ! RESPONSE=$(dt_api "api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" "PUT" "{\"version\": \"${EXTENSION_VERSION}\"}"); then
+      warn "- Activation $EXTENSION_ZIP failed."
     else
       echo "- Extension $UPLOADED_EXTENSION:$EXTENSION_VERSION activated."
     fi
@@ -247,17 +259,10 @@ get_activated_extensions_on_cluster() {
   DYNATRACE_URL=$1
   DYNATRACE_ACCESS_KEY=$2
 
-  if RESPONSE=$(curl -k -s "$DYNATRACE_URL/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
-    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
-
-    if [ "$CODE" -gt "310" ]; then
-      err "- Dynatrace Cluster at: $DYNATRACE_URL/api/v2/extensions response with code: $CODE"
-      exit
-    fi
-
+  if RESPONSE=$(dt_api "api/v2/extensions"); then
     EXTENSIONS_FROM_CLUSTER=$(echo "$RESPONSE" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
   else
-    err "- Dynatrace Cluster time out at: $DYNATRACE_URL/api/v2/extensions."
+    err "- Dynatrace Cluster failed on ${DYNATRACE_URL}api/v2/extensions endpoint."
     exit
   fi
 }
@@ -266,26 +271,25 @@ activate_extension_on_cluster() {
   DYNATRACE_URL=$1
   DYNATRACE_ACCESS_KEY=$2
   EXTENSIONS_FROM_CLUSTER=$3
+  EXTENSION_ZIP=$4
 
-  for EXTENSION_ZIP in ./extensions/*.zip*; do
-    EXTENSION_NAME=${EXTENSION_ZIP:13:${#EXTENSION_ZIP}-23}
-    EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
-    EXTENSION_IN_DT=$(echo "${EXTENSIONS_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
+  EXTENSION_NAME=${EXTENSION_ZIP:0:${#EXTENSION_ZIP}-10}
+  EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
+  EXTENSION_IN_DT=$(echo "${EXTENSIONS_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
 
-    if [ -z "$EXTENSION_IN_DT" ]; then
-      # missing extension in cluster installing it
+  if [ -z "$EXTENSION_IN_DT" ]; then
+    # missing extension in cluster installing it
+    upload_extension_to_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSION_ZIP" "$EXTENSION_VERSION"
+  elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+    # cluster has never version warning and install if flag was set
+    if [ -n "$UPGRADE_EXTENSIONS" ]; then
       upload_extension_to_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSION_ZIP" "$EXTENSION_VERSION"
-    elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-      # cluster has never version warning and install if flag was set
-      if [ -n "$UPGRADE_EXTENSIONS" ]; then
-        upload_extension_to_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSION_ZIP" "$EXTENSION_VERSION"
-      else
-        warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
-      fi
-    elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-      warn "Actuall installed extension into cluster is ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} is newer then ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+    else
+      warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} installed on the cluster, use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
     fi
-  done
+  elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
+    warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} installed on the cluster is newer than ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+  fi
 }
 
 check_if_parameter_is_empty()
@@ -304,15 +308,7 @@ check_api_token() {
   V1_API_REQUIREMENTS=("ReadConfig" "WriteConfig")
   V2_API_REQUIREMENTS=("extensions.read" "extensions.write" "extensionConfigurations.read" "extensionConfigurations.write" "extensionEnvironment.read" "extensionEnvironment.write")
 
-  if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$DYNATRACE_URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
-    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
-    RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
-
-    if [ "$CODE" -ge 300 ]; then
-      err "Failed to check Dynatrace API token permissions - please verify provided values for parameters: --target-url (${DYNATRACE_URL}) and --target-api-token. $RESPONSE"
-      exit 1
-    fi
-
+  if RESPONSE=$(dt_api "api/v2/apiTokens/lookup" "POST" "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}"); then
     for REQUIRED in "${V1_API_REQUIREMENTS[@]}"; do
       if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
         err "Missing $REQUIRED permission (v1) for the API token"
@@ -326,9 +322,8 @@ check_api_token() {
         exit 1
       fi
     done
-
   else
-      warn "Failed to connect to endpoint $DYNATRACE_URL to check API token permissions. It can be ignored if Dynatrace does not allow public access."
+    warn "Failed to connect to endpoint $DYNATRACE_URL to check API token permissions. It can be ignored if Dynatrace does not allow public access."
   fi
 }
 
@@ -472,10 +467,6 @@ echo "- checking activated extensions in Dynatrace"
 get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
 echo -e
-echo "- activating extensions in Dynatrace"
-activate_extension_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSIONS_FROM_CLUSTER"
-
-echo -e
 echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
 wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
 
@@ -493,6 +484,63 @@ else
   GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL_MIN} * * * *"
 fi
 
+# If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
+if [[ "$UPGRADE_EXTENSIONS" != "Y" ]]; then
+  echo -e
+  echo "- downloading active extensions from Dynatrace"
+  mkdir -p ../extensions_from_cluster
+  cd ../extensions_from_cluster || exit
+  EXTENSIONS_TO_DOWNLOAD="com.dynatrace.extension.google"
+  readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$( echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD" )"
+  for i in "${!EXTENSIONS_FROM_CLUSTER_ARRAY[@]}"; do
+    EXTENSION_NAME="$(cut -d':' -f1 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
+    EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
+    curl -k -s -X GET "${DYNATRACE_URL}api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+    if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
+      find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
+    fi
+  done
+fi
+
+# Add '/default' to service name when featureSet is missing
+for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
+  if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]];then
+    SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default"
+  fi
+done
+SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
+
+cd ../extensions || exit
+echo "- choosing and uploading extensions to Dynatrace"
+for EXTENSION_ZIP in *.zip; do
+  EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"
+  unzip -j -q "$EXTENSION_ZIP" "extension.zip"
+  unzip -p -q "extension.zip" "extension.yaml" >"$EXTENSION_FILE_NAME".yaml
+  EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_FILE_NAME".yaml)
+  #Get all service/featureSet pairs defined in extensions
+  SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"')
+  for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
+    SERVICE_FROM_EXTENSION="${SERVICE_FROM_EXTENSION/null/default}"
+    #Check if service should be monitored
+    if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
+      CONFIG_NAME=$(yq e '.name' "$EXTENSION_FILE_NAME".yaml)
+      if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
+        echo "gcp:" >../"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
+        echo "$EXTENSION_GCP_CONFIG" >>../"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
+      fi
+      activate_extension_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
+      break
+    fi
+  done
+  rm extension.zip
+  rm "$EXTENSION_FILE_NAME".yaml
+  rm "$EXTENSION_ZIP"
+done
+rm -rf ../extensions_from_cluster
+
+cd ../$GCP_FUNCTION_NAME || exit
+
 if [ "$INSTALL" == true ]; then
   echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
   gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:COMPATIBILITY_MODE=$COMPATIBILITY_MODE:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
@@ -509,7 +557,6 @@ else
   gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:COMPATIBILITY_MODE=$COMPATIBILITY_MODE:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
 fi
 
-
 echo -e
 echo "- schedule the runs"
 if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then
@@ -518,75 +565,16 @@ if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="v
 fi
 gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
 
-  echo -e
-  echo "- create self monitoring dashboard"
-  SELF_MONITORING_DASHBOARD_NAME=$(cat dashboards/dynatrace-gcp-function_self_monitoring.json | jq .displayName)
-  if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORING_DASHBOARD_NAME" --format="value(displayName)") ]]; then
-      echo "Dashboard already exists, skipping"
-  else
-      gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
-  fi
+echo -e
+echo "- create self monitoring dashboard"
+SELF_MONITORING_DASHBOARD_NAME=$(cat dashboards/dynatrace-gcp-function_self_monitoring.json | jq .displayName)
+if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORING_DASHBOARD_NAME" --format="value(displayName)") ]]; then
+  echo "Dashboard already exists, skipping"
+else
+  gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
+fi
 
-  IMPORTED_DASHBOARD_IDS=()
-  if [[ "${IMPORT_DASHBOARDS,,}" =~ ^(yes|true)$ ]] ; then
-    EXISTING_DASHBOARDS=$(dt_api "api/config/v1/dashboards" | jq -r '.dashboards[].name | select (. |contains("Google"))')
-    if [ -n "${EXISTING_DASHBOARDS}" ]; then
-        warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_DASHBOARDS"
-    fi
-
-    for DASHBOARD_PATH in $(get_ext_files 'dashboards[].dashboard')
-    do
-      DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
-      DASHBOARD_NAME=$(jq -r .dashboardMetadata.name < "./$DASHBOARD_PATH")
-      if ! grep -q "$DASHBOARD_NAME" <<< "$EXISTING_DASHBOARDS"; then
-        echo "- Create [$DASHBOARD_NAME] dashboard from file [$DASHBOARD_PATH]"
-            if ! DASHBOARD_RESPONSE=$(dt_api "api/config/v1/dashboards" POST "$DASHBOARD_JSON"); then
-              warn "Unable to create dashboard($?)\n$DASHBOARD_RESPONSE"
-              continue
-            fi
-            IMPORTED_DASHBOARD_IDS+=("$(jq -r .id <<< "$DASHBOARD_RESPONSE")")
-      else
-        echo "- Dashboard [$DASHBOARD_NAME] already exists on cluster, skipping"
-      fi
-    done
-
-    sleep 5s  # can be removed after APM-323370
-    for DASHBOARD_ID in "${IMPORTED_DASHBOARD_IDS[@]}"
-    do
-      DASHBOARD_SHARE_RESPONSE=$(dt_api "api/config/v1/dashboards/${DASHBOARD_ID}/shareSettings" \
-          PUT "{ \"id\": \"${DASHBOARD_ID}\",\"published\": \"true\", \"preset\": \"true\", \"enabled\" : \"true\", \"publicAccess\" : { \"managementZoneIds\": [], \"urls\": {}}, \"permissions\": [ { \"type\": \"ALL\", \"permission\": \"VIEW\"} ] }"\
-          ) || warn "Unable to set dashboard permissions($?)\n$DASHBOARD_SHARE_RESPONSE"
-    done
-
-  else
-    echo "Dashboards import disabled"
-  fi
-
-  if [[ "${IMPORT_ALERTS,,}" =~ ^(yes|true)$ ]]; then
-    echo "- Importing alerts"
-    EXISTING_ALERTS=$(dt_api "api/config/v1/anomalyDetection/metricEvents"| jq -r '.values[] | select (.id |startswith("cloud.gcp.")) | (.id + "\t" + .name )')
-    if [ -n "${EXISTING_ALERTS}" ]; then
-        warn "Found existing Google alerts in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"
-    fi
-
-    for ALERT_PATH in $(get_ext_files 'alerts[].path')
-    do
-      ALERT_JSON=$(cat "./$ALERT_PATH")
-      ALERT_ID=$(jq -r .id < "./$ALERT_PATH")
-      ALERT_NAME=$(jq -r  .name < "./$ALERT_PATH" )
-
-      if ! grep -q "$ALERT_ID" <<< "$EXISTING_ALERTS"; then
-        echo "- Create [$ALERT_NAME] alert from file [$ALERT_PATH]"
-        RESPONSE=$(dt_api "api/config/v1/anomalyDetection/metricEvents/$ALERT_ID" PUT "$ALERT_JSON") || warn "Unable to create alert($?):\n$RESPONSE"
-      else
-        echo "- Alert [$ALERT_NAME] already exists on cluster, skipping"
-      fi
-    done
-  else
-    echo "Alerts import disabled"
-  fi
-
-
+echo -e
 echo "- cleaning up"
 
 popd || exit 1

@@ -3,113 +3,130 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud ML Job
 gcp:
 - service: cloudml_job
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
-    id: project_id
+  - value: label:resource.labels.project_id
+    key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
-    id: gcp.project.id
-  - value: resource.labels.job_id
-    id: job_id
+  - value: label:resource.labels.project_id
+    key: gcp.project.id
+  - value: label:resource.labels.job_id
+    key: job_id
     compatibilityModeOnly: true
-  - value: resource.labels.job_id
-    id: gcp.instance.id
-  - value: resource.labels.region
-    id: region
+  - value: label:resource.labels.job_id
+    key: gcp.instance.id
+  - value: label:resource.labels.region
+    key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
-    id: gcp.region
+  - value: label:resource.labels.region
+    key: gcp.region
   metrics:
-  - value: ml.googleapis.com/training/accelerator/memory/utilization
-    id: cloud.gcp.ml_googleapis_com.training.accelerator.memory.utilization
+  - value: metric:ml.googleapis.com/training/accelerator/memory/utilization
+    key: cloud.gcp.ml_googleapis_com.training.accelerator.memory.utilization
     type: gauge
     name: Accelerator memory utilization
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 360s
-      samplePeriod: 60s
+      ingestDelay: 360
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions:
-    - value: metric.labels.task_type
-    - value: metric.labels.task_index
-    - value: metric.labels.trial_id
-  - value: ml.googleapis.com/training/accelerator/utilization
-    id: cloud.gcp.ml_googleapis_com.training.accelerator.utilization
+    - value: label:metric.labels.task_type
+      key: task_type
+    - value: label:metric.labels.task_index
+      key: task_index
+    - value: label:metric.labels.trial_id
+      key: trial_id
+  - value: metric:ml.googleapis.com/training/accelerator/utilization
+    key: cloud.gcp.ml_googleapis_com.training.accelerator.utilization
     type: gauge
     name: Accelerator utilization
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 360s
-      samplePeriod: 60s
+      ingestDelay: 360
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions:
-    - value: metric.labels.task_type
-    - value: metric.labels.task_index
-    - value: metric.labels.trial_id
-  - value: ml.googleapis.com/training/cpu/utilization
-    id: cloud.gcp.ml_googleapis_com.training.cpu.utilization
+    - value: label:metric.labels.task_type
+      key: task_type
+    - value: label:metric.labels.task_index
+      key: task_index
+    - value: label:metric.labels.trial_id
+      key: trial_id
+  - value: metric:ml.googleapis.com/training/cpu/utilization
+    key: cloud.gcp.ml_googleapis_com.training.cpu.utilization
     type: gauge
     name: CPU utilization
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 360s
-      samplePeriod: 60s
+      ingestDelay: 360
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions:
-    - value: metric.labels.task_type
-    - value: metric.labels.task_index
-    - value: metric.labels.trial_id
-  - value: ml.googleapis.com/training/memory/utilization
-    id: cloud.gcp.ml_googleapis_com.training.memory.utilization
+    - value: label:metric.labels.task_type
+      key: task_type
+    - value: label:metric.labels.task_index
+      key: task_index
+    - value: label:metric.labels.trial_id
+      key: trial_id
+  - value: metric:ml.googleapis.com/training/memory/utilization
+    key: cloud.gcp.ml_googleapis_com.training.memory.utilization
     type: gauge
     name: Memory utilization
-    unit: 10^2.%
     gcpOptions:
-      ingestDelay: 360s
-      samplePeriod: 60s
+      ingestDelay: 360
+      samplePeriod: 60
       valueType: DOUBLE
       metricKind: GAUGE
+      unit: 10^2.%
     dimensions:
-    - value: metric.labels.task_type
-    - value: metric.labels.task_index
-    - value: metric.labels.trial_id
-  - value: ml.googleapis.com/training/network/received_bytes_count
-    id: cloud.gcp.ml_googleapis_com.training.network.received_bytes_count
+    - value: label:metric.labels.task_type
+      key: task_type
+    - value: label:metric.labels.task_index
+      key: task_index
+    - value: label:metric.labels.trial_id
+      key: trial_id
+  - value: metric:ml.googleapis.com/training/network/received_bytes_count
+    key: cloud.gcp.ml_googleapis_com.training.network.received_bytes_count
     type: count,delta
     name: Network bytes received
-    unit: By
     gcpOptions:
-      ingestDelay: 360s
-      samplePeriod: 60s
+      ingestDelay: 360
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
-    - value: metric.labels.task_type
-    - value: metric.labels.task_index
-    - value: metric.labels.trial_id
-  - value: ml.googleapis.com/training/network/sent_bytes_count
-    id: cloud.gcp.ml_googleapis_com.training.network.sent_bytes_count
+    - value: label:metric.labels.task_type
+      key: task_type
+    - value: label:metric.labels.task_index
+      key: task_index
+    - value: label:metric.labels.trial_id
+      key: trial_id
+  - value: metric:ml.googleapis.com/training/network/sent_bytes_count
+    key: cloud.gcp.ml_googleapis_com.training.network.sent_bytes_count
     type: count,delta
     name: Network bytes sent
-    unit: By
     gcpOptions:
-      ingestDelay: 360s
-      samplePeriod: 60s
+      ingestDelay: 360
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
-    - value: metric.labels.task_type
-    - value: metric.labels.task_index
-    - value: metric.labels.trial_id
+    - value: label:metric.labels.task_type
+      key: task_type
+    - value: label:metric.labels.task_index
+      key: task_index
+    - value: label:metric.labels.trial_id
+      key: trial_id

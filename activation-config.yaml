@@ -33,10 +33,6 @@ googleCloud:
     # Set the proxy addresses. To be used in conjunction with USE_PROXY.
     httpProxy: ""
     httpsProxy: ""
-    # Import predefined dashboards for selected services. Allowed values: true/yes, false/no
-    importDashboards: true
-    # Import predefined alerts for selected services. Allowed values: true/yes, false/no
-    importAlerts: true
     # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly.
     # Allowed values: true/yes, false/no
     selfMonitoringEnabled: false
@@ -49,11 +45,11 @@ googleCloud:
     scheduler: dynatrace-gcp-schedule
     # dynatrace-gcp-function execution interval in minutes (1 - 6)
     queryInterval: 3
-      # Compatibility mode - concerns the change in reported dimension names. Allowed values: "true"/"yes", "false"/"no".
-      # Should be false for all new setups. Meant to allow a gradual transition for setups that already have historical metrics data.
-      # If true, report deprecated metric dimensions (flagged as compatiblityModeOnly=true) along with their new equivalents:
-      # project_id > gcp.project.id | region, location, zone, metrics.label.region > gcp.region
-      compatibilityMode: false
+    # Compatibility mode - concerns the change in reported dimension names. Allowed values: "true"/"yes", "false"/"no".
+    # Should be false for all new setups. Meant to allow a gradual transition for setups that already have historical metrics data.
+    # If true, report deprecated metric dimensions (flagged as compatiblityModeOnly=true) along with their new equivalents:
+    # project_id > gcp.project.id | region, location, zone, metrics.label.region > gcp.region
+    compatibilityMode: false
 activation:
   metrics:
     # List of services to forward Google Monitoring Metrics to Dynatrace
@@ -61,11 +57,11 @@ activation:
     # Google Cloud APIs
     - api/default     
     # Google Apigee Environment
-    #- apigee.googleapis.com/Environment/default
+    #- apigee.googleapis.com_Environment/default
     # Google Apigee Proxy
-    #- apigee.googleapis.com/Proxy/default
+    #- apigee.googleapis.com_Proxy/default
     # Google Apigee Proxy (v2)
-    #- apigee.googleapis.com/ProxyV2/default
+    #- apigee.googleapis.com_ProxyV2/default
     # Google Assistant Action Project
     #- assistant_action_project/default
     # Google Autoscaler
@@ -87,9 +83,9 @@ activation:
     #Cloud SQL Database
     - cloudsql_database/default
     # Google Cloud Trace
-    #- cloudtrace.googleapis.com/CloudtraceProject/default
+    #- cloudtrace.googleapis.com_CloudtraceProject/default
     # Google NetApp CVS-SO
-    #- cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO/default
+    #- cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO/default
     # Google Cloud Composer Environment
     #- cloud_composer_environment/default
     # Google Cloud Dataproc Cluster
@@ -139,7 +135,7 @@ activation:
     # Google VM Instance Uptime Checks
     #- gce_instance/uptime_check
     # Google VM Instance VM Flow
-    #- gce_instance_vm_flow/None
+    #- gce_instance_vm_flow/default
     # Google Cloud Router
     #- gce_router/default
     # Google Zone Network Health
@@ -231,4 +227,4 @@ activation:
     # Google VPC Access Connector
     #- vpc_access_connector/default
     # Google Cloud VPN Tunnel
-    #- vpn_gatewayv/None
+    #- vpn_gateway/default

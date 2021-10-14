@@ -3,105 +3,112 @@ $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
 vars:
- - id: filter_conditions
-   displayName: Metric query filter for which metrics should be queried
-   type: variables
+- id: filter_conditions
+  displayName: Metric query filter for which metrics should be queried
+  type: variables
 technology:
   name: Google Cloud Network UDP Load Balancer Rule
 gcp:
 - service: udp_lb_rule
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.project_id
-    id: project_id
+  - value: label:resource.labels.project_id
+    key: project_id
     compatibilityModeOnly: true
-  - value: resource.labels.project_id
-    id: gcp.project.id
-  - value: resource.labels.load_balancer_name
-    id: load_balancer_name
+  - value: label:resource.labels.project_id
+    key: gcp.project.id
+  - value: label:resource.labels.load_balancer_name
+    key: load_balancer_name
     compatibilityModeOnly: true
-  - value: resource.labels.load_balancer_name
-    id: gcp.instance.name
-  - value: resource.labels.region
-    id: region
+  - value: label:resource.labels.load_balancer_name
+    key: gcp.instance.name
+  - value: label:resource.labels.region
+    key: region
     compatibilityModeOnly: true
-  - value: resource.labels.region
-    id: gcp.region
-  - value: resource.labels.network_name
-    id: network_name
-  - value: resource.labels.backend_target_type
-    id: backend_target_type
-  - value: resource.labels.backend_target_name
-    id: backend_target_name
-  - value: resource.labels.forwarding_rule_name
-    id: forwarding_rule_name
-  - value: resource.labels.forwarding_rule_network_tier
-    id: forwarding_rule_network_tier
-  - value: resource.labels.backend_name
-    id: backend_name
-  - value: resource.labels.backend_type
-    id: backend_type
-  - value: resource.labels.backend_scope
-    id: backend_scope
-  - value: resource.labels.backend_scope_type
-    id: backend_scope_type
-  - value: resource.labels.backend_failover_configuration
-    id: backend_failover_configuration
-  - value: resource.labels.backend_subnetwork_name
-    id: backend_subnetwork_name
-  - value: resource.labels.endpoint_zone
-    id: endpoint_zone
+  - value: label:resource.labels.region
+    key: gcp.region
+  - value: label:resource.labels.network_name
+    key: network_name
+  - value: label:resource.labels.backend_target_type
+    key: backend_target_type
+  - value: label:resource.labels.backend_target_name
+    key: backend_target_name
+  - value: label:resource.labels.forwarding_rule_name
+    key: forwarding_rule_name
+  - value: label:resource.labels.forwarding_rule_network_tier
+    key: forwarding_rule_network_tier
+  - value: label:resource.labels.backend_name
+    key: backend_name
+  - value: label:resource.labels.backend_type
+    key: backend_type
+  - value: label:resource.labels.backend_scope
+    key: backend_scope
+  - value: label:resource.labels.backend_scope_type
+    key: backend_scope_type
+  - value: label:resource.labels.backend_failover_configuration
+    key: backend_failover_configuration
+  - value: label:resource.labels.backend_subnetwork_name
+    key: backend_subnetwork_name
+  - value: label:resource.labels.endpoint_zone
+    key: endpoint_zone
   metrics:
-  - value: loadbalancing.googleapis.com/l3/external/egress_bytes_count
-    id: cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count
+  - value: metric:loadbalancing.googleapis.com/l3/external/egress_bytes_count
+    key: cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_bytes_count
     type: count,delta
     name: Egress bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 150s
-      samplePeriod: 60s
+      ingestDelay: 150
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
-    - value: metric.labels.client_continent
-    - value: metric.labels.client_country
-  - value: loadbalancing.googleapis.com/l3/external/egress_packets_count
-    id: cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count
+    - value: label:metric.labels.client_continent
+      key: client_continent
+    - value: label:metric.labels.client_country
+      key: client_country
+  - value: metric:loadbalancing.googleapis.com/l3/external/egress_packets_count
+    key: cloud.gcp.loadbalancing_googleapis_com.l3.external.egress_packets_count
     type: count,delta
     name: Egress packets
-    unit: '1'
     gcpOptions:
-      ingestDelay: 150s
-      samplePeriod: 60s
+      ingestDelay: 150
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.client_continent
-    - value: metric.labels.client_country
-  - value: loadbalancing.googleapis.com/l3/external/ingress_bytes_count
-    id: cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count
+    - value: label:metric.labels.client_continent
+      key: client_continent
+    - value: label:metric.labels.client_country
+      key: client_country
+  - value: metric:loadbalancing.googleapis.com/l3/external/ingress_bytes_count
+    key: cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_bytes_count
     type: count,delta
     name: Ingress bytes
-    unit: By
     gcpOptions:
-      ingestDelay: 150s
-      samplePeriod: 60s
+      ingestDelay: 150
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: By
     dimensions:
-    - value: metric.labels.client_continent
-    - value: metric.labels.client_country
-  - value: loadbalancing.googleapis.com/l3/external/ingress_packets_count
-    id: cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count
+    - value: label:metric.labels.client_continent
+      key: client_continent
+    - value: label:metric.labels.client_country
+      key: client_country
+  - value: metric:loadbalancing.googleapis.com/l3/external/ingress_packets_count
+    key: cloud.gcp.loadbalancing_googleapis_com.l3.external.ingress_packets_count
     type: count,delta
     name: Ingress packets
-    unit: '1'
     gcpOptions:
-      ingestDelay: 150s
-      samplePeriod: 60s
+      ingestDelay: 150
+      samplePeriod: 60
       valueType: INT64
       metricKind: DELTA
+      unit: '1'
     dimensions:
-    - value: metric.labels.client_continent
-    - value: metric.labels.client_country
+    - value: label:metric.labels.client_continent
+      key: client_continent
+    - value: label:metric.labels.client_country
+      key: client_country

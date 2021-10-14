@@ -1,4 +1,4 @@
-id: apigee.googleapis.com/Environment
+id: apigee.googleapis.com_Environment
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 technology:
@@ -9,33 +9,35 @@ vars:
    displayName: Metric query filter for which metrics should be queried
    type: variables
 gcp:
-- service: apigee.googleapis.com/Environment
-  featureSet: default
-  gcp_monitoring_filter: var:filter_conditions
+- service: apigee.googleapis.com_Environment
+  gcpMonitoringFilter: var:filter_conditions
   dimensions:
-  - value: resource.labels.resource_container
-    id: resource_container
-  - value: resource.labels.org
-    id: org
-  - value: resource.labels.env
-    id: env
-  - value: resource.labels.location
-    id: location
+  - value: label:resource.labels.resource_container
+    key: resource_container
+  - value: label:resource.labels.org
+    key: org
+  - value: label:resource.labels.env
+    key: env
+  - value: label:resource.labels.location
+    key: location
     compatibilityModeOnly: true
-  - value: resource.labels.location
-    id: gcp.region
+  - value: label:resource.labels.location
+    key: gcp.region
   metrics:
-  - value: apigee.googleapis.com/environment/anomaly_count
-    id: cloud.gcp.apigee_googleapis_com.environment.anomaly_count
+  - value: metric:apigee.googleapis.com/environment/anomaly_count
+    key: cloud.gcp.apigee_googleapis_com.environment.anomaly_count
     type: count,delta
     name: Apigee anomaly event count
-    unit: '1'
     gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
+      ingestDelay: 180
+      samplePeriod: 60
       valueType: INT64
       metricKind: CUMULATIVE
+      unit: '1'
     dimensions:
-    - value: metric.labels.severity
-    - value: metric.labels.direction
-    - value: metric.labels.anomaly_type
+    - value: label:metric.labels.severity
+      key: severity
+    - value: label:metric.labels.direction
+      key: direction
+    - value: label:metric.labels.anomaly_type
+      key: anomaly_type
