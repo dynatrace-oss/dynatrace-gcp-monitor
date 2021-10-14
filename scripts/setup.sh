@@ -155,8 +155,6 @@ readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' 
 readonly USE_PROXY=$(yq e '.googleCloud.common.useProxy' $FUNCTION_ACTIVATION_CONFIG)
 readonly HTTP_PROXY=$(yq e '.googleCloud.common.httpProxy' $FUNCTION_ACTIVATION_CONFIG)
 readonly HTTPS_PROXY=$(yq e '.googleCloud.common.httpsProxy' $FUNCTION_ACTIVATION_CONFIG)
-readonly IMPORT_DASHBOARDS=$(yq e '.googleCloud.common.importDashboards' $FUNCTION_ACTIVATION_CONFIG)
-readonly IMPORT_ALERTS=$(yq e '.googleCloud.common.importAlerts' $FUNCTION_ACTIVATION_CONFIG)
 readonly COMPATIBILITY_MODE=$(yq e '.googleCloud.common.compatibilityMode' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_IAM_ROLE=$(yq e '.googleCloud.common.iamRole' $FUNCTION_ACTIVATION_CONFIG)
 # Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
@@ -554,7 +552,6 @@ else
   gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:COMPATIBILITY_MODE=$COMPATIBILITY_MODE:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
 fi
 
-
 echo -e
 echo "- schedule the runs"
 if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)") ]]; then
@@ -563,73 +560,14 @@ if [[ $(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="v
 fi
 gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x"
 
-  echo -e
-  echo "- create self monitoring dashboard"
-  SELF_MONITORING_DASHBOARD_NAME=$(cat dashboards/dynatrace-gcp-function_self_monitoring.json | jq .displayName)
-  if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORING_DASHBOARD_NAME" --format="value(displayName)") ]]; then
-      echo "Dashboard already exists, skipping"
-  else
-      gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
-  fi
-
-  IMPORTED_DASHBOARD_IDS=()
-  if [[ "${IMPORT_DASHBOARDS,,}" =~ ^(yes|true)$ ]] ; then
-    EXISTING_DASHBOARDS=$(dt_api "api/config/v1/dashboards" | jq -r '.dashboards[].name | select (. |contains("Google"))')
-    if [ -n "${EXISTING_DASHBOARDS}" ]; then
-        warn "Found existing Google dashboards in [${DYNATRACE_URL}] tenant:\n$EXISTING_DASHBOARDS"
-    fi
-
-    for DASHBOARD_PATH in $(get_ext_files 'dashboards[].dashboard')
-    do
-      DASHBOARD_JSON=$(cat "./$DASHBOARD_PATH")
-      DASHBOARD_NAME=$(jq -r .dashboardMetadata.name < "./$DASHBOARD_PATH")
-      if ! grep -q "$DASHBOARD_NAME" <<< "$EXISTING_DASHBOARDS"; then
-        echo "- Create [$DASHBOARD_NAME] dashboard from file [$DASHBOARD_PATH]"
-            if ! DASHBOARD_RESPONSE=$(dt_api "api/config/v1/dashboards" POST "$DASHBOARD_JSON"); then
-              warn "Unable to create dashboard($?)\n$DASHBOARD_RESPONSE"
-              continue
-            fi
-            IMPORTED_DASHBOARD_IDS+=("$(jq -r .id <<< "$DASHBOARD_RESPONSE")")
-      else
-        echo "- Dashboard [$DASHBOARD_NAME] already exists on cluster, skipping"
-      fi
-    done
-
-    sleep 5s  # can be removed after APM-323370
-    for DASHBOARD_ID in "${IMPORTED_DASHBOARD_IDS[@]}"
-    do
-      DASHBOARD_SHARE_RESPONSE=$(dt_api "api/config/v1/dashboards/${DASHBOARD_ID}/shareSettings" \
-          PUT "{ \"id\": \"${DASHBOARD_ID}\",\"published\": \"true\", \"preset\": \"true\", \"enabled\" : \"true\", \"publicAccess\" : { \"managementZoneIds\": [], \"urls\": {}}, \"permissions\": [ { \"type\": \"ALL\", \"permission\": \"VIEW\"} ] }"\
-          ) || warn "Unable to set dashboard permissions($?)\n$DASHBOARD_SHARE_RESPONSE"
-    done
-
-  else
-    echo "Dashboards import disabled"
-  fi
-
-  if [[ "${IMPORT_ALERTS,,}" =~ ^(yes|true)$ ]]; then
-    echo "- Importing alerts"
-    EXISTING_ALERTS=$(dt_api "api/config/v1/anomalyDetection/metricEvents"| jq -r '.values[] | select (.id |startswith("cloud.gcp.")) | (.id + "\t" + .name )')
-    if [ -n "${EXISTING_ALERTS}" ]; then
-        warn "Found existing Google alerts in [${DYNATRACE_URL}] tenant:\n$EXISTING_ALERTS"
-    fi
-
-    for ALERT_PATH in $(get_ext_files 'alerts[].path')
-    do
-      ALERT_JSON=$(cat "./$ALERT_PATH")
-      ALERT_ID=$(jq -r .id < "./$ALERT_PATH")
-      ALERT_NAME=$(jq -r  .name < "./$ALERT_PATH" )
-
-      if ! grep -q "$ALERT_ID" <<< "$EXISTING_ALERTS"; then
-        echo "- Create [$ALERT_NAME] alert from file [$ALERT_PATH]"
-        RESPONSE=$(dt_api "api/config/v1/anomalyDetection/metricEvents/$ALERT_ID" PUT "$ALERT_JSON") || warn "Unable to create alert($?):\n$RESPONSE"
-      else
-        echo "- Alert [$ALERT_NAME] already exists on cluster, skipping"
-      fi
-    done
-  else
-    echo "Alerts import disabled"
-  fi
+echo -e
+echo "- create self monitoring dashboard"
+SELF_MONITORING_DASHBOARD_NAME=$(cat dashboards/dynatrace-gcp-function_self_monitoring.json | jq .displayName)
+if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORING_DASHBOARD_NAME" --format="value(displayName)") ]]; then
+  echo "Dashboard already exists, skipping"
+else
+  gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json
+fi
 
 echo -e
 echo "- cleaning up"
