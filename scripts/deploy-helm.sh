@@ -248,7 +248,7 @@ readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --json
 readonly USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.useProxy}")
 readonly HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
 readonly HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
-API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"')
+API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"')
 
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
@@ -297,9 +297,9 @@ fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "api/v2/extensions/schemas"); then
-    GCP_EXTENSIONS_SCHEMA_PRESENT=$(echo "${EXTENSIONS_SCHEMA_RESPONSE}" | jq -r '.versions[] | select(.=="1.229.0")')
+    GCP_EXTENSIONS_SCHEMA_PRESENT=$(jq -r '.versions[] | select(.=="1.229.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
     if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
-      echo -e "\e[91mERROR: \e[37mDynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.229 or higher to complete installation."
+      err "\e[91mERROR: \e[37mDynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.229 or higher to complete installation."
       exit 1
     fi
   fi
