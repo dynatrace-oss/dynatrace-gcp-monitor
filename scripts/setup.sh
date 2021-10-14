@@ -407,7 +407,7 @@ if [ "$INSTALL" == true ]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "api/v2/extensions/schemas"); then
     GCP_EXTENSIONS_SCHEMA_PRESENT=$(jq -r '.versions[] | select(.=="1.229.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
     if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
-      echo -e "\e[91mERROR: \e[37mDynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.229 or higher to complete installation."
+      err Dynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.229 or higher to complete installation."
       exit 1
     fi
   fi
