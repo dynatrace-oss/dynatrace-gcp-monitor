@@ -192,7 +192,7 @@ elif [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "Deploying metrics and logs ingest"
 elif [[ $DEPLOYMENT_TYPE == logs ]]; then
   echo "Deploying $DEPLOYMENT_TYPE ingest"
-  API_TOKEN_SCOPES=('"logs.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
+  API_TOKEN_SCOPES=('"logs.ingest"')
 elif [[ $DEPLOYMENT_TYPE == metrics ]]; then
   echo "Deploying $DEPLOYMENT_TYPE ingest"
   API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
@@ -267,28 +267,30 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   fi
 fi
 
-echo
-echo "- downloading extensions"
-get_extensions_zip_packages
-
-echo
-echo "- checking activated extensions in Dynatrace"
-EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
-
-# If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
-if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
+if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   echo
-  echo "- downloading active extensions from Dynatrace"
-  get_extensions_from_dynatrace "$EXTENSIONS_FROM_CLUSTER"
+  echo "- downloading extensions"
+  get_extensions_zip_packages
+
+  echo
+  echo "- checking activated extensions in Dynatrace"
+  EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
+
+  # If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
+  if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
+    echo
+    echo "- downloading active extensions from Dynatrace"
+    get_extensions_from_dynatrace "$EXTENSIONS_FROM_CLUSTER"
+  fi
+
+  echo
+  echo "- read activation config"
+  SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "$SERVICES_FROM_ACTIVATION_CONFIG")
+
+  echo
+  echo "- choosing and uploading extensions to Dynatrace"
+  upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
 fi
-
-echo
-echo "- read activation config"
-SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "$SERVICES_FROM_ACTIVATION_CONFIG")
-
-echo
-echo "- choosing and uploading extensions to Dynatrace"
-upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
 
 if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   SELECTED_REGION=$(gcloud config get-value compute/region 2>/dev/null)
