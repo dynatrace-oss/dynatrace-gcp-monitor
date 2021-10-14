@@ -222,9 +222,14 @@ get_ext_files() {
 
 get_extensions_zip_packages() {
   curl -s -O $EXTENSION_S3_URL/$EXTENSION_MANIFEST_FILE
-  mkdir -p ./extensions
+  EXTENSIONS_LIST=$(grep -v '^ *#' < "$EXTENSION_MANIFEST_FILE" | grep "^google.*\.zip" 2>/dev/null)
+  if [ -z "$EXTENSIONS_LIST" ]; then
+    err "Empty extensions manifest file downloaded"
+    exit 1
+  fi
 
-  grep -v '^ *#' < "$EXTENSION_MANIFEST_FILE" | while IFS= read -r EXTENSION_FILE_NAME
+  mkdir -p ./extensions
+  echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME
   do
     (cd ./extensions && curl -s -O "$EXTENSION_S3_URL/$EXTENSION_FILE_NAME")
   done
