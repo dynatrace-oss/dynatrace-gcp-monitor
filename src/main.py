@@ -256,14 +256,6 @@ def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str,
 
 
 def load_supported_services(context: LoggingContext, selected_services: List[str]) -> List[GCPService]:
-    activation_file_path = '/code/config/activation/gcp_services.yaml'
-    try:
-        with open(activation_file_path, encoding="utf-8") as activation_file:
-            activation_yaml = yaml.safe_load(activation_file)
-    except Exception:
-        activation_yaml = yaml.safe_load(os.environ.get("ACTIVATION_CONFIG", ""))
-    activation_config = {service_activation.get('service'): service_activation for service_activation in activation_yaml['services']} if activation_yaml and activation_yaml['services'] else {}
-
     working_directory = os.path.dirname(os.path.realpath(__file__))
     config_directory = os.path.join(working_directory, "config")
     config_files = [
@@ -282,25 +274,13 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
                 technology_name = extract_technology_name(config_yaml)
 
                 for service_yaml in config_yaml.get("gcp", {}):
-                    service_name=service_yaml.get("service", "None")
-                    featureSet=service_yaml.get("featureSet", "default")
-
-                    if activation_yaml is not None:
-                        activation_config_feature_sets = activation_config.get(service_name, {}).get("featureSets", [])
-                        should_skip = featureSet not in activation_config_feature_sets
-                        activation = activation_config.get(service_name)
-                        gcp_service = GCPService(tech_name=technology_name, activation=activation, **service_yaml)
-                    else:
-                        # If activation_config yaml not given, using passed selected_services param as whitelist
-                        # If whitelist of services exists and current service is not present in it, skip
-                        # If whitelist is empty - no services explicitly selected - load all available
-                        whitelist_exists = selected_services is not None and selected_services.__len__() > 0
-                        should_skip = whitelist_exists and f'{service_name}/{featureSet}' not in selected_services
-                        gcp_service = GCPService(tech_name=technology_name, **service_yaml)
-                    if should_skip:
-                        continue
-
-                    services.append(gcp_service)
+                    service_name = service_yaml.get("service", "None")
+                    featureSet = service_yaml.get("featureSet", "default")
+                    # If whitelist of services exists and current service is not present in it, skip
+                    # If whitelist is empty - no services explicitly selected - load all available
+                    whitelist_exists = selected_services is not None and selected_services.__len__() > 0
+                    if f'{service_name}/{featureSet}' in selected_services or not whitelist_exists:
+                        services.append(GCPService(tech_name=technology_name, **service_yaml))
 
         except Exception as error:
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
