@@ -87,7 +87,10 @@ class ExtensionsFetcher:
     async def _get_service_configs_for_extension(self, extension_name: str, extension_version: str) -> List[GCPService]:
         extension_zip = await self._get_extension_zip_from_dynatrace_cluster(extension_name, extension_version)
         extension_configuration = self._load_extension_config_from_zip(extension_name, extension_zip) if extension_zip else {}
-        return [GCPService(**feature_set) for feature_set in extension_configuration.get("gcp", [])]
+        if "gcp" not in extension_configuration:
+            self.logging_context.log(f"Incorrect extension fetched from Dynatrace cluster. {extension_name}-{extension_version} has no 'gcp' section and will be skipped")
+            return []
+        return [GCPService(**feature_set) for feature_set in extension_configuration.get("gcp")]
 
     async def _get_extension_zip_from_dynatrace_cluster(self, extension_name, extension_version) -> Optional[bytes]:
         url = f"{self.dynatrace_url.rstrip('/')}/api/v2/extensions/{extension_name}/{extension_version}"
