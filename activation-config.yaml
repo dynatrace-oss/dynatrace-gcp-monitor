@@ -57,11 +57,11 @@ activation:
     # Google Cloud APIs
     - api/default     
     # Google Apigee Environment
-    #- apigee.googleapis.com_Environment/default
+    #- apigee_googleapis_com_Environment/default
     # Google Apigee Proxy
-    #- apigee.googleapis.com_Proxy/default
+    #- apigee_googleapis_com_Proxy/default
     # Google Apigee Proxy (v2)
-    #- apigee.googleapis.com_ProxyV2/default
+    #- apigee_googleapis_com_ProxyV2/default
     # Google Assistant Action Project
     #- assistant_action_project/default
     # Google Autoscaler
@@ -83,9 +83,9 @@ activation:
     #Cloud SQL Database
     - cloudsql_database/default
     # Google Cloud Trace
-    #- cloudtrace.googleapis.com_CloudtraceProject/default
+    #- cloudtrace_googleapis_com_CloudtraceProject/default
     # Google NetApp CVS-SO
-    #- cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO/default
+    #- cloudvolumesgcp_api_netapp_com_NetAppCloudVolumeSO/default
     # Google Cloud Composer Environment
     #- cloud_composer_environment/default
     # Google Cloud Dataproc Cluster
@@ -98,8 +98,6 @@ activation:
     #- cloud_run_revision/default
     #Amazon EC2 Instance (via GCP)
     #- cloud_tasks_queue/default
-    # Google Consumed API
-    #- consumed_api/default
     # Google Consumer Quota
     #- consumer_quota/default
     # Google Dataflow Job
@@ -126,8 +124,6 @@ activation:
     #- gce_instance/default
     # Google VM Instance Agent
     #- gce_instance/agent
-    # Google VM Instance
-    #- gce_instance/appenginee
     # Google VM Instance Firewall Insights
     #- gce_instance/firewallinsights
     # Google VM Instance Istio
@@ -142,26 +138,20 @@ activation:
     #- gce_zone_network_health/default
     # Google Cloud Storage bucket
     - gcs_bucket/default
-    # Google GKE Container
-    #- gke_container/default
     # Google Cloud HTTP/S Load Balancing Rule
     - https_lb_rule/default
     # Google Instance Group
     #- instance_group/default
     # Google Interconnect
     #- interconnect/default
-    # Google Interconnect Attachment
-    #- interconnect_attachment/default
     # Google Internal HTTP/S Load Balancing Rule
     - internal_http_lb_rule/default
-    # Google Internal TCP Load Balancer Rule
-    - internal_tcp_lb_rule/default
-    # Google Internal UDP Load Balancer Rule
-    - internal_udp_lb_rule/default
-    # Google Istio Canonical Service
-    #- istio_canonical_service/default
+    # Google Internal Network Load Balancer
+    - internal_network_lb_rule/default
+    # Google Network Load Balancer
+    - network_lb_rule/default
     # Google Kubernetes Cluster
-    #- k8s_cluster/default
+    - k8s/default
     # Google Kubernetes Container
     - k8s_container/default
     # Google Kubernetes Container Agent
@@ -172,18 +162,8 @@ activation:
     #- k8s_container/istio
     # Google Kubernetes Container Nginx
     #- k8s_container/nginx
-    # Google Kubernetes Node
-    - k8s_node/default
-    # Google Kubernetes Pod
-    - k8s_pod/default
     # Google Kubernetes Pod
     #- k8s_pod/istio
-    # Google Cloud Run for Anthos Broker
-    #- knative_broker/default
-    # Google Cloud Run for Anthos Revision
-    #- knative_revision/default
-    # Google Cloud Run for Anthos Trigger
-    #- knative_trigger/default
     # Google Cloud Logging export sink
     #- logging_sink/default
     # Google Cloud Microsoft Active Directory Domain
@@ -196,8 +176,6 @@ activation:
     #- network_security_policy/default
     # Google Producer Quota
     #- producer_quota/default
-    # Google Pub/Sub Lite Subscription Partition
-    - pubsublite_subscription_partition/default
     # Google Pub/Sub Lite Topic Partition
     - pubsublite_topic_partition/default
     # Google Cloud Pub/Sub Snapshot
@@ -207,21 +185,17 @@ activation:
     # Google Cloud Pub/Sub Topic
     - pubsub_topic/default
     # Google reCAPTCHA Key
-    #- recaptchaenterprise.googleapis.com/Key/default
+    #- recaptchaenterprise_googleapis_com_Key/default
     # Google Cloud Memorystore
     - redis_instance/default
     # Google Cloud Spanner Instance
     #- spanner_instance/default
-    # Google Cloud Network TCP Load Balancer Rule
-    - tcp_lb_rule/default
     # Google Cloud TCP/SSL Proxy Rule
     #- tcp_ssl_proxy_rule/default
     # Google Cloud TPU Worker
     #- tpu_worker/default
     # Google Transfer Service Agent
     #- transfer_service_agent/default
-    # Google Cloud Network UDP Load Balancer Rule
-    #- udp_lb_rule/default
     # Google Uptime Check URL
     #- uptime_url/default
     # Google VPC Access Connector
