@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #     Copyright 2021 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,71 +13,9 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-onFailure() {
-  echo -e "\e[91m- deployment failed, please examine error messages and run again"
-  exit 2
-}
+source ./lib.sh
+
 trap onFailure ERR
-
-check_if_parameter_is_empty() {
-  PARAMETER=$1
-  PARAMETER_NAME=$2
-  if [ -z "$PARAMETER" ]; then
-    echo "Missing required parameter: $PARAMETER_NAME"
-    exit
-  fi
-}
-
-warn()
-{
-  MESSAGE=$1
-  echo -e >&2
-  echo -e "\e[93mWARNING: \e[37m$MESSAGE" >&2
-  echo -e >&2
-}
-
-dt_api()
-{
-  URL=$1
-  if [ $# -eq 3 ]; then
-    METHOD="$2"
-    DATA=("-d" "$3")
-  else
-    METHOD="GET"
-  fi
-  if RESPONSE=$(curl -k -s -X $METHOD "${DYNATRACE_URL}/${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}"); then
-    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<< "$RESPONSE")
-    sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<< "$RESPONSE"
-    if [ "$CODE" -ge 400 ]; then
-      warn "Received ${CODE} response from ${DYNATRACE_URL}/${URL}"
-      return 1
-    fi
-  else
-    warn "Unable to connect to ${DYNATRACE_URL}"
-    return 2
-  fi
-}
-
-check_api_token() {
-  URL="$1"
-  if RESPONSE=$(curl -k -s -X POST -d "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}" "$URL/api/v2/apiTokens/lookup" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
-    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
-    RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
-    if [ "$CODE" -ge 300 ]; then
-      echo -e "\e[91mERROR: \e[37mFailed to check Dynatrace API token permissions - please verify provided URL (${URL}) and API token. $RESPONSE"
-      exit 1
-    fi
-    for scope in "${API_TOKEN_SCOPES[@]}"; do
-      if ! grep -q "$scope" <<<"$RESPONSE"; then
-        echo -e "\e[91mERROR: \e[37mMissing permission for the API token: $scope."
-        echo "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: $DEPLOYMENT_TYPE"
-        exit 1
-      fi
-    done
-  else
-    warn "Failed to connect to Dynatrace/ActiveGate endpoint ($URL) to check API token permissions. It can be ignored if Dynatrace/ActiveGate does not allow public access."
-  fi
-}
 
 generate_test_log() {
   DATE=$(date --iso-8601=seconds)
@@ -96,7 +34,7 @@ check_dynatrace_log_ingest_url() {
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
     if [ "$CODE" -ge 300 ]; then
-      echo -e "\e[91mERROR: \e[37mFailed to send a test log to Dynatrace - please verify provided log ingest url ($DYNATRACE_LOG_INGEST_URL) and API token. $RESPONSE"
+      err "Failed to send a test log to Dynatrace - please verify provided log ingest url ($DYNATRACE_LOG_INGEST_URL) and API token. $RESPONSE"
       exit 1
     fi
   else
@@ -114,7 +52,7 @@ check_dynatrace_docker_login() {
       echo "Successfully logged to Dynatrace cluster Docker registry"
       echo "The ActiveGate will be deployed in k8s cluster"
     else
-      echo -e "\e[91mERROR: \e[37mCouldn't log to Dynatrace cluster Docker registry. Is your PaaS token a valid one?"
+      err "Couldn't log to Dynatrace cluster Docker registry. Is your PaaS token a valid one?"
       exit 1
     fi
   else
@@ -122,19 +60,9 @@ check_dynatrace_docker_login() {
   fi
 }
 
-check_url() {
-  URL=$1
-  REGEX=$2
-  MESSAGE=$3
-  if ! [[ "$URL" =~ $REGEX ]]; then
-    echo -e "\e[91mERROR: \e[37m$MESSAGE"
-    exit 1
-  fi
-}
-
 print_help() {
   printf "
-usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME]
+usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--upgrade-extensions] [--auto-yes] [--quiet]
 
 arguments:
     --service-account SA_NAME
@@ -148,6 +76,8 @@ arguments:
     --autopilot-cluster-name CLUSTER_NAME
                             Name of new GKE Autopilot cluster to be created if '--create-autopilot-cluster option' was selected.
                             By default 'dynatrace-gcp-function' will be used.
+    --upgrade-extensions
+                            Upgrade all extensions into dynatrace cluster
     -y, --auto-yes
                             By default 'yes' will be answer for all user input prompts from GCP.
     -q, --quiet
@@ -157,35 +87,11 @@ arguments:
     "
 }
 
-if ! command -v gcloud &>/dev/null; then
-
-  echo -e "\e[91mERROR: \e[37mGoogle Cloud CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and download latest version of Cloud SDK:"
-  echo -e
-  echo -e "https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version"
-  echo -e
-  echo
-  exit
-fi
-
-if ! command -v kubectl &>/dev/null; then
-
-  echo -e "\e[91mERROR: \e[37mKubernetes CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install kubectl in the most convenient way to you:"
-  echo -e
-  echo -e "https://kubernetes.io/docs/tasks/tools/"
-  echo -e
-  echo
-  exit
-fi
-
-if ! command -v helm &>/dev/null; then
-
-  echo -e "\e[91mERROR: \e[37mHelm is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install Helm in the most convenient way to you:"
-  echo -e
-  echo -e "https://helm.sh/docs/intro/install/"
-  echo -e
-  echo
-  exit
-fi
+# test pre-requirements
+test_req_yq
+test_req_gcloud
+test_req_kubectl
+test_req_helm
 
 CMD_OUT_PIPE="/dev/stdout"
 AUTOPILOT_CLUSTER_NAME="dynatrace-gcp-function"
@@ -212,6 +118,11 @@ while (( "$#" )); do
                 shift; shift
             ;;
 
+            "--upgrade-extensions")
+                UPGRADE_EXTENSIONS="Y"
+                shift
+            ;;
+
             "-y" | "--auto-yes")
                 export CLOUDSDK_CORE_DISABLE_PROMPTS=1
                 shift; shift
@@ -220,6 +131,11 @@ while (( "$#" )); do
             "-q" | "--quiet")
                 CMD_OUT_PIPE="/dev/null"
                 shift
+            ;;
+
+            "--s3-url")
+                EXTENSION_S3_URL=$2
+                shift; shift
             ;;
 
             "-h" | "--help")
@@ -234,9 +150,6 @@ while (( "$#" )); do
     esac
 done
 
-readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
-readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
-
 GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
 DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
 readonly DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}")
@@ -248,7 +161,14 @@ readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --json
 readonly USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.useProxy}")
 readonly HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
 readonly HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
-API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"')
+SERVICES_FROM_ACTIVATION_CONFIG=$(yq e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | yq e -j '.services[]' - | jq -r '. | "\(.service)/\(.featureSets[])"')
+API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
+
+if [ -z "$EXTENSION_S3_URL" ]; then
+  EXTENSION_S3_URL="https://dynatrace-gcp-extensions.s3.amazonaws.com"
+else
+  warn "Development mode on: custom S3 url link."
+fi
 
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
@@ -275,15 +195,15 @@ elif [[ $DEPLOYMENT_TYPE == logs ]]; then
   API_TOKEN_SCOPES=('"logs.ingest"')
 elif [[ $DEPLOYMENT_TYPE == metrics ]]; then
   echo "Deploying $DEPLOYMENT_TYPE ingest"
-  API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"')
+  API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 else
-  echo -e "\e[91mERROR: \e[37mInvalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
+  err "Invalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
   exit 1
 fi
 
 if [ -n "$USE_PROXY" ]; then
   if [ -z "$HTTP_PROXY" ] || [ -z "$HTTPS_PROXY" ]; then
-    echo -e "\e[91mERROR: \e[37mThe useProxy is set, please fill httpProxy or httpsProxy in your values file"
+    err "The useProxy is set, please fill httpProxy or httpsProxy in your values file"
     exit 1
   fi
 fi
@@ -322,7 +242,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   readonly LOGS_SUBSCRIPTION_FULL_ID="projects/$GCP_PROJECT/subscriptions/$LOGS_SUBSCRIPTION_ID"
 
   if ! [[ $(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(name)") ]]; then
-    echo -e "\e[91mERROR: \e[37mPub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
+    err "Pub/Sub subscription '$LOGS_SUBSCRIPTION_FULL_ID' does not exist"
     exit 1
   fi
 
@@ -330,13 +250,13 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
   readonly ACK_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(ackDeadlineSeconds)")
   if [[ "$ACK_DEADLINE" != "120" ]]; then
-    echo -e "\e[91mERROR: \e[37mInvalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
+    err "Invalid Pub/Sub subscription Acknowledgement Deadline - should be '120's (2 minutes), was '$ACK_DEADLINE's"
     INVALID_PUBSUB=true
   fi
 
   readonly MESSAGE_RETENTION_DEADLINE=$(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(messageRetentionDuration)")
   if [[ "$MESSAGE_RETENTION_DEADLINE" != "86400s" ]]; then
-    echo -e "\e[91mERROR: \e[37mInvalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
+    err "Invalid Pub/Sub subscription Acknowledge Deadline - should be '86400s' (24 hours), was '$MESSAGE_RETENTION_DEADLINE'"
     INVALID_PUBSUB=true
   fi
 
@@ -351,17 +271,42 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
       warn "Unable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL to check if ActiveGate is running. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
     fi
     if [[ "$ACTIVE_GATE_STATE" != "RUNNING" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]; then
-      echo -e "\e[91mERROR: \e[37mActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
+      err "ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
       exit 1
     fi
   fi
+fi
+
+if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+  echo
+  echo "- downloading extensions"
+  get_extensions_zip_packages
+
+  echo
+  echo "- checking activated extensions in Dynatrace"
+  EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
+
+  # If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
+  if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
+    echo
+    echo "- downloading active extensions from Dynatrace"
+    get_extensions_from_dynatrace "$EXTENSIONS_FROM_CLUSTER"
+  fi
+
+  echo
+  echo "- read activation config"
+  SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "$SERVICES_FROM_ACTIVATION_CONFIG")
+
+  echo
+  echo "- choosing and uploading extensions to Dynatrace"
+  upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
 fi
 
 if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   SELECTED_REGION=$(gcloud config get-value compute/region 2>/dev/null)
   if [ -z "$SELECTED_REGION" ]; then
     echo
-    echo -e "\e[91mERROR: \e[37mDefault region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
+    err "Default region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
     exit 1
   fi
   echo
