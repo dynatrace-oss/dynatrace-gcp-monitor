@@ -123,10 +123,10 @@ class ExtensionsFetcher:
         services_in_env_but_no_in_extensions = services_from_env.difference(set(services_from_extensions_dict.keys()))
         if services_in_env_but_no_in_extensions:
             self.logging_context.log(
-                f"Following services are not found in extensions, but defined in 'GCP_SERVICES' env: {services_in_env_but_no_in_extensions}")
+                f"Following services are not found in extensions, but defined in 'gcpServicesYaml' env: {services_in_env_but_no_in_extensions}")
         services_not_configured = set(services_from_extensions_dict.keys()).difference(services_from_env)
         if services_not_configured:
-            self.logging_context.log(f"Following services from extensions are filtered out, because not found in 'GCP_SERVICES' env: {services_not_configured}")
+            self.logging_context.log(f"Following services from extensions are filtered out, because not found in 'gcpServicesYaml' env: {services_not_configured}")
             return [services_from_extensions_dict[service_name] for service_name in services_from_extensions_dict.keys()
                     if service_name not in services_not_configured]
         else:
