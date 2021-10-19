@@ -57,7 +57,9 @@ if ! command -v yq &> /dev/null
 then
 
     err 'yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
-    YQ: https://github.com/mikefarah/yq'
+    YQ: https://github.com/mikefarah/yq
+    Example command to install yq:
+    sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
     if ! command -v jq &> /dev/null
     then
         echo -e "JQ: https://stedolan.github.io/jq/download/"
@@ -393,24 +395,26 @@ if [ "$INSTALL" == true ]; then
       exit 1
       ;;
   esac
+fi
 
-  echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
-  while ! [[ "${DYNATRACE_URL}" =~ ^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/)(e\/[a-z0-9-]{36}\/)?$ ]]; do
-      read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
-  done
-  echo ""
+echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
+while ! [[ "${DYNATRACE_URL}" =~ ^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/)(e\/[a-z0-9-]{36}\/)?$ ]]; do
+  read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
+done
+echo ""
 
-  echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)."
-  echo "The token requires grant of 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read configuration (API v1)',  and 'Write configuration (API v1)' scope"
-  while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
-      read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
-  done
-  echo ""
+echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)."
+echo "The token requires grant of 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read configuration (API v1)',  and 'Write configuration (API v1)' scope"
+while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
+  read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
+done
+echo ""
 
+if [ "$INSTALL" == true ]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "api/v2/extensions/schemas"); then
     GCP_EXTENSIONS_SCHEMA_PRESENT=$(jq -r '.versions[] | select(.=="1.229.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
     if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
-      err Dynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.229 or higher to complete installation."
+      err "Dynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.229 or higher to complete installation."
       exit 1
     fi
   fi
@@ -466,7 +470,6 @@ if [ "$INSTALL" == true ]; then
       gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
       gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer
   fi
-
 fi
 
 check_api_token "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
@@ -555,11 +558,13 @@ rm -rf ../extensions_from_cluster
 cd ../$GCP_FUNCTION_NAME || exit
 
 if [ "$INSTALL" == true ]; then
+  echo -e
   echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
   gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:COMPATIBILITY_MODE=$COMPATIBILITY_MODE:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
 else
 
   while true; do
+    echo -e
     read -p "- your Cloud Function will be updated - any manual changes made to Cloud Function environment variables will be replaced with values from 'activation-config.yaml' file, do you want to continue? [y/n]" yn
     case $yn in
         [Yy]* ) echo -e "- updating the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m";  break;;
