@@ -114,19 +114,19 @@ gcpServicesYaml: |
       vars:
         filter_conditions: ""
     # Google Apigee Environment
-    #- service: apigee.googleapis.com_Environment
+    #- service: apigee_googleapis_com_Environment
     #  featureSets:
     #    - default
     #  vars:
     #    filter_conditions: ""
     # Google Apigee Proxy
-    #- service: apigee.googleapis.com_Proxy
+    #- service: apigee_googleapis_com_Proxy
     #  featureSets:
     #    - default
     #  vars:
     #    filter_conditions: ""
     # Google Apigee Proxy (v2)
-    #- service: apigee.googleapis.com_ProxyV2
+    #- service: apigee_googleapis_com_ProxyV2
     #  featureSets:
     #    - default
     #  vars:
@@ -192,13 +192,13 @@ gcpServicesYaml: |
       vars:
         filter_conditions: ""
     # Google Cloud Trace
-    #- service: cloudtrace.googleapis.com_CloudtraceProject
+    #- service: cloudtrace_googleapis_com_CloudtraceProject
     #  featureSets:
     #    - default
     #  vars:
     #    filter_conditions: ""
     # Google NetApp CVS-SO
-    #- service: cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO
+    #- service: cloudvolumesgcp_api_netapp_com_NetAppCloudVolumeSO
     #  featureSets:
     #    - default
     #  vars:
@@ -235,12 +235,6 @@ gcpServicesYaml: |
     #    filter_conditions: ""
     # Google Cloud Tasks queues
     #- service: cloud_tasks_queue
-    #  featureSets:
-    #    - default
-    #  vars:
-    #    filter_conditions: ""
-    # Google Consumed API
-    #- service: consumed_api
     #  featureSets:
     #    - default
     #  vars:
@@ -316,7 +310,6 @@ gcpServicesYaml: |
       featureSets:
         - default
     #    - agent
-    #    - appenginee
     #    - firewallinsights
     #    - istio
     #    - uptime_check
@@ -346,12 +339,6 @@ gcpServicesYaml: |
         - default
       vars:
         filter_conditions: ""
-    # Google GKE Container
-    #- service: gke_container
-    #  featureSets:
-    #    - default
-    #  vars:
-    #    filter_conditions: ""
     # Google Cloud HTTP/S Load Balancing Rule
     - service: https_lb_rule
       featureSets:
@@ -370,38 +357,26 @@ gcpServicesYaml: |
     #    - default
     #  vars:
     #    filter_conditions: ""
-    # Google Interconnect Attachment
-    #- service: interconnect_attachment
-    #  featureSets:
-    #    - default
-    # vars:
-    #    filter_conditions: ""
     # Google Internal HTTP/S Load Balancing Rule
     - service: internal_http_lb_rule
       featureSets:
         - default
       vars:
         filter_conditions: ""
-    # Google Internal TCP Load Balancer Rule
-    - service: internal_tcp_lb_rule
+    # Google Internal Network Load Balancer
+    - service: internal_network_lb_rule
       featureSets:
         - default
       vars:
         filter_conditions: ""
-    # Google Internal UDP Load Balancer Rule
-    - service: internal_udp_lb_rule
+    # Google Network Load Balancer
+    - service: network_lb_rule
       featureSets:
         - default
       vars:
         filter_conditions: ""
-    # Google Istio Canonical Service
-    #- service: istio_canonical_service
-    #  featureSets:
-    #    - default
-    #  vars:
-    #    filter_conditions: ""
     # Google Kubernetes Cluster
-    - service: k8s_cluster
+    - service: k8s
       featureSets:
         - default
       vars:
@@ -417,37 +392,12 @@ gcpServicesYaml: |
       vars:
         filter_conditions: ""
     #    filter_conditions: resource.labels.location = "us-central1-c" AND resource.labels.namespace_name != "jenkins"
-    # Google Kubernetes Node
-    - service: k8s_node
-      featureSets:
-        - default
-      vars:
-        filter_conditions: ""
     # Google Kubernetes Pod
-    - service: k8s_pod
-      featureSets:
-        - default
+    #- service: k8s_pod
+    #  featureSets:
     #    - istio
       vars:
         filter_conditions: ""
-    # Google Cloud Run for Anthos Broker
-    #- service: knative_broker
-    #  featureSets:
-    #    - default
-    #  vars:
-    #    filter_conditions: ""
-    # Google Cloud Run for Anthos Revision
-    #- service: knative_revision
-    #  featureSets:
-    #    - default
-    #  vars:
-    #    filter_conditions: ""
-    # Google Cloud Run for Anthos Trigger
-    #- service: knative_trigger
-    #  featureSets:
-    #    - default
-    #  vars:
-    #    filter_conditions: ""
     # Google Cloud Logging export sink
     #- service: logging_sink
     #  featureSets:
@@ -484,12 +434,6 @@ gcpServicesYaml: |
     #    - default
     #  vars:
     #    filter_conditions: ""
-    # Google Pub/Sub Lite Subscription Partition
-    #- service: pubsublite_subscription_partition
-    #  featureSets:
-    #    - default
-    #  vars:
-    #    filter_conditions: ""
     # Google Pub/Sub Lite Topic Partition
     - service: pubsublite_topic_partition
       featureSets:
@@ -515,7 +459,7 @@ gcpServicesYaml: |
       vars:
         filter_conditions: ""
     # Google reCAPTCHA Key
-    #- service: recaptchaenterprise.googleapis.com/Key
+    #- service: recaptchaenterprise_googleapis_com_Key
     #  featureSets:
     #    - default
     #  vars:
@@ -532,12 +476,6 @@ gcpServicesYaml: |
     #    - default
     #  vars:
     #    filter_conditions: ""
-    # Google Cloud Network TCP Load Balancer Rule
-    - service: tcp_lb_rule
-      featureSets:
-        - default
-      vars:
-        filter_conditions: ""
     # Google Cloud TCP/SSL Proxy Rule
     #- service: tcp_ssl_proxy_rule
     #  featureSets:
@@ -556,12 +494,6 @@ gcpServicesYaml: |
     #    - default
     #  vars:
     #    filter_conditions: ""
-    # Google Cloud Network UDP Load Balancer Rule
-    - service: udp_lb_rule
-      featureSets:
-        - default
-      vars:
-        filter_conditions: ""
     # Google Uptime Check URL
     #- service: uptime_url
     #  featureSets:
