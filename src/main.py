@@ -45,7 +45,7 @@ def dynatrace_gcp_extension(event, context, project_id: Optional[str] = None):
         raise e
 
 
-async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None):
+async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
     timestamp_utc = datetime.utcnow()
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
@@ -60,7 +60,7 @@ async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None)
     data = {'data': '', 'publishTime': timestamp_utc_iso}
 
     start_time = time.time()
-    await handle_event(data, event_context, "dynatrace-gcp-extension", project_ids)
+    await handle_event(data, event_context, "dynatrace-gcp-extension", project_ids, services)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
@@ -69,21 +69,22 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, event_context, project_id_owner: Optional[str], projects_ids: Optional[List[str]] = None):
+async def handle_event(event: Dict, event_context, project_id_owner: Optional[str], projects_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
     if isinstance(event_context, Dict):
         context = LoggingContext(event_context.get("execution_id", None))
     else:
         context = LoggingContext(None)
 
-    selected_services = []
-    if "GCP_SERVICES" in os.environ:
-        selected_services = get_selected_services()
-        # set default featureset if featureset not present in env variable
-        for i, service in enumerate(selected_services):
-            if "/" not in service:
-                selected_services[i] = f"{service}/default"
-
-    services = load_supported_services(context, selected_services)
+    if not services:
+        # load services for GCP Function
+        selected_services = []
+        if "GCP_SERVICES" in os.environ:
+            selected_services = get_selected_services()
+            # set default featureset if featureset not present in env variable
+            for i, service in enumerate(selected_services):
+                if "/" not in service:
+                    selected_services[i] = f"{service}/default"
+        services = load_supported_services(context, selected_services)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         setup_start_time = time.time()
@@ -255,14 +256,6 @@ def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str,
 
 
 def load_supported_services(context: LoggingContext, selected_services: List[str]) -> List[GCPService]:
-    activation_file_path = '/code/config/activation/gcp_services.yaml'
-    try:
-        with open(activation_file_path, encoding="utf-8") as activation_file:
-            activation_yaml = yaml.safe_load(activation_file)
-    except Exception:
-        activation_yaml = yaml.safe_load(os.environ.get("ACTIVATION_CONFIG", ""))
-    activation_config = {service_activation.get('service'): service_activation for service_activation in activation_yaml['services']} if activation_yaml and activation_yaml['services'] else {}
-
     working_directory = os.path.dirname(os.path.realpath(__file__))
     config_directory = os.path.join(working_directory, "config")
     config_files = [
@@ -281,25 +274,13 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
                 technology_name = extract_technology_name(config_yaml)
 
                 for service_yaml in config_yaml.get("gcp", {}):
-                    service_name=service_yaml.get("service", "None")
-                    featureSet=service_yaml.get("featureSet", "default")
-
-                    if activation_yaml is not None:
-                        activation_config_feature_sets = activation_config.get(service_name, {}).get("featureSets", [])
-                        should_skip = featureSet not in activation_config_feature_sets
-                        activation = activation_config.get(service_name)
-                        gcp_service = GCPService(tech_name=technology_name, activation=activation, **service_yaml)
-                    else:
-                        # If activation_config yaml not given, using passed selected_services param as whitelist
-                        # If whitelist of services exists and current service is not present in it, skip
-                        # If whitelist is empty - no services explicitly selected - load all available
-                        whitelist_exists = selected_services is not None and selected_services.__len__() > 0
-                        should_skip = whitelist_exists and f'{service_name}/{featureSet}' not in selected_services
-                        gcp_service = GCPService(tech_name=technology_name, **service_yaml)
-                    if should_skip:
-                        continue
-
-                    services.append(gcp_service)
+                    service_name = service_yaml.get("service", "None")
+                    featureSet = service_yaml.get("featureSet", "default")
+                    # If whitelist of services exists and current service is not present in it, skip
+                    # If whitelist is empty - no services explicitly selected - load all available
+                    whitelist_exists = selected_services is not None and selected_services.__len__() > 0
+                    if f'{service_name}/{featureSet}' in selected_services or not whitelist_exists:
+                        services.append(GCPService(tech_name=technology_name, **service_yaml))
 
         except Exception as error:
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")

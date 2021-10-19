@@ -13,35 +13,23 @@
 #   limitations under the License.
 from typing import NewType, Any
 
+from assertpy import assert_that
+
 from lib.context import LoggingContext
-from main import load_supported_services
+from lib.extensions_fetcher import load_activated_service_names
 
 context = LoggingContext("TEST")
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 ACTIVATION_CONFIG = "{services: [{service: pubsub_snapshot, featureSets: [default], vars: {filter_conditions: ''}},\
- {service: pubsub_subscription, featureSets: [default], vars: {filter_conditions: 'resource.labels.subscription_id=starts_with(\"test\")'}}]}"
+ {service: pubsub_subscription, featureSets: [default, test], vars: {filter_conditions: 'resource.labels.subscription_id=starts_with(\"test\")'}}]}"
 
 
 def test_filtering_config_loaded(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG)
-    config = load_supported_services(context, ["pubsub_snapshot/default", "pubsub_subscription/default"])
-    assert len(config) == 2
-    assert any(elem.name == "pubsub_subscription" and elem.monitoring_filter == 'resource.labels.subscription_id=starts_with("test")' for elem in config)
-    assert any(elem.name == "pubsub_snapshot" and elem.monitoring_filter == '' for elem in config)
-
-
-def test_filtering_config_blank_when_activation_config_missing():
-    config = load_supported_services(context, ["pubsub_snapshot/default", "pubsub_subscription/default"])
-    assert len(config) == 2
-    assert any(elem.name == "pubsub_subscription" and elem.monitoring_filter == '' for elem in config)
-    assert any(elem.name == "pubsub_snapshot" and elem.monitoring_filter == '' for elem in config)
+    activated_service_names = load_activated_service_names()
+    assert_that(activated_service_names).contains_only("pubsub_subscription/", "pubsub_subscription/test", "pubsub_snapshot/")
 
 def test_filtering_missing_configs(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("ACTIVATION_CONFIG", "{services: []}")
-    config = load_supported_services(context, [])
+    config = load_activated_service_names()
     assert len(config) == 0
-
-def test_all_configs_when_activation_config_missing():
-    config = load_supported_services(context, [])
-    assert len(config) != 0
-    assert len(config) == 87
