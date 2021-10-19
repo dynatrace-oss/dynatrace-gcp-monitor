@@ -501,7 +501,7 @@ else
 fi
 
 # If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
-if [[ "$UPGRADE_EXTENSIONS" != "Y" ]]; then
+if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
   echo -e
   echo "- downloading active extensions from Dynatrace"
   mkdir -p ../extensions_from_cluster
