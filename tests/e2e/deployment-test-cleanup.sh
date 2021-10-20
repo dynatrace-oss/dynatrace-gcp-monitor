@@ -13,6 +13,8 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
+
 gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}" 
 gcloud pubsub topics delete "${PUBSUB_TOPIC}" 
 gcloud logging sinks delete "${LOG_ROUTER}" 
@@ -22,8 +24,14 @@ gcloud iam roles delete "${IAM_ROLE_PREFIX}.metrics" --project="${GCP_PROJECT_ID
 gcloud container images delete "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}" 
 gcloud functions delete "${CLOUD_FUNCTION_NAME}"
 
-INSTALLED_EXTENSIONS=$(curl -s -k -X GET "${DYNATRACE_URL}/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.extensions[] | "\(.extensionName)/\(.version)"')
+INSTALLED_EXTENSIONS=$(curl -s -k -X GET "${DYNATRACE_URL}/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.extensions[] | "\(.extensionName)"')
 
 for extension in ${INSTALLED_EXTENSIONS}; do
-    curl -s -k -X DELETE "${DYNATRACE_URL}/api/v2/extensions/${extension}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}"
+    VERSION=$(curl -s -k -X GET "${DYNATRACE_URL}/api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.version')
+    echo "${extension}"
+    echo "Deactivated configuration version:"
+    curl -s -k -X DELETE "${DYNATRACE_URL}/api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.version'
+    echo "Extension deleted:"
+    curl -s -k -X DELETE "${DYNATRACE_URL}/api/v2/extensions/${extension}/${VERSION}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.extensions[] | "\(.extensionName):\(.version)"'
+    echo
 done
