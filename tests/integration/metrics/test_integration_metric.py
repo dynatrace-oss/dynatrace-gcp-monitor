@@ -94,9 +94,10 @@ def setup_wiremock():
     wiremock.stop()
 
 
+# If the test fails because of not founding correct mapping, check working directory for the test
+# It should be '/tests/integration/metrics'
 @pytest.mark.asyncio
-async def test_metric_authorization_header(monkeypatch):
-    monkeypatch.setenv('COMPATIBILITY_MODE', None)
+async def test_metric_authorization_header():
     await async_dynatrace_gcp_extension()
 
     request = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
@@ -112,15 +113,8 @@ async def test_metric_authorization_header(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_ingest_lines_output_compatibility_mode_false(resource_path_root, monkeypatch):
-    monkeypatch.setenv('COMPATIBILITY_MODE', 'False')
+async def test_ingest_lines_output(resource_path_root):
     await ingest_lines_output(os.path.join(resource_path_root, "metrics/ingest_input.dat"))
-
-
-@pytest.mark.asyncio
-async def test_ingest_lines_output_compatibility_mode_true(resource_path_root, monkeypatch):
-    monkeypatch.setenv('COMPATIBILITY_MODE', 'True')
-    await ingest_lines_output(os.path.join(resource_path_root, "metrics/ingest_input_compatibility_mode.dat"))
 
 
 async def ingest_lines_output(expected_ingest_output_file):

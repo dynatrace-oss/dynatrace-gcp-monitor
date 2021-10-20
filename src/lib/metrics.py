@@ -22,11 +22,6 @@ from typing import List, Text, Any, Dict
 VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
 VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 
-ODIN_DIMENSIONS_COMPATIBILITY_MODE = False
-
-def update_env_var_configuration():
-    global ODIN_DIMENSIONS_COMPATIBILITY_MODE
-    ODIN_DIMENSIONS_COMPATIBILITY_MODE = os.environ.get("COMPATIBILITY_MODE", "").upper() in ["TRUE", "YES"]
 
 def include_dimension(dimension_config):
     dimension_in_compatibility_mode_only = dimension_config.get("compatibilityModeOnly", False)
@@ -109,8 +104,7 @@ class Metric:
         object.__setattr__(self, "unit", kwargs.get("gcpOptions", {}).get("unit", None))
         object.__setattr__(self, "value_type", gcp_options.get("valueType", ""))
 
-        dimensions_ = [Dimension(**x) for x in kwargs.get("dimensions", {}) if include_dimension(x)]
-        object.__setattr__(self, "dimensions", dimensions_)
+        object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 
         ingest_delay = kwargs.get("gcpOptions", {}).get("ingestDelay", None)
         if ingest_delay:
@@ -141,9 +135,7 @@ class GCPService:
         object.__setattr__(self, "name", kwargs.get("service", ""))
         object.__setattr__(self, "feature_set", kwargs.get("featureSet", ""))
         object.__setattr__(self, "technology_name", kwargs.get("tech_name", "N/A"))
-
-        dimensions_ = [Dimension(**x) for x in kwargs.get("dimensions", {}) if include_dimension(x)]
-        object.__setattr__(self, "dimensions", dimensions_)
+        object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 
         object.__setattr__(self, "metrics", [
             Metric(**x)

@@ -1,16 +1,10 @@
-id: api
-$schema: gcp_schema_v_1_0.json
-version: 0.0.1
-technology:
-  name: Google Cloud APIs
+name: com.dynatrace.extension.api
+version: 0.0.3
 minDynatraceVersion: 1.199
 gcp:
 - service: api
   featureSet: default
   dimensions:
-  - value: resource.labels.project_id
-    key: project_id
-    compatibilityModeOnly: true
   - value: resource.labels.project_id
     key: gcp.project.id
   - value: resource.labels.service
@@ -19,9 +13,6 @@ gcp:
     key: method
   - value: resource.labels.version
     key: version
-  - value: resource.labels.location
-    key: location
-    compatibilityModeOnly: true
   - value: resource.labels.location
     key: gcp.region
   metrics:

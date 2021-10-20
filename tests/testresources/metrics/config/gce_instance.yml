@@ -9,18 +9,9 @@ gcp:
   featureSet: default
   dimensions:
   - value: resource.labels.project_id
-    key: project_id
-    compatibilityModeOnly: true
-  - value: resource.labels.project_id
     key: gcp.project.id
   - value: resource.labels.instance_id
-    key: instance_id
-    compatibilityModeOnly: true
-  - value: resource.labels.instance_id
     key: gcp.instance.id
-  - value: resource.labels.zone
-    key: zone
-    compatibilityModeOnly: true
   - value: resource.labels.zone
     key: gcp.region
   metrics:
@@ -36,9 +27,6 @@ gcp:
       unit: '1'
     dimensions:
     - value: metric.labels.instance_name
-      key: instance_name
-      compatibilityModeOnly: true
-    - value: metric.labels.instance_name
       key: gcp.instance.name
     - value: metric.labels.device_name
     - value: metric.labels.direction
@@ -53,9 +41,6 @@ gcp:
       metricKind: CUMULATIVE
       unit: s{CPU}
     dimensions:
-    - value: metric.labels.instance_name
-      key: instance_name
-      compatibilityModeOnly: true
     - value: metric.labels.instance_name
       key: gcp.instance.name
     - value: metric.labels.state

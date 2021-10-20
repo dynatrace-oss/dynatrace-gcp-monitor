@@ -9,18 +9,9 @@ gcp:
   featureSet: default
   dimensions:
   - value: resource.labels.project_id
-    key: project_id
-    compatibilityModeOnly: true
-  - value: resource.labels.project_id
     key: gcp.project.id
   - value: resource.labels.database_id
-    key: database_id
-    compatibilityModeOnly: true
-  - value: resource.labels.database_id
     key: gcp.instance.name
-  - value: resource.labels.region
-    key: region
-    compatibilityModeOnly: true
   - value: resource.labels.region
     key: gcp.region
   metrics:
