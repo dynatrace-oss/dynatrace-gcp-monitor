@@ -341,6 +341,7 @@ check_if_parameter_is_empty "$GCP_FUNCTION_NAME" 'googleCloud.metrics.function'
 check_if_parameter_is_empty "$GCP_IAM_ROLE" "'googleCloud.common.iamRole'"
 check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "'googleCloud.common.serviceAccount'"
 check_if_parameter_is_empty "$QUERY_INTERVAL_MIN" "'googleCloud.metrics.queryInterval'"
+check_if_parameter_is_empty "$FUNCTION_GCP_SERVICES" "'googleCloud.activation.metrics.services'"
 
 echo  "- Logging to your account..."
 GCP_ACCOUNT=$(gcloud config get-value account)
