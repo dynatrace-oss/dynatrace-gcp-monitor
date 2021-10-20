@@ -13,8 +13,6 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-set -e
-
 function run_deploy_and_tests() {
     TEST_TYPE=$1
 
@@ -30,6 +28,7 @@ function run_deploy_and_tests() {
         TEST_TYPE=''
     fi
 
+    set -e
     pytest "tests/e2e/${TEST_TYPE}" -v
 
     helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
