@@ -155,7 +155,6 @@ get_extensions_zip_packages() {
     exit 1
   fi
 
-  mkdir -p ${EXTENSIONS_TMPDIR}
   echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME
   do
     (cd ${EXTENSIONS_TMPDIR} && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
@@ -227,9 +226,6 @@ activate_extension_on_cluster() {
 
 get_extensions_from_dynatrace() {
   EXTENSIONS_FROM_CLUSTER=$1
-
-  mkdir -p ${EXTENSIONS_TMPDIR}
-  mkdir -p ${CLUSTRER_EXTENSIONS_TMPDIR}
 
   cd ${CLUSTRER_EXTENSIONS_TMPDIR} || exit
 
