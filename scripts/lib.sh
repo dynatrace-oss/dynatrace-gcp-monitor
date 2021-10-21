@@ -157,6 +157,7 @@ get_extensions_zip_packages() {
 
   echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME
   do
+    echo -n "."
     (cd ${EXTENSIONS_TMPDIR} && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
   done
 }
@@ -269,6 +270,7 @@ upload_correct_extension_to_dynatrace() {
         activate_extension_on_cluster "$EXTENSION_ZIP"
         break
       fi
+      echo -n "."
     done
     rm extension.zip
     rm "$EXTENSION_FILE_NAME".yaml
