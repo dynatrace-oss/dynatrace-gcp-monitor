@@ -25,8 +25,7 @@ gcloud container images delete "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 gcloud functions delete "${CLOUD_FUNCTION_NAME}"
 
 # testing message
-curl -s -k -X GET "${DYNATRACE_URL}/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}"
-curl -s -k -X GET "${DYNATRACE_URL}/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.extensions[].extensionName'
+echo curl -s -k -X GET "${DYNATRACE_URL}/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token xxxxxxxxxxxxx"
 INSTALLED_EXTENSIONS=$(curl -s -k -X GET "${DYNATRACE_URL}/api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.extensions[].extensionName')
 
 for extension in ${INSTALLED_EXTENSIONS}; do
