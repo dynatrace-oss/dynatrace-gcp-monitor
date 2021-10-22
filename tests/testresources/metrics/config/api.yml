@@ -1,46 +1,43 @@
-name: com.dynatrace.extension.api
-version: 0.0.3
-minDynatraceVersion: 1.199
 gcp:
-- service: api
-  featureSet: default
-  dimensions:
-  - value: resource.labels.project_id
-    key: gcp.project.id
-  - value: resource.labels.service
-    key: service
-  - value: resource.labels.method
-    key: method
-  - value: resource.labels.version
-    key: version
-  - value: resource.labels.location
-    key: gcp.region
-  metrics:
-  - value: serviceruntime.googleapis.com/api/request_count
-    key: cloud.gcp.serviceruntime_googleapis_com.api.request_count
-    type: count,delta
-    name: Request count
-    gcpOptions:
-      ingestDelay: 180
-      samplePeriod: 60
-      valueType: INT64
-      metricKind: DELTA
-      unit: '1'
+  - service: api
+    gcpMonitoringFilter: var:filter_conditions
     dimensions:
-    - value: metric.labels.protocol
-    - value: metric.labels.response_code
-    - value: metric.labels.response_code_class
-    - value: metric.labels.grpc_status_code
-  - value: serviceruntime.googleapis.com/api/request_latencies
-    key: cloud.gcp.serviceruntime_googleapis_com.api.request_latencies
-    type: gauge
-    name: Request latencies
-    gcpOptions:
-      ingestDelay: 180
-      samplePeriod: 60
-      valueType: DISTRIBUTION
-      metricKind: DELTA
-      unit: s
-    dimensions: []
-dashboards:
-  - dashboard: "dashboards/api.json"
+      - value: label:resource.labels.project_id
+        key: gcp.project.id
+      - value: label:resource.labels.service
+        key: service
+      - value: label:resource.labels.method
+        key: method
+      - value: label:resource.labels.version
+        key: version
+      - value: label:resource.labels.location
+        key: gcp.region
+    metrics:
+      - value: metric:serviceruntime.googleapis.com/api/request_count
+        key: cloud.gcp.serviceruntime_googleapis_com.api.request_count
+        type: count,delta
+        gcpOptions:
+          ingestDelay: 180
+          samplePeriod: 60
+          valueType: INT64
+          metricKind: DELTA
+          unit: "1"
+        dimensions:
+          - value: label:metric.labels.protocol
+            key: protocol
+          - value: label:metric.labels.response_code
+            key: response_code
+          - value: label:metric.labels.response_code_class
+            key: response_code_class
+          - value: label:metric.labels.grpc_status_code
+            key: grpc_status_code
+      - value: metric:serviceruntime.googleapis.com/api/request_latencies
+        key: cloud.gcp.serviceruntime_googleapis_com.api.request_latencies
+        type: gauge
+        gcpOptions:
+          ingestDelay: 180
+          samplePeriod: 60
+          valueType: DISTRIBUTION
+          metricKind: DELTA
+          unit: s
+        dimensions: []

@@ -133,5 +133,5 @@ async def ingest_lines_output(expected_ingest_output_file):
     with open(expected_ingest_output_file) as ingest:
         recorded_ingest = ingest.read()
 
-        assert_that(body.split("\n")).is_length(289)
+        assert_that(body.split("\n")).is_length(306)
         assert_that(body).is_equal_to(recorded_ingest)
