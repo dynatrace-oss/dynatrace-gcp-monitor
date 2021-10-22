@@ -186,7 +186,8 @@ upload_extension_to_cluster() {
     if ! RESPONSE=$(dt_api "/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" "PUT" "{\"version\": \"${EXTENSION_VERSION}\"}"); then
       warn "- Activation ${EXTENSION_ZIP} failed."
     else
-      echo -e "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated."
+      echo
+      echo "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated."
     fi
   fi
 }

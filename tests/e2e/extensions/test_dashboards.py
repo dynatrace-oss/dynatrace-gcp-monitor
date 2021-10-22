@@ -11,36 +11,31 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+
 import os
-import time
+import jq
+import pytest
 
 import requests
 
+testdata = ['Google Cloud Function', 'Google Cloud Storage', 'Google Cloud Datastore', 'Google Cloud Filestore', 'Google Cloud HTTPs Load Balancing', 'Google Cloud TCP Load Balancing', 'Google Cloud SQL', 'Google Cloud Pub/Sub'] 
+
 
 def test_environment_vars():
-    assert "GCP_PROJECT_ID" in os.environ
-    assert "CLOUD_FUNCTION_NAME" in os.environ
     assert "DYNATRACE_URL" in os.environ
     assert "DYNATRACE_ACCESS_KEY" in os.environ
-    assert "START_LOAD_GENERATION" in os.environ
-    assert "END_LOAD_GENERATION" in os.environ
 
-
-def test_metrics_on_dynatrace():
-    print(f"Try to receive execution_count metric from Dynatrace in 5 min (start_time={os.environ['START_LOAD_GENERATION']} ,end_time={os.environ['END_LOAD_GENERATION']})")
-    time.sleep(5*60)
-
-    url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/metrics/query"
-    params = {'from': os.environ['START_LOAD_GENERATION'],
-              'to': os.environ['END_LOAD_GENERATION'],
-              'metricSelector': f"cloud.gcp.cloudfunctions_googleapis_com.function.execution_count:filter(eq(gcp.instance.name, {os.environ['CLOUD_FUNCTION_NAME']}),eq(gcp.project.id, {os.environ['GCP_PROJECT_ID']}))"
-              }
+@pytest.mark.parametrize("dashboard", testdata)
+def test_metrics_on_dynatrace(dashboard):
+    url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/config/v1/dashboards"
+    params = {
+        'owner': 'Dynatrace Open Source'
+        }
     headers = {
         'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"
     }
     response = requests.get(url, params=params, headers=headers)
     assert response.status_code == 200
     response_json = response.json()
-    assert 'totalCount' in response_json
-    assert response_json['totalCount'] == 1
-    assert 5 in response_json['result'][0]['data'][0]['values']
+    assert 'dashboards' in response_json
+    assert dashboard in jq.compile(".dashboards[].name").input(response_json).all()
