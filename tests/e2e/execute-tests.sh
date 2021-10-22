@@ -15,6 +15,7 @@ function run_deploy_and_tests() {
         TEST_TYPE=''
     fi
 
+    set -e
     pytest "tests/e2e/${TEST_TYPE}" -v
 
     helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
