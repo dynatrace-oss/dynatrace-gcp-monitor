@@ -239,6 +239,28 @@ get_extensions_zip_packages() {
   done
 }
 
+check_gcp_config_in_extension() {
+    EXTENSION_ZIP=$1
+
+    echo ${EXTENSION_ZIP}
+    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &> /dev/null
+    if [[ $(unzip -c "$EXTENSION_ZIP-tmp/extension.zip" "extension.yaml" | tail -n +3 | yq e 'has("gcp")' -) == "false" ]] ; then
+        warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
+        rm ${EXTENSION_ZIP}
+    fi
+    rm -r "$EXTENSION_ZIP-tmp"
+}
+
+check_gcp_config_in_extensions() {
+    EXTENSION_DIR=$1
+
+    pushd ${EXTENSION_DIR} &> /dev/null  || exit
+    for EXTENSION_ZIP in *.zip; do
+        check_gcp_config_in_extension ${EXTENSION_ZIP}
+    done
+    popd &> /dev/null
+}
+
 upload_extension_to_cluster() {
   DYNATRACE_URL=$1
   DYNATRACE_ACCESS_KEY=$2
@@ -480,6 +502,10 @@ echo "- downloading extensions"
 get_extensions_zip_packages
 
 echo -e
+echo "- checking extensions"
+check_gcp_config_in_extensions ./extensions
+
+echo -e
 echo "- checking activated extensions in Dynatrace"
 get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
@@ -514,8 +540,11 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
     EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
     curl -k -s -X GET "${DYNATRACE_URL}api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
-      find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
-      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
+      check_gcp_config_in_extension "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+      if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ]; then
+        find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+        mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
+      fi
     fi
   done
 fi
