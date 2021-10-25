@@ -18,15 +18,8 @@ import pytest
 import requests
 
 testdata = [
-    'Google Kubernetes Engine',
-    'Google Cloud Function',
-    'Google Cloud Storage',
-    'Google Cloud Datastore',
-    'Google Cloud Filestore',
-    'Google Cloud HTTPs Load Balancing',
-    'Google Cloud TCP Load Balancing',
-    'Google Cloud SQL',
-    'Google Cloud Pub/Sub'
+    'cloud:gcp:k8s_pod',
+    'cloud:gcp:k8s_cluster'
     ] 
 
 @pytest.fixture(scope="class")
@@ -36,9 +29,11 @@ def test_environment_vars():
 
 @pytest.fixture
 def api_response():
-    url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/config/v1/dashboards"
+    url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/settings/objects"
     params = {
-        'owner': 'Dynatrace'
+        'schemaIds': 'builtin:monitoredentities.generic.relation',
+        'scopes': 'environment',
+        'fields': 'value'
         }
     headers = {
         'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"
@@ -47,8 +42,10 @@ def api_response():
     assert response.status_code == 200
     return response.json()
 
-@pytest.mark.parametrize("dashboard", testdata)
-def test_metrics_on_dynatrace(dashboard, api_response):
-    assert 'dashboards' in api_response
-    createdByList = [item['name'] for item in api_response['dashboards']]
-    assert dashboard in createdByList
+@pytest.mark.parametrize("generic_relation", testdata)
+def test_metrics_on_dynatrace(generic_relation, api_response):
+    assert 'totalCount' in api_response
+    assert api_response['totalCount'] >= 1
+    assert 'items' in api_response
+    createdByList = [item['value']['toType'] for item in api_response['items'] if 'com.dynatrace.extension.' in item['value']['createdBy']]
+    assert generic_relation in createdByList
