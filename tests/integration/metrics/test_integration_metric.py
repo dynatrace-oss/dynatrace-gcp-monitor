@@ -131,8 +131,8 @@ async def ingest_lines_output(expected_ingest_output_file):
     body = result.body
 
     with open(expected_ingest_output_file) as ingest:
-        recorded_ingest = ingest.read()
+        expected_ingest_lines = ingest.read().split("\n")
+        actual_ingest_lines = body.split("\n")
 
-        assert_that(body.split("\n")).is_length(306)
-        print(body)
-        assert_that(body).is_equal_to(recorded_ingest)
+        assert_that(actual_ingest_lines).is_length(len(expected_ingest_lines))
+        assert_that(actual_ingest_lines).contains_only(*expected_ingest_lines)
