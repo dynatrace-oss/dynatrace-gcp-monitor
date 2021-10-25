@@ -37,5 +37,6 @@ def test_metrics_on_dynatrace(dashboard):
     response = requests.get(url, params=params, headers=headers)
     assert response.status_code == 200
     response_json = response.json()
+    print(response_json)
     assert 'dashboards' in response_json
     assert dashboard in jq.compile(".dashboards[].name").input(response_json).all()
