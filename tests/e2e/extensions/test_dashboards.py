@@ -29,7 +29,7 @@ def test_environment_vars():
 def test_metrics_on_dynatrace(dashboard):
     url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/config/v1/dashboards"
     params = {
-        'owner': 'Dynatrace Open Source'
+        'owner': 'Dynatrace'
         }
     headers = {
         'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"
