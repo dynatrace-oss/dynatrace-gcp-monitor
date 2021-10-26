@@ -23,11 +23,6 @@ VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
 VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 
 
-def include_dimension(dimension_config):
-    dimension_in_compatibility_mode_only = dimension_config.get("compatibilityModeOnly", False)
-    # in compatibilityMode, include all dimensions, else (in normal mode) exclude compatibilityModeOnly dimensions
-    return ODIN_DIMENSIONS_COMPATIBILITY_MODE == True or not dimension_in_compatibility_mode_only
-
 @dataclass(frozen=True)
 class DimensionValue:
     name: Text
