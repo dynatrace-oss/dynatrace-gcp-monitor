@@ -44,7 +44,7 @@ def api_response():
     return response.json()
 
 @pytest.mark.parametrize("generic_relation", testdata)
-def test_metrics_on_dynatrace(generic_relation, api_response):
+def test_alerts_on_dynatrace(generic_relation, api_response):
     assert 'values' in api_response
     createdByList = [item['name'] for item in api_response['values']]
     assert generic_relation in createdByList

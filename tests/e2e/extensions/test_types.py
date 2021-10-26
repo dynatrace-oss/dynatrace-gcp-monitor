@@ -63,7 +63,7 @@ def api_response():
     return response.json()
 
 @pytest.mark.parametrize("generic_type", testdata)
-def test_metrics_on_dynatrace(generic_type, api_response):
+def test_generic_type_on_dynatrace(generic_type, api_response):
     assert 'totalCount' in api_response
     assert api_response['totalCount'] >= 1
     assert 'items' in api_response

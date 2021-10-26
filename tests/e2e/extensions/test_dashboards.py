@@ -48,7 +48,7 @@ def api_response():
     return response.json()
 
 @pytest.mark.parametrize("dashboard", testdata)
-def test_metrics_on_dynatrace(dashboard, api_response):
+def test_dashboard_on_dynatrace(dashboard, api_response):
     assert 'dashboards' in api_response
     createdByList = [item['name'] for item in api_response['dashboards']]
     assert dashboard in createdByList

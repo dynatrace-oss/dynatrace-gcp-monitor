@@ -43,7 +43,7 @@ def api_response():
     return response.json()
 
 @pytest.mark.parametrize("generic_relation", testdata)
-def test_metrics_on_dynatrace(generic_relation, api_response):
+def test_generic_relation_on_dynatrace(generic_relation, api_response):
     assert 'totalCount' in api_response
     assert api_response['totalCount'] >= 1
     assert 'items' in api_response
