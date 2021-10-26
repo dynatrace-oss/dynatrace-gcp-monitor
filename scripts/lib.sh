@@ -17,7 +17,7 @@ readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
 readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
 readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
 EXTENSIONS_TMPDIR=$(mktemp -d)
-CLUSTRER_EXTENSIONS_TMPDIR=$(mktemp -d)
+CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 warn() {
@@ -36,7 +36,7 @@ err() {
 
 clean() {
   echo "- removing extensions files"
-  rm -rf $EXTENSION_MANIFEST_FILE $CLUSTRER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
+  rm -rf $EXTENSION_MANIFEST_FILE $CLUSTER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
 }
 
 ctrl_c() {
@@ -240,7 +240,7 @@ activate_extension_on_cluster() {
 get_extensions_from_dynatrace() {
   EXTENSIONS_FROM_CLUSTER=$1
 
-  cd ${CLUSTRER_EXTENSIONS_TMPDIR} || exit
+  cd ${CLUSTER_EXTENSIONS_TMPDIR} || exit
 
   EXTENSIONS_TO_DOWNLOAD="com.dynatrace.extension.google"
   readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$( echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD" )"
@@ -256,7 +256,7 @@ get_extensions_from_dynatrace() {
   done
   
   cd ${WORKING_DIR} || exit
-  rm -rf ${CLUSTRER_EXTENSIONS_TMPDIR}
+  rm -rf ${CLUSTER_EXTENSIONS_TMPDIR}
 }
 
 upload_correct_extension_to_dynatrace() {
