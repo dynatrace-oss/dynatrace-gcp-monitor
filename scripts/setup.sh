@@ -146,7 +146,7 @@ readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
 EXTENSIONS_TMPDIR=$(mktemp -d)
-CLUSTRER_EXTENSIONS_TMPDIR=$(mktemp -d)
+CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ -z "$EXTENSION_S3_URL" ]; then
@@ -555,7 +555,7 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
   echo -e
   echo "- downloading active extensions from Dynatrace"
   
-  cd ${CLUSTRER_EXTENSIONS_TMPDIR} || exit
+  cd ${CLUSTER_EXTENSIONS_TMPDIR} || exit
   
   EXTENSIONS_TO_DOWNLOAD="com.dynatrace.extension.google"
   readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$( echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD" )"
@@ -609,7 +609,7 @@ for EXTENSION_ZIP in *.zip; do
   rm "$EXTENSION_ZIP"
 done
 cd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
-rm -rf ${CLUSTRER_EXTENSIONS_TMPDIR}
+rm -rf ${CLUSTER_EXTENSIONS_TMPDIR}
 
 if [ "$INSTALL" == true ]; then
   echo -e
