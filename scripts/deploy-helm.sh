@@ -15,6 +15,7 @@
 
 source ./lib.sh
 
+trap ctrl_c INT
 trap onFailure ERR
 
 generate_test_log() {

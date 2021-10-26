@@ -34,6 +34,17 @@ err() {
   echo -e >&2
 }
 
+clean() {
+  echo "- removing extensions files"
+  rm -rf $EXTENSION_MANIFEST_FILE $CLUSTRER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
+}
+
+ctrl_c() {
+  clean
+  err " - deployment failed, script was break by CTRL-C"
+  exit 3
+}
+
 onFailure() {
     err " - deployment failed, please examine error messages and run again"
     exit 2
