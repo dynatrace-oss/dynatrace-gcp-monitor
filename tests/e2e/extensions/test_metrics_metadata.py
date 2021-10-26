@@ -24,7 +24,6 @@ testdata = [
     'cloud.gcp.kubernetes_io.pod',
     'cloud.gcp.kubernetes_io.container',
     'cloud.gcp.agent_googleapis_com.agent',
-    'cloud.gcp.apigee_googleapis_com.upstream',
     'cloud.gcp.storage_googleapis_com.api',
     'cloud.gcp.storage_googleapis_com.authn',
     'cloud.gcp.storage_googleapis_com.authz',
