@@ -48,6 +48,9 @@ usage: setup.sh [--upgrade-extensions]
 arguments:
     --upgrade-extensions
                             Upgrade all extensions into dynatrace cluster
+    -d, --auto-default
+                            Disable all interactive prompts when running gcloud commands.
+                            If input is required, defaults will be used, or an error will be raised.
     -h, --help
                             Show this help message and exit
     "
@@ -112,6 +115,11 @@ while (( "$#" )); do
 
             "--use-local-function-zip")
                 USE_LOCAL_FUNCTION_ZIP="Y" #todo ms ścieżka?
+                shift
+            ;;
+
+            "-d" | "--auto-default") #todo ms
+                export CLOUDSDK_CORE_DISABLE_PROMPTS=1
                 shift
             ;;
 

@@ -61,7 +61,7 @@ yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' "${ACTIV
 
 cd ./e2e_test || exit 1
 echo "Deploying gcp cloud function"
-echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY" | ./setup.sh --use-local-function-zip --s3-url "https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com"
+echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY" | ./setup.sh --use-local-function-zip --auto-default --s3-url "https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com"
 
 # Verify if function is running
 echo
