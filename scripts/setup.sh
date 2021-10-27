@@ -32,7 +32,7 @@ onFailure() {
     exit 2
 }
 
-trap onFailure ERR
+#trap onFailure ERR todo ms
 
 versionNumber() {
    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
@@ -388,6 +388,9 @@ echo ""
 
 echo "- set current project to [$GCP_PROJECT]"
 gcloud config set project $GCP_PROJECT
+
+#todo ms
+exit
 
 UPDATE=$(gcloud functions list --filter=$GCP_FUNCTION_NAME --project="$GCP_PROJECT" --format="value(name)")
 INSTALL=true
