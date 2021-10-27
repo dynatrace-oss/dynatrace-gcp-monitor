@@ -2,7 +2,7 @@
 set -eu
 
 #build contaienr
-docker build -t dynatrace/dynatrace-gcp-function .
+docker build -t dynatrace/dynatrace-gcp-function:v2-latest .
 
 #tag contaienr
 if [[ "${PUSH:-}" == "true" ]]; then
