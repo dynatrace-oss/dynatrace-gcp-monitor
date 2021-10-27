@@ -376,6 +376,9 @@ echo -e "You are now logged in as [$GCP_ACCOUNT]"
 echo
 DEFAULT_PROJECT=$(gcloud config get-value project)
 
+#todo ms to remove
+echo "GCP_PROJECT: $GCP_PROJECT_ID"
+
 echo "Please provide the GCP project ID where Dynatrace function should be deployed to. Default value: [$DEFAULT_PROJECT] (current project)"
 echo
 echo "Available projects:"

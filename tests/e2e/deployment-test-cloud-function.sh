@@ -16,7 +16,7 @@
 check_function_state()
 {
   FUNCTION=$1
-  FUNCTION_DESCRIBE=$(gcloud functions "$FUNCTION" describe --format="json")
+  FUNCTION_DESCRIBE=$(gcloud functions describe "$FUNCTION"  --format="json")
   FUNCTION_STATE=$(echo "$FUNCTION_DESCRIBE" | jq -r '.status') # todo ms yq?
   if [[ "${FUNCTION_STATE}" != *"ACTIVE"* ]]; then
     return 1
