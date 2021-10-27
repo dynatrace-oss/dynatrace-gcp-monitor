@@ -90,10 +90,6 @@ printMetricIngestInput: "false"
 # if set to destination: monitoring API calls are booked towards project which is monitored
 # REQUIRES serviceusage.services.use Permission granted for Service Account!
 serviceUsageBooking: "source"
-# Import predefined dashboards for selected services. Allowed values: "true"/"yes", "false"/"no"
-importDashboards: "true"
-# Import predefined alerting rules for selected services. Allowed values: "true"/"yes", "false"/"no"
-importAlerts: "true"
 # Metrics polling interval in minutes. Allowed values: 1 - 6
 queryInterval: 3
 #clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh
