@@ -64,7 +64,7 @@ echo "Deploying gcp cloud function"
 #todo ms
 echo "$GCP_PROJECT_ID"
 
-echo "$GCP_PROJECT_ID" "s" "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" | ./setup.sh --use-local-function-zip --s3-url "https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com"
+echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY" | ./setup.sh --use-local-function-zip --s3-url "https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com"
 
 #./setup.sh --use-local-function-zip --s3-url "https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com" << ANSWERS
 #"$GCP_PROJECT_ID"
