@@ -110,6 +110,11 @@ while (( "$#" )); do
                 shift; shift
             ;;
 
+            "--use-local-function-zip")
+                USE_LOCAL_FUNCTION_ZIP="Y" #todo ms ścieżka?
+                shift
+            ;;
+
             "-h" | "--help")
                 print_help
                 exit 0
@@ -509,10 +514,11 @@ echo -e
 echo "- checking activated extensions in Dynatrace"
 get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
-echo -e
-echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
-wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
-
+if [[ "$USE_LOCAL_FUNCTION_ZIP" != "Y" ]]; then
+  echo -e
+  echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
+  wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
+fi
 
 echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 mkdir -p $GCP_FUNCTION_NAME
