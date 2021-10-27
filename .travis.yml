@@ -53,6 +53,7 @@ jobs:
     - mkdir -p artefacts
     - ./build/version.sh
     - ./build/helm-package.sh
+    - cp activation-config.yaml ./src/
     - "(cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')"
     deploy:
       provider: releases

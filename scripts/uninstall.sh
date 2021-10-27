@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #     Copyright 2020 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +12,23 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
+readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
+readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
+WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+TMP_FUNCTION_DIR=$(mktemp -d)
 
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring / uninstall script"
 echo -e "\033[0;37m"
 
+
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
-    echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
-    wget -q $FUNCTION_RAW_REPOSITORY_URL/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
+    echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
+    wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
+    unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
+    mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG $FUNCTION_ACTIVATION_CONFIG
     echo
 fi
-
 
 readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_PUBSUB_TOPIC=$(yq e  '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
@@ -36,7 +41,6 @@ readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCT
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-function Self monitoring"
 
-
 if ! command -v gcloud &> /dev/null
 then
 
@@ -47,7 +51,6 @@ then
     echo 
     exit
 fi
-
 
 GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
@@ -103,7 +106,6 @@ if ! [[ $REMOVE_DASHBOARD ]] & ! [[ $REMOVE_JOB ]] & ! [[ $REMOVE_FUNCTION ]] & 
     echo -e "\e[93mWARNING: \e[37mNo resources found. Operation canceled."
     exit
 fi
-
 
 echo -e
 echo -e "\e[93mWARNING: \e[37mAll of the resources listed above will be deleted."
