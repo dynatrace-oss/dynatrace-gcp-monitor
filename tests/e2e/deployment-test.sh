@@ -130,7 +130,7 @@ yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
 
 cd ./e2e_test || exit 1
-./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --s3-url 'https://dynatrace-gcp-extensions-dev.s3.amazonaws.com' --quiet || exit 1
+./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 
 # Verify containers running
 echo
