@@ -32,7 +32,7 @@ onFailure() {
     exit 2
 }
 
-trap onFailure ERR
+#trap onFailure ERR
 
 versionNumber() {
    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
