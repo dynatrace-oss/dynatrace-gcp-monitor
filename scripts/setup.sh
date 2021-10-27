@@ -32,7 +32,7 @@ onFailure() {
     exit 2
 }
 
-#trap onFailure ERR todo ms
+trap onFailure ERR
 
 versionNumber() {
    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
@@ -376,9 +376,6 @@ echo -e "You are now logged in as [$GCP_ACCOUNT]"
 echo
 DEFAULT_PROJECT=$(gcloud config get-value project)
 
-#todo ms to remove
-echo "GCP_PROJECT: $GCP_PROJECT_ID"
-
 echo "Please provide the GCP project ID where Dynatrace function should be deployed to. Default value: [$DEFAULT_PROJECT] (current project)"
 echo
 echo "Available projects:"
@@ -391,9 +388,6 @@ echo ""
 
 echo "- set current project to [$GCP_PROJECT]"
 gcloud config set project $GCP_PROJECT
-
-#todo ms
-exit
 
 UPDATE=$(gcloud functions list --filter=$GCP_FUNCTION_NAME --project="$GCP_PROJECT" --format="value(name)")
 INSTALL=true
