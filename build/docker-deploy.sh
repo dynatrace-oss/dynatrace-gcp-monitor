@@ -11,7 +11,7 @@ if [[ "${PUSH:-}" == "true" ]]; then
     base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
 
     ./build/version.sh
-    docker tag dynatrace/dynatrace-gcp-function:latest dynatrace/dynatrace-gcp-function:$TAG
+    docker tag dynatrace/dynatrace-gcp-function:v2-latest dynatrace/dynatrace-gcp-function:$TAG
     docker push dynatrace/dynatrace-gcp-function
 elif [[ "${PUSH:-}" != "true" && "${E2E:-}" == "true" ]]; then
     docker tag dynatrace/dynatrace-gcp-function ${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}
