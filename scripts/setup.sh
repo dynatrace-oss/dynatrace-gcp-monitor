@@ -478,9 +478,13 @@ if [ "$INSTALL" == true ]; then
   if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" ) ]]; then
       echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, skipping"
   else
+      echo "1"
       stty -echo
+      echo "2"
       printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
+      echo "3"
       stty echo
+      echo "4"
   fi
 
   echo -e

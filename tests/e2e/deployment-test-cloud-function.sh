@@ -63,6 +63,8 @@ cd ./e2e_test || exit 1
 echo "Deploying gcp cloud function"
 echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY" | ./setup.sh --use-local-function-zip --auto-default --s3-url "https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com"
 
+exit
+
 # Verify if function is running
 echo
 echo -n "Verifying deployment result"
