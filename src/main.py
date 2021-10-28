@@ -24,7 +24,6 @@ from typing import Dict, List, Optional
 
 import yaml
 
-from lib import metrics
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes, get_selected_services
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
@@ -264,7 +263,6 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
         if isfile(os.path.join(config_directory, file)) and is_yaml_file(file)
     ]
 
-    metrics.update_env_var_configuration()
     services = []
     for file in config_files:
         config_file_path = os.path.join(config_directory, file)

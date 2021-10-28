@@ -29,9 +29,6 @@ data:
   {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
   PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
   SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
-  IMPORT_DASHBOARDS: {{ .Values.importDashboards | quote }}
-  IMPORT_ALERTS: {{ .Values.importAlerts | quote }}
-  COMPATIBILITY_MODE: {{ .Values.compatibilityMode | quote }}
   QUERY_INTERVAL_MIN: {{ .Values.queryInterval | quote }}
   GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
   {{- end }}
