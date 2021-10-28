@@ -20,12 +20,14 @@ import requests
 testdata = [
     'cloud:gcp:k8s_pod',
     'cloud:gcp:k8s_cluster'
-    ] 
+]
+
 
 @pytest.fixture(scope="class")
 def test_environment_vars():
     assert "DYNATRACE_URL" in os.environ
     assert "DYNATRACE_ACCESS_KEY" in os.environ
+
 
 @pytest.fixture
 def api_response():
@@ -34,7 +36,7 @@ def api_response():
         'schemaIds': 'builtin:monitoredentities.generic.relation',
         'scopes': 'environment',
         'fields': 'value'
-        }
+    }
     headers = {
         'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"
     }
@@ -42,10 +44,12 @@ def api_response():
     assert response.status_code == 200
     return response.json()
 
+
 @pytest.mark.parametrize("generic_relation", testdata)
 def test_generic_relation_on_dynatrace(generic_relation, api_response):
     assert 'totalCount' in api_response
     assert api_response['totalCount'] >= 1
     assert 'items' in api_response
-    createdByList = [item['value']['toType'] for item in api_response['items'] if 'com.dynatrace.extension.' in item['value']['createdBy']]
+    createdByList = [item['value']['toType'] for item in api_response['items']
+                     if 'com.dynatrace.extension.' in item['value']['createdBy']]
     assert generic_relation in createdByList

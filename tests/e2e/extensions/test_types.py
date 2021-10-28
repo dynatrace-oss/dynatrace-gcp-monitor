@@ -40,12 +40,14 @@ testdata = [
     'cloud:gcp:pubsublite_topic_partition',
     'cloud:gcp:pubsublite_subscription_partition',
     'cloud:gcp:cloudsql_database'
-    ] 
+]
+
 
 @pytest.fixture(scope="class")
 def test_environment_vars():
     assert "DYNATRACE_URL" in os.environ
     assert "DYNATRACE_ACCESS_KEY" in os.environ
+
 
 @pytest.fixture
 def api_response():
@@ -54,7 +56,7 @@ def api_response():
         'schemaIds': 'builtin:monitoredentities.generic.type',
         'scopes': 'environment',
         'fields': 'value'
-        }
+    }
     headers = {
         'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"
     }
@@ -62,10 +64,12 @@ def api_response():
     assert response.status_code == 200
     return response.json()
 
+
 @pytest.mark.parametrize("generic_type", testdata)
 def test_generic_type_on_dynatrace(generic_type, api_response):
     assert 'totalCount' in api_response
     assert api_response['totalCount'] >= 1
     assert 'items' in api_response
-    createdByList = [item['value']['name'] for item in api_response['items'] if 'com.dynatrace.extension.' in item['value']['createdBy']]
+    createdByList = [item['value']['name'] for item in api_response['items']
+                     if 'com.dynatrace.extension.' in item['value']['createdBy']]
     assert generic_type in createdByList

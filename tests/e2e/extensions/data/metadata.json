@@ -1,0 +1,156 @@
+[
+    {
+        "key": "cloud.gcp.logging.googleapis.com.log_entry_count.gauge",
+        "metadata": {
+            "displayName": "Log entries",
+            "unit": "Count"
+        }
+    },
+    {
+        "key": "cloud.gcp.apigee_googleapis_com.cassandra.jvm_memory_bytes_init",
+        "metadata": {
+            "displayName": "Apigee Cassandra initial memory bytes",
+            "unit": "Byte"
+        }
+    },
+    {
+        "key": "cloud.gcp.serviceruntime_googleapis_com.quota.allocation.usage",
+        "metadata": {
+            "displayName": "Allocation quota usage",
+            "unit": "Count"
+        }
+    },
+    {
+        "key": "cloud.gcp.serviceruntime_googleapis_com.api.request_latencies_backend",
+        "metadata": {
+            "displayName": "Request backend latencies",
+            "unit": "Second"
+        }
+    },
+    {
+        "key": "cloud.gcp.cloudsql_googleapis_com.database.cpu.reserved_cores",
+        "metadata": {
+            "displayName": "CPU reserved cores",
+            "unit": "Count"
+        }
+    },
+    {
+        "key": "cloud.gcp.cloudsql_googleapis_com.database.mysql.replication.seconds_behind_master",
+        "metadata": {
+            "displayName": "Replica lag",
+            "unit": "Second"
+        }
+    },
+    {
+        "key": "cloud.gcp.cloudfunctions_googleapis_com.function.network_egress.count",
+        "metadata": {
+            "displayName": "Network egress",
+            "unit": "Byte"
+        }
+    },
+    {
+        "key": "cloud.gcp.cloudfunctions_googleapis_com.function.user_memory_bytes",
+        "metadata": {
+            "displayName": "Memory usage",
+            "unit": "Byte"
+        }
+    },
+    {
+        "key": "cloud.gcp.datastore_googleapis_com.api.request_count",
+        "metadata": {
+            "displayName": "Requests",
+            "unit": "Count"
+        }
+    },
+    {
+        "key": "cloud.gcp.datastore_googleapis_com.entity.read_sizes",
+        "metadata": {
+            "displayName": "Sizes of read entities",
+            "unit": "Byte"
+        }
+    },
+    {
+        "key": "cloud.gcp.file_googleapis_com.nfs.server.read_milliseconds_count",
+        "metadata": {
+            "displayName": "Time (in milliseconds) spent on read operations",
+            "unit": "MilliSecond"
+        }
+    },
+    {
+        "key": "cloud.gcp.file_googleapis_com.nfs.server.free_bytes_percent",
+        "metadata": {
+            "displayName": "Free disk space percent",
+            "unit": "Percent"
+        }
+    },
+    {
+        "key": "cloud.gcp.compute_googleapis_com.guest.cpu.usage_time.count",
+        "metadata": {
+            "displayName": "CPU usage",
+            "unit": "Second"
+        }
+    },
+    {
+        "key": "cloud.gcp.compute_googleapis_com.guest.disk.bytes_used",
+        "metadata": {
+            "displayName": "Disk usage in Bytes",
+            "unit": "Byte"
+        }
+    },
+    {
+        "key": "cloud.gcp.storage_googleapis_com.api.request_count",
+        "metadata": {
+            "displayName": "Request count",
+            "unit": "Count"
+        }
+    },
+    {
+        "key": "cloud.gcp.storage_googleapis_com.authn.authentication_count",
+        "metadata": {
+            "displayName": "Authentication count",
+            "unit": "Count"
+        }
+    },
+    {
+        "key": "cloud.gcp.loadbalancing_googleapis_com.https.backend_latencies",
+        "metadata": {
+            "displayName": "Backend latency",
+            "unit": "MilliSecond"
+        }
+    },
+    {
+        "key": "cloud.gcp.loadbalancing_googleapis_com.https.backend_request_bytes_count",
+        "metadata": {
+            "displayName": "Backend Request Bytes",
+            "unit": "Byte"
+        }
+    },
+    {
+        "key": "cloud.gcp.pubsublite_googleapis_com.topic.subscribe_quota_utilization",
+        "metadata": {
+            "displayName": "Subscribe quota utilization ratio",
+            "unit": "Percent"
+        }
+    },
+    {
+        "key": "cloud.gcp.pubsublite_googleapis_com.subscription.backlog_message_count.gauge",
+        "metadata": {
+            "displayName": "Backlog message count",
+            "unit": "Count"
+        }
+    },
+    {
+        "key": "cloud.gcp.pubsub_googleapis_com.snapshot.num_messages",
+        "metadata": {
+            "displayName": "Snapshot messages",
+            "unit": "Count"
+        }
+    },
+    {
+        "key": "cloud.gcp.pubsub_googleapis_com.snapshot.num_messages_by_region",
+        "metadata": {
+            "displayName": "Snapshot messages by region",
+            "unit": "Count"
+        }
+    }
+]

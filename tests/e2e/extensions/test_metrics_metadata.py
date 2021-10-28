@@ -14,42 +14,38 @@
 
 import os
 import pytest
-
+import json
+from pathlib import Path
 import requests
 
-testdata = [
-    'cloud.gcp.cloudfunctions_googleapis_com.function',
-    'cloud.gcp.logging.googleapis.com',
-    'cloud.gcp.kubernetes_io.node',
-    'cloud.gcp.kubernetes_io.pod',
-    'cloud.gcp.kubernetes_io.container',
-    'cloud.gcp.agent_googleapis_com.agent',
-    'cloud.gcp.storage_googleapis_com.api',
-    'cloud.gcp.storage_googleapis_com.authn',
-    'cloud.gcp.storage_googleapis_com.authz',
-    'cloud.gcp.storage_googleapis_com.network',
-    'cloud.gcp.storage_googleapis_com.storage',
-    'cloud.gcp.compute_googleapis_com.instance'
-    ]
+TEST_DATA_DIR = Path(__file__).resolve().parent / 'data'
+
+with open(TEST_DATA_DIR / 'metadata.json', 'r') as res_file:
+    testdata = json.loads(res_file.read())
+
 
 @pytest.fixture(scope="class")
 def test_environment_vars():
     assert "DYNATRACE_URL" in os.environ
     assert "DYNATRACE_ACCESS_KEY" in os.environ
 
-@pytest.mark.parametrize("metric_selector", testdata)
+
+@pytest.mark.parametrize("metric_selector", testdata, ids=[i['key'] for i in testdata])
 def test_metrics_on_dynatrace(metric_selector):
-    url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/metrics"
+    url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/settings/objects"
     params = {
-        'metricSelector': f"{metric_selector}.*",
-        'fields': 'displayName'
-        }
+        'schemaIds': 'builtin:metric.metadata',
+        'scopes': f"metric-{metric_selector['key']}",
+        'fields': 'objectId,value'
+    }
     headers = {
         'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"
     }
     response = requests.get(url, params=params, headers=headers)
     assert response.status_code == 200
     api_response = response.json()
+    print(api_response)
     assert 'totalCount' in api_response
     assert api_response['totalCount'] >= 1
-    assert 'metrics' in api_response
+    assert api_response['items'][0]['value']['displayName'] == metric_selector['metadata']['displayName']
+    assert api_response['items'][0]['value']['unit'] == metric_selector['metadata']['unit']

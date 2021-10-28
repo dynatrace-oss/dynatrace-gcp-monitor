@@ -23,25 +23,28 @@ testdata = [
     'Google Pub/Sub Lite Topic Partition subscribe quota utilization ratio [GCP]',
     'Google Pub/Sub Lite Topic Partition publish quota utilization ratio [GCP]',
     'Cloud SQL Database CPU utilization [GCP]'
-    ] 
+]
+
 
 @pytest.fixture(scope="class")
 def test_environment_vars():
     assert "DYNATRACE_URL" in os.environ
     assert "DYNATRACE_ACCESS_KEY" in os.environ
 
+
 @pytest.fixture
 def api_response():
     url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/config/v1/anomalyDetection/metricEvents"
     params = {
         'includeEntityFilterMetricEvents': 'false'
-        }
+    }
     headers = {
         'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"
     }
     response = requests.get(url, params=params, headers=headers)
     assert response.status_code == 200
     return response.json()
+
 
 @pytest.mark.parametrize("generic_relation", testdata)
 def test_alerts_on_dynatrace(generic_relation, api_response):
