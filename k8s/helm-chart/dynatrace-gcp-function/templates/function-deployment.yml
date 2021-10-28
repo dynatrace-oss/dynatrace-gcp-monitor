@@ -99,16 +99,6 @@ spec:
               name: dynatrace-gcp-function-config
               key: HTTPS_PROXY
         {{- end }}
-        - name: IMPORT_DASHBOARDS
-          valueFrom:
-            configMapKeyRef:
-              name: dynatrace-gcp-function-config
-              key: IMPORT_DASHBOARDS
-        - name: IMPORT_ALERTS
-          valueFrom:
-            configMapKeyRef:
-              name: dynatrace-gcp-function-config
-              key: IMPORT_ALERTS
         - name: COMPATIBILITY_MODE
           valueFrom:
             configMapKeyRef:
