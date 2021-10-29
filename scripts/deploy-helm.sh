@@ -297,6 +297,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   echo
   echo "- read activation config"
   SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "$SERVICES_FROM_ACTIVATION_CONFIG")
+  echo "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
 
   echo
   echo "- choosing and uploading extensions to Dynatrace"
