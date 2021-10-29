@@ -47,7 +47,7 @@ activeGate:
 # METRICS VALUES - REQUIRED for 'metrics' and 'all' deployment
 
 
-# COMMON VALUES - default_metricsS
+# COMMON VALUES - DEFAULT
 # requireValidCertificate: if true function requires valid SSL certificates when communicating with Dynatrace cluster
 # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate.
 # Allowed values: "true"/"yes", "false"/"no"
@@ -69,7 +69,7 @@ httpProxy: ""
 # httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
 httpsProxy: ""
 
-# LOGS VALUES - default_metricsS
+# LOGS VALUES - DEFAULT
 # max content length of log event. Should be the same or lower than on cluster
 logIngestContentMaxLength: 8192
 # max length of log event attribute value. If it surpasses server limit, Content will be truncated
@@ -81,7 +81,7 @@ logIngestRequestMaxSize: 1048576
 # Determines max age of forwarded log event. Should be the same or lower than on cluster
 logIngestEventMaxAgeSeconds: 86400
 
-# METRICS VALUES - default_metricsS
+# METRICS VALUES - DEFAULT
 # printMetricIngestInput: if true function will output lines of metrics into stdout
 # Allowed values: "true"/"yes", "false"/"no"
 printMetricIngestInput: "false"
