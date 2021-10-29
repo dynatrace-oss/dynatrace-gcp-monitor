@@ -13,6 +13,19 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+# testing message
+INSTALLED_EXTENSIONS=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.extensions[].extensionName')
+
+for extension in ${INSTALLED_EXTENSIONS}; do
+    VERSION=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.version')
+    echo "${extension}"
+    echo "Deactivated configuration version:"
+    curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.version'
+    echo "Extension deleted:"
+    curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/${VERSION}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '"\(.extensionName):\(.version)"'
+    echo
+done
+
 for metric in $(jq -r '.[].key' < tests/e2e/extensions/data/metadata.json); do
     OBJECT_ID=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/settings/objects?schemaIds=builtin%3Ametric.metadata&scopes=metric-${metric}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.items[].objectId')
     echo "${metric}"

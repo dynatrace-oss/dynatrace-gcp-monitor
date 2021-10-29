@@ -99,7 +99,7 @@ jobs:
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
       - gcloud auth configure-docker
       - ./build/docker-deploy.sh
-      - ./tests/e2e/remove-metadata.sh
+      - ./tests/e2e/before-deployment-test-cleanup.sh
     script:
       - ./tests/e2e/execute-tests.sh
     after_script:
