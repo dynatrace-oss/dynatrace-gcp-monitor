@@ -2,7 +2,7 @@
 set -eu
 
 #build contaienr
-docker build -t dynatrace/dynatrace-gcp-function:v2-latest .
+docker build -t dynatrace/dynatrace-gcp-function:v1-latest .
 
 #tag contaienr
 if [[ "${PUSH:-}" == "true" ]]; then
@@ -11,9 +11,9 @@ if [[ "${PUSH:-}" == "true" ]]; then
     base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
 
     ./build/version.sh
-    docker tag dynatrace/dynatrace-gcp-function:v2-latest dynatrace/dynatrace-gcp-function:$TAG
+    docker tag dynatrace/dynatrace-gcp-function:v1-latest dynatrace/dynatrace-gcp-function:$TAG
     docker push dynatrace/dynatrace-gcp-function
 elif [[ "${PUSH:-}" != "true" && "${E2E:-}" == "true" ]]; then
-    docker tag dynatrace/dynatrace-gcp-function:v2-latest ${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}
+    docker tag dynatrace/dynatrace-gcp-function:v1-latest ${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}
     docker push ${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}
 fi
