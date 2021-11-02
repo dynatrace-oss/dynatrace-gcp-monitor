@@ -13,7 +13,7 @@ from lib.metrics import GCPService
 ExtensionsFetchResult = NamedTuple('ExtensionsFetchResult', [('services', List[GCPService])])
 
 
-def load_activated_service_names() -> List[str]:
+def load_activated_service_names(logging_context: LoggingContext) -> List[str]:
     activation_file_path = '/code/config/activation/gcp_services.yaml'
     try:
         with open(activation_file_path, encoding="utf-8") as activation_file:
@@ -24,8 +24,12 @@ def load_activated_service_names() -> List[str]:
         return []
     services_whitelist = []
     for service in activation_yaml.get('services', []):
-        for feature_set in service.get("featureSets", []):
-            services_whitelist.append(f"{service.get('service')}/{feature_set if feature_set != 'default' else ''}")
+        feature_sets = service.get("featureSets", [])
+        for feature_set in feature_sets:
+            services_whitelist.append(f"{service.get('service')}/{feature_set if feature_set != 'default_metrics' else ''}")
+        if not feature_sets:
+            logging_context.error(f"No feature set in given {service} service.")
+
     return services_whitelist
 
 
@@ -117,7 +121,7 @@ class ExtensionsFetcher:
         return activation_yaml
 
     def _filter_out_not_configured_services(self, services_from_extensions: List[GCPService]) -> List[GCPService]:
-        services_from_env = set(load_activated_service_names())
+        services_from_env = set(load_activated_service_names(self.logging_context))
         services_from_extensions_dict = {f"{gcp_service_config.name}/{gcp_service_config.feature_set}": gcp_service_config
                                          for gcp_service_config in services_from_extensions}
         services_in_env_but_no_in_extensions = services_from_env.difference(set(services_from_extensions_dict.keys()))

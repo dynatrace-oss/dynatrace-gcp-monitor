@@ -11,8 +11,8 @@ from lib.context import LoggingContext
 from lib.extensions_fetcher import ExtensionsFetcher
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
-ACTIVATION_CONFIG = "{services: [{service: gce_instance, featureSets: [default, agent], vars: {filter_conditions: ''}},\
- {service: cloudsql_database, featureSets: [default], vars: {filter_conditions: ''}}]}"
+ACTIVATION_CONFIG = "{services: [{service: gce_instance, featureSets: [default_metrics, agent], vars: {filter_conditions: ''}},\
+ {service: cloudsql_database, featureSets: [default_metrics], vars: {filter_conditions: ''}}]}"
 
 @pytest.fixture(scope="function", autouse=True)
 def setup_env(monkeypatch, resource_path_root):
