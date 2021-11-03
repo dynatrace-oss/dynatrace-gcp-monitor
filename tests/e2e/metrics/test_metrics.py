@@ -33,7 +33,7 @@ def test_metrics_on_dynatrace():
     url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/metrics/query"
     params = {'from': os.environ['START_LOAD_GENERATION'],
               'to': os.environ['END_LOAD_GENERATION'],
-              'metricSelector': f"cloud.gcp.cloudfunctions_googleapis_com.function.execution_count:filter(eq(function_name, {os.environ['CLOUD_FUNCTION_NAME']}),eq(project_id, {os.environ['GCP_PROJECT_ID']}))"
+              'metricSelector': f"cloud.gcp.cloudfunctions_googleapis_com.function.execution_count:filter(eq(gcp.instance.name, {os.environ['CLOUD_FUNCTION_NAME']}),eq(gcp.project.id, {os.environ['GCP_PROJECT_ID']}))"
               }
     headers = {
         'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"

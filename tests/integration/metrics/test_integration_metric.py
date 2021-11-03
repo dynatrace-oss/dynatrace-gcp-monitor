@@ -94,9 +94,10 @@ def setup_wiremock():
     wiremock.stop()
 
 
+# If the test fails because of not founding correct mapping, check working directory for the test
+# It should be '/tests/integration/metrics'
 @pytest.mark.asyncio
-async def test_metric_authorization_header(monkeypatch):
-    monkeypatch.setenv('COMPATIBILITY_MODE', None)
+async def test_metric_authorization_header():
     await async_dynatrace_gcp_extension()
 
     request = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
@@ -112,15 +113,8 @@ async def test_metric_authorization_header(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_ingest_lines_output_compatibility_mode_false(resource_path_root, monkeypatch):
-    monkeypatch.setenv('COMPATIBILITY_MODE', 'False')
+async def test_ingest_lines_output(resource_path_root):
     await ingest_lines_output(os.path.join(resource_path_root, "metrics/ingest_input.dat"))
-
-
-@pytest.mark.asyncio
-async def test_ingest_lines_output_compatibility_mode_true(resource_path_root, monkeypatch):
-    monkeypatch.setenv('COMPATIBILITY_MODE', 'True')
-    await ingest_lines_output(os.path.join(resource_path_root, "metrics/ingest_input_compatibility_mode.dat"))
 
 
 async def ingest_lines_output(expected_ingest_output_file):
@@ -137,7 +131,8 @@ async def ingest_lines_output(expected_ingest_output_file):
     body = result.body
 
     with open(expected_ingest_output_file) as ingest:
-        recorded_ingest = ingest.read()
+        expected_ingest_lines = ingest.read().split("\n")
+        actual_ingest_lines = body.split("\n")
 
-        assert_that(body.split("\n")).is_length(289)
-        assert_that(body).is_equal_to(recorded_ingest)
+        assert_that(actual_ingest_lines).is_length(len(expected_ingest_lines))
+        assert_that(actual_ingest_lines).contains_only(*expected_ingest_lines)
