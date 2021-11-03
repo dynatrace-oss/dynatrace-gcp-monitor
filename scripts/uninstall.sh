@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #     Copyright 2020 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,8 +24,11 @@ versionNumber() {
    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
 }
 
-readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
+readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
+readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
+WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+TMP_FUNCTION_DIR=$(mktemp -d)
 
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring / uninstall script"
 echo -e "\033[0;37m"
@@ -69,13 +72,15 @@ if ! command -v gcloud &>/dev/null; then
 fi
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
-    echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
-    wget -q $FUNCTION_RAW_REPOSITORY_URL/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
+    echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
+    wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
+    unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
+    mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG $FUNCTION_ACTIVATION_CONFIG
     echo
 fi
 
 readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_PUBSUB_TOPIC=$(yq e '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_PUBSUB_TOPIC=$(yq e  '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_FUNCTION_NAME=$(yq e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_SCHEDULER_NAME=$(yq e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
@@ -89,7 +94,7 @@ DEFAULT_PROJECT=$(gcloud config get-value project)
 
 echo "Please provide the GCP project from which monitoring function should be removed. Default value: [$DEFAULT_PROJECT] (current project)"
 while ! [[ "${GCP_PROJECT}" =~ ^[a-z]{1}[a-z0-9-]{5,29}$ ]]; do
-  read -p "Enter GCP project ID: " -i $DEFAULT_PROJECT -e GCP_PROJECT
+    read -p "Enter GCP project ID: " -i $DEFAULT_PROJECT -e GCP_PROJECT
 done
 echo ""
 
@@ -99,56 +104,49 @@ gcloud config set project $GCP_PROJECT
 echo "Discovering instances to remove"
 REMOVE_FUNCTION=$(gcloud functions list --filter=name:$GCP_FUNCTION_NAME --format="value(name)")
 if [[ $REMOVE_FUNCTION ]]; then
-  echo "found function [$REMOVE_FUNCTION]"
+    echo "found function [$REMOVE_FUNCTION]"
 fi
 
 REMOVE_TOPIC=$(gcloud pubsub topics list --filter=name:$GCP_PUBSUB_TOPIC --format="value(name)")
 if [[ $REMOVE_TOPIC ]]; then
-  echo "found pub/sub topic [$REMOVE_TOPIC]"
+    echo "found pub/sub topic [$REMOVE_TOPIC]"
 fi
 
 REMOVE_SECRET_URL=$(gcloud secrets list --filter=name:$DYNATRACE_URL_SECRET_NAME --format="value(name)")
 if [[ $REMOVE_SECRET_URL ]]; then
-  echo "found secret [$REMOVE_SECRET_URL]"
+    echo "found secret [$REMOVE_SECRET_URL]"
 fi
 
 REMOVE_SECRET_TOKEN=$(gcloud secrets list --filter=name:$DYNATRACE_ACCESS_KEY_SECRET_NAME --format="value(name)")
 if [[ $REMOVE_SECRET_TOKEN ]]; then
-  echo "found secret [$REMOVE_SECRET_TOKEN]"
+    echo "found secret [$REMOVE_SECRET_TOKEN]"
 fi
 
 REMOVE_SERVICE_ACCOUNT=$(gcloud iam service-accounts list --filter=name:$GCP_SERVICE_ACCOUNT --format="value(email)")
 if [[ $REMOVE_SERVICE_ACCOUNT ]]; then
-  echo "found service account [$REMOVE_SERVICE_ACCOUNT]"
+    echo "found service account [$REMOVE_SERVICE_ACCOUNT]"
 fi
 
 REMOVE_JOB=$(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)")
 if [[ $REMOVE_JOB ]]; then
-  echo "found scheduler [$REMOVE_JOB]"
+    echo "found scheduler [$REMOVE_JOB]"
 fi
 
 REMOVE_DASHBOARD=$(gcloud monitoring dashboards list --filter=displayName:"$SELF_MONITORING_DASHBOARD_NAME" --format="value(name)")
 if [[ $REMOVE_DASHBOARD ]]; then
-  echo "found dashboard [$REMOVE_DASHBOARD]"
+    echo "found dashboard [$REMOVE_DASHBOARD]"
 fi
 
-if
-  ! [[ $REMOVE_DASHBOARD ]] &
-  ! [[ $REMOVE_JOB ]] &
-  ! [[ $REMOVE_FUNCTION ]] &
-  ! [[ $REMOVE_SECRET_URL ]] &
-  ! [[ $REMOVE_SECRET_TOKEN ]] &
-  ! [[ $REMOVE_SERVICE_ACCOUNT ]]
-then
-  echo -e "\e[93mWARNING: \e[37mNo resources found. Operation canceled."
-  exit
+if ! [[ $REMOVE_DASHBOARD ]] & ! [[ $REMOVE_JOB ]] & ! [[ $REMOVE_FUNCTION ]] & ! [[ $REMOVE_SECRET_URL ]] & ! [[ $REMOVE_SECRET_TOKEN ]] & ! [[ $REMOVE_SERVICE_ACCOUNT ]]; then
+    echo -e "\e[93mWARNING: \e[37mNo resources found. Operation canceled."
+    exit
 fi
 
 echo -e
 echo -e "\e[93mWARNING: \e[37mAll of the resources listed above will be deleted."
 echo -e ""
 while ! [[ "${CONFIRM_DELETE}" =~ ^(y|n|Y|N)$ ]]; do
-  read -p "Do you want to continue (Y/n)?" -e CONFIRM_DELETE
+    read -p "Do you want to continue (Y/n)?"  -e CONFIRM_DELETE
 done
 echo ""
 

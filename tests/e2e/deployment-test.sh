@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #     Copyright 2021 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,6 +104,7 @@ gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
 # Run helm deployment.
 rm -rf ./e2e_test
 mkdir -p ./e2e_test/gcp_iam_roles
+cp ./scripts/lib.sh ./e2e_test/lib.sh
 cp ./scripts/deploy-helm.sh ./e2e_test/deploy-helm.sh
 cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./e2e_test/gcp_iam_roles/
 cp ./gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml ./e2e_test/gcp_iam_roles/
@@ -165,8 +166,9 @@ kubectl -n dynatrace get pods
 
 # Generate load on GC Function
 for i in {1..5}; do
-  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
+  curl -s "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
   -H "Authorization: bearer $(gcloud auth print-identity-token)"
+  echo
 done
 
 if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then

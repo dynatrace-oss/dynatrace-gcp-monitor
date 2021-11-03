@@ -47,7 +47,7 @@ activeGate:
 # METRICS VALUES - REQUIRED for 'metrics' and 'all' deployment
 
 
-# COMMON VALUES - DEFAULTS
+# COMMON VALUES - DEFAULT
 # requireValidCertificate: if true function requires valid SSL certificates when communicating with Dynatrace cluster
 # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate.
 # Allowed values: "true"/"yes", "false"/"no"
@@ -69,7 +69,7 @@ httpProxy: ""
 # httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
 httpsProxy: ""
 
-# LOGS VALUES - DEFAULTS
+# LOGS VALUES - DEFAULT
 # max content length of log event. Should be the same or lower than on cluster
 logIngestContentMaxLength: 8192
 # max length of log event attribute value. If it surpasses server limit, Content will be truncated
@@ -81,7 +81,7 @@ logIngestRequestMaxSize: 1048576
 # Determines max age of forwarded log event. Should be the same or lower than on cluster
 logIngestEventMaxAgeSeconds: 86400
 
-# METRICS VALUES - DEFAULTS
+# METRICS VALUES - DEFAULT
 # printMetricIngestInput: if true function will output lines of metrics into stdout
 # Allowed values: "true"/"yes", "false"/"no"
 printMetricIngestInput: "false"
@@ -90,15 +90,6 @@ printMetricIngestInput: "false"
 # if set to destination: monitoring API calls are booked towards project which is monitored
 # REQUIRES serviceusage.services.use Permission granted for Service Account!
 serviceUsageBooking: "source"
-# Import predefined dashboards for selected services. Allowed values: "true"/"yes", "false"/"no"
-importDashboards: "true"
-# Import predefined alerting rules for selected services. Allowed values: "true"/"yes", "false"/"no"
-importAlerts: "true"
-# Compatibility mode - concerns the change in reported dimension names. Allowed values: "true"/"yes", "false"/"no".
-# Should be false for all new setups. Meant to allow a gradual transition for setups that already have historical metrics data.
-# If true, report deprecated metric dimensions (flagged as compatiblityModeOnly=true) along their new equivalents:
-# project_id > gcp.project.id | region, location, zone, metrics.label.region > gcp.region
-compatibilityMode: "false"
 # Metrics polling interval in minutes. Allowed values: 1 - 6
 queryInterval: 3
 #clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh
@@ -110,205 +101,205 @@ gcpServicesYaml: |
     # Google Cloud APIs
     - service: api
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Apigee Environment
     #- service: apigee_googleapis_com_Environment
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Apigee Proxy
     #- service: apigee_googleapis_com_Proxy
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Apigee Proxy (v2)
     #- service: apigee_googleapis_com_ProxyV2
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Assistant Action Project
     #- service: assistant_action_project
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Autoscaler
     #- service: autoscaler
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud BigQuery BI Engine Model
     #- service: bigquery_biengine_model
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud BigQuery Project
     #- service: bigquery_project
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Bigtable Cluster
     #- service: bigtable_cluster
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Bigtable Table
     #- service: bigtable_table
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud IoT Registry
     #- service: cloudiot_device_registry
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud ML Job
     #- service: cloudml_job
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud ML Model Version
     #- service: cloudml_model_version
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     #Cloud SQL Database
     - service: cloudsql_database
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Trace
     #- service: cloudtrace_googleapis_com_CloudtraceProject
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google NetApp CVS-SO
     #- service: cloudvolumesgcp_api_netapp_com_NetAppCloudVolumeSO
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Composer Environment
     #- service: cloud_composer_environment
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Dataproc Cluster
     #- service: cloud_dataproc_cluster
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Data Loss Prevention Project
     #- service: cloud_dlp_project
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Function
     - service: cloud_function
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Run Revision
     #- service: cloud_run_revision
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Tasks queues
     #- service: cloud_tasks_queue
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Consumer Quota
     #- service: consumer_quota
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Dataflow Job
     #- service: dataflow_job
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Datastore
     - service: datastore_request
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud DNS Query
     #- service: dns_query
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Filestore Instance
     - service: filestore_instance
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Firebase Hosting Site Domain
     #- service: firebase_domain
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Firebase Realtime Database
     #- service: firebase_namespace
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Firestore Instance
     #- service: firestore_instance
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google App Engine Application
     #- service: gae_app
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google App Engine Application - Uptime Checks
     #- service: gae_app_uptime_check
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google App Engine Instance
     #- service: gae_instance
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google VM Instance
     - service: gce_instance
       featureSets:
-        - default
+        - default_metrics
     #    - agent
     #    - firewallinsights
     #    - istio
@@ -318,73 +309,73 @@ gcpServicesYaml: |
     # Google VM Instance VM Flow
     #- service: gce_instance_vm_flow
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Router
     #- service: gce_router
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Zone Network Health
     #- service: gce_zone_network_health
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Storage bucket
     - service: gcs_bucket
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud HTTP/S Load Balancing Rule
     - service: https_lb_rule
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Instance Group
     #- service: instance_group
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Interconnect
     #- service: interconnect
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Internal HTTP/S Load Balancing Rule
     - service: internal_http_lb_rule
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Internal Network Load Balancer
     - service: internal_network_lb_rule
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Network Load Balancer
     - service: network_lb_rule
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Kubernetes Cluster
     - service: k8s
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Kubernetes Container
     - service: k8s_container
       featureSets:
-        - default
+        - default_metrics
     #    - agent
     #    - apigee
     #    - istio
@@ -401,114 +392,114 @@ gcpServicesYaml: |
     # Google Cloud Logging export sink
     #- service: logging_sink
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Microsoft Active Directory Domain
     #- service: microsoft_ad_domain
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud NAT Gateway
     #- service: nat_gateway
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google NetApp Cloud Volume
     #- service: netapp_cloud_volume
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Network Security Policy
     #- service: network_security_policy
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Producer Quota
     #- service: producer_quota
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Pub/Sub Lite Topic Partition
     - service: pubsublite_topic_partition
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Snapshot
     - service: pubsub_snapshot
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Subscription
     - service: pubsub_subscription
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Topic
     - service: pubsub_topic
       featureSets:
-        - default
+        - default_metrics
       vars:
         filter_conditions: ""
     # Google reCAPTCHA Key
     #- service: recaptchaenterprise_googleapis_com_Key
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Memorystore
     #- service: redis_instance
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud Spanner Instance
     #- service: spanner_instance
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud TCP/SSL Proxy Rule
     #- service: tcp_ssl_proxy_rule
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud TPU Worker
     #- service: tpu_worker
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Transfer Service Agent
     #- service: transfer_service_agent
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Uptime Check URL
     #- service: uptime_url
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google VPC Access Connector
     #- service: vpc_access_connector
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""
     # Google Cloud VPN Tunnel
     #- service: vpn_gateway
     #  featureSets:
-    #    - default
+    #    - default_metrics
     #  vars:
     #    filter_conditions: ""

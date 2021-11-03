@@ -16,6 +16,9 @@
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
 readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
 readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
+EXTENSIONS_TMPDIR=$(mktemp -d)
+CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
+WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 warn() {
   MESSAGE=$1
@@ -29,6 +32,17 @@ err() {
   echo -e >&2
   echo -e "\e[91mERROR: \e[37m${MESSAGE}" >&2
   echo -e >&2
+}
+
+clean_extensions() {
+  echo "- removing extensions files"
+  rm -rf $EXTENSION_MANIFEST_FILE $CLUSTER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
+}
+
+ctrl_c() {
+  clean_extensions
+  err " - deployment failed, script was break by CTRL-C"
+  exit 3
 }
 
 onFailure() {
@@ -152,10 +166,10 @@ get_extensions_zip_packages() {
     exit 1
   fi
 
-  mkdir -p ./extensions
   echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME
   do
-    (cd ./extensions && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
+    echo -n "."
+    (cd ${EXTENSIONS_TMPDIR} && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
   done
 }
 
@@ -183,6 +197,7 @@ upload_extension_to_cluster() {
     if ! RESPONSE=$(dt_api "/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" "PUT" "{\"version\": \"${EXTENSION_VERSION}\"}"); then
       warn "- Activation ${EXTENSION_ZIP} failed."
     else
+      echo
       echo "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated."
     fi
   fi
@@ -225,10 +240,7 @@ activate_extension_on_cluster() {
 get_extensions_from_dynatrace() {
   EXTENSIONS_FROM_CLUSTER=$1
 
-  mkdir -p ./extensions
-  mkdir -p ./extensions_from_cluster
-
-  cd ./extensions_from_cluster || exit
+  cd ${CLUSTER_EXTENSIONS_TMPDIR} || exit
 
   EXTENSIONS_TO_DOWNLOAD="com.dynatrace.extension.google"
   readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$( echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD" )"
@@ -238,19 +250,19 @@ get_extensions_from_dynatrace() {
     
     curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
-      find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
-      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
+      find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
     fi
   done
   
-  cd ../ || exit
-  rm -rf ../extensions_from_cluster
+  cd ${WORKING_DIR} || exit
+  rm -rf ${CLUSTER_EXTENSIONS_TMPDIR}
 }
 
 upload_correct_extension_to_dynatrace() {
   SERVICES_FROM_ACTIVATION_CONFIG_STR=$1
 
-  cd ./extensions || exit
+  cd ${EXTENSIONS_TMPDIR} || exit
 
   for EXTENSION_ZIP in *.zip; do
     EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"
@@ -270,11 +282,12 @@ upload_correct_extension_to_dynatrace() {
         activate_extension_on_cluster "$EXTENSION_ZIP"
         break
       fi
+      echo -n "."
     done
     rm extension.zip
     rm "$EXTENSION_FILE_NAME".yaml
     rm "$EXTENSION_ZIP"
   done
 
-  cd ../ || exit
+  cd ${WORKING_DIR} || exit
 }

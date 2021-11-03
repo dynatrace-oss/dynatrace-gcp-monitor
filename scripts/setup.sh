@@ -27,11 +27,30 @@ err() {
   echo -e >&2
 }
 
+clean() {
+  echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
+  rm $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
+
+  echo "- removing temporary directory [$FUNCTION_ZIP_PACKAGE]"
+  rm -r $WORKING_DIR/$GCP_FUNCTION_NAME
+
+  echo "- removing extensions files"
+  rm -rf $EXTENSIONS_TMPDIR $EXTENSION_MANIFEST_FILE
+}
+
 onFailure() {
+    clean
     err " - deployment failed, please examine error messages and run again"
     exit 2
 }
 
+ctrl_c() {
+  clean
+  err " - deployment failed, script was break by CTRL-C"
+  exit 3
+}
+
+trap ctrl_c INT
 trap onFailure ERR
 
 versionNumber() {
@@ -136,10 +155,12 @@ while (( "$#" )); do
 done
 
 readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
-readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
+EXTENSIONS_TMPDIR=$(mktemp -d)
+CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
+WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ -z "$EXTENSION_S3_URL" ]; then
   EXTENSION_S3_URL="https://dynatrace-gcp-extensions.s3.amazonaws.com"
@@ -147,10 +168,20 @@ else
   warn "Development mode on: custom S3 url link."
 fi
 
+if [[ "$USE_LOCAL_FUNCTION_ZIP" != "Y" ]]; then
+  echo -e
+  echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
+  wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
+fi
+
+echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
+TMP_FUNCTION_DIR=$(mktemp -d)
+unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
+
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
-    echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
-    wget -q $FUNCTION_RAW_REPOSITORY_URL/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
-    echo
+  echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
+  mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
+  echo
 fi
 
 readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
@@ -170,7 +201,6 @@ readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' 
 readonly USE_PROXY=$(yq e '.googleCloud.common.useProxy' $FUNCTION_ACTIVATION_CONFIG)
 readonly HTTP_PROXY=$(yq e '.googleCloud.common.httpProxy' $FUNCTION_ACTIVATION_CONFIG)
 readonly HTTPS_PROXY=$(yq e '.googleCloud.common.httpsProxy' $FUNCTION_ACTIVATION_CONFIG)
-readonly COMPATIBILITY_MODE=$(yq e '.googleCloud.common.compatibilityMode' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_IAM_ROLE=$(yq e '.googleCloud.common.iamRole' $FUNCTION_ACTIVATION_CONFIG)
 # Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
 readonly GCP_IAM_ROLE_PERMISSIONS=(
@@ -245,10 +275,10 @@ get_extensions_zip_packages() {
     exit 1
   fi
 
-  mkdir -p ./extensions
   echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME
   do
-    (cd ./extensions && curl -s -O "$EXTENSION_S3_URL/$EXTENSION_FILE_NAME")
+    echo -n "."
+    (cd ${EXTENSIONS_TMPDIR} && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
   done
 }
 
@@ -291,6 +321,7 @@ upload_extension_to_cluster() {
     if ! RESPONSE=$(dt_api "api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" "PUT" "{\"version\": \"${EXTENSION_VERSION}\"}"); then
       warn "- Activation $EXTENSION_ZIP failed."
     else
+      echo
       echo "- Extension $UPLOADED_EXTENSION:$EXTENSION_VERSION activated."
     fi
   fi
@@ -497,7 +528,7 @@ if [ "$INSTALL" == true ]; then
   if [[ $(gcloud iam service-accounts list --filter=name:$GCP_SERVICE_ACCOUNT --format="value(name)") ]]; then
       echo "Service account [$GCP_SERVICE_ACCOUNT] already exists, skipping"
   else
-      gcloud iam service-accounts create "$GCP_SERVICE_ACCOUNT"
+      gcloud iam service-accounts create "$GCP_SERVICE_ACCOUNT" >/dev/null
       gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$GCP_IAM_ROLE"
       gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
       gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer
@@ -514,22 +545,14 @@ get_extensions_zip_packages
 
 echo -e
 echo "- checking extensions"
-check_gcp_config_in_extensions ./extensions
+check_gcp_config_in_extensions $EXTENSIONS_TMPDIR
 
 echo -e
 echo "- checking activated extensions in Dynatrace"
 get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
-if [[ "$USE_LOCAL_FUNCTION_ZIP" != "Y" ]]; then
-  echo -e
-  echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
-  wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
-fi
-
-echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
-mkdir -p $GCP_FUNCTION_NAME
-unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME || exit
-pushd ./$GCP_FUNCTION_NAME || exit
+mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME
+pushd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
 if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
   echo "Invalid value of 'googleCloud.metrics.queryInterval', defaulting to 3"
   GCP_FUNCTION_TIMEOUT=180
@@ -543,8 +566,9 @@ fi
 if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
   echo -e
   echo "- downloading active extensions from Dynatrace"
-  mkdir -p ../extensions_from_cluster
-  cd ../extensions_from_cluster || exit
+
+  cd ${CLUSTER_EXTENSIONS_TMPDIR} || exit
+
   EXTENSIONS_TO_DOWNLOAD="com.dynatrace.extension.google"
   readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$( echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD" )"
   for i in "${!EXTENSIONS_FROM_CLUSTER_ARRAY[@]}"; do
@@ -554,8 +578,8 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
       check_gcp_config_in_extension "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
       if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ]; then
-        find ../extensions -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
-        mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ../extensions
+        find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+        mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
       fi
     fi
   done
@@ -569,7 +593,7 @@ for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
 done
 SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 
-cd ../extensions || exit
+cd ${EXTENSIONS_TMPDIR} || exit
 echo "- choosing and uploading extensions to Dynatrace"
 for EXTENSION_ZIP in *.zip; do
   EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"
@@ -584,25 +608,25 @@ for EXTENSION_ZIP in *.zip; do
     if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
       CONFIG_NAME=$(yq e '.name' "$EXTENSION_FILE_NAME".yaml)
       if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
-        echo "gcp:" >../"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
-        echo "$EXTENSION_GCP_CONFIG" >>../"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
+        echo "gcp:" >$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
+        echo "$EXTENSION_GCP_CONFIG" >>$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
       fi
       activate_extension_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
       break
     fi
+    echo -n "."
   done
   rm extension.zip
   rm "$EXTENSION_FILE_NAME".yaml
   rm "$EXTENSION_ZIP"
 done
-rm -rf ../extensions_from_cluster
-
-cd ../$GCP_FUNCTION_NAME || exit
+cd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
+rm -rf ${CLUSTER_EXTENSIONS_TMPDIR}
 
 if [ "$INSTALL" == true ]; then
   echo -e
   echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:COMPATIBILITY_MODE=$COMPATIBILITY_MODE:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
+  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
 else
 
   while true; do
@@ -614,7 +638,7 @@ else
         * ) echo "- please answer yes or no.";;
     esac
   done
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:COMPATIBILITY_MODE=$COMPATIBILITY_MODE:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
+  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
 fi
 
 echo -e
@@ -638,11 +662,4 @@ echo -e
 echo "- cleaning up"
 
 popd || exit 1
-echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
-rm ./$FUNCTION_ZIP_PACKAGE
-
-echo "- removing temporary directory [$GCP_FUNCTION_NAME]"
-rm -r ./$GCP_FUNCTION_NAME
-
-echo "- removing extensions files"
-rm -rf ./extensions $EXTENSION_MANIFEST_FILE
+clean
