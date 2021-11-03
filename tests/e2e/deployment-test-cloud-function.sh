@@ -31,6 +31,7 @@ curl -sSLo yq "https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux
 # Create E2E Sample App
 echo "Deploying sample app"
 gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
+--project "${GCP_PROJECT_ID}" \
 --runtime python37 \
 --trigger-http \
 --source ./tests/e2e/sample_app/
