@@ -81,11 +81,12 @@ do
   echo -n "."
 done
 
-# Generate load on GC Function
+echo
+echo -n "Generating load on GC Function"
 DEPLOYMENT_TYPE="metrics"
 for i in {1..5}; do
   curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
-  -H "Authorization: bearer $(gcloud auth print-identity-token)"
+  -H "Authorization: bearer $(gcloud auth print-identity-token)" > /dev/null
 done
 
 if [[ ${CLOUD_FUNCTION_STATE} == 0 ]]; then
