@@ -1,16 +1,16 @@
 #!/bin/bash
 set -eu
 
-#build contaienr
+#build container
+./build/version.sh
 docker build -t dynatrace/dynatrace-gcp-function:v1-latest .
 
-#tag contaienr
+#tag container
 if [[ "${PUSH:-}" == "true" ]]; then
     mkdir -p ~/.docker && chmod 0700 ~/.docker
     touch ~/.docker/config.json && chmod 0600 ~/.docker/config.json
     base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
 
-    ./build/version.sh
     docker tag dynatrace/dynatrace-gcp-function:v1-latest dynatrace/dynatrace-gcp-function:$TAG
     docker push dynatrace/dynatrace-gcp-function
 elif [[ "${PUSH:-}" != "true" && "${E2E:-}" == "true" ]]; then
