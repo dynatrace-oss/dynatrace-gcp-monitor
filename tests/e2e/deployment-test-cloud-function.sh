@@ -28,14 +28,14 @@ check_function_state()
 # Install YQ
 curl -sSLo yq "https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64" && chmod +x yq && sudo mv yq /usr/local/bin/yq
 
+gcloud config set project "${GCP_PROJECT_ID}"
+
 # Create E2E Sample App
 echo "Deploying sample app"
 gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
---project "${GCP_PROJECT_ID}" \
 --runtime python37 \
 --trigger-http \
---source ./tests/e2e/sample_app/
-#--source ./tests/e2e/sample_app/ > /dev/null 2>&1
+--source ./tests/e2e/sample_app/ > /dev/null 2>&1
 
 # Run cloud function deployment.
 rm -rf ./e2e_test
@@ -82,10 +82,11 @@ do
 done
 
 # Generate load on GC Function
-#for i in {1..5}; do
-#  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?build_id=${TRAVIS_BUILD_ID}" \
-#  -H "Authorization: bearer $(gcloud auth print-identity-token)"
-#done
+DEPLOYMENT_TYPE="metrics"
+for i in {1..5}; do
+  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
+  -H "Authorization: bearer $(gcloud auth print-identity-token)"
+done
 
 if [[ ${CLOUD_FUNCTION_STATE} == 0 ]]; then
   echo "Deployment completed successfully"
