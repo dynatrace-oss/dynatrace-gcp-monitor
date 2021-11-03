@@ -33,7 +33,8 @@ echo "Deploying sample app"
 gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
 --runtime python37 \
 --trigger-http \
---source ./tests/e2e/sample_app/ > /dev/null 2>&1
+--source ./tests/e2e/sample_app/
+#--source ./tests/e2e/sample_app/ > /dev/null 2>&1
 
 # Run cloud function deployment.
 rm -rf ./e2e_test
@@ -61,7 +62,7 @@ cp activation-config.yaml "$ACTIVATION_CONFIG_FILE"
 
 cd ./e2e_test || exit 1
 echo "Deploying gcp cloud function"
-echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY" | ./setup.sh --use-local-function-zip --auto-default --s3-url "https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com"
+echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY" | ./setup.sh --use-local-function-zip --auto-default
 
 # Verify if function is running
 echo
