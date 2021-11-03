@@ -404,3 +404,5 @@ if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/shortlink/deploy-k8#anchor_verify"
   echo "Additionally you can enable self-monitoring for quick diagnosis: https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp#anchor_sfm"
 fi
+
+clean_extensions

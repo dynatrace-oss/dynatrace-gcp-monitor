@@ -40,7 +40,7 @@ clean_extensions() {
 }
 
 ctrl_c() {
-  clean
+  clean_extensions
   err " - deployment failed, script was break by CTRL-C"
   exit 3
 }
