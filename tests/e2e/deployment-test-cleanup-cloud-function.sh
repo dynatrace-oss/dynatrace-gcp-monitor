@@ -14,7 +14,7 @@
 #     limitations under the License.
 
 echo -e "$GCP_PROJECT_ID\nY" | ./scripts/uninstall.sh
-#gcloud functions delete "$CLOUD_FUNCTION_NAME" todo ms
+gcloud functions delete "$CLOUD_FUNCTION_NAME"
 
 # testing message
 INSTALLED_EXTENSIONS=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.extensions[].extensionName')
