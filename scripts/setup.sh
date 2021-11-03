@@ -553,6 +553,7 @@ get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
 mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME
 pushd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
+
 if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
   echo "Invalid value of 'googleCloud.metrics.queryInterval', defaulting to 3"
   GCP_FUNCTION_TIMEOUT=180
@@ -596,6 +597,7 @@ done
 SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 echo "${SERVICES_FROM_ACTIVATION_CONFIG_STR}"
 
+mkdir -p $WORKING_DIR/$GCP_FUNCTION_NAME/config/
 cd ${EXTENSIONS_TMPDIR} || exit
 echo
 echo "- choosing and uploading extensions to Dynatrace"
