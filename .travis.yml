@@ -93,5 +93,5 @@ jobs:
       - ./build/build-zip-release.sh
     script:
       - ./tests/e2e/execute-tests-cloud-function.sh #todo ms run setup.sh with prod s3 only???
-#    after_script:
-#      - ./tests/e2e/deployment-test-cleanup-cloud-function.sh
+    after_script:
+      - ./tests/e2e/deployment-test-cleanup-cloud-function.sh
