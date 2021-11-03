@@ -585,16 +585,19 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
   done
 fi
 
+echo
+echo "- read activation config"
 # Add '/default' to service name when featureSet is missing
 for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
   if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]];then
     SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default"
   fi
 done
-echo "${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
+echo "${SERVICES_FROM_ACTIVATION_CONFIG_STR}"
 
 cd ${EXTENSIONS_TMPDIR} || exit
+echo
 echo "- choosing and uploading extensions to Dynatrace"
 for EXTENSION_ZIP in *.zip; do
   EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"
