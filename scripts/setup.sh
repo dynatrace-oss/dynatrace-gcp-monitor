@@ -32,7 +32,7 @@ onFailure() {
     exit 2
 }
 
-#trap onFailure ERR todo ms
+trap onFailure ERR
 
 versionNumber() {
    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
@@ -442,7 +442,7 @@ echo ""
 echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)."
 echo "The token requires grant of 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read configuration (API v1)',  and 'Write configuration (API v1)' scope"
 while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
-  read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
+  read -s -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
 done
 echo ""
 
@@ -459,7 +459,7 @@ if [ "$INSTALL" == true ]; then
   echo "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com]"
   gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com
 
-  echo -e
+  echo -e #todo ms update?
   echo "- create the pubsub topic [$GCP_PUBSUB_TOPIC]"
   if [[ $(gcloud pubsub topics list --filter=name:$GCP_PUBSUB_TOPIC --format="value(name)") ]]; then
       echo "Topic [$GCP_PUBSUB_TOPIC] already exists, skipping"
@@ -467,7 +467,7 @@ if [ "$INSTALL" == true ]; then
       gcloud pubsub topics create "$GCP_PUBSUB_TOPIC"
   fi
 
-  echo -e
+  echo -e #todo ms update?
   echo "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]"
   if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_URL_SECRET_NAME$" --format="value(name)" ) ]]; then
       echo "Secret [$DYNATRACE_URL_SECRET_NAME] already exists, skipping"
@@ -478,9 +478,7 @@ if [ "$INSTALL" == true ]; then
   if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" ) ]]; then
       echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, skipping"
   else
-      stty -echo
-      printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
-      stty echo
+      gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic <<<"$DYNATRACE_ACCESS_KEY"
   fi
 
   echo -e
