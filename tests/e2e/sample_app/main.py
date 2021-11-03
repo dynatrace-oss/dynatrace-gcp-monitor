@@ -1,6 +1,7 @@
 import logging
 
-def e2e_test_sample_app(request):
+
+def e2e_test_sample_app_cf(request):
 
     request_args = request.args
     deployment_type = 'None'
