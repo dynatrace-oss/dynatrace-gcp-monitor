@@ -34,7 +34,7 @@ err() {
   echo -e >&2
 }
 
-clean() {
+clean_extensions() {
   echo "- removing extensions files"
   rm -rf $EXTENSION_MANIFEST_FILE $CLUSTER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
 }
