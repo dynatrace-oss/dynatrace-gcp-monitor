@@ -31,7 +31,7 @@ clean() {
   echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
   rm $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
 
-  echo "- removing temporary directory [$FUNCTION_ZIP_PACKAGE]"
+  echo "- removing temporary directory [$GCP_FUNCTION_NAME]"
   rm -r $WORKING_DIR/$GCP_FUNCTION_NAME
 
   echo "- removing extensions files"
