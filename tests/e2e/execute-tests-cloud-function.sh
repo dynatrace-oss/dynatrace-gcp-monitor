@@ -17,4 +17,5 @@ export START_LOAD_GENERATION=$(date -u +%s%3N)
 ./tests/e2e/deployment-test-cloud-function.sh
 sleep 300
 export END_LOAD_GENERATION=$(date -u +%s%3N)
-#pytest "tests/e2e/metrics" -v todo ms
+pytest "tests/e2e/extensions" -v
+pytest "tests/e2e/metrics" -v

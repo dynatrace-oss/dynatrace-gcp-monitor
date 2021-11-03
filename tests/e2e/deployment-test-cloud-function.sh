@@ -35,8 +35,7 @@ echo "Deploying sample app"
 gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
 --runtime python37 \
 --trigger-http \
---source ./tests/e2e/sample_app/
-#--source ./tests/e2e/sample_app/ > /dev/null 2>&1
+--source ./tests/e2e/sample_app/ > /dev/null 2>&1
 
 # Run cloud function deployment.
 rm -rf ./e2e_test
