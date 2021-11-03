@@ -17,7 +17,7 @@ check_function_state()
 {
   FUNCTION=$1
   FUNCTION_DESCRIBE=$(gcloud functions describe "$FUNCTION"  --format="json")
-  FUNCTION_STATE=$(echo "$FUNCTION_DESCRIBE" | jq -r '.status') # todo ms yq?
+  FUNCTION_STATE=$(echo "$FUNCTION_DESCRIBE" | jq -r '.status')
   if [[ "${FUNCTION_STATE}" != *"ACTIVE"* ]]; then
     return 1
   fi
@@ -40,8 +40,6 @@ rm -rf ./e2e_test
 mkdir -p ./e2e_test/gcp_iam_roles
 cp ./scripts/setup.sh ./e2e_test/setup.sh
 cp dynatrace-gcp-function.zip ./e2e_test/dynatrace-gcp-function.zip
-ACTIVATION_CONFIG_FILE="./e2e_test/activation-config.yaml"
-cp activation-config.yaml "$ACTIVATION_CONFIG_FILE"
 cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./e2e_test/gcp_iam_roles/
 
 cat <<EOF > activation.config.e2e.yaml
@@ -57,13 +55,13 @@ googleCloud:
     function: "${METRIC_FORWARDING_FUNCTION}"
     scheduler: "${CLOUD_SCHEDULER}"
 EOF
-yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' "${ACTIVATION_CONFIG_FILE}" activation.config.e2e.yaml
+yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.e2e.yaml
+ACTIVATION_CONFIG_FILE="./e2e_test/activation-config.yaml"
+cp activation-config.yaml "$ACTIVATION_CONFIG_FILE"
 
 cd ./e2e_test || exit 1
 echo "Deploying gcp cloud function"
 echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY" | ./setup.sh --use-local-function-zip --auto-default --s3-url "https://dynatrace-gcp-extensions-dev.s3.eu-central-1.amazonaws.com"
-
-exit
 
 # Verify if function is running
 echo
@@ -82,10 +80,10 @@ do
 done
 
 # Generate load on GC Function
-for i in {1..5}; do
-  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?build_id=${TRAVIS_BUILD_ID}" \
-  -H "Authorization: bearer $(gcloud auth print-identity-token)"
-done
+#for i in {1..5}; do
+#  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?build_id=${TRAVIS_BUILD_ID}" \
+#  -H "Authorization: bearer $(gcloud auth print-identity-token)"
+#done
 
 if [[ ${CLOUD_FUNCTION_STATE} == 0 ]]; then
   echo "Deployment completed successfully"
