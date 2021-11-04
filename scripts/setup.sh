@@ -276,24 +276,23 @@ get_extensions_zip_packages() {
   done
 }
 
-check_gcp_config_in_extension() {
-    EXTENSION_ZIP=$1
-
-    echo ${EXTENSION_ZIP}
-    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &> /dev/null
-    if [[ $(unzip -c "$EXTENSION_ZIP-tmp/extension.zip" "extension.yaml" | tail -n +3 | yq e 'has("gcp")' -) == "false" ]] ; then
-        warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
-        rm ${EXTENSION_ZIP}
-    fi
-    rm -r "$EXTENSION_ZIP-tmp"
-}
-
-check_gcp_config_in_extensions() {
-    EXTENSION_DIR=$1
-
-    pushd ${EXTENSION_DIR} &> /dev/null  || exit
+validate_gcp_config_in_extensions() {
+    pushd ${EXTENSIONS_TMPDIR} &> /dev/null  || exit
     for EXTENSION_ZIP in *.zip; do
-        check_gcp_config_in_extension ${EXTENSION_ZIP}
+      unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &> /dev/null
+      cd "$EXTENSION_ZIP-tmp"
+      unzip "extension.zip" "extension.yaml" &> /dev/null
+      if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]] ; then
+        warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
+        rm ../${EXTENSION_ZIP}
+      elif [[ $(yq e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]] ; then
+        warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
+        rm ../${EXTENSION_ZIP}
+      else
+        echo -n "."
+      fi
+      cd ..
+      rm -r "$EXTENSION_ZIP-tmp"
     done
     popd &> /dev/null
 }
@@ -540,10 +539,6 @@ echo "- downloading extensions"
 get_extensions_zip_packages
 
 echo -e
-echo "- checking extensions"
-check_gcp_config_in_extensions $EXTENSIONS_TMPDIR
-
-echo -e
 echo "- checking activated extensions in Dynatrace"
 get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
@@ -572,21 +567,16 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
     EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
     curl -k -s -X GET "${DYNATRACE_URL}api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
-      check_gcp_config_in_extension "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
-      if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ]; then
-        find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
-        mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
-      fi
+      find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
     fi
   done
 fi
 
-# Add '/default' to service name when featureSet is missing
-for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
-  if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]];then
-    SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default"
-  fi
-done
+echo -e
+echo "- validating extensions"
+validate_gcp_config_in_extensions
+
 SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 
 mkdir -p $WORKING_DIR/$GCP_FUNCTION_NAME/config/
