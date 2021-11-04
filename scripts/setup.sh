@@ -133,7 +133,7 @@ while (( "$#" )); do
             ;;
 
             "--use-local-function-zip")
-                USE_LOCAL_FUNCTION_ZIP="Y" #todo ms ścieżka?
+                USE_LOCAL_FUNCTION_ZIP="Y"
                 shift
             ;;
 
