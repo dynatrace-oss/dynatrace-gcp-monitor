@@ -129,6 +129,11 @@ while (( "$#" )); do
                 shift; shift
             ;;
 
+            "--use-local-function-zip")
+                USE_LOCAL_FUNCTION_ZIP="Y"
+                shift
+            ;;
+
             "-h" | "--help")
                 print_help
                 exit 0
@@ -155,9 +160,11 @@ else
   warn "Development mode on: custom S3 url link."
 fi
 
-echo -e
-echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
-wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
+if [[ "$USE_LOCAL_FUNCTION_ZIP" != "Y" ]]; then
+  echo -e
+  echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
+  wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
+fi
 
 echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 TMP_FUNCTION_DIR=$(mktemp -d)
