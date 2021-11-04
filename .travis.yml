@@ -143,5 +143,5 @@ jobs:
       - ./tests/e2e/before-deployment-test-cleanup.sh
     script:
       - ./tests/e2e/execute-tests-cloud-function.sh
-#    after_script: todo ms
-#      - ./tests/e2e/deployment-test-cleanup-cloud-function.sh
+    after_script:
+      - ./tests/e2e/deployment-test-cleanup-cloud-function.sh
