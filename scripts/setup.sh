@@ -580,6 +580,7 @@ for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
 done
 SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 
+mkdir -p $WORKING_DIR/$GCP_FUNCTION_NAME/config/
 cd ${EXTENSIONS_TMPDIR} || exit
 echo "- choosing and uploading extensions to Dynatrace"
 for EXTENSION_ZIP in *.zip; do
