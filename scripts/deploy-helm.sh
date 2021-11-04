@@ -295,6 +295,10 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   fi
 
   echo
+  echo "- validating extensions"
+  validate_gcp_config_in_extensions
+
+  echo
   echo "- read activation config"
   SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "$SERVICES_FROM_ACTIVATION_CONFIG")
   echo "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
