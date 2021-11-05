@@ -6,7 +6,8 @@ notifications:
 stages:
 - tests
 - github-deploy
-- e2e-deployment-test
+- e2e-helm-deployment-test
+- e2e-cloud-function-deployment-test
 - docker-deploy
 env:
   global:
