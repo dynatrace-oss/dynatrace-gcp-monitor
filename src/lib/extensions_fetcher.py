@@ -26,7 +26,7 @@ def load_activated_service_names(logging_context: LoggingContext) -> List[str]:
     for service in activation_yaml.get('services', []):
         feature_sets = service.get("featureSets", [])
         for feature_set in feature_sets:
-            services_whitelist.append(f"{service.get('service')}/{feature_set if feature_set != 'default_metrics' else ''}")
+            services_whitelist.append(f"{service.get('service')}/{feature_set}")
         if not feature_sets:
             logging_context.error(f"No feature set in given {service} service.")
 
