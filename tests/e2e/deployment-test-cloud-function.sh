@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #     Copyright 2021 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+source ./lib-tests.sh
+
 check_function_state()
 {
   FUNCTION=$1
@@ -24,18 +26,9 @@ check_function_state()
   return 0
 }
 
-#todo ms common methods?
-# Install YQ
-curl -sSLo yq "https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64" && chmod +x yq && sudo mv yq /usr/local/bin/yq
-
+install_yq
 gcloud config set project "${GCP_PROJECT_ID}"
-
-# Create E2E Sample App
-echo "Deploying sample app"
-gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
---runtime python37 \
---trigger-http \
---source ./tests/e2e/sample_app/ > /dev/null 2>&1
+create_sample_app
 
 # Run cloud function deployment.
 rm -rf ./e2e_test
@@ -81,15 +74,8 @@ do
   echo -n "."
 done
 
-# Generate load on GC Function
-DEPLOYMENT_TYPE="metrics"
-for i in {1..5}; do
-  curl -s "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
-  -H "Authorization: bearer $(gcloud auth print-identity-token)"
-  echo
-done
+generate_load_on_sample_app
 
-echo
 if [[ ${CLOUD_FUNCTION_STATE} == 0 ]]; then
   echo "Deployment completed successfully"
   exit 0

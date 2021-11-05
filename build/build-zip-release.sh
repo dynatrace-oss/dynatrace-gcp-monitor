@@ -19,6 +19,6 @@ if [[ "${E2E:-}" != "true" ]]; then
   echo $VERSION > ./build/version
   mkdir -p $PACKAGE_PATH
   (cd ./src/; zip -r ../$PACKAGE_PATH/dynatrace-gcp-function.zip ./ -x '*__pycache__*')
-elif [[ "${E2E:-}" == "true" ]]; then #todo ms
+else
   (cd ./src/; zip -r ../dynatrace-gcp-function.zip ./ -x '*__pycache__*')
 fi
