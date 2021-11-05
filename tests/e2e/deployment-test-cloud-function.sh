@@ -13,7 +13,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-source ./lib-tests.sh
+source ./tests/e2e/lib-tests.sh
 
 check_function_state()
 {
