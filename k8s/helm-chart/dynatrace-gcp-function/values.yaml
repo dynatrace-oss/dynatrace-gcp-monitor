@@ -57,7 +57,7 @@ requireValidCertificate: "true"
 selfMonitoringEnabled: "false"
 # Dynatrace GCP function docker image. Using default value is advised,
 # but can be changed if there is a need to use customized image or specific, tagged version
-dockerImage: "dynatrace/dynatrace-gcp-function"
+dockerImage: "dynatrace/dynatrace-gcp-function:v1-latest"
 # useProxy: depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
 # if set to ALL: proxy settings will be used for requests to Dynatrace and GCP API
 # if set to DT_ONLY: proxy settings will be used only for requests to Dynatrace or to an existing Active Gate (activeGate.useExisting true)

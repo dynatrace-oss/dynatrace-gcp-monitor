@@ -173,6 +173,8 @@ if [[ "$USE_LOCAL_FUNCTION_ZIP" != "Y" ]]; then
   echo -e
   echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
   wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
+else
+  warn "Development mode on: using local function zip"
 fi
 
 echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
@@ -568,9 +570,9 @@ fi
 if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
   echo -e
   echo "- downloading active extensions from Dynatrace"
-
+  
   cd ${CLUSTER_EXTENSIONS_TMPDIR} || exit
-
+  
   EXTENSIONS_TO_DOWNLOAD="com.dynatrace.extension.google"
   readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$( echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD" )"
   for i in "${!EXTENSIONS_FROM_CLUSTER_ARRAY[@]}"; do
@@ -588,7 +590,7 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
 fi
 
 echo
-echo "- read activation config"
+echo "- reading activation config"
 # Add '/default' to service name when featureSet is missing
 for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
   if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]];then

@@ -82,7 +82,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
             # set default featureset if featureset not present in env variable
             for i, service in enumerate(selected_services):
                 if "/" not in service:
-                    selected_services[i] = f"{service}/default"
+                    selected_services[i] = f"{service}/default_metrics"
         services = load_supported_services(context, selected_services)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -273,7 +273,7 @@ def load_supported_services(context: LoggingContext, selected_services: List[str
 
                 for service_yaml in config_yaml.get("gcp", {}):
                     service_name = service_yaml.get("service", "None")
-                    featureSet = service_yaml.get("featureSet", "default")
+                    featureSet = service_yaml.get("featureSet", "default_metrics")
                     # If whitelist of services exists and current service is not present in it, skip
                     # If whitelist is empty - no services explicitly selected - load all available
                     whitelist_exists = selected_services is not None and selected_services.__len__() > 0
