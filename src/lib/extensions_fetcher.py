@@ -122,11 +122,8 @@ class ExtensionsFetcher:
 
     def _filter_out_not_configured_services(self, services_from_extensions: List[GCPService]) -> List[GCPService]:
         services_from_env = set(load_activated_service_names(self.logging_context))
-        services_from_extensions_dict = {}
-        for gcp_service_config in services_from_extensions:
-            service_name = gcp_service_config.name
-            feature_set = gcp_service_config.feature_set if gcp_service_config.feature_set != 'default_metrics' else ''
-            services_from_extensions_dict[f"{service_name}/{feature_set}"] = gcp_service_config
+        services_from_extensions_dict = {f"{gcp_service_config.name}/{gcp_service_config.feature_set}": gcp_service_config
+                                         for gcp_service_config in services_from_extensions}
 
         services_in_env_but_no_in_extensions = services_from_env.difference(set(services_from_extensions_dict.keys()))
         if services_in_env_but_no_in_extensions:
