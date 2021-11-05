@@ -50,11 +50,9 @@ jobs:
     install: skip
     language: minimal
     before_deploy:
-    - mkdir -p artefacts
     - ./build/version.sh
     - ./build/helm-package.sh
-    - cp activation-config.yaml ./src/
-    - "(cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')"
+    - ./build/function-package.sh
     deploy:
       provider: releases
       file_glob: true
