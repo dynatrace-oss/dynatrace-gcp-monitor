@@ -65,4 +65,4 @@ async def test_execute(mocker: MockerFixture):
     result = await extensions_fetcher.execute()
     assert_that(result).is_not_none()
     services_names = [f"{gcp_service_config.name}/{gcp_service_config.feature_set}" for gcp_service_config in result.services]
-    assert_that(services_names).contains_only("gce_instance/", "gce_instance/agent", "cloudsql_database/")
+    assert_that(services_names).contains_only("gce_instance/default_metrics", "gce_instance/agent", "cloudsql_database/default_metrics")
