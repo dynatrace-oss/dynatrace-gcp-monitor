@@ -111,7 +111,7 @@ jobs:
     language: python
     python:
       - "3.8"
-#    if: (branch = master OR type = pull_request) AND fork = false todo ms
+    if: (branch = master OR type = pull_request) AND fork = false
     cache:
       directories:
         - "$HOME/google-cloud-sdk/"

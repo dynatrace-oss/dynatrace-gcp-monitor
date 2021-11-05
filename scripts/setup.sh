@@ -62,7 +62,7 @@ echo -e "\033[0;37m"
 
 print_help() {
   printf "
-usage: setup.sh [--upgrade-extensions]
+usage: setup.sh [--upgrade-extensions] [--auto-default]
 
 arguments:
     --upgrade-extensions

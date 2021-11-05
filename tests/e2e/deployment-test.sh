@@ -113,7 +113,6 @@ cat <<EOF > values.e2e.yaml
 gcpProjectId: "${GCP_PROJECT_ID}"
 deploymentType: "${DEPLOYMENT_TYPE}"
 dynatraceAccessKey: "${DYNATRACE_ACCESS_KEY}"
-dynatraceLogIngestUrl: "${DYNATRACE_LOG_INGEST_URL}"
 dynatraceUrl: "${DYNATRACE_URL}"
 logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
