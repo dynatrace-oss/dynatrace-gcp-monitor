@@ -163,7 +163,7 @@ readonly USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.use
 readonly HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
 readonly HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
 SERVICES_FROM_ACTIVATION_CONFIG=$(yq e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | yq e -j '.services[]' - | jq -r '. | "\(.service)/\(.featureSets[])"')
-API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
+API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 
 if [ -z "$EXTENSION_S3_URL" ]; then
   EXTENSION_S3_URL="https://dynatrace-gcp-extensions.s3.amazonaws.com"
@@ -196,7 +196,7 @@ elif [[ $DEPLOYMENT_TYPE == logs ]]; then
   API_TOKEN_SCOPES=('"logs.ingest"')
 elif [[ $DEPLOYMENT_TYPE == metrics ]]; then
   echo "Deploying $DEPLOYMENT_TYPE ingest"
-  API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
+  API_TOKEN_SCOPES=('"metrics.ingest"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 else
   err "Invalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
   exit 1

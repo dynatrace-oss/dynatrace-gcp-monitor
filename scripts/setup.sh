@@ -371,17 +371,9 @@ check_if_parameter_is_empty()
 check_api_token() {
   DYNATRACE_URL=$1
   DYNATRACE_ACCESS_KEY=$2
-  V1_API_REQUIREMENTS=("ReadConfig" "WriteConfig")
   V2_API_REQUIREMENTS=("extensions.read" "extensions.write" "extensionConfigurations.read" "extensionConfigurations.write" "extensionEnvironment.read" "extensionEnvironment.write")
 
   if RESPONSE=$(dt_api "api/v2/apiTokens/lookup" "POST" "{\"token\":\"$DYNATRACE_ACCESS_KEY\"}"); then
-    for REQUIRED in "${V1_API_REQUIREMENTS[@]}"; do
-      if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
-        err "Missing $REQUIRED permission (v1) for the API token"
-        exit 1
-      fi
-    done
-
     for REQUIRED in "${V2_API_REQUIREMENTS[@]}"; do
       if ! grep -q "$REQUIRED" <<<"$RESPONSE"; then
         err "Missing $REQUIRED permission (v2) for the API token"
