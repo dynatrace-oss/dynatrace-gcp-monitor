@@ -256,10 +256,8 @@ services_setup_in_config() {
 }
 
 activate_extension_on_cluster() {
-  DYNATRACE_URL=$1
-  DYNATRACE_ACCESS_KEY=$2
-  EXTENSIONS_FROM_CLUSTER=$3
-  EXTENSION_ZIP=$4
+  EXTENSIONS_FROM_CLUSTER=$1
+  EXTENSION_ZIP=$2
 
   EXTENSION_NAME=${EXTENSION_ZIP:0:${#EXTENSION_ZIP}-10}
   EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
@@ -325,14 +323,14 @@ upload_correct_extension_to_dynatrace() {
       SERVICE_FROM_EXTENSION="${SERVICE_FROM_EXTENSION/null/default}"
       # Check if service should be monitored
       if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
-        if [ -z "$GCP_FUNCTION_NAME" ]; then
+        if [ -n "$GCP_FUNCTION_NAME" ]; then
           CONFIG_NAME=$(yq e '.name' "$EXTENSION_FILE_NAME".yaml)
           if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
             echo "gcp:" >$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
             echo "$EXTENSION_GCP_CONFIG" >>$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
           fi
         fi
-        activate_extension_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
+        activate_extension_on_cluster "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
         break
       fi
       echo -n "."
