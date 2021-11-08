@@ -35,13 +35,21 @@ err() {
   echo -e >&2
 }
 
-clean_extensions() {
+clean() {
   echo "- removing extensions files"
   rm -rf $EXTENSION_MANIFEST_FILE $CLUSTER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
+
+  if [ -n "$GCP_FUNCTION_NAME" ]; then
+    echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
+    rm $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
+
+    echo "- removing temporary directory [$FUNCTION_ZIP_PACKAGE]"
+    rm -r $WORKING_DIR/$GCP_FUNCTION_NAME
+  fi
 }
 
 ctrl_c() {
-  clean_extensions
+  clean
   err " - deployment failed, script was break by CTRL-C"
   exit 3
 }

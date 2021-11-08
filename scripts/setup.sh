@@ -371,4 +371,4 @@ echo -e
 echo "- cleaning up"
 
 popd || exit 1
-clean_extensions
+clean

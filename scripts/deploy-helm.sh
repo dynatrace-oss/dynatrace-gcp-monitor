@@ -401,4 +401,4 @@ if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   echo "Additionally you can enable self-monitoring for quick diagnosis: https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp#anchor_sfm"
 fi
 
-clean_extensions
+clean
