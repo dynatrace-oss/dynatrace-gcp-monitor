@@ -91,6 +91,7 @@ arguments:
 # test pre-requirements
 test_req_yq
 test_req_gcloud
+test_req_unzip
 test_req_kubectl
 test_req_helm
 
@@ -163,13 +164,8 @@ readonly USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.use
 readonly HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
 readonly HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
 SERVICES_FROM_ACTIVATION_CONFIG=$(yq e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | yq e -j '.services[]' - | jq -r '. | "\(.service)/\(.featureSets[])"')
-API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 
-if [ -z "$EXTENSION_S3_URL" ]; then
-  EXTENSION_S3_URL="https://dynatrace-gcp-extensions.s3.amazonaws.com"
-else
-  warn "Development mode on: custom S3 url link."
-fi
+check_s3_url
 
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)

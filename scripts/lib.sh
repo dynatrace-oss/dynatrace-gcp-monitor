@@ -16,6 +16,7 @@
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
 readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
 readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
+API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 EXTENSIONS_TMPDIR=$(mktemp -d)
 CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -91,6 +92,14 @@ test_req_gcloud() {
   fi
 }
 
+test_req_unzip() {
+  if ! command -v unzip &> /dev/null
+  then
+      err 'unzip is required to install Dynatrace function'
+      exit
+  fi
+}
+
 test_req_kubectl() {
   if ! command -v kubectl &>/dev/null; then
     err 'Kubernetes CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install kubectl in the most convenient way to you:
@@ -128,8 +137,9 @@ dt_api()
 check_if_parameter_is_empty() {
   PARAMETER=$1
   PARAMETER_NAME=$2
+  ADDITIONAL_MESSAGE=$3
   if [ -z "${PARAMETER}" ]; then
-    echo "Missing required parameter: ${PARAMETER_NAME}"
+    echo "Missing required parameter: ${PARAMETER_NAME}. ${ADDITIONAL_MESSAGE}"
     exit
   fi
 }
@@ -156,6 +166,36 @@ check_api_token() {
   else
     warn "Failed to connect to endpoint ${URL} to check API token permissions. It can be ignored if Dynatrace does not allow public access."
   fi
+}
+
+check_s3_url() {
+  if [ -z "$EXTENSION_S3_URL" ]; then
+    EXTENSION_S3_URL="https://dynatrace-gcp-extensions.s3.amazonaws.com"
+  else
+    warn "Development mode on: custom S3 url link."
+  fi
+}
+
+check_gcp_config_in_extension() {
+    EXTENSION_ZIP=$1
+
+    echo ${EXTENSION_ZIP}
+    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &> /dev/null
+    if [[ $(unzip -c "$EXTENSION_ZIP-tmp/extension.zip" "extension.yaml" | tail -n +3 | yq e 'has("gcp")' -) == "false" ]] ; then
+        warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
+        rm ${EXTENSION_ZIP}
+    fi
+    rm -r "$EXTENSION_ZIP-tmp"
+}
+
+check_gcp_config_in_extensions() {
+    EXTENSION_DIR=$1
+
+    pushd ${EXTENSION_DIR} &> /dev/null  || exit
+    for EXTENSION_ZIP in *.zip; do
+        check_gcp_config_in_extension ${EXTENSION_ZIP}
+    done
+    popd &> /dev/null
 }
 
 get_extensions_zip_packages() {
@@ -216,7 +256,10 @@ services_setup_in_config() {
 }
 
 activate_extension_on_cluster() {
-  EXTENSION_ZIP=$1
+  DYNATRACE_URL=$1
+  DYNATRACE_ACCESS_KEY=$2
+  EXTENSIONS_FROM_CLUSTER=$3
+  EXTENSION_ZIP=$4
 
   EXTENSION_NAME=${EXTENSION_ZIP:0:${#EXTENSION_ZIP}-10}
   EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
@@ -250,8 +293,11 @@ get_extensions_from_dynatrace() {
     
     curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
-      find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
-      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
+      check_gcp_config_in_extension "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+      if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ]; then
+        find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+        mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
+      fi
     fi
   done
   
@@ -279,7 +325,14 @@ upload_correct_extension_to_dynatrace() {
       SERVICE_FROM_EXTENSION="${SERVICE_FROM_EXTENSION/null/default}"
       # Check if service should be monitored
       if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
-        activate_extension_on_cluster "$EXTENSION_ZIP"
+        if [ -z "$GCP_FUNCTION_NAME" ]; then
+          CONFIG_NAME=$(yq e '.name' "$EXTENSION_FILE_NAME".yaml)
+          if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
+            echo "gcp:" >$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
+            echo "$EXTENSION_GCP_CONFIG" >>$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
+          fi
+        fi
+        activate_extension_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY" "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
         break
       fi
       echo -n "."
