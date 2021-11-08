@@ -590,7 +590,6 @@ for EXTENSION_ZIP in *.zip; do
   #Get all service/featureSet pairs defined in extensions
   SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"')
   for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
-    SERVICE_FROM_EXTENSION="${SERVICE_FROM_EXTENSION/null/default}"
     #Check if service should be monitored
     if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
       CONFIG_NAME=$(yq e '.name' "$EXTENSION_FILE_NAME".yaml)
