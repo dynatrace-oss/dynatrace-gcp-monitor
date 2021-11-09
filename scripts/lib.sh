@@ -19,7 +19,7 @@ readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e
 API_TOKEN_SCOPES=('"metrics.ingest"' '"logs.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 EXTENSIONS_TMPDIR=$(mktemp -d)
 CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
-WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 warn() {
   MESSAGE=$1
@@ -55,27 +55,25 @@ ctrl_c() {
 }
 
 onFailure() {
-    err " - deployment failed, please examine error messages and run again"
-    exit 2
+  err " - deployment failed, please examine error messages and run again"
+  exit 2
 }
 
 versionNumber() {
-   echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
+  echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'
 }
 
 test_req_yq() {
-  if ! command -v yq &> /dev/null
-  then
-      err 'yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
+  if ! command -v yq &>/dev/null; then
+    err 'yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
       YQ: https://github.com/mikefarah/yq
       Example command to install yq:
       sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
-      if ! command -v jq &> /dev/null
-      then
-          echo -e "JQ: https://stedolan.github.io/jq/download/"
-      fi
-      err 'You may also try installing YQ with PIP: pip install yq'
-      exit 1
+    if ! command -v jq &>/dev/null; then
+      echo -e "JQ: https://stedolan.github.io/jq/download/"
+    fi
+    err 'You may also try installing YQ with PIP: pip install yq'
+    exit 1
   else
     VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
 
@@ -86,27 +84,25 @@ test_req_yq() {
     echo "Using yq version $VERSION_YQ"
 
     if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.0.0')" ]; then
-        err 'yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
+      err 'yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
         YQ: https://github.com/mikefarah/yq'
-        exit 1
+      exit 1
     fi
   fi
 }
 
 test_req_gcloud() {
-  if ! command -v gcloud &> /dev/null
-  then
-      err 'Google Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:
+  if ! command -v gcloud &>/dev/null; then
+    err 'Google Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:
       https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version'
-      exit
+    exit
   fi
 }
 
 test_req_unzip() {
-  if ! command -v unzip &> /dev/null
-  then
-      err 'unzip is required to install Dynatrace function'
-      exit
+  if ! command -v unzip &>/dev/null; then
+    err 'unzip is required to install Dynatrace function'
+    exit
   fi
 }
 
@@ -126,8 +122,7 @@ test_req_helm() {
   fi
 }
 
-dt_api()
-{
+dt_api() {
   URL=$1
   if [ $# -eq 3 ]; then
     METHOD="$2"
@@ -136,8 +131,8 @@ dt_api()
     METHOD="GET"
   fi
   if RESPONSE=$(curl -k -s -X $METHOD "${DYNATRACE_URL}${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}"); then
-    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<< "$RESPONSE")
-    sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<< "$RESPONSE"
+    CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
+    sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE"
     if [ "$CODE" -ge 400 ]; then
       return 255
     fi
@@ -187,37 +182,36 @@ check_s3_url() {
 }
 
 check_gcp_config_in_extension() {
-    EXTENSION_ZIP=$1
+  EXTENSION_ZIP=$1
 
-    echo ${EXTENSION_ZIP}
-    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &> /dev/null
-    if [[ $(unzip -c "$EXTENSION_ZIP-tmp/extension.zip" "extension.yaml" | tail -n +3 | yq e 'has("gcp")' -) == "false" ]] ; then
-        warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
-        rm ${EXTENSION_ZIP}
-    fi
-    rm -r "$EXTENSION_ZIP-tmp"
+  echo ${EXTENSION_ZIP}
+  unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &>/dev/null
+  if [[ $(unzip -c "$EXTENSION_ZIP-tmp/extension.zip" "extension.yaml" | tail -n +3 | yq e 'has("gcp")' -) == "false" ]]; then
+    warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
+    rm ${EXTENSION_ZIP}
+  fi
+  rm -r "$EXTENSION_ZIP-tmp"
 }
 
 check_gcp_config_in_extensions() {
-    EXTENSION_DIR=$1
+  EXTENSION_DIR=$1
 
-    pushd ${EXTENSION_DIR} &> /dev/null  || exit
-    for EXTENSION_ZIP in *.zip; do
-        check_gcp_config_in_extension ${EXTENSION_ZIP}
-    done
-    popd &> /dev/null
+  pushd ${EXTENSION_DIR} &>/dev/null || exit
+  for EXTENSION_ZIP in *.zip; do
+    check_gcp_config_in_extension ${EXTENSION_ZIP}
+  done
+  popd &>/dev/null
 }
 
 get_extensions_zip_packages() {
   curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_MANIFEST_FILE}"
-  EXTENSIONS_LIST=$(grep "^google.*\.zip" < "$EXTENSION_MANIFEST_FILE" 2>/dev/null)
+  EXTENSIONS_LIST=$(grep "^google.*\.zip" <"$EXTENSION_MANIFEST_FILE" 2>/dev/null)
   if [ -z "$EXTENSIONS_LIST" ]; then
     err "Empty extensions manifest file downloaded"
     exit 1
   fi
 
-  echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME
-  do
+  echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME; do
     echo -n "."
     (cd ${EXTENSIONS_TMPDIR} && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
   done
@@ -258,7 +252,7 @@ services_setup_in_config() {
 
   # Add '/default' to service name when featureSet is missing
   for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
-    if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]];then
+    if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]]; then
       SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default"
     fi
   done
@@ -294,11 +288,11 @@ get_extensions_from_dynatrace() {
   cd ${CLUSTER_EXTENSIONS_TMPDIR} || exit
 
   EXTENSIONS_TO_DOWNLOAD="com.dynatrace.extension.google"
-  readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$( echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD" )"
+  readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$(echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD")"
   for i in "${!EXTENSIONS_FROM_CLUSTER_ARRAY[@]}"; do
     EXTENSION_NAME="$(cut -d':' -f1 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
     EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
-    
+
     curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
       check_gcp_config_in_extension "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
@@ -308,7 +302,7 @@ get_extensions_from_dynatrace() {
       fi
     fi
   done
-  
+
   cd ${WORKING_DIR} || exit
   rm -rf ${CLUSTER_EXTENSIONS_TMPDIR}
 }
@@ -320,10 +314,10 @@ upload_correct_extension_to_dynatrace() {
 
   for EXTENSION_ZIP in *.zip; do
     EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"
-    
+
     unzip -j -q "$EXTENSION_ZIP" "extension.zip"
     unzip -p -q "extension.zip" "extension.yaml" >"$EXTENSION_FILE_NAME".yaml
-    
+
     EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_FILE_NAME".yaml)
 
     # Get all service/featureSet pairs defined in extensions
@@ -354,22 +348,22 @@ upload_correct_extension_to_dynatrace() {
 }
 
 validate_gcp_config_in_extensions() {
-    cd ${EXTENSIONS_TMPDIR} || exit
-    for EXTENSION_ZIP in *.zip; do
-      unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &> /dev/null
-      cd "$EXTENSION_ZIP-tmp"
-      unzip "extension.zip" "extension.yaml" &> /dev/null
-      if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]] ; then
-        warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
-        rm ../${EXTENSION_ZIP}
-      elif [[ $(yq e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]] ; then
-        warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
-        rm ../${EXTENSION_ZIP}
-      else
-        echo -n "."
-      fi
-      cd ..
-      rm -r "$EXTENSION_ZIP-tmp"
-    done
-    cd ${WORKING_DIR} || exit
+  cd "${EXTENSIONS_TMPDIR}" || exit
+  for EXTENSION_ZIP in *.zip; do
+    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &>/dev/null
+    cd "$EXTENSION_ZIP-tmp" || exit
+    unzip "extension.zip" "extension.yaml" &>/dev/null
+    if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]]; then
+      warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
+      rm -rf "../${EXTENSION_ZIP}"
+    elif [[ $(yq e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]]; then
+      warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
+      rm -rf "../${EXTENSION_ZIP}"
+    else
+      echo -n "."
+    fi
+    cd ..
+    rm -r "$EXTENSION_ZIP-tmp"
+  done
+  cd ${WORKING_DIR} || exit
 }
