@@ -298,10 +298,8 @@ get_extensions_from_dynatrace() {
 
     curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
-      if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ]; then
-        find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
-        mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
-      fi
+      find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
     fi
   done
 
@@ -326,7 +324,6 @@ upload_correct_extension_to_dynatrace() {
     SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null)
 
     for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
-      SERVICE_FROM_EXTENSION="${SERVICE_FROM_EXTENSION/null/default}"
       # Check if service should be monitored
       if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
         if [ -n "$GCP_FUNCTION_NAME" ]; then

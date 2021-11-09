@@ -311,7 +311,7 @@ echo -e
 echo "- checking activated extensions in Dynatrace"
 get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
-mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME
+mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME >/dev/null
 pushd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
 
 if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
