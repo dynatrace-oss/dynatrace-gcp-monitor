@@ -43,4 +43,6 @@ def test_metrics_on_dynatrace():
     response_json = response.json()
     assert 'totalCount' in response_json
     assert response_json['totalCount'] == 1
+    # show full response on test fail
+    print(response_json)
     assert 5 in response_json['result'][0]['data'][0]['values']

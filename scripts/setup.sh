@@ -20,7 +20,6 @@ onFailure() {
 
 trap onFailure ERR
 
-
 versionNumber() {
    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
 }
@@ -28,38 +27,35 @@ versionNumber() {
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring"
 echo -e "\033[0;37m"
 
-if ! command -v yq &> /dev/null
-then
+if ! command -v yq &> /dev/null; then
 
-    echo -e "\e[91mERROR: \e[37m yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:"
-    echo -e
-    echo -e "YQ: https://github.com/mikefarah/yq"
-    if ! command -v jq &> /dev/null
-    then
+    echo -e "\e[91mERROR: yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
+    YQ: https://github.com/mikefarah/yq
+    Example command to install yq:
+    sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq"
+    if ! command -v jq &> /dev/null; then
         echo -e "JQ: https://stedolan.github.io/jq/download/"
     fi
-    echo -e
-    echo -e "You may also try installing YQ with PIP: pip install yq"
-    echo -e ""
-    echo
+    echo -e "\e[91mERROR: You may also try installing YQ with PIP: pip install yq"
     exit 1
 else
   VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
+
+  if [ "$VERSION_YQ" == "version" ]; then
+    VERSION_YQ=$(yq --version | cut -d' ' -f4 | tr -d '"')
+  fi
+
   echo "Using yq version $VERSION_YQ"
 
+  if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.0.0')" ]; then
 
-  if [ $(versionNumber $VERSION_YQ) -lt $(versionNumber '4.0.0') ]; then
-      echo -e
-      echo -e "\e[91mERROR: \e[37m yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:"
-      echo -e "YQ: https://github.com/mikefarah/yq"
-      echo -e
+      echo -e "\e[91mERROR: yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
+      YQ: https://github.com/mikefarah/yq"
       exit 1
   fi
 fi
 
-
-if ! command -v gcloud &> /dev/null
-then
+if ! command -v gcloud &> /dev/null; then
 
     echo -e "\e[91mERROR: \e[37mGoogle Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:"
     echo -e
@@ -69,8 +65,7 @@ then
     exit
 fi
 
-if ! command -v unzip &> /dev/null
-then
+if ! command -v unzip &> /dev/null; then
     echo -e "\e[91mERROR: \e[37munzip is required to install Dynatrace function"
     echo
     exit
@@ -229,36 +224,48 @@ fi
 
 # Create App Engine app if not exists
 echo
-echo "- checking App Engine app required for Cloud Scheduler"
-APP_ENGINE=$(gcloud app describe --format="json" 2>/dev/null)
-#todo ms what if App Engine app is disabled? servingStatus:?
+echo "- checking App Engine app, required for Cloud Scheduler"
+APP_ENGINE=$(gcloud app describe --format="json" 2>/dev/null || true)
+SERVING_APP_ENGINE=$(echo "$APP_ENGINE" | jq -r '.servingStatus')
+
 if [[ -z "$APP_ENGINE" ]]; then
   echo
   echo "To continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
   while true; do
     read -p "Do you want to create App Engine app? [y/n]" yn
     case $yn in
-        [Yy]* )
-          echo
-          echo "Please provide the region for App Engine app."
-          echo
-          echo "Available regions:"
-          APP_ENGINE_LOCATIONS_RESPONSE=$(gcloud app regions list --format="json")
-          APP_ENGINE_LOCATIONS=$(echo "$APP_ENGINE_LOCATIONS_RESPONSE" | jq -r '.[] | .region')
-          echo $APP_ENGINE_LOCATIONS
-          readarray -t LOCATIONS_ARR <<<"$( echo "${APP_ENGINE_LOCATIONS}")"
-          echo
-          while ! [[ " ${LOCATIONS_ARR[*]} " == *" $APP_ENGINE_LOCATION "* ]]; do
-            read -p "Enter location for App Engine app: " -e APP_ENGINE_LOCATION
-          done
-          echo
-          echo "- creating the App Engine app"
-          gcloud app create -q --region="$APP_ENGINE_LOCATION"
-          break;;
-        [Nn]* ) echo -e "Cannot continue without App Engine. Deployment aborted." ; exit;;
-        * ) echo "- please answer y or n";;
+    [Yy]*)
+      echo
+      echo "Please provide the region for App Engine app."
+      echo
+      echo "Available regions:"
+      APP_ENGINE_LOCATIONS=$(gcloud app regions list --format="json" | jq -r '.[] | .region')
+      echo "$APP_ENGINE_LOCATIONS"
+      readarray -t LOCATIONS_ARR <<<"$(echo "${APP_ENGINE_LOCATIONS}")"
+      echo
+      while ! [[ " ${LOCATIONS_ARR[*]} " == *" $APP_ENGINE_LOCATION "* ]]; do
+        read -p "Enter location for App Engine app: " -e APP_ENGINE_LOCATION
+      done
+      echo
+      echo "- creating the App Engine app"
+      gcloud app create -q --region="$APP_ENGINE_LOCATION"
+      break
+      ;;
+    [Nn]*)
+      echo
+      echo -e "\e[91mERROR: \e[37mCannot continue without App Engine. Deployment aborted."
+      exit
+      ;;
+    *) echo "- please answer y or n" ;;
     esac
   done
+elif [[ "$SERVING_APP_ENGINE" != "SERVING"  ]]; then
+  echo
+  echo -e "\e[91mERROR: \e[37mTo continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
+  echo
+  echo 'Enable App Engine on: https://console.cloud.google.com/appengine/settings'
+  echo
+  exit
 fi
 
 if [ "$INSTALL" == true ]; then
