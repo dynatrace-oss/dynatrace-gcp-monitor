@@ -43,7 +43,7 @@ clean() {
     echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
     rm $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
 
-    echo "- removing temporary directory [$FUNCTION_ZIP_PACKAGE]"
+    echo "- removing temporary directory [$GCP_FUNCTION_NAME]"
     rm -r $WORKING_DIR/$GCP_FUNCTION_NAME
   fi
 }
@@ -181,26 +181,25 @@ check_s3_url() {
   fi
 }
 
-check_gcp_config_in_extension() {
-  EXTENSION_ZIP=$1
-
-  echo ${EXTENSION_ZIP}
-  unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &>/dev/null
-  if [[ $(unzip -c "$EXTENSION_ZIP-tmp/extension.zip" "extension.yaml" | tail -n +3 | yq e 'has("gcp")' -) == "false" ]]; then
-    warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
-    rm ${EXTENSION_ZIP}
-  fi
-  rm -r "$EXTENSION_ZIP-tmp"
-}
-
-check_gcp_config_in_extensions() {
-  EXTENSION_DIR=$1
-
-  pushd ${EXTENSION_DIR} &>/dev/null || exit
+validate_gcp_config_in_extensions() {
+  cd "${EXTENSIONS_TMPDIR}" || exit
   for EXTENSION_ZIP in *.zip; do
-    check_gcp_config_in_extension ${EXTENSION_ZIP}
+    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &>/dev/null
+    cd "$EXTENSION_ZIP-tmp" || exit
+    unzip "extension.zip" "extension.yaml" &>/dev/null
+    if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]]; then
+      warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
+      rm -rf "../${EXTENSION_ZIP}"
+    elif [[ $(yq e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]]; then
+      warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
+      rm -rf "../${EXTENSION_ZIP}"
+    else
+      echo -n "."
+    fi
+    cd ..
+    rm -r "$EXTENSION_ZIP-tmp"
   done
-  popd &>/dev/null
+  cd ${WORKING_DIR} || exit
 }
 
 get_extensions_zip_packages() {
@@ -344,26 +343,5 @@ upload_correct_extension_to_dynatrace() {
     rm "$EXTENSION_ZIP"
   done
 
-  cd ${WORKING_DIR} || exit
-}
-
-validate_gcp_config_in_extensions() {
-  cd "${EXTENSIONS_TMPDIR}" || exit
-  for EXTENSION_ZIP in *.zip; do
-    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &>/dev/null
-    cd "$EXTENSION_ZIP-tmp" || exit
-    unzip "extension.zip" "extension.yaml" &>/dev/null
-    if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]]; then
-      warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
-      rm -rf "../${EXTENSION_ZIP}"
-    elif [[ $(yq e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]]; then
-      warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
-      rm -rf "../${EXTENSION_ZIP}"
-    else
-      echo -n "."
-    fi
-    cd ..
-    rm -r "$EXTENSION_ZIP-tmp"
-  done
   cd ${WORKING_DIR} || exit
 }
