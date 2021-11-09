@@ -13,7 +13,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
+helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -r -n1 helm -n dynatrace delete
 
 gcloud pubsub subscriptions list --format="value(name)" | grep e2e_test_subscription_ | xargs -r -n1 gcloud pubsub subscriptions delete
 gcloud pubsub topics list --format="value(name)" | grep e2e_test_topic_ | xargs -r -n1 gcloud pubsub topics delete
