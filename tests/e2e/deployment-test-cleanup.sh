@@ -21,4 +21,8 @@ gcloud logging sinks list --format="value(name)" | grep e2e_test_log_router_ | x
 gcloud iam service-accounts list --format="value(email)" | grep e2e-test-sa- | xargs -r -n1 gcloud iam service-accounts delete
 gcloud iam roles list --format="value(name)" --project="${GCP_PROJECT_ID}" | grep e2e_test_ | xargs -r -n1 basename |  xargs -r -n1 gcloud iam roles delete --project="${GCP_PROJECT_ID}"
 gcloud container images list-tags "${GCR_NAME}" --format="value(tags)" | grep e2e-travis-test- | xargs -r -n1 echo "${GCR_NAME}" | tr ' ' ':' | xargs -r -n1 gcloud container images delete
-gcloud functions delete "${CLOUD_FUNCTION_NAME}" --project="${GCP_PROJECT_ID}"
+
+CLOUD_FUNCTION_EXISTS=$(gcloud functions list --filter=$CLOUD_FUNCTION_NAME --project="$GCP_PROJECT_ID" --format="value(name)")
+if [ -n  "$CLOUD_FUNCTION_EXISTS" ]; then
+  gcloud functions delete "${CLOUD_FUNCTION_NAME}" --project="${GCP_PROJECT_ID}"
+fi
