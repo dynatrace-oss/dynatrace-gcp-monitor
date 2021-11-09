@@ -231,6 +231,9 @@ while ! [[ "${DYNATRACE_URL}" =~ ^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/)(e\/
 done
 echo ""
 
+#remove last '/' from URL
+DYNATRACE_URL=$(echo "${DYNATRACE_URL}" | sed 's:/*$::')
+
 echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)."
 echo "The token requires grant of 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read configuration (API v1)',  and 'Write configuration (API v1)' scope"
 while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
@@ -239,7 +242,7 @@ done
 echo ""
 
 if [ "$INSTALL" == true ]; then
-  if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "api/v2/extensions/schemas"); then
+  if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "/api/v2/extensions/schemas"); then
     GCP_EXTENSIONS_SCHEMA_PRESENT=$(jq -r '.versions[] | select(.=="1.229.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
     if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
       err "Dynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.229 or higher to complete installation."

@@ -134,8 +134,12 @@ dt_api() {
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE"
     if [ "$CODE" -ge 400 ]; then
-      return 255
+      warn "Received ${CODE} response from ${DYNATRACE_URL}${URL}"
+      return 1
     fi
+  else
+    warn "Unable to connect to ${DYNATRACE_URL}"
+    return 2
   fi
 }
 
