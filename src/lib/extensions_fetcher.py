@@ -124,6 +124,7 @@ class ExtensionsFetcher:
         services_from_env = set(load_activated_service_names(self.logging_context))
         services_from_extensions_dict = {f"{gcp_service_config.name}/{gcp_service_config.feature_set}": gcp_service_config
                                          for gcp_service_config in services_from_extensions}
+
         services_in_env_but_no_in_extensions = services_from_env.difference(set(services_from_extensions_dict.keys()))
         if services_in_env_but_no_in_extensions:
             self.logging_context.log(

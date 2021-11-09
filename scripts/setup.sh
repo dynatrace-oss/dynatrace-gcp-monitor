@@ -31,7 +31,7 @@ clean() {
   echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
   rm $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
 
-  echo "- removing temporary directory [$FUNCTION_ZIP_PACKAGE]"
+  echo "- removing temporary directory [$GCP_FUNCTION_NAME]"
   rm -r $WORKING_DIR/$GCP_FUNCTION_NAME
 
   echo "- removing extensions files"
@@ -62,11 +62,15 @@ echo -e "\033[0;37m"
 
 print_help() {
   printf "
-usage: setup.sh [--upgrade-extensions]
+usage: setup.sh [--upgrade-extensions] [--auto-default]
 
 arguments:
     --upgrade-extensions
                             Upgrade all extensions into dynatrace cluster
+    -d, --auto-default
+                            Disable all interactive prompts when running gcloud commands.
+                            If input is required, defaults will be used, or an error will be raised.
+                            It's equivalent to gcloud global parameter -q, --quiet
     -h, --help
                             Show this help message and exit
     "
@@ -131,6 +135,11 @@ while (( "$#" )); do
 
             "--use-local-function-zip")
                 USE_LOCAL_FUNCTION_ZIP="Y"
+                shift
+            ;;
+
+            "-d" | "--auto-default")
+                export CLOUDSDK_CORE_DISABLE_PROMPTS=1
                 shift
             ;;
 
@@ -502,9 +511,7 @@ if [ "$INSTALL" == true ]; then
   if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" ) ]]; then
       echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, skipping"
   else
-      stty -echo
       printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
-      stty echo
   fi
 
   echo -e
@@ -524,11 +531,11 @@ if [ "$INSTALL" == true ]; then
       echo "Service account [$GCP_SERVICE_ACCOUNT] already exists, skipping"
   else
       gcloud iam service-accounts create "$GCP_SERVICE_ACCOUNT" >/dev/null
-      gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$GCP_IAM_ROLE"
-      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
-      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer
-      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
-      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer
+      gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$GCP_IAM_ROLE" >/dev/null
+      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor >/dev/null
+      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer >/dev/null
+      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor >/dev/null
+      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer >/dev/null
   fi
 fi
 
@@ -544,6 +551,7 @@ get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
 mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME
 pushd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
+
 if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
   echo "Invalid value of 'googleCloud.metrics.queryInterval', defaulting to 3"
   GCP_FUNCTION_TIMEOUT=180
@@ -578,9 +586,11 @@ echo "- validating extensions"
 validate_gcp_config_in_extensions
 
 SERVICES_FROM_ACTIVATION_CONFIG_STR="${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
+echo "${SERVICES_FROM_ACTIVATION_CONFIG_STR}"
 
 mkdir -p $WORKING_DIR/$GCP_FUNCTION_NAME/config/
 cd ${EXTENSIONS_TMPDIR} || exit
+echo
 echo "- choosing and uploading extensions to Dynatrace"
 for EXTENSION_ZIP in *.zip; do
   EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"

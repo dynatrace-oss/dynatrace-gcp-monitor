@@ -13,6 +13,8 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+source ./tests/e2e/lib-tests.sh
+
 check_container_state()
 {
   CONTAINER=$1
@@ -47,8 +49,7 @@ while (( "$#" )); do
     esac
 done
 
-# Install YQ
-curl -sSLo yq "https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64" && chmod +x yq && sudo mv yq /usr/local/bin/yq
+install_yq
 
 # Install kubectl.
 curl -sSLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
@@ -95,11 +96,7 @@ fi
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | jq -r '.writerIdentity')
 gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher > /dev/null 2>&1
 
-# Create E2E Sample App
-gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
---runtime python37 \
---trigger-http \
---source ./tests/e2e/sample_app/ > /dev/null 2>&1
+create_sample_app
 
 # Run helm deployment.
 rm -rf ./e2e_test
@@ -116,7 +113,6 @@ cat <<EOF > values.e2e.yaml
 gcpProjectId: "${GCP_PROJECT_ID}"
 deploymentType: "${DEPLOYMENT_TYPE}"
 dynatraceAccessKey: "${DYNATRACE_ACCESS_KEY}"
-dynatraceLogIngestUrl: "${DYNATRACE_LOG_INGEST_URL}"
 dynatraceUrl: "${DYNATRACE_URL}"
 logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
@@ -164,12 +160,7 @@ done
 echo
 kubectl -n dynatrace get pods
 
-# Generate load on GC Function
-for i in {1..5}; do
-  curl -s "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
-  -H "Authorization: bearer $(gcloud auth print-identity-token)"
-  echo
-done
+generate_load_on_sample_app
 
 if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
   echo "Deployment completed successfully"

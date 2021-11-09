@@ -6,7 +6,8 @@ notifications:
 stages:
 - tests
 - github-deploy
-- e2e-deployment-test
+- e2e-helm-deployment-test
+- e2e-cloud-function-deployment-test
 - docker-deploy
 env:
   global:
@@ -63,8 +64,8 @@ jobs:
       skip_cleanup: true
       on:
         tags: true
-  - stage: e2e-deployment-test
-    name: E2E GCP deployment test
+  - stage: e2e-helm-deployment-test
+    name: E2E GCP helm deployment test
     sudo: required
     language: python
     python:
@@ -105,3 +106,43 @@ jobs:
       - ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
+  - stage: e2e-cloud-function-deployment-test
+    name: E2E GCP Cloud Function deployment test
+    sudo: required
+    language: python
+    python:
+      - "3.8"
+    if: (branch = master OR type = pull_request) AND fork = false
+    cache:
+      directories:
+        - "$HOME/google-cloud-sdk/"
+    env:
+      - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+      - IAM_SERVICE_ACCOUNT="e2e-test-sa-${TRAVIS_BUILD_ID}
+      - GCP_PROJECT_ID="dynatrace-gcp-extension"
+      - E2E=true
+      - DYNATRACE_URL_SECRET_NAME="DYNATRACE_URL_${TRAVIS_BUILD_ID}"
+      - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_ACCESS_KEY_${TRAVIS_BUILD_ID}"
+      - IAM_SERVICE_ACCOUNT="e2e-test-sa-${TRAVIS_BUILD_ID}"
+      - IAM_ROLE_METRCICS="e2e_test_cloud_function_${TRAVIS_BUILD_ID}.metrics"
+      - PUBSUB_TOPIC="e2e_test_topic_${TRAVIS_BUILD_ID}"
+      - CLOUD_SCHEDULER="e2e_test_scheduler_${TRAVIS_BUILD_ID}"
+      - METRIC_FORWARDING_FUNCTION="e2e_test_function_${TRAVIS_BUILD_ID}"
+      - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
+      - secure: "tdw5iV7XGhQ+gVPw70n+/SeA2xfVAXL5uwhMrKjI6FgayQQB7cIFxGfhIGMMw17p9Td5KdpiuBvw1tZh8SRh7vJfx4dr8ZgkU3W3whjOt+gbuI/igzp4K5TYuEFajbuPRWPtJbDmRwS4a2VwkO9t5RyVUDZW1Pkj3d/SsaedUOxnKOBorSJLkXdlgNlijo1LS9jrsEbo47mVKsBpp6l7HsgvDurq8y32mgh+SNUuUhf20MYxBDtDmtf3qkhaGlIR4Pfz9MNFcMq/Qac9lpJAxRPNifN+frlkDMnyGRNlkpgv8aokZdf5ohURDhH1ff4lHJa9tORVPHf1GGyA5SW8ucplTq9PtMP30Zh2mO3E9YE6chtZ2QxOC1HT6GJL/5SXj2NCYe0nemiynTk8QHiPEnE5n0grKfLTdDHmZ6q3Gwa6rd6e/KvCGfNs/B8hAjkPOEkqM3zk8WUw2sD4DUq5YmyKTUSoz+z6zgueY//3ecgCvUz+GZ2BBtTEFybZtv0860FI8x79EFMdvEGbRa4mzsij2oWYbHmlT1LsvNuqMgzdjh4pD97pek3jl3JSPgNY6bDI6z2XA4bM5mbdCHr68+7CwNfNckM1Pi8gHt0H5dH9zjW5ehC7inMlSvBKGUR35af+OW64DevhY2/EHu7AVxcFFwKAK2ZMeXzeBVY1IE8="
+      - secure: "WBTVUC4B/VNnZbN6NLDeH1ZRfanYwOJJugE+ZikkZdNhqag56IzlkR/VVen2LeqElrPMQmV+U8/pf9PG3aOeVpRBvIOzEBZ4fJiEo/udYSj11ioJxiDDDwZ9QkRFcqL9GwBCJMDBMt1pE7Vw6p/XvQLKi+Nc+n0iCuuGUj3C+zLEzrEFcoXYS/TYlKqDQQZC3lgk2V1edkCG24hB69KtweHmOTYINAFtORg+CfHSm7dtd4vzAy4HxXuJRlHqFcQ1BU3u0hmK/YzDadZiVvCNDFz6LQYOYnVfQup5MUYRE9swlZz6bRYJNcgS6v46xT+qaSTtft4fz9GVnT8/9iguTC3soqVplD5AZddIxMYBjL9JCZPeE75Q7YLLGOmdjVhLj0kMmFkj1YpZB+6+9qfY542NwpMso/bUX5ip66Um8CACLsBXxX4hWDlupnIcQKEa4cSGs4lLKXYb91pdDiI2xO/yo2UK2VHNHMxmFQoGj9yStoAkhU8O0mEY3hNe9haLEdFLW6PPxPrXEgUDLpuaRLsPrL1SVWNu91sslUKRxHD+3MPFqjn7yYI9PBkIXlRpYLgN4FcG+botHcuHavp4avb1HLOKYliGNiI8d0XDnehhl0VyVyuevDP8qb38NJr+7ELJiKQZSL59UL7H2y5seNmdIO1TjVygTknmlDxTIeQ="
+    install:
+      # Install GCP SDK if not already cached
+      - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
+      - source $HOME/google-cloud-sdk/path.bash.inc
+      - gcloud version
+      - pip install -r tests/requirements.txt
+    before_script:
+      - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
+      - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
+      - ./build/build-zip-release.sh
+      - ./tests/e2e/before-deployment-test-cleanup.sh
+    script:
+      - ./tests/e2e/execute-tests-cloud-function.sh
+    after_script:
+      - ./tests/e2e/deployment-test-cleanup-cloud-function.sh

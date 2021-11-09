@@ -63,7 +63,7 @@ check_dynatrace_docker_login() {
 
 print_help() {
   printf "
-usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--upgrade-extensions] [--auto-yes] [--quiet]
+usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--upgrade-extensions] [--auto-default] [--quiet]
 
 arguments:
     --service-account SA_NAME
@@ -79,8 +79,10 @@ arguments:
                             By default 'dynatrace-gcp-function' will be used.
     --upgrade-extensions
                             Upgrade all extensions into dynatrace cluster
-    -y, --auto-yes
-                            By default 'yes' will be answer for all user input prompts from GCP.
+    -d, --auto-default
+                            Disable all interactive prompts when running gcloud commands.
+                            If input is required, defaults will be used, or an error will be raised.
+                            It's equivalent to gcloud global parameter -q, --quiet
     -q, --quiet
                             Reduce output verbosity, progress messages and errors are still printed.
     -h, --help
@@ -124,9 +126,9 @@ while (( "$#" )); do
                 shift
             ;;
 
-            "-y" | "--auto-yes")
+            "-d" | "--auto-default")
                 export CLOUDSDK_CORE_DISABLE_PROMPTS=1
-                shift; shift
+                shift
             ;;
 
             "-q" | "--quiet")

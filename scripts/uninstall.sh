@@ -12,6 +12,18 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+
+err() {
+  MESSAGE=$1
+  echo -e >&2
+  echo -e "\e[91mERROR: \e[37m$MESSAGE" >&2
+  echo -e >&2
+}
+
+versionNumber() {
+   echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
+}
+
 readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
@@ -21,6 +33,43 @@ TMP_FUNCTION_DIR=$(mktemp -d)
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring / uninstall script"
 echo -e "\033[0;37m"
 
+if ! command -v yq &> /dev/null
+then
+    err 'yq and jq is required to uninstall Dynatrace function. Please refer to following links for installation instructions:
+    YQ: https://github.com/mikefarah/yq
+    Example command to install yq:
+    sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
+    if ! command -v jq &> /dev/null
+    then
+        echo -e "JQ: https://stedolan.github.io/jq/download/"
+    fi
+    err 'You may also try installing YQ with PIP: pip install yq'
+    exit 1
+else
+  VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
+
+  if [ "$VERSION_YQ" == "version" ]; then
+    VERSION_YQ=$(yq --version | cut -d' ' -f4 | tr -d '"')
+  fi
+
+  echo "Using yq version $VERSION_YQ"
+
+  if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.0.0')" ]; then
+
+      err 'yq in 4+ version is required to uninstall Dynatrace function. Please refer to following links for installation instructions:
+      YQ: https://github.com/mikefarah/yq'
+      exit 1
+  fi
+fi
+
+if ! command -v gcloud &>/dev/null; then
+  echo -e "\e[93mWARNING: \e[37mGoogle Cloud CLI is required to uninstall Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:"
+  echo -e
+  echo -e "https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version"
+  echo -e
+  echo
+  exit
+fi
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
@@ -36,28 +85,14 @@ readonly GCP_FUNCTION_NAME=$(yq e '.googleCloud.metrics.function' $FUNCTION_ACTI
 readonly GCP_SCHEDULER_NAME=$(yq e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
-readonly ACTIVATION_SERVICES=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq 'join(",")')
-readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
-readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-function Self monitoring"
-
-if ! command -v gcloud &> /dev/null
-then
-
-    echo -e "\e[93mWARNING: \e[37mGoogle Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:"
-    echo -e
-    echo -e "https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version"
-    echo -e
-    echo 
-    exit
-fi
 
 GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
 echo
 DEFAULT_PROJECT=$(gcloud config get-value project)
 
-echo "Please provide the GCP project, form which monitoring function should be removed. Default value: [$DEFAULT_PROJECT] (current project)"
+echo "Please provide the GCP project from which monitoring function should be removed. Default value: [$DEFAULT_PROJECT] (current project)"
 while ! [[ "${GCP_PROJECT}" =~ ^[a-z]{1}[a-z0-9-]{5,29}$ ]]; do
     read -p "Enter GCP project ID: " -i $DEFAULT_PROJECT -e GCP_PROJECT
 done
@@ -66,18 +101,18 @@ echo ""
 echo "- set current project to [$GCP_PROJECT]"
 gcloud config set project $GCP_PROJECT
 
-echo "Discovering instances to remove"    
-REMOVE_FUNCTION=$(gcloud functions list --filter=name:dynatrace-gcp-function --format="value(name)")
+echo "Discovering instances to remove"
+REMOVE_FUNCTION=$(gcloud functions list --filter=name:$GCP_FUNCTION_NAME --format="value(name)")
 if [[ $REMOVE_FUNCTION ]]; then
     echo "found function [$REMOVE_FUNCTION]"
 fi
 
-REMOVE_TOPIC=$(gcloud pubsub topics list --filter=name:dynatrace-gcp-service-invocation --format="value(name)")
+REMOVE_TOPIC=$(gcloud pubsub topics list --filter=name:$GCP_PUBSUB_TOPIC --format="value(name)")
 if [[ $REMOVE_TOPIC ]]; then
     echo "found pub/sub topic [$REMOVE_TOPIC]"
 fi
 
-REMOVE_SECRET_URL=$(gcloud secrets list --filter=name:$DYNATRACE_URL_SECRET_NAME --format="value(name)" )
+REMOVE_SECRET_URL=$(gcloud secrets list --filter=name:$DYNATRACE_URL_SECRET_NAME --format="value(name)")
 if [[ $REMOVE_SECRET_URL ]]; then
     echo "found secret [$REMOVE_SECRET_URL]"
 fi
@@ -92,7 +127,7 @@ if [[ $REMOVE_SERVICE_ACCOUNT ]]; then
     echo "found service account [$REMOVE_SERVICE_ACCOUNT]"
 fi
 
-REMOVE_JOB=$(gcloud scheduler jobs list --filter=name:dynatrace-gcp-schedule --format="value(name)")
+REMOVE_JOB=$(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)")
 if [[ $REMOVE_JOB ]]; then
     echo "found scheduler [$REMOVE_JOB]"
 fi
@@ -116,63 +151,55 @@ done
 echo ""
 
 if [[ $CONFIRM_DELETE =~ (y|Y) ]]; then
-    if [[ $REMOVE_DASHBOARD ]]; then
-        for DASHBOARD in $REMOVE_DASHBOARD
-        do
-            echo -e "Removing dashboard [$DASHBOARD]"
-            gcloud monitoring dashboards delete "$DASHBOARD" --quiet
-        done
-    fi
-    if [[ $REMOVE_JOB ]]; then
-        for JOB in $REMOVE_JOB
-        do
-            echo -e "Removing job [$JOB]"
-            gcloud scheduler jobs delete "$JOB" --quiet
-        done
-    fi
-    if [[ $REMOVE_FUNCTION ]]; then
-        for FUNCTION in $REMOVE_FUNCTION
-        do
-            echo -e "Removing function [$FUNCTION]"
-            gcloud functions delete "$FUNCTION" --quiet
-        done
-    fi
-    if [[ $REMOVE_TOPIC ]]; then
-        for TOPIC in $REMOVE_TOPIC
-        do
-            echo -e "Removing pub/sub topic [$TOPIC]"
-            gcloud pubsub topics delete "$TOPIC" --quiet
-        done
-    fi
-    if [[ $REMOVE_SECRET_URL ]]; then
-        for SECRET_URL in $REMOVE_SECRET_URL
-        do
-            echo -e "Removing secret [$SECRET_URL]"
-            gcloud secrets delete "$SECRET_URL" --quiet
-        done
-    fi
-    if [[ $REMOVE_SECRET_TOKEN ]]; then
-        for SECRET_TOKEN in $REMOVE_SECRET_TOKEN
-        do
-            echo -e "Removing secret [$SECRET_TOKEN]"
-            gcloud secrets delete "$SECRET_TOKEN" --quiet
-        done
-    fi
-    if [[ $REMOVE_SERVICE_ACCOUNT ]]; then
-        for SERVICE_ACCOUNT in $REMOVE_SERVICE_ACCOUNT
-        do
-            echo -e "Removing service account [$SERVICE_ACCOUNT] IAM role bindings"
-            ROLES=$(gcloud projects get-iam-policy $DEFAULT_PROJECT --flatten="bindings[].members" --format='value(bindings.role)' --filter="bindings.members:$SERVICE_ACCOUNT")
-            for ROLE in $ROLES
-            do
-                echo -e "Removing IAM role [$ROLE] for service account [$SERVICE_ACCOUNT]"
-                gcloud projects remove-iam-policy-binding $DEFAULT_PROJECT --role=$ROLE --member="serviceAccount:$SERVICE_ACCOUNT" --quiet
-            done 
-            echo -e "Removing service account [$SERVICE_ACCOUNT]"
-            gcloud iam service-accounts delete "$SERVICE_ACCOUNT" --quiet
-        done
-    fi
-    echo -e "\e[92mOK: \e[37mOperation completed."
+  if [[ $REMOVE_DASHBOARD ]]; then
+    for DASHBOARD in $REMOVE_DASHBOARD; do
+      echo -e "Removing dashboard [$DASHBOARD]"
+      gcloud monitoring dashboards delete "$DASHBOARD" --quiet
+    done
+  fi
+  if [[ $REMOVE_JOB ]]; then
+    for JOB in $REMOVE_JOB; do
+      echo -e "Removing job [$JOB]"
+      gcloud scheduler jobs delete "$JOB" --quiet
+    done
+  fi
+  if [[ $REMOVE_FUNCTION ]]; then
+    for FUNCTION in $REMOVE_FUNCTION; do
+      echo -e "Removing function [$FUNCTION]"
+      gcloud functions delete "$FUNCTION" --quiet
+    done
+  fi
+  if [[ $REMOVE_TOPIC ]]; then
+    for TOPIC in $REMOVE_TOPIC; do
+      echo -e "Removing pub/sub topic [$TOPIC]"
+      gcloud pubsub topics delete "$TOPIC" --quiet
+    done
+  fi
+  if [[ $REMOVE_SECRET_URL ]]; then
+    for SECRET_URL in $REMOVE_SECRET_URL; do
+      echo -e "Removing secret [$SECRET_URL]"
+      gcloud secrets delete "$SECRET_URL" --quiet
+    done
+  fi
+  if [[ $REMOVE_SECRET_TOKEN ]]; then
+    for SECRET_TOKEN in $REMOVE_SECRET_TOKEN; do
+      echo -e "Removing secret [$SECRET_TOKEN]"
+      gcloud secrets delete "$SECRET_TOKEN" --quiet
+    done
+  fi
+  if [[ $REMOVE_SERVICE_ACCOUNT ]]; then
+    for SERVICE_ACCOUNT in $REMOVE_SERVICE_ACCOUNT; do
+      echo -e "Removing service account [$SERVICE_ACCOUNT] IAM role bindings"
+      ROLES=$(gcloud projects get-iam-policy $DEFAULT_PROJECT --flatten="bindings[].members" --format='value(bindings.role)' --filter="bindings.members:$SERVICE_ACCOUNT")
+      for ROLE in $ROLES; do
+        echo -e "Removing IAM role [$ROLE] for service account [$SERVICE_ACCOUNT]"
+        gcloud projects remove-iam-policy-binding $DEFAULT_PROJECT --role=$ROLE --member="serviceAccount:$SERVICE_ACCOUNT" --quiet >/dev/null
+      done
+      echo -e "Removing service account [$SERVICE_ACCOUNT]"
+      gcloud iam service-accounts delete "$SERVICE_ACCOUNT" --quiet
+    done
+  fi
+  echo -e "\e[92mOK: \e[37mOperation completed."
 else
-    echo -e "\e[93mWARNING: \e[37mOperation canceled."
+  echo -e "\e[93mWARNING: \e[37mOperation canceled."
 fi
