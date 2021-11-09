@@ -13,7 +13,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -r -n1 helm -n dynatrace delete
+gcloud config set project "${GCP_PROJECT_ID}"
 
 gcloud pubsub subscriptions list --format="value(name)" | grep e2e_test_subscription_ | xargs -r -n1 gcloud pubsub subscriptions delete
 gcloud pubsub topics list --format="value(name)" | grep e2e_test_topic_ | xargs -r -n1 gcloud pubsub topics delete
@@ -21,4 +21,4 @@ gcloud logging sinks list --format="value(name)" | grep e2e_test_log_router_ | x
 gcloud iam service-accounts list --format="value(email)" | grep e2e-test-sa- | xargs -r -n1 gcloud iam service-accounts delete
 gcloud iam roles list --format="value(name)" --project="${GCP_PROJECT_ID}" | grep e2e_test_ | xargs -r -n1 basename |  xargs -r -n1 gcloud iam roles delete --project="${GCP_PROJECT_ID}"
 gcloud container images list-tags "${GCR_NAME}" --format="value(tags)" | grep e2e-travis-test- | xargs -r -n1 echo "${GCR_NAME}" | tr ' ' ':' | xargs -r -n1 gcloud container images delete
-gcloud functions delete "${CLOUD_FUNCTION_NAME}"
+gcloud functions delete "${CLOUD_FUNCTION_NAME}" --project="${GCP_PROJECT_ID}"
