@@ -293,3 +293,24 @@ upload_correct_extension_to_dynatrace() {
 
   cd ${WORKING_DIR} || exit
 }
+
+validate_gcp_config_in_extensions() {
+    cd ${EXTENSIONS_TMPDIR} || exit
+    for EXTENSION_ZIP in *.zip; do
+      unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &> /dev/null
+      cd "$EXTENSION_ZIP-tmp"
+      unzip "extension.zip" "extension.yaml" &> /dev/null
+      if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]] ; then
+        warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
+        rm ../${EXTENSION_ZIP}
+      elif [[ $(yq e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]] ; then
+        warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
+        rm ../${EXTENSION_ZIP}
+      else
+        echo -n "."
+      fi
+      cd ..
+      rm -r "$EXTENSION_ZIP-tmp"
+    done
+    cd ${WORKING_DIR} || exit
+}
