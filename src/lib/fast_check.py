@@ -136,28 +136,37 @@ class MetricsFastCheck:
         self.token = token
 
     async def list_services(self, project_id: str, timeout: Optional[int] = 2):
+        fetch_next_page = True
+        next_token = None
+        services = []
         try:
-            response = await self.gcp_session.get(
-                urljoin(GCP_SERVICE_USAGE_URL, f'{project_id}/services'),
-                headers={
-                    "Authorization": f'Bearer {self.token}'
-                },
-                params={
-                    "filter": "state:ENABLED"
-                },
-                timeout=timeout)
-            if response.status != 200:
-                self.logging_context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
-                return {}
+            while fetch_next_page:
+                query_params = {"filter": "state:ENABLED"}
+                if next_token:
+                    query_params["pageToken"] = next_token
+                response = await self.gcp_session.get(
+                    urljoin(GCP_SERVICE_USAGE_URL, f'{project_id}/services'),
+                    headers={
+                        "Authorization": f'Bearer {self.token}'
+                    },
+                    params=query_params,
+                    timeout=timeout)
+                if response.status != 200:
+                    self.logging_context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
+                    return []
 
-            return await response.json()
+                response = await response.json()
+                services.extend(response.get('services', []))
+                next_token = response.get('nextPageToken', None)
+                fetch_next_page = next_token is not None
+            return services
         except Exception as e:
             self.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
-            return {}
+            return []
 
     async def _check_services(self, project_id):
         list_services_result = await self.list_services(project_id)
-        service_names = [find_service_name(service['name']) for service in list_services_result.get('services', [])]
+        service_names = [find_service_name(service['name']) for service in list_services_result]
         if not all(name in service_names for name in REQUIRED_SERVICES):
             self.logging_context.log(f'Cannot monitor project: \'{project_id}\'. '
                                      f'Enable required services: {REQUIRED_SERVICES}')
