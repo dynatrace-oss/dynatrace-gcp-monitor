@@ -102,7 +102,7 @@ activation:
     # Google Cloud DNS Query
     #- dns_query/default_metrics
     # Google Filestore Instance
-    #- filestore_instance/default_metrics
+    - filestore_instance/default_metrics
     # Google Firebase Hosting Site Domain
     #- firebase_domain/default_metrics
     # Google Firebase Realtime Database
@@ -116,7 +116,7 @@ activation:
     # Google App Engine Instance
     #- gae_instance/default_metrics
     # Google VM Instance
-    #- gce_instance/default_metrics
+    - gce_instance/default_metrics
     # Google VM Instance Agent
     #- gce_instance/agent
     # Google VM Instance Firewall Insights

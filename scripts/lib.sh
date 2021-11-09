@@ -67,7 +67,9 @@ test_req_yq() {
   if ! command -v yq &> /dev/null
   then
       err 'yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
-      YQ: https://github.com/mikefarah/yq'
+      YQ: https://github.com/mikefarah/yq
+      Example command to install yq:
+      sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
       if ! command -v jq &> /dev/null
       then
           echo -e "JQ: https://stedolan.github.io/jq/download/"
@@ -349,4 +351,25 @@ upload_correct_extension_to_dynatrace() {
   done
 
   cd ${WORKING_DIR} || exit
+}
+
+validate_gcp_config_in_extensions() {
+    cd ${EXTENSIONS_TMPDIR} || exit
+    for EXTENSION_ZIP in *.zip; do
+      unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &> /dev/null
+      cd "$EXTENSION_ZIP-tmp"
+      unzip "extension.zip" "extension.yaml" &> /dev/null
+      if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]] ; then
+        warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
+        rm ../${EXTENSION_ZIP}
+      elif [[ $(yq e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]] ; then
+        warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
+        rm ../${EXTENSION_ZIP}
+      else
+        echo -n "."
+      fi
+      cd ..
+      rm -r "$EXTENSION_ZIP-tmp"
+    done
+    cd ${WORKING_DIR} || exit
 }

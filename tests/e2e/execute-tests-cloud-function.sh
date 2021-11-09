@@ -1,5 +1,5 @@
-#!/bin/bash
-#     Copyright 2020 Dynatrace LLC
+#!/usr/bin/env bash
+#     Copyright 2021 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -13,12 +13,9 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-if [[ "${E2E:-}" != "true" ]]; then
-  readonly VERSION=$(cat ./build/version | awk 'BEGIN { FS="." } { $3++;  if ($3 > 999) { $3=0; $2++; if ($2 > 99) { $2=0; $1++ } } } { printf "%s.%s.%s", $1, $2, $3 }')
-  readonly PACKAGE_PATH="./build/dist/$VERSION"
-  echo $VERSION > ./build/version
-  mkdir -p $PACKAGE_PATH
-  (cd ./src/; zip -r ../$PACKAGE_PATH/dynatrace-gcp-function.zip ./ -x '*__pycache__*')
-else
-  (cd ./src/; zip -r ../dynatrace-gcp-function.zip ./ -x '*__pycache__*')
-fi
+export START_LOAD_GENERATION=$(date -u +%s%3N)
+./tests/e2e/deployment-test-cloud-function.sh
+sleep 300
+export END_LOAD_GENERATION=$(date -u +%s%3N)
+pytest "tests/e2e/extensions" -v
+pytest "tests/e2e/metrics" -v
