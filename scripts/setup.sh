@@ -339,13 +339,7 @@ echo "- read activation config"
 SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "$SERVICES_FROM_ACTIVATION_CONFIG")
 echo "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
 
-echo 'start test'
-echo $WORKING_DIR/$GCP_FUNCTION_NAME
-ls $WORKING_DIR/$GCP_FUNCTION_NAME
-ls -al $WORKING_DIR/$GCP_FUNCTION_NAME/config/
-pwd
-echo 'done test'
-
+mkdir -p $WORKING_DIR/$GCP_FUNCTION_NAME/config/
 echo
 echo "- choosing and uploading extensions to Dynatrace"
 upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
