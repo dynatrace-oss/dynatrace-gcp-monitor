@@ -4,17 +4,14 @@ title: Dynatrace GCP Function cloud function deployment role
 description: Role for Dynatrace GCP function cloud function deployment
 stage: GA
 includedPermissions:
-  - cloudfunctions.functions.call
+  - appengine.applications.get
+  - appengine.applications.create
   - cloudfunctions.functions.create
   - cloudfunctions.functions.get
-  - cloudfunctions.functions.invoke
   - cloudfunctions.functions.list
-  - cloudfunctions.functions.sourceCodeGet
   - cloudfunctions.functions.sourceCodeSet
   - cloudfunctions.functions.update
   - cloudfunctions.functions.getIamPolicy
-  - cloudfunctions.locations.get
-  - cloudfunctions.locations.list
   - cloudfunctions.operations.get
   - cloudfunctions.operations.list
   - cloudscheduler.locations.list
@@ -22,13 +19,9 @@ includedPermissions:
   - cloudscheduler.jobs.create
   - cloudscheduler.jobs.get
   - cloudscheduler.jobs.delete
-  - appengine.applications.get
-  - appengine.applications.create
   - pubsub.topics.list
   - pubsub.topics.create
   - pubsub.topics.update
-  - pubsub.topics.getIamPolicy
-  - pubsub.topics.setIamPolicy
   - secretmanager.secrets.list
   - secretmanager.versions.add
   - secretmanager.secrets.create
@@ -39,7 +32,6 @@ includedPermissions:
   - resourcemanager.projects.getIamPolicy
   - resourcemanager.projects.setIamPolicy
   - serviceusage.services.enable
-  - serviceusage.services.get
   - iam.serviceAccounts.actAs
   - iam.serviceAccounts.list
   - iam.serviceAccounts.create
