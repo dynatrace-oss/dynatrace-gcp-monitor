@@ -330,7 +330,7 @@ if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
   get_extensions_from_dynatrace "$EXTENSIONS_FROM_CLUSTER"
 fi
 
-echo -e
+echo
 echo "- validating extensions"
 validate_gcp_config_in_extensions
 
@@ -338,6 +338,13 @@ echo
 echo "- read activation config"
 SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "$SERVICES_FROM_ACTIVATION_CONFIG")
 echo "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
+
+echo 'start test'
+echo $WORKING_DIR/$GCP_FUNCTION_NAME
+ls $WORKING_DIR/$GCP_FUNCTION_NAME
+ls -al $WORKING_DIR/$GCP_FUNCTION_NAME/config/
+pwd
+echo 'done test'
 
 echo
 echo "- choosing and uploading extensions to Dynatrace"
