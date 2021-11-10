@@ -344,6 +344,7 @@ echo
 echo "- choosing and uploading extensions to Dynatrace"
 upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
 
+cd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
 if [ "$INSTALL" == true ]; then
   echo -e
   echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
