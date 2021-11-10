@@ -393,7 +393,7 @@ fi
 
 echo
 echo "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME"
-helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace dynatrace --set clusterName="$CLUSTER_NAME" >${CMD_OUT_PIPE}
+helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace dynatrace --wait --set clusterName="$CLUSTER_NAME" >${CMD_OUT_PIPE}
 
 echo
 echo -e "\e[92m- Deployment complete, check if containers are running:\e[37m" >${CMD_OUT_PIPE}

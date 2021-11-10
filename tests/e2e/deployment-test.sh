@@ -132,33 +132,33 @@ cd ./e2e_test || exit 1
 ./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 
 # Verify containers running
-echo
-echo -n "Verifying deployment result"
-METRICS_CONTAINER_STATE=0
-LOGS_CONTAINER_STATE=0
-ACTIVEGATE_CONTAINER_STATE=0
+# echo
+# echo -n "Verifying deployment result"
+# METRICS_CONTAINER_STATE=0
+# LOGS_CONTAINER_STATE=0
+# ACTIVEGATE_CONTAINER_STATE=0
 
-for i in {1..60}
-do
-  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
-    check_container_state "dynatrace-gcp-function-metrics"
-    METRICS_CONTAINER_STATE=$?
-  fi
+# for i in {1..60}
+# do
+#   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+#     check_container_state "dynatrace-gcp-function-metrics"
+#     METRICS_CONTAINER_STATE=$?
+#   fi
 
-  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
-    check_container_state "dynatrace-gcp-function-logs"
-    LOGS_CONTAINER_STATE=$?
-    check_container_state "dynatrace-activegate-gcpmon"
-    ACTIVEGATE_CONTAINER_STATE=$?
-  fi
+#   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
+#     check_container_state "dynatrace-gcp-function-logs"
+#     LOGS_CONTAINER_STATE=$?
+#     check_container_state "dynatrace-activegate-gcpmon"
+#     ACTIVEGATE_CONTAINER_STATE=$?
+#   fi
 
-  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
-    break
-  fi
+#   if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
+#     break
+#   fi
 
-  sleep 10
-  echo -n "."
-done
+#   sleep 10
+#   echo -n "."
+# done
 
 echo
 kubectl -n dynatrace get pods
