@@ -38,6 +38,8 @@ includedPermissions:
   - container.statefulSets.create
   - container.statefulSets.delete
   - container.statefulSets.get
+  - container.replicaSets.list
+  - container.replicaSets.get
   - resourcemanager.projects.get
   - resourcemanager.projects.getIamPolicy
   - resourcemanager.projects.setIamPolicy
