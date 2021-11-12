@@ -17,9 +17,11 @@ includedPermissions:
   - container.configMaps.create
   - container.configMaps.delete
   - container.configMaps.get
+  - container.configMaps.update
   - container.deployments.create
   - container.deployments.delete
   - container.deployments.get
+  - container.deployments.update
   - container.namespaces.create
   - container.namespaces.get
   - container.pods.list
@@ -37,6 +39,7 @@ includedPermissions:
   - container.services.get
   - container.statefulSets.create
   - container.statefulSets.delete
+  - container.statefulSets.update
   - container.statefulSets.get
   - container.replicaSets.list
   - container.replicaSets.get
