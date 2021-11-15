@@ -96,12 +96,14 @@ jobs:
       - source $HOME/google-cloud-sdk/path.bash.inc
       - gcloud version
       - pip install -r tests/requirements.txt
+      - ./tests/e2e/helm-preinstall.sh
     before_script:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
       - gcloud auth configure-docker
       - ./build/docker-deploy.sh
-      - ./tests/e2e/before-deployment-test-cleanup.sh
+      - ./tests/e2e/before-deployment-test-helm-cleanup.sh
+      - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
       - ./tests/e2e/execute-tests.sh
     after_script:
@@ -141,7 +143,7 @@ jobs:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
       - ./build/build-zip-release.sh
-      - ./tests/e2e/before-deployment-test-cleanup.sh
+      - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
       - ./tests/e2e/execute-tests-cloud-function.sh
     after_script:
