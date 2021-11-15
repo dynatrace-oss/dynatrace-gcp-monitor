@@ -13,6 +13,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
 helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace uninstall --timeout 10m
 
 # testing message
