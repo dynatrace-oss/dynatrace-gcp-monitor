@@ -14,7 +14,7 @@
 #     limitations under the License.
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
-helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace uninstall --timeout 10m
+helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace uninstall --timeout 10m > /dev/null
 
 # testing message
 INSTALLED_EXTENSIONS=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.extensions[].extensionName' 2>/dev/null)
