@@ -404,11 +404,16 @@ if [[ $DEPLOYMENT_TYPE != "metrics" ]] && [[ $USE_EXISTING_ACTIVE_GATE != "true"
   LOG_VIEWER="Log Viewer: ${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
 fi
 
+echo
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  echo
   echo -e "\e[92m- Check logs in Dynatrace in 5 min. ${LOG_VIEWER}\e[37m" >${CMD_OUT_PIPE}
-  echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/shortlink/deploy-k8#anchor_verify"
-  echo "Additionally you can enable self-monitoring for quick diagnosis: https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp#anchor_sfm"
+  fi
+if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
+  GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
+  echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"
 fi
+echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/shortlink/deploy-k8#anchor_verify"
+echo "Additionally you can enable self-monitoring for quick diagnosis: https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp#anchor_sfm"
+echo
 
 clean_extensions

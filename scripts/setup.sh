@@ -663,6 +663,6 @@ clean
 GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
 echo
 echo -e "\e[92m- Deployment complete\e[37m"
-echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"
+echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"
 echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/shortlink/deploy-gcp#verify"
 echo
