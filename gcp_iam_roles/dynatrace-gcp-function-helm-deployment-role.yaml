@@ -1,6 +1,6 @@
 # create with command:
-# gcloud iam roles create dynatrace_function.deployment --project={PROJECT_ID} --file=dynatrace-gcp-function-deployment-role.yaml
-title: Dynatrace GCP Function deployment role
+# gcloud iam roles create dynatrace_function.helm_deployment --project={PROJECT_ID} --file=dynatrace-gcp-function-helm-deployment-role.yaml
+title: Dynatrace GCP Function helm deployment role
 description: Role for Dynatrace GCP function helm and pubsub deployment
 stage: GA
 includedPermissions:
