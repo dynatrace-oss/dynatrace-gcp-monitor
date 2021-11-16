@@ -51,25 +51,6 @@ done
 
 install_yq
 
-# Install kubectl.
-curl -sSLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
-
-# Install helm.
-wget --no-verbose https://get.helm.sh/helm-v3.5.3-linux-amd64.tar.gz
-FILE=./helm-v3.5.3-linux-amd64.tar.gz
-if [ ! -f "$FILE" ]; then
-    echo "$FILE does not exist. Can't create helm chart."
-    exit 1
-fi
-tar -zxvf helm-v3.5.3-linux-amd64.tar.gz
-FILE=./linux-amd64/helm
-if [ ! -f "$FILE" ]; then
-    echo "$FILE does not exist. Can't create helm chart."
-    exit 1
-fi
-
-sudo mv linux-amd64/helm /usr/local/bin/helm
-
 # Create Pub/Sub topic and subscription.
 gcloud config set project "${GCP_PROJECT_ID}"
 

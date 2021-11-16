@@ -6,6 +6,9 @@ To help with deployment you can use automation scripts available in this repo.
 
 Maintaining its lifecycle places a burden on the operational team.
 
+## Migrating to 1.0.x from previous 0.1.x installations
+If you already have previous version of `dynatrace-gcp-function` deployed, please refer to [migration guide](./MIGRATION-V1.md) before installing latest version.
+
 
 ## Getting started
 There are two deployment options available, you can:
