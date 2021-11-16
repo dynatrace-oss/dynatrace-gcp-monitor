@@ -33,6 +33,7 @@ create_sample_app
 # Run cloud function deployment.
 rm -rf ./e2e_test
 mkdir -p ./e2e_test/gcp_iam_roles
+cp ./scripts/lib.sh ./e2e_test/lib.sh
 cp ./scripts/setup.sh ./e2e_test/setup.sh
 cp dynatrace-gcp-function.zip ./e2e_test/dynatrace-gcp-function.zip
 cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./e2e_test/gcp_iam_roles/
