@@ -101,6 +101,6 @@ jobs:
       - ./tests/e2e/deployment-test-cleanup.sh
       - ./build/docker-deploy.sh
     script:
-      - ./tests/e2e/execute-tests.sh
+      - travis_wait 30 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
