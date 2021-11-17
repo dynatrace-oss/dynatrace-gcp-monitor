@@ -33,7 +33,8 @@ def test_metrics_on_dynatrace():
     url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/metrics/query"
     params = {'from': os.environ['START_LOAD_GENERATION'],
               'to': os.environ['END_LOAD_GENERATION'],
-              'metricSelector': f"cloud.gcp.cloudfunctions_googleapis_com.function.execution_count:filter(eq(function_name, {os.environ['CLOUD_FUNCTION_NAME']}),eq(project_id, {os.environ['GCP_PROJECT_ID']}))"
+              'metricSelector': f"cloud.gcp.cloudfunctions_googleapis_com.function.execution_count:filter(eq(function_name, {os.environ['CLOUD_FUNCTION_NAME']}),eq(project_id, {os.environ['GCP_PROJECT_ID']}))",
+              'resolution': 'Inf'
               }
     headers = {
         'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"
@@ -43,4 +44,6 @@ def test_metrics_on_dynatrace():
     response_json = response.json()
     assert 'totalCount' in response_json
     assert response_json['totalCount'] == 1
+    # show full response on test fail
+    print(response_json)
     assert 5 in response_json['result'][0]['data'][0]['values']

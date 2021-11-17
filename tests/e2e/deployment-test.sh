@@ -131,48 +131,11 @@ gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 
 cd ./e2e_test || exit 1
 ./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 
-# Verify containers running
-echo
-echo -n "Verifying deployment result"
-METRICS_CONTAINER_STATE=0
-LOGS_CONTAINER_STATE=0
-ACTIVEGATE_CONTAINER_STATE=0
-
-for i in {1..60}
-do
-  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
-    check_container_state "dynatrace-gcp-function-metrics"
-    METRICS_CONTAINER_STATE=$?
-  fi
-
-  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
-    check_container_state "dynatrace-gcp-function-logs"
-    LOGS_CONTAINER_STATE=$?
-    check_container_state "dynatrace-activegate-gcpmon"
-    ACTIVEGATE_CONTAINER_STATE=$?
-  fi
-
-  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
-    break
-  fi
-
-  sleep 10
-  echo -n "."
-done
-
 echo
 kubectl -n dynatrace get pods
 
 # Generate load on GC Function
 for i in {1..5}; do
-  curl "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
-  -H "Authorization: bearer $(gcloud auth print-identity-token)"
+  curl -s "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
+  -H "Authorization: bearer $(gcloud auth print-identity-token)" 
 done
-
-if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
-  echo "Deployment completed successfully"
-  exit 0
-else
-  echo "Deployment failed"
-  exit 1
-fi

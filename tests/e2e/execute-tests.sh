@@ -18,7 +18,7 @@ function run_deploy_and_tests() {
     set -e
     pytest "tests/e2e/${TEST_TYPE}" -v
 
-    helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace delete
+    helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -r -n1 helm -n dynatrace delete
 }
 
 if [[ $TRAVIS_EVENT_TYPE == 'cron' ]] || [[ $1 == 'separate' ]]; then
