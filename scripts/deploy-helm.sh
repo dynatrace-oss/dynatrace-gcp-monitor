@@ -166,6 +166,7 @@ readonly USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.use
 readonly HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
 readonly HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
 SERVICES_FROM_ACTIVATION_CONFIG=$(yq e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | yq e -j '.services[]' - | jq -r '. | "\(.service)/\(.featureSets[])"')
+API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 
 check_s3_url
 
