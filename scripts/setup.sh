@@ -236,7 +236,7 @@ echo ""
 DYNATRACE_URL=$(echo "${DYNATRACE_URL}" | sed 's:/*$::')
 
 echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)."
-echo "The token requires grant of 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read configuration (API v1)',  and 'Write configuration (API v1)' scope"
+echo "The token requires grant of 'Read configuration (API v1)', 'Write configuration (API v1)', 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read extension monitoring configurations (API v2)', 'Write extension monitoring configurations (API v2)', 'Read extension environment configurations (API v2)' and 'Write extension environment configurations (API v2)' scope"
 while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
   read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
 done
