@@ -78,6 +78,7 @@ done
 readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
+API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 
 check_s3_url
 
@@ -235,7 +236,7 @@ echo ""
 DYNATRACE_URL=$(echo "${DYNATRACE_URL}" | sed 's:/*$::')
 
 echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)."
-echo "The token requires grant of 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read configuration (API v1)',  and 'Write configuration (API v1)' scope"
+echo "The token requires grant of 'Read configuration (API v1)', 'Write configuration (API v1)', 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read extension monitoring configurations (API v2)', 'Write extension monitoring configurations (API v2)', 'Read extension environment configurations (API v2)' and 'Write extension environment configurations (API v2)' scope"
 while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
   read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
 done
