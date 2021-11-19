@@ -23,9 +23,11 @@ echo -e "\033[0;37m"
 
 print_help() {
   printf "
-usage: setup.sh [--upgrade-extensions] [--auto-default]
+usage: setup.sh [-v|--version GCP_FUNCTION_RELEASE_VERSION] [--upgrade-extensions] [--auto-default]
 
 arguments:
+    -v, --version GCP_FUNCTION_RELEASE_VERSION
+                            Specify GCP Function release version, by default latest.
     --upgrade-extensions
                             Upgrade all extensions into dynatrace cluster
     -d, --auto-default
@@ -43,6 +45,11 @@ test_req_unzip
 
 while (( "$#" )); do
     case "$1" in
+            "-v" | "--version")
+                GCP_FUNCTION_RELEASE_VERSION=$2
+                shift; shift
+            ;;
+
             "--upgrade-extensions")
                 UPGRADE_EXTENSIONS="Y"
                 shift
@@ -75,7 +82,12 @@ while (( "$#" )); do
     esac
 done
 
-readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
+if [[ -z "$GCP_FUNCTION_RELEASE_VERSION" ]]; then
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.zip" 
+else
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/${GCP_FUNCTION_RELEASE_VERSION}/dynatrace-gcp-function.zip"
+fi
+
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
@@ -96,7 +108,7 @@ unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
   echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
-  mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
+  mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG $FUNCTION_ACTIVATION_CONFIG
   echo
 fi
 
