@@ -136,5 +136,4 @@ async def test_ingest_lines_output(resource_path_root):
         recorded_ingest = ingest.read()
 
         assert_that(body.split("\n")).is_length(289)
-        for line in body.split("\n"):
-            assert line in recorded_ingest
+        assert_that(body_response).is_equal_to(recorded_ingest)
