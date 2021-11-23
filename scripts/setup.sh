@@ -87,7 +87,7 @@ wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
 
 echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 TMP_FUNCTION_DIR=$(mktemp -d)
-unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
+unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
   echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
