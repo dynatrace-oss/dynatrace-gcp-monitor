@@ -133,7 +133,11 @@ async def test_ingest_lines_output(resource_path_root):
     body = result.body
 
     with open(os.path.join(resource_path_root, "metrics/ingest_input.dat")) as ingest:
-        recorded_ingest = ingest.read()
+        recorded_ingest = ingest.read().split("\n")
+        recorded_ingest.sort()
 
-        assert_that(body.split("\n")).is_length(289)
-        assert_that(body).is_equal_to(recorded_ingest)
+        body_response = body.split("\n")
+        body_response.sort()
+
+        assert_that(body_response).is_length(289)
+        assert_that(body_response).is_equal_to(recorded_ingest)
