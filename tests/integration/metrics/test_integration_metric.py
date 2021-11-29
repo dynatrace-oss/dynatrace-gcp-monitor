@@ -41,7 +41,9 @@ MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 system_variables: Dict = {
     'DYNATRACE_URL': 'http://localhost:' + str(MOCKED_API_PORT),
     'REQUIRE_VALID_CERTIFICATE': 'False',
-    'GCP_SERVICES': "gce_instance/default_metrics,api/default_metrics,gce_instance/default_metrics,cloudsql_database/default_metrics"
+    'ACTIVATION_CONFIG': "{services: [{service: gce_instance, featureSets: [default_metrics], vars: {filter_conditions: resource.labels.instance_name=starts_with(\"test\")}},\
+                        {service: api, featureSets: [default_metrics], vars: {filter_conditions: ''}},\
+                        {service: cloudsql_database, featureSets: [default_metrics], vars: {filter_conditions: ''}}]}"
     # 'DYNATRACE_ACCESS_KEY': ACCESS_KEY, this one is encoded in mocks files
 }
 
@@ -119,14 +121,19 @@ async def test_ingest_lines_output(resource_path_root):
 
 async def ingest_lines_output(expected_ingest_output_file):
     await async_dynatrace_gcp_extension()
+    reqeusts_gcp_timeseries_pattern = NearMissMatchPatternRequest(url_path_pattern="/v3/projects/dynatrace-gcp-extension/timeSeries?([\d\w\W]*)",
+                                          method="GET")
+    reqeusts_gcp_timeseries: RequestResponseFindResponse = Requests.get_matching_requests(reqeusts_gcp_timeseries_pattern)
+    gce_instance_filter="resource.labels.instance_name%3Dstarts_with(%22test%22)"
+    requests_with_filter = [reqeust_gcp_timeseries for reqeust_gcp_timeseries in reqeusts_gcp_timeseries.requests
+                            if gce_instance_filter in reqeust_gcp_timeseries.url]
+    assert_that(requests_with_filter).is_length(3)
 
-    request = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
+    request_metrics_ingest_pattern = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
                                           method="POST")
-
-    r: RequestResponseFindResponse = Requests.get_matching_requests(request)
-
-    assert_that(r.requests).is_not_empty()
-    result: RequestResponseRequest = r.requests[0]
+    request_metrics_ingest: RequestResponseFindResponse = Requests.get_matching_requests(request_metrics_ingest_pattern)
+    assert_that(request_metrics_ingest.requests).is_not_empty()
+    result: RequestResponseRequest = request_metrics_ingest.requests[0]
 
     body = result.body
 

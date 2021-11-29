@@ -16,7 +16,7 @@ from typing import NewType, Any
 from assertpy import assert_that
 
 from lib.context import LoggingContext
-from lib.extensions_fetcher import load_activated_service_names
+from lib.utilities import load_activated_feature_sets, read_activation_yaml
 
 context = LoggingContext("TEST")
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
@@ -32,24 +32,28 @@ ACTIVATION_CONFIG_WITH_EMPTY_FEATURE_SET = "{services: [{service: you_shall_not_
 
 def test_filtering_config_loaded(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG)
-    activated_service_names = load_activated_service_names(context)
+    activation_yaml = read_activation_yaml()
+    activated_service_names = load_activated_feature_sets(context, activation_yaml)
     assert_that(activated_service_names).contains_only("pubsub_subscription/default_metrics", "pubsub_subscription/test",
                                                        "pubsub_snapshot/default_metrics")
 
 
 def test_filtering_missing_configs(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("ACTIVATION_CONFIG", "{services: []}")
-    config = load_activated_service_names(context)
+    activation_yaml = read_activation_yaml()
+    config = load_activated_feature_sets(context, activation_yaml)
     assert len(config) == 0
 
 
 def test_filtering_services_without_feature_sets(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG_WITHOUT_FEATURE_SET)
-    activated_service_names = load_activated_service_names(context)
+    activation_yaml = read_activation_yaml()
+    activated_service_names = load_activated_feature_sets(context, activation_yaml)
     assert_that(activated_service_names).contains_only("services_to_be_activated/default_metrics")
 
 
 def test_services_with_an_empty_feature_sets(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG_WITH_EMPTY_FEATURE_SET)
-    activated_service_names = load_activated_service_names(context)
+    activation_yaml = read_activation_yaml()
+    activated_service_names = load_activated_feature_sets(context, activation_yaml)
     assert_that(activated_service_names).contains_only("services_to_be_activated/default_metrics", "services_to_be_activated/test")
