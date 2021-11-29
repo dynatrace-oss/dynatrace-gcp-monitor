@@ -27,7 +27,6 @@ testdata = [
     'cloud:gcp:gce_instance',
     'cloud:gcp:autoscaler',
     'cloud:gcp:tpu_worker',
-    'cloud:gcp:datastore_request',
     'cloud:gcp:filestore_instance',
     'cloud:gcp:https_lb',
     'cloud:gcp:internal_http_lb_rule',
