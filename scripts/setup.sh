@@ -13,6 +13,8 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+GCP_FUNCTION_RELEASE_VERSION=""
+
 onFailure() {
     echo -e "\e[91mERROR: - deployment failed, please examine error messages and run again"
     exit 2
@@ -71,15 +73,26 @@ if ! command -v unzip &> /dev/null; then
     exit
 fi
 
-readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
-readonly FUNCTION_RAW_REPOSITORY_URL=https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master
+if [[ -z "$GCP_FUNCTION_RELEASE_VERSION" ]]; then
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.zip" 
+else
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/${GCP_FUNCTION_RELEASE_VERSION}/dynatrace-gcp-function.zip"
+fi
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 
+echo -e
+echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
+wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
+
+echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
+TMP_FUNCTION_DIR=$(mktemp -d)
+unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
+
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
-    echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, downloading default"
-    wget -q $FUNCTION_RAW_REPOSITORY_URL/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
-    echo
+  echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
+  mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG $FUNCTION_ACTIVATION_CONFIG
+  echo
 fi
 
 readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
@@ -183,8 +196,6 @@ check_if_parameter_is_empty()
     exit
   fi
 }
-
-
 
 check_if_parameter_is_empty "$GCP_PUBSUB_TOPIC" "'googleCloud.metrics.pubSubTopic'"
 check_if_parameter_is_empty "$GCP_SCHEDULER_NAME" "'googleCloud.metrics.scheduler'"
@@ -362,14 +373,7 @@ if [ "$INSTALL" == true ]; then
   fi
 fi
 
-echo -e
-echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
-wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $FUNCTION_ZIP_PACKAGE
-
-
-echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
-mkdir -p $GCP_FUNCTION_NAME
-unzip -o -q ./$FUNCTION_ZIP_PACKAGE -d ./$GCP_FUNCTION_NAME || exit
+mv $TMP_FUNCTION_DIR ./$GCP_FUNCTION_NAME >/dev/null
 pushd ./$GCP_FUNCTION_NAME || exit
 if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
   echo "Invalid value of 'googleCloud.metrics.queryInterval', defaulting to 3"
