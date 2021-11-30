@@ -18,7 +18,7 @@ cp activation-config.yaml "./release/activation-config.yaml"
 
 cd release/ || exit
 
-wget -q "https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/function-deployment-package.zip" -O function-deployment-package.zip; unzip function-deployment-package.zip; chmod a+x *.sh;
+wget -q "https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/${TRAVIS_TAG}/function-deployment-package.zip" -O function-deployment-package.zip; unzip function-deployment-package.zip; chmod a+x *.sh;
 
 cat <<EOF > activation.config.release.yaml
 googleCloud:
