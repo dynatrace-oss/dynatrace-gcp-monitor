@@ -249,6 +249,7 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
 def create_dimensions(context: MetricsContext, service_name: str, time_serie: Dict, dt_dimensions_mapping: DtDimensionsMap) -> List[DimensionValue]:
     dt_dimensions = []
 
+    #"gcp.resource.type" is required to easily differentiate services with the same metric set e.g. internal_tcp_lb_rule and internal_udp_lb_rule
     dt_dimensions.append(create_dimension("gcp.resource.type", service_name, context))
 
     metric_labels = time_serie.get('metric', {}).get('labels', {})
