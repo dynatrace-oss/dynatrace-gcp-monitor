@@ -16,6 +16,7 @@
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
 readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
 readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
+readonly EXTENSION_ZIP_REGEX="^(.*)-([0-9.]*).zip$"
 EXTENSIONS_TMPDIR=$(mktemp -d)
 CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
 WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -265,22 +266,25 @@ activate_extension_on_cluster() {
   EXTENSIONS_FROM_CLUSTER=$1
   EXTENSION_ZIP=$2
 
-  EXTENSION_NAME=${EXTENSION_ZIP:0:${#EXTENSION_ZIP}-10}
-  EXTENSION_VERSION=${EXTENSION_ZIP: -9:5}
+  if [[ "$EXTENSION_ZIP" =~ $EXTENSION_ZIP_REGEX ]]; then
+    EXTENSION_NAME="${BASH_REMATCH[1]}"
+    EXTENSION_VERSION="${BASH_REMATCH[2]}"
+  fi
   EXTENSION_IN_DT=$(echo "${EXTENSIONS_FROM_CLUSTER[*]}" | grep "${EXTENSION_NAME}:")
 
   if [ -z "${EXTENSION_IN_DT}" ]; then
     # missing extension in cluster installing it
     upload_extension_to_cluster "${EXTENSION_ZIP}" "${EXTENSION_VERSION}"
-  elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-    # cluster has never version warning and install if flag was set
+  # example of extension from DT: com.dynatrace.extension.google-kubernetes-engine:0.0.10
+  elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT##*:})" ]; then
+    # cluster has newer version warning and install if flag was set
     if [ -n "${UPGRADE_EXTENSIONS}" ]; then
       upload_extension_to_cluster "${EXTENSION_ZIP}" "${EXTENSION_VERSION}"
     else
-      warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} installed on the cluster, use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+      warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT##*:} installed on the cluster, use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
     fi
-  elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-    warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT: -5} installed on the cluster is newer than ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+  elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT##*:})" ]; then
+    warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT##*:} installed on the cluster is newer than ${EXTENSION_NAME}:${EXTENSION_VERSION}"
   fi
 }
 
