@@ -227,7 +227,7 @@ if [ "$INSTALL" == true ]; then
 fi
 
 echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
-while ! [[ "${DYNATRACE_URL}" =~ ^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/)(e\/[a-z0-9-]{36}\/)?$ ]]; do
+while ! [[ "${DYNATRACE_URL}" =~ $DYNATRACE_URL_REGEX ]]; do
   read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
 done
 echo ""
@@ -310,7 +310,7 @@ get_extensions_zip_packages
 
 echo -e
 echo "- checking activated extensions in Dynatrace"
-get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
+EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
 mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME >/dev/null
 pushd $WORKING_DIR/$GCP_FUNCTION_NAME || exit

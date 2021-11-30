@@ -273,7 +273,7 @@ activate_extension_on_cluster() {
     # missing extension in cluster installing it
     upload_extension_to_cluster "${EXTENSION_ZIP}" "${EXTENSION_VERSION}"
   elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT: -5})" ]; then
-    # cluster has never version warning and install if flag was set
+    # cluster has newer version warning and install if flag was set
     if [ -n "${UPGRADE_EXTENSIONS}" ]; then
       upload_extension_to_cluster "${EXTENSION_ZIP}" "${EXTENSION_VERSION}"
     else
