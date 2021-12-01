@@ -276,6 +276,7 @@ activate_extension_on_cluster() {
     # missing extension in cluster installing it
     upload_extension_to_cluster "${EXTENSION_ZIP}" "${EXTENSION_VERSION}"
   # example of extension from DT: com.dynatrace.extension.google-kubernetes-engine:0.0.10
+  # $EXTENSION_IN_DT##*: -> removes everything before ':', e.g. we will get '0.0.10'
   elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT##*:})" ]; then
     # cluster has newer version warning and install if flag was set
     if [ -n "${UPGRADE_EXTENSIONS}" ]; then
