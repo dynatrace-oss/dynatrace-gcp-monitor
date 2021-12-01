@@ -77,14 +77,14 @@ jobs:
         - "$HOME/google-cloud-sdk/"
     env:
       - CLOUDSDK_CORE_DISABLE_PROMPTS=1
-      - IAM_SERVICE_ACCOUNT="dynatrace-gcp-sa-release-${TRAVIS_TAG}
+      - IAM_SERVICE_ACCOUNT="dynatrace-gcp-sa-release
       - GCP_PROJECT_ID="dynatrace-gcp-extension"
-      - DYNATRACE_URL_SECRET_NAME="DYNATRACE_RELEASE_URL_${TRAVIS_TAG}"
-      - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_RELEASE_ACCESS_KEY_${TRAVIS_TAG}"
-      - IAM_ROLE_METRCICS="dynatrace_gcp_release_${TRAVIS_TAG}.metrics"
-      - PUBSUB_TOPIC="dynatrace_gcp_topic_release_${TRAVIS_TAG}"
-      - CLOUD_SCHEDULER="dynatrace_gcp_scheduler_release_${TRAVIS_TAG}"
-      - METRIC_FORWARDING_FUNCTION="dynatrace_gcp_release_${TRAVIS_TAG}"
+      - DYNATRACE_URL_SECRET_NAME="DYNATRACE_RELEASE_URL"
+      - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_RELEASE_ACCESS_KEY"
+      - IAM_ROLE_METRCICS="dynatrace_gcp_release.metrics"
+      - PUBSUB_TOPIC="dynatrace_gcp_topic_release"
+      - CLOUD_SCHEDULER="dynatrace_gcp_scheduler_release"
+      - METRIC_FORWARDING_FUNCTION="dynatrace_gcp_release"
       - secure: "DEzuhbQQL2JSrV0Nqni1ojsbAItrmtWSsihgN1kT809oPvaPvVDVrnlxZGjCHNZDhPMzOSaigeIAczfONcAupcobh/9cedZQfgj4/a5/Q0pU21ej0a3gnJK+6MANFnvLuhuUlguQ0Pa60wYjQAwo2F4+j6VsVL7QyhEuaFqogGmXWip8dATRVDpjYZx8UD1oUzvOj5Yn92b49JkJzjaBWs0MYhbCpPiHrwWT5um7plCXKxJiylpteCIYN+PPn2UDc3x098bZITmqCGqV6GwqvmkLTKO+MfQye5L6Ls7hYsK9eutlQrvcdf9ZSHpNad0X+NzbK9mxmwWtl6pud9z8g8dqTMTNxFyUAAiCjql66ztoeZPrhQ4vT5GvpoFCzwGHOTTV8r4ywMoexSj9o9utfI3ppgkH9Wlm9Vb9gYZI3fPmzDoCOvVgqtWjU1Gg6YZ2stV2N8q0A+4TJjugdD3HtmxE5qIgSWzbraeOTKTi++nI029MMandBjVIT0Q9Ty8b1ADTLHe8sy+LhBcjUHLflUYVDNWkh7jTW12PXgWO/bjwnKgYkYh5TYRurX0svoEy49PEJQX8kzNz+aSmendzeLNCbv3n3jcGMeKmoRrWM9kerMjFSmI8Rj+VPNOACadeQHMdBQNVcyrvEFT3j4/TIkbYm8k6dvhFPT1zwYLfQwM="
       - secure: "LjIM7KYwSr2DqVN2QwmMFRUFHFDOrCICf4CPCaOp6KgsldOaGdZ8HCWnfpprGKs1xEPV1Jsui8HOk/Z+ljl1DcZnIqHmW+BR6McQ0xHhzlXQemHpaY5nyzaAxb3PKETn6w/rVSaDVRy+LnY8lPK05NmVF+4eMrrlhfERsAiBYjsxKcxcPqliZUtD8DOzzY2E7+UgPGAvwGLf2NWhOOIDEzQ0nBRLMvArYrlPH0+Fvd/jS+j2X1FJTnC4BYkSGPeuD08yrrnbv9ZtvUf+m09Cnu/Gk0K3W7phMt7/2m2UGYS3gF3VetDrhBNSfmaFLmR7+ppUysDgxTrTQloG+f0d1DHXFrJR+kxf+dQRa1qMRVjQEiTzU842/yIamlsWqingQmJlEdGINVNaKL6guog3GJtHrc+AeGd8oAS2r6zRuiMx67ZQ3ujPoZ5aVYhfBm9+snbPh+ylUQyEQEpiF8gG7YhBIG/abpq+K/OtCeCGUS2HVtURYjnv+FEvm18O0fLY0TrvF+RQOAzXUsRZuFx6Rq5XYPbiDW/dBU3JlOB3Le/jpuLKsL7QLM53Zdv+mab3JtWwuA5DiNokSfFQbKkV4L6rl0qZZ3OJo9aqeypHss0+TnBxh84f/0iUOUUBRWulHHFH/AgF/dX7wBG8W0bkFrZIaSDzSmbbcbh8m+ADW2A="
     install:
