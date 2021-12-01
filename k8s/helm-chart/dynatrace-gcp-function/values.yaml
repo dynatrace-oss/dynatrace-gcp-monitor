@@ -237,7 +237,6 @@ gcpServicesYaml: |
     #  vars:
     #    filter_conditions: ""
     # Google Consumer Quota
-    # Google Consumer Quota
     #- service: consumer_quota
     #  featureSets:
     #    - default_metrics
