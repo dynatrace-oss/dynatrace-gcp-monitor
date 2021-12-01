@@ -150,10 +150,8 @@ activation:
     # Google Internal UDP Load Balancer Rule
     - internal_udp_lb_rule/default_metrics
     # Google Network TCP Load Balancer Rule
-    # We recommend to monitor tcp_lb_rule/default_metrics together with udp_lb_rule/default_metrics
     - tcp_lb_rule/default_metrics
     # Google Network UDP Load Balancer Rule
-    # We recommend to monitor udp_lb_rule/default_metrics with tcp_lb_rule/default_metrics
     - udp_lb_rule/default_metrics
     # Google Kubernetes Cluster
     #- k8s_cluster/default_metrics
@@ -193,8 +191,10 @@ activation:
     # Google Cloud Pub/Sub Snapshot
     - pubsub_snapshot/default_metrics
     # Google Cloud Pub/Sub Subscription
+    # We recommend to monitor pubsub_subscription/default_metrics together with pubsub_topic/default_metrics
     - pubsub_subscription/default_metrics
     # Google Cloud Pub/Sub Topic
+    # We recommend to monitor pubsub_topic/default_metrics together with pubsub_subscription/default_metrics
     - pubsub_topic/default_metrics
     # Google reCAPTCHA Key
     #- recaptchaenterprise_googleapis_com_Key/default_metrics

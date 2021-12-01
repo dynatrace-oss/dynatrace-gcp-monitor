@@ -381,14 +381,12 @@ gcpServicesYaml: |
     # Google Network TCP Load Balancer Rule
     - service: tcp_lb_rule
       featureSets:
-        # We recommend to monitor tcp_lb_rule/default_metrics together with udp_lb_rule/default_metrics
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Network UDP Load Balancer Rule
     - service: udp_lb_rule
       featureSets:
-        # We recommend to monitor udp_lb_rule/default_metrics together with tcp_lb_rule/default_metrics
         - default_metrics
       vars:
         filter_conditions: ""
@@ -476,12 +474,14 @@ gcpServicesYaml: |
     # Google Cloud Pub/Sub Subscription
     - service: pubsub_subscription
       featureSets:
+        # We recommend to monitor pubsub_subscription/default_metrics together with pubsub_topic/default_metrics
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Topic
     - service: pubsub_topic
       featureSets:
+        # We recommend to monitor pubsub_topic/default_metrics together with pubsub_subscription/default_metrics
         - default_metrics
       vars:
         filter_conditions: ""
