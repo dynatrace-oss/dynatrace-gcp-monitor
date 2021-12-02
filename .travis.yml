@@ -82,7 +82,7 @@ jobs:
       - TRAVIS_TAG=release-1.0.0
       # for test only
       - CLOUDSDK_CORE_DISABLE_PROMPTS=1
-      - IAM_SERVICE_ACCOUNT="dynatrace-gcp-sa-release
+      - IAM_SERVICE_ACCOUNT="dynatrace-gcp-sa-release"
       - GCP_PROJECT_ID="dynatrace-gcp-extension"
       - DYNATRACE_URL_SECRET_NAME="DYNATRACE_RELEASE_URL"
       - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_RELEASE_ACCESS_KEY"
