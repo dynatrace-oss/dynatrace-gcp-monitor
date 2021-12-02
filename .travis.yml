@@ -71,11 +71,15 @@ jobs:
     language: python
     python:
       - "3.8"
-    if: tag IS present
+    # test on branch
+    # if: tag IS present
     cache:
       directories:
         - "$HOME/google-cloud-sdk/"
     env:
+      # for test setup correct release version
+      - TRAVIS_TAG=release-1.0.0
+      # for test only
       - CLOUDSDK_CORE_DISABLE_PROMPTS=1
       - IAM_SERVICE_ACCOUNT="dynatrace-gcp-sa-release
       - GCP_PROJECT_ID="dynatrace-gcp-extension"
