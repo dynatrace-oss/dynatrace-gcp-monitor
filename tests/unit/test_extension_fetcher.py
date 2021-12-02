@@ -25,13 +25,11 @@ from lib.context import LoggingContext
 from lib.extensions_fetcher import ExtensionsFetcher
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
-ACTIVATION_CONFIG = "{services: [{service: gce_instance, featureSets: [default_metrics, agent], vars: {filter_conditions: ''}},\
+ACTIVATION_CONFIG = "{services: [{service: gce_instance, featureSets: [default_metrics, agent], vars: {filter_conditions: 'resource.labels.instance_name=starts_with(\"test\")'}},\
  {service: cloudsql_database, featureSets: [default_metrics], vars: {filter_conditions: ''}}]}"
 
 @pytest.fixture(scope="function", autouse=True)
 def setup_env(monkeypatch, resource_path_root):
-    # NO filestore/default configured
-    monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG)
     Response.resource_path_root = resource_path_root
 
 
@@ -70,13 +68,36 @@ def mocked_get(url: str, headers={}, params={}, verify_ssl=False):
             returned_future.set_result(None)
     return returned_future
 
+
 @pytest.mark.asyncio
-async def test_execute(mocker: MockerFixture):
+async def test_execute(mocker: MockerFixture, monkeypatch: MonkeyPatchFixture):
+    # NO filestore/default configured
+    monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG)
     dt_session = ClientSession()
     mocker.patch.object(dt_session, 'get', side_effect=mocked_get)
 
     extensions_fetcher = ExtensionsFetcher(dt_session, "", "", LoggingContext("TEST"))
     result = await extensions_fetcher.execute()
     assert_that(result).is_not_none()
-    services_names = [f"{gcp_service_config.name}/{gcp_service_config.feature_set}" for gcp_service_config in result.services]
-    assert_that(services_names).contains_only("gce_instance/default_metrics", "gce_instance/agent", "cloudsql_database/default_metrics")
+    feature_sets_to_filter_conditions = {f"{gcp_service_config.name}/{gcp_service_config.feature_set}": gcp_service_config.monitoring_filter
+                                         for gcp_service_config in result.services}
+    assert_that(feature_sets_to_filter_conditions).is_equal_to({"cloudsql_database/default_metrics": "",
+                                                                  "gce_instance/default_metrics": "resource.labels.instance_name=starts_with(\"test\")",
+                                                                  "gce_instance/agent": "resource.labels.instance_name=starts_with(\"test\")"})
+
+
+@pytest.mark.asyncio
+async def test_empty_activation_config(mocker: MockerFixture, monkeypatch: MonkeyPatchFixture):
+    # NO filestore/default configured
+    monkeypatch.setenv("ACTIVATION_CONFIG", "{services: []}")
+
+    dt_session = ClientSession()
+    mocker.patch.object(dt_session, 'get', side_effect=mocked_get)
+
+    extensions_fetcher = ExtensionsFetcher(dt_session, "", "", LoggingContext("TEST"))
+    result = await extensions_fetcher.execute()
+    assert_that(result).is_not_none()
+    feature_sets_to_filter_conditions = {f"{gcp_service_config.name}/{gcp_service_config.feature_set}": gcp_service_config.monitoring_filter
+                                         for gcp_service_config in result.services}
+    assert_that(feature_sets_to_filter_conditions).is_equal_to({})
+

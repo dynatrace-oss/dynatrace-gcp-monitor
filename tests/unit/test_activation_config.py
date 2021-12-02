@@ -16,7 +16,7 @@ from typing import NewType, Any
 from assertpy import assert_that
 
 from lib.context import LoggingContext
-from lib.utilities import load_activated_feature_sets, read_activation_yaml
+from lib.utilities import read_activation_yaml, load_activated_feature_sets
 
 context = LoggingContext("TEST")
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)

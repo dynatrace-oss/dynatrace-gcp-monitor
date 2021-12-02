@@ -180,6 +180,12 @@ activation: |
     #    - default_metrics
     #  vars:
     #    filter_conditions: ""
+    # Google Consumed API
+    #- service: consumed_api
+    #  featureSets:
+    #    - default_metrics
+    #  vars:
+    #    filter_conditions: ""
     # Google Consumer Quota
     #- service: consumer_quota
     #  featureSets:
@@ -298,26 +304,44 @@ activation: |
     #    - default_metrics
     #  vars:
     #    filter_conditions: ""
+    # Google Interconnect Attachment
+    #- service: interconnect_attachment
+    #  featureSets:
+    #    - default_metrics
+    # vars:
+    #    filter_conditions: ""
     # Google Internal HTTP/S Load Balancing Rule
     - service: internal_http_lb_rule
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
-    # Google Internal Network Load Balancer
-    - service: internal_network_lb_rule
+    # Google Internal TCP Load Balancer Rule
+    - service: internal_tcp_lb_rule
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
-    # Google Network Load Balancer
-    - service: network_lb_rule
+    # Google Internal UDP Load Balancer Rule
+    - service: internal_udp_lb_rule
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    # Google Network TCP Load Balancer Rule
+    - service: tcp_lb_rule
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    # Google Network UDP Load Balancer Rule
+    - service: udp_lb_rule
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Kubernetes Cluster
-    - service: k8s
+    - service: k8s_cluster
       featureSets:
         - default_metrics
       vars:
@@ -325,6 +349,7 @@ activation: |
     # Google Kubernetes Container
     - service: k8s_container
       featureSets:
+        # We recommend to monitor k8s_container/default_metrics together with k8s_node/default_metrics, k8s_pod/default_metrics
         - default_metrics
     #    - agent
     #    - apigee
@@ -333,9 +358,18 @@ activation: |
       vars:
         filter_conditions: ""
     #    filter_conditions: resource.labels.location = "us-central1-c" AND resource.labels.namespace_name != "jenkins"
+    # Google Kubernetes Node
+    - service: k8s_node
+      featureSets:
+        # We recommend to monitor k8s_node/default_metrics together with k8s_pod/default_metrics, k8s_container/default_metrics
+        - default_metrics
+      vars:
+        filter_conditions: ""
     # Google Kubernetes Pod
-    #- service: k8s_pod
-    #  featureSets:
+    - service: k8s_pod
+      featureSets:
+        # We recommend to monitor k8s_pod/default_metrics together with k8s_node/default_metrics, k8s_container/default_metrics
+        - default_metrics
     #    - istio
       vars:
         filter_conditions: ""
@@ -390,12 +424,14 @@ activation: |
     # Google Cloud Pub/Sub Subscription
     - service: pubsub_subscription
       featureSets:
+        # We recommend to monitor pubsub_subscription/default_metrics together with pubsub_topic/default_metrics
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Topic
     - service: pubsub_topic
       featureSets:
+        # We recommend to monitor pubsub_topic/default_metrics together with pubsub_subscription/default_metrics
         - default_metrics
       vars:
         filter_conditions: ""

@@ -13,6 +13,8 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+GCP_FUNCTION_RELEASE_VERSION=""
+
 source ./lib.sh
 
 trap ctrl_c INT
@@ -75,7 +77,11 @@ while (( "$#" )); do
     esac
 done
 
-readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
+if [[ -z "$GCP_FUNCTION_RELEASE_VERSION" ]]; then
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.zip" 
+else
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/${GCP_FUNCTION_RELEASE_VERSION}/dynatrace-gcp-function.zip"
+fi
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
@@ -96,7 +102,7 @@ unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
   echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
-  mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG -O $FUNCTION_ACTIVATION_CONFIG
+  mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG $FUNCTION_ACTIVATION_CONFIG
   echo
 fi
 
@@ -227,7 +233,7 @@ if [ "$INSTALL" == true ]; then
 fi
 
 echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
-while ! [[ "${DYNATRACE_URL}" =~ ^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/)(e\/[a-z0-9-]{36}\/)?$ ]]; do
+while ! [[ "${DYNATRACE_URL}" =~ $DYNATRACE_URL_REGEX ]]; do
   read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
 done
 echo ""
@@ -310,7 +316,7 @@ get_extensions_zip_packages
 
 echo -e
 echo "- checking activated extensions in Dynatrace"
-get_activated_extensions_on_cluster "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
+EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
 mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME >/dev/null
 pushd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
