@@ -308,7 +308,7 @@ activation: |
     #- service: interconnect_attachment
     #  featureSets:
     #    - default_metrics
-    # vars:
+    #  vars:
     #    filter_conditions: ""
     # Google Internal HTTP/S Load Balancing Rule
     - service: internal_http_lb_rule
