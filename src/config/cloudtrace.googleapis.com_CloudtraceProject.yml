@@ -1,4 +1,4 @@
-id: cloudtrace.googleapis.com/CloudtraceProject
+id: cloudtrace.googleapis.com_CloudtraceProject
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
@@ -9,7 +9,7 @@ vars:
 technology:
   name: Google Cloud Trace
 gcp:
-- service: cloudtrace.googleapis.com/CloudtraceProject
+- service: cloudtrace.googleapis.com_CloudtraceProject
   featureSet: default
   gcp_monitoring_filter: var:filter_conditions
   dimensions:

@@ -1,4 +1,4 @@
-id: apigee.googleapis.com/Environment
+id: apigee.googleapis.com_Environment
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 technology:
@@ -9,7 +9,7 @@ vars:
    displayName: Metric query filter for which metrics should be queried
    type: variables
 gcp:
-- service: apigee.googleapis.com/Environment
+- service: apigee.googleapis.com_Environment
   featureSet: default
   gcp_monitoring_filter: var:filter_conditions
   dimensions:

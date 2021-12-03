@@ -1,4 +1,4 @@
-id: apigee.googleapis.com/Proxy
+id: apigee.googleapis.com_Proxy
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 technology:
@@ -9,7 +9,7 @@ vars:
    displayName: Metric query filter for which metrics should be queried
    type: variables
 gcp:
-- service: apigee.googleapis.com/Proxy
+- service: apigee.googleapis.com_Proxy
   featureSet: default
   gcp_monitoring_filter: var:filter_conditions
   dimensions:

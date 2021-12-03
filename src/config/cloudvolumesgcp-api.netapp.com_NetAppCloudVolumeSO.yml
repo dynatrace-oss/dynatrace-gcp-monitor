@@ -1,4 +1,4 @@
-id: cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO
+id: cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
@@ -9,7 +9,7 @@ vars:
 technology:
   name: Google NetApp CVS-SO
 gcp:
-- service: cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO
+- service: cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO
   featureSet: default
   gcp_monitoring_filter: var:filter_conditions
   dimensions:

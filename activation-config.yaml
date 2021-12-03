@@ -56,11 +56,11 @@ activation:
     # Google Cloud APIs
     - api/default     
     # Google Apigee Environment
-    #- apigee.googleapis.com/Environment/default
+    #- apigee.googleapis.com_Environment/default
     # Google Apigee Proxy
-    #- apigee.googleapis.com/Proxy/default
+    #- apigee.googleapis.com_Proxy/default
     # Google Apigee Proxy (v2)
-    #- apigee.googleapis.com/ProxyV2/default
+    #- apigee.googleapis.com_ProxyV2/default
     # Google Assistant Action Project
     #- assistant_action_project/default
     # Google Autoscaler
@@ -82,9 +82,9 @@ activation:
     #Cloud SQL Database
     - cloudsql_database/default
     # Google Cloud Trace
-    #- cloudtrace.googleapis.com/CloudtraceProject/default
+    #- cloudtrace.googleapis.com_CloudtraceProject/default
     # Google NetApp CVS-SO
-    #- cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO/default
+    #- cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO/default
     # Google Cloud Composer Environment
     #- cloud_composer_environment/default
     # Google Cloud Dataproc Cluster
@@ -206,7 +206,7 @@ activation:
     # Google Cloud Pub/Sub Topic
     - pubsub_topic/default
     # Google reCAPTCHA Key
-    #- recaptchaenterprise.googleapis.com/Key/default
+    #- recaptchaenterprise.googleapis.com_Key/default
     # Google Cloud Memorystore
     - redis_instance/default
     # Google Cloud Spanner Instance
@@ -226,4 +226,4 @@ activation:
     # Google VPC Access Connector
     #- vpc_access_connector/default
     # Google Cloud VPN Tunnel
-    #- vpn_gatewayv/None
+    #- vpn_gatewayv/default

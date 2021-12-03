@@ -1,4 +1,4 @@
-id: recaptchaenterprise.googleapis.com/Key
+id: recaptchaenterprise.googleapis.com_Key
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
@@ -9,7 +9,7 @@ vars:
 technology:
   name: Google reCAPTCHA Key
 gcp:
-- service: recaptchaenterprise.googleapis.com/Key
+- service: recaptchaenterprise.googleapis.com_Key
   featureSet: default
   gcp_monitoring_filter: var:filter_conditions
   dimensions:

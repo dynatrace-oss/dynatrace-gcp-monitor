@@ -1,4 +1,4 @@
-id: apigee.googleapis.com/ProxyV2
+id: apigee.googleapis.com_ProxyV2
 $schema: gcp_schema_v_1_0.json
 version: 0.0.1
 minDynatraceVersion: 1.199
@@ -9,7 +9,7 @@ vars:
 technology:
   name: Google Apigee Proxy (v2)
 gcp:
-- service: apigee.googleapis.com/ProxyV2
+- service: apigee.googleapis.com_ProxyV2
   featureSet: default
   gcp_monitoring_filter: var:filter_conditions
   dimensions:
