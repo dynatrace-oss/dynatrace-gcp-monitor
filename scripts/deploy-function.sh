@@ -32,157 +32,188 @@ googleCloud:
     pubSubTopic: "${PUBSUB_TOPIC}"
     function: "${METRIC_FORWARDING_FUNCTION}"
     scheduler: "${CLOUD_SCHEDULER}"
-activation:
-  metrics:
-    services:
-    # Google Cloud APIs
-    #- api/default_metrics
-    # Google Apigee Environment
-    #- apigee_googleapis_com_Environment/default_metrics
-    # Google Apigee Proxy
-    #- apigee_googleapis_com_Proxy/default_metrics
-    # Google Apigee Proxy (v2)
-    #- apigee_googleapis_com_ProxyV2/default_metrics
-    # Google Assistant Action Project
-    #- assistant_action_project/default_metrics
-    # Google Autoscaler
-    - autoscaler/default_metrics
-    # Google Cloud BigQuery BI Engine Model
-    #- bigquery_biengine_model/default_metrics
-    # Google Cloud BigQuery Project
-    #- bigquery_project/default_metrics
-    # Google Cloud Bigtable Cluster
-    #- bigtable_cluster/default_metrics
-    # Google Cloud Bigtable Table
-    #- bigtable_table/default_metrics
-    # Google Cloud IoT Registry
-    #- cloudiot_device_registry/default_metrics
-    # Google Cloud ML Job
-    #- cloudml_job/default_metrics
-    # Google Cloud ML Model Version
-    #- cloudml_model_version/default_metrics
-    #Cloud SQL Database
-    - cloudsql_database/default_metrics
-    # Google Cloud Trace
-    #- cloudtrace_googleapis_com_CloudtraceProject/default_metrics
-    # Google NetApp CVS-SO
-    #- cloudvolumesgcp_api_netapp_com_NetAppCloudVolumeSO/default_metrics
-    # Google Cloud Composer Environment
-    #- cloud_composer_environment/default_metrics
-    # Google Cloud Dataproc Cluster
-    #- cloud_dataproc_cluster/default_metrics
-    # Google Cloud Data Loss Prevention Project
-    #- cloud_dlp_project/default_metrics
-    # Google Cloud Function
-    - cloud_function/default_metrics
-    # Google Cloud Run Revision
-    - cloud_run_revision/default_metrics
-    #Amazon EC2 Instance (via GCP)
-    - cloud_tasks_queue/default_metrics
-    # Google Consumer Quota
-    #- consumer_quota/default_metrics
-    # Google Dataflow Job
-    #- dataflow_job/default_metrics
-    # Google Cloud Datastore
-    - datastore_request/default_metrics
-    # Google Cloud DNS Query
-    - dns_query/default_metrics
-    # Google Filestore Instance
-    - filestore_instance/default_metrics
-    # Google Firebase Hosting Site Domain
-    #- firebase_domain/default_metrics
-    # Google Firebase Realtime Database
-    #- firebase_namespace/default_metrics
-    # Google Firestore Instance
-    #- firestore_instance/default_metrics
-    # Google App Engine Application
-    - gae_app/default_metrics
-    # Google App Engine Application - Uptime Checks
-    #- gae_app_uptime_check/default_metrics
-    # Google App Engine Instance
-    - gae_instance/default_metrics
-    # Google VM Instance
-    - gce_instance/default_metrics
-    # Google VM Instance Agent
-    - gce_instance/agent
-    # Google VM Instance Firewall Insights
-    - gce_instance/firewallinsights
-    # Google VM Instance Istio
-    - gce_instance/istio
-    # Google VM Instance Uptime Checks
-    - gce_instance/uptime_check
-    # Google VM Instance VM Flow
-    - gce_instance_vm_flow/default_metrics
-    # Google Cloud Router
-    #- gce_router/default_metrics
-    # Google Zone Network Health
-    - gce_zone_network_health/default_metrics
-    # Google Cloud Storage bucket
-    - gcs_bucket/default_metrics
-    # Google Cloud HTTP/S Load Balancing Rule
-    - https_lb_rule/default_metrics
-    # Google Instance Group
-    - instance_group/default_metrics
-    # Google Interconnect
-    #- interconnect/default_metrics
-    # Google Internal HTTP/S Load Balancing Rule
-    - internal_http_lb_rule/default_metrics
-    # Google Internal Network Load Balancer
-    - internal_network_lb_rule/default_metrics
-    # Google Network Load Balancer
-    - network_lb_rule/default_metrics
-    # Google Kubernetes Cluster
-    - k8s/default_metrics
-    # Google Kubernetes Container
-    - k8s_container/default_metrics
-    # Google Kubernetes Container Agent
-    - k8s_container/agent
-    # Google Kubernetes Container Apigee
-    - k8s_container/apigee
-    # Google Kubernetes Container Istio
-    - k8s_container/istio
-    # Google Kubernetes Container Nginx
-    - k8s_container/nginx
-    # Google Kubernetes Pod
-    - k8s_pod/istio
-    # Google Cloud Logging export sink
-    #- logging_sink/default_metrics
-    # Google Cloud Microsoft Active Directory Domain
-    #- microsoft_ad_domain/default_metrics
-    # Google Cloud NAT Gateway
-    - nat_gateway/default_metrics
-    # Google NetApp Cloud Volume
-    #- netapp_cloud_volume/default_metrics
-    # Google Network Security Policy
-    #- network_security_policy/default_metrics
-    # Google Producer Quota
-    #- producer_quota/default_metrics
-    # Google Pub/Sub Lite Topic Partition
-    - pubsublite_topic_partition/default_metrics
-    # Google Cloud Pub/Sub Snapshot
-    - pubsub_snapshot/default_metrics
-    # Google Cloud Pub/Sub Subscription
-    - pubsub_subscription/default_metrics
-    # Google Cloud Pub/Sub Topic
-    - pubsub_topic/default_metrics
-    # Google reCAPTCHA Key
-    #- recaptchaenterprise_googleapis_com_Key/default_metrics
-    # Google Cloud Memorystore
-    - redis_instance/default_metrics
-    # Google Cloud Spanner Instance
-    - spanner_instance/default_metrics
-    # Google Cloud TCP/SSL Proxy Rule
-    - tcp_ssl_proxy_rule/default_metrics
-    # Google Cloud TPU Worker
-    - tpu_worker/default_metrics
-    # Google Transfer Service Agent
-    #- transfer_service_agent/default_metrics
-    # Google Uptime Check URL
-    #- uptime_url/default_metrics
-    # Google VPC Access Connector
-    #- vpc_access_connector/default_metrics
-    # Google Cloud VPN Tunnel
-    #- vpn_gateway/default_metrics
+activation: |
+  services:
+    - service: autoscaler
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: cloudsql_database
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: cloud_function
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: cloud_run_revision
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: cloud_tasks_queue
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: datastore_request
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: dns_query
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: filestore_instance
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: gae_app
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: gae_instance
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: gce_instance
+      featureSets:
+        - default_metrics
+        - agent
+        - firewallinsights
+        - istio
+        - uptime_check
+      vars:
+        filter_conditions: ""
+    - service: gce_instance_vm_flow
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: gce_zone_network_health
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: gcs_bucket
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: https_lb_rule
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: instance_group
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: internal_http_lb_rule
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: internal_tcp_lb_rule
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: internal_udp_lb_rule
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: tcp_lb_rule
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: udp_lb_rule
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: k8s_cluster
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: k8s_container
+      featureSets:
+        - default_metrics
+       - agent
+       - apigee
+       - istio
+       - nginx
+     vars:
+       filter_conditions: ""
+    - service: k8s_node
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: k8s_pod
+      featureSets:
+        - default_metrics
+        - istio
+      vars:
+        filter_conditions: ""
+    - service: nat_gateway
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: pubsublite_topic_partition
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: pubsub_snapshot
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: pubsub_subscription
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: pubsub_topic
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: redis_instance
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: spanner_instance
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: tcp_ssl_proxy_rule
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: tpu_worker
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+
 EOF
 yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.release.yaml
 
