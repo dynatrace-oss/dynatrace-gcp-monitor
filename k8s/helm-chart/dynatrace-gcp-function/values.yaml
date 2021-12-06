@@ -189,13 +189,13 @@ gcpServicesYaml: |
       vars:
         filter_conditions: ""
     # Google Cloud Trace
-    # - service: cloudtrace.googleapis.com/CloudtraceProject
+    # - service: cloudtrace.googleapis.com_CloudtraceProject
     #   featureSets:
     #     - default
     #   vars:
     #     filter_conditions: ""
     # Google NetApp CVS-SO
-    # - service: cloudvolumesgcp-api.netapp.com/NetAppCloudVolumeSO
+    # - service: cloudvolumesgcp-api.netapp.com_NetAppCloudVolumeSO
     #   featureSets:
     #     - default
     #   vars:
@@ -512,7 +512,7 @@ gcpServicesYaml: |
       vars:
         filter_conditions: ""
     # Google reCAPTCHA Key
-    # - service: recaptchaenterprise.googleapis.com/Key
+    # - service: recaptchaenterprise.googleapis.com_Key
     #   featureSets:
     #     - default
     #   vars:
