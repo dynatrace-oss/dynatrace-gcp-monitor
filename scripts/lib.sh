@@ -363,15 +363,13 @@ upload_correct_extension_to_dynatrace() {
 
   if [[ "$AMOUNT_OF_EXTENSIONS_TO_UPLOAD" -eq "$AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS" ]]; then
     err "Activating all GCP extensions on Dynatrace failed. It can be a temporary problem with the cluster. Please try activate your extensions on the cluster manually in a while."
-    exit 1
-  fi
-
-  AMOUNT_OF_ALL_FAILED_EXTENSIONS=$((AMOUNT_OF_NOT_UPLOADED_EXTENSIONS + AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS))
-  if [[ "$AMOUNT_OF_EXTENSIONS_TO_UPLOAD" -eq "$AMOUNT_OF_ALL_FAILED_EXTENSIONS" ]]; then
-    err "Activating all GCP extensions on Dynatrace failed.
-    It can be a temporary problem with the cluster. Please run deployment script again in a while.
-    For not activated but uploaded extensions - please try activate them on the cluster manually in a while."
-    exit 1
+  else
+    AMOUNT_OF_ALL_FAILED_EXTENSIONS=$((AMOUNT_OF_NOT_UPLOADED_EXTENSIONS + AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS))
+    if [[ "$AMOUNT_OF_EXTENSIONS_TO_UPLOAD" -eq "$AMOUNT_OF_ALL_FAILED_EXTENSIONS" ]]; then
+      err "Uploading and activating GCP extensions on Dynatrace failed.
+      It can be a temporary problem with the cluster. Please run deployment script again in a while.
+      For not activated but uploaded extensions - please try activate them on the cluster manually in a while."
+    fi
   fi
 
   cd ${WORKING_DIR} || exit
