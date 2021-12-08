@@ -35,6 +35,7 @@ from lib.gcp_apis import get_all_disabled_apis
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
+from lib.utilities import read_activation_yaml
 
 
 def dynatrace_gcp_extension(event, context):
@@ -276,12 +277,7 @@ def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str,
 
 
 def load_supported_services(context: LoggingContext, selected_featuresets: List[str]) -> List[GCPService]:
-    activation_file_path = '/code/config/activation/gcp_services.yaml'
-    try:
-        with open(activation_file_path, encoding="utf-8") as activation_file:
-            activation_yaml = yaml.safe_load(activation_file)
-    except Exception:
-        activation_yaml = yaml.safe_load(os.environ.get("ACTIVATION_CONFIG", ""))
+    activation_yaml = read_activation_yaml()
     activation_config = {service_activation.get('service'): service_activation for service_activation in activation_yaml['services']} if activation_yaml and activation_yaml['services'] else {}
 
     working_directory = os.path.dirname(os.path.realpath(__file__))
