@@ -238,11 +238,13 @@ upload_extension_to_cluster() {
 
   if [[ "${CODE}" -ge "400" ]]; then
     warn "- Extension ${EXTENSION_ZIP} upload failed with error code: ${CODE}"
+    ((AMOUNT_OF_NOT_UPLOADED_EXTENSIONS+=1))
   else
     UPLOADED_EXTENSION=$(echo "${UPLOAD_RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensionName')
 
     if ! RESPONSE=$(dt_api "/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" "PUT" "{\"version\": \"${EXTENSION_VERSION}\"}"); then
       warn "- Activation ${EXTENSION_ZIP} failed."
+      ((AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS+=1))
     else
       echo
       echo "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated."
@@ -282,10 +284,12 @@ activate_extension_on_cluster() {
     if [ -n "${UPGRADE_EXTENSIONS}" ]; then
       upload_extension_to_cluster "${EXTENSION_ZIP}" "${EXTENSION_VERSION}"
     else
-      warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT##*:} installed on the cluster, use '--upgrade-extensions' to uprgate to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+      warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT##*:} installed on the cluster, use '--upgrade-extensions' to upgrade to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+      ((AMOUNT_OF_EXTENSIONS_TO_UPLOAD-=1))
     fi
   elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT##*:})" ]; then
     warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT##*:} installed on the cluster is newer than ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+    ((AMOUNT_OF_EXTENSIONS_TO_UPLOAD-=1))
   fi
 }
 
@@ -316,6 +320,10 @@ upload_correct_extension_to_dynatrace() {
 
   cd ${EXTENSIONS_TMPDIR} || exit
 
+  AMOUNT_OF_EXTENSIONS_TO_UPLOAD=0
+  AMOUNT_OF_NOT_UPLOADED_EXTENSIONS=0
+  AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS=0
+
   for EXTENSION_ZIP in *.zip; do
     EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"
 
@@ -337,6 +345,7 @@ upload_correct_extension_to_dynatrace() {
             echo "$EXTENSION_GCP_CONFIG" >>$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
           fi
         fi
+        ((AMOUNT_OF_EXTENSIONS_TO_UPLOAD+=1))
         activate_extension_on_cluster "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
         break
       fi
@@ -346,6 +355,22 @@ upload_correct_extension_to_dynatrace() {
     rm "$EXTENSION_FILE_NAME".yaml
     rm "$EXTENSION_ZIP"
   done
+
+  if [[ "$AMOUNT_OF_EXTENSIONS_TO_UPLOAD" -eq "$AMOUNT_OF_NOT_UPLOADED_EXTENSIONS" ]]; then
+    err "Uploading all GCP extensions to Dynatrace failed. It can be a temporary problem with the cluster. Please run deployment script again in a while."
+    exit 1
+  fi
+
+  if [[ "$AMOUNT_OF_EXTENSIONS_TO_UPLOAD" -eq "$AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS" ]]; then
+    err "Activating all GCP extensions on Dynatrace failed. It can be a temporary problem with the cluster. Please try activate your extensions on the cluster manually in a while."
+  else
+    AMOUNT_OF_ALL_FAILED_EXTENSIONS=$((AMOUNT_OF_NOT_UPLOADED_EXTENSIONS + AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS))
+    if [[ "$AMOUNT_OF_EXTENSIONS_TO_UPLOAD" -eq "$AMOUNT_OF_ALL_FAILED_EXTENSIONS" ]]; then
+      err "Uploading and activating GCP extensions on Dynatrace failed.
+      It can be a temporary problem with the cluster. Please run deployment script again in a while.
+      For not activated but uploaded extensions - please try activate them on the cluster manually in a while."
+    fi
+  fi
 
   cd ${WORKING_DIR} || exit
 }
