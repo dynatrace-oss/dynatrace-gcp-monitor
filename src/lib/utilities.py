@@ -38,7 +38,7 @@ def read_activation_yaml():
 
 def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml) -> List[str]:
     services_whitelist = []
-    for service in activation_yaml.get("services"):
+    for service in activation_yaml.get("services", []):
         feature_sets = service.get("featureSets", [])
         for feature_set in feature_sets:
             services_whitelist.append(f"{service.get('service')}/{feature_set}")
