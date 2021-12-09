@@ -13,6 +13,8 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+GCP_FUNCTION_RELEASE_VERSION=""
+
 source ./lib.sh
 
 trap ctrl_c INT
@@ -75,7 +77,11 @@ while (( "$#" )); do
     esac
 done
 
-readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
+if [[ -z "$GCP_FUNCTION_RELEASE_VERSION" ]]; then
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.zip" 
+else
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/${GCP_FUNCTION_RELEASE_VERSION}/dynatrace-gcp-function.zip"
+fi
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
@@ -108,9 +114,9 @@ readonly GCP_SCHEDULER_NAME=$(yq e '.googleCloud.metrics.scheduler' $FUNCTION_AC
 readonly QUERY_INTERVAL_MIN=$(yq e '.googleCloud.metrics.queryInterval' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
-readonly FUNCTION_GCP_SERVICES=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq 'join(",")' 2>/dev/null)
-readonly SERVICES_TO_ACTIVATE=$(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[]? | sed 's/\/.*$//')
-SERVICES_FROM_ACTIVATION_CONFIG=($(yq e -j '.activation.metrics.services' $FUNCTION_ACTIVATION_CONFIG | jq -r .[]? ))
+readonly ACTIVATION_JSON=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -P -j)
+readonly SERVICES_TO_ACTIVATE=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -j '.services[]' - | jq -r '.service')
+SERVICES_WITH_FEATURE_SET=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -j '.services[]' - | jq -r '. | "\(.service)/\(.featureSets[])"' 2>/dev/null)
 readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
@@ -169,7 +175,7 @@ check_if_parameter_is_empty "$GCP_FUNCTION_NAME" 'googleCloud.metrics.function' 
 check_if_parameter_is_empty "$GCP_IAM_ROLE" "'googleCloud.common.iamRole'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "'googleCloud.common.serviceAccount'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$QUERY_INTERVAL_MIN" "'googleCloud.metrics.queryInterval'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
-check_if_parameter_is_empty "$FUNCTION_GCP_SERVICES" "'googleCloud.activation.metrics.services'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
+check_if_parameter_is_empty "$SERVICES_WITH_FEATURE_SET" "'googleCloud.activation.metrics.services'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 
 echo  "- Logging to your account..."
 GCP_ACCOUNT=$(gcloud config get-value account)
@@ -337,19 +343,33 @@ validate_gcp_config_in_extensions
 
 echo
 echo "- read activation config"
-SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "$SERVICES_FROM_ACTIVATION_CONFIG")
-echo "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
+SERVICES_WITH_FEATURE_SET_STR=$(services_setup_in_config "$SERVICES_WITH_FEATURE_SET")
+echo "$SERVICES_WITH_FEATURE_SET_STR"
 
 mkdir -p $WORKING_DIR/$GCP_FUNCTION_NAME/config/
 echo
 echo "- choosing and uploading extensions to Dynatrace"
-upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
+upload_correct_extension_to_dynatrace "$SERVICES_WITH_FEATURE_SET_STR"
 
 cd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
+cat <<EOF > function_env_vars.yaml
+ACTIVATION_CONFIG: '$ACTIVATION_JSON'
+PRINT_METRIC_INGEST_INPUT: '$PRINT_METRIC_INGEST_INPUT'
+DYNATRACE_ACCESS_KEY_SECRET_NAME: '$DYNATRACE_ACCESS_KEY_SECRET_NAME'
+DYNATRACE_URL_SECRET_NAME: '$DYNATRACE_URL_SECRET_NAME'
+REQUIRE_VALID_CERTIFICATE: '$REQUIRE_VALID_CERTIFICATE'
+SERVICE_USAGE_BOOKING: '$SERVICE_USAGE_BOOKING'
+USE_PROXY: '$USE_PROXY'
+HTTP_PROXY: '$HTTP_PROXY'
+HTTPS_PROXY: '$HTTPS_PROXY'
+SELF_MONITORING_ENABLED: '$SELF_MONITORING_ENABLED'
+QUERY_INTERVAL_MIN: '$QUERY_INTERVAL_MIN'
+EOF
+
 if [ "$INSTALL" == true ]; then
   echo -e
   echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
+  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml
 else
 
   while true; do
@@ -361,7 +381,7 @@ else
         * ) echo "- please answer yes or no.";;
     esac
   done
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --set-env-vars ^:^GCP_SERVICES=$FUNCTION_GCP_SERVICES:PRINT_METRIC_INGEST_INPUT=$PRINT_METRIC_INGEST_INPUT:DYNATRACE_ACCESS_KEY_SECRET_NAME=$DYNATRACE_ACCESS_KEY_SECRET_NAME:DYNATRACE_URL_SECRET_NAME=$DYNATRACE_URL_SECRET_NAME:REQUIRE_VALID_CERTIFICATE=$REQUIRE_VALID_CERTIFICATE:SERVICE_USAGE_BOOKING=$SERVICE_USAGE_BOOKING:USE_PROXY=$USE_PROXY:HTTP_PROXY=$HTTP_PROXY:HTTPS_PROXY=$HTTPS_PROXY:SELF_MONITORING_ENABLED=$SELF_MONITORING_ENABLED:QUERY_INTERVAL_MIN=$QUERY_INTERVAL_MIN
+  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml
 fi
 
 echo -e
