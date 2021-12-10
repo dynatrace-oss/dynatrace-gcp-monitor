@@ -101,9 +101,8 @@ TMP_FUNCTION_DIR=$(mktemp -d)
 unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
-  echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
-  mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG $FUNCTION_ACTIVATION_CONFIG
-  echo
+  err "Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing! Download correct function-deployment-package.zip again."
+  exit 1
 fi
 
 readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
