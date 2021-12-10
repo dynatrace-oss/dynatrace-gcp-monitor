@@ -21,7 +21,7 @@
     {{- if contains "/e/" .dynatraceUrl -}}
       {{- printf "%s" (split "/e/" .dynatraceUrl)._1 | replace "/" "" }}
     {{- else -}}
-      {{- printf "%s" (split "//" ((split "." .dynatraceUrl))._0)._1 | replace "/" "" }}
+      {{- printf "%s" (split "//" ((split "." .dynatraceUrl))._0)._1 | trimSuffix "/" }}
     {{- end -}}
   {{- end }}
 {{- end }}
