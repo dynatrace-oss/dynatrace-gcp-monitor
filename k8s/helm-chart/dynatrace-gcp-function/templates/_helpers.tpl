@@ -21,7 +21,7 @@
     {{- if contains "/e/" .dynatraceUrl -}}
       {{- printf "%s" (split "/e/" .dynatraceUrl)._1 | replace "/" "" }}
     {{- else -}}
-      {{- printf "%s" (split "//" ((split "." .dynatraceUrl))._0)._1 | trimSuffix "/" }}
+      {{- printf "%s" (split "//" ((split "." .dynatraceUrl))._0)._1 | replace "/" "" }}
     {{- end -}}
   {{- end }}
 {{- end }}
@@ -42,7 +42,7 @@
 */}}
 {{- define "activeGateImage" }}
 {{- with .Values }}
-{{- printf "%s/linux/activegate" ((split "//" .dynatraceUrl)._1 | replace "/" "") }}
+{{- printf "%s/linux/activegate" ((split "//" .dynatraceUrl)._1 | trimSuffix "/") }}
 {{- end }}
 {{- end }}
 
