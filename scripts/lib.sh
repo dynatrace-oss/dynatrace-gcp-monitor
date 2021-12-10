@@ -83,7 +83,7 @@ test_req_yq() {
 
     echo "Using yq version $VERSION_YQ"
 
-    if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.0.0')" ]; then
+    if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
       err 'yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
         YQ: https://github.com/mikefarah/yq'
       exit 1
