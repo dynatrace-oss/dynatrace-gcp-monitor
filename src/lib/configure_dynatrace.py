@@ -92,14 +92,13 @@ class ConfigureDynatrace:
 
     def get_ext_resources(self, list_name: str, item_name: str, properties_extractor: Callable[[Dict], Dict]) -> List[Dict]:
         try:
-            if "GCP_SERVICES" in os.environ:
-                selected_services = get_selected_services()
+            if self.selected_services:
                 working_directory = os.path.dirname(os.path.realpath(__file__))
                 config_directory = os.path.join(working_directory, "../config")
                 config_files = [
                     file for file
                     in listdir(config_directory)
-                    if os.path.splitext(os.path.basename(file))[0] in selected_services and isfile(os.path.join(config_directory, file)) and is_yaml_file(file)
+                    if os.path.splitext(os.path.basename(file))[0] in self.selected_services and isfile(os.path.join(config_directory, file)) and is_yaml_file(file)
                 ]
                 resources = []
                 for file in config_files:
@@ -125,9 +124,11 @@ class ConfigureDynatrace:
             self.logging_context.log(f'Unable to get available dashboards. Error details: {e}')
             return []
             
-    def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, logging_context: LoggingContext):
+    def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, selected_services: List,
+                 logging_context: LoggingContext):
         self.gcp_session = gcp_session
         self.dt_session = dt_session
+        self.selected_services = selected_services
         self.logging_context = logging_context
 
     async def import_dashboards(self, dt_api: DtApi):

@@ -26,6 +26,7 @@ from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
 from lib.self_monitoring import import_self_monitoring_dashboard
+from lib.utilities import read_activation_yaml, load_activated_feature_sets
 from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode
 
@@ -78,9 +79,11 @@ async def run_instance_metadata_check() -> Optional[InstanceMetadata]:
     return None
 
 
-async def try_configure_dynatrace():
+async def try_configure_dynatrace(selected_services: List):
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
-        dashboards_result = await ConfigureDynatrace(gcp_session=gcp_session, dt_session=dt_session, logging_context=logging_context)
+        dashboards_result = await ConfigureDynatrace(gcp_session=gcp_session, dt_session=dt_session,
+                                                     selected_services=selected_services,
+                                                     logging_context=logging_context)
 
 
 async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
@@ -101,10 +104,13 @@ async def health(request):
 
 
 def run_metrics():
-    if "GCP_SERVICES" in os.environ:
-        services = get_selected_services()
-        logging_context.log(f"Running with configured services: {services}")
-    loop.run_until_complete(try_configure_dynatrace())
+    activation_yaml = read_activation_yaml()
+    selected_feature_sets = load_activated_feature_sets(logging_context, activation_yaml)
+    selected_feature_sets_str = ", ".join(selected_feature_sets)
+    logging_context.log(f"Running with configured services: {selected_feature_sets_str}")
+    selected_services = [service_activation.get('service') for service_activation in activation_yaml['services']
+                         if activation_yaml and activation_yaml['services']]
+    loop.run_until_complete(try_configure_dynatrace(selected_services))
     fast_check_result = loop.run_until_complete(metrics_initial_check())
     if fast_check_result:
         loop.create_task(scheduling_loop(fast_check_result.projects))
