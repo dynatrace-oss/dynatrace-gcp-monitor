@@ -78,7 +78,7 @@ while (( "$#" )); do
 done
 
 if [[ -z "$GCP_FUNCTION_RELEASE_VERSION" ]]; then
-  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.zip" 
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.zip"
 else
   FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/${GCP_FUNCTION_RELEASE_VERSION}/dynatrace-gcp-function.zip"
 fi
@@ -247,6 +247,22 @@ while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
 done
 echo ""
 
+echo -e
+echo "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]"
+if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_URL_SECRET_NAME$" --format="value(name)" ) ]]; then
+  printf "$DYNATRACE_URL" | gcloud secrets versions add $DYNATRACE_URL_SECRET_NAME --data-file=-
+  echo "Secret [$DYNATRACE_URL_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed."
+else
+  printf "$DYNATRACE_URL" | gcloud secrets create $DYNATRACE_URL_SECRET_NAME --data-file=- --replication-policy=automatic
+fi
+
+if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" ) ]]; then
+  printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets versions add $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=-
+  echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed."
+else
+  printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
+fi
+
 if [ "$INSTALL" == true ]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "/api/v2/extensions/schemas"); then
     GCP_EXTENSIONS_SCHEMA_PRESENT=$(jq -r '.versions[] | select(.=="1.229.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
@@ -266,20 +282,6 @@ if [ "$INSTALL" == true ]; then
       echo "Topic [$GCP_PUBSUB_TOPIC] already exists, skipping"
   else
       gcloud pubsub topics create "$GCP_PUBSUB_TOPIC"
-  fi
-
-  echo -e
-  echo "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]"
-  if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_URL_SECRET_NAME$" --format="value(name)" ) ]]; then
-      echo "Secret [$DYNATRACE_URL_SECRET_NAME] already exists, skipping"
-  else
-      printf "$DYNATRACE_URL" | gcloud secrets create $DYNATRACE_URL_SECRET_NAME --data-file=- --replication-policy=automatic
-  fi
-
-  if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" ) ]]; then
-      echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, skipping"
-  else
-      printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
   fi
 
   echo -e
