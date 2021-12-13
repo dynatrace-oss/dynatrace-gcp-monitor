@@ -333,7 +333,7 @@ upload_correct_extension_to_dynatrace() {
     EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_FILE_NAME".yaml)
 
     # Get all service/featureSet pairs defined in extensions
-    SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null)
+    SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -o=json | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null)
 
     for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
       # Check if service should be monitored

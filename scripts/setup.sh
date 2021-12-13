@@ -113,9 +113,9 @@ readonly GCP_SCHEDULER_NAME=$(yq e '.googleCloud.metrics.scheduler' $FUNCTION_AC
 readonly QUERY_INTERVAL_MIN=$(yq e '.googleCloud.metrics.queryInterval' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
-readonly ACTIVATION_JSON=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -P -j)
-readonly SERVICES_TO_ACTIVATE=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -j '.services[]' - | jq -r '.service')
-SERVICES_WITH_FEATURE_SET=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -j '.services[]' - | jq -r '. | "\(.service)/\(.featureSets[])"' 2>/dev/null)
+readonly ACTIVATION_JSON=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -P -o=json)
+readonly SERVICES_TO_ACTIVATE=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -o=json '.services[]' - | jq -r '.service')
+SERVICES_WITH_FEATURE_SET=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -o=json '.services[]' - | jq -r '. | "\(.service)/\(.featureSets[])"' 2>/dev/null)
 readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
 readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
@@ -154,7 +154,7 @@ get_ext_files() {
     if ! (grep -q "$SERVICE" <<< "$SERVICES_TO_ACTIVATE") ; then
       continue
     fi
-    for EXT_FILE in $(yq e -j ".$YAML_PATH"  "$FILEPATH"| tr -d '"')
+    for EXT_FILE in $(yq e -o=json ".$YAML_PATH"  "$FILEPATH"| tr -d '"')
     do
       if [ ! -f "./$EXT_FILE" ] ; then
         warn "Missing file $EXT_FILE"
