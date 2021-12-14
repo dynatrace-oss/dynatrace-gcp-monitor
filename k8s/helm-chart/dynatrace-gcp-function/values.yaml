@@ -459,6 +459,12 @@ gcpServicesYaml: |
     #     - default_metrics
     #   vars:
     #     filter_conditions: ""
+    # Google Pub/Sub Lite Subscription Partition
+    - service: pubsublite_subscription_partition
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
     # Google Pub/Sub Lite Topic Partition
     - service: pubsublite_topic_partition
       featureSets:
