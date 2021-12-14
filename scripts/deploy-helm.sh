@@ -79,6 +79,8 @@ arguments:
                             By default 'dynatrace-gcp-function' will be used.
     --upgrade-extensions
                             Upgrade all extensions into dynatrace cluster
+    -n, --namespace
+                            Kubernetes namespace, by default dynatrace
     -d, --auto-default
                             Disable all interactive prompts when running gcloud commands.
                             If input is required, defaults will be used, or an error will be raised.
@@ -124,6 +126,11 @@ while (( "$#" )); do
 
             "--upgrade-extensions")
                 UPGRADE_EXTENSIONS="Y"
+                shift
+            ;;
+
+            "-n" | "--namespace")
+                KUBERNETES_NAMESPACE=$2
                 shift
             ;;
 
@@ -183,6 +190,10 @@ fi
 
 if [ -z "$ROLE_NAME" ]; then
   ROLE_NAME="dynatrace_function"
+fi
+
+if [ -z "$KUBERNETES_NAMESPACE" ]; then
+  KUBERNETES_NAMESPACE="dynatrace"
 fi
 
 if [ -z "$DEPLOYMENT_TYPE" ]; then
@@ -321,11 +332,11 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
 fi
 
 echo
-echo "- 1. Create dynatrace namespace in k8s cluster."
-if [[ $(kubectl get namespace dynatrace --ignore-not-found) ]]; then
-  echo "namespace dynatrace already exists"
+echo "- 1. Create $KUBERNETES_NAMESPACE namespace in k8s cluster."
+if [[ $(kubectl get namespace $KUBERNETES_NAMESPACE --ignore-not-found) ]]; then
+  echo "namespace $KUBERNETES_NAMESPACE already exists"
 else
-  kubectl create namespace dynatrace >${CMD_OUT_PIPE}
+  kubectl create namespace $KUBERNETES_NAMESPACE >${CMD_OUT_PIPE}
 fi
 
 echo
@@ -383,16 +394,16 @@ fi
 
 echo
 echo "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME"
-helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace dynatrace --set clusterName="$CLUSTER_NAME" >${CMD_OUT_PIPE}
+helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace "$KUBERNETES_NAMESPACE" --set clusterName="$CLUSTER_NAME" >${CMD_OUT_PIPE}
 
 echo
 echo -e "\e[92m- Deployment complete, check if containers are running:\e[37m" >${CMD_OUT_PIPE}
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs" >${CMD_OUT_PIPE}
+  echo "kubectl -n $KUBERNETES_NAMESPACE logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs" >${CMD_OUT_PIPE}
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics" >${CMD_OUT_PIPE}
+  echo "kubectl -n $KUBERNETES_NAMESPACE logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics" >${CMD_OUT_PIPE}
 fi
 
 if [[ $DEPLOYMENT_TYPE != "metrics" ]] && [[ $USE_EXISTING_ACTIVE_GATE != "true" ]]; then
