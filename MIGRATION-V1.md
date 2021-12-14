@@ -2,7 +2,7 @@
 
 Upgrading existing `dynatrace-gcp-function` installations (either K8S or Cloud Function deployment) from 0.1.x is not supported.
 Existing old 0.1.x deployments need to be deleted and new 1.0.x installation needs to be deployed.
-New wersion (1.0.x) of `dynatrace-gcp-function` is using [Extensions 2.0](https://www.dynatrace.com/support/help/extend-dynatrace/extensions20/) and requires Dynatrace version 1.229 or higher.
+New wersion (1.0.x) of `dynatrace-gcp-function` is using [Extensions 2.0](https://www.dynatrace.com/support/help/extend-dynatrace/extensions20/) and requires Dynatrace version 1.230 or higher.
 Required permissions for Dynatrace API token has changed in 1.0.x
 If you want to reuse previous Dynatrace API token in new deployment modify its permissions (see [Dynatrace documentation](https://www.dynatrace.com/support/help/setup-and-configuration/setup-on-cloud-platforms/google-cloud-platform/set-up-integration-gcp/) for details).
 
