@@ -22,10 +22,13 @@ gcpProjectId: ""
 # if set to all - deploy two containers to send GCP metrics and logs to Dynatrace
 deploymentType: "all"
 # Dynatrace API token with permissions:
-# 'Ingest logs' for deployment type 'all' or'logs'
-# 'Ingest metrics', 'Read configuration', 'Write configuration' for deployment type 'all' or 'metrics'
+# Deployment type 'all' or'logs'
+# API v2: 'logs.ingest'
+# Deployment type 'all' or 'metrics'
+# API v2: 'metrics.ingest', 'extensions.read', 'extensions.write', 'extensionConfigurations.read', 'extensionConfigurations.write', 'extensionEnvironment.read', 'extensionEnvironment.write'
+# API v1: 'ReadConfig', 'WriteConfig'
 dynatraceAccessKey: ""
-# Dynatrace environment endpoint, for example: https://environment-id.live.dynatrace.com
+# Dynatrace environment endpoint, for example: SaaS: https://environment-id.live.dynatrace.com, Managed: https://cluster-id.managed.internal.dynatrace.com/e/environment-id
 # Needed for deployment type 'metrics'. For deployment 'all' and 'logs' in case when activeGate.useExisting is false
 dynatraceUrl: ""
 
