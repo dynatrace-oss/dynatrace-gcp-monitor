@@ -83,7 +83,7 @@ test_req_yq() {
 
     echo "Using yq version $VERSION_YQ"
 
-    if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.0.0')" ]; then
+    if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
       err 'yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
         YQ: https://github.com/mikefarah/yq'
       exit 1
@@ -221,8 +221,17 @@ get_extensions_zip_packages() {
 }
 
 get_activated_extensions_on_cluster() {
-  if RESPONSE=$(dt_api "/api/v2/extensions"); then
-    echo "${RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"'
+  if RESPONSE=$(dt_api "/api/v2/extensions?pageSize=100"); then
+    EXTENSIONS=$(echo "${RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
+    NEXT_PAGE_KEY=$(echo "${RESPONSE}" | jq -r '.nextPageKey')
+    while [[ "$NEXT_PAGE_KEY" != "null" ]]; do
+      RESPONSE=$(dt_api "/api/v2/extensions?nextPageKey=$NEXT_PAGE_KEY")
+      NEXT_PAGE_KEY=$(echo "${RESPONSE}" | jq -r '.nextPageKey')
+      EXTENSIONS_FROM_NEXT_PAGE=$(echo "${RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
+      EXTENSIONS_FROM_NEXT_PAGE=$(echo -e "\n$EXTENSIONS_FROM_NEXT_PAGE")
+      EXTENSIONS=("${EXTENSIONS[@]}" "${EXTENSIONS_FROM_NEXT_PAGE[@]}")
+    done
+    echo "${EXTENSIONS[@]}"
   else
     err "- Dynatrace Cluster failed on ${DYNATRACE_URL}/api/v2/extensions endpoint."
     exit
