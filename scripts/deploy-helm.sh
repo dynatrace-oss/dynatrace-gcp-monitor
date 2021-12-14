@@ -131,7 +131,7 @@ while (( "$#" )); do
 
             "-n" | "--namespace")
                 KUBERNETES_NAMESPACE=$2
-                shift
+                shift; shift
             ;;
 
             "-d" | "--auto-default")
@@ -349,7 +349,7 @@ fi
 
 echo
 echo "- 3. Configure the IAM service account for Workload Identity."
-gcloud iam service-accounts add-iam-policy-binding "$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role roles/iam.workloadIdentityUser --member "serviceAccount:$GCP_PROJECT.svc.id.goog[dynatrace/dynatrace-gcp-function-sa]" >${CMD_OUT_PIPE}
+gcloud iam service-accounts add-iam-policy-binding "$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role roles/iam.workloadIdentityUser --member "serviceAccount:$GCP_PROJECT.svc.id.goog[$KUBERNETES_NAMESPACE/dynatrace-gcp-function-sa]" >${CMD_OUT_PIPE}
 
 echo
 echo "- 4. Create dynatrace-gcp-function IAM role(s)."
