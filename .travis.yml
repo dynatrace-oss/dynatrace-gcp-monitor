@@ -6,10 +6,10 @@ notifications:
 stages:
 - tests
 - github-deploy
-- github-install-release
 - e2e-helm-deployment-test
 - e2e-cloud-function-deployment-test
 - docker-deploy
+- github-install-release
 env:
   global:
   - TAG=$TRAVIS_TAG
