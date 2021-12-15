@@ -149,12 +149,12 @@ activation: |
     - service: k8s_container
       featureSets:
         - default_metrics
-       - agent
-       - apigee
-       - istio
-       - nginx
-     vars:
-       filter_conditions: ""
+        - agent
+        - apigee
+        - istio
+        - nginx
+      vars:
+        filter_conditions: ""
     - service: k8s_node
       featureSets:
         - default_metrics
