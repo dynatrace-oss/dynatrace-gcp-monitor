@@ -264,10 +264,10 @@ upload_extension_to_cluster() {
 services_setup_in_config() {
   SERVICES_FROM_ACTIVATION_CONFIG=$1
 
-  # Add '/default' to service name when featureSet is missing
+  # Add '/default_metrics' to service name when featureSet is missing
   for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
     if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]]; then
-      SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default"
+      SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default_metrics"
     fi
   done
   echo "${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
