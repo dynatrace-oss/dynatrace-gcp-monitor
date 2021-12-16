@@ -173,8 +173,8 @@ check_s3_url
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
   if [ -z "$GCP_PROJECT" ]; then
-  err "Invalid GCP_PROJECT: $GCP_PROJECT. Set correct gcpProjectId in values.yaml"
-  exit 1
+    err "Invalid GCP_PROJECT. Set correct gcpProjectId in values.yaml"
+    exit 1
   fi
 fi
 
