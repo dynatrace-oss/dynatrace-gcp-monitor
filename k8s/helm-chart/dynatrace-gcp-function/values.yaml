@@ -14,7 +14,6 @@
 
 # COMMON VALUES
 # GCP project ID
-# For 'logs' and 'all' deployment use GCP project of log sink pubsub subscription
 gcpProjectId: ""
 # deploymentType:
 # if set to metrics - deploy only one container to send GCP metrics to Dynatrace
