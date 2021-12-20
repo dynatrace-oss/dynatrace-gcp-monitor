@@ -10,7 +10,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"custom.googleapis.com/dynatrace/ingest_lines\" resource.type=\"generic_task\" resource.label.\"task_id\"=\"dynatrace-gcp-function\"",
+                    "filter": "metric.type=\"custom.googleapis.com/dynatrace/ingest_lines\" resource.type=\"generic_task\"",
                     "aggregation": {
                       "perSeriesAligner": "ALIGN_MEAN"
                     },
@@ -38,7 +38,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"custom.googleapis.com/dynatrace/connectivity\" resource.type=\"generic_task\" resource.label.\"task_id\"=\"dynatrace-gcp-function\"",
+                    "filter": "metric.type=\"custom.googleapis.com/dynatrace/connectivity\" resource.type=\"generic_task\"",
                     "aggregation": {
                       "perSeriesAligner": "ALIGN_MEAN"
                     },
@@ -66,7 +66,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"cloudfunctions.googleapis.com/function/execution_times\" resource.type=\"cloud_function\" resource.label.\"function_name\"=\"dynatrace-gcp-function\"",
+                    "filter": "metric.type=\"cloudfunctions.googleapis.com/function/execution_times\" resource.type=\"cloud_function\"",
                     "aggregation": {
                       "perSeriesAligner": "ALIGN_PERCENTILE_99"
                     },
@@ -129,7 +129,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"custom.googleapis.com/dynatrace/request_count\" resource.type=\"generic_task\" resource.label.\"task_id\"=\"dynatrace-gcp-function\" metric.label.\"response_code\"=\"202\"",
+                    "filter": "metric.type=\"custom.googleapis.com/dynatrace/request_count\" resource.type=\"generic_task\" metric.label.\"response_code\"=\"202\"",
                     "aggregation": {
                       "perSeriesAligner": "ALIGN_MEAN",
                       "crossSeriesReducer": "REDUCE_SUM",
@@ -161,7 +161,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"custom.googleapis.com/dynatrace/request_count\" resource.type=\"generic_task\" resource.label.\"task_id\"=\"dynatrace-gcp-function\" metric.label.\"response_code\"=\"400\"",
+                    "filter": "metric.type=\"custom.googleapis.com/dynatrace/request_count\" resource.type=\"generic_task\" metric.label.\"response_code\"=\"400\"",
                     "aggregation": {
                       "perSeriesAligner": "ALIGN_MEAN",
                       "crossSeriesReducer": "REDUCE_SUM",
@@ -193,7 +193,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"cloudfunctions.googleapis.com/function/user_memory_bytes\" resource.type=\"cloud_function\" resource.label.\"function_name\"=\"dynatrace-gcp-function\"",
+                    "filter": "metric.type=\"cloudfunctions.googleapis.com/function/user_memory_bytes\" resource.type=\"cloud_function\"",
                     "aggregation": {
                       "perSeriesAligner": "ALIGN_PERCENTILE_99"
                     },
@@ -222,7 +222,7 @@
               {
                 "timeSeriesQuery": {
                   "timeSeriesFilter": {
-                    "filter": "metric.type=\"cloudfunctions.googleapis.com/function/execution_count\" resource.type=\"cloud_function\" resource.label.\"function_name\"=\"dynatrace-gcp-function\"",
+                    "filter": "metric.type=\"cloudfunctions.googleapis.com/function/execution_count\" resource.type=\"cloud_function\"",
                     "aggregation": {
                       "perSeriesAligner": "ALIGN_RATE",
                       "crossSeriesReducer": "REDUCE_SUM",
