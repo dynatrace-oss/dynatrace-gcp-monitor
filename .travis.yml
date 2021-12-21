@@ -68,7 +68,7 @@ jobs:
     language: python
     python:
       - "3.8"
-    if: (branch = master OR type = pull_request) AND fork = false
+    if: branch = master OR tag =~ /^release.*$/
     cache:
       directories:
         - "$HOME/google-cloud-sdk/"
