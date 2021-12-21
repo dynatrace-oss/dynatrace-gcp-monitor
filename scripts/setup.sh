@@ -203,6 +203,52 @@ echo -e "- function \e[1;32m $GCP_FUNCTION_NAME \e[0m already exists in $GCP_PRO
 INSTALL=false
 fi
 
+# Create App Engine app if not exists
+echo
+echo "- checking App Engine app, required for Cloud Scheduler"
+APP_ENGINE=$(gcloud app describe --format="json" 2>/dev/null || true)
+SERVING_APP_ENGINE=$(echo "$APP_ENGINE" | jq -r '.servingStatus')
+
+if [[ -z "$APP_ENGINE" ]]; then
+  echo
+  echo "To continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
+  while true; do
+    read -p "Do you want to create App Engine app? [y/n]" yn
+    case $yn in
+    [Yy]*)
+      echo
+      echo "Please provide the region for App Engine app."
+      echo
+      echo "Available regions:"
+      APP_ENGINE_LOCATIONS=$(gcloud app regions list --format="json" | jq -r '.[] | .region')
+      echo "$APP_ENGINE_LOCATIONS"
+      readarray -t LOCATIONS_ARR <<<"$(echo "${APP_ENGINE_LOCATIONS}")"
+      echo
+      while ! [[ " ${LOCATIONS_ARR[*]} " == *" $APP_ENGINE_LOCATION "* ]]; do
+        read -p "Enter location for App Engine app: " -e APP_ENGINE_LOCATION
+      done
+      echo
+      echo "- creating the App Engine app"
+      gcloud app create -q --region="$APP_ENGINE_LOCATION"
+      break
+      ;;
+    [Nn]*)
+      echo
+      echo -e "\e[91mERROR: \e[37mCannot continue without App Engine. Deployment aborted."
+      exit
+      ;;
+    *) echo "- please answer y or n" ;;
+    esac
+  done
+elif [[ "$SERVING_APP_ENGINE" != "SERVING"  ]]; then
+  echo
+  echo -e "\e[91mERROR: \e[37mTo continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
+  echo
+  echo 'Enable App Engine on: https://console.cloud.google.com/appengine/settings'
+  echo
+  exit
+fi
+
 if [ "$INSTALL" == true ]; then
   echo "Please provide the size of Your GCP environment to adjust memory allocated to monitoring function"
   echo "[s] - small, up to 500 instances, 256 MB memory allocated to function"

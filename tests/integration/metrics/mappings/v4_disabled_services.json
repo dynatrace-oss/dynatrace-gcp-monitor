@@ -1,0 +1,30 @@
+{
+  "id": "f67c0a4d-0456-4d4f-aa32-4288a2167257",
+  "name": "v4_disabled_services",
+  "request": {
+    "url": "/v4/dynatrace-gcp-extension/services?filter=state:DISABLED",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "disabled-services.json",
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8",
+      "Vary": [
+        "Origin",
+        "X-Origin",
+        "Referer"
+      ],
+      "Date": "Tue, 21 Sep 2021 12:01:31 GMT",
+      "Server": "ESF",
+      "Cache-Control": "private",
+      "X-XSS-Protection": "0",
+      "X-Frame-Options": "SAMEORIGIN",
+      "X-Content-Type-Options": "nosniff",
+      "Alt-Svc": "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\""
+    }
+  },
+  "uuid": "f67c0a4d-0456-4d4f-aa32-4288a2167257",
+  "persistent": true,
+  "insertionIndex": 14
+}

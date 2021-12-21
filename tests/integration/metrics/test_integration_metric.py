@@ -13,11 +13,11 @@
 #     limitations under the License.
 
 
-import base64
 import os
-from typing import NewType, Any, Dict, List
+from typing import NewType, Any, Dict
 
 import pytest
+from assertpy import assert_that
 from pytest_mock import MockerFixture
 from wiremock.constants import Config
 from wiremock.resources.near_misses import NearMissMatchPatternRequest
@@ -29,6 +29,7 @@ import lib.credentials
 import lib.entities.extractors.cloud_sql
 import lib.entities.extractors.gce_instance
 import lib.entities.google_api
+import lib.gcp_apis
 import lib.metric_ingest
 from main import async_dynatrace_gcp_extension
 from assertpy import assert_that
@@ -43,7 +44,8 @@ system_variables: Dict = {
     'REQUIRE_VALID_CERTIFICATE': 'False',
     'ACTIVATION_CONFIG': "{services: [{service: gce_instance, featureSets: [default_metrics], vars: {filter_conditions: resource.labels.instance_name=starts_with(\"test\")}},\
                         {service: api, featureSets: [default_metrics], vars: {filter_conditions: ''}},\
-                        {service: cloudsql_database, featureSets: [default_metrics], vars: {filter_conditions: ''}}]}"
+                        {service: cloudsql_database, featureSets: [default_metrics], vars: {filter_conditions: ''}}]}",
+    'GCP_PROJECT': 'dynatrace-gcp-extension'
     # 'DYNATRACE_ACCESS_KEY': ACCESS_KEY, this one is encoded in mocks files
 }
 
@@ -53,6 +55,7 @@ def setup_test_variables(resource_path_root):
     lib.credentials._CLOUD_RESOURCE_MANAGER_ROOT = f"http://localhost:{MOCKED_API_PORT}/v1"
     lib.credentials._SECRET_ROOT = f"http://localhost:{MOCKED_API_PORT}/v1"
     lib.metric_ingest._MONITORING_ROOT = f"http://localhost:{MOCKED_API_PORT}/v3"
+    lib.gcp_apis.GCP_SERVICE_USAGE_URL = f"http://localhost:{MOCKED_API_PORT}/v4/"
     lib.entities.extractors.cloud_sql._SQL_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
     lib.entities.google_api._GCP_COMPUTE_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
     lib.entities.extractors.gce_instance._GCP_COMPUTE_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
@@ -129,8 +132,13 @@ async def ingest_lines_output(expected_ingest_output_file):
                             if gce_instance_filter in reqeust_gcp_timeseries.url]
     assert_that(requests_with_filter).is_length(3)
 
-    request_metrics_ingest_pattern = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
-                                          method="POST")
+    sent_requests = Requests.get_all_received_requests().get_json_data().get('requests')
+    urls = {sent_request["request"]["url"] for sent_request in sent_requests}
+    apigee_url_prefix = "/v3/projects/dynatrace-gcp-extension/timeSeries?filter=metric.type+%3D+%22apigee.googleapis.com/environment/anomaly_count"
+    request_for_apigee_metric_was_sent = any(url.startswith(apigee_url_prefix) for url in urls)
+    assert not request_for_apigee_metric_was_sent
+
+    request_metrics_ingest_pattern = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest", method="POST")
     request_metrics_ingest: RequestResponseFindResponse = Requests.get_matching_requests(request_metrics_ingest_pattern)
     assert_that(request_metrics_ingest.requests).is_not_empty()
     result: RequestResponseRequest = request_metrics_ingest.requests[0]

@@ -137,11 +137,12 @@ jobs:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
       - gcloud auth configure-docker
+      - ./tests/e2e/deployment-test-cleanup.sh
       - ./build/docker-deploy.sh
       - ./tests/e2e/before-deployment-test-helm-cleanup.sh
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
-      - ./tests/e2e/execute-tests.sh
+      - travis_wait 30 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
 

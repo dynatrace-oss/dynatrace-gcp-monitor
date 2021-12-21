@@ -20,7 +20,7 @@ import traceback
 from datetime import datetime
 from os import listdir
 from os.path import isfile
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 import yaml
 
@@ -31,21 +31,28 @@ from lib.credentials import create_token, get_project_id_from_environment, fetch
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace
+from lib.gcp_apis import get_all_disabled_apis
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
 
 
-def dynatrace_gcp_extension(event, context, project_id: Optional[str] = None):
+def dynatrace_gcp_extension(event, context):
+    """
+    Starting point for installation as a GCP function. See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
+    """
     try:
-        asyncio.run(handle_event(event, context, project_id))
+        asyncio.run(handle_event(event, context))
     except Exception as e:
         traceback.print_exc()
         raise e
 
 
 async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
+    """
+    Used in docker or for tests
+    """
     timestamp_utc = datetime.utcnow()
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
@@ -60,7 +67,7 @@ async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None,
     data = {'data': '', 'publishTime': timestamp_utc_iso}
 
     start_time = time.time()
-    await handle_event(data, event_context, "dynatrace-gcp-extension", project_ids, services)
+    await handle_event(data, event_context, project_ids, services)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
@@ -71,6 +78,7 @@ def is_yaml_file(f: str) -> bool:
 
 async def handle_event(event: Dict, event_context, project_id_owner: Optional[str], projects_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
     if isinstance(event_context, Dict):
+        # for k8s installation
         context = LoggingContext(event_context.get("execution_id", None))
     else:
         context = LoggingContext(None)
@@ -91,8 +99,7 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
 
         context.log("Successfully obtained access token")
 
-        if not project_id_owner:
-            project_id_owner = get_project_id_from_environment()
+        project_id_owner = get_project_id_from_environment()
 
         dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
@@ -124,13 +131,17 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
         if not projects_ids:
             projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
+        disabled_apis = {}
+        for project_id in projects_ids:
+            disabled_apis = {project_id: await get_all_disabled_apis(context, token, project_id)}
+
         setup_time = (time.time() - setup_start_time)
         context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}
 
         context.start_processing_timestamp = time.time()
 
         process_project_metrics_tasks = [
-            process_project_metrics(context, project_id, services)
+            process_project_metrics(context, project_id, services, disabled_apis.get(project_id, set()))
             for project_id
             in projects_ids
         ]
@@ -147,11 +158,12 @@ async def handle_event(event: Dict, event_context, project_id_owner: Optional[st
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
 
-async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService]):
+async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
+                                  disabled_apis: Set[str]):
     try:
         context.log(project_id, f"Starting processing...")
         await check_x_goog_user_project_header_permissions(context, project_id)
-        ingest_lines = await fetch_ingest_lines_task(context, project_id, services)
+        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis)
         fetch_data_time = time.time() - context.start_processing_timestamp
         context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
@@ -197,7 +209,8 @@ async def _check_x_goog_user_project_header_permissions(context: MetricsContext,
         context.log(project_id, f"Unexpected response when checking 'x-goog-user-project' header: {str(page)}")
 
 
-async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService]) -> List[IngestLine]:
+async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
+                                  disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_tasks = []
     topology_tasks = []
     topology_task_services = []
@@ -209,14 +222,20 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             topology_task_services.append(service)
     fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
 
-    skipped_services = []
+    skipped_services_no_instances = []
+    skipped_disabled_apis = set()
     for service in services:
         if service in topology_task_services:
             service_topology = fetch_topology_results[topology_task_services.index(service)]
             if not service_topology:
-                skipped_services.append(f"{service.name}/{service.feature_set}")
+                skipped_services_no_instances.append(f"{service.name}/{service.feature_set}")
                 continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
+            gcp_api_last_index = metric.google_metric.find("/")
+            api = metric.google_metric[:gcp_api_last_index]
+            if api in disabled_apis:
+                skipped_disabled_apis.add(api)
+                continue # skip fetching the metrics because service API is disabled
             fetch_metric_task = run_fetch_metric(
                 context=context,
                 project_id=project_id,
@@ -225,9 +244,12 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             )
             fetch_metric_tasks.append(fetch_metric_task)
 
-    if skipped_services:
-        skipped_services_string = ', '.join(skipped_services)
+    if skipped_services_no_instances:
+        skipped_services_string = ', '.join(skipped_services_no_instances)
         context.log(project_id, f"Skipped fetching metrics for {skipped_services_string} due to no instances detected")
+    if skipped_disabled_apis:
+        skipped_disabled_apis_string = ", ".join(skipped_disabled_apis)
+        context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
     entity_id_map = build_entity_id_map(fetch_topology_results)

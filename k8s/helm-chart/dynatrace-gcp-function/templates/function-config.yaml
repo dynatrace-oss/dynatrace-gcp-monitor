@@ -38,6 +38,7 @@ data:
   DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH: {{ .Values.logIngestAttributeValueMaxLength | quote }}
   DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS: {{ .Values.logIngestRequestMaxEvents | quote }}
   DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
+  DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD: {{ .Values.logIngestSendingWorkerExecutionPeriod | quote }}
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
   USE_EXISTING_ACTIVE_GATE: {{ .Values.activeGate.useExisting | quote }}
   {{- end }}
