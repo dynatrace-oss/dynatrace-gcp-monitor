@@ -155,12 +155,18 @@ check_if_parameter_is_empty() {
 
 check_url() {
   URL=$1
-  REGEX=$2
-  MESSAGE=$3
-  if ! [[ "${URL}" =~ ${REGEX} ]]; then
-    err "${MESSAGE}"
-    exit 1
-  fi
+  REGEXES=${@:2:$#-2} # all arguments except first and last
+  MESSAGE=${@: -1} # last argument
+
+  for REGEX in $REGEXES
+  do
+    if [[ "$URL" =~ $REGEX ]]; then
+      return 0
+    fi
+  done
+
+  err "$MESSAGE"
+  exit 1
 }
 
 check_api_token() {
