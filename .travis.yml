@@ -1,5 +1,6 @@
 os: linux
 dist: xenial
+if: fork = false
 notifications:
   email:
     on_success: never
