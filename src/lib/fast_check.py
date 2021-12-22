@@ -42,8 +42,6 @@ METRICS_CONFIGURATION_FLAGS = [
     "REQUIRE_VALID_CERTIFICATE",
     "SERVICE_USAGE_BOOKING",
     "USE_PROXY",
-    "IMPORT_DASHBOARDS",
-    "IMPORT_ALERTS",
     "SELF_MONITORING_ENABLED",
     "QUERY_INTERVAL_MIN"
 ]
@@ -72,6 +70,7 @@ REQUIRED_SERVICES = [
 
 DYNATRACE_REQUIRED_TOKEN_SCOPES = [
     'metrics.ingest',
+    'extensions.read'
 ]
 
 FastCheckResult = NamedTuple('FastCheckResult', [('projects', List[str])])

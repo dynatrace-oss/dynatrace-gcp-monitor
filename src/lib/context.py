@@ -38,11 +38,6 @@ def get_should_require_valid_certificate() -> bool:
     return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
 
 
-def get_selected_services() -> []:
-    selected_services_string = os.environ.get("GCP_SERVICES", "")
-    return selected_services_string.strip('"').split(",") if selected_services_string else []
-
-
 def get_query_interval_minutes() -> int:
     default_query_interval = 3
     query_interval_env_var = os.environ.get('QUERY_INTERVAL_MIN', None)

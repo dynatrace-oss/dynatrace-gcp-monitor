@@ -13,30 +13,47 @@
 #   limitations under the License.
 from typing import NewType, Any
 
+from assertpy import assert_that
+
 from lib.context import LoggingContext
-from main import load_supported_services
+from lib.utilities import read_activation_yaml, load_activated_feature_sets
 
 context = LoggingContext("TEST")
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
-ACTIVATION_CONFIG = "{services: [{service: pubsub_snapshot, featureSets: [default], vars: {filter_conditions: ''}},\
- {service: pubsub_subscription, featureSets: [default], vars: {filter_conditions: 'resource.labels.subscription_id=starts_with(\"test\")'}}]}"
+ACTIVATION_CONFIG = "{services: [{service: pubsub_snapshot, featureSets: [default_metrics], vars: {filter_conditions: ''}},\
+ {service: pubsub_subscription, featureSets: [default_metrics, test], vars: {filter_conditions: 'resource.labels.subscription_id=starts_with(\"test\")'}}]}"
+
+ACTIVATION_CONFIG_WITHOUT_FEATURE_SET = "{services: [{service: services_to_be_activated, featureSets: [default_metrics], vars: {filter_conditions: ''}},\
+ {service: you_shall_not_be_activated, vars: {filter_conditions: 'resource.labels.subscription_id=starts_with(\"test\")'}}]}"
+
+ACTIVATION_CONFIG_WITH_EMPTY_FEATURE_SET = "{services: [{service: you_shall_not_be_activated, featureSets: [], vars: {filter_conditions: ''}},\
+ {service: services_to_be_activated,featureSets: [default_metrics, test], vars: {filter_conditions: 'resource.labels.subscription_id=starts_with(\"test\")'}}]}"
 
 
 def test_filtering_config_loaded(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG)
-    config = load_supported_services(context, ["pubsub_snapshot/default", "pubsub_subscription/default"])
-    assert len(config) == 2
-    assert any(elem.name == "pubsub_subscription" and elem.monitoring_filter == 'resource.labels.subscription_id=starts_with("test")' for elem in config)
-    assert any(elem.name == "pubsub_snapshot" and elem.monitoring_filter == '' for elem in config)
+    activation_yaml = read_activation_yaml()
+    activated_service_names = load_activated_feature_sets(context, activation_yaml)
+    assert_that(activated_service_names).contains_only("pubsub_subscription/default_metrics", "pubsub_subscription/test",
+                                                       "pubsub_snapshot/default_metrics")
 
 
-def test_filtering_config_blank_when_activation_config_missing():
-    config = load_supported_services(context, ["pubsub_snapshot/default", "pubsub_subscription/default"])
-    assert len(config) == 2
-    assert any(elem.name == "pubsub_subscription" and elem.monitoring_filter == '' for elem in config)
-    assert any(elem.name == "pubsub_snapshot" and elem.monitoring_filter == '' for elem in config)
-
-
-def test_filtering_missing_configs():
-    config = load_supported_services(context, [])
+def test_filtering_missing_configs(monkeypatch: MonkeyPatchFixture):
+    monkeypatch.setenv("ACTIVATION_CONFIG", "{services: []}")
+    activation_yaml = read_activation_yaml()
+    config = load_activated_feature_sets(context, activation_yaml)
     assert len(config) == 0
+
+
+def test_filtering_services_without_feature_sets(monkeypatch: MonkeyPatchFixture):
+    monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG_WITHOUT_FEATURE_SET)
+    activation_yaml = read_activation_yaml()
+    activated_service_names = load_activated_feature_sets(context, activation_yaml)
+    assert_that(activated_service_names).contains_only("services_to_be_activated/default_metrics")
+
+
+def test_services_with_an_empty_feature_sets(monkeypatch: MonkeyPatchFixture):
+    monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG_WITH_EMPTY_FEATURE_SET)
+    activation_yaml = read_activation_yaml()
+    activated_service_names = load_activated_feature_sets(context, activation_yaml)
+    assert_that(activated_service_names).contains_only("services_to_be_activated/default_metrics", "services_to_be_activated/test")
