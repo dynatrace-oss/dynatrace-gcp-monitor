@@ -51,7 +51,6 @@ jobs:
 
   - stage: github-deploy
     name: GitHub deploy
-    if: tag =~ /^release-.*
     install: skip
     language: minimal
     before_deploy:
