@@ -142,7 +142,7 @@ jobs:
       - ./tests/e2e/before-deployment-test-helm-cleanup.sh
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
-      - travis_wait 30 ./tests/e2e/execute-tests.sh
+      - travis_wait 60 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
 
@@ -182,6 +182,6 @@ jobs:
       - ./build/build-zip-release.sh
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
-      - ./tests/e2e/execute-tests-cloud-function.sh
+      - travis_wait 60 ./tests/e2e/execute-tests-cloud-function.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup-cloud-function.sh
