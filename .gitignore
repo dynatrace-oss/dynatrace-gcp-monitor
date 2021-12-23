@@ -11,3 +11,4 @@ metric-metadata/
 artefacts/
 helm-deployment-package/
 release/
+src/config/
