@@ -128,8 +128,8 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
             scheduled_execution_id=context.scheduled_execution_id
         )
 
-        # if not projects_ids:
-        projects_ids = await get_all_accessible_projects(context, gcp_session, token)
+        if not projects_ids:
+            projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
         disabled_apis = {}
         for project_id in projects_ids:
