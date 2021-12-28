@@ -76,7 +76,7 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, event_context, project_id_owner: Optional[str], projects_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
+async def handle_event(event: Dict, event_context, projects_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
     if isinstance(event_context, Dict):
         # for k8s installation
         context = LoggingContext(event_context.get("execution_id", None))
