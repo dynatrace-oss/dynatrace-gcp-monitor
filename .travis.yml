@@ -1,5 +1,6 @@
 os: linux
 dist: xenial
+if: fork = false
 notifications:
   email:
     on_success: never
@@ -106,7 +107,6 @@ jobs:
     language: python
     python:
       - "3.8"
-    if: (branch = master OR type = pull_request) AND fork = false
     cache:
       directories:
         - "$HOME/google-cloud-sdk/"
@@ -152,7 +152,6 @@ jobs:
     language: python
     python:
       - "3.8"
-    if: (branch = master OR type = pull_request) AND fork = false
     cache:
       directories:
         - "$HOME/google-cloud-sdk/"
