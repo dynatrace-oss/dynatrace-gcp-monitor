@@ -35,7 +35,7 @@ echo -e "\033[0;37m"
 
 if ! command -v yq &> /dev/null
 then
-    err 'yq and jq is required to uninstall Dynatrace function. Please refer to following links for installation instructions:
+    err 'yq (4.9.x+) and jq is required to uninstall Dynatrace function. Please refer to following links for installation instructions:
     YQ: https://github.com/mikefarah/yq
     Example command to install yq:
     sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
@@ -43,7 +43,6 @@ then
     then
         echo -e "JQ: https://stedolan.github.io/jq/download/"
     fi
-    err 'You may also try installing YQ with PIP: pip install yq'
     exit 1
 else
   VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
@@ -54,9 +53,9 @@ else
 
   echo "Using yq version $VERSION_YQ"
 
-  if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.0.0')" ]; then
+  if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
 
-      err 'yq in 4+ version is required to uninstall Dynatrace function. Please refer to following links for installation instructions:
+      err 'yq in 4.9.8+ version is required to uninstall Dynatrace function. Please refer to following links for installation instructions:
       YQ: https://github.com/mikefarah/yq'
       exit 1
   fi
