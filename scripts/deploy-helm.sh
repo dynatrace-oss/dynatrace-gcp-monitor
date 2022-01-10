@@ -31,7 +31,7 @@ EOF
 }
 
 check_dynatrace_log_ingest_url() {
-  if RESPONSE=$(curl -k -s -X POST -d "$(generate_test_log)" "$DYNATRACE_LOG_INGEST_URL/api/v2/logs/ingest" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20); then
+  if RESPONSE=$(curl -k -s -X POST -d "$(generate_test_log)" "$DYNATRACE_LOG_INGEST_URL/api/v2/logs/ingest" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" --connect-timeout 20 | tee -a "$FULL_LOG_FILE"); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     RESPONSE=$(sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE")
     if [ "$CODE" -ge 300 ]; then
@@ -48,10 +48,10 @@ check_dynatrace_docker_login() {
 
   DOCKER_LOGIN=$(helm template dynatrace-gcp-function --show-only templates/active-gate-statefulset.yaml | tr '\015' '\n' | grep "envid:" | awk '{print $2}')
 
-  if RESPONSE=$(curl -ksS -w "%{http_code}" -o /dev/null -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/"); then
+  if RESPONSE=$(curl -ksS -w "%{http_code}" -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/" | tee -a "$FULL_LOG_FILE"); then
     if [[ $RESPONSE == "200" ]]; then
-      echo "Successfully logged to Dynatrace cluster Docker registry"
-      echo "The ActiveGate will be deployed in k8s cluster"
+      echo "Successfully logged to Dynatrace cluster Docker registry" | tee -a "$FULL_LOG_FILE"
+      echo "The ActiveGate will be deployed in k8s cluster" | tee -a "$FULL_LOG_FILE"
     else
       err "Couldn't log to Dynatrace cluster Docker registry. Is your PaaS token a valid one?"
       exit 1
@@ -178,8 +178,8 @@ if [ -z "$GCP_PROJECT" ]; then
   fi
 fi
 
-gcloud config set project "$GCP_PROJECT"
-echo "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]"
+gcloud config set project "$GCP_PROJECT" | tee -a "$FULL_LOG_FILE"
+echo "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]" | tee -a "$FULL_LOG_FILE"
 
 if [ -z "$SA_NAME" ]; then
   SA_NAME="dynatrace-gcp-function-sa"
@@ -191,14 +191,14 @@ fi
 
 if [ -z "$DEPLOYMENT_TYPE" ]; then
   DEPLOYMENT_TYPE="all"
-  echo "Deploying metrics and logs ingest"
+  echo "Deploying metrics and logs ingest" | tee -a "$FULL_LOG_FILE"
 elif [[ $DEPLOYMENT_TYPE == all ]]; then
-  echo "Deploying metrics and logs ingest"
+  echo "Deploying metrics and logs ingest" | tee -a "$FULL_LOG_FILE"
 elif [[ $DEPLOYMENT_TYPE == logs ]]; then
-  echo "Deploying $DEPLOYMENT_TYPE ingest"
+  echo "Deploying $DEPLOYMENT_TYPE ingest" | tee -a "$FULL_LOG_FILE"
   API_TOKEN_SCOPES=('"logs.ingest"')
 elif [[ $DEPLOYMENT_TYPE == metrics ]]; then
-  echo "Deploying $DEPLOYMENT_TYPE ingest"
+  echo "Deploying $DEPLOYMENT_TYPE ingest" | tee -a "$FULL_LOG_FILE"
   API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 else
   err "Invalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
@@ -234,7 +234,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   if [[ $USE_EXISTING_ACTIVE_GATE == false ]]; then
     check_dynatrace_docker_login
   else
-    echo "Using an existing Active Gate"
+    echo "Using an existing Active Gate" | tee -a "$FULL_LOG_FILE"
     check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
     check_url "$DYNATRACE_LOG_INGEST_URL" "$DYNATRACE_URL_REGEX" "$ACTIVE_GATE_TARGET_URL_REGEX" \
       "Not correct dynatraceLogIngestUrl. Example of proper endpoint used to ingest logs to Dynatrace:\n
@@ -285,101 +285,101 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
-  echo
-  echo "- downloading extensions"
+  echo | tee -a "$FULL_LOG_FILE"
+  echo "- downloading extensions" | tee -a "$FULL_LOG_FILE"
   get_extensions_zip_packages
 
-  echo
-  echo "- checking activated extensions in Dynatrace"
+  echo | tee -a "$FULL_LOG_FILE"
+  echo "- checking activated extensions in Dynatrace" | tee -a "$FULL_LOG_FILE"
   EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
   # If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
   if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
-    echo
-    echo "- downloading active extensions from Dynatrace"
+    echo | tee -a "$FULL_LOG_FILE"
+    echo "- downloading active extensions from Dynatrace" | tee -a "$FULL_LOG_FILE"
     get_extensions_from_dynatrace "$EXTENSIONS_FROM_CLUSTER"
   fi
 
-  echo
-  echo "- validating extensions"
+  echo | tee -a "$FULL_LOG_FILE"
+  echo "- validating extensions" | tee -a "$FULL_LOG_FILE"
   validate_gcp_config_in_extensions
 
-  echo
-  echo "- read activation config"
+  echo | tee -a "$FULL_LOG_FILE"
+  echo "- read activation config" | tee -a "$FULL_LOG_FILE"
   SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "$SERVICES_FROM_ACTIVATION_CONFIG")
-  echo "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
+  echo "$SERVICES_FROM_ACTIVATION_CONFIG_STR" | tee -a "$FULL_LOG_FILE"
 
-  echo
-  echo "- choosing and uploading extensions to Dynatrace"
+  echo | tee -a "$FULL_LOG_FILE"
+  echo "- choosing and uploading extensions to Dynatrace" | tee -a "$FULL_LOG_FILE"
   upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
 fi
 
 if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
-  SELECTED_REGION=$(gcloud config get-value compute/region 2>/dev/null)
+  SELECTED_REGION=$(gcloud config get-value compute/region 2>/dev/null | tee -a "$FULL_LOG_FILE")
   if [ -z "$SELECTED_REGION" ]; then
     echo
     err "Default region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
     exit 1
   fi
-  echo
-  echo "- Create and connect GKE Autopilot k8s cluster ${AUTOPILOT_CLUSTER_NAME}."
-  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" >${CMD_OUT_PIPE}
-  gcloud container clusters get-credentials "${AUTOPILOT_CLUSTER_NAME}" --project ${GCP_PROJECT} >${CMD_OUT_PIPE}
+  echo | tee -a "$FULL_LOG_FILE"
+  echo "- Create and connect GKE Autopilot k8s cluster ${AUTOPILOT_CLUSTER_NAME}." | tee -a "$FULL_LOG_FILE"
+  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
+  gcloud container clusters get-credentials "${AUTOPILOT_CLUSTER_NAME}" --project ${GCP_PROJECT} >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
 fi
 
-echo
-echo "- 1. Create dynatrace namespace in k8s cluster."
+echo | tee -a "$FULL_LOG_FILE"
+echo "- 1. Create dynatrace namespace in k8s cluster." | tee -a "$FULL_LOG_FILE"
 if [[ $(kubectl get namespace dynatrace --ignore-not-found) ]]; then
-  echo "namespace dynatrace already exists"
+  echo "namespace dynatrace already exists" | tee -a "$FULL_LOG_FILE"
 else
-  kubectl create namespace dynatrace >${CMD_OUT_PIPE}
+  kubectl create namespace dynatrace >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
 fi
 
-echo
-echo "- 2. Create IAM service account."
+echo | tee -a "$FULL_LOG_FILE"
+echo "- 2. Create IAM service account." | tee -a "$FULL_LOG_FILE"
 if [[ $(gcloud iam service-accounts list --filter="name ~ serviceAccounts/$SA_NAME@" --project="$GCP_PROJECT" --format="value(name)") ]]; then
-  echo "Service Account [$SA_NAME] already exists, skipping"
+  echo "Service Account [$SA_NAME] already exists, skipping" | tee -a "$FULL_LOG_FILE"
 else
-  gcloud iam service-accounts create "$SA_NAME" >${CMD_OUT_PIPE}
+  gcloud iam service-accounts create "$SA_NAME" >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
 fi
 
-echo
-echo "- 3. Configure the IAM service account for Workload Identity."
-gcloud iam service-accounts add-iam-policy-binding "$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role roles/iam.workloadIdentityUser --member "serviceAccount:$GCP_PROJECT.svc.id.goog[dynatrace/dynatrace-gcp-function-sa]" >${CMD_OUT_PIPE}
+echo | tee -a "$FULL_LOG_FILE"
+echo "- 3. Configure the IAM service account for Workload Identity." | tee -a "$FULL_LOG_FILE"
+gcloud iam service-accounts add-iam-policy-binding "$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role roles/iam.workloadIdentityUser --member "serviceAccount:$GCP_PROJECT.svc.id.goog[dynatrace/dynatrace-gcp-function-sa]" >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
 
-echo
-echo "- 4. Create dynatrace-gcp-function IAM role(s)."
+echo | tee -a "$FULL_LOG_FILE"
+echo "- 4. Create dynatrace-gcp-function IAM role(s)." | tee -a "$FULL_LOG_FILE"
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.logs" --project="$GCP_PROJECT" --format="value(name)") ]]; then
-    echo "Updating existing IAM role $ROLE_NAME.logs"
-    gcloud iam roles update $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml >${CMD_OUT_PIPE}
+    echo "Updating existing IAM role $ROLE_NAME.logs" | tee -a "$FULL_LOG_FILE"
+    gcloud iam roles update $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
   else
-    gcloud iam roles create $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml >${CMD_OUT_PIPE}
+    gcloud iam roles create $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
   fi
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.metrics" --project="$GCP_PROJECT" --format="value(name)") ]]; then
-    echo "Updating existing IAM role $ROLE_NAME.metrics"
-    gcloud iam roles update $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml >${CMD_OUT_PIPE}
+    echo "Updating existing IAM role $ROLE_NAME.metrics" | tee -a "$FULL_LOG_FILE"
+    gcloud iam roles update $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
   else
-    gcloud iam roles create $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml >${CMD_OUT_PIPE}
+    gcloud iam roles create $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
   fi
 fi
 
-echo
-echo "- 5. Grant the required IAM policies to the service account."
+echo | tee -a "$FULL_LOG_FILE"
+echo "- 5. Grant the required IAM policies to the service account." | tee -a "$FULL_LOG_FILE"
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.logs" >/dev/null
+  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.logs" | tee -a "$FULL_LOG_FILE"
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.metrics" >/dev/null
+  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.metrics" | tee -a "$FULL_LOG_FILE"
 fi
 
-echo
-echo "- 6. Enable the APIs required for monitoring."
-gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com cloudresourcemanager.googleapis.com >${CMD_OUT_PIPE}
+echo | tee -a "$FULL_LOG_FILE"
+echo "- 6. Enable the APIs required for monitoring." | tee -a "$FULL_LOG_FILE"
+gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com cloudresourcemanager.googleapis.com >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
 
 CLUSTER_NAME=""
 if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
@@ -388,18 +388,18 @@ else
   CLUSTER_NAME=$(kubectl config current-context 2>${CMD_OUT_PIPE})
 fi
 
-echo
-echo "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME"
-helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace dynatrace --wait --timeout 10m --set clusterName="$CLUSTER_NAME" >${CMD_OUT_PIPE}
+echo | tee -a "$FULL_LOG_FILE"
+echo "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME" | tee -a "$FULL_LOG_FILE"
+helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace dynatrace --wait --timeout 10m --set clusterName="$CLUSTER_NAME" >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
 
-echo
-echo -e "\e[92m- Deployment complete, check if containers are running:\e[37m" >${CMD_OUT_PIPE}
+echo | tee -a "$FULL_LOG_FILE"
+echo -e "\e[92m- Deployment complete, check if containers are running:\e[37m" >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs" >${CMD_OUT_PIPE}
+  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs" >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics" >${CMD_OUT_PIPE}
+  echo "kubectl -n dynatrace logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics" >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
 fi
 
 if [[ $DEPLOYMENT_TYPE != "metrics" ]] && [[ $USE_EXISTING_ACTIVE_GATE != "true" ]]; then
@@ -408,16 +408,16 @@ if [[ $DEPLOYMENT_TYPE != "metrics" ]] && [[ $USE_EXISTING_ACTIVE_GATE != "true"
   LOG_VIEWER="Log Viewer: ${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
 fi
 
-echo
+echo | tee -a "$FULL_LOG_FILE"
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  echo -e "\e[92m- Check logs in Dynatrace in 5 min. ${LOG_VIEWER}\e[37m" >${CMD_OUT_PIPE}
+  echo -e "\e[92m- Check logs in Dynatrace in 5 min. ${LOG_VIEWER}\e[37m" >${CMD_OUT_PIPE} | tee -a "$FULL_LOG_FILE"
   fi
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
-  echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"
+  echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m" | tee -a "$FULL_LOG_FILE"
 fi
-echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/shortlink/deploy-k8#anchor_verify"
-echo "Additionally you can enable self-monitoring for quick diagnosis: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/set-up-integration-gcp/deploy-with-google-cloud-function/#verify"
-echo
+echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/shortlink/deploy-k8#anchor_verify" | tee -a "$FULL_LOG_FILE"
+echo "Additionally you can enable self-monitoring for quick diagnosis: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/set-up-integration-gcp/deploy-with-google-cloud-function/#verify" | tee -a "$FULL_LOG_FILE"
+echo | tee -a "$FULL_LOG_FILE"
 
 clean

@@ -12,3 +12,4 @@ artefacts/
 helm-deployment-package/
 release/
 src/config/
+*.log

@@ -20,30 +20,32 @@ readonly EXTENSION_ZIP_REGEX="^(.*)-([0-9.]*).zip$"
 EXTENSIONS_TMPDIR=$(mktemp -d)
 CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
 WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FULL_LOG_FILE="${WORKING_DIR}/dynatrace_gcp_$(date '+%Y-%m-%d_%H:%M:%S').log"
+touch $FULL_LOG_FILE
 
 warn() {
   MESSAGE=$1
-  echo -e >&2
-  echo -e "\e[93mWARNING: \e[37m${MESSAGE}" >&2
-  echo -e >&2
+  echo -e | tee -a "$FULL_LOG_FILE"
+  echo -e "\e[93mWARNING: \e[37m${MESSAGE}" | tee -a "$FULL_LOG_FILE"
+  echo -e | tee -a "$FULL_LOG_FILE"
 }
 
 err() {
   MESSAGE=$1
-  echo -e >&2
-  echo -e "\e[91mERROR: \e[37m${MESSAGE}" >&2
-  echo -e >&2
+  echo -e | tee -a "$FULL_LOG_FILE"
+  echo -e "\e[91mERROR: \e[37m${MESSAGE}" | tee -a "$FULL_LOG_FILE"
+  echo -e | tee -a "$FULL_LOG_FILE"
 }
 
 clean() {
-  echo "- removing extensions files"
+  echo "- removing extensions files" | tee -a "$FULL_LOG_FILE"
   rm -rf $EXTENSION_MANIFEST_FILE $CLUSTER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
 
   if [ -n "$GCP_FUNCTION_NAME" ]; then
-    echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
+    echo "- removing archive [$FUNCTION_ZIP_PACKAGE]" | tee -a "$FULL_LOG_FILE"
     rm $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
 
-    echo "- removing temporary directory [$GCP_FUNCTION_NAME]"
+    echo "- removing temporary directory [$GCP_FUNCTION_NAME]" | tee -a "$FULL_LOG_FILE"
     rm -r $WORKING_DIR/$GCP_FUNCTION_NAME
   fi
 }
@@ -70,7 +72,7 @@ test_req_yq() {
       Example command to install yq:
       sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
     if ! command -v jq &>/dev/null; then
-      echo -e "JQ: https://stedolan.github.io/jq/download/"
+      echo -e "JQ: https://stedolan.github.io/jq/download/" | tee -a "$FULL_LOG_FILE"
     fi
     exit 1
   else
@@ -80,7 +82,7 @@ test_req_yq() {
       VERSION_YQ=$(yq --version | cut -d' ' -f4 | tr -d '"')
     fi
 
-    echo "Using yq version $VERSION_YQ"
+    echo "Using yq version $VERSION_YQ" | tee -a "$FULL_LOG_FILE"
 
     if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
       err 'yq in 4.9.8+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
@@ -129,7 +131,7 @@ dt_api() {
   else
     METHOD="GET"
   fi
-  if RESPONSE=$(curl -k -s -X $METHOD "${DYNATRACE_URL}${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}"); then
+  if RESPONSE=$(curl -k -s -X $METHOD "${DYNATRACE_URL}${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}" | tee -a "$FULL_LOG_FILE"); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE"
     if [ "$CODE" -ge 400 ]; then
@@ -147,7 +149,7 @@ check_if_parameter_is_empty() {
   PARAMETER_NAME=$2
   ADDITIONAL_MESSAGE=$3
   if [ -z "${PARAMETER}" ]; then
-    echo "Missing required parameter: ${PARAMETER_NAME}. ${ADDITIONAL_MESSAGE}"
+    echo "Missing required parameter: ${PARAMETER_NAME}. ${ADDITIONAL_MESSAGE}" | tee -a "$FULL_LOG_FILE"
     exit
   fi
 }
@@ -173,7 +175,7 @@ check_api_token() {
     for REQUIRED in "${API_TOKEN_SCOPES[@]}"; do
       if ! grep -q "${REQUIRED}" <<<"$RESPONSE"; then
         err "Missing permission for the API token: ${REQUIRED}."
-        echo "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: ${DEPLOYMENT_TYPE}"
+        echo "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: ${DEPLOYMENT_TYPE}" | tee -a "$FULL_LOG_FILE"
         exit 1
       fi
     done
@@ -193,9 +195,9 @@ check_s3_url() {
 validate_gcp_config_in_extensions() {
   cd "${EXTENSIONS_TMPDIR}" || exit
   for EXTENSION_ZIP in *.zip; do
-    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &>/dev/null
+    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" | tee -a "$FULL_LOG_FILE"
     cd "$EXTENSION_ZIP-tmp" || exit
-    unzip "extension.zip" "extension.yaml" &>/dev/null
+    unzip "extension.zip" "extension.yaml" | tee -a "$FULL_LOG_FILE"
     if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]]; then
       warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
       rm -rf "../${EXTENSION_ZIP}"
@@ -203,7 +205,7 @@ validate_gcp_config_in_extensions() {
       warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
       rm -rf "../${EXTENSION_ZIP}"
     else
-      echo -n "."
+      echo -n "." | tee -a "$FULL_LOG_FILE"
     fi
     cd ..
     rm -r "$EXTENSION_ZIP-tmp"
@@ -213,14 +215,14 @@ validate_gcp_config_in_extensions() {
 
 get_extensions_zip_packages() {
   curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_MANIFEST_FILE}"
-  EXTENSIONS_LIST=$(grep "^google.*\.zip" <"$EXTENSION_MANIFEST_FILE" 2>/dev/null)
+  EXTENSIONS_LIST=$(grep "^google.*\.zip" <"$EXTENSION_MANIFEST_FILE" 2>/dev/null | tee -a "$FULL_LOG_FILE")
   if [ -z "$EXTENSIONS_LIST" ]; then
     err "Empty extensions manifest file downloaded"
     exit 1
   fi
 
   echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME; do
-    echo -n "."
+    echo -n "." | tee -a "$FULL_LOG_FILE"
     (cd ${EXTENSIONS_TMPDIR} && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
   done
 }
@@ -236,7 +238,7 @@ get_activated_extensions_on_cluster() {
       EXTENSIONS_FROM_NEXT_PAGE=$(echo -e "\n$EXTENSIONS_FROM_NEXT_PAGE")
       EXTENSIONS=("${EXTENSIONS[@]}" "${EXTENSIONS_FROM_NEXT_PAGE[@]}")
     done
-    echo "${EXTENSIONS[@]}"
+    echo "${EXTENSIONS[@]}" | tee -a "$FULL_LOG_FILE"
   else
     err "- Dynatrace Cluster failed on ${DYNATRACE_URL}/api/v2/extensions endpoint."
     exit
@@ -247,7 +249,7 @@ upload_extension_to_cluster() {
   EXTENSION_ZIP=$1
   EXTENSION_VERSION=$2
 
-  UPLOAD_RESPONSE=$(curl -s -k -X POST "${DYNATRACE_URL}/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -H "Content-Type: multipart/form-data" -F "file=@${EXTENSION_ZIP};type=application/zip")
+  UPLOAD_RESPONSE=$(curl -s -k -X POST "${DYNATRACE_URL}/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -H "Content-Type: multipart/form-data" -F "file=@${EXTENSION_ZIP};type=application/zip"  | tee -a "$FULL_LOG_FILE")
   CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$UPLOAD_RESPONSE")
 
   if [[ "${CODE}" -ge "400" ]]; then
@@ -260,8 +262,8 @@ upload_extension_to_cluster() {
       warn "- Activation ${EXTENSION_ZIP} failed."
       ((AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS+=1))
     else
-      echo
-      echo "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated."
+      echo | tee -a "$FULL_LOG_FILE"
+      echo "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated." | tee -a "$FULL_LOG_FILE"
     fi
   fi
 }
@@ -275,7 +277,7 @@ services_setup_in_config() {
       SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default_metrics"
     fi
   done
-  echo "${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
+  echo "${SERVICES_FROM_ACTIVATION_CONFIG[*]}" | tee -a "$FULL_LOG_FILE"
 }
 
 activate_extension_on_cluster() {
@@ -318,7 +320,7 @@ get_extensions_from_dynatrace() {
     EXTENSION_NAME="$(cut -d':' -f1 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
     EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
 
-    curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+    curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" | tee -a "$FULL_LOG_FILE"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
       find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
       mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
@@ -347,7 +349,7 @@ upload_correct_extension_to_dynatrace() {
     EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_FILE_NAME".yaml)
 
     # Get all service/featureSet pairs defined in extensions
-    SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null)
+    SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null | tee -a "$FULL_LOG_FILE")
 
     for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
       # Check if service should be monitored
@@ -363,7 +365,7 @@ upload_correct_extension_to_dynatrace() {
         activate_extension_on_cluster "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
         break
       fi
-      echo -n "."
+      echo -n "." | tee -a "$FULL_LOG_FILE"
     done
     rm extension.zip
     rm "$EXTENSION_FILE_NAME".yaml
