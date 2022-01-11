@@ -195,9 +195,9 @@ check_s3_url() {
 validate_gcp_config_in_extensions() {
   cd "${EXTENSIONS_TMPDIR}" || exit
   for EXTENSION_ZIP in *.zip; do
-    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" | tee -a "$FULL_LOG_FILE"
+    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" | tee -a "$FULL_LOG_FILE" >/dev/null
     cd "$EXTENSION_ZIP-tmp" || exit
-    unzip "extension.zip" "extension.yaml" | tee -a "$FULL_LOG_FILE"
+    unzip "extension.zip" "extension.yaml" | tee -a "$FULL_LOG_FILE" >/dev/null
     if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]]; then
       warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
       rm -rf "../${EXTENSION_ZIP}"
@@ -214,8 +214,8 @@ validate_gcp_config_in_extensions() {
 }
 
 get_extensions_zip_packages() {
-  curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_MANIFEST_FILE}"
-  EXTENSIONS_LIST=$(grep "^google.*\.zip" <"$EXTENSION_MANIFEST_FILE" 2>/dev/null | tee -a "$FULL_LOG_FILE")
+  curl -O "${EXTENSION_S3_URL}/${EXTENSION_MANIFEST_FILE}" &>/dev/stdout | tee -a "$FULL_LOG_FILE" &> /dev/null
+  EXTENSIONS_LIST=$(grep "^google.*\.zip" <"$EXTENSION_MANIFEST_FILE" | tee -a "$FULL_LOG_FILE")
   if [ -z "$EXTENSIONS_LIST" ]; then
     err "Empty extensions manifest file downloaded"
     exit 1

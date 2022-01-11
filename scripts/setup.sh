@@ -206,7 +206,7 @@ fi
 # Create App Engine app if not exists
 echo | tee -a "$FULL_LOG_FILE"
 echo "- checking App Engine app, required for Cloud Scheduler" | tee -a "$FULL_LOG_FILE"
-APP_ENGINE=$(gcloud app describe --format="json" 2>/dev/null | tee -a "$FULL_LOG_FILE" || true)
+APP_ENGINE=$(gcloud app describe --format="json" 2>/dev/null || true)
 SERVING_APP_ENGINE=$(echo "$APP_ENGINE" | jq -r '.servingStatus')
 
 if [[ -z "$APP_ENGINE" ]]; then
@@ -295,14 +295,14 @@ echo ""
 
 echo -e | tee -a "$FULL_LOG_FILE"
 echo "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]" | tee -a "$FULL_LOG_FILE"
-if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_URL_SECRET_NAME$" --format="value(name)" ) ]]; then
+if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_URL_SECRET_NAME$" --format="value(name)" | tee -a "$FULL_LOG_FILE") ]]; then
   printf "$DYNATRACE_URL" | gcloud secrets versions add $DYNATRACE_URL_SECRET_NAME --data-file=-
   echo "Secret [$DYNATRACE_URL_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed." | tee -a "$FULL_LOG_FILE"
 else
   printf "$DYNATRACE_URL" | gcloud secrets create $DYNATRACE_URL_SECRET_NAME --data-file=- --replication-policy=automatic
 fi
 
-if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" ) ]]; then
+if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" | tee -a "$FULL_LOG_FILE") ]]; then
   printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets versions add $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=-
   echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed." | tee -a "$FULL_LOG_FILE"
 else
@@ -342,16 +342,16 @@ if [ "$INSTALL" == true ]; then
   fi
 
   echo -e | tee -a "$FULL_LOG_FILE"
-  echo "- create service account [$GCP_SERVICE_ACCOUNT with created role [roles/$GCP_IAM_ROLE]" | tee -a "$FULL_LOG_FILE"
+  echo "- create service account [$GCP_SERVICE_ACCOUNT] with created role [roles/$GCP_IAM_ROLE]" | tee -a "$FULL_LOG_FILE"
   if [[ $(gcloud iam service-accounts list --filter=name:$GCP_SERVICE_ACCOUNT --format="value(name)") ]]; then
       echo "Service account [$GCP_SERVICE_ACCOUNT] already exists, skipping" | tee -a "$FULL_LOG_FILE"
   else
-      gcloud iam service-accounts create "$GCP_SERVICE_ACCOUNT" | tee -a "$FULL_LOG_FILE"
-      gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$GCP_IAM_ROLE" | tee -a "$FULL_LOG_FILE"
-      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor | tee -a "$FULL_LOG_FILE"
-      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer | tee -a "$FULL_LOG_FILE"
-      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor | tee -a "$FULL_LOG_FILE"
-      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer | tee -a "$FULL_LOG_FILE"
+      gcloud iam service-accounts create "$GCP_SERVICE_ACCOUNT" >/dev/null
+      gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$GCP_IAM_ROLE" >/dev/null
+      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor >/dev/null
+      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer >/dev/null
+      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor >/dev/null
+      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer >/dev/null
   fi
 fi
 
@@ -365,7 +365,7 @@ echo -e | tee -a "$FULL_LOG_FILE"
 echo "- checking activated extensions in Dynatrace" | tee -a "$FULL_LOG_FILE"
 EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
-mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME | tee -a "$FULL_LOG_FILE"
+mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME
 pushd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
 
 if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
@@ -451,7 +451,7 @@ fi
 echo -e | tee -a "$FULL_LOG_FILE"
 echo "- cleaning up" | tee -a "$FULL_LOG_FILE"
 
-popd || exit 1
+popd | tee -a "$FULL_LOG_FILE" || exit 1
 clean
 
 GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
