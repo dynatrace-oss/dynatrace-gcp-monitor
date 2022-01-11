@@ -48,7 +48,7 @@ check_dynatrace_docker_login() {
 
   DOCKER_LOGIN=$(helm template dynatrace-gcp-function --show-only templates/active-gate-statefulset.yaml | tr '\015' '\n' | grep "envid:" | awk '{print $2}')
 
-  if RESPONSE=$(curl -ksS -w "%{http_code}" -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/" | tee -a "$FULL_LOG_FILE"); then
+  if RESPONSE=$(curl -ksS -w "%{http_code}" -o /dev/null -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/"); then
     if [[ $RESPONSE == "200" ]]; then
       echo "Successfully logged to Dynatrace cluster Docker registry" | tee -a "$FULL_LOG_FILE"
       echo "The ActiveGate will be deployed in k8s cluster" | tee -a "$FULL_LOG_FILE"
