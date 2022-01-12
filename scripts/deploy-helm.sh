@@ -179,6 +179,10 @@ check_s3_url
 
 if [ -z "$GCP_PROJECT" ]; then
   GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
+  if [ -z "$GCP_PROJECT" ]; then
+    err "Invalid GCP_PROJECT. Set correct gcpProjectId in values.yaml"
+    exit 1
+  fi
 fi
 
 gcloud config set project "$GCP_PROJECT"
@@ -243,7 +247,10 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
   else
     echo "Using an existing Active Gate"
     check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
-    check_url "$DYNATRACE_LOG_INGEST_URL" "$ACTIVE_GATE_TARGET_URL_REGEX" "Not correct dynatraceLogIngestUrl. Example of proper ActiveGate endpoint used to ingest logs to Dynatrace: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
+    check_url "$DYNATRACE_LOG_INGEST_URL" "$DYNATRACE_URL_REGEX" "$ACTIVE_GATE_TARGET_URL_REGEX" \
+      "Not correct dynatraceLogIngestUrl. Example of proper endpoint used to ingest logs to Dynatrace:\n
+        - for direct ingest through the Cluster API: https://<your_environment_ID>.live.dynatrace.com\n
+        - for Environment ActiveGate: https://<your_activegate_IP_or_hostname>:9999/e/<your_environment_ID>"
     check_api_token "$DYNATRACE_LOG_INGEST_URL"
     check_dynatrace_log_ingest_url
   fi
@@ -394,7 +401,7 @@ fi
 
 echo
 echo "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME"
-helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace "$KUBERNETES_NAMESPACE" --set clusterName="$CLUSTER_NAME" >${CMD_OUT_PIPE}
+helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" >${CMD_OUT_PIPE}
 
 echo
 echo -e "\e[92m- Deployment complete, check if containers are running:\e[37m" >${CMD_OUT_PIPE}

@@ -14,8 +14,6 @@
 #     limitations under the License.
 
 mkdir -p release
-cp activation-config.yaml "./release/activation-config.yaml"
-
 cd release/ || exit
 
 wget -q "https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/${TRAVIS_TAG}/function-deployment-package.zip" -O function-deployment-package.zip; unzip function-deployment-package.zip; chmod a+x *.sh;
@@ -151,12 +149,12 @@ activation: |
     - service: k8s_container
       featureSets:
         - default_metrics
-       - agent
-       - apigee
-       - istio
-       - nginx
-     vars:
-       filter_conditions: ""
+        - agent
+        - apigee
+        - istio
+        - nginx
+      vars:
+        filter_conditions: ""
     - service: k8s_node
       featureSets:
         - default_metrics
@@ -218,4 +216,4 @@ EOF
 yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.release.yaml
 
 echo "Deploying gcp cloud function"
-echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY" | ./setup.sh --auto-default
+echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY\ny" | ./setup.sh --auto-default

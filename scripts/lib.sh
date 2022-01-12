@@ -65,14 +65,13 @@ versionNumber() {
 
 test_req_yq() {
   if ! command -v yq &>/dev/null; then
-    err 'yq and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
+    err 'yq (4.9.x+) and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
       YQ: https://github.com/mikefarah/yq
       Example command to install yq:
       sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
     if ! command -v jq &>/dev/null; then
       echo -e "JQ: https://stedolan.github.io/jq/download/"
     fi
-    err 'You may also try installing YQ with PIP: pip install yq'
     exit 1
   else
     VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
@@ -84,7 +83,7 @@ test_req_yq() {
     echo "Using yq version $VERSION_YQ"
 
     if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
-      err 'yq in 4+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
+      err 'yq in 4.9.8+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
         YQ: https://github.com/mikefarah/yq'
       exit 1
     fi
@@ -155,12 +154,18 @@ check_if_parameter_is_empty() {
 
 check_url() {
   URL=$1
-  REGEX=$2
-  MESSAGE=$3
-  if ! [[ "${URL}" =~ ${REGEX} ]]; then
-    err "${MESSAGE}"
-    exit 1
-  fi
+  REGEXES=${@:2:$#-2} # all arguments except first and last
+  MESSAGE=${@: -1} # last argument
+
+  for REGEX in $REGEXES
+  do
+    if [[ "$URL" =~ $REGEX ]]; then
+      return 0
+    fi
+  done
+
+  err "$MESSAGE"
+  exit 1
 }
 
 check_api_token() {
@@ -264,10 +269,10 @@ upload_extension_to_cluster() {
 services_setup_in_config() {
   SERVICES_FROM_ACTIVATION_CONFIG=$1
 
-  # Add '/default' to service name when featureSet is missing
+  # Add '/default_metrics' to service name when featureSet is missing
   for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
     if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]]; then
-      SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default"
+      SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default_metrics"
     fi
   done
   echo "${SERVICES_FROM_ACTIVATION_CONFIG[*]}"

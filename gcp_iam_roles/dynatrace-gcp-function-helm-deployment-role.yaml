@@ -4,26 +4,24 @@ title: Dynatrace GCP Function helm deployment role
 description: Role for Dynatrace GCP function helm and pubsub deployment
 stage: GA
 includedPermissions:
-  - pubsub.subscriptions.get
-  - pubsub.subscriptions.list
-  - pubsub.subscriptions.create
-  - pubsub.topics.list
-  - pubsub.topics.create
-  - pubsub.topics.update
-  - pubsub.topics.getIamPolicy
-  - pubsub.topics.setIamPolicy
-  - pubsub.topics.attachSubscription
   - container.clusters.get
   - container.configMaps.create
   - container.configMaps.delete
   - container.configMaps.get
+  - container.configMaps.update
   - container.deployments.create
   - container.deployments.delete
   - container.deployments.get
+  - container.deployments.update
   - container.namespaces.create
   - container.namespaces.get
-  - container.pods.list
   - container.pods.get
+  - container.pods.list
+  - container.replicaSets.create
+  - container.replicaSets.get
+  - container.replicaSets.getScale
+  - container.replicaSets.getStatus
+  - container.replicaSets.list
   - container.secrets.create
   - container.secrets.delete
   - container.secrets.get
@@ -38,16 +36,26 @@ includedPermissions:
   - container.statefulSets.create
   - container.statefulSets.delete
   - container.statefulSets.get
+  - container.statefulSets.update
+  - iam.roles.create
+  - iam.roles.list
+  - iam.roles.update
+  - iam.serviceAccounts.actAs
+  - iam.serviceAccounts.create
+  - iam.serviceAccounts.getIamPolicy
+  - iam.serviceAccounts.list
+  - iam.serviceAccounts.setIamPolicy
+  - pubsub.subscriptions.create
+  - pubsub.subscriptions.get
+  - pubsub.subscriptions.list
+  - pubsub.topics.attachSubscription
+  - pubsub.topics.create
+  - pubsub.topics.getIamPolicy
+  - pubsub.topics.list
+  - pubsub.topics.setIamPolicy
+  - pubsub.topics.update
   - resourcemanager.projects.get
   - resourcemanager.projects.getIamPolicy
   - resourcemanager.projects.setIamPolicy
   - serviceusage.services.enable
   - serviceusage.services.get
-  - iam.serviceAccounts.actAs
-  - iam.serviceAccounts.list
-  - iam.serviceAccounts.create
-  - iam.serviceAccounts.getIamPolicy
-  - iam.serviceAccounts.setIamPolicy
-  - iam.roles.list
-  - iam.roles.create
-  - iam.roles.update

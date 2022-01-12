@@ -15,13 +15,13 @@
 
 helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace uninstall --timeout 10m
 
-gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}" 
-gcloud pubsub topics delete "${PUBSUB_TOPIC}" 
-gcloud logging sinks delete "${LOG_ROUTER}" 
+gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}"
+gcloud pubsub topics delete "${PUBSUB_TOPIC}"
+gcloud logging sinks delete "${LOG_ROUTER}"
 gcloud iam service-accounts delete "${IAM_SERVICE_ACCOUNT}@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.logs" --project="${GCP_PROJECT_ID}" > /dev/null
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.metrics" --project="${GCP_PROJECT_ID}" > /dev/null
-gcloud container images delete "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}" 
+gcloud container images delete "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 gcloud functions delete "${CLOUD_FUNCTION_NAME}"
 
 # testing message

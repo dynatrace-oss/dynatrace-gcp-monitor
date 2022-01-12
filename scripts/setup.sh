@@ -174,7 +174,7 @@ check_if_parameter_is_empty "$GCP_FUNCTION_NAME" 'googleCloud.metrics.function' 
 check_if_parameter_is_empty "$GCP_IAM_ROLE" "'googleCloud.common.iamRole'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "'googleCloud.common.serviceAccount'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$QUERY_INTERVAL_MIN" "'googleCloud.metrics.queryInterval'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
-check_if_parameter_is_empty "$SERVICES_WITH_FEATURE_SET" "'googleCloud.activation.metrics.services'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
+check_if_parameter_is_empty "$SERVICES_WITH_FEATURE_SET" "'activation.services'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 
 echo  "- Logging to your account..."
 GCP_ACCOUNT=$(gcloud config get-value account)
@@ -201,6 +201,52 @@ INSTALL=true
 if [ -n  "$UPDATE" ]; then
 echo -e "- function \e[1;32m $GCP_FUNCTION_NAME \e[0m already exists in $GCP_PROJECT and it will be updated"
 INSTALL=false
+fi
+
+# Create App Engine app if not exists
+echo
+echo "- checking App Engine app, required for Cloud Scheduler"
+APP_ENGINE=$(gcloud app describe --format="json" 2>/dev/null || true)
+SERVING_APP_ENGINE=$(echo "$APP_ENGINE" | jq -r '.servingStatus')
+
+if [[ -z "$APP_ENGINE" ]]; then
+  echo
+  echo "To continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
+  while true; do
+    read -p "Do you want to create App Engine app? [y/n]" yn
+    case $yn in
+    [Yy]*)
+      echo
+      echo "Please provide the region for App Engine app."
+      echo
+      echo "Available regions:"
+      APP_ENGINE_LOCATIONS=$(gcloud app regions list --format="json" | jq -r '.[] | .region')
+      echo "$APP_ENGINE_LOCATIONS"
+      readarray -t LOCATIONS_ARR <<<"$(echo "${APP_ENGINE_LOCATIONS}")"
+      echo
+      while ! [[ " ${LOCATIONS_ARR[*]} " == *" $APP_ENGINE_LOCATION "* ]]; do
+        read -p "Enter location for App Engine app: " -e APP_ENGINE_LOCATION
+      done
+      echo
+      echo "- creating the App Engine app"
+      gcloud app create -q --region="$APP_ENGINE_LOCATION"
+      break
+      ;;
+    [Nn]*)
+      echo
+      echo -e "\e[91mERROR: \e[37mCannot continue without App Engine. Deployment aborted."
+      exit
+      ;;
+    *) echo "- please answer y or n" ;;
+    esac
+  done
+elif [[ "$SERVING_APP_ENGINE" != "SERVING"  ]]; then
+  echo
+  echo -e "\e[91mERROR: \e[37mTo continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
+  echo
+  echo 'Enable App Engine on: https://console.cloud.google.com/appengine/settings'
+  echo
+  exit
 fi
 
 if [ "$INSTALL" == true ]; then
