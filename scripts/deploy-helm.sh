@@ -171,11 +171,8 @@ API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfi
 check_s3_url
 
 if [ -z "$GCP_PROJECT" ]; then
-  GCP_PROJECT=$(gcloud config get-value project 2>/dev/null)
-  if [ -z "$GCP_PROJECT" ]; then
-    err "Invalid GCP_PROJECT. Set correct gcpProjectId in values.yaml"
-    exit 1
-  fi
+  err "Invalid GCP_PROJECT. Set correct gcpProjectId in values.yaml"
+  exit 1
 fi
 
 gcloud config set project "$GCP_PROJECT"
