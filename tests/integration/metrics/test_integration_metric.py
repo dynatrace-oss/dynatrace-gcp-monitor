@@ -32,6 +32,7 @@ import lib.entities.google_api
 import lib.gcp_apis
 import lib.metric_ingest
 from main import async_dynatrace_gcp_extension
+from assertpy import assert_that
 
 AUTHORIZATION_KEY = "Fake secret - Open sesame"
 METRIC_MESSAGE_DATA = '{}'
@@ -41,7 +42,9 @@ MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 system_variables: Dict = {
     'DYNATRACE_URL': 'http://localhost:' + str(MOCKED_API_PORT),
     'REQUIRE_VALID_CERTIFICATE': 'False',
-    'GCP_SERVICES': "gce_instance/default,api/default,gce_instance/default,cloudsql_database/default,apigee.googleapis.com/Environment/default",
+    'ACTIVATION_CONFIG': "{services: [{service: gce_instance, featureSets: [default_metrics], vars: {filter_conditions: resource.labels.instance_name=starts_with(\"test\")}},\
+                        {service: api, featureSets: [default_metrics], vars: {filter_conditions: ''}},\
+                        {service: cloudsql_database, featureSets: [default_metrics], vars: {filter_conditions: ''}}]}",
     'GCP_PROJECT': 'dynatrace-gcp-extension'
     # 'DYNATRACE_ACCESS_KEY': ACCESS_KEY, this one is encoded in mocks files
 }
@@ -96,6 +99,8 @@ def setup_wiremock():
     wiremock.stop()
 
 
+# If the test fails because of not founding correct mapping, check working directory for the test
+# It should be '/tests/integration/metrics'
 @pytest.mark.asyncio
 async def test_metric_authorization_header():
     await async_dynatrace_gcp_extension()
@@ -114,7 +119,18 @@ async def test_metric_authorization_header():
 
 @pytest.mark.asyncio
 async def test_ingest_lines_output(resource_path_root):
+    await ingest_lines_output(os.path.join(resource_path_root, "metrics/ingest_input.dat"))
+
+
+async def ingest_lines_output(expected_ingest_output_file):
     await async_dynatrace_gcp_extension()
+    reqeusts_gcp_timeseries_pattern = NearMissMatchPatternRequest(url_path_pattern="/v3/projects/dynatrace-gcp-extension/timeSeries?([\d\w\W]*)",
+                                          method="GET")
+    reqeusts_gcp_timeseries: RequestResponseFindResponse = Requests.get_matching_requests(reqeusts_gcp_timeseries_pattern)
+    gce_instance_filter="resource.labels.instance_name%3Dstarts_with(%22test%22)"
+    requests_with_filter = [reqeust_gcp_timeseries for reqeust_gcp_timeseries in reqeusts_gcp_timeseries.requests
+                            if gce_instance_filter in reqeust_gcp_timeseries.url]
+    assert_that(requests_with_filter).is_length(3)
 
     sent_requests = Requests.get_all_received_requests().get_json_data().get('requests')
     urls = {sent_request["request"]["url"] for sent_request in sent_requests}
@@ -122,22 +138,16 @@ async def test_ingest_lines_output(resource_path_root):
     request_for_apigee_metric_was_sent = any(url.startswith(apigee_url_prefix) for url in urls)
     assert not request_for_apigee_metric_was_sent
 
-    request = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
-                                          method="POST")
-
-    r: RequestResponseFindResponse = Requests.get_matching_requests(request)
-
-    assert_that(r.requests).is_not_empty()
-    result: RequestResponseRequest = r.requests[0]
+    request_metrics_ingest_pattern = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest", method="POST")
+    request_metrics_ingest: RequestResponseFindResponse = Requests.get_matching_requests(request_metrics_ingest_pattern)
+    assert_that(request_metrics_ingest.requests).is_not_empty()
+    result: RequestResponseRequest = request_metrics_ingest.requests[0]
 
     body = result.body
 
-    with open(os.path.join(resource_path_root, "metrics/ingest_input.dat")) as ingest:
-        recorded_ingest = ingest.read().split("\n")
-        recorded_ingest.sort()
+    with open(expected_ingest_output_file) as ingest:
+        expected_ingest_lines = ingest.read().split("\n")
+        actual_ingest_lines = body.split("\n")
 
-        body_response = body.split("\n")
-        body_response.sort()
-
-        assert_that(body_response).is_length(289)
-        assert_that(body_response).is_equal_to(recorded_ingest)
+        assert_that(actual_ingest_lines).is_length(len(expected_ingest_lines))
+        assert_that(actual_ingest_lines).contains_only(*expected_ingest_lines)

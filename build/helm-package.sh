@@ -19,6 +19,7 @@ mkdir -p ./helm-deployment-package/gcp_iam_roles
 
 cp -r ./k8s/helm-chart/dynatrace-gcp-function ./helm-deployment-package
 
+cp ./scripts/lib.sh ./helm-deployment-package
 cp ./scripts/deploy-helm.sh ./helm-deployment-package
 
 cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./helm-deployment-package/gcp_iam_roles/

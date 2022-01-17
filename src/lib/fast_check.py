@@ -42,8 +42,6 @@ METRICS_CONFIGURATION_FLAGS = [
     "REQUIRE_VALID_CERTIFICATE",
     "SERVICE_USAGE_BOOKING",
     "USE_PROXY",
-    "IMPORT_DASHBOARDS",
-    "IMPORT_ALERTS",
     "SELF_MONITORING_ENABLED",
     "QUERY_INTERVAL_MIN"
 ]
@@ -72,6 +70,7 @@ REQUIRED_SERVICES = [
 
 DYNATRACE_REQUIRED_TOKEN_SCOPES = [
     'metrics.ingest',
+    'extensions.read'
 ]
 
 FastCheckResult = NamedTuple('FastCheckResult', [('projects', List[str])])
@@ -134,11 +133,10 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
         if token_metadata.get('name', None):
             logging_context.log(f"Token name: {token_metadata.get('name')}.")
         if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
-            logging_context.log(f'Dynatrace API Token for project: \'{project_id}\'is not valid. '
-                                     f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
+            logging_context.log(f'Dynatrace API Token for project: \'{project_id}\' is not valid. '
+                                f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
     except Exception as e:
         logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
-
 
 
 class MetricsFastCheck:

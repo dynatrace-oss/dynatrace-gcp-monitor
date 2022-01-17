@@ -119,6 +119,23 @@ async def log_invalid_lines(context: MetricsContext, ingest_response_json: Dict,
                 invalid_line_error_message = invalid_line_error_message.get("error", "")
                 context.log(f"INVALID LINE: '{lines_batch[line_index].to_string()}', reason: '{invalid_line_error_message}'")
 
+class DtDimensionsMap:
+    def __init__(self) -> None:
+            self.dt_dimensions_set_by_source_dimension = {}
+
+    def add_label_mapping(self, source_dimension, dt_target_dimension):
+        all_dt_dims_for_source_dim = self.dt_dimensions_set_by_source_dimension.get(source_dimension, set())
+        all_dt_dims_for_source_dim.add(dt_target_dimension)
+        self.dt_dimensions_set_by_source_dimension[source_dimension] = all_dt_dims_for_source_dim
+
+    def get_dt_dimensions(self, source_dimension, dt_dimension_if_unmapped) -> List:
+        # dt_label_if_unmapped - shouldn't happen, but if we get dimension back that we didn't query for (=not defined in map), it would be unsafe to discard it
+        # (could result in duplicate metric entries for remaining dim label+value set):
+        # report it to Dt under dt_label_if_unmapped - this is expected to be last part for full source dimension label, e.g.:
+        # resource.label.unrequestedDimensionLabel > unrequestedDimensionLabel
+        dt_dimensions_set = self.dt_dimensions_set_by_source_dimension.get(source_dimension, {dt_dimension_if_unmapped})
+        dt_dimension_sorted_list = sorted(dt_dimensions_set)
+        return dt_dimension_sorted_list
 
 async def fetch_metric(
         context: MetricsContext,
@@ -147,9 +164,12 @@ async def fetch_metric(
     ]
 
     all_dimensions = (service.dimensions + metric.dimensions)
+    dt_dimensions_mapping = DtDimensionsMap()
     for dimension in all_dimensions:
-        source = dimension.source or f'metric.labels.{dimension.dimension}'
-        params.append(('aggregation.groupByFields', source))
+        if dimension.key_for_send_to_dynatrace:
+            dt_dimensions_mapping.add_label_mapping(dimension.key_for_fetch_metric, dimension.key_for_send_to_dynatrace)
+
+        params.append(('aggregation.groupByFields', dimension.key_for_fetch_metric))
 
     headers = context.create_gcp_request_headers(project_id)
 
@@ -170,7 +190,7 @@ async def fetch_metric(
 
         for time_serie in page['timeSeries']:
             typed_value_key = extract_typed_value_key(time_serie)
-            dimensions = create_dimensions(context, time_serie)
+            dimensions = create_dimensions(context, service.name, time_serie, dt_dimensions_mapping)
             entity_id = create_entity_id(service, time_serie)
 
             for point in time_serie['points']:
@@ -221,18 +241,32 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
     return DimensionValue(name, string_value)
 
 
-def create_dimensions(context: MetricsContext, time_serie: Dict) -> List[DimensionValue]:
-    metric = time_serie.get('metric', {})
-    labels = metric.get('labels', {}).copy()
+
+def create_dimensions(context: MetricsContext, service_name: str, time_serie: Dict, dt_dimensions_mapping: DtDimensionsMap) -> List[DimensionValue]:
+    dt_dimensions = []
+
+    #"gcp.resource.type" is required to easily differentiate services with the same metric set e.g. internal_tcp_lb_rule and internal_udp_lb_rule
+    dt_dimensions.append(create_dimension("gcp.resource.type", service_name, context))
+
+    metric_labels = time_serie.get('metric', {}).get('labels', {})
+    for short_source_label, dim_value in metric_labels.items():
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metric.labels.{short_source_label}", short_source_label)
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
+
     resource_labels = time_serie.get('resource', {}).get('labels', {})
-    labels.update(resource_labels)    
+    for short_source_label, dim_value in resource_labels.items():
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"resource.labels.{short_source_label}", short_source_label)
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
+
     system_labels = time_serie.get('metadata', {}).get('systemLabels', {})
-    labels.update(system_labels)
+    for short_source_label, dim_value in system_labels.items():
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metadata.systemLabels.{short_source_label}", short_source_label)
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
-    dimension_values = [create_dimension(label, value, context) for label, value in labels.items()]
-
-    return dimension_values
-
+    return dt_dimensions
 
 def flatten_and_enrich_metric_results(
         context: MetricsContext,
@@ -280,7 +314,8 @@ def create_entity_id(service: GCPService, time_serie):
     resource_labels = resource.get('labels', {})
     parts = [service.name]
     for dimension in service.dimensions:
-        key = (dimension.source or dimension.dimension).replace("resource.labels.", "")
+        key = dimension.key_for_create_entity_id
+
         dimension_value = resource_labels.get(key)
         if dimension_value:
             parts.append(dimension_value)

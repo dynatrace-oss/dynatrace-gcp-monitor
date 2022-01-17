@@ -16,7 +16,7 @@ set -e
 
 mkdir -p artefacts
 
-cp activation-config.yaml ./src/
 (cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')
-cp scripts/setup.sh artefacts/setup.sh
-sed -i "s/^GCP_FUNCTION_RELEASE_VERSION=.*/GCP_FUNCTION_RELEASE_VERSION='$TRAVIS_TAG'/" artefacts/setup.sh
+sed -i "s/^GCP_FUNCTION_RELEASE_VERSION=.*/GCP_FUNCTION_RELEASE_VERSION='$TRAVIS_TAG'/" scripts/setup.sh
+cp ./activation-config.yaml scripts/
+(cd scripts/; zip -r ../artefacts/function-deployment-package.zip ./lib.sh ./setup.sh ./activation-config.yaml)

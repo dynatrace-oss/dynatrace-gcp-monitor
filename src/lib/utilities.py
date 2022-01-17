@@ -36,6 +36,11 @@ def read_activation_yaml():
     return activation_yaml
 
 
+def get_activation_config_per_service(activation_yaml):
+    return {service_activation.get('service'): service_activation for service_activation in
+            activation_yaml['services']} if activation_yaml and activation_yaml['services'] else {}
+
+
 def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml) -> List[str]:
     services_whitelist = []
     for service in activation_yaml.get("services", []):
