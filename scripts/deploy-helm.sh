@@ -170,10 +170,7 @@ API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfi
 
 check_s3_url
 
-if [ -z "$GCP_PROJECT" ]; then
-  err "Invalid GCP_PROJECT. Set correct gcpProjectId in values.yaml"
-  exit 1
-fi
+check_if_parameter_is_empty "$GCP_PROJECT" "Set correct gcpProjectId in values.yaml"
 
 gcloud config set project "$GCP_PROJECT"
 echo "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]"
