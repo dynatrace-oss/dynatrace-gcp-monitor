@@ -1,0 +1,1535 @@
+{
+  "timeSeries": [
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "response_code_class": "2xx",
+          "response_code": "200",
+          "grpc_status_code": "0"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "method": "google.cloud.functions.v1.CloudFunctionsService.ListFunctions",
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "cloudfunctions.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "response_code": "200",
+          "response_code_class": "2xx",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1",
+          "service": "cloudresourcemanager.googleapis.com",
+          "location": "us-central1",
+          "method": "google.cloudresourcemanager.v1.Projects.ListProjects"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code": "404",
+          "response_code_class": "4xx",
+          "grpc_status_code": "5",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.BackendServicesService.Get",
+          "service": "compute.googleapis.com",
+          "location": "europe-west1",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "2"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "4xx",
+          "response_code": "404",
+          "protocol": "https",
+          "grpc_status_code": "5"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.BackendServicesService.Get",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "5"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "5",
+          "response_code_class": "4xx",
+          "response_code": "404",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.BackendServicesService.Get",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1",
+          "service": "compute.googleapis.com",
+          "location": "us-central2"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "9"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "protocol": "https",
+          "response_code_class": "2xx",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.DisksService.List",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1",
+          "location": "us-central1",
+          "service": "compute.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "3"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "response_code": "200",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.DisksService.List",
+          "location": "us-central2",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "2"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "response_code": "200",
+          "grpc_status_code": "0",
+          "response_code_class": "2xx"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "europe-west1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.InstanceGroupManagersService.Get",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "response_code": "200",
+          "protocol": "https",
+          "response_code_class": "2xx"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "compute.v1.InstanceGroupManagersService.Get",
+          "service": "compute.googleapis.com",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "2"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "grpc_status_code": "0",
+          "protocol": "https",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1",
+          "method": "compute.v1.InstanceGroupManagersService.Get",
+          "location": "us-central2",
+          "service": "compute.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "2"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code": "200",
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.InstanceGroupManagersService.List",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "21"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "protocol": "https",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "location": "us-central2",
+          "version": "v1",
+          "method": "compute.v1.InstanceGroupManagersService.List"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "26"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "grpc_status_code": "0",
+          "response_code": "200",
+          "response_code_class": "2xx"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "location": "europe-west1",
+          "version": "v1",
+          "method": "compute.v1.InstanceGroupManagersService.ListManagedInstances",
+          "service": "compute.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "compute.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "compute.v1.InstanceGroupManagersService.ListManagedInstances",
+          "version": "v1",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "5"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "response_code": "200",
+          "grpc_status_code": "0",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.InstanceGroupManagersService.ListManagedInstances",
+          "version": "v1",
+          "location": "us-central2",
+          "service": "compute.googleapis.com",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "6"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "response_code": "200",
+          "grpc_status_code": "0",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "compute.v1.InstancesService.List",
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "compute.googleapis.com",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "0"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "protocol": "https",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.InstancesService.List",
+          "version": "v1",
+          "location": "us-central2",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "location": "europe-west1",
+          "service": "compute.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "compute.v1.ProjectsService.Get"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "protocol": "https",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1",
+          "location": "us-central1",
+          "service": "compute.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "compute.v1.ProjectsService.Get"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code": "200",
+          "response_code_class": "2xx",
+          "protocol": "https",
+          "grpc_status_code": "0"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central2",
+          "method": "compute.v1.ProjectsService.Get",
+          "service": "compute.googleapis.com",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "response_code_class": "2xx",
+          "grpc_status_code": "0",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1",
+          "service": "compute.googleapis.com",
+          "method": "compute.v1.RoutesService.List",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "3"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "grpc_status_code": "0",
+          "response_code": "200",
+          "response_code_class": "2xx"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "compute.googleapis.com",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central2",
+          "method": "compute.v1.RoutesService.List"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "4"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "grpc_status_code": "0",
+          "response_code": "200",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "europe-west1",
+          "method": "compute.v1.SslCertificatesService.Get",
+          "service": "compute.googleapis.com",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "6"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code": "200",
+          "response_code_class": "2xx",
+          "protocol": "grpc",
+          "grpc_status_code": "0"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "method": "google.datastore.v1.Datastore.BeginTransaction",
+          "service": "datastore.googleapis.com",
+          "version": "v1",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "4"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code": "200",
+          "protocol": "grpc",
+          "grpc_status_code": "0",
+          "response_code_class": "2xx"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "method": "google.datastore.v1.Datastore.Commit",
+          "service": "datastore.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "2"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "protocol": "https",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1",
+          "method": "google.iam.credentials.v1.IAMCredentials.GenerateAccessToken",
+          "version": "v1",
+          "service": "iamcredentials.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code": "200",
+          "response_code_class": "2xx",
+          "grpc_status_code": "0",
+          "protocol": "grpc"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "europe-north1",
+          "service": "logging.googleapis.com",
+          "method": "google.logging.v2.LoggingServiceV2.WriteLogEntries",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v2"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "53"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "protocol": "grpc",
+          "grpc_status_code": "0",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "logging.googleapis.com",
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "google.logging.v2.LoggingServiceV2.WriteLogEntries",
+          "version": "v2"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "63"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "protocol": "https",
+          "response_code": "200",
+          "grpc_status_code": "0"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v2",
+          "service": "logging.googleapis.com",
+          "method": "google.logging.v2.LoggingServiceV2.WriteLogEntries"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code": "200",
+          "response_code_class": "2xx",
+          "grpc_status_code": "0",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "google.monitoring.v3.AgentTranslationService.CreateCollectdTimeSeries",
+          "version": "v3",
+          "service": "monitoring.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "2"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "response_code": "200",
+          "response_code_class": "2xx",
+          "protocol": "grpc"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "monitoring.googleapis.com",
+          "version": "v3",
+          "method": "google.monitoring.v3.MetricService.CreateTimeSeries",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "europe-north1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "22"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "europe-north1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "monitoring.googleapis.com",
+          "method": "google.monitoring.v3.MetricService.CreateTimeSeries",
+          "version": "v3"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "8"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "response_code": "200",
+          "grpc_status_code": "0",
+          "protocol": "grpc"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v3",
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "monitoring.googleapis.com",
+          "method": "google.monitoring.v3.MetricService.CreateTimeSeries"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "175"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "protocol": "https",
+          "response_code": "200",
+          "response_code_class": "2xx"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "monitoring.googleapis.com",
+          "version": "v3",
+          "location": "us-central1",
+          "method": "google.monitoring.v3.MetricService.CreateTimeSeries",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "16"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "3",
+          "response_code_class": "4xx",
+          "protocol": "https",
+          "response_code": "400"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v3",
+          "service": "monitoring.googleapis.com",
+          "method": "google.monitoring.v3.MetricService.CreateTimeSeries"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "grpc_status_code": "0",
+          "response_code": "200",
+          "response_code_class": "2xx"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "europe-north1",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "google.monitoring.v3.MetricService.ListMetricDescriptors",
+          "version": "v3",
+          "service": "monitoring.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "protocol": "https",
+          "response_code": "200",
+          "grpc_status_code": "0"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v3",
+          "service": "monitoring.googleapis.com",
+          "method": "google.monitoring.v3.MetricService.ListMetricDescriptors",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "2"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "response_code": "200",
+          "grpc_status_code": "0",
+          "protocol": "https"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "service": "monitoring.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "version": "v3",
+          "method": "google.monitoring.v3.MetricService.ListTimeSeries"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "236"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "protocol": "internal",
+          "response_code_class": "2xx",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "method": "google.pubsub.v1.Publisher.Publish",
+          "version": "v1",
+          "service": "pubsub.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code_class": "2xx",
+          "protocol": "https",
+          "response_code": "200",
+          "grpc_status_code": "0"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "version": "v1",
+          "method": "google.pubsub.v1.Subscriber.ListSubscriptions",
+          "service": "pubsub.googleapis.com",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "grpc",
+          "response_code_class": "5xx",
+          "response_code": "503",
+          "grpc_status_code": "14"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "location": "us-central1",
+          "project_id": "dynatrace-gcp-extension",
+          "service": "pubsub.googleapis.com",
+          "version": "v1",
+          "method": "google.pubsub.v1.Subscriber.StreamingPull"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "grpc_status_code": "0",
+          "response_code_class": "2xx",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "secretmanager.googleapis.com",
+          "method": "google.cloud.secretmanager.v1.SecretManagerService.AccessSecretVersion",
+          "location": "us-central1",
+          "version": "v1",
+          "project_id": "dynatrace-gcp-extension"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "2"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "protocol": "https",
+          "response_code": "200",
+          "grpc_status_code": "0",
+          "response_code_class": "2xx"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "version": "v1beta4",
+          "project_id": "dynatrace-gcp-extension",
+          "location": "us-central1",
+          "method": "google.cloud.sql.v1beta4.SqlInstancesService.List",
+          "service": "sqladmin.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "response_code": "200",
+          "response_code_class": "2xx",
+          "protocol": "grpc",
+          "grpc_status_code": "0"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "method": "google.cloud.stackdriver.v1beta3.ResourceService.PublishResourceMetadata",
+          "location": "europe-north1",
+          "version": "v1beta3",
+          "service": "stackdriver.googleapis.com"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "136"
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "labels": {
+          "grpc_status_code": "0",
+          "protocol": "grpc",
+          "response_code_class": "2xx",
+          "response_code": "200"
+        },
+        "type": "serviceruntime.googleapis.com/api/request_count"
+      },
+      "resource": {
+        "type": "consumed_api",
+        "labels": {
+          "service": "stackdriver.googleapis.com",
+          "project_id": "dynatrace-gcp-extension",
+          "method": "google.cloud.stackdriver.v1beta3.ResourceService.PublishResourceMetadata",
+          "location": "us-central1",
+          "version": "v1beta3"
+        }
+      },
+      "metricKind": "DELTA",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+             "endTime": "2033-05-02T12:14:12Z"
+          },
+          "value": {
+            "int64Value": "699"
+          }
+        }
+      ]
+    }
+  ],
+  "unit": "1"
+}

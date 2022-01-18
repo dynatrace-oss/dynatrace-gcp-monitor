@@ -13,47 +13,22 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-from typing import Any, Callable, Dict, List, Text
+from typing import Any, Callable, Dict, List, Text, Optional
 
-from lib.context import Context
+from lib.context import MetricsContext
 from lib.entities.model import Entity
 
-
-async def fetch_zones(
-        context: Context,
-        project_id: str
-) -> List[str]:
-    headers = {
-        "Accept": "application/json",
-        "Authorization": "Bearer {token}".format(token=context.token)
-    }
-
-    resp = await context.gcp_session.request(
-        "GET",
-        params={},
-        url=f"https://compute.googleapis.com/compute/v1/projects/{project_id}/zones",
-        headers=headers,
-        raise_for_status=True
-    )
-
-    response_json = await resp.json()
-    if resp.status != 200:
-        raise Exception(f"Failed to fetch available zones, response is {response_json}")
-
-    zone_items = response_json.get("items", [])
-    return [zone["name"] for zone in zone_items]
+_GCP_COMPUTE_ENDPOINT = "https://compute.googleapis.com"
 
 
 async def generic_paging(
+        project_id: str,
         url: Text,
-        ctx: Context,
+        ctx: MetricsContext,
         mapper: Callable[[Dict[Any, Any]], List[Entity]]
 ) -> List[Entity]:
     """Apply mapper function on any page returned by gcp api url."""
-    headers = {
-        "Accept": "application/json",
-        "Authorization": "Bearer {token}".format(token=ctx.token)
-    }
+    headers = ctx.create_gcp_request_headers(project_id)
 
     get_page = True
     params: Dict[Text, Text] = {}
@@ -89,3 +64,25 @@ async def generic_paging(
             params["pageToken"] = page.get("nextPageToken", None)
 
     return entities
+
+
+async def fetch_zones(
+        context: MetricsContext,
+        project_id: str
+) -> List[str]:
+    headers = context.create_gcp_request_headers(project_id)
+
+    resp = await context.gcp_session.request(
+        "GET",
+        params={},
+        url=f"{_GCP_COMPUTE_ENDPOINT}/compute/v1/projects/{project_id}/zones",
+        headers=headers,
+        raise_for_status=True
+    )
+
+    response_json = await resp.json()
+    if resp.status != 200:
+        raise Exception(f"Failed to fetch available zones, response is {response_json}")
+
+    zone_items = response_json.get("items", [])
+    return [zone["name"] for zone in zone_items]

@@ -1,0 +1,26 @@
+{
+  "id": "projects/dynatrace-gcp-extension/zones",
+  "items": [
+    {
+      "id": "2352",
+      "creationTimestamp": "1969-12-31T16:00:00.000-08:00",
+      "name": "europe-north1-a",
+      "description": "europe-north1-a",
+      "status": "UP",
+      "region": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/regions/europe-north1",
+      "selfLink": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones/europe-north1-a",
+      "availableCpuPlatforms": [
+        "Intel Cascade Lake",
+        "Intel Skylake",
+        "Intel Broadwell",
+        "Intel Ivy Bridge",
+        "Intel Sandy Bridge",
+        "AMD Rome"
+      ],
+      "supportsPzs": false,
+      "kind": "compute#zone"
+    }
+  ],
+  "selfLink": "https://www.googleapis.com/compute/v1/projects/dynatrace-gcp-extension/zones",
+  "kind": "compute#zoneList"
+}

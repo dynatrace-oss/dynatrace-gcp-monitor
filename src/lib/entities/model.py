@@ -16,9 +16,9 @@
 
 from dataclasses import dataclass
 from json import dumps
-from typing import Callable, FrozenSet, Iterable, NamedTuple, Text
+from typing import Callable, FrozenSet, Iterable, NamedTuple, Text, List
 
-from lib.context import Context
+from lib.context import MetricsContext
 from lib.metrics import GCPService
 
 
@@ -36,13 +36,13 @@ class Entity:  # pylint: disable=R0902
     id: Text
     display_name: Text
     group: Text
-    ip_addresses: FrozenSet[str]
-    listen_ports: FrozenSet[str]
+    ip_addresses: List[str]
+    listen_ports: List[str]
     favicon_url: Text
     dtype: Text
     properties: Iterable[CdProperty]
-    tags: FrozenSet[str]
-    dns_names: FrozenSet[str]
+    tags: List[str]
+    dns_names: List[str]
 
 
-ExtractEntitesFunc = Callable[[Context, str, GCPService], Iterable[Entity]]
+ExtractEntitesFunc = Callable[[MetricsContext, str, GCPService], Iterable[Entity]]

@@ -11,21 +11,27 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import json
+import os
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
-from typing import Dict, List
+from typing import Dict, List, Any
 
-from lib.context import Context, DynatraceConnectivity
+from lib.context import MetricsContext, LoggingContext, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
 from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
 UNIT_10TO2PERCENT = "10^2.%"
+MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
+MAX_DIMENSION_VALUE_LENGTH = os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
+
+_MONITORING_ROOT = "https://monitoring.googleapis.com/v3"
 
 
-async def push_ingest_lines(context: Context, project_id: str, fetch_metric_results: List[IngestLine]):
+async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
     if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
         context.log(project_id, f"Skipping push due to detected connectivity error")
         return
@@ -63,7 +69,7 @@ async def push_ingest_lines(context: Context, project_id: str, fetch_metric_resu
         context.log(project_id, f"Finished uploading metric ingest lines to Dynatrace in {push_data_time} s")
 
 
-async def _push_to_dynatrace(context: Context, project_id: str, lines_batch: List[IngestLine]):
+async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_batch: List[IngestLine]):
     ingest_input = "\n".join([line.to_string() for line in lines_batch])
     if context.print_metric_ingest_input:
         context.log("Ingest input is: ")
@@ -100,7 +106,7 @@ async def _push_to_dynatrace(context: Context, project_id: str, lines_batch: Lis
     await log_invalid_lines(context, ingest_response_json, lines_batch)
 
 
-async def log_invalid_lines(context: Context, ingest_response_json: Dict, lines_batch: List[IngestLine]):
+async def log_invalid_lines(context: MetricsContext, ingest_response_json: Dict, lines_batch: List[IngestLine]):
     error = ingest_response_json.get("error", None)
     if error is None:
         return
@@ -113,9 +119,26 @@ async def log_invalid_lines(context: Context, ingest_response_json: Dict, lines_
                 invalid_line_error_message = invalid_line_error_message.get("error", "")
                 context.log(f"INVALID LINE: '{lines_batch[line_index].to_string()}', reason: '{invalid_line_error_message}'")
 
+class DtDimensionsMap:
+    def __init__(self) -> None:
+            self.dt_dimensions_set_by_source_dimension = {}
+
+    def add_label_mapping(self, source_dimension, dt_target_dimension):
+        all_dt_dims_for_source_dim = self.dt_dimensions_set_by_source_dimension.get(source_dimension, set())
+        all_dt_dims_for_source_dim.add(dt_target_dimension)
+        self.dt_dimensions_set_by_source_dimension[source_dimension] = all_dt_dims_for_source_dim
+
+    def get_dt_dimensions(self, source_dimension, dt_dimension_if_unmapped) -> List:
+        # dt_label_if_unmapped - shouldn't happen, but if we get dimension back that we didn't query for (=not defined in map), it would be unsafe to discard it
+        # (could result in duplicate metric entries for remaining dim label+value set):
+        # report it to Dt under dt_label_if_unmapped - this is expected to be last part for full source dimension label, e.g.:
+        # resource.label.unrequestedDimensionLabel > unrequestedDimensionLabel
+        dt_dimensions_set = self.dt_dimensions_set_by_source_dimension.get(source_dimension, {dt_dimension_if_unmapped})
+        dt_dimension_sorted_list = sorted(dt_dimensions_set)
+        return dt_dimension_sorted_list
 
 async def fetch_metric(
-        context: Context,
+        context: MetricsContext,
         project_id: str,
         service: GCPService,
         metric: Metric
@@ -132,7 +155,7 @@ async def fetch_metric(
         aligner = 'ALIGN_DELTA'
 
     params = [
-        ('filter', f'metric.type = "{metric.google_metric}"'),
+        ('filter', f'metric.type = "{metric.google_metric}" {service.monitoring_filter}'.strip()),
         ('interval.startTime', start_time.isoformat() + "Z"),
         ('interval.endTime', end_time.isoformat() + "Z"),
         ('aggregation.alignmentPeriod', f"{metric.sample_period_seconds.total_seconds()}s"),
@@ -141,15 +164,14 @@ async def fetch_metric(
     ]
 
     all_dimensions = (service.dimensions + metric.dimensions)
+    dt_dimensions_mapping = DtDimensionsMap()
     for dimension in all_dimensions:
-        source = dimension.source or f'metric.labels.{dimension.dimension}'
-        params.append(('aggregation.groupByFields', source))
+        if dimension.key_for_send_to_dynatrace:
+            dt_dimensions_mapping.add_label_mapping(dimension.key_for_fetch_metric, dimension.key_for_send_to_dynatrace)
 
-    headers = {
-        "Authorization": "Bearer {token}".format(token=context.token)
-    }
-    if context.use_x_goog_user_project_header.get(project_id, False):
-        headers["x-goog-user-project"] = project_id
+        params.append(('aggregation.groupByFields', dimension.key_for_fetch_metric))
+
+    headers = context.create_gcp_request_headers(project_id)
 
     should_fetch = True
 
@@ -157,7 +179,7 @@ async def fetch_metric(
     while should_fetch:
         context.gcp_metric_request_count[project_id] = context.gcp_metric_request_count.get(project_id, 0) + 1
 
-        url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/timeSeries"
+        url = f"{_MONITORING_ROOT}/projects/{project_id}/timeSeries"
         resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
@@ -168,7 +190,7 @@ async def fetch_metric(
 
         for time_serie in page['timeSeries']:
             typed_value_key = extract_typed_value_key(time_serie)
-            dimensions = create_dimensions(time_serie)
+            dimensions = create_dimensions(context, service.name, time_serie, dt_dimensions_mapping)
             entity_id = create_entity_id(service, time_serie)
 
             for point in time_serie['points']:
@@ -206,20 +228,48 @@ def extract_typed_value_key(time_serie):
     return typed_value_key
 
 
-def create_dimensions(time_serie: Dict) -> List[DimensionValue]:
-    metric = time_serie.get('metric', {})
-    labels = metric.get('labels', {}).copy()
+def create_dimension(name: str, value: Any, context: LoggingContext = LoggingContext(None)) -> DimensionValue:
+    string_value = str(value)
+
+    if len(name) > MAX_DIMENSION_NAME_LENGTH:
+        context.log(f'MINT rejects dimension names longer that {MAX_DIMENSION_NAME_LENGTH} chars. Dimension name \"{name}\" "has been truncated')
+        name = name[:MAX_DIMENSION_NAME_LENGTH]
+    if len(string_value) > MAX_DIMENSION_VALUE_LENGTH:
+        context.log(f'MINT rejects dimension values longer that {MAX_DIMENSION_VALUE_LENGTH} chars. Dimension value \"{string_value}\" has been truncated')
+        string_value = string_value[:MAX_DIMENSION_VALUE_LENGTH]
+
+    return DimensionValue(name, string_value)
+
+
+
+def create_dimensions(context: MetricsContext, service_name: str, time_serie: Dict, dt_dimensions_mapping: DtDimensionsMap) -> List[DimensionValue]:
+    dt_dimensions = []
+
+    #"gcp.resource.type" is required to easily differentiate services with the same metric set e.g. internal_tcp_lb_rule and internal_udp_lb_rule
+    dt_dimensions.append(create_dimension("gcp.resource.type", service_name, context))
+
+    metric_labels = time_serie.get('metric', {}).get('labels', {})
+    for short_source_label, dim_value in metric_labels.items():
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metric.labels.{short_source_label}", short_source_label)
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
+
     resource_labels = time_serie.get('resource', {}).get('labels', {})
-    labels.update(resource_labels)    
+    for short_source_label, dim_value in resource_labels.items():
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"resource.labels.{short_source_label}", short_source_label)
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
+
     system_labels = time_serie.get('metadata', {}).get('systemLabels', {})
-    labels.update(system_labels)
+    for short_source_label, dim_value in system_labels.items():
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metadata.systemLabels.{short_source_label}", short_source_label)
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
-    dimension_values = [DimensionValue(label, value) for label, value in labels.items()]
-
-    return dimension_values
-
+    return dt_dimensions
 
 def flatten_and_enrich_metric_results(
+        context: MetricsContext,
         fetch_metric_results: List[List[IngestLine]],
         entity_id_map: Dict[str, Entity]
 ) -> List[IngestLine]:
@@ -230,20 +280,27 @@ def flatten_and_enrich_metric_results(
         for ingest_line in ingest_lines:
             entity = entity_id_map.get(ingest_line.entity_id, None)
             if entity:
-                for index, dns_name in enumerate(entity.dns_names):
-                    dim_name = "dns_name" if index == 0 else f"dns_name.{index}"
-                    dimension_value = DimensionValue(name=entity_dimension_prefix + dim_name, value=dns_name)
+                if entity.dns_names:
+                    dimension_value = create_dimension(
+                        name=entity_dimension_prefix + "dns_name",
+                        value=entity.dns_names[0],
+                        context=context
+                    )
                     ingest_line.dimension_values.append(dimension_value)
 
-                for index, ip_address in enumerate(entity.ip_addresses):
-                    dim_name = "ip_address" if index == 0 else f"ip_address.{index}"
-                    dimension_value = DimensionValue(name=entity_dimension_prefix + dim_name, value=ip_address)
+                if entity.ip_addresses:
+                    dimension_value = create_dimension(
+                        name=entity_dimension_prefix + "ip_address",
+                        value=entity.ip_addresses[0],
+                        context=context
+                    )
                     ingest_line.dimension_values.append(dimension_value)
 
                 for cd_property in entity.properties:
-                    dimension_value = DimensionValue(
+                    dimension_value = create_dimension(
                         name=entity_dimension_prefix + cd_property.key.replace(" ", "_").lower(),
-                        value=cd_property.value
+                        value=cd_property.value,
+                        context=context
                     )
                     ingest_line.dimension_values.append(dimension_value)
 
@@ -257,7 +314,8 @@ def create_entity_id(service: GCPService, time_serie):
     resource_labels = resource.get('labels', {})
     parts = [service.name]
     for dimension in service.dimensions:
-        key = (dimension.source or dimension.dimension).replace("resource.labels.", "")
+        key = dimension.key_for_create_entity_id
+
         dimension_value = resource_labels.get(key)
         if dimension_value:
             parts.append(dimension_value)

@@ -1,0 +1,174 @@
+{
+  "items": [
+    {
+      "kind": "sql#instance",
+      "state": "RUNNABLE",
+      "databaseVersion": "MYSQL_5_7",
+      "settings": {
+        "authorizedGaeApplications": [],
+        "tier": "db-f1-micro",
+        "kind": "sql#settings",
+        "userLabels": {
+          "owner": "pawelsiwek",
+          "environment": "demo-wordpress"
+        },
+        "availabilityType": "ZONAL",
+        "pricingPlan": "PER_USE",
+        "replicationType": "SYNCHRONOUS",
+        "activationPolicy": "ALWAYS",
+        "ipConfiguration": {
+          "authorizedNetworks": [
+
+            {
+              "value": "8.8.8.8",
+              "name": "azure jumpbox",
+              "kind": "sql#aclEntry"
+            }
+
+          ],
+          "ipv4Enabled": true
+        },
+        "locationPreference": {
+          "zone": "europe-north1-a",
+          "kind": "sql#locationPreference"
+        },
+        "dataDiskType": "PD_HDD",
+        "maintenanceWindow": {
+          "kind": "sql#maintenanceWindow",
+          "hour": 0,
+          "day": 0
+        },
+        "backupConfiguration": {
+          "startTime": "23:00",
+          "kind": "sql#backupConfiguration",
+          "backupRetentionSettings": {
+            "retentionUnit": "COUNT",
+            "retainedBackups": 7
+          },
+          "enabled": true,
+          "binaryLogEnabled": false,
+          "transactionLogRetentionDays": 7
+        },
+        "denyMaintenancePeriods": [
+          {
+            "startDate": "2020-10-21",
+            "endDate": "2021-1-1",
+            "time": "00:00:00"
+          }
+        ],
+        "settingsVersion": "97",
+        "storageAutoResizeLimit": "0",
+        "storageAutoResize": true,
+        "dataDiskSizeGb": "10"
+      },
+      "etag": "980d09331def47095b7e08b46c47e48128a2a3a6fba401d6e32c8ee5e2ab61a6",
+      "ipAddresses": [
+        {
+          "type": "PRIMARY",
+          "ipAddress": "33.222.44.55"
+        }
+      ],
+      "serverCaCert": {
+        "kind": "sql#sslCert",
+        "certSerialNumber": "0",
+        "cert": "What are u looking for",
+        "commonName": "C=US,O=Google\\, Inc,CN=Google Cloud SQL Server CA,dnQualifier=86a528fb-aaaa-9999-dddd-9a440d99e35e",
+        "sha1Fingerprint": "thumb",
+        "instance": "pawel-001-mysql",
+        "createTime": "2020-01-10T16:13:48.351Z",
+        "expirationTime": "2030-01-07T16:14:48.351Z"
+      },
+      "instanceType": "CLOUD_SQL_INSTANCE",
+      "project": "dynatrace-gcp-extension",
+      "serviceAccountEmailAddress": "pa3m@gcp-sa-cloud-sql.iam.gserviceaccount.com",
+      "backendType": "SECOND_GEN",
+      "selfLink": "https://sqladmin.googleapis.com/sql/v1beta4/projects/dynatrace-gcp-extension/instances/pawel-001-mysql",
+      "connectionName": "dynatrace-gcp-extension:europe-north1:pawel-001-mysql",
+      "name": "pawel-001-mysql",
+      "region": "europe-north1",
+      "gceZone": "europe-north1-a"
+    },
+    {
+      "kind": "sql#instance",
+      "state": "RUNNABLE",
+      "databaseVersion": "POSTGRES_12",
+      "settings": {
+        "authorizedGaeApplications": [],
+        "tier": "db-custom-1-3840",
+        "kind": "sql#settings",
+        "userLabels": {
+          "owner": "kapitan-bomba",
+          "environment": "stage"
+        },
+        "availabilityType": "ZONAL",
+        "pricingPlan": "PER_USE",
+        "replicationType": "SYNCHRONOUS",
+        "activationPolicy": "ALWAYS",
+        "ipConfiguration": {
+          "authorizedNetworks": [],
+          "ipv4Enabled": true
+        },
+        "locationPreference": {
+          "zone": "europe-west3-c",
+          "kind": "sql#locationPreference"
+        },
+        "dataDiskType": "PD_SSD",
+        "maintenanceWindow": {
+          "kind": "sql#maintenanceWindow",
+          "hour": 0,
+          "day": 0
+        },
+        "backupConfiguration": {
+          "startTime": "20:00",
+          "kind": "sql#backupConfiguration",
+          "location": "eu",
+          "backupRetentionSettings": {
+            "retentionUnit": "COUNT",
+            "retainedBackups": 7
+          },
+          "enabled": true,
+          "replicationLogArchivingEnabled": true,
+          "pointInTimeRecoveryEnabled": true,
+          "transactionLogRetentionDays": 7
+        },
+        "denyMaintenancePeriods": [
+          {
+            "startDate": "2020-10-21",
+            "endDate": "2021-1-1",
+            "time": "00:00:00"
+          }
+        ],
+        "settingsVersion": "53",
+        "storageAutoResizeLimit": "0",
+        "storageAutoResize": true,
+        "dataDiskSizeGb": "10"
+      },
+      "etag": "988a009ef58c030e57718c8280149d842a29b42c4c386003b175072811e17453",
+      "ipAddresses": [
+        {
+          "type": "PRIMARY",
+          "ipAddress": "33.222.222.111"
+        }
+      ],
+      "serverCaCert": {
+        "kind": "sql#sslCert",
+        "certSerialNumber": "0",
+        "cert": "What are u looking for",
+        "commonName": "C=US,O=Google\\, Inc,CN=Google Cloud SQL Server CA,dnQualifier=723649a8-aaaa-49c4-aaaa-ca40da7fbd04",
+        "sha1Fingerprint": "thumb",
+        "instance": "pawel-001-pgsql",
+        "createTime": "2020-09-10T11:38:04.201Z",
+        "expirationTime": "2030-09-08T11:39:04.201Z"
+      },
+      "instanceType": "CLOUD_SQL_INSTANCE",
+      "project": "dynatrace-gcp-extension",
+      "serviceAccountEmailAddress": "pa@gcp-sa-cloud-sql.iam.gserviceaccount.com",
+      "backendType": "SECOND_GEN",
+      "selfLink": "https://sqladmin.googleapis.com/sql/v1beta4/projects/dynatrace-gcp-extension/instances/pawel-001-pgsql",
+      "connectionName": "dynatrace-gcp-extension:europe-west3:pawel-001-pgsql",
+      "name": "pawel-001-pgsql",
+      "region": "europe-west3",
+      "gceZone": "europe-west3-c"
+    }
+  ]
+}

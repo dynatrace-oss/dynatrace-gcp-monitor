@@ -7,3 +7,8 @@ __pycache__
 DynatraceGCPExtension-567694bc8bb0.json
 *.swp
 build/dist/
+metric-metadata/
+artefacts/
+helm-deployment-package/
+release/
+src/config/

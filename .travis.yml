@@ -1,11 +1,16 @@
 os: linux
 dist: xenial
+if: fork = false
 notifications:
   email:
     on_success: never
 stages:
-- docker-build
+- tests
 - github-deploy
+- e2e-helm-deployment-test
+- e2e-cloud-function-deployment-test
+- docker-deploy
+- github-install-release
 env:
   global:
   - TAG=$TRAVIS_TAG
@@ -13,27 +18,45 @@ env:
   - DOCKER_CLI_EXPERIMENTAL=enabled
 jobs:
   include:
-  - stage: docker-build
-    name: Docker build
-    language: minimal
-    script: "./build/docker-deploy.sh"    
+  - stage: tests
+    name: Tests
+    language: python
+    python:
+      - "3.8"
+    install:
+      - pip install -r src/requirements.txt
+      - pip install -r tests/requirements.txt
+    addons:
+      apt:
+        packages:
+          - default-jre
+    env:
+      - PYTHONPATH="$TRAVIS_BUILD_DIR/src:$TRAVIS_BUILD_DIR/tests"
+    script:
+      - echo $TRAVIS_BUILD_DIR
+      - pytest tests/unit -v
+      - pytest tests/integration/logs -v
+#       The cd is executed due to the fact that the wiremock instance initialized in the test is using
+#       the mappings (folder mappings) and the files ( __files) in the current execution dir.
+      - |
+          cd tests/integration/metrics
+          pytest -v
+
   - stage: docker-deploy
     name: Docker Hub deploy
     if: tag =~ /^release-.*
     language: minimal
     script: "./build/docker-deploy.sh"
     env: PUSH=true
+
   - stage: github-deploy
     name: GitHub deploy
-    #if: tag =~ /^release-.*
     install: skip
     language: minimal
     before_deploy:
-    - mkdir artefacts
-    - cp ./k8s/dynatrace-gcp-function.yaml ./artefacts/dynatrace-gcp-function.yaml    
-    - chmod +x ./build/version.sh
-    - sh ./build/version.sh
-    - "(cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')"
+    - ./build/version.sh
+    - ./build/helm-package.sh
+    - ./build/function-package.sh
     deploy:
       provider: releases
       file_glob: true
@@ -42,3 +65,122 @@ jobs:
       skip_cleanup: true
       on:
         tags: true
+
+  - stage: github-install-release
+    name: GitHub install release
+    sudo: required
+    language: python
+    python:
+      - "3.8"
+    if: tag =~ /^release-.*
+    cache:
+      directories:
+        - "$HOME/google-cloud-sdk/"
+    env:
+      - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+      - IAM_SERVICE_ACCOUNT="dynatrace-gcp-sa-release"
+      - GCP_PROJECT_ID="dynatrace-gcp-extension"
+      - DYNATRACE_URL_SECRET_NAME="DYNATRACE_RELEASE_URL"
+      - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_RELEASE_ACCESS_KEY"
+      - IAM_ROLE_METRCICS="dynatrace_gcp_release.metrics"
+      - PUBSUB_TOPIC="dynatrace_gcp_topic_release"
+      - CLOUD_SCHEDULER="dynatrace_gcp_scheduler_release"
+      - METRIC_FORWARDING_FUNCTION="dynatrace_gcp_release"
+      - secure: "DEzuhbQQL2JSrV0Nqni1ojsbAItrmtWSsihgN1kT809oPvaPvVDVrnlxZGjCHNZDhPMzOSaigeIAczfONcAupcobh/9cedZQfgj4/a5/Q0pU21ej0a3gnJK+6MANFnvLuhuUlguQ0Pa60wYjQAwo2F4+j6VsVL7QyhEuaFqogGmXWip8dATRVDpjYZx8UD1oUzvOj5Yn92b49JkJzjaBWs0MYhbCpPiHrwWT5um7plCXKxJiylpteCIYN+PPn2UDc3x098bZITmqCGqV6GwqvmkLTKO+MfQye5L6Ls7hYsK9eutlQrvcdf9ZSHpNad0X+NzbK9mxmwWtl6pud9z8g8dqTMTNxFyUAAiCjql66ztoeZPrhQ4vT5GvpoFCzwGHOTTV8r4ywMoexSj9o9utfI3ppgkH9Wlm9Vb9gYZI3fPmzDoCOvVgqtWjU1Gg6YZ2stV2N8q0A+4TJjugdD3HtmxE5qIgSWzbraeOTKTi++nI029MMandBjVIT0Q9Ty8b1ADTLHe8sy+LhBcjUHLflUYVDNWkh7jTW12PXgWO/bjwnKgYkYh5TYRurX0svoEy49PEJQX8kzNz+aSmendzeLNCbv3n3jcGMeKmoRrWM9kerMjFSmI8Rj+VPNOACadeQHMdBQNVcyrvEFT3j4/TIkbYm8k6dvhFPT1zwYLfQwM="
+      - secure: "LjIM7KYwSr2DqVN2QwmMFRUFHFDOrCICf4CPCaOp6KgsldOaGdZ8HCWnfpprGKs1xEPV1Jsui8HOk/Z+ljl1DcZnIqHmW+BR6McQ0xHhzlXQemHpaY5nyzaAxb3PKETn6w/rVSaDVRy+LnY8lPK05NmVF+4eMrrlhfERsAiBYjsxKcxcPqliZUtD8DOzzY2E7+UgPGAvwGLf2NWhOOIDEzQ0nBRLMvArYrlPH0+Fvd/jS+j2X1FJTnC4BYkSGPeuD08yrrnbv9ZtvUf+m09Cnu/Gk0K3W7phMt7/2m2UGYS3gF3VetDrhBNSfmaFLmR7+ppUysDgxTrTQloG+f0d1DHXFrJR+kxf+dQRa1qMRVjQEiTzU842/yIamlsWqingQmJlEdGINVNaKL6guog3GJtHrc+AeGd8oAS2r6zRuiMx67ZQ3ujPoZ5aVYhfBm9+snbPh+ylUQyEQEpiF8gG7YhBIG/abpq+K/OtCeCGUS2HVtURYjnv+FEvm18O0fLY0TrvF+RQOAzXUsRZuFx6Rq5XYPbiDW/dBU3JlOB3Le/jpuLKsL7QLM53Zdv+mab3JtWwuA5DiNokSfFQbKkV4L6rl0qZZ3OJo9aqeypHss0+TnBxh84f/0iUOUUBRWulHHFH/AgF/dX7wBG8W0bkFrZIaSDzSmbbcbh8m+ADW2A="
+    install:
+      # Install GCP SDK if not already cached
+      - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
+      - source $HOME/google-cloud-sdk/path.bash.inc
+      - gcloud version
+      - sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
+    before_script:
+      - mkdir -p release
+      - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out release/e2e-gcp-sa-key.json -d
+      - gcloud auth activate-service-account --key-file release/e2e-gcp-sa-key.json
+    script:
+      - ./scripts/deploy-function.sh
+
+  - stage: e2e-helm-deployment-test
+    name: E2E GCP helm deployment test
+    sudo: required
+    language: python
+    python:
+      - "3.8"
+    cache:
+      directories:
+        - "$HOME/google-cloud-sdk/"
+    env:
+      - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+      - PUBSUB_TOPIC="e2e_test_topic_${TRAVIS_BUILD_ID}"
+      - PUBSUB_SUBSCRIPTION="e2e_test_subscription_${TRAVIS_BUILD_ID}"
+      - IAM_SERVICE_ACCOUNT="e2e-test-sa-${TRAVIS_BUILD_ID}"
+      - LOG_ROUTER="e2e_test_log_router_${TRAVIS_BUILD_ID}"
+      - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
+      - K8S_CLUSTER="e2e-test-master"
+      - GCP_PROJECT_ID="dynatrace-gcp-extension"
+      - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-function"
+      - E2E=true
+      - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
+      - secure: "muHGNxIK6fxTltIsGgms6v3dleuQ1LZyQmZIGQDSfQ5sfYDYEvR2xsabK237AipSSGppoVhc7S6ri8A/WNQautHUfdBOsVn1i7czzoPhELdOJkAiigXrI3kla68OTCiC0TPwWbIYOxzmiYDHZr+rYbA1773O0iyhWHiTVQerLMndn0wCFWUUnLbD1WfzdAxlfSo1rd7u81m8g4efLIUppo/fjfaxmVwvo1oIfensGVknyOE+gtSh/OpGdYfNeOqxoDGOoMe5bnCqibUoREXRzUZKGb6upxMMmW6E3hGG02kqle4jYjaC7Uiu2IVZsK38iAWNGwIRy21CIXNHn4R6we44n5JLH92aiRtVw8D/fDOnN2gWTtmdrvoB8YklbaYZBnDrGJxI6rESfeQjwD8ImWWKUJFUlwovKjNWhOw8RMhPVtPOuC00+F2UDq5NosrWYGUjLjaKFC/4nysOiK2DgsMBF/Mk1Ei1BDMYmcHQ7Jsrs8ys/kgPasV3Qs9xOuSJpF+AiwKPfI1R9bxYiORg70TNz62wPD7FlKWIVe0DvhrWcHCTpnrROabt6B0hUROfljCZe2H+j8HD9uCJCJHk5qP7llNVofVnz8w+s90wLEKpUNn2rVUH0fzffYM7YaLRPhzLEUJSQso3a7hXFfcoUow8OOPTmCgViGCfPjuy2zc="
+      - secure: "tdw5iV7XGhQ+gVPw70n+/SeA2xfVAXL5uwhMrKjI6FgayQQB7cIFxGfhIGMMw17p9Td5KdpiuBvw1tZh8SRh7vJfx4dr8ZgkU3W3whjOt+gbuI/igzp4K5TYuEFajbuPRWPtJbDmRwS4a2VwkO9t5RyVUDZW1Pkj3d/SsaedUOxnKOBorSJLkXdlgNlijo1LS9jrsEbo47mVKsBpp6l7HsgvDurq8y32mgh+SNUuUhf20MYxBDtDmtf3qkhaGlIR4Pfz9MNFcMq/Qac9lpJAxRPNifN+frlkDMnyGRNlkpgv8aokZdf5ohURDhH1ff4lHJa9tORVPHf1GGyA5SW8ucplTq9PtMP30Zh2mO3E9YE6chtZ2QxOC1HT6GJL/5SXj2NCYe0nemiynTk8QHiPEnE5n0grKfLTdDHmZ6q3Gwa6rd6e/KvCGfNs/B8hAjkPOEkqM3zk8WUw2sD4DUq5YmyKTUSoz+z6zgueY//3ecgCvUz+GZ2BBtTEFybZtv0860FI8x79EFMdvEGbRa4mzsij2oWYbHmlT1LsvNuqMgzdjh4pD97pek3jl3JSPgNY6bDI6z2XA4bM5mbdCHr68+7CwNfNckM1Pi8gHt0H5dH9zjW5ehC7inMlSvBKGUR35af+OW64DevhY2/EHu7AVxcFFwKAK2ZMeXzeBVY1IE8="
+      - secure: "WzNy/QJoUukfd9G6f62VasEV1aZneJOe0r5tlIiHzKjyFi6tNlizBiIsoOosbUoW8qaEf8xY2+H1pLeroBWcswi1hMzYNPmYHu8HfWhD64/yMDkTz6obpzWtvge88ZsjCHzXcgIu8/8AhOgOZpyXwmgS+GMTfvL4quo/k4c3ZsSwv/HHnH3Uh2HUnMK+AFY16ZIGnKAbP7vf8S5lPgyB3w+FjzyAPxYxpc74V7yOg5uyJW8W9mews/wyAKnWMyEWBUBpieOXvCT52R1jQNplAootSSrdm5Wj3hQRhsH5b/hJUeHX9ex586sn4zXbb7AOfVuK0y8TVovdT9Ld2osKATfXYS4I3yVX6ZdwAZ0wYd4znw+7fVxi+qbZ+46cKzDEOZ+0jN+bzn9SFlOy4Z0VUIZEM9ooQPpQJ9XXlglmHZdnwxD1LUITP3H4vljPdcl5+oz10E7zWN/epMClqJXbRds1RDZ+l9m1lEpt05DCYPWW61+Dca10szaxRavY390wkz9JqD2f92aqcTmYhVu2X46zL3pZONLpd8DlQv2Je/3ik7E28V875SDy/4mMSZyi+RhrG6Ob5A0zTXeiZArVKkGinlfyhcAIgu7t0brd0l7hL0eNqOpqU6Jnqz5TWLwMJjqsoMuSiheYl1avLMQYTg1EDA56dMloZEh0jdihYfM="
+      - secure: "pmnIVxqixHvgidZRXXmWKUfuyAeBun1eOzhP79onCFTazGRnMG+Lv+c4422nHUDA9KsmYPezjk3ESfd8EGlfL0ZFQbL45eQp3oGcbN9to6wDj8g6xyrr+tG9GJ4jirO5DlLZ5I0y3WywmE+anzbFdjV0+sWTe1QWxtzqbySCwewPThBvn/iOdJMaPh7S328W7WxkD095ZCC2pQx42Mwfforw+1Jg6yd2ZI3W4b0+KsrTBveeyfj0A7F3e7uTrA+zXst26sYY37zlT/IYT5hgpQiGqbWpnoTrYLvgjdnLxSz43zWKY/YDxFU7DY1t0HIKC4N9vWynjcx1R8VjWT4SCy5f1TPHNvNt5zJUBJ59zUBuTL8Yi6FfMqDqHRLq6W8/bMJe0QSrjJFocWIs+YD+AlCbTS6rhpynzsrbS/GHo6KjVkFhXIRVjp798IFLHsJQ2JonO8McWdaldQszu8O/rB1v8B9tXsUoc5e0pJFSXI9qVwPYAAMOx1bmDPOBQoapx5ciwUh0U2rPZyGDQVh+iDcGlGX1ttWlF83vaRYbzBYqzLzcckNSnHlva6F/ZwcTQsbrZSM5Trz3OUk7fWJMRuf7XjKFAEWzASFLYpdZ1EVP+vUmxpT8OzA9kUn3XMFd9sTm9v5GZ0zQscM+/WSmJsPPGwlQZRX5CtHbq7mySJ0="
+    install:
+      # Install GCP SDK if not already cached
+      - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
+      - source $HOME/google-cloud-sdk/path.bash.inc
+      - gcloud version
+      - pip install -r tests/requirements.txt
+      - ./tests/e2e/helm-preinstall.sh
+    before_script:
+      - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
+      - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
+      - gcloud auth configure-docker
+      - ./tests/e2e/deployment-test-cleanup.sh
+      - ./build/docker-deploy.sh
+      - ./tests/e2e/before-deployment-test-helm-cleanup.sh
+      - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
+    script:
+      - travis_wait 60 ./tests/e2e/execute-tests.sh
+    after_script:
+      - ./tests/e2e/deployment-test-cleanup.sh
+
+  - stage: e2e-cloud-function-deployment-test
+    name: E2E GCP Cloud Function deployment test
+    sudo: required
+    language: python
+    python:
+      - "3.8"
+    cache:
+      directories:
+        - "$HOME/google-cloud-sdk/"
+    env:
+      - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+      - GCP_PROJECT_ID="dynatrace-gcp-extension"
+      - E2E=true
+      - DYNATRACE_URL_SECRET_NAME="DYNATRACE_URL_${TRAVIS_BUILD_ID}"
+      - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_ACCESS_KEY_${TRAVIS_BUILD_ID}"
+      - IAM_SERVICE_ACCOUNT="e2e-test-sa-${TRAVIS_BUILD_ID}"
+      - IAM_ROLE_METRCICS="e2e_test_cloud_function_${TRAVIS_BUILD_ID}.metrics"
+      - PUBSUB_TOPIC="e2e_test_topic_${TRAVIS_BUILD_ID}"
+      - CLOUD_SCHEDULER="e2e_test_scheduler_${TRAVIS_BUILD_ID}"
+      - METRIC_FORWARDING_FUNCTION="e2e_test_function_${TRAVIS_BUILD_ID}"
+      - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
+      - secure: "tdw5iV7XGhQ+gVPw70n+/SeA2xfVAXL5uwhMrKjI6FgayQQB7cIFxGfhIGMMw17p9Td5KdpiuBvw1tZh8SRh7vJfx4dr8ZgkU3W3whjOt+gbuI/igzp4K5TYuEFajbuPRWPtJbDmRwS4a2VwkO9t5RyVUDZW1Pkj3d/SsaedUOxnKOBorSJLkXdlgNlijo1LS9jrsEbo47mVKsBpp6l7HsgvDurq8y32mgh+SNUuUhf20MYxBDtDmtf3qkhaGlIR4Pfz9MNFcMq/Qac9lpJAxRPNifN+frlkDMnyGRNlkpgv8aokZdf5ohURDhH1ff4lHJa9tORVPHf1GGyA5SW8ucplTq9PtMP30Zh2mO3E9YE6chtZ2QxOC1HT6GJL/5SXj2NCYe0nemiynTk8QHiPEnE5n0grKfLTdDHmZ6q3Gwa6rd6e/KvCGfNs/B8hAjkPOEkqM3zk8WUw2sD4DUq5YmyKTUSoz+z6zgueY//3ecgCvUz+GZ2BBtTEFybZtv0860FI8x79EFMdvEGbRa4mzsij2oWYbHmlT1LsvNuqMgzdjh4pD97pek3jl3JSPgNY6bDI6z2XA4bM5mbdCHr68+7CwNfNckM1Pi8gHt0H5dH9zjW5ehC7inMlSvBKGUR35af+OW64DevhY2/EHu7AVxcFFwKAK2ZMeXzeBVY1IE8="
+      - secure: "WBTVUC4B/VNnZbN6NLDeH1ZRfanYwOJJugE+ZikkZdNhqag56IzlkR/VVen2LeqElrPMQmV+U8/pf9PG3aOeVpRBvIOzEBZ4fJiEo/udYSj11ioJxiDDDwZ9QkRFcqL9GwBCJMDBMt1pE7Vw6p/XvQLKi+Nc+n0iCuuGUj3C+zLEzrEFcoXYS/TYlKqDQQZC3lgk2V1edkCG24hB69KtweHmOTYINAFtORg+CfHSm7dtd4vzAy4HxXuJRlHqFcQ1BU3u0hmK/YzDadZiVvCNDFz6LQYOYnVfQup5MUYRE9swlZz6bRYJNcgS6v46xT+qaSTtft4fz9GVnT8/9iguTC3soqVplD5AZddIxMYBjL9JCZPeE75Q7YLLGOmdjVhLj0kMmFkj1YpZB+6+9qfY542NwpMso/bUX5ip66Um8CACLsBXxX4hWDlupnIcQKEa4cSGs4lLKXYb91pdDiI2xO/yo2UK2VHNHMxmFQoGj9yStoAkhU8O0mEY3hNe9haLEdFLW6PPxPrXEgUDLpuaRLsPrL1SVWNu91sslUKRxHD+3MPFqjn7yYI9PBkIXlRpYLgN4FcG+botHcuHavp4avb1HLOKYliGNiI8d0XDnehhl0VyVyuevDP8qb38NJr+7ELJiKQZSL59UL7H2y5seNmdIO1TjVygTknmlDxTIeQ="
+    install:
+      # Install GCP SDK if not already cached
+      - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
+      - source $HOME/google-cloud-sdk/path.bash.inc
+      - gcloud version
+      - pip install -r tests/requirements.txt
+    before_script:
+      - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
+      - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
+      - ./build/build-zip-release.sh
+      - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
+    script:
+      - travis_wait 60 ./tests/e2e/execute-tests-cloud-function.sh
+    after_script:
+      - ./tests/e2e/deployment-test-cleanup-cloud-function.sh

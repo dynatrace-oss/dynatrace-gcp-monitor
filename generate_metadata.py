@@ -32,7 +32,7 @@ _UNIT_MAPPING = {
     "d": "Day",
 
     "": "Unspecified",
-    "1": "Unspecified",
+    "1": "Count",
     "count": "Count",
     "1/s": "PerSecond",
 
@@ -57,7 +57,7 @@ def generate_metadata():
     unmapped_units = set()
     # some metrics are used for multiple services and script will encounter them multiple times
     visited_metric_keys = set()
-    supported_services = load_supported_services(LoggingContext(None), [])
+    supported_services = load_supported_services(LoggingContext(None))
 
     prepare_metric_metadata_dir()
 

@@ -14,15 +14,76 @@
 
 import enum
 import os
+import traceback
 from datetime import datetime, timedelta
-from typing import Optional
+from queue import Queue
+from typing import Optional, Dict
 
 import aiohttp
+
+from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
+from lib.logs.log_sfm_metrics import LogSelfMonitoring
+from lib.metric_descriptor import SELF_MONITORING_METRIC_MAP
+from operation_mode import OperationMode
+
+LOG_THROTTLING_LIMIT_PER_MESSAGE = 10
+
+
+def get_int_environment_value(key: str, default_value: int) -> int:
+    environment_value = os.environ.get(key, None)
+    return int(environment_value) if environment_value and environment_value.isdigit() else default_value
+
+
+def get_should_require_valid_certificate() -> bool:
+    return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
+
+
+def get_query_interval_minutes() -> int:
+    default_query_interval = 3
+    query_interval_env_var = os.environ.get('QUERY_INTERVAL_MIN', None)
+    if query_interval_env_var:
+        query_interval_min = int(query_interval_env_var) if query_interval_env_var.isdigit() else default_query_interval
+    else:
+        # keep old query frequency for logs ingest or if cloud function code was updated without changing cloud scheduler (missing environment variable)
+        query_interval_min = 1
+    if query_interval_min not in range(1, 7):
+        query_interval_min = default_query_interval
+    return query_interval_min
 
 
 class LoggingContext:
     def __init__(self, scheduled_execution_id: Optional[str]):
         self.scheduled_execution_id: str = scheduled_execution_id[0:8] if scheduled_execution_id else None
+        self.throttled_log_call_count = dict()
+
+    def error(self, *args):
+        self.log("ERROR", *args)
+
+    def exception(self, *args):
+        self.error(*args)
+        traceback.print_exc()
+
+    def t_error(self, *args):
+        """
+        Prints error with throttling limit per message. Limit per message set in LOG_THROTTLING_LIMIT_PER_CALLER
+        Use for potentially frequent log.
+        :param args:
+        :return:
+        """
+        if args and self.__check_if_message_exceeded_limit(args[-1]):
+            return
+        self.error(*args)
+
+    def t_exception(self, *args):
+        """
+        Prints exception with throttling limit per message. Limit per message set in LOG_THROTTLING_LIMIT_PER_CALLER
+        Use for potentially frequent log.
+        :param args:
+        :return:
+        """
+        if args and self.__check_if_message_exceeded_limit(args[-1]):
+            return
+        self.exception(*args)
 
     def log(self, *args):
         """
@@ -35,6 +96,7 @@ class LoggingContext:
         """
         if not args:
             return
+
         message = args[-1]
 
         timestamp_utc = datetime.utcnow()
@@ -49,8 +111,148 @@ class LoggingContext:
 
         print(f"{timestamp_utc_iso} {context_section} : {message}")
 
+    def __check_if_message_exceeded_limit(self, message: str):
+        log_calls_performed = self.throttled_log_call_count.get(message, 0)
+        log_calls_left = LOG_THROTTLING_LIMIT_PER_MESSAGE - log_calls_performed
 
-class Context(LoggingContext):
+        if log_calls_left == 0:
+            self.throttled_log_call_count[message] = log_calls_performed + 1
+            self.log(f"Logging calls for message '{message}' exceeded the throttling limit of"
+                     f" {LOG_THROTTLING_LIMIT_PER_MESSAGE}. Further logs from this caller will be discarded")
+
+        message_exceeded_limit = log_calls_left <= 0
+        if not message_exceeded_limit:
+            self.throttled_log_call_count[message] = log_calls_performed + 1
+
+        return message_exceeded_limit
+
+
+class ExecutionContext(LoggingContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            dynatrace_api_key: str,
+            dynatrace_url: str,
+            scheduled_execution_id: Optional[str]
+    ):
+        super().__init__(scheduled_execution_id)
+        self.project_id_owner = project_id_owner
+        self.dynatrace_api_key = dynatrace_api_key
+        self.dynatrace_url = dynatrace_url
+        self.function_name = os.environ.get("FUNCTION_NAME", "Local")
+        self.location = os.environ.get("FUNCTION_REGION", "us-east1")
+        self.require_valid_certificate = get_should_require_valid_certificate()
+
+
+class LogsContext(ExecutionContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            dynatrace_api_key: str,
+            dynatrace_url: str,
+            scheduled_execution_id: Optional[str],
+            sfm_queue: Queue,
+    ):
+        super().__init__(
+            project_id_owner=project_id_owner,
+            dynatrace_api_key=dynatrace_api_key,
+            dynatrace_url=dynatrace_url,
+            scheduled_execution_id=scheduled_execution_id
+        )
+
+        self.sfm_queue = sfm_queue
+        self.self_monitoring = LogSelfMonitoring()
+
+
+class LogsProcessingContext(LogsContext):
+    def __init__(
+            self,
+            scheduled_execution_id: Optional[str],
+            message_publish_time: Optional[datetime],
+            sfm_queue: Queue
+    ):
+        super().__init__(
+            project_id_owner="",
+            dynatrace_api_key="",
+            dynatrace_url="",
+            scheduled_execution_id=scheduled_execution_id,
+            sfm_queue = sfm_queue
+        )
+        self.message_publish_time = message_publish_time
+
+
+class SfmDashboardsContext(LoggingContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            token,
+            gcp_session: aiohttp.ClientSession,
+            operation_mode: OperationMode,
+            scheduled_execution_id: Optional[str]
+    ):
+        super().__init__(scheduled_execution_id)
+        self.project_id_owner = project_id_owner
+        self.token = token
+        self.gcp_session = gcp_session
+        self.operation_mode = operation_mode
+
+
+class SfmContext(ExecutionContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            dynatrace_api_key: str,
+            dynatrace_url: str,
+            token,
+            scheduled_execution_id: Optional[str],
+            self_monitoring_enabled: bool,
+            sfm_metric_map: Dict,
+            gcp_session: aiohttp.ClientSession,
+    ):
+        super().__init__(
+            project_id_owner=project_id_owner,
+            dynatrace_api_key=dynatrace_api_key,
+            dynatrace_url=dynatrace_url,
+            scheduled_execution_id=scheduled_execution_id
+        )
+        self.token = token
+        self.self_monitoring_enabled = self_monitoring_enabled
+        self.sfm_metric_map = sfm_metric_map
+        self.gcp_session = gcp_session
+
+
+class LogsSfmContext(SfmContext):
+    def __init__(
+            self,
+            project_id_owner: str,
+            dynatrace_url: str,
+            logs_subscription_id: str,
+            token: str,
+            scheduled_execution_id: Optional[str],
+            sfm_queue: Queue,
+            self_monitoring_enabled: bool,
+            gcp_session: aiohttp.ClientSession,
+            container_name: str,
+            zone: str
+    ):
+        super().__init__(
+            project_id_owner=project_id_owner,
+            dynatrace_api_key="",
+            dynatrace_url=dynatrace_url,
+            token=token,
+            scheduled_execution_id=scheduled_execution_id,
+            self_monitoring_enabled = self_monitoring_enabled,
+            sfm_metric_map = LOG_SELF_MONITORING_METRIC_MAP,
+            gcp_session = gcp_session
+        )
+        self.sfm_queue = sfm_queue
+        self.logs_subscription_id = logs_subscription_id
+        self.timestamp = datetime.utcnow()
+        self.container_name = container_name
+        self.zone = zone
+
+
+class MetricsContext(SfmContext):
     def __init__(
             self,
             gcp_session: aiohttp.ClientSession,
@@ -62,24 +264,26 @@ class Context(LoggingContext):
             dynatrace_api_key: str,
             dynatrace_url: str,
             print_metric_ingest_input: bool,
+            self_monitoring_enabled: bool,
             scheduled_execution_id: Optional[str]
     ):
-        super().__init__(scheduled_execution_id)
-
-        self.gcp_session = gcp_session
+        super().__init__(
+            project_id_owner=project_id_owner,
+            dynatrace_api_key=dynatrace_api_key,
+            dynatrace_url=dynatrace_url,
+            token=token,
+            scheduled_execution_id=scheduled_execution_id,
+            self_monitoring_enabled=self_monitoring_enabled,
+            sfm_metric_map=SELF_MONITORING_METRIC_MAP,
+            gcp_session=gcp_session
+        )
         self.dt_session = dt_session
-        self.project_id_owner = project_id_owner
-        self.token = token
         self.execution_time = execution_time.replace(microsecond=0)
         self.execution_interval = timedelta(seconds=execution_interval_seconds)
-        self.dynatrace_api_key = dynatrace_api_key
-        self.dynatrace_url = dynatrace_url
         self.print_metric_ingest_input = print_metric_ingest_input
-        self.function_name = os.environ.get("FUNCTION_NAME", "Local")
-        self.location = os.environ.get("FUNCTION_REGION", "us-east1")
-        self.maximum_metric_data_points_per_minute = int(os.environ.get("MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE", "100000"))
-        self.metric_ingest_batch_size = int(os.environ.get("METRIC_INGEST_BATCH_SIZE", "1000"))
-        self.require_valid_certificate = os.environ.get("REQUIRE_VALID_CERTIFICATE", "True") in ["True", "T", "true"]
+        self.self_monitoring_enabled = self_monitoring_enabled
+        self.maximum_metric_data_points_per_minute = get_int_environment_value("MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE", 100000)
+        self.metric_ingest_batch_size = get_int_environment_value("METRIC_INGEST_BATCH_SIZE", 1000)
         self.use_x_goog_user_project_header = {project_id_owner: False}
 
         # self monitoring data
@@ -98,10 +302,23 @@ class Context(LoggingContext):
         self.fetch_gcp_data_execution_time = {}
         self.push_to_dynatrace_execution_time = {}
 
+    def create_gcp_request_headers(self, project_id: str) -> Dict:
+        headers = {
+            "Accept": "application/json",
+            "Authorization": "Bearer {token}".format(token=self.token)
+        }
+
+        if self.use_x_goog_user_project_header.get(project_id, False):
+            headers["x-goog-user-project"] = project_id
+
+        return headers
+
 
 class DynatraceConnectivity(enum.Enum):
-    Ok = 0,
-    ExpiredToken = 1,
-    WrongToken = 2,
-    WrongURL = 3,
-    Other = 4
+    Ok = 0
+    ExpiredToken = 1
+    WrongToken = 2
+    WrongURL = 3
+    InvalidInput = 4
+    TooManyRequests = 5
+    Other = 6

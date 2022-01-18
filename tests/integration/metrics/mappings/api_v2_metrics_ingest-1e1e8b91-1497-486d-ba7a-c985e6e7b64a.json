@@ -1,0 +1,27 @@
+{
+  "id": "1e1e8b91-1497-486d-ba7a-c985e6e7b64a",
+  "name": "api_v2_metrics_ingest",
+  "request": {
+    "url": "/api/v2/metrics/ingest",
+    "method": "POST"
+  },
+  "response": {
+    "status": 202,
+    "bodyFileName": "dynatrace-metrics-response.json",
+    "headers": {
+      "date": "Wed, 12 May 2021 09:11:40 GMT",
+      "server-timing": "dtRpid;desc=\"217456531\"",
+      "x-oneagent-js-injection": "true",
+      "content-type": "application/json;charset=utf-8",
+      "cache-control": "no-store, no-cache",
+      "pragma": "no-cache",
+      "vary": "Accept-Encoding",
+      "x-robots-tag": "noindex",
+      "server": "ruxit gateway",
+      "strict-transport-security": "max-age=31536000;includeSubDomains"
+    }
+  },
+  "uuid": "1e1e8b91-1497-486d-ba7a-c985e6e7b64a",
+  "persistent": true,
+  "insertionIndex": 15
+}

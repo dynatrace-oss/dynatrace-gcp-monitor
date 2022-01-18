@@ -1,0 +1,53 @@
+gcp:
+  - service: gce_instance
+    gcpMonitoringFilter: var:filter_conditions
+    dimensions:
+      - value: label:resource.labels.project_id
+        key: gcp.project.id
+      - value: label:resource.labels.instance_id
+        key: gcp.instance.id
+      - value: label:resource.labels.zone
+        key: gcp.region
+    metrics:
+      - value: metric:compute.googleapis.com/guest/cpu/usage_time
+        key: cloud.gcp.compute_googleapis_com.guest.cpu.usage_time
+        type: count,delta
+        gcpOptions:
+          ingestDelay: 180
+          samplePeriod: 60
+          valueType: DOUBLE
+          metricKind: CUMULATIVE
+          unit: s{CPU}
+        dimensions:
+          - value: label:metric.labels.instance_name
+            key: instance_name
+          - value: label:metric.labels.state
+            key: state
+      - value: metric:compute.googleapis.com/instance/cpu/usage_time
+        key: cloud.gcp.compute_googleapis_com.instance.cpu.usage_time
+        type: count,delta
+        gcpOptions:
+          ingestDelay: 240
+          samplePeriod: 60
+          valueType: DOUBLE
+          metricKind: DELTA
+          unit: s{CPU}
+        dimensions:
+          - value: label:metric.labels.instance_name
+            key: instance_name
+      - value: metric:compute.googleapis.com/guest/disk/merged_operation_count
+        key: cloud.gcp.compute_googleapis_com.guest.disk.merged_operation_count
+        type: count,delta
+        gcpOptions:
+          ingestDelay: 180
+          samplePeriod: 60
+          valueType: INT64
+          metricKind: CUMULATIVE
+          unit: "1"
+        dimensions:
+          - value: label:metric.labels.instance_name
+            key: instance_name
+          - value: label:metric.labels.device_name
+            key: device_name
+          - value: label:metric.labels.direction
+            key: direction

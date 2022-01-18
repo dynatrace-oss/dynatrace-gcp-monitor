@@ -1,0 +1,33 @@
+{
+  "name": "cloud_function",
+  "displayName": "Cloud Function",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('cloud_function')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "faas.id",
+          "pattern": "labels.execution_id"
+        },
+        {
+          "key": "faas.name",
+          "pattern": "resource.labels.function_name"
+        },
+        {
+          "key": "gcp.instance.name",
+          "pattern": "resource.labels.function_name"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}

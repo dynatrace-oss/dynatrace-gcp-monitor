@@ -1,0 +1,10 @@
+{
+  "type": "service_account",
+  "project_id": "dynatrace-gcp-extension",
+  "private_key": "-----BEGIN RSA PRIVATE KEY-----\nMIIBOQIBAAJAY/BaTAUdSc86pUvooeaVFaaYSvzzmug6dZtBUvpggGeqF9EoeA++\nf1AcJ9hAxEpxkbbtJcr/B8645gyMhW1O/QIDAQABAkACAb2OcTvZU5P15cRSG/M6\ncBH2z4WEws0Jt4hkRirR6TyDYzFwroKkQu/UbBBk1FGAydGXD2jhhDAGPUFDV65x\nAiEAtZjR0pitMuAI19GbpvGfeuk5A6JdtP5LP7YPtfKkCDMCIQCM4qc/VOPYHc3c\n+OIuROmJgbfO4vDNW8k0Pb6vjSfcDwIhAJ+oKxl/uA7Zn4y3saSWHIPAlqrWTpK5\nXEk4dRmfqY23AiBzXthfAIFk5WND5XwzL7OfK17+SNGxGcz2vul8kTdm+QIgK7vS\nLYB4RTL6PdOIEg3oZUUFhl5Zi/p6WrHQYY+mzNg=\n-----END RSA PRIVATE KEY-----",
+  "client_email": "test@dynatrace-gcp-extension.iam.gserviceaccount.com",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "http://localhost:9182/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dynatrace-gcp-function-sa%40dynatrace-gcp-extension.iam.gserviceaccount.com"
+}

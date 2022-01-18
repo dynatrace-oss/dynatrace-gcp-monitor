@@ -1,0 +1,18 @@
+{
+  "projects": [
+ {
+      "projectNumber": "125992521190",
+      "projectId": "dynatrace-gcp-extension",
+      "lifecycleState": "ACTIVE",
+      "name": "Dynatrace GCP Extension",
+      "labels": {
+        "test": "test"
+      },
+      "createTime": "2019-12-20T08:58:39.531Z",
+      "parent": {
+        "type": "organization",
+        "id": "178056077565"
+      }
+    }
+  ]
+}
