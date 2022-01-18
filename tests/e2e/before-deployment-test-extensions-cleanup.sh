@@ -13,21 +13,23 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+source ./tests/e2e/lib-tests.sh
+
 # testing message
-INSTALLED_EXTENSIONS=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.extensions[].extensionName' 2>/dev/null)
+INSTALLED_EXTENSIONS=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '.extensions[].extensionName' 2>/dev/null)
 
 for extension in ${INSTALLED_EXTENSIONS}; do
-    VERSION=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.version')
+    VERSION=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '.version')
     echo "${extension}"
     echo "Deactivated configuration version:"
-    curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.version'
+    curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '.version'
     echo "Extension deleted:"
-    curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/${VERSION}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '"\(.extensionName):\(.version)"'
+    curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/${VERSION}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '"\(.extensionName):\(.version)"'
     echo
 done
 
-for metric in $(jq -r '.[].key' < tests/e2e/extensions/data/metadata.json); do
-    OBJECT_ID=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/settings/objects?schemaIds=builtin%3Ametric.metadata&scopes=metric-${metric}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | jq -r '.items[].objectId' 2>/dev/null)
+for metric in $("$TEST_JQ" -r '.[].key' < tests/e2e/extensions/data/metadata.json); do
+    OBJECT_ID=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/settings/objects?schemaIds=builtin%3Ametric.metadata&scopes=metric-${metric}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '.items[].objectId' 2>/dev/null)
     echo "${metric}"
     curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/settings/objects/${OBJECT_ID}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" > /dev/null
 done

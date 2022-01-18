@@ -64,29 +64,29 @@ versionNumber() {
 }
 
 test_req_yq() {
-  if ! command -v yq &>/dev/null; then
-    err 'yq (4.9.x+) and jq is required to install Dynatrace function. Please refer to following links for installation instructions:
+  if command -v "$YQ" &>/dev/null ; then
+    VERSION_YQ=$("$YQ" --version | cut -d' ' -f3 | tr -d '"')
+    if [ "$VERSION_YQ" == "version" ]; then
+      VERSION_YQ=$("$YQ" --version | cut -d' ' -f4 | tr -d '"')
+    fi
+  fi
+
+  if [ -z "$VERSION_YQ" -o "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
+    err 'yq (4.9.x+) is required to install Dynatrace function. Please refer to following links for installation instructions:
       YQ: https://github.com/mikefarah/yq
       Example command to install yq:
       sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
-    if ! command -v jq &>/dev/null; then
-      echo -e "JQ: https://stedolan.github.io/jq/download/"
-    fi
     exit 1
-  else
-    VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
+  fi
+}
 
-    if [ "$VERSION_YQ" == "version" ]; then
-      VERSION_YQ=$(yq --version | cut -d' ' -f4 | tr -d '"')
-    fi
-
-    echo "Using yq version $VERSION_YQ"
-
-    if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
-      err 'yq in 4.9.8+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
-        YQ: https://github.com/mikefarah/yq'
-      exit 1
-    fi
+test_req_jq() {
+  if ! command -v "$JQ" &>/dev/null; then
+    err 'jq is required to install Dynatrace function. Please refer to following links for installation instructions:
+    JQ: https://stedolan.github.io/jq/download/"
+    Example command to install jq:
+    sudo wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -O /usr/bin/jq && sudo chmod +x /usr/bin/jq'
+    exit 1
   fi
 }
 
@@ -196,10 +196,10 @@ validate_gcp_config_in_extensions() {
     unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &>/dev/null
     cd "$EXTENSION_ZIP-tmp" || exit
     unzip "extension.zip" "extension.yaml" &>/dev/null
-    if [[ $(yq e 'has("gcp")' extension.yaml) == "false" ]]; then
+    if [[ $("$YQ" e 'has("gcp")' extension.yaml) == "false" ]]; then
       warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
       rm -rf "../${EXTENSION_ZIP}"
-    elif [[ $(yq e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]]; then
+    elif [[ $("$YQ" e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]]; then
       warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
       rm -rf "../${EXTENSION_ZIP}"
     else
@@ -208,7 +208,7 @@ validate_gcp_config_in_extensions() {
     cd ..
     rm -r "$EXTENSION_ZIP-tmp"
   done
-  cd ${WORKING_DIR} || exit
+  cd "${WORKING_DIR}" || exit
 }
 
 get_extensions_zip_packages() {
@@ -227,12 +227,12 @@ get_extensions_zip_packages() {
 
 get_activated_extensions_on_cluster() {
   if RESPONSE=$(dt_api "/api/v2/extensions?pageSize=100"); then
-    EXTENSIONS=$(echo "${RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
-    NEXT_PAGE_KEY=$(echo "${RESPONSE}" | jq -r '.nextPageKey')
+    EXTENSIONS=$(echo "${RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | "$JQ" -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
+    NEXT_PAGE_KEY=$(echo "${RESPONSE}" | "$JQ" -r '.nextPageKey')
     while [[ "$NEXT_PAGE_KEY" != "null" ]]; do
       RESPONSE=$(dt_api "/api/v2/extensions?nextPageKey=$NEXT_PAGE_KEY")
-      NEXT_PAGE_KEY=$(echo "${RESPONSE}" | jq -r '.nextPageKey')
-      EXTENSIONS_FROM_NEXT_PAGE=$(echo "${RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
+      NEXT_PAGE_KEY=$(echo "${RESPONSE}" | "$JQ" -r '.nextPageKey')
+      EXTENSIONS_FROM_NEXT_PAGE=$(echo "${RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | "$JQ" -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
       EXTENSIONS_FROM_NEXT_PAGE=$(echo -e "\n$EXTENSIONS_FROM_NEXT_PAGE")
       EXTENSIONS=("${EXTENSIONS[@]}" "${EXTENSIONS_FROM_NEXT_PAGE[@]}")
     done
@@ -254,7 +254,7 @@ upload_extension_to_cluster() {
     warn "- Extension ${EXTENSION_ZIP} upload failed with error code: ${CODE}"
     ((AMOUNT_OF_NOT_UPLOADED_EXTENSIONS+=1))
   else
-    UPLOADED_EXTENSION=$(echo "${UPLOAD_RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | jq -r '.extensionName')
+    UPLOADED_EXTENSION=$(echo "${UPLOAD_RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | "$JQ" -r '.extensionName')
 
     if ! RESPONSE=$(dt_api "/api/v2/extensions/${UPLOADED_EXTENSION}/environmentConfiguration" "PUT" "{\"version\": \"${EXTENSION_VERSION}\"}"); then
       warn "- Activation ${EXTENSION_ZIP} failed."
@@ -325,7 +325,7 @@ get_extensions_from_dynatrace() {
     fi
   done
 
-  cd ${WORKING_DIR} || exit
+  cd "${WORKING_DIR}" || exit
   rm -rf ${CLUSTER_EXTENSIONS_TMPDIR}
 }
 
@@ -344,16 +344,16 @@ upload_correct_extension_to_dynatrace() {
     unzip -j -q "$EXTENSION_ZIP" "extension.zip"
     unzip -p -q "extension.zip" "extension.yaml" >"$EXTENSION_FILE_NAME".yaml
 
-    EXTENSION_GCP_CONFIG=$(yq e '.gcp' "$EXTENSION_FILE_NAME".yaml)
+    EXTENSION_GCP_CONFIG=$("$YQ" e '.gcp' "$EXTENSION_FILE_NAME".yaml)
 
     # Get all service/featureSet pairs defined in extensions
-    SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | yq e -j | jq -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null)
+    SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | "$YQ" e -j | "$JQ" -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null)
 
     for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
       # Check if service should be monitored
       if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
         if [ -n "$GCP_FUNCTION_NAME" ]; then
-          CONFIG_NAME=$(yq e '.name' "$EXTENSION_FILE_NAME".yaml)
+          CONFIG_NAME=$("$YQ" e '.name' "$EXTENSION_FILE_NAME".yaml)
           if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
             echo "gcp:" >$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
             echo "$EXTENSION_GCP_CONFIG" >>$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
@@ -386,5 +386,37 @@ upload_correct_extension_to_dynatrace() {
     fi
   fi
 
-  cd ${WORKING_DIR} || exit
+  cd "${WORKING_DIR}" || exit
+}
+
+init_ext_tools() {
+  OS=$(uname -s)
+  HW=$(uname -i)
+
+  case "$OS $HW" in
+    "Linux x86_64")
+      ARCH=linux_x64
+    ;;
+    *)
+      warn "Architecture '$OS $HW' not supported"
+      ARCH=""
+    ;;
+  esac
+
+  if [ -z "$YQ" ]; then
+    YQ=yq
+  fi
+
+  if [ -z "$JQ" ]; then
+    JQ=jq
+  fi
+
+  if [ -n "$ARCH" ]; then
+     # Always use internal tools on supported architectures
+     YQ="$WORKING_DIR/ext_tools/yq_$ARCH"
+     JQ="$WORKING_DIR/ext_tools/jq_$ARCH"
+  fi
+
+  test_req_yq
+  test_req_jq
 }
