@@ -14,14 +14,15 @@
 import asyncio
 import os
 import threading
-from typing import Optional, List
+from typing import Optional, List, NamedTuple
 
-from aiohttp import web
+from aiohttp import web, ClientSession
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
-from lib.configure_dynatrace import ConfigureDynatrace
-from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes, get_selected_services
-from lib.credentials import create_token, get_project_id_from_environment
+from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes
+from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_url, fetch_dynatrace_api_key
+
+from lib.extensions_fetcher import ExtensionsFetchResult, ExtensionsFetcher
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
@@ -39,31 +40,56 @@ QUERY_INTERVAL_MIN = get_query_interval_minutes()
 
 loop = asyncio.get_event_loop()
 
+PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('projects', List[str]), ('services', List[str])])
 
-async def scheduling_loop(project_ids: Optional[List[str]] = None):
+
+async def scheduling_loop(pre_launch_check_result: PreLaunchCheckResult):
     while True:
-        loop.create_task(async_dynatrace_gcp_extension(project_ids))
+        loop.create_task(async_dynatrace_gcp_extension(project_ids=pre_launch_check_result.projects,
+                                                       services=pre_launch_check_result.services))
         await asyncio.sleep(60 * QUERY_INTERVAL_MIN)
 
 
-async def metrics_initial_check() -> Optional[FastCheckResult]:
+async def metrics_pre_launch_check() -> Optional[PreLaunchCheckResult]:
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         token = await create_token(logging_context, gcp_session)
-        if token:
-            fast_check_result = await MetricsFastCheck(
-                gcp_session=gcp_session,
-                dt_session=dt_session,
-                token=token,
-                logging_context=logging_context
-            ).execute()
-            if fast_check_result.projects:
-                logging_context.log(f'Monitoring enabled for the following projects: {fast_check_result}')
-                return fast_check_result
-            else:
-                logging_context.log("Monitoring disabled. Check your project(s) settings.")
-        else:
+        if not token:
             logging_context.log(f'Monitoring disabled. Unable to acquire authorization token.')
+        fast_check_result = await metrics_initial_check(gcp_session, dt_session, token) if token else None
+        extensions_fetch_result = await extensions_fetch(gcp_session, dt_session, token) if fast_check_result else None
+    return PreLaunchCheckResult(projects=fast_check_result.projects,
+                                services=extensions_fetch_result.services) if fast_check_result and extensions_fetch_result else None
 
+
+async def metrics_initial_check(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[FastCheckResult]:
+    fast_check_result = await MetricsFastCheck(
+        gcp_session=gcp_session,
+        dt_session=dt_session,
+        token=token,
+        logging_context=logging_context
+    ).execute()
+    if fast_check_result.projects:
+        logging_context.log(f'Monitoring enabled for the following projects: {fast_check_result.projects}')
+        return fast_check_result
+    else:
+        logging_context.log("Monitoring disabled. Check your project(s) settings.")
+        return None
+
+
+async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[ExtensionsFetchResult]:
+    extension_fetcher_result = await ExtensionsFetcher(
+        dt_session=dt_session,
+        dynatrace_url=await fetch_dynatrace_url(gcp_session, get_project_id_from_environment(), token),
+        dynatrace_access_key=await fetch_dynatrace_api_key(gcp_session, get_project_id_from_environment(), token),
+        logging_context=logging_context
+    ).execute()
+
+    if extension_fetcher_result.services:
+        feature_sets_names = [f"{service.name}/{service.feature_set}" for service in extension_fetcher_result.services]
+        logging_context.log(f'Monitoring enabled for the following fetched extensions feature sets: {feature_sets_names}')
+        return extension_fetcher_result
+    else:
+        logging_context.log("Monitoring disabled. Check configured extensions.")
         return None
 
 
@@ -76,11 +102,6 @@ async def run_instance_metadata_check() -> Optional[InstanceMetadata]:
             logging_context.log(f'Instance metadata check skipped. Unable to acquire authorization token.')
 
     return None
-
-
-async def try_configure_dynatrace():
-    async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
-        dashboards_result = await ConfigureDynatrace(gcp_session=gcp_session, dt_session=dt_session, logging_context=logging_context)
 
 
 async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
@@ -101,13 +122,9 @@ async def health(request):
 
 
 def run_metrics():
-    if "GCP_SERVICES" in os.environ:
-        services = get_selected_services()
-        logging_context.log(f"Running with configured services: {services}")
-    loop.run_until_complete(try_configure_dynatrace())
-    fast_check_result = loop.run_until_complete(metrics_initial_check())
-    if fast_check_result:
-        loop.create_task(scheduling_loop(fast_check_result.projects))
+    pre_launch_check_result = loop.run_until_complete(metrics_pre_launch_check())
+    if pre_launch_check_result:
+        loop.create_task(scheduling_loop(pre_launch_check_result))
         run_loop_forever()
 
 

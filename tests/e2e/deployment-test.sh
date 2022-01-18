@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #     Copyright 2021 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,8 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+
+source ./tests/e2e/lib-tests.sh
 
 check_container_state()
 {
@@ -47,27 +49,7 @@ while (( "$#" )); do
     esac
 done
 
-# Install YQ
-curl -sSLo yq "https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64" && chmod +x yq && sudo mv yq /usr/local/bin/yq
-
-# Install kubectl.
-curl -sSLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/kubectl
-
-# Install helm.
-wget --no-verbose https://get.helm.sh/helm-v3.5.3-linux-amd64.tar.gz
-FILE=./helm-v3.5.3-linux-amd64.tar.gz
-if [ ! -f "$FILE" ]; then
-    echo "$FILE does not exist. Can't create helm chart."
-    exit 1
-fi
-tar -zxvf helm-v3.5.3-linux-amd64.tar.gz
-FILE=./linux-amd64/helm
-if [ ! -f "$FILE" ]; then
-    echo "$FILE does not exist. Can't create helm chart."
-    exit 1
-fi
-
-sudo mv linux-amd64/helm /usr/local/bin/helm
+install_yq
 
 # Create Pub/Sub topic and subscription.
 gcloud config set project "${GCP_PROJECT_ID}"
@@ -95,15 +77,12 @@ fi
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | jq -r '.writerIdentity')
 gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher > /dev/null 2>&1
 
-# Create E2E Sample App
-gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
---runtime python37 \
---trigger-http \
---source ./tests/e2e/sample_app/ > /dev/null 2>&1
+create_sample_app
 
 # Run helm deployment.
 rm -rf ./e2e_test
 mkdir -p ./e2e_test/gcp_iam_roles
+cp ./scripts/lib.sh ./e2e_test/lib.sh
 cp ./scripts/deploy-helm.sh ./e2e_test/deploy-helm.sh
 cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./e2e_test/gcp_iam_roles/
 cp ./gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml ./e2e_test/gcp_iam_roles/
@@ -115,7 +94,6 @@ cat <<EOF > values.e2e.yaml
 gcpProjectId: "${GCP_PROJECT_ID}"
 deploymentType: "${DEPLOYMENT_TYPE}"
 dynatraceAccessKey: "${DYNATRACE_ACCESS_KEY}"
-dynatraceLogIngestUrl: "${DYNATRACE_LOG_INGEST_URL}"
 dynatraceUrl: "${DYNATRACE_URL}"
 logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
@@ -131,11 +109,44 @@ gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 
 cd ./e2e_test || exit 1
 ./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 
+# Verify containers running
+echo
+echo -n "Verifying deployment result"
+METRICS_CONTAINER_STATE=0
+LOGS_CONTAINER_STATE=0
+ACTIVEGATE_CONTAINER_STATE=0
+
+for i in {1..60}
+do
+  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+    check_container_state "dynatrace-gcp-function-metrics"
+    METRICS_CONTAINER_STATE=$?
+  fi
+
+  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
+    check_container_state "dynatrace-gcp-function-logs"
+    LOGS_CONTAINER_STATE=$?
+    check_container_state "dynatrace-activegate-gcpmon"
+    ACTIVEGATE_CONTAINER_STATE=$?
+  fi
+
+  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
+    break
+  fi
+
+  sleep 10
+  echo -n "."
+done
+
 echo
 kubectl -n dynatrace get pods
 
-# Generate load on GC Function
-for i in {1..5}; do
-  curl -s "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
-  -H "Authorization: bearer $(gcloud auth print-identity-token)" 
-done
+generate_load_on_sample_app
+
+if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
+  echo "Deployment completed successfully"
+  exit 0
+else
+  echo "Deployment failed"
+  exit 1
+fi

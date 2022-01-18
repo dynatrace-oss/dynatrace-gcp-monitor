@@ -1,46 +1,53 @@
-id: gce_instance
-$schema: gcp_schema_v_1_0.json
-version: 0.0.1
-minDynatraceVersion: 1.199
-technology:
-  name: Google VM Instance
 gcp:
-- service: gce_instance
-  featureSet: default
-  dimensions:
-  - value: resource.labels.project_id
-    id: project_id
-  - value: resource.labels.instance_id
-    id: instance_id
-  - value: resource.labels.zone
-    id: zone
-  metrics:
-  - value: compute.googleapis.com/guest/disk/merged_operation_count
-    id: cloud.gcp.compute_googleapis_com.guest.disk.merged_operation_count
-    type: count,delta
-    name: Merged disk operations
-    unit: '1'
-    gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
-      valueType: INT64
-      metricKind: CUMULATIVE
+  - service: gce_instance
+    gcpMonitoringFilter: var:filter_conditions
     dimensions:
-    - value: metric.labels.instance_name
-    - value: metric.labels.device_name
-    - value: metric.labels.direction
-  - value: compute.googleapis.com/guest/cpu/usage_time
-    id: cloud.gcp.compute_googleapis_com.guest.cpu.usage_time
-    type: count,delta
-    name: CPU usage
-    unit: s{CPU}
-    gcpOptions:
-      ingestDelay: 180s
-      samplePeriod: 60s
-      valueType: DOUBLE
-      metricKind: CUMULATIVE
-    dimensions:
-    - value: metric.labels.instance_name
-    - value: metric.labels.state
-alerts:
-  - path: alerts/gce_instance/cpu.utilization.json
+      - value: label:resource.labels.project_id
+        key: gcp.project.id
+      - value: label:resource.labels.instance_id
+        key: gcp.instance.id
+      - value: label:resource.labels.zone
+        key: gcp.region
+    metrics:
+      - value: metric:compute.googleapis.com/guest/cpu/usage_time
+        key: cloud.gcp.compute_googleapis_com.guest.cpu.usage_time
+        type: count,delta
+        gcpOptions:
+          ingestDelay: 180
+          samplePeriod: 60
+          valueType: DOUBLE
+          metricKind: CUMULATIVE
+          unit: s{CPU}
+        dimensions:
+          - value: label:metric.labels.instance_name
+            key: instance_name
+          - value: label:metric.labels.state
+            key: state
+      - value: metric:compute.googleapis.com/instance/cpu/usage_time
+        key: cloud.gcp.compute_googleapis_com.instance.cpu.usage_time
+        type: count,delta
+        gcpOptions:
+          ingestDelay: 240
+          samplePeriod: 60
+          valueType: DOUBLE
+          metricKind: DELTA
+          unit: s{CPU}
+        dimensions:
+          - value: label:metric.labels.instance_name
+            key: instance_name
+      - value: metric:compute.googleapis.com/guest/disk/merged_operation_count
+        key: cloud.gcp.compute_googleapis_com.guest.disk.merged_operation_count
+        type: count,delta
+        gcpOptions:
+          ingestDelay: 180
+          samplePeriod: 60
+          valueType: INT64
+          metricKind: CUMULATIVE
+          unit: "1"
+        dimensions:
+          - value: label:metric.labels.instance_name
+            key: instance_name
+          - value: label:metric.labels.device_name
+            key: device_name
+          - value: label:metric.labels.direction
+            key: direction

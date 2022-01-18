@@ -20,7 +20,7 @@ ASSUMED_AVG_DIMENSION_VALUES = 3
 
 
 def generate_ddu_estimation():
-    supported_services = load_supported_services(LoggingContext(None), [])
+    supported_services = load_supported_services(LoggingContext(None))
 
     print("|| Service name || Configuration || DDU per minute per instance ||")
 

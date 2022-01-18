@@ -42,7 +42,7 @@
 */}}
 {{- define "activeGateImage" }}
 {{- with .Values }}
-{{- printf "%s/linux/activegate" ((split "//" .dynatraceUrl)._1 | replace "/" "") }}
+{{- printf "%s/linux/activegate" ((split "//" .dynatraceUrl)._1 | trimSuffix "/") }}
 {{- end }}
 {{- end }}
 

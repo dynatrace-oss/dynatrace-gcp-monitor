@@ -26,3 +26,6 @@ includedPermissions:
   - logging.sinks.create
   - logging.sinks.delete
   - iam.roles.delete
+  - scheduler.jobs.delete
+  - secretmanager.secrets.delete
+  - monitoring.dashboards.delete
