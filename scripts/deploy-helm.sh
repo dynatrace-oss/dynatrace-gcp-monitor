@@ -410,8 +410,9 @@ if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
   echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m" | tee -a "$FULL_LOG_FILE"
 fi
+
 echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/shortlink/deploy-k8#anchor_verify" | tee -a "$FULL_LOG_FILE"
-echo "Additionally you can enable self-monitoring for quick diagnosis: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/set-up-integration-gcp/deploy-with-google-cloud-function/#verify" | tee -a "$FULL_LOG_FILE"
+echo "Additionally you can enable self-monitoring for quick diagnosis: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/set-up-gcp-integration-on-new-cluster#verify" | tee -a "$FULL_LOG_FILE"
 echo | tee -a "$FULL_LOG_FILE"
 
 clean
