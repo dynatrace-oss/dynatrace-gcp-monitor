@@ -42,8 +42,9 @@ logsSubscriptionId: ""
 dynatraceLogIngestUrl: ""
 
 activeGate:
-  #useExisting if set to false (by default) the Active Gate will be deployed in k8s. In that case also the activeGate.dynatracePaasToken must be filled.
-  useExisting: "false"
+  #useExisting if you choose to use direct ingest through the Cluster API (available to all SaaS customers) or existing ActiveGate, put 'true' (default).
+  #If you choose new ActiveGate deployment, put 'false', the Active Gate will be deployed in k8s. In such case also the activeGate.dynatracePaasToken must be filled.
+  useExisting: "true"
   #dynatracePaasToken PaaS token, generated in Dynatrace cluster.
   dynatracePaasToken: ""
 
