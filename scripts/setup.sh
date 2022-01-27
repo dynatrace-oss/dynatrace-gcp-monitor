@@ -458,5 +458,5 @@ GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
 echo
 echo -e "\e[92m- Deployment complete\e[37m"
 echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"
-echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/set-up-integration-gcp/deploy-with-google-cloud-function/#verify"
+echo "Check the 'Verify installation' section in the docs for further steps."
 echo
