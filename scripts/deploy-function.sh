@@ -213,7 +213,7 @@ activation: |
         filter_conditions: ""
 
 EOF
-yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.release.yaml
+ext_tools/yq_linux_x64 eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.release.yaml
 
 echo "Deploying gcp cloud function"
 echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY\ny" | ./setup.sh --auto-default

@@ -15,7 +15,7 @@
 set -e
 
 EXT_DIR=ext_tools
-WGET_CACHE=.wgetcache
+WGET_CACHE="$HOME/.wgetcache"
 
 wget_cache(){
   local URL=$1
@@ -56,3 +56,4 @@ get_ext https://github.com/mikefarah/yq/releases/download/v4.9.8/yq yq _linux_am
 
 cd ext_tools
 sha256sum -c sha256sums.txt
+ls -lh .
