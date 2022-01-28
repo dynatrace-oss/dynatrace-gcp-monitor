@@ -21,7 +21,7 @@ wget_cache(){
   local URL=$1
   local TARGET=$2
 
-  FILE="${WGET_CACHE}/${URL/https:\/\//}"
+  local FILE="${WGET_CACHE}/${URL/https:\/\//}"
   if [ ! -f "$FILE" ]; then
     echo "Downloading $URL ..."
     mkdir -p "$(dirname "$FILE" )"
@@ -46,12 +46,7 @@ get_ext() {
      local ARCH_DST=$2
 
      local FILE="$EXT_DIR/${NAME}_${ARCH_DST}"
-     wget_cache "${URL}${ARCH_SRC}" "$FILE"
-     ls -l "$FILE"
-     chmod -v +x "$FILE"
-     ls -l "$FILE"
-     chmod -v a+x "$FILE"
-     ls -l "$FILE"
+     wget_cache "${URL}${ARCH_SRC}" "$FILE" && chmod -v +x "$FILE"
      shift 2
   done
 }
