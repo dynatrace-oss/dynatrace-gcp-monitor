@@ -23,6 +23,18 @@ WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FULL_LOG_FILE="${WORKING_DIR}/dynatrace_gcp_$(date '+%Y-%m-%d_%H:%M:%S').log"
 touch $FULL_LOG_FILE
 
+debug() {
+  MESSAGE=$1
+  echo -e | tee -a "$FULL_LOG_FILE" &> /dev/null
+  echo -e "DEBUG: ${MESSAGE}" | tee -a "$FULL_LOG_FILE" &> /dev/null
+  echo -e | tee -a "$FULL_LOG_FILE" &> /dev/null
+}
+
+info() {
+  MESSAGE=$1
+  echo -e "${MESSAGE}" | tee -a "$FULL_LOG_FILE"
+}
+
 warn() {
   MESSAGE=$1
   echo -e | tee -a "$FULL_LOG_FILE"
@@ -37,15 +49,21 @@ err() {
   echo -e | tee -a "$FULL_LOG_FILE"
 }
 
+system_info() {
+  debug "Current shell version: $($(ps -p $$ -ocomm= | sed s/-//g) --version)"
+  debug "CLOUD_SHELL=${CLOUD_SHELL}"
+}
+system_info
+
 clean() {
-  echo "- removing extensions files" | tee -a "$FULL_LOG_FILE"
+  info "- removing extensions files"
   rm -rf $EXTENSION_MANIFEST_FILE $CLUSTER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
 
   if [ -n "$GCP_FUNCTION_NAME" ]; then
-    echo "- removing archive [$FUNCTION_ZIP_PACKAGE]" | tee -a "$FULL_LOG_FILE"
+    info "- removing archive [$FUNCTION_ZIP_PACKAGE]"
     rm $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
 
-    echo "- removing temporary directory [$GCP_FUNCTION_NAME]" | tee -a "$FULL_LOG_FILE"
+    info "- removing temporary directory [$GCP_FUNCTION_NAME]"
     rm -r $WORKING_DIR/$GCP_FUNCTION_NAME
   fi
 }
@@ -72,7 +90,7 @@ test_req_yq() {
       Example command to install yq:
       sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
     if ! command -v jq &>/dev/null; then
-      echo -e "JQ: https://stedolan.github.io/jq/download/" | tee -a "$FULL_LOG_FILE"
+      info "JQ: https://stedolan.github.io/jq/download/"
     fi
     exit 1
   else
@@ -82,7 +100,7 @@ test_req_yq() {
       VERSION_YQ=$(yq --version | cut -d' ' -f4 | tr -d '"')
     fi
 
-    echo "Using yq version $VERSION_YQ" | tee -a "$FULL_LOG_FILE"
+    info "Using yq version $VERSION_YQ"
 
     if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
       err 'yq in 4.9.8+ version is required to install Dynatrace function. Please refer to following links for installation instructions:
@@ -149,7 +167,7 @@ check_if_parameter_is_empty() {
   PARAMETER_NAME=$2
   ADDITIONAL_MESSAGE=$3
   if [ -z "${PARAMETER}" ]; then
-    echo "Missing required parameter: ${PARAMETER_NAME}. ${ADDITIONAL_MESSAGE}" | tee -a "$FULL_LOG_FILE"
+    info "Missing required parameter: ${PARAMETER_NAME}. ${ADDITIONAL_MESSAGE}"
     exit
   fi
 }
@@ -175,7 +193,7 @@ check_api_token() {
     for REQUIRED in "${API_TOKEN_SCOPES[@]}"; do
       if ! grep -q "${REQUIRED}" <<<"$RESPONSE"; then
         err "Missing permission for the API token: ${REQUIRED}."
-        echo "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: ${DEPLOYMENT_TYPE}" | tee -a "$FULL_LOG_FILE"
+        info "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: ${DEPLOYMENT_TYPE}"
         exit 1
       fi
     done
@@ -238,7 +256,7 @@ get_activated_extensions_on_cluster() {
       EXTENSIONS_FROM_NEXT_PAGE=$(echo -e "\n$EXTENSIONS_FROM_NEXT_PAGE")
       EXTENSIONS=("${EXTENSIONS[@]}" "${EXTENSIONS_FROM_NEXT_PAGE[@]}")
     done
-    echo "${EXTENSIONS[@]}" | tee -a "$FULL_LOG_FILE"
+    info "${EXTENSIONS[@]}"
   else
     err "- Dynatrace Cluster failed on ${DYNATRACE_URL}/api/v2/extensions endpoint."
     exit
@@ -262,8 +280,8 @@ upload_extension_to_cluster() {
       warn "- Activation ${EXTENSION_ZIP} failed."
       ((AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS+=1))
     else
-      echo | tee -a "$FULL_LOG_FILE"
-      echo "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated." | tee -a "$FULL_LOG_FILE"
+      info ""
+      info "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated."
     fi
   fi
 }
@@ -277,7 +295,7 @@ services_setup_in_config() {
       SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default_metrics"
     fi
   done
-  echo "${SERVICES_FROM_ACTIVATION_CONFIG[*]}" | tee -a "$FULL_LOG_FILE"
+  info "${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 }
 
 activate_extension_on_cluster() {

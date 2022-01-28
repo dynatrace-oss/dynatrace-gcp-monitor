@@ -20,8 +20,8 @@ source ./lib.sh
 trap ctrl_c INT
 trap onFailure ERR
 
-echo -e "\033[1;34mDynatrace function for Google Cloud Platform ${GCP_FUNCTION_RELEASE_VERSION} monitoring" | tee -a "$FULL_LOG_FILE"
-echo -e "\033[0;37m" | tee -a "$FULL_LOG_FILE"
+info "\033[1;34mDynatrace GCP metric integration in GCP Cloud Function ${GCP_FUNCTION_RELEASE_VERSION}"
+info "\033[0;37m"
 
 print_help() {
   printf "
@@ -88,23 +88,27 @@ API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions
 
 check_s3_url
 
+debug "Downloading function sources from GitHub release"
 if [[ "$USE_LOCAL_FUNCTION_ZIP" != "Y" ]]; then
-  echo -e | tee -a "$FULL_LOG_FILE"
-  echo "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]" | tee -a "$FULL_LOG_FILE"
+  info ""
+  info "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
   wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $WORKING_DIR/$FUNCTION_ZIP_PACKAGE | tee -a "$FULL_LOG_FILE"
 else
   warn "Development mode on: using local function zip"
 fi
 
-echo "- extracting archive [$FUNCTION_ZIP_PACKAGE]" | tee -a "$FULL_LOG_FILE"
+debug "Unpacking downloaded release"
+info "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 TMP_FUNCTION_DIR=$(mktemp -d)
 unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
 
+debug "Check if $FUNCTION_ACTIVATION_CONFIG exist in working directory"
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
   err "Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing! Download correct function-deployment-package.zip again."
   exit 1
 fi
 
+debug "Parsing $FUNCTION_ACTIVATION_CONFIG to set correct parameteras for current installation"
 readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
 readonly REQUIRE_VALID_CERTIFICATE=$(yq e '.googleCloud.common.requireValidCertificate' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_PUBSUB_TOPIC=$(yq e '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
@@ -160,12 +164,13 @@ get_ext_files() {
         warn "Missing file $EXT_FILE"
         continue
       else
-        echo "$EXT_FILE" | tee -a "$FULL_LOG_FILE"
+        info "$EXT_FILE"
       fi
     done
   done
 }
 
+debug "Check if any required parameter is empty"
 check_if_parameter_is_empty "$GCP_PUBSUB_TOPIC" "'googleCloud.metrics.pubSubTopic'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$GCP_SCHEDULER_NAME" "'googleCloud.metrics.scheduler'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$DYNATRACE_URL_SECRET_NAME" "'googleCloud.common.dynatraceUrlSecretName'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
@@ -176,89 +181,93 @@ check_if_parameter_is_empty "$GCP_SERVICE_ACCOUNT" "'googleCloud.common.serviceA
 check_if_parameter_is_empty "$QUERY_INTERVAL_MIN" "'googleCloud.metrics.queryInterval'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$SERVICES_WITH_FEATURE_SET" "'activation.services'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 
-echo  "- Logging to your account..." | tee -a "$FULL_LOG_FILE"
+debug "Logging to GCP project"
+info  "- Logging to your account..."
 GCP_ACCOUNT=$(gcloud config get-value account)
-echo -e "You are now logged in as [$GCP_ACCOUNT]" | tee -a "$FULL_LOG_FILE"
-echo
+info "You are now logged in as [$GCP_ACCOUNT]"
+info ""
 DEFAULT_PROJECT=$(gcloud config get-value project)
 
-echo "Please provide the GCP project ID where Dynatrace function should be deployed to. Default value: [$DEFAULT_PROJECT] (current project)" | tee -a "$FULL_LOG_FILE"
-echo
-echo "Available projects:"
+info "Please provide the GCP project ID where Dynatrace function should be deployed to. Default value: [$DEFAULT_PROJECT] (current project)"
+info ""
+info "Available projects:"
 gcloud projects list --format="value(project_id)"
-echo
+info ""
 while ! [[ "${GCP_PROJECT}" =~ ^[a-z]{1}[a-z0-9-]{5,29}$ ]]; do
     read -p "Enter GCP project ID: " -i $DEFAULT_PROJECT -e GCP_PROJECT
 done
-echo ""
+info ""
 
-echo "- set current project to [$GCP_PROJECT]" | tee -a "$FULL_LOG_FILE"
+info "- set current project to [$GCP_PROJECT]"
 gcloud config set project $GCP_PROJECT
 
 UPDATE=$(gcloud functions list --filter=$GCP_FUNCTION_NAME --project="$GCP_PROJECT" --format="value(name)")
 INSTALL=true
 
+debug "Check if function already exist"
 if [ -n  "$UPDATE" ]; then
-echo -e "- function \e[1;32m $GCP_FUNCTION_NAME \e[0m already exists in $GCP_PROJECT and it will be updated" | tee -a "$FULL_LOG_FILE"
+info "- function \e[1;32m $GCP_FUNCTION_NAME \e[0m already exists in $GCP_PROJECT and it will be updated"
 INSTALL=false
 fi
 
 # Create App Engine app if not exists
-echo | tee -a "$FULL_LOG_FILE"
-echo "- checking App Engine app, required for Cloud Scheduler" | tee -a "$FULL_LOG_FILE"
+debug "Check if App Engine exist and configured"
+info ""
+info "- checking App Engine app, required for Cloud Scheduler"
 APP_ENGINE=$(gcloud app describe --format="json" 2>/dev/null || true)
 SERVING_APP_ENGINE=$(echo "$APP_ENGINE" | jq -r '.servingStatus')
 
 if [[ -z "$APP_ENGINE" ]]; then
-  echo | tee -a "$FULL_LOG_FILE"
-  echo "To continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler" | tee -a "$FULL_LOG_FILE"
+  info ""
+  info "To continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
   while true; do
     read -p "Do you want to create App Engine app? [y/n]" yn
     case $yn in
     [Yy]*)
-      echo | tee -a "$FULL_LOG_FILE"
-      echo "Please provide the region for App Engine app." | tee -a "$FULL_LOG_FILE"
-      echo | tee -a "$FULL_LOG_FILE"
-      echo "Available regions:" | tee -a "$FULL_LOG_FILE"
+      info ""
+      info "Please provide the region for App Engine app."
+      info ""
+      info "Available regions:"
       APP_ENGINE_LOCATIONS=$(gcloud app regions list --format="json" | jq -r '.[] | .region')
-      echo "$APP_ENGINE_LOCATIONS" | tee -a "$FULL_LOG_FILE"
+      info "$APP_ENGINE_LOCATIONS"
       readarray -t LOCATIONS_ARR <<<"$(echo "${APP_ENGINE_LOCATIONS}")"
-      echo
+      info ""
       while ! [[ " ${LOCATIONS_ARR[*]} " == *" $APP_ENGINE_LOCATION "* ]]; do
         read -p "Enter location for App Engine app: " -e APP_ENGINE_LOCATION
       done
-      echo | tee -a "$FULL_LOG_FILE"
-      echo "- creating the App Engine app" | tee -a "$FULL_LOG_FILE"
+      info ""
+      info "- creating the App Engine app"
       gcloud app create -q --region="$APP_ENGINE_LOCATION" | tee -a "$FULL_LOG_FILE"
       break
       ;;
     [Nn]*)
-      echo | tee -a "$FULL_LOG_FILE"
-      echo -e "\e[91mERROR: \e[37mCannot continue without App Engine. Deployment aborted." | tee -a "$FULL_LOG_FILE"
+      info ""
+      info "\e[91mERROR: \e[37mCannot continue without App Engine. Deployment aborted."
       exit
       ;;
     *) echo "- please answer y or n" ;;
     esac
   done
 elif [[ "$SERVING_APP_ENGINE" != "SERVING"  ]]; then
-  echo | tee -a "$FULL_LOG_FILE"
-  echo -e "\e[91mERROR: \e[37mTo continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler" | tee -a "$FULL_LOG_FILE"
-  echo | tee -a "$FULL_LOG_FILE"
-  echo 'Enable App Engine on: https://console.cloud.google.com/appengine/settings' | tee -a "$FULL_LOG_FILE"
-  echo | tee -a "$FULL_LOG_FILE"
+  info ""
+  info "\e[91mERROR: \e[37mTo continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
+  info ""
+  info 'Enable App Engine on: https://console.cloud.google.com/appengine/settings'
+  info ""
   exit
 fi
 
+debug "Select size of GCP Function"
 if [ "$INSTALL" == true ]; then
-  echo "Please provide the size of Your GCP environment to adjust memory allocated to monitoring function" | tee -a "$FULL_LOG_FILE"
-  echo "[s] - small, up to 500 instances, 256 MB memory allocated to function" | tee -a "$FULL_LOG_FILE"
-  echo "[m] - medium, up to 1000 instances, 512 MB memory allocated to function" | tee -a "$FULL_LOG_FILE"
-  echo "[l] - large, up to 5000 instances, 2048 MB memory allocated to function" | tee -a "$FULL_LOG_FILE"
-  echo "Default value: [$DEFAULT_GCP_FUNCTION_SIZE]" | tee -a "$FULL_LOG_FILE"
+  info "Please provide the size of Your GCP environment to adjust memory allocated to monitoring function"
+  info "[s] - small, up to 500 instances, 256 MB memory allocated to function"
+  info "[m] - medium, up to 1000 instances, 512 MB memory allocated to function"
+  info "[l] - large, up to 5000 instances, 2048 MB memory allocated to function"
+  info "Default value: [$DEFAULT_GCP_FUNCTION_SIZE]"
    while ! [[ "${GCP_FUNCTION_SIZE}" =~ ^(s|m|l)$ ]]; do
       read -p "Enter function size: " -i $DEFAULT_GCP_FUNCTION_SIZE -e GCP_FUNCTION_SIZE
   done
-  echo ""
+  info ""
 
   case $GCP_FUNCTION_SIZE in
   l)
@@ -271,69 +280,76 @@ if [ "$INSTALL" == true ]; then
       GCP_FUNCTION_MEMORY=256
       ;;
   *)
-      echo "unexpected function size" | tee -a "$FULL_LOG_FILE"
+      info "unexpected function size"
       exit 1
       ;;
   esac
 fi
 
-echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/" | tee -a "$FULL_LOG_FILE"
+debug "Set Dynatrace tenant url"
+info "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
 while ! [[ "${DYNATRACE_URL}" =~ $DYNATRACE_URL_REGEX ]]; do
   read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
 done
-echo ""
+info ""
 
 #remove last '/' from URL
 DYNATRACE_URL=$(echo "${DYNATRACE_URL}" | sed 's:/*$::')
 
-echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)." | tee -a "$FULL_LOG_FILE"
-echo "The token requires grant of 'Read configuration (API v1)', 'Write configuration (API v1)', 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read extension monitoring configurations (API v2)', 'Write extension monitoring configurations (API v2)', 'Read extension environment configurations (API v2)' and 'Write extension environment configurations (API v2)' scope" | tee -a "$FULL_LOG_FILE"
+debug "Set Dynatrace API token"
+info "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)."
+info "The token requires grant of 'Read configuration (API v1)', 'Write configuration (API v1)', 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read extension monitoring configurations (API v2)', 'Write extension monitoring configurations (API v2)', 'Read extension environment configurations (API v2)' and 'Write extension environment configurations (API v2)' scope"
 while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
   read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
 done
-echo ""
+info ""
 
-echo -e | tee -a "$FULL_LOG_FILE"
-echo "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]" | tee -a "$FULL_LOG_FILE"
+debug "Creating GCP Secret with Dynatrace URL and Dynatrace API token"
+info ""
+info "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]"
 if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_URL_SECRET_NAME$" --format="value(name)" | tee -a "$FULL_LOG_FILE") ]]; then
   printf "$DYNATRACE_URL" | gcloud secrets versions add $DYNATRACE_URL_SECRET_NAME --data-file=-
-  echo "Secret [$DYNATRACE_URL_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed." | tee -a "$FULL_LOG_FILE"
+  info "Secret [$DYNATRACE_URL_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed."
 else
   printf "$DYNATRACE_URL" | gcloud secrets create $DYNATRACE_URL_SECRET_NAME --data-file=- --replication-policy=automatic
 fi
 
 if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" | tee -a "$FULL_LOG_FILE") ]]; then
   printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets versions add $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=-
-  echo "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed." | tee -a "$FULL_LOG_FILE"
+  info "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed."
 else
   printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
 fi
 
+debug "Check if Dynatrace Environment support API at least in version 1.230.0"
 if [ "$INSTALL" == true ]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "/api/v2/extensions/schemas"); then
     GCP_EXTENSIONS_SCHEMA_PRESENT=$(jq -r '.versions[] | select(.=="1.230.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
     if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
-      err "Dynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.230 or higher to complete installation." | tee -a "$FULL_LOG_FILE"
+      err "Dynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.230 or higher to complete installation."
       exit 1
     fi
   fi
 
-  echo -e | tee -a "$FULL_LOG_FILE"
-  echo "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com]" | tee -a "$FULL_LOG_FILE"
+  debug "Enablig required Google APIs"
+  info ""
+  info "- enable googleapis [secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudmonitoring.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com]"
   gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.com cloudapis.googleapis.com cloudscheduler.googleapis.com monitoring.googleapis.com pubsub.googleapis.com cloudbuild.googleapis.com cloudresourcemanager.googleapis.com | tee -a "$FULL_LOG_FILE"
 
-  echo -e | tee -a "$FULL_LOG_FILE"
-  echo "- create the pubsub topic [$GCP_PUBSUB_TOPIC]" | tee -a "$FULL_LOG_FILE"
+  debug "Creating PubSub topic"
+  info ""
+  info "- create the pubsub topic [$GCP_PUBSUB_TOPIC]"
   if [[ $(gcloud pubsub topics list --filter=name:$GCP_PUBSUB_TOPIC --format="value(name)") ]]; then
-      echo "Topic [$GCP_PUBSUB_TOPIC] already exists, skipping" | tee -a "$FULL_LOG_FILE"
+      info "Topic [$GCP_PUBSUB_TOPIC] already exists, skipping"
   else
       gcloud pubsub topics create "$GCP_PUBSUB_TOPIC" | tee -a "$FULL_LOG_FILE"
   fi
 
-  echo -e | tee -a "$FULL_LOG_FILE"
-  echo "- create GCP IAM Role" | tee -a "$FULL_LOG_FILE"
+  debug "Creating GCP IAM Role for Dynatrace integration"
+  info ""
+  info "- create GCP IAM Role"
   if [[ $(gcloud iam roles list --filter="name ~ $GCP_IAM_ROLE$" --format="value(name)" --project="$GCP_PROJECT") ]]; then
-      echo "Role [$GCP_IAM_ROLE] already exists, skipping" | tee -a "$FULL_LOG_FILE"
+      info "Role [$GCP_IAM_ROLE] already exists, skipping"
   else
       readonly GCP_IAM_ROLE_TITLE="Dynatrace GCP Metrics Function"
       readonly GCP_IAM_ROLE_DESCRIPTION="Role for Dynatrace GCP function operating in metrics mode"
@@ -341,10 +357,11 @@ if [ "$INSTALL" == true ]; then
       gcloud iam roles create $GCP_IAM_ROLE --project="$GCP_PROJECT" --title="$GCP_IAM_ROLE_TITLE" --description="$GCP_IAM_ROLE_DESCRIPTION" --stage="GA" --permissions="$GCP_IAM_ROLE_PERMISSIONS_STRING" | tee -a "$FULL_LOG_FILE"
   fi
 
-  echo -e | tee -a "$FULL_LOG_FILE"
-  echo "- create service account [$GCP_SERVICE_ACCOUNT] with created role [roles/$GCP_IAM_ROLE]" | tee -a "$FULL_LOG_FILE"
+  debug "Creating GCP Service Account for Dynatrace integration"
+  info ""
+  info "- create service account [$GCP_SERVICE_ACCOUNT] with created role [roles/$GCP_IAM_ROLE]"
   if [[ $(gcloud iam service-accounts list --filter=name:$GCP_SERVICE_ACCOUNT --format="value(name)") ]]; then
-      echo "Service account [$GCP_SERVICE_ACCOUNT] already exists, skipping" | tee -a "$FULL_LOG_FILE"
+      info "Service account [$GCP_SERVICE_ACCOUNT] already exists, skipping"
   else
       gcloud iam service-accounts create "$GCP_SERVICE_ACCOUNT" >/dev/null
       gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$GCP_IAM_ROLE" >/dev/null
@@ -355,21 +372,25 @@ if [ "$INSTALL" == true ]; then
   fi
 fi
 
+debug "Dynatrace API token validation"
 check_api_token "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
-echo -e | tee -a "$FULL_LOG_FILE"
-echo "- downloading extensions" | tee -a "$FULL_LOG_FILE"
+debug "Downloading Dynatrace GCP Extensions from S3"
+info ""
+info "- downloading extensions"
 get_extensions_zip_packages
 
-echo -e | tee -a "$FULL_LOG_FILE"
-echo "- checking activated extensions in Dynatrace" | tee -a "$FULL_LOG_FILE"
+debug "Checking installed extension version on Dynatrace environemnt"
+info ""
+info "- checking activated extensions in Dynatrace"
 EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
 mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME
 pushd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
 
+debug "Verification GCP Function Interval"
 if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
-  echo "Invalid value of 'googleCloud.metrics.queryInterval', defaulting to 3" | tee -a "$FULL_LOG_FILE"
+  info "Invalid value of 'googleCloud.metrics.queryInterval', defaulting to 3"
   GCP_FUNCTION_TIMEOUT=180
   GCP_SCHEDULER_CRON="*/3 * * * *"
 else
@@ -379,25 +400,30 @@ fi
 
 # If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
 if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
-  echo | tee -a "$FULL_LOG_FILE"
-  echo "- downloading active extensions from Dynatrace" | tee -a "$FULL_LOG_FILE"
+  debug "Downloading activated extensions from Dynatrace environment"
+  info ""
+  info "- downloading active extensions from Dynatrace"
   get_extensions_from_dynatrace "$EXTENSIONS_FROM_CLUSTER"
 fi
 
-echo | tee -a "$FULL_LOG_FILE"
-echo "- validating extensions" | tee -a "$FULL_LOG_FILE"
+debug "Validation all downloaded extensions"
+info ""
+info "- validating extensions"
 validate_gcp_config_in_extensions
 
-echo | tee -a "$FULL_LOG_FILE"
-echo "- read activation config" | tee -a "$FULL_LOG_FILE"
+debug "Select correct extensions depend on activation config"
+info ""
+info "- read activation config"
 SERVICES_WITH_FEATURE_SET_STR=$(services_setup_in_config "$SERVICES_WITH_FEATURE_SET")
-echo "$SERVICES_WITH_FEATURE_SET_STR" | tee -a "$FULL_LOG_FILE"
+info "$SERVICES_WITH_FEATURE_SET_STR"
 
+debug "Upload selected extensions to Dynatrace environemnt"
 mkdir -p $WORKING_DIR/$GCP_FUNCTION_NAME/config/ | tee -a "$FULL_LOG_FILE"
-echo | tee -a "$FULL_LOG_FILE"
-echo "- choosing and uploading extensions to Dynatrace" | tee -a "$FULL_LOG_FILE"
+info ""
+info "- choosing and uploading extensions to Dynatrace"
 upload_correct_extension_to_dynatrace "$SERVICES_WITH_FEATURE_SET_STR"
 
+debug "Prepare environemnt veriables for GCP Function"
 cd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
 cat <<EOF > function_env_vars.yaml
 ACTIVATION_CONFIG: '$ACTIVATION_JSON'
@@ -414,49 +440,53 @@ QUERY_INTERVAL_MIN: '$QUERY_INTERVAL_MIN'
 EOF
 
 if [ "$INSTALL" == true ]; then
-  echo -e | tee -a "$FULL_LOG_FILE"
-  echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m" | tee -a "$FULL_LOG_FILE"
+  debug "Installing Dynatrace integration on GCP Function"
+  info ""
+  info "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
   gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml | tee -a "$FULL_LOG_FILE"
 else
 
   while true; do
-    echo -e | tee -a "$FULL_LOG_FILE"
+    info ""
     read -p "- your Cloud Function will be updated - any manual changes made to Cloud Function environment variables will be replaced with values from 'activation-config.yaml' file, do you want to continue? [y/n]" yn
     case $yn in
-        [Yy]* ) echo -e "- updating the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m" | tee -a "$FULL_LOG_FILE";  break;;
-        [Nn]* ) echo -e "Update aborted" | tee -a "$FULL_LOG_FILE"; exit;;
-        * ) echo "- please answer yes or no.";;
+        [Yy]* ) info "- updating the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m";  break;;
+        [Nn]* ) info "Update aborted"; exit;;
+        * ) info "- please answer yes or no.";;
     esac
   done
   gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml | tee -a "$FULL_LOG_FILE"
 fi
 
-echo -e | tee -a "$FULL_LOG_FILE"
-echo "- schedule the runs" | tee -a "$FULL_LOG_FILE"
+debug "Set GCP cheduler to run function periodically"
+info ""
+info "- schedule the runs"
 if [[ $(gcloud scheduler jobs list --filter="name ~ $GCP_SCHEDULER_NAME$" --format="value(name)") ]]; then
-    echo "Recreating Cloud Scheduler [$GCP_SCHEDULER_NAME]" | tee -a "$FULL_LOG_FILE"
+    info "Recreating Cloud Scheduler [$GCP_SCHEDULER_NAME]"
     gcloud -q scheduler jobs delete "$GCP_SCHEDULER_NAME" | tee -a "$FULL_LOG_FILE"
 fi
 gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_TOPIC" --schedule="$GCP_SCHEDULER_CRON" --message-body="x" | tee -a "$FULL_LOG_FILE"
 
-echo -e | tee -a "$FULL_LOG_FILE"
-echo "- create self monitoring dashboard" | tee -a "$FULL_LOG_FILE"
+debug "Uploading Dynatrace integration dashboard to GCP"
+info ""
+info "- create self monitoring dashboard"
 SELF_MONITORING_DASHBOARD_NAME=$(cat dashboards/dynatrace-gcp-function_self_monitoring.json | jq .displayName)
 if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORING_DASHBOARD_NAME" --format="value(displayName)") ]]; then
-  echo "Dashboard already exists, skipping" | tee -a "$FULL_LOG_FILE"
+  info "Dashboard already exists, skipping"
 else
   gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json | tee -a "$FULL_LOG_FILE"
 fi
 
-echo -e | tee -a "$FULL_LOG_FILE"
-echo "- cleaning up" | tee -a "$FULL_LOG_FILE"
+debug "Cleaning all temporary files "
+info ""
+info "- cleaning up"
 
 popd | tee -a "$FULL_LOG_FILE" || exit 1
 clean
 
 GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
-echo
-echo -e "\e[92m- Deployment complete\e[37m"  | tee -a "$FULL_LOG_FILE"
-echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"  | tee -a "$FULL_LOG_FILE"
-echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/alternative-deployment-scenarios/deploy-with-google-cloud-function#verify"  | tee -a "$FULL_LOG_FILE"
-echo  | tee -a "$FULL_LOG_FILE"
+info ""
+info "\e[92m- Deployment complete\e[37m"
+info "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"
+info "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/alternative-deployment-scenarios/deploy-with-google-cloud-function#verify"
+info ""
