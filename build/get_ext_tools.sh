@@ -46,7 +46,7 @@ get_ext() {
      local ARCH_DST=$2
 
      local FILE="$EXT_DIR/${NAME}_${ARCH_DST}"
-     wget_cache "${URL}${ARCH_SRC}" "$FILE" && chmod +x "$FILE"
+     wget_cache "${URL}${ARCH_SRC}" "$FILE" && chmod a+x "$FILE"
      shift 2
   done
 }
