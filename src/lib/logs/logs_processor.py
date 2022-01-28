@@ -23,7 +23,8 @@ from dateutil.parser import *
 from google.pubsub_v1 import ReceivedMessage, PubsubMessage
 
 from lib.context import LogsProcessingContext, LogsContext, LoggingContext
-from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, CONTENT_LENGTH_LIMIT, ATTRIBUTE_VALUE_LENGTH_LIMIT
+from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, CONTENT_LENGTH_LIMIT, \
+    ATTRIBUTE_VALUE_LENGTH_LIMIT, DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED
 from lib.logs.log_self_monitoring import LogSelfMonitoring, put_sfm_into_queue
 from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
 
@@ -106,8 +107,10 @@ def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) ->
     if content:
         if not isinstance(content, str):
             parsed_record[ATTRIBUTE_CONTENT] = json.dumps(parsed_record[ATTRIBUTE_CONTENT])
-        if len(parsed_record[ATTRIBUTE_CONTENT]) >= CONTENT_LENGTH_LIMIT:
-            parsed_record[ATTRIBUTE_CONTENT] = parsed_record[ATTRIBUTE_CONTENT][:CONTENT_LENGTH_LIMIT]
+        if len(parsed_record[ATTRIBUTE_CONTENT]) > CONTENT_LENGTH_LIMIT:
+            trimmed_len = CONTENT_LENGTH_LIMIT - len(DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED)
+            parsed_record[ATTRIBUTE_CONTENT] = parsed_record[ATTRIBUTE_CONTENT][
+                                       :trimmed_len] + DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED
             context.self_monitoring.records_with_too_long_content += 1
 
     return parsed_record

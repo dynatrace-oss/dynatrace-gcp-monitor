@@ -455,8 +455,8 @@ popd | tee -a "$FULL_LOG_FILE" || exit 1
 clean
 
 GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
-echo | tee -a "$FULL_LOG_FILE"
-echo -e "\e[92m- Deployment complete\e[37m" | tee -a "$FULL_LOG_FILE"
-echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m" | tee -a "$FULL_LOG_FILE"
-echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/set-up-integration-gcp/deploy-with-google-cloud-function/#verify" | tee -a "$FULL_LOG_FILE"
-echo | tee -a "$FULL_LOG_FILE"
+echo
+echo -e "\e[92m- Deployment complete\e[37m"  | tee -a "$FULL_LOG_FILE"
+echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"  | tee -a "$FULL_LOG_FILE"
+echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/alternative-deployment-scenarios/deploy-with-google-cloud-function#verify"  | tee -a "$FULL_LOG_FILE"
+echo  | tee -a "$FULL_LOG_FILE"
