@@ -71,7 +71,7 @@ while (( "$#" )); do
             ;;
 
             *)
-            echo "Unknown param $1" | tee -a "$FULL_LOG_FILE"
+            info "Unknown param $1"
             print_help
             exit 1
     esac
