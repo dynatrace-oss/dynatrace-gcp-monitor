@@ -18,8 +18,8 @@ EXT_DIR=ext_tools
 WGET_CACHE=.wgetcache
 
 wget_cache(){
-  URL=$1
-  TARGET=$2
+  local URL=$1
+  local TARGET=$2
 
   FILE="${WGET_CACHE}/${URL/https:\/\//}"
   if [ ! -f "$FILE" ]; then
@@ -35,20 +35,20 @@ wget_cache(){
 }
 
 get_ext() {
-URL=$1
-NAME=$2
+  local URL=$1
+  local NAME=$2
 
-shift 2
+  shift 2
 
-while [ "$#" -ge 2 ]
-do
-   ARCH_SRC=$1
-   ARCH_DST=$2
+  while [ "$#" -ge 2 ]
+  do
+     local ARCH_SRC=$1
+     local ARCH_DST=$2
 
-   FILE="$EXT_DIR/${NAME}_${ARCH_DST}"
-   wget_cache "${URL}${ARCH_SRC}" "$FILE" && chmod +x "$FILE"
-   shift 2
-done
+     local FILE="$EXT_DIR/${NAME}_${ARCH_DST}"
+     wget_cache "${URL}${ARCH_SRC}" "$FILE" && chmod +x "$FILE"
+     shift 2
+  done
 }
 
 get_ext https://github.com/stedolan/jq/releases/download/jq-1.5/jq jq -linux64 linux_x64

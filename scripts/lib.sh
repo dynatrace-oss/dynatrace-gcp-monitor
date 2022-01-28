@@ -390,8 +390,8 @@ upload_correct_extension_to_dynatrace() {
 }
 
 init_ext_tools() {
-  OS=$(uname -s)
-  HW=$(uname -i)
+  local OS=$(uname -s)
+  local HW=$(uname -i)
 
   case "$OS $HW" in
     "Linux x86_64")
