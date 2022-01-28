@@ -5,6 +5,8 @@ debug:
 googleCloud:
   required:
     # The GCP project ID where Dynatrace function should be deployed to
+    # With this command you can get list of your projects:
+    # gcloud projects list --format="value(project_id)"
     gcpProjectId: <PLACEHOLDER>
     # Dynatrace Tenant URL, example: https://mytenant.live.dynatrace.com/
     dynatraceTenantUrl: <PLACEHOLDER>
