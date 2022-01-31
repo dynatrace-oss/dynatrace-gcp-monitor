@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#     Copyright 2021 Dynatrace LLC
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -213,7 +213,7 @@ activation: |
         filter_conditions: ""
 
 EOF
-yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.release.yaml
+ext_tools/yq_linux_x64 eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.release.yaml
 
 echo "Deploying gcp cloud function"
 echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY\ny" | ./setup.sh --auto-default
