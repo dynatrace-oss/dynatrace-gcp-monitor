@@ -13,9 +13,8 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-install_yq() {
-  curl -sSLo yq "https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64" && chmod +x yq && sudo mv yq /usr/local/bin/yq
-}
+TEST_YQ=ext_tools/yq_linux_x64
+TEST_JQ=ext_tools/jq_linux_x64
 
 create_sample_app() {
   echo "Deploying sample app"

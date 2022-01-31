@@ -19,24 +19,23 @@ check_function_state()
 {
   FUNCTION=$1
   FUNCTION_DESCRIBE=$(gcloud functions describe "$FUNCTION"  --format="json")
-  FUNCTION_STATE=$(echo "$FUNCTION_DESCRIBE" | jq -r '.status')
+  FUNCTION_STATE=$(echo "$FUNCTION_DESCRIBE" | "$TEST_JQ" -r '.status')
   if [[ "${FUNCTION_STATE}" != *"ACTIVE"* ]]; then
     return 1
   fi
   return 0
 }
 
-install_yq
 gcloud config set project "${GCP_PROJECT_ID}"
 create_sample_app
 
 # Run cloud function deployment.
 rm -rf ./e2e_test
-mkdir -p ./e2e_test/gcp_iam_roles
-cp ./scripts/lib.sh ./e2e_test/lib.sh
-cp ./scripts/setup.sh ./e2e_test/setup.sh
-cp dynatrace-gcp-function.zip ./e2e_test/dynatrace-gcp-function.zip
-cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./e2e_test/gcp_iam_roles/
+mkdir ./e2e_test
+unzip -d ./e2e_test ./artefacts/function-deployment-package.zip
+cp ./artefacts/dynatrace-gcp-function.zip ./e2e_test
+
+ACTIVATION_CONFIG_FILE="./e2e_test/activation-config.yaml"
 
 cat <<EOF > activation.config.e2e.yaml
 googleCloud:
@@ -51,8 +50,8 @@ googleCloud:
     function: "${METRIC_FORWARDING_FUNCTION}"
     scheduler: "${CLOUD_SCHEDULER}"
 EOF
-yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.e2e.yaml
-ACTIVATION_CONFIG_FILE="./e2e_test/activation-config.yaml"
+"$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.e2e.yaml
+
 cp activation-config.yaml "$ACTIVATION_CONFIG_FILE"
 
 cd ./e2e_test || exit 1

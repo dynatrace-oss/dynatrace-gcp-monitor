@@ -15,6 +15,7 @@
 
 source ./tests/e2e/lib-tests.sh
 
+
 check_container_state()
 {
   CONTAINER=$1
@@ -49,8 +50,6 @@ while (( "$#" )); do
     esac
 done
 
-install_yq
-
 # Create Pub/Sub topic and subscription.
 gcloud config set project "${GCP_PROJECT_ID}"
 
@@ -74,21 +73,17 @@ else
     --log-filter="resource.type=\"cloud_function\" AND resource.labels.function_name=\"${CLOUD_FUNCTION_NAME}\"" --description="Simple Sink for E2E tests" > /dev/null 2>&1
 fi
 
-writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | jq -r '.writerIdentity')
+writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | "$TEST_JQ" -r '.writerIdentity')
 gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher > /dev/null 2>&1
 
 create_sample_app
 
 # Run helm deployment.
 rm -rf ./e2e_test
-mkdir -p ./e2e_test/gcp_iam_roles
-cp ./scripts/lib.sh ./e2e_test/lib.sh
-cp ./scripts/deploy-helm.sh ./e2e_test/deploy-helm.sh
-cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./e2e_test/gcp_iam_roles/
-cp ./gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml ./e2e_test/gcp_iam_roles/
-cp -r ./k8s/helm-chart/dynatrace-gcp-function/ ./e2e_test/dynatrace-gcp-function/
+mkdir ./e2e_test
+tar -C ./e2e_test -xf ./artefacts/helm-deployment-package.tar
 
-VALUES_FILE="./e2e_test/dynatrace-gcp-function/values.yaml"
+VALUES_FILE="./e2e_test/helm-deployment-package/dynatrace-gcp-function/values.yaml"
 
 cat <<EOF > values.e2e.yaml
 gcpProjectId: "${GCP_PROJECT_ID}"
@@ -102,11 +97,11 @@ activeGate:
   useExisting: "false"
   dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
 EOF
-yq eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
+"$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
 
-cd ./e2e_test || exit 1
+cd ./e2e_test/helm-deployment-package || exit 1
 ./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 
 # Verify containers running

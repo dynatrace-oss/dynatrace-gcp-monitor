@@ -13,18 +13,11 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-err() {
-  MESSAGE=$1
-  echo -e >&2
-  echo -e "\e[91mERROR: \e[37m$MESSAGE" >&2
-  echo -e >&2
-}
+WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$WORKING_DIR/lib.sh"
+init_ext_tools
 
-versionNumber() {
-   echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
-}
-
-readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | jq 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
+readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | "$JQ" 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -32,34 +25,6 @@ TMP_FUNCTION_DIR=$(mktemp -d)
 
 echo -e "\033[1;34mDynatrace function for Google Cloud Platform monitoring / uninstall script"
 echo -e "\033[0;37m"
-
-if ! command -v yq &> /dev/null
-then
-    err 'yq (4.9.x+) and jq is required to uninstall Dynatrace function. Please refer to following links for installation instructions:
-    YQ: https://github.com/mikefarah/yq
-    Example command to install yq:
-    sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
-    if ! command -v jq &> /dev/null
-    then
-        echo -e "JQ: https://stedolan.github.io/jq/download/"
-    fi
-    exit 1
-else
-  VERSION_YQ=$(yq --version | cut -d' ' -f3 | tr -d '"')
-
-  if [ "$VERSION_YQ" == "version" ]; then
-    VERSION_YQ=$(yq --version | cut -d' ' -f4 | tr -d '"')
-  fi
-
-  echo "Using yq version $VERSION_YQ"
-
-  if [ "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
-
-      err 'yq in 4.9.8+ version is required to uninstall Dynatrace function. Please refer to following links for installation instructions:
-      YQ: https://github.com/mikefarah/yq'
-      exit 1
-  fi
-fi
 
 if ! command -v gcloud &>/dev/null; then
   echo -e "\e[93mWARNING: \e[37mGoogle Cloud CLI is required to uninstall Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:"
@@ -78,12 +43,12 @@ if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo
 fi
 
-readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_PUBSUB_TOPIC=$(yq e  '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_FUNCTION_NAME=$(yq e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_SCHEDULER_NAME=$(yq e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
-readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
-readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SERVICE_ACCOUNT=$("$YQ" e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_PUBSUB_TOPIC=$("$YQ" e  '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_NAME=$("$YQ" e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SCHEDULER_NAME=$("$YQ" e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_URL_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-function Self monitoring"
 
 GCP_ACCOUNT=$(gcloud config get-value account)
