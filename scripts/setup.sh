@@ -13,9 +13,11 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-GCP_FUNCTION_RELEASE_VERSION=""
+GCP_FUNCTION_RELEASE_VERSION=''
 
-source ./lib.sh
+WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $WORKING_DIR/lib.sh
+init_ext_tools
 
 trap ctrl_c INT
 trap onFailure ERR
@@ -39,7 +41,6 @@ arguments:
     "
 }
 
-test_req_yq
 test_req_gcloud
 test_req_unzip
 
@@ -105,24 +106,24 @@ if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
   exit 1
 fi
 
-readonly GCP_SERVICE_ACCOUNT=$(yq e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
-readonly REQUIRE_VALID_CERTIFICATE=$(yq e '.googleCloud.common.requireValidCertificate' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_PUBSUB_TOPIC=$(yq e '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_FUNCTION_NAME=$(yq e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_SCHEDULER_NAME=$(yq e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
-readonly QUERY_INTERVAL_MIN=$(yq e '.googleCloud.metrics.queryInterval' $FUNCTION_ACTIVATION_CONFIG)
-readonly DYNATRACE_URL_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
-readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$(yq e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
-readonly ACTIVATION_JSON=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -P -j)
-readonly SERVICES_TO_ACTIVATE=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -j '.services[]' - | jq -r '.service')
-SERVICES_WITH_FEATURE_SET=$(yq e '.activation' $FUNCTION_ACTIVATION_CONFIG | yq e -j '.services[]' - | jq -r '. | "\(.service)/\(.featureSets[])"' 2>/dev/null)
-readonly PRINT_METRIC_INGEST_INPUT=$(yq e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
-readonly DEFAULT_GCP_FUNCTION_SIZE=$(yq e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
-readonly SERVICE_USAGE_BOOKING=$(yq e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
-readonly USE_PROXY=$(yq e '.googleCloud.common.useProxy' $FUNCTION_ACTIVATION_CONFIG)
-readonly HTTP_PROXY=$(yq e '.googleCloud.common.httpProxy' $FUNCTION_ACTIVATION_CONFIG)
-readonly HTTPS_PROXY=$(yq e '.googleCloud.common.httpsProxy' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_IAM_ROLE=$(yq e '.googleCloud.common.iamRole' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SERVICE_ACCOUNT=$("$YQ" e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
+readonly REQUIRE_VALID_CERTIFICATE=$("$YQ" e '.googleCloud.common.requireValidCertificate' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_PUBSUB_TOPIC=$("$YQ" e '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_NAME=$("$YQ" e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SCHEDULER_NAME=$("$YQ" e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
+readonly QUERY_INTERVAL_MIN=$("$YQ" e '.googleCloud.metrics.queryInterval' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_URL_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly ACTIVATION_JSON=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -P -j)
+readonly SERVICES_TO_ACTIVATE=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -j '.services[]' - | "$JQ" -r '.service')
+SERVICES_WITH_FEATURE_SET=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"' 2>/dev/null)
+readonly PRINT_METRIC_INGEST_INPUT=$("$YQ" e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
+readonly DEFAULT_GCP_FUNCTION_SIZE=$("$YQ" e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
+readonly SERVICE_USAGE_BOOKING=$("$YQ" e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
+readonly USE_PROXY=$("$YQ" e '.googleCloud.common.useProxy' $FUNCTION_ACTIVATION_CONFIG)
+readonly HTTP_PROXY=$("$YQ" e '.googleCloud.common.httpProxy' $FUNCTION_ACTIVATION_CONFIG)
+readonly HTTPS_PROXY=$("$YQ" e '.googleCloud.common.httpsProxy' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_IAM_ROLE=$("$YQ" e '.googleCloud.common.iamRole' $FUNCTION_ACTIVATION_CONFIG)
 # Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
 readonly GCP_IAM_ROLE_PERMISSIONS=(
   resourcemanager.projects.get
@@ -141,7 +142,7 @@ readonly GCP_IAM_ROLE_PERMISSIONS=(
   monitoring.dashboards.list
   monitoring.dashboards.create
 )
-readonly SELF_MONITORING_ENABLED=$(yq e '.googleCloud.common.selfMonitoringEnabled' $FUNCTION_ACTIVATION_CONFIG)
+readonly SELF_MONITORING_ENABLED=$("$YQ" e '.googleCloud.common.selfMonitoringEnabled' $FUNCTION_ACTIVATION_CONFIG)
 EXTENSIONS_FROM_CLUSTER=""
 
 shopt -s nullglob
@@ -154,7 +155,7 @@ get_ext_files() {
     if ! (grep -q "$SERVICE" <<< "$SERVICES_TO_ACTIVATE") ; then
       continue
     fi
-    for EXT_FILE in $(yq e -j ".$YAML_PATH"  "$FILEPATH"| tr -d '"')
+    for EXT_FILE in $("$YQ" e -j ".$YAML_PATH"  "$FILEPATH"| tr -d '"')
     do
       if [ ! -f "./$EXT_FILE" ] ; then
         warn "Missing file $EXT_FILE"
@@ -207,7 +208,7 @@ fi
 echo
 echo "- checking App Engine app, required for Cloud Scheduler"
 APP_ENGINE=$(gcloud app describe --format="json" 2>/dev/null || true)
-SERVING_APP_ENGINE=$(echo "$APP_ENGINE" | jq -r '.servingStatus')
+SERVING_APP_ENGINE=$(echo "$APP_ENGINE" | "$JQ" -r '.servingStatus')
 
 if [[ -z "$APP_ENGINE" ]]; then
   echo
@@ -220,7 +221,7 @@ if [[ -z "$APP_ENGINE" ]]; then
       echo "Please provide the region for App Engine app."
       echo
       echo "Available regions:"
-      APP_ENGINE_LOCATIONS=$(gcloud app regions list --format="json" | jq -r '.[] | .region')
+      APP_ENGINE_LOCATIONS=$(gcloud app regions list --format="json" | "$JQ" -r '.[] | .region')
       echo "$APP_ENGINE_LOCATIONS"
       readarray -t LOCATIONS_ARR <<<"$(echo "${APP_ENGINE_LOCATIONS}")"
       echo
@@ -311,7 +312,7 @@ fi
 
 if [ "$INSTALL" == true ]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "/api/v2/extensions/schemas"); then
-    GCP_EXTENSIONS_SCHEMA_PRESENT=$(jq -r '.versions[] | select(.=="1.230.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
+    GCP_EXTENSIONS_SCHEMA_PRESENT=$("$JQ" -r '.versions[] | select(.=="1.230.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
     if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
       err "Dynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.230 or higher to complete installation."
       exit 1
@@ -441,7 +442,7 @@ gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_T
 
 echo -e
 echo "- create self monitoring dashboard"
-SELF_MONITORING_DASHBOARD_NAME=$(cat dashboards/dynatrace-gcp-function_self_monitoring.json | jq .displayName)
+SELF_MONITORING_DASHBOARD_NAME=$(cat dashboards/dynatrace-gcp-function_self_monitoring.json | "$JQ" .displayName)
 if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORING_DASHBOARD_NAME" --format="value(displayName)") ]]; then
   echo "Dashboard already exists, skipping"
 else
@@ -458,5 +459,5 @@ GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
 echo
 echo -e "\e[92m- Deployment complete\e[37m"
 echo -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"
-echo "You can verify if the installation was successful by following the steps from: https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/alternative-deployment-scenarios/deploy-with-google-cloud-function#verify"
+echo "Check the 'Verify installation' section in the docs for further steps."
 echo

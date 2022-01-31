@@ -13,7 +13,10 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-source ./lib.sh
+
+WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$WORKING_DIR/lib.sh"
+init_ext_tools
 
 trap ctrl_c INT
 trap onFailure ERR
@@ -93,7 +96,6 @@ arguments:
 }
 
 # test pre-requirements
-test_req_yq
 test_req_gcloud
 test_req_unzip
 test_req_kubectl
@@ -172,7 +174,7 @@ readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --json
 readonly USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.useProxy}")
 readonly HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
 readonly HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
-SERVICES_FROM_ACTIVATION_CONFIG=$(yq e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | yq e -j '.services[]' - | jq -r '. | "\(.service)/\(.featureSets[])"')
+SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
 API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 
 check_s3_url
@@ -226,7 +228,7 @@ fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "/api/v2/extensions/schemas"); then
-    GCP_EXTENSIONS_SCHEMA_PRESENT=$(jq -r '.versions[] | select(.=="1.230.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
+    GCP_EXTENSIONS_SCHEMA_PRESENT=$("$JQ" -r '.versions[] | select(.=="1.230.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
     if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
       err "Dynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.230 or higher to complete installation."
       exit 1
@@ -356,7 +358,7 @@ echo
 echo "- 4. Create dynatrace-gcp-function IAM role(s)."
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.logs" --project="$GCP_PROJECT" --format="value(name)") ]]; then
-    echo "Updating existing IAM role $ROLE_NAME.logs"
+    echo "Updating existing IAM role $ROLE_NAME.logs. It was probably created for previous GCP integration deployment and you can safely replace it."
     gcloud iam roles update $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml >${CMD_OUT_PIPE}
   else
     gcloud iam roles create $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml >${CMD_OUT_PIPE}
@@ -365,7 +367,7 @@ fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   if [[ $(gcloud iam roles list --filter="name:$ROLE_NAME.metrics" --project="$GCP_PROJECT" --format="value(name)") ]]; then
-    echo "Updating existing IAM role $ROLE_NAME.metrics"
+    echo "Updating existing IAM role $ROLE_NAME.metrics. It was probably created for previous GCP integration deployment and you can safely replace it."
     gcloud iam roles update $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml >${CMD_OUT_PIPE}
   else
     gcloud iam roles create $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml >${CMD_OUT_PIPE}
