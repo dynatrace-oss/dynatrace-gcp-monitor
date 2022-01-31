@@ -103,7 +103,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
 
         dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-        await check_version(logging_context=context)
+        check_version(logging_context=context)
         await check_dynatrace(logging_context=context,
                               project_id=project_id_owner,
                               dt_session=dt_session,
