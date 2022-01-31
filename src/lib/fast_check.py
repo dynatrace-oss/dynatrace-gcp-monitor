@@ -187,7 +187,7 @@ class MetricsFastCheck:
 
     async def execute(self) -> FastCheckResult:
         _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
-        _check_version(self.logging_context)
+        check_version(self.logging_context)
 
         project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
@@ -218,7 +218,7 @@ class LogsFastCheck:
 
     def execute(self):
         _check_configuration_flags(self.logging_context, LOGS_CONFIGURATION_FLAGS)
-        _check_version(self.logging_context)
+        check_version(self.logging_context)
         self.logging_context.log("Sending the startup message")
         container_name = self.instance_metadata.hostname if self.instance_metadata else "local deployment"
         fast_check_event = {
@@ -241,7 +241,7 @@ def _check_configuration_flags(logging_context: LoggingContext, flags_to_check: 
     logging_context.log(f"Found configuration flags: {', '.join(configuration_flag_values)}")
 
 
-def _check_version(logging_context: LoggingContext):
+def check_version(logging_context: LoggingContext):
     script_directory = os.path.dirname(os.path.realpath(__file__))
     version_file_path = os.path.join(script_directory, "./../version.txt")
     with open(version_file_path) as version_file:
