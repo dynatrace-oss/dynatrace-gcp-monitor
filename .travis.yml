@@ -5,6 +5,7 @@ notifications:
   email:
     on_success: never
 stages:
+- shellcheck
 - tests
 - github-deploy
 - e2e-helm-deployment-test
@@ -18,6 +19,14 @@ env:
   - DOCKER_CLI_EXPERIMENTAL=enabled
 jobs:
   include:
+  - stage: shellcheck
+    name: CheckStyle
+    language: minimal
+    script: |
+      for script in $(find . -iname "*.sh"); 
+      do
+        shellcheck -x "$script";
+      done
   - stage: tests
     name: Tests
     language: python
