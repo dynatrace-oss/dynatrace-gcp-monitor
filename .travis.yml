@@ -24,10 +24,13 @@ jobs:
     name: CheckStyle
     language: minimal
     script: |
+      status=0
       for script in $(find . -iname "*.sh"); 
       do
         shellcheck -x "$script";
-      done
+        status=$?;
+      done;
+      exit $status
   - stage: tests
     name: Tests
     language: python
