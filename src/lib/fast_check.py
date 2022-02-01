@@ -85,6 +85,12 @@ def valid_dynatrace_scopes(token_metadata: dict):
     token_scopes = token_metadata.get('scopes', [])
     return all(scope in token_scopes for scope in DYNATRACE_REQUIRED_TOKEN_SCOPES) if token_scopes else False
 
+def check_version(logging_context: LoggingContext):
+    script_directory = os.path.dirname(os.path.realpath(__file__))
+    version_file_path = os.path.join(script_directory, "./../version.txt")
+    with open(version_file_path) as version_file:
+        _version = version_file.readline()
+        logging_context.log(f"Found version: {_version}")
 
 async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:
@@ -187,7 +193,6 @@ class MetricsFastCheck:
 
     async def execute(self) -> FastCheckResult:
         _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
-        _check_version(self.logging_context)
 
         project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
@@ -218,7 +223,7 @@ class LogsFastCheck:
 
     def execute(self):
         _check_configuration_flags(self.logging_context, LOGS_CONFIGURATION_FLAGS)
-        _check_version(self.logging_context)
+        check_version(self.logging_context)
         self.logging_context.log("Sending the startup message")
         container_name = self.instance_metadata.hostname if self.instance_metadata else "local deployment"
         fast_check_event = {
@@ -239,11 +244,3 @@ def _check_configuration_flags(logging_context: LoggingContext, flags_to_check: 
         else:
             configuration_flag_values.append(f"{key} = '{value}'")
     logging_context.log(f"Found configuration flags: {', '.join(configuration_flag_values)}")
-
-
-def _check_version(logging_context: LoggingContext):
-    script_directory = os.path.dirname(os.path.realpath(__file__))
-    version_file_path = os.path.join(script_directory, "./../version.txt")
-    with open(version_file_path) as version_file:
-        _version = version_file.readline()
-        logging_context.log(f"Found version: {_version}")
