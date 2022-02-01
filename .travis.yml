@@ -28,7 +28,9 @@ jobs:
       for script in $(find . -iname "*.sh"); 
       do
         shellcheck -x "$script";
-        status=$?;
+        if [ $? -eq 0 ]; then
+          status=1;
+        fi;
       done;
       exit $status
   - stage: tests
