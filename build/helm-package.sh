@@ -1,5 +1,5 @@
-#!/bin/bash 
-#     Copyright 2021 Dynatrace LLC
+#!/usr/bin/env bash
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -26,5 +26,7 @@ cp ./ext_tools/* ./helm-deployment-package/ext_tools/
 
 cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./helm-deployment-package/gcp_iam_roles/
 cp ./gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml ./helm-deployment-package/gcp_iam_roles/
+
+cp ./src/version.txt ./helm-deployment-package/version.txt
 
 tar -cf ./artefacts/helm-deployment-package.tar ./helm-deployment-package
