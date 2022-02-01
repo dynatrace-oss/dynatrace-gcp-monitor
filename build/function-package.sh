@@ -1,5 +1,5 @@
-#!/bin/bash 
-#     Copyright 2021 Dynatrace LLC
+#!/usr/bin/env bash
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -20,4 +20,4 @@ rm -f ./artefacts/dynatrace-gcp-function.zip
 (cd ./src/; zip -r ../artefacts/dynatrace-gcp-function.zip ./ -x '*__pycache__*')
 sed -i "s/^GCP_FUNCTION_RELEASE_VERSION=.*/GCP_FUNCTION_RELEASE_VERSION='$TRAVIS_TAG'/" scripts/setup.sh
 zip -r ./artefacts/function-deployment-package.zip ./ext_tools/
-zip -j ./artefacts/function-deployment-package.zip ./scripts/lib.sh ./scripts/setup.sh ./scripts/uninstall.sh ./activation-config.yaml
+zip -j ./artefacts/function-deployment-package.zip ./scripts/lib.sh ./scripts/setup.sh ./scripts/uninstall.sh ./activation-config.yaml ./src/version.txt
