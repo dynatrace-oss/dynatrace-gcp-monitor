@@ -30,7 +30,7 @@ from lib.credentials import create_token, get_project_id_from_environment, fetch
     get_all_accessible_projects
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
-from lib.fast_check import check_dynatrace
+from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_all_disabled_apis
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
@@ -103,6 +103,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
 
         dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+        check_version(logging_context=context)
         await check_dynatrace(logging_context=context,
                               project_id=project_id_owner,
                               dt_session=dt_session,
