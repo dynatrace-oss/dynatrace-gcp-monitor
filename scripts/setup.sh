@@ -106,6 +106,12 @@ if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
   exit 1
 fi
 
+readonly GCP_PROJECT=$("$YQ" e '.googleCloud.required.gcpProjectId' $FUNCTION_ACTIVATION_CONFIG)
+DYNATRACE_URL=$("$YQ" e '.googleCloud.required.dynatraceTenantUrl' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_ACCESS_KEY=$("$YQ" e '.googleCloud.required.dynatraceApiToken' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_SIZE=$("$YQ" e '.googleCloud.required.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_REGION=$("$YQ" e '.googleCloud.required.cloudFunctionRegion' $FUNCTION_ACTIVATION_CONFIG)
+readonly PREFERRED_APP_ENGINE_REGION=$("$YQ" e '.googleCloud.required.preferredAppEngineRegion' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_SERVICE_ACCOUNT=$("$YQ" e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
 readonly REQUIRE_VALID_CERTIFICATE=$("$YQ" e '.googleCloud.common.requireValidCertificate' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_PUBSUB_TOPIC=$("$YQ" e '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
@@ -118,7 +124,6 @@ readonly ACTIVATION_JSON=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "
 readonly SERVICES_TO_ACTIVATE=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -j '.services[]' - | "$JQ" -r '.service')
 SERVICES_WITH_FEATURE_SET=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"' 2>/dev/null)
 readonly PRINT_METRIC_INGEST_INPUT=$("$YQ" e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
-readonly DEFAULT_GCP_FUNCTION_SIZE=$("$YQ" e '.googleCloud.common.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
 readonly SERVICE_USAGE_BOOKING=$("$YQ" e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
 readonly USE_PROXY=$("$YQ" e '.googleCloud.common.useProxy' $FUNCTION_ACTIVATION_CONFIG)
 readonly HTTP_PROXY=$("$YQ" e '.googleCloud.common.httpProxy' $FUNCTION_ACTIVATION_CONFIG)
@@ -167,6 +172,10 @@ get_ext_files() {
   done
 }
 
+check_if_parameter_is_empty "$GCP_PROJECT" "'.googleCloud.required.gcpProjectId'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
+check_if_parameter_is_empty "$DYNATRACE_URL" "'.googleCloud.required.dynatraceTenantUrl'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
+check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "'.googleCloud.required.dynatraceApiToken'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
+check_if_parameter_is_empty "$PREFERRED_APP_ENGINE_REGION" "'.googleCloud.required.preferredAppEngineRegion'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$GCP_PUBSUB_TOPIC" "'googleCloud.metrics.pubSubTopic'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$GCP_SCHEDULER_NAME" "'googleCloud.metrics.scheduler'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$DYNATRACE_URL_SECRET_NAME" "'googleCloud.common.dynatraceUrlSecretName'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
@@ -180,21 +189,6 @@ check_if_parameter_is_empty "$SERVICES_WITH_FEATURE_SET" "'activation.services'"
 echo  "- Logging to your account..."
 GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
-echo
-DEFAULT_PROJECT=$(gcloud config get-value project)
-GCP_REGION=$(gcloud config get-value functions/region)
-echo -e "Using region [$GCP_REGION]"
-echo
-
-echo "Please provide the GCP project ID where Dynatrace function should be deployed to. Default value: [$DEFAULT_PROJECT] (current project)"
-echo
-echo "Available projects:"
-gcloud projects list --format="value(project_id)"
-echo
-while ! [[ "${GCP_PROJECT}" =~ ^[a-z]{1}[a-z0-9-]{5,29}$ ]]; do
-    read -p "Enter GCP project ID: " -i $DEFAULT_PROJECT -e GCP_PROJECT
-done
-echo ""
 
 echo "- set current project to [$GCP_PROJECT]"
 gcloud config set project $GCP_PROJECT
@@ -215,54 +209,20 @@ SERVING_APP_ENGINE=$(echo "$APP_ENGINE" | "$JQ" -r '.servingStatus')
 
 if [[ -z "$APP_ENGINE" ]]; then
   echo
-  echo "To continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
-  while true; do
-    read -p "Do you want to create App Engine app? [y/n]" yn
-    case $yn in
-    [Yy]*)
-      echo
-      echo "Please provide the region for App Engine app."
-      echo
-      echo "Available regions:"
-      APP_ENGINE_LOCATIONS=$(gcloud app regions list --format="json" | "$JQ" -r '.[] | .region')
-      echo "$APP_ENGINE_LOCATIONS"
-      readarray -t LOCATIONS_ARR <<<"$(echo "${APP_ENGINE_LOCATIONS}")"
-      echo
-      while ! [[ " ${LOCATIONS_ARR[*]} " == *" $APP_ENGINE_LOCATION "* ]]; do
-        read -p "Enter location for App Engine app: " -e APP_ENGINE_LOCATION
-      done
-      echo
-      echo "- creating the App Engine app"
-      gcloud app create -q --region="$APP_ENGINE_LOCATION"
-      break
-      ;;
-    [Nn]*)
-      echo
-      echo -e "\e[91mERROR: \e[37mCannot continue without App Engine. Deployment aborted."
-      exit
-      ;;
-    *) echo "- please answer y or n" ;;
-    esac
-  done
+  echo "AppEngine not found. It will be created in your preferredAppEngineRegion $PREFERRED_APP_ENGINE_REGION"
+  echo "- creating the App Engine app"
+  gcloud app create -q --region="$PREFERRED_APP_ENGINE_REGION"
 elif [[ "$SERVING_APP_ENGINE" != "SERVING"  ]]; then
   echo
-  echo -e "\e[91mERROR: \e[37mTo continue deployment your GCP project must contain an App Engine app - it's required for Cloud Scheduler"
+  echo -e "\e[91mERROR: \e[37mTo continue deployment your GCP project must contain an App Engine"
   echo
-  echo 'Enable App Engine on: https://console.cloud.google.com/appengine/settings'
+  echo 'Please check status of App Engine and enable it on: https://console.cloud.google.com/appengine/settings'
   echo
   exit
 fi
 
 if [ "$INSTALL" == true ]; then
-  echo "Please provide the size of Your GCP environment to adjust memory allocated to monitoring function"
-  echo "[s] - small, up to 500 instances, 256 MB memory allocated to function"
-  echo "[m] - medium, up to 1000 instances, 512 MB memory allocated to function"
-  echo "[l] - large, up to 5000 instances, 2048 MB memory allocated to function"
-  echo "Default value: [$DEFAULT_GCP_FUNCTION_SIZE]"
-   while ! [[ "${GCP_FUNCTION_SIZE}" =~ ^(s|m|l)$ ]]; do
-      read -p "Enter function size: " -i $DEFAULT_GCP_FUNCTION_SIZE -e GCP_FUNCTION_SIZE
-  done
-  echo ""
+  check_if_parameter_is_empty "$GCP_FUNCTION_SIZE" "'.googleCloud.required.cloudFunctionSize'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 
   case $GCP_FUNCTION_SIZE in
   l)
@@ -275,27 +235,19 @@ if [ "$INSTALL" == true ]; then
       GCP_FUNCTION_MEMORY=256
       ;;
   *)
-      echo "unexpected function size"
+      echo "unexpected function size, should be one of: s/m/l"
       exit 1
       ;;
   esac
 fi
 
-echo "Please provide the URL used to access Dynatrace, for example: https://mytenant.live.dynatrace.com/"
-while ! [[ "${DYNATRACE_URL}" =~ $DYNATRACE_URL_REGEX ]]; do
-  read -p "Enter Dynatrace tenant URI: " DYNATRACE_URL
-done
-echo ""
+if ! [[ "${DYNATRACE_URL}" =~ $DYNATRACE_URL_REGEX ]]; then
+  echo "Dynatrace Tenant URL does not match expected pattern"
+  exit 1
+fi
 
 #remove last '/' from URL
 DYNATRACE_URL=$(echo "${DYNATRACE_URL}" | sed 's:/*$::')
-
-echo "Please log in to Dynatrace, and generate API token (Settings->Integration->Dynatrace API)."
-echo "The token requires grant of 'Read configuration (API v1)', 'Write configuration (API v1)', 'Ingest metrics (API v2)', 'Read extensions (API v2)', 'Write extensions (API v2)', 'Read extension monitoring configurations (API v2)', 'Write extension monitoring configurations (API v2)', 'Read extension environment configurations (API v2)' and 'Write extension environment configurations (API v2)' scope"
-while ! [[ "${DYNATRACE_ACCESS_KEY}" != "" ]]; do
-  read -p "Enter Dynatrace API token: " DYNATRACE_ACCESS_KEY
-done
-echo ""
 
 echo -e
 echo "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]"
@@ -416,25 +368,17 @@ HTTPS_PROXY: '$HTTPS_PROXY'
 SELF_MONITORING_ENABLED: '$SELF_MONITORING_ENABLED'
 QUERY_INTERVAL_MIN: '$QUERY_INTERVAL_MIN'
 GCP_PROJECT: '$GCP_PROJECT'
-FUNCTION_REGION: '$GCP_REGION'
+FUNCTION_REGION: '$GCP_FUNCTION_REGION'
 EOF
 
 if [ "$INSTALL" == true ]; then
   echo -e
   echo -e "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python38 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml
+  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --region "$GCP_FUNCTION_REGION" --entry-point=dynatrace_gcp_extension --runtime=python38 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml
 else
-
-  while true; do
-    echo -e
-    read -p "- your Cloud Function will be updated - any manual changes made to Cloud Function environment variables will be replaced with values from 'activation-config.yaml' file, do you want to continue? [y/n]" yn
-    case $yn in
-        [Yy]* ) echo -e "- updating the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m";  break;;
-        [Nn]* ) echo -e "Update aborted" ; exit;;
-        * ) echo "- please answer yes or no.";;
-    esac
-  done
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python38  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml
+  echo -e "- your Cloud Function will be updated - any manual changes made to Cloud Function environment variables will be replaced with values from 'activation-config.yaml' file"
+  echo -e "- updating the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
+  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --region "$GCP_FUNCTION_REGION" --entry-point=dynatrace_gcp_extension --runtime=python38  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml
 fi
 
 echo -e
