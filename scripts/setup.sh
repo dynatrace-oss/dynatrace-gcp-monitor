@@ -188,6 +188,9 @@ GCP_ACCOUNT=$(gcloud config get-value account)
 info "You are now logged in as [$GCP_ACCOUNT]"
 info ""
 DEFAULT_PROJECT=$(gcloud config get-value project)
+GCP_REGION=$(gcloud config get-value functions/region)
+echo -e "Using region [$GCP_REGION]"
+echo
 
 info "Please provide the GCP project ID where Dynatrace function should be deployed to. Default value: [$DEFAULT_PROJECT] (current project)"
 info ""
@@ -438,13 +441,15 @@ HTTP_PROXY: '$HTTP_PROXY'
 HTTPS_PROXY: '$HTTPS_PROXY'
 SELF_MONITORING_ENABLED: '$SELF_MONITORING_ENABLED'
 QUERY_INTERVAL_MIN: '$QUERY_INTERVAL_MIN'
+GCP_PROJECT: '$GCP_PROJECT'
+FUNCTION_REGION: '$GCP_REGION'
 EOF
 
 if [ "$INSTALL" == true ]; then
   debug "Installing Dynatrace integration on GCP Function"
   info ""
   info "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml | tee -a "$FULL_LOG_FILE"
+  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python38 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml | tee -a "$FULL_LOG_FILE"
 else
 
   while true; do
@@ -456,7 +461,7 @@ else
         * ) info "- please answer yes or no.";;
     esac
   done
-  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python37  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml | tee -a "$FULL_LOG_FILE"
+  gcloud functions -q deploy "$GCP_FUNCTION_NAME" --entry-point=dynatrace_gcp_extension --runtime=python38  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml | tee -a "$FULL_LOG_FILE"
 fi
 
 debug "Set GCP cheduler to run function periodically"
