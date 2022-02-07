@@ -39,6 +39,13 @@ ACTIVATION_CONFIG_FILE="./e2e_test/activation-config.yaml"
 
 cat <<EOF > activation.config.e2e.yaml
 googleCloud:
+  required:
+    gcpProjectId: "${$GCP_PROJECT_ID}"
+    dynatraceTenantUrl: "${$DYNATRACE_URL}"
+    dynatraceApiToken: "${DYNATRACE_ACCESS_KEY}"
+    cloudFunctionSize: s
+    cloudFunctionRegion: us-central1
+    preferredAppEngineRegion: us-central
   common:
     dynatraceUrlSecretName: "${DYNATRACE_URL_SECRET_NAME}"
     dynatraceAccessKeySecretName: "${DYNATRACE_ACCESS_KEY_SECRET_NAME}"
@@ -56,7 +63,7 @@ cp activation-config.yaml "$ACTIVATION_CONFIG_FILE"
 
 cd ./e2e_test || exit 1
 echo "Deploying gcp cloud function"
-echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY" | ./setup.sh --use-local-function-zip --auto-default
+./setup.sh --use-local-function-zip --auto-default
 
 # Verify if function is running
 echo
