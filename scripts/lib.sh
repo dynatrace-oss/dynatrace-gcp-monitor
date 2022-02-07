@@ -123,21 +123,18 @@ test_req_helm() {
 
 init_ext_tools() {
   local OS=$(uname -s)
-  local HW=$(uname -i)
+  local HW=$(uname -m)
 
-  if ${CLOUD_SHELL}; then
-    ARCH=linux_x64
-  else
-    case "$OS $HW" in
-      "Linux x86_64")
-        ARCH=linux_x64
-      ;;
-      *)
-        warn "Architecture '$OS $HW' not supported"
-        ARCH=""
-      ;;
-    esac
-  fi
+
+  case "$OS $HW" in
+    "Linux x86_64")
+      ARCH=linux_x64
+    ;;
+    *)
+      warn "Architecture '$OS $HW' not supported"
+      ARCH=""
+    ;;
+  esac
 
   if [ -z "$YQ" ]; then
     YQ=yq
