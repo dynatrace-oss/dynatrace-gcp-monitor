@@ -121,6 +121,42 @@ test_req_helm() {
   fi
 }
 
+init_ext_tools() {
+  local OS=$(uname -s)
+  local HW=$(uname -i)
+
+  if ${CLOUD_SHELL}; then
+    ARCH=linux_x64
+  else
+    case "$OS $HW" in
+      "Linux x86_64")
+        ARCH=linux_x64
+      ;;
+      *)
+        warn "Architecture '$OS $HW' not supported"
+        ARCH=""
+      ;;
+    esac
+  fi
+
+  if [ -z "$YQ" ]; then
+    YQ=yq
+  fi
+
+  if [ -z "$JQ" ]; then
+    JQ=jq
+  fi
+
+  if [ -n "$ARCH" ]; then
+     # Always use internal tools on supported architectures
+     YQ="$WORKING_DIR/ext_tools/yq_$ARCH"
+     JQ="$WORKING_DIR/ext_tools/jq_$ARCH"
+  fi
+
+  test_req_yq
+  test_req_jq
+}
+
 dt_api() {
   URL=$1
   if [ $# -eq 3 ]; then
@@ -387,36 +423,4 @@ upload_correct_extension_to_dynatrace() {
   fi
 
   cd "${WORKING_DIR}" || exit
-}
-
-init_ext_tools() {
-  local OS=$(uname -s)
-  local HW=$(uname -i)
-
-  case "$OS $HW" in
-    "Linux x86_64")
-      ARCH=linux_x64
-    ;;
-    *)
-      warn "Architecture '$OS $HW' not supported"
-      ARCH=""
-    ;;
-  esac
-
-  if [ -z "$YQ" ]; then
-    YQ=yq
-  fi
-
-  if [ -z "$JQ" ]; then
-    JQ=jq
-  fi
-
-  if [ -n "$ARCH" ]; then
-     # Always use internal tools on supported architectures
-     YQ="$WORKING_DIR/ext_tools/yq_$ARCH"
-     JQ="$WORKING_DIR/ext_tools/jq_$ARCH"
-  fi
-
-  test_req_yq
-  test_req_jq
 }
