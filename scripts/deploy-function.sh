@@ -21,8 +21,8 @@ wget -q "https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/downlo
 cat <<EOF > activation.config.release.yaml
 googleCloud:
   required:
-    gcpProjectId: "${$GCP_PROJECT_ID}"
-    dynatraceTenantUrl: "${$DYNATRACE_URL}"
+    gcpProjectId: "${GCP_PROJECT_ID}"
+    dynatraceTenantUrl: "${DYNATRACE_URL}"
     dynatraceApiToken: "${DYNATRACE_ACCESS_KEY}"
     cloudFunctionSize: s
     cloudFunctionRegion: us-central1

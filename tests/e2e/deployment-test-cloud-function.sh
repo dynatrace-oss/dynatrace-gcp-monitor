@@ -40,8 +40,8 @@ ACTIVATION_CONFIG_FILE="./e2e_test/activation-config.yaml"
 cat <<EOF > activation.config.e2e.yaml
 googleCloud:
   required:
-    gcpProjectId: "${$GCP_PROJECT_ID}"
-    dynatraceTenantUrl: "${$DYNATRACE_URL}"
+    gcpProjectId: "${GCP_PROJECT_ID}"
+    dynatraceTenantUrl: "${DYNATRACE_URL}"
     dynatraceApiToken: "${DYNATRACE_ACCESS_KEY}"
     cloudFunctionSize: s
     cloudFunctionRegion: us-central1
