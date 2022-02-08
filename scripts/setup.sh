@@ -175,6 +175,8 @@ get_ext_files() {
 check_if_parameter_is_empty "$GCP_PROJECT" "'.googleCloud.required.gcpProjectId'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$DYNATRACE_URL" "'.googleCloud.required.dynatraceTenantUrl'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "'.googleCloud.required.dynatraceApiToken'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
+check_if_parameter_is_empty "$GCP_FUNCTION_SIZE" "'.googleCloud.required.cloudFunctionSize'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
+check_if_parameter_is_empty "$GCP_FUNCTION_REGION" "'.googleCloud.required.cloudFunctionSize'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$PREFERRED_APP_ENGINE_REGION" "'.googleCloud.required.preferredAppEngineRegion'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$GCP_PUBSUB_TOPIC" "'googleCloud.metrics.pubSubTopic'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 check_if_parameter_is_empty "$GCP_SCHEDULER_NAME" "'googleCloud.metrics.scheduler'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
