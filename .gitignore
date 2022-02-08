@@ -12,6 +12,7 @@ artefacts/
 helm-deployment-package/
 release/
 src/config/
+*.log
 .wgetcache
 ext_tools/
 !ext_tools/*.txt
