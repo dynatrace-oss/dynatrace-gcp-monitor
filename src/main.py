@@ -135,6 +135,9 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         disabled_apis = {}
         for project_id in projects_ids:
             disabled_apis = {project_id: await get_all_disabled_apis(context, token, project_id)}
+            if disabled_apis[project_id] == {project_id}:
+                projects_ids.remove(project_id)
+        context.log("monitoring.googleapis.com API enabled at following projects: " + ", ".join(projects_ids))
 
         setup_time = (time.time() - setup_start_time)
         context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}
