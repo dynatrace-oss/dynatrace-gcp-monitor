@@ -142,7 +142,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         for disabled_project in disabled_projects:
             projects_ids.remove(disabled_project)
         
-        context.log(f"monitoring.googleapis.com API disabled in the projects: " + ", ".join(disabled_projects) + ", this project will not be monitored")
+        context.log(f"monitoring.googleapis.com API disabled in the projects: " + ", ".join(disabled_projects) + ", that projects will not be monitored")
 
         setup_time = (time.time() - setup_start_time)
         context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}
