@@ -36,9 +36,6 @@ async def get_all_disabled_apis(context: MetricsContext, token: str, project_id:
                 disabled_services_json = await response.json()
                 disabled_services = disabled_services_json.get("services", [])
                 disabled_apis.update({disable_service.get("config", {}).get("name", "") for disable_service in disabled_services})
-        if 'monitoring.googleapis.com' in disabled_apis:
-            disabled_apis.clear()
-            disabled_apis = {project_id}
         return disabled_apis
     except Exception as e:
         context.log(f'Cannot get disabled APIs: {GCP_SERVICE_USAGE_URL}/projects/{project_id}/services?filter = state:DISABLED. {e}')

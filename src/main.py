@@ -136,7 +136,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         disabled_projects = []
         for project_id in projects_ids:
             disabled_apis = {project_id: await get_all_disabled_apis(context, token, project_id)}
-            if disabled_apis[project_id] == {project_id}:
+            if 'monitoring.googleapis.com' in disabled_apis:
                 disabled_projects.append(project_id)
         
         for disabled_project in disabled_projects:
