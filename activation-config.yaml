@@ -1,20 +1,40 @@
 # Debug properties for Dynatrace Cloud Function
-debug:  
+debug:
   # if true will print full MINT ingest input. Allowed values: true/yes, false/no
-  printMetricIngestInput: false 
+  printMetricIngestInput: false
 googleCloud:
+  required:
+    # The GCP project ID where Dynatrace function should be deployed to
+    # With this command you can get list of your projects:
+    # gcloud projects list --format="value(project_id)"
+    gcpProjectId: <PLACEHOLDER>
+    # Dynatrace Tenant URL, example: https://mytenant.live.dynatrace.com/
+    dynatraceTenantUrl: <PLACEHOLDER>
+    # Dynatrace API Token (see docs for list of required permissions)
+    dynatraceApiToken: <PLACEHOLDER>
+    # Size of function (only needed for installation, not used for updates):
+    # s - small, up to 500 instances, 256 MB memory allocated to function
+    # m - medium, up to 1000 instances, 512 MB memory allocated to function
+    # l - large, up to 5000 instances, 2048 MB memory allocated to function
+    cloudFunctionSize: s
+    # Region for Cloud Function
+    cloudFunctionRegion: us-east1
+    # Preferred App Engine Region
+    # The Function uses Cloud Scheduler which requires App Engine. If you don't have App Engine installed, script will create it in preferred region
+    # If running App Engine is found, new one will not be created
+    # Note: europe-west1 and us-central1 have different naming in AppEngine: europe-west and us-central (other regions are normal, like us-east1)
+    preferredAppEngineRegion: us-east1
   common:
     # Name of Google Secret Manager Secret containing Dynatrace URL
-    dynatraceUrlSecretName: DYNATRACE_URL
+    dynatraceUrlSecretName: DYNATRACE_URL_SECRET
     # Name of Google Secret Manager Secret containing Dynatrace Access Key
-    dynatraceAccessKeySecretName: DYNATRACE_ACCESS_KEY
+    dynatraceAccessKeySecretName: DYNATRACE_ACCESS_KEY_SECRET
     # Name of the Service Account that should be created for Dynatrace Function to authenticate with Google Monitoring API 
     serviceAccount: dynatrace-gcp-service-custom
     # Name of the GCP IAM Role that should be created for Dynatrace Function Service Account
     iamRole: dynatrace_extension.metrics
     # Path to Google credentials file
     # googleApplicationCredentialsPath: ''
-    cloudFunctionSize: s 
     # Require valid SSL certificate when communicating with Dynatrace Cluster / Active Gate
     # May be set to false in case communication through Active Gate is debugged, for non-production use cases
     # Allowed values: true/yes, false/no
