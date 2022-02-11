@@ -7,6 +7,7 @@ notifications:
     on_success: never
 stages:
 - tests
+- build
 - e2e-helm-deployment-test
 - e2e-cloud-function-deployment-test
 - github-deploy
@@ -22,24 +23,22 @@ jobs:
   - stage: tests
     name: Tests
     language: python
-
-    cache:
-      directories:
-        - "$HOME/.cache/pip"
-        - "$HOME/.wgetcache"
     python:
       - "3.8"
-    install:
-      - pip install -r src/requirements.txt
-      - pip install -r tests/requirements.txt
+    env:
+      - PYTHONPATH="$TRAVIS_BUILD_DIR/src:$TRAVIS_BUILD_DIR/tests"
     addons:
       apt:
         packages:
           - default-jre
-    env:
-      - PYTHONPATH="$TRAVIS_BUILD_DIR/src:$TRAVIS_BUILD_DIR/tests"
+    cache:
+      directories:
+        - "$HOME/.cache/pip"
+        - "$HOME/.wgetcache"
+    install:
+      - pip install -r src/requirements.txt
+      - pip install -r tests/requirements.txt
     script:
-      - echo $TRAVIS_BUILD_DIR
       - pytest tests/unit -v
       - pytest tests/integration/logs -v
 #       The cd is executed due to the fact that the wiremock instance initialized in the test is using
@@ -48,13 +47,42 @@ jobs:
           cd tests/integration/metrics
           pytest -v
 
+  - stage: build
+    name: Build
+    language: python
+    python:
+      - "3.8"
+    cache:
+      directories:
+        - "$HOME/.cache/pip"
+        - "$HOME/.wgetcache"
+    before_install:
+      # Install GCP SDK if not already cached
+      - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
+      - source $HOME/google-cloud-sdk/path.bash.inc
+      - gcloud version
+      # Put correct Version into files
+      - ./build/version.sh
+    install: 
+      - ./build/get_ext_tools.sh
+      - ./build/helm-package.sh
+      - ./build/function-package.sh
+    before_deploy:
+      - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out release/e2e-gcp-sa-key.json -d
+      - gcloud auth activate-service-account --key-file release/e2e-gcp-sa-key.json
+    deploy:
+      provider: gcs
+      bucket: "travis-e2e"
+      skip_cleanup: true
+      file: "./artefacts/*"
+
   - stage: docker-deploy
     name: Docker Hub deploy
     if: tag =~ /^release-.*
     language: minimal
     script:
       - ./build/version.sh
-      - ./build/docker-deploy.sh
+      - ./build/docker-deploy.sh #to changes to pull not build during release
     env: PUSH=true
 
   - stage: github-deploy
@@ -63,14 +91,13 @@ jobs:
     cache:
       directories:
         - "$HOME/.wgetcache"
-
     install: skip
     language: minimal
     before_deploy:
-    - ./build/version.sh
-    - ./build/get_ext_tools.sh
-    - ./build/helm-package.sh
-    - ./build/function-package.sh
+      - ./build/version.sh
+      - ./build/get_ext_tools.sh
+      - ./build/helm-package.sh
+      - ./build/function-package.sh
     deploy:
       provider: releases
       file_glob: true
@@ -108,13 +135,11 @@ jobs:
       - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
       - source $HOME/google-cloud-sdk/path.bash.inc
       - gcloud version
-      - sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
     before_script:
       - mkdir -p release
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out release/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file release/e2e-gcp-sa-key.json
     script:
-      - ./build/get_ext_tools.sh
       - ./scripts/deploy-function.sh
 
   - stage: e2e-helm-deployment-test
