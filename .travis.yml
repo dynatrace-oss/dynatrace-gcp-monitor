@@ -8,11 +8,11 @@ notifications:
 stages:
 - tests
 - build
-- e2e-helm-deployment-test
-- e2e-cloud-function-deployment-test
-- github-deploy
-- docker-deploy
-- gcp-install-release
+# - e2e-helm-deployment-test
+# - e2e-cloud-function-deployment-test
+# - github-deploy
+# - docker-deploy
+# - gcp-install-release
 env:
   global:
   - TAG=$TRAVIS_TAG
@@ -56,18 +56,15 @@ jobs:
       directories:
         - "$HOME/.cache/pip"
         - "$HOME/.wgetcache"
-    before_install:
+    install:
       # Install GCP SDK if not already cached
       - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
       - source $HOME/google-cloud-sdk/path.bash.inc
       - gcloud version
-      # Put correct Version into files
-      - ./build/version.sh
-    install: 
+      - ./build/version.sh 
       - ./build/get_ext_tools.sh
       - ./build/helm-package.sh
       - ./build/function-package.sh
-    before_deploy:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out release/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file release/e2e-gcp-sa-key.json
     deploy:
