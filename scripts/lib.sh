@@ -199,7 +199,7 @@ check_if_parameter_is_empty() {
   PARAMETER=$1
   PARAMETER_NAME=$2
   ADDITIONAL_MESSAGE=$3
-  if [ -z "${PARAMETER}" ]; then
+  if [ -z "${PARAMETER}" ] || [ "$PARAMETER" = "<PLACEHOLDER>" ]; then
     info "Missing required parameter: ${PARAMETER_NAME}. ${ADDITIONAL_MESSAGE}"
     exit
   fi
