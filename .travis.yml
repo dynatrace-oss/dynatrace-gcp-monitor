@@ -74,6 +74,7 @@ jobs:
       # Put correct Version into files
       - ./build/version.sh
       - ./build/get_ext_tools.sh
+      - ./ext_tools/yq_linux_x64 e -i ".dockerImage |= \"${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}\"" k8s/helm-chart/dynatrace-gcp-function/values.yaml
       - ./build/helm-package.sh
       - ./build/docker-deploy.sh
       - ./build/function-package.sh
