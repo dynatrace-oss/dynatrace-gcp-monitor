@@ -18,6 +18,8 @@ env:
   - TAG=$TRAVIS_TAG
   - VERSION_TAG=/^release-.*
   - DOCKER_CLI_EXPERIMENTAL=enabled
+  - GCP_PROJECT_ID="dynatrace-gcp-extension"
+  - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-function"
 jobs:
   include:
   - stage: tests
@@ -59,7 +61,6 @@ jobs:
         - "$HOME/.wgetcache"
     env:
       - CLOUDSDK_CORE_DISABLE_PROMPTS=1
-      - GCP_PROJECT_ID="dynatrace-gcp-extension"
       - E2E=true
     before_script:
       # Install GCP SDK if not already cached
@@ -123,7 +124,6 @@ jobs:
     env:
       - CLOUDSDK_CORE_DISABLE_PROMPTS=1
       - IAM_SERVICE_ACCOUNT="dynatrace-gcp-sa-release"
-      - GCP_PROJECT_ID="dynatrace-gcp-extension"
       - DYNATRACE_URL_SECRET_NAME="DYNATRACE_RELEASE_URL"
       - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_RELEASE_ACCESS_KEY"
       - IAM_ROLE_METRCICS="dynatrace_gcp_release.metrics"
@@ -163,8 +163,7 @@ jobs:
       - LOG_ROUTER="e2e_test_log_router_${TRAVIS_BUILD_ID}"
       - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
       - K8S_CLUSTER="e2e-test-master"
-      - GCP_PROJECT_ID="dynatrace-gcp-extension"
-      - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-function"
+      
       - E2E=true
       - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
       - secure: "muHGNxIK6fxTltIsGgms6v3dleuQ1LZyQmZIGQDSfQ5sfYDYEvR2xsabK237AipSSGppoVhc7S6ri8A/WNQautHUfdBOsVn1i7czzoPhELdOJkAiigXrI3kla68OTCiC0TPwWbIYOxzmiYDHZr+rYbA1773O0iyhWHiTVQerLMndn0wCFWUUnLbD1WfzdAxlfSo1rd7u81m8g4efLIUppo/fjfaxmVwvo1oIfensGVknyOE+gtSh/OpGdYfNeOqxoDGOoMe5bnCqibUoREXRzUZKGb6upxMMmW6E3hGG02kqle4jYjaC7Uiu2IVZsK38iAWNGwIRy21CIXNHn4R6we44n5JLH92aiRtVw8D/fDOnN2gWTtmdrvoB8YklbaYZBnDrGJxI6rESfeQjwD8ImWWKUJFUlwovKjNWhOw8RMhPVtPOuC00+F2UDq5NosrWYGUjLjaKFC/4nysOiK2DgsMBF/Mk1Ei1BDMYmcHQ7Jsrs8ys/kgPasV3Qs9xOuSJpF+AiwKPfI1R9bxYiORg70TNz62wPD7FlKWIVe0DvhrWcHCTpnrROabt6B0hUROfljCZe2H+j8HD9uCJCJHk5qP7llNVofVnz8w+s90wLEKpUNn2rVUH0fzffYM7YaLRPhzLEUJSQso3a7hXFfcoUow8OOPTmCgViGCfPjuy2zc="
@@ -203,7 +202,6 @@ jobs:
         - "$HOME/.cache/pip"
     env:
       - CLOUDSDK_CORE_DISABLE_PROMPTS=1
-      - GCP_PROJECT_ID="dynatrace-gcp-extension"
       - E2E=true
       - DYNATRACE_URL_SECRET_NAME="DYNATRACE_URL_${TRAVIS_BUILD_ID}"
       - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_ACCESS_KEY_${TRAVIS_BUILD_ID}"
