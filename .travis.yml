@@ -183,7 +183,7 @@ jobs:
       - ./tests/e2e/before-deployment-test-helm-cleanup.sh
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
-      - gsutil cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
+      - mkdir -p ./artefacts/ && gsutil cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
       - travis_wait 60 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
@@ -223,7 +223,7 @@ jobs:
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
-      - gsutil -m cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/* ./artefacts/
+      - mkdir -p ./artefacts/ && gsutil -m cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/* ./artefacts/
       - travis_wait 60 ./tests/e2e/execute-tests-cloud-function.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup-cloud-function.sh
