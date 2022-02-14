@@ -50,9 +50,7 @@ googleCloud:
     function: "${METRIC_FORWARDING_FUNCTION}"
     scheduler: "${CLOUD_SCHEDULER}"
 EOF
-"$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.e2e.yaml
-
-cp activation-config.yaml "$ACTIVATION_CONFIG_FILE"
+"$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' "$ACTIVATION_CONFIG_FILE" activation.config.e2e.yaml
 
 cd ./e2e_test || exit 1
 echo "Deploying gcp cloud function"
