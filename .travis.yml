@@ -163,7 +163,6 @@ jobs:
       - LOG_ROUTER="e2e_test_log_router_${TRAVIS_BUILD_ID}"
       - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
       - K8S_CLUSTER="e2e-test-master"
-      
       - E2E=true
       - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
       - secure: "muHGNxIK6fxTltIsGgms6v3dleuQ1LZyQmZIGQDSfQ5sfYDYEvR2xsabK237AipSSGppoVhc7S6ri8A/WNQautHUfdBOsVn1i7czzoPhELdOJkAiigXrI3kla68OTCiC0TPwWbIYOxzmiYDHZr+rYbA1773O0iyhWHiTVQerLMndn0wCFWUUnLbD1WfzdAxlfSo1rd7u81m8g4efLIUppo/fjfaxmVwvo1oIfensGVknyOE+gtSh/OpGdYfNeOqxoDGOoMe5bnCqibUoREXRzUZKGb6upxMMmW6E3hGG02kqle4jYjaC7Uiu2IVZsK38iAWNGwIRy21CIXNHn4R6we44n5JLH92aiRtVw8D/fDOnN2gWTtmdrvoB8YklbaYZBnDrGJxI6rESfeQjwD8ImWWKUJFUlwovKjNWhOw8RMhPVtPOuC00+F2UDq5NosrWYGUjLjaKFC/4nysOiK2DgsMBF/Mk1Ei1BDMYmcHQ7Jsrs8ys/kgPasV3Qs9xOuSJpF+AiwKPfI1R9bxYiORg70TNz62wPD7FlKWIVe0DvhrWcHCTpnrROabt6B0hUROfljCZe2H+j8HD9uCJCJHk5qP7llNVofVnz8w+s90wLEKpUNn2rVUH0fzffYM7YaLRPhzLEUJSQso3a7hXFfcoUow8OOPTmCgViGCfPjuy2zc="
@@ -177,7 +176,6 @@ jobs:
       - gcloud version
       - pip install -r tests/requirements.txt
       - ./tests/e2e/helm-preinstall.sh
-      - gsutil cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
     before_script:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
@@ -185,6 +183,7 @@ jobs:
       - ./tests/e2e/before-deployment-test-helm-cleanup.sh
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
+      - gsutil cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
       - travis_wait 60 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
@@ -219,12 +218,12 @@ jobs:
       - source $HOME/google-cloud-sdk/path.bash.inc
       - gcloud version
       - pip install -r tests/requirements.txt
-      - gsutil -m cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/* ./artefacts/
     before_script:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
+      - gsutil -m cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/* ./artefacts/
       - travis_wait 60 ./tests/e2e/execute-tests-cloud-function.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup-cloud-function.sh
