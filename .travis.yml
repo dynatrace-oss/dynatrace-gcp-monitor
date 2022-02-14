@@ -86,7 +86,7 @@ jobs:
     language: minimal
     script:
       - ./build/version.sh
-      - ./build/docker-deploy.sh #to changes to pull not build during release
+      - ./build/docker-deploy.sh
     env: PUSH=true
 
   - stage: github-deploy
