@@ -49,7 +49,7 @@ jobs:
 
   - stage: build
     name: Build
-    if: NOT (tag =~ /^release-.*)
+    if: tag !~ /^release-.*
     language: python
     python:
       - "3.8"
