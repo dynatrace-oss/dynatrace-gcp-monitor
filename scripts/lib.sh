@@ -15,13 +15,15 @@
 
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
 readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
-readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
 readonly EXTENSION_ZIP_REGEX="^(.*)-([0-9.]*).zip$"
 EXTENSIONS_TMPDIR=$(mktemp -d)
 CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
 WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FULL_LOG_FILE="${WORKING_DIR}/dynatrace_gcp_$(date '+%Y-%m-%d_%H:%M:%S').log"
-touch $FULL_LOG_FILE
+touch "$FULL_LOG_FILE"
+
+# schellchek SC2034 placeholder usage
+echo "$DYNATRACE_URL_REGEX" >/dev/null
 
 debug() {
   MESSAGE=$1
@@ -57,14 +59,14 @@ system_info
 
 clean() {
   info "- removing extensions files"
-  rm -rf $EXTENSION_MANIFEST_FILE $CLUSTER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
+  rm -rf $EXTENSION_MANIFEST_FILE "$CLUSTER_EXTENSIONS_TMPDIR" "$EXTENSIONS_TMPDIR"
 
   if [ -n "$GCP_FUNCTION_NAME" ]; then
     info "- removing archive [$FUNCTION_ZIP_PACKAGE]"
-    rm $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
+    rm "$WORKING_DIR"/"$FUNCTION_ZIP_PACKAGE"
 
     info "- removing temporary directory [$GCP_FUNCTION_NAME]"
-    rm -r $WORKING_DIR/$GCP_FUNCTION_NAME
+    rm -r "${WORKING_DIR:?}"/"$GCP_FUNCTION_NAME"
   fi
 }
 
@@ -91,7 +93,7 @@ test_req_yq() {
     fi
   fi
 
-  if [ -z "$VERSION_YQ" -o "$(versionNumber $VERSION_YQ)" -lt "$(versionNumber '4.9.8')" ]; then
+  if [ -z "$VERSION_YQ" ] || [ "$(versionNumber "$VERSION_YQ")" -lt "$(versionNumber '4.9.8')" ]; then
     err 'yq (4.9.x+) is required to install Dynatrace function. Please refer to following links for installation instructions:
       YQ: https://github.com/mikefarah/yq
       Example command to install yq:
@@ -142,8 +144,11 @@ test_req_helm() {
 }
 
 init_ext_tools() {
-  local OS=$(uname -s)
-  local HW=$(uname -m)
+  local OS
+  local HW
+  
+  OS=$(uname -s)
+  HW=$(uname -m)
 
 
   case "$OS $HW" in
@@ -207,8 +212,8 @@ check_if_parameter_is_empty() {
 
 check_url() {
   URL=$1
-  REGEXES=${@:2:$#-2} # all arguments except first and last
-  MESSAGE=${@: -1} # last argument
+  REGEXES=${*:2:$#-2} # all arguments except first and last
+  MESSAGE=${*: -1} # last argument
 
   for REGEX in $REGEXES
   do
@@ -246,7 +251,7 @@ check_s3_url() {
 validate_gcp_config_in_extensions() {
   cd "${EXTENSIONS_TMPDIR}" || exit
   for EXTENSION_ZIP in *.zip; do
-    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" | tee -a "$FULL_LOG_FILE" >/dev/null
+    unzip "${EXTENSION_ZIP}" -d "$EXTENSION_ZIP-tmp" | tee -a "$FULL_LOG_FILE" >/dev/null
     cd "$EXTENSION_ZIP-tmp" || exit
     unzip "extension.zip" "extension.yaml" | tee -a "$FULL_LOG_FILE" >/dev/null
     if [[ $("$YQ" e 'has("gcp")' extension.yaml) == "false" ]]; then
@@ -265,7 +270,7 @@ validate_gcp_config_in_extensions() {
 }
 
 get_extensions_zip_packages() {
-  curl -O "${EXTENSION_S3_URL}/${EXTENSION_MANIFEST_FILE}" &>/dev/stdout | tee -a "$FULL_LOG_FILE" &> /dev/null
+  curl -O "${EXTENSION_S3_URL}/${EXTENSION_MANIFEST_FILE}" | tee -a "$FULL_LOG_FILE" &> /dev/null
   EXTENSIONS_LIST=$(grep "^google.*\.zip" <"$EXTENSION_MANIFEST_FILE" | tee -a "$FULL_LOG_FILE")
   if [ -z "$EXTENSIONS_LIST" ]; then
     err "Empty extensions manifest file downloaded"
@@ -274,7 +279,7 @@ get_extensions_zip_packages() {
 
   echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME; do
     echo -n "." | tee -a "$FULL_LOG_FILE"
-    (cd ${EXTENSIONS_TMPDIR} && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
+    (cd "${EXTENSIONS_TMPDIR}" && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
   done
 }
 
@@ -346,7 +351,7 @@ activate_extension_on_cluster() {
     upload_extension_to_cluster "${EXTENSION_ZIP}" "${EXTENSION_VERSION}"
   # example of extension from DT: com.dynatrace.extension.google-kubernetes-engine:0.0.10
   # $EXTENSION_IN_DT##*: -> removes everything before ':', e.g. we will get '0.0.10'
-  elif [ "$(versionNumber ${EXTENSION_VERSION})" -gt "$(versionNumber ${EXTENSION_IN_DT##*:})" ]; then
+  elif [ "$(versionNumber "${EXTENSION_VERSION}")" -gt "$(versionNumber "${EXTENSION_IN_DT##*:}")" ]; then
     # cluster has newer version warning and install if flag was set
     if [ -n "${UPGRADE_EXTENSIONS}" ]; then
       upload_extension_to_cluster "${EXTENSION_ZIP}" "${EXTENSION_VERSION}"
@@ -354,7 +359,7 @@ activate_extension_on_cluster() {
       warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT##*:} installed on the cluster, use '--upgrade-extensions' to upgrade to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
       ((AMOUNT_OF_EXTENSIONS_TO_UPLOAD-=1))
     fi
-  elif [ "$(versionNumber ${EXTENSION_VERSION})" -lt "$(versionNumber ${EXTENSION_IN_DT##*:})" ]; then
+  elif [ "$(versionNumber "${EXTENSION_VERSION}")" -lt "$(versionNumber "${EXTENSION_IN_DT##*:}")" ]; then
     warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT##*:} installed on the cluster is newer than ${EXTENSION_NAME}:${EXTENSION_VERSION}"
     ((AMOUNT_OF_EXTENSIONS_TO_UPLOAD-=1))
   fi
@@ -363,7 +368,7 @@ activate_extension_on_cluster() {
 get_extensions_from_dynatrace() {
   EXTENSIONS_FROM_CLUSTER=$1
 
-  cd ${CLUSTER_EXTENSIONS_TMPDIR} || exit
+  cd "${CLUSTER_EXTENSIONS_TMPDIR}" || exit
 
   EXTENSIONS_TO_DOWNLOAD="com.dynatrace.extension.google"
   readarray -t EXTENSIONS_FROM_CLUSTER_ARRAY <<<"$(echo "${EXTENSIONS_FROM_CLUSTER}" | sed 's/ /\n/' | grep "$EXTENSIONS_TO_DOWNLOAD")"
@@ -373,19 +378,19 @@ get_extensions_from_dynatrace() {
 
     curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" | tee -a "$FULL_LOG_FILE"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
-      find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
-      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
+      find "${EXTENSIONS_TMPDIR}" -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
+      mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" "${EXTENSIONS_TMPDIR}"
     fi
   done
 
   cd "${WORKING_DIR}" || exit
-  rm -rf ${CLUSTER_EXTENSIONS_TMPDIR}
+  rm -rf "${CLUSTER_EXTENSIONS_TMPDIR}"
 }
 
 upload_correct_extension_to_dynatrace() {
   SERVICES_FROM_ACTIVATION_CONFIG_STR=$1
 
-  cd ${EXTENSIONS_TMPDIR} || exit
+  cd "${EXTENSIONS_TMPDIR}" || exit
 
   AMOUNT_OF_EXTENSIONS_TO_UPLOAD=0
   AMOUNT_OF_NOT_UPLOADED_EXTENSIONS=0
@@ -408,8 +413,8 @@ upload_correct_extension_to_dynatrace() {
         if [ -n "$GCP_FUNCTION_NAME" ]; then
           CONFIG_NAME=$("$YQ" e '.name' "$EXTENSION_FILE_NAME".yaml)
           if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
-            echo "gcp:" >$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
-            echo "$EXTENSION_GCP_CONFIG" >>$WORKING_DIR/$GCP_FUNCTION_NAME/config/"${BASH_REMATCH[1]}".yaml
+            echo "gcp:" >"$WORKING_DIR"/"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
+            echo "$EXTENSION_GCP_CONFIG" >>"$WORKING_DIR"/"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
           fi
         fi
         ((AMOUNT_OF_EXTENSIONS_TO_UPLOAD+=1))

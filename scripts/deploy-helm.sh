@@ -177,6 +177,7 @@ readonly LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --json
 readonly USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.useProxy}")
 readonly HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
 readonly HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
+readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
 SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
 API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 

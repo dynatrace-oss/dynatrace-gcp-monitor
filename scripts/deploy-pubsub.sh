@@ -73,9 +73,8 @@ done
 check_arg --topic-name "$TOPIC_NAME"
 check_arg --subscription-name "$SUBSCRIPTION_NAME"
 
-gcloud pubsub topics create "${TOPIC_NAME}"
-if [[ $? != 0 ]]
-then
+
+if ! gcloud pubsub topics create "${TOPIC_NAME}"; then
     exit 2
 fi
 
