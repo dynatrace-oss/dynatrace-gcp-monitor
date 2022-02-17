@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -20,30 +20,50 @@ readonly EXTENSION_ZIP_REGEX="^(.*)-([0-9.]*).zip$"
 EXTENSIONS_TMPDIR=$(mktemp -d)
 CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
 WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FULL_LOG_FILE="${WORKING_DIR}/dynatrace_gcp_$(date '+%Y-%m-%d_%H:%M:%S').log"
+touch $FULL_LOG_FILE
+
+debug() {
+  MESSAGE=$1
+  echo -e | tee -a "$FULL_LOG_FILE" &> /dev/null
+  echo -e "DEBUG: ${MESSAGE}" | tee -a "$FULL_LOG_FILE" &> /dev/null
+  echo -e | tee -a "$FULL_LOG_FILE" &> /dev/null
+}
+
+info() {
+  MESSAGE=$1
+  echo -e "${MESSAGE}" | tee -a "$FULL_LOG_FILE"
+}
 
 warn() {
   MESSAGE=$1
-  echo -e >&2
-  echo -e "\e[93mWARNING: \e[37m${MESSAGE}" >&2
-  echo -e >&2
+  echo -e | tee -a "$FULL_LOG_FILE"
+  echo -e "\e[93mWARNING: \e[37m${MESSAGE}" | tee -a "$FULL_LOG_FILE"
+  echo -e | tee -a "$FULL_LOG_FILE"
 }
 
 err() {
   MESSAGE=$1
-  echo -e >&2
-  echo -e "\e[91mERROR: \e[37m${MESSAGE}" >&2
-  echo -e >&2
+  echo -e | tee -a "$FULL_LOG_FILE"
+  echo -e "\e[91mERROR: \e[37m${MESSAGE}" | tee -a "$FULL_LOG_FILE"
+  echo -e | tee -a "$FULL_LOG_FILE"
 }
 
+system_info() {
+  debug "Current shell version: $($(ps -p $$ -ocomm= | sed s/-//g) --version)"
+  debug "CLOUD_SHELL=${CLOUD_SHELL}"
+}
+system_info
+
 clean() {
-  echo "- removing extensions files"
+  info "- removing extensions files"
   rm -rf $EXTENSION_MANIFEST_FILE $CLUSTER_EXTENSIONS_TMPDIR $EXTENSIONS_TMPDIR
 
   if [ -n "$GCP_FUNCTION_NAME" ]; then
-    echo "- removing archive [$FUNCTION_ZIP_PACKAGE]"
+    info "- removing archive [$FUNCTION_ZIP_PACKAGE]"
     rm $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
 
-    echo "- removing temporary directory [$GCP_FUNCTION_NAME]"
+    info "- removing temporary directory [$GCP_FUNCTION_NAME]"
     rm -r $WORKING_DIR/$GCP_FUNCTION_NAME
   fi
 }
@@ -121,6 +141,39 @@ test_req_helm() {
   fi
 }
 
+init_ext_tools() {
+  local OS=$(uname -s)
+  local HW=$(uname -m)
+
+
+  case "$OS $HW" in
+    "Linux x86_64")
+      ARCH=linux_x64
+    ;;
+    *)
+      warn "Architecture '$OS $HW' not supported"
+      ARCH=""
+    ;;
+  esac
+
+  if [ -z "$YQ" ]; then
+    YQ=yq
+  fi
+
+  if [ -z "$JQ" ]; then
+    JQ=jq
+  fi
+
+  if [ -n "$ARCH" ]; then
+     # Always use internal tools on supported architectures
+     YQ="$WORKING_DIR/ext_tools/yq_$ARCH"
+     JQ="$WORKING_DIR/ext_tools/jq_$ARCH"
+  fi
+
+  test_req_yq
+  test_req_jq
+}
+
 dt_api() {
   URL=$1
   if [ $# -eq 3 ]; then
@@ -129,7 +182,7 @@ dt_api() {
   else
     METHOD="GET"
   fi
-  if RESPONSE=$(curl -k -s -X $METHOD "${DYNATRACE_URL}${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}"); then
+  if RESPONSE=$(curl -k -s -X $METHOD "${DYNATRACE_URL}${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}" | tee -a "$FULL_LOG_FILE"); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE"
     if [ "$CODE" -ge 400 ]; then
@@ -146,8 +199,8 @@ check_if_parameter_is_empty() {
   PARAMETER=$1
   PARAMETER_NAME=$2
   ADDITIONAL_MESSAGE=$3
-  if [ -z "${PARAMETER}" ]; then
-    echo "Missing required parameter: ${PARAMETER_NAME}. ${ADDITIONAL_MESSAGE}"
+  if [ -z "${PARAMETER}" ] || [ "$PARAMETER" = "<PLACEHOLDER>" ]; then
+    info "Missing required parameter: ${PARAMETER_NAME}. ${ADDITIONAL_MESSAGE}"
     exit
   fi
 }
@@ -173,7 +226,7 @@ check_api_token() {
     for REQUIRED in "${API_TOKEN_SCOPES[@]}"; do
       if ! grep -q "${REQUIRED}" <<<"$RESPONSE"; then
         err "Missing permission for the API token: ${REQUIRED}."
-        echo "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: ${DEPLOYMENT_TYPE}"
+        info "Please enable all required permissions: ${API_TOKEN_SCOPES[*]} for chosen deployment type: ${DEPLOYMENT_TYPE}"
         exit 1
       fi
     done
@@ -193,9 +246,9 @@ check_s3_url() {
 validate_gcp_config_in_extensions() {
   cd "${EXTENSIONS_TMPDIR}" || exit
   for EXTENSION_ZIP in *.zip; do
-    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" &>/dev/null
+    unzip ${EXTENSION_ZIP} -d "$EXTENSION_ZIP-tmp" | tee -a "$FULL_LOG_FILE" >/dev/null
     cd "$EXTENSION_ZIP-tmp" || exit
-    unzip "extension.zip" "extension.yaml" &>/dev/null
+    unzip "extension.zip" "extension.yaml" | tee -a "$FULL_LOG_FILE" >/dev/null
     if [[ $("$YQ" e 'has("gcp")' extension.yaml) == "false" ]]; then
       warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
       rm -rf "../${EXTENSION_ZIP}"
@@ -203,7 +256,7 @@ validate_gcp_config_in_extensions() {
       warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
       rm -rf "../${EXTENSION_ZIP}"
     else
-      echo -n "."
+      echo -n "." | tee -a "$FULL_LOG_FILE"
     fi
     cd ..
     rm -r "$EXTENSION_ZIP-tmp"
@@ -212,15 +265,15 @@ validate_gcp_config_in_extensions() {
 }
 
 get_extensions_zip_packages() {
-  curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_MANIFEST_FILE}"
-  EXTENSIONS_LIST=$(grep "^google.*\.zip" <"$EXTENSION_MANIFEST_FILE" 2>/dev/null)
+  curl -O "${EXTENSION_S3_URL}/${EXTENSION_MANIFEST_FILE}" &>/dev/stdout | tee -a "$FULL_LOG_FILE" &> /dev/null
+  EXTENSIONS_LIST=$(grep "^google.*\.zip" <"$EXTENSION_MANIFEST_FILE" | tee -a "$FULL_LOG_FILE")
   if [ -z "$EXTENSIONS_LIST" ]; then
     err "Empty extensions manifest file downloaded"
     exit 1
   fi
 
   echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME; do
-    echo -n "."
+    echo -n "." | tee -a "$FULL_LOG_FILE"
     (cd ${EXTENSIONS_TMPDIR} && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
   done
 }
@@ -236,7 +289,7 @@ get_activated_extensions_on_cluster() {
       EXTENSIONS_FROM_NEXT_PAGE=$(echo -e "\n$EXTENSIONS_FROM_NEXT_PAGE")
       EXTENSIONS=("${EXTENSIONS[@]}" "${EXTENSIONS_FROM_NEXT_PAGE[@]}")
     done
-    echo "${EXTENSIONS[@]}"
+    info "${EXTENSIONS[@]}"
   else
     err "- Dynatrace Cluster failed on ${DYNATRACE_URL}/api/v2/extensions endpoint."
     exit
@@ -247,7 +300,7 @@ upload_extension_to_cluster() {
   EXTENSION_ZIP=$1
   EXTENSION_VERSION=$2
 
-  UPLOAD_RESPONSE=$(curl -s -k -X POST "${DYNATRACE_URL}/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -H "Content-Type: multipart/form-data" -F "file=@${EXTENSION_ZIP};type=application/zip")
+  UPLOAD_RESPONSE=$(curl -s -k -X POST "${DYNATRACE_URL}/api/v2/extensions" -w "<<HTTP_CODE>>%{http_code}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -H "Content-Type: multipart/form-data" -F "file=@${EXTENSION_ZIP};type=application/zip"  | tee -a "$FULL_LOG_FILE")
   CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$UPLOAD_RESPONSE")
 
   if [[ "${CODE}" -ge "400" ]]; then
@@ -260,8 +313,8 @@ upload_extension_to_cluster() {
       warn "- Activation ${EXTENSION_ZIP} failed."
       ((AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS+=1))
     else
-      echo
-      echo "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated."
+      info ""
+      info "- Extension ${UPLOADED_EXTENSION}:${EXTENSION_VERSION} activated."
     fi
   fi
 }
@@ -275,7 +328,7 @@ services_setup_in_config() {
       SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default_metrics"
     fi
   done
-  echo "${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
+  info "${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 }
 
 activate_extension_on_cluster() {
@@ -318,7 +371,7 @@ get_extensions_from_dynatrace() {
     EXTENSION_NAME="$(cut -d':' -f1 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
     EXTENSION_VERSION="$(cut -d':' -f2 <<<"${EXTENSIONS_FROM_CLUSTER_ARRAY[$i]}")"
 
-    curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip"
+    curl -k -s -X GET "${DYNATRACE_URL}/api/v2/extensions/${EXTENSION_NAME}/${EXTENSION_VERSION}" -H "Accept: application/octet-stream" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" -o "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" | tee -a "$FULL_LOG_FILE"
     if [ -f "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ] && [[ "$EXTENSION_NAME" =~ ^com.dynatrace.extension.(google.*)$ ]]; then
       find ${EXTENSIONS_TMPDIR} -regex ".*${BASH_REMATCH[1]}.*" -exec rm -rf {} \;
       mv "${EXTENSION_NAME}-${EXTENSION_VERSION}.zip" ${EXTENSIONS_TMPDIR}
@@ -347,7 +400,7 @@ upload_correct_extension_to_dynatrace() {
     EXTENSION_GCP_CONFIG=$("$YQ" e '.gcp' "$EXTENSION_FILE_NAME".yaml)
 
     # Get all service/featureSet pairs defined in extensions
-    SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | "$YQ" e -j | "$JQ" -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null)
+    SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | "$YQ" e -j | "$JQ" -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null | tee -a "$FULL_LOG_FILE")
 
     for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
       # Check if service should be monitored
@@ -363,7 +416,7 @@ upload_correct_extension_to_dynatrace() {
         activate_extension_on_cluster "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
         break
       fi
-      echo -n "."
+      echo -n "." | tee -a "$FULL_LOG_FILE"
     done
     rm extension.zip
     rm "$EXTENSION_FILE_NAME".yaml
@@ -387,36 +440,4 @@ upload_correct_extension_to_dynatrace() {
   fi
 
   cd "${WORKING_DIR}" || exit
-}
-
-init_ext_tools() {
-  local OS=$(uname -s)
-  local HW=$(uname -i)
-
-  case "$OS $HW" in
-    "Linux x86_64")
-      ARCH=linux_x64
-    ;;
-    *)
-      warn "Architecture '$OS $HW' not supported"
-      ARCH=""
-    ;;
-  esac
-
-  if [ -z "$YQ" ]; then
-    YQ=yq
-  fi
-
-  if [ -z "$JQ" ]; then
-    JQ=jq
-  fi
-
-  if [ -n "$ARCH" ]; then
-     # Always use internal tools on supported architectures
-     YQ="$WORKING_DIR/ext_tools/yq_$ARCH"
-     JQ="$WORKING_DIR/ext_tools/jq_$ARCH"
-  fi
-
-  test_req_yq
-  test_req_jq
 }

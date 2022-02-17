@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#     Copyright 2021 Dynatrace LLC
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -20,6 +20,13 @@ wget -q "https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/downlo
 
 cat <<EOF > activation.config.release.yaml
 googleCloud:
+  required:
+    gcpProjectId: "${GCP_PROJECT_ID}"
+    dynatraceTenantUrl: "${DYNATRACE_URL}"
+    dynatraceApiToken: "${DYNATRACE_ACCESS_KEY}"
+    cloudFunctionSize: s
+    cloudFunctionRegion: us-central1
+    preferredAppEngineRegion: us-central
   common:
     dynatraceUrlSecretName: "${DYNATRACE_URL_SECRET_NAME}"
     dynatraceAccessKeySecretName: "${DYNATRACE_ACCESS_KEY_SECRET_NAME}"
@@ -216,4 +223,4 @@ EOF
 ext_tools/yq_linux_x64 eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.release.yaml
 
 echo "Deploying gcp cloud function"
-echo -e "$GCP_PROJECT_ID\ns\n$DYNATRACE_URL\n$DYNATRACE_ACCESS_KEY\ny" | ./setup.sh --auto-default
+./setup.sh --auto-default

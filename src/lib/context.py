@@ -139,7 +139,7 @@ class ExecutionContext(LoggingContext):
         self.project_id_owner = project_id_owner
         self.dynatrace_api_key = dynatrace_api_key
         self.dynatrace_url = dynatrace_url
-        self.function_name = os.environ.get("FUNCTION_NAME", "Local")
+        self.function_name = os.environ.get("K_SERVICE", "Local")
         self.location = os.environ.get("FUNCTION_REGION", "us-east1")
         self.require_valid_certificate = get_should_require_valid_certificate()
 
