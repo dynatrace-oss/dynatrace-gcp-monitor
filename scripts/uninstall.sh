@@ -109,7 +109,7 @@ if [[ $REMOVE_DASHBOARD ]]; then
     echo "found dashboard [$REMOVE_DASHBOARD]"
 fi
 
-if ! [[ $REMOVE_DASHBOARD ]] & ! [[ $REMOVE_JOB ]] & ! [[ $REMOVE_FUNCTION ]] & ! [[ $REMOVE_SECRET_URL ]] & ! [[ $REMOVE_SECRET_TOKEN ]] & ! [[ $REMOVE_SERVICE_ACCOUNT ]]; then
+if ! [[ $REMOVE_DASHBOARD ]] && ! [[ $REMOVE_JOB ]] && ! [[ $REMOVE_FUNCTION ]] && ! [[ $REMOVE_SECRET_URL ]] && ! [[ $REMOVE_SECRET_TOKEN ]] && ! [[ $REMOVE_SERVICE_ACCOUNT ]]; then
     echo -e "\e[93mWARNING: \e[37mNo resources found. Operation canceled."
     exit
 fi
