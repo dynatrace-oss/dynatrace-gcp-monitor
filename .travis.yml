@@ -29,8 +29,8 @@ jobs:
       do
         echo "Checking $script";
         shellcheck -x "$script";
-        if [ $? -eq 0 ]; then
-          echo "ERROR";
+        if [ $? -ne 0 ]; then
+          echo "ERROR: shellcheck failed at $script";
           status=1;
         fi;
       done;
