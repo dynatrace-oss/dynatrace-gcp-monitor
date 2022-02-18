@@ -16,7 +16,8 @@
 GCP_FUNCTION_RELEASE_VERSION=''
 
 WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source $WORKING_DIR/lib.sh
+# shellcheck source=./scripts/lib.sh
+source "$WORKING_DIR"/lib.sh
 init_ext_tools
 
 trap ctrl_c INT
@@ -52,6 +53,7 @@ while (( "$#" )); do
             ;;
 
             "--s3-url")
+                # shellcheck disable=SC2034  # Unused variables left for readability
                 EXTENSION_S3_URL=$2
                 shift; shift
             ;;
@@ -85,6 +87,7 @@ else
 fi
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
+# shellcheck disable=SC2034  # Unused variables left for readability
 API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 
 check_s3_url
@@ -93,7 +96,7 @@ debug "Downloading function sources from GitHub release"
 if [[ "$USE_LOCAL_FUNCTION_ZIP" != "Y" ]]; then
   info ""
   info "- downloading functions source [$FUNCTION_REPOSITORY_RELEASE_URL]"
-  wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $WORKING_DIR/$FUNCTION_ZIP_PACKAGE | tee -a "$FULL_LOG_FILE"
+  wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O "$WORKING_DIR"/$FUNCTION_ZIP_PACKAGE | tee -a "$FULL_LOG_FILE"
 else
   warn "Development mode on: using local function zip"
 fi
@@ -101,7 +104,7 @@ fi
 debug "Unpacking downloaded release"
 info "- extracting archive [$FUNCTION_ZIP_PACKAGE]"
 TMP_FUNCTION_DIR=$(mktemp -d)
-unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
+unzip -o -q "$WORKING_DIR"/$FUNCTION_ZIP_PACKAGE -d "$TMP_FUNCTION_DIR" || exit
 
 debug "Check if $FUNCTION_ACTIVATION_CONFIG exist in working directory"
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
@@ -110,29 +113,50 @@ if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
 fi
 
 debug "Parsing $FUNCTION_ACTIVATION_CONFIG to set correct parameteras for current installation"
-readonly GCP_PROJECT=$("$YQ" e '.googleCloud.required.gcpProjectId' $FUNCTION_ACTIVATION_CONFIG)
+GCP_PROJECT=$("$YQ" e '.googleCloud.required.gcpProjectId' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_PROJECT
 DYNATRACE_URL=$("$YQ" e '.googleCloud.required.dynatraceTenantUrl' $FUNCTION_ACTIVATION_CONFIG)
-readonly DYNATRACE_ACCESS_KEY=$("$YQ" e '.googleCloud.required.dynatraceApiToken' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_FUNCTION_SIZE=$("$YQ" e '.googleCloud.required.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_FUNCTION_REGION=$("$YQ" e '.googleCloud.required.cloudFunctionRegion' $FUNCTION_ACTIVATION_CONFIG)
-readonly PREFERRED_APP_ENGINE_REGION=$("$YQ" e '.googleCloud.required.preferredAppEngineRegion' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_SERVICE_ACCOUNT=$("$YQ" e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
-readonly REQUIRE_VALID_CERTIFICATE=$("$YQ" e '.googleCloud.common.requireValidCertificate' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_PUBSUB_TOPIC=$("$YQ" e '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_FUNCTION_NAME=$("$YQ" e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_SCHEDULER_NAME=$("$YQ" e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
-readonly QUERY_INTERVAL_MIN=$("$YQ" e '.googleCloud.metrics.queryInterval' $FUNCTION_ACTIVATION_CONFIG)
-readonly DYNATRACE_URL_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
-readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
-readonly ACTIVATION_JSON=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -P -j | tee -a "$FULL_LOG_FILE")
-readonly SERVICES_TO_ACTIVATE=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -j '.services[]' - | "$JQ" -r '.service' | tee -a "$FULL_LOG_FILE")
+DYNATRACE_ACCESS_KEY=$("$YQ" e '.googleCloud.required.dynatraceApiToken' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_ACCESS_KEY
+GCP_FUNCTION_SIZE=$("$YQ" e '.googleCloud.required.cloudFunctionSize' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_SIZE
+GCP_FUNCTION_REGION=$("$YQ" e '.googleCloud.required.cloudFunctionRegion' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_REGION
+PREFERRED_APP_ENGINE_REGION=$("$YQ" e '.googleCloud.required.preferredAppEngineRegion' $FUNCTION_ACTIVATION_CONFIG)
+readonly PREFERRED_APP_ENGINE_REGION
+GCP_SERVICE_ACCOUNT=$("$YQ" e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SERVICE_ACCOUNT
+REQUIRE_VALID_CERTIFICATE=$("$YQ" e '.googleCloud.common.requireValidCertificate' $FUNCTION_ACTIVATION_CONFIG)
+readonly REQUIRE_VALID_CERTIFICATE
+GCP_PUBSUB_TOPIC=$("$YQ" e '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_PUBSUB_TOPIC
+GCP_FUNCTION_NAME=$("$YQ" e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_NAME
+GCP_SCHEDULER_NAME=$("$YQ" e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SCHEDULER_NAME
+QUERY_INTERVAL_MIN=$("$YQ" e '.googleCloud.metrics.queryInterval' $FUNCTION_ACTIVATION_CONFIG)
+readonly QUERY_INTERVAL_MIN
+DYNATRACE_URL_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_URL_SECRET_NAME
+DYNATRACE_ACCESS_KEY_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_ACCESS_KEY_SECRET_NAME
+ACTIVATION_JSON=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -P -j | tee -a "$FULL_LOG_FILE")
+readonly ACTIVATION_JSON
+SERVICES_TO_ACTIVATE=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -j '.services[]' - | "$JQ" -r '.service' | tee -a "$FULL_LOG_FILE")
+readonly SERVICES_TO_ACTIVATE
 SERVICES_WITH_FEATURE_SET=$("$YQ" e '.activation' $FUNCTION_ACTIVATION_CONFIG | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"' 2>/dev/null | tee -a "$FULL_LOG_FILE")
-readonly PRINT_METRIC_INGEST_INPUT=$("$YQ" e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
-readonly SERVICE_USAGE_BOOKING=$("$YQ" e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
-readonly USE_PROXY=$("$YQ" e '.googleCloud.common.useProxy' $FUNCTION_ACTIVATION_CONFIG)
-readonly HTTP_PROXY=$("$YQ" e '.googleCloud.common.httpProxy' $FUNCTION_ACTIVATION_CONFIG)
-readonly HTTPS_PROXY=$("$YQ" e '.googleCloud.common.httpsProxy' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_IAM_ROLE=$("$YQ" e '.googleCloud.common.iamRole' $FUNCTION_ACTIVATION_CONFIG)
+PRINT_METRIC_INGEST_INPUT=$("$YQ" e '.debug.printMetricIngestInput' $FUNCTION_ACTIVATION_CONFIG)
+readonly PRINT_METRIC_INGEST_INPUT
+SERVICE_USAGE_BOOKING=$("$YQ" e '.googleCloud.common.serviceUsageBooking' $FUNCTION_ACTIVATION_CONFIG)
+readonly SERVICE_USAGE_BOOKING
+USE_PROXY=$("$YQ" e '.googleCloud.common.useProxy' $FUNCTION_ACTIVATION_CONFIG)
+readonly USE_PROXY
+HTTP_PROXY=$("$YQ" e '.googleCloud.common.httpProxy' $FUNCTION_ACTIVATION_CONFIG)
+readonly HTTP_PROXY
+HTTPS_PROXY=$("$YQ" e '.googleCloud.common.httpsProxy' $FUNCTION_ACTIVATION_CONFIG)
+readonly HTTPS_PROXY
+GCP_IAM_ROLE=$("$YQ" e '.googleCloud.common.iamRole' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_IAM_ROLE
 # Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
 readonly GCP_IAM_ROLE_PERMISSIONS=(
   resourcemanager.projects.get
@@ -151,7 +175,8 @@ readonly GCP_IAM_ROLE_PERMISSIONS=(
   monitoring.dashboards.list
   monitoring.dashboards.create
 )
-readonly SELF_MONITORING_ENABLED=$("$YQ" e '.googleCloud.common.selfMonitoringEnabled' $FUNCTION_ACTIVATION_CONFIG)
+SELF_MONITORING_ENABLED=$("$YQ" e '.googleCloud.common.selfMonitoringEnabled' $FUNCTION_ACTIVATION_CONFIG)
+readonly SELF_MONITORING_ENABLED
 EXTENSIONS_FROM_CLUSTER=""
 
 shopt -s nullglob
@@ -199,9 +224,9 @@ GCP_ACCOUNT=$(gcloud config get-value account)
 info -e "You are now logged in as [$GCP_ACCOUNT]"
 
 info "- set current project to [$GCP_PROJECT]"
-gcloud config set project $GCP_PROJECT
+gcloud config set project "$GCP_PROJECT"
 
-UPDATE=$(gcloud functions list --filter=$GCP_FUNCTION_NAME --project="$GCP_PROJECT" --format="value(name)")
+UPDATE=$(gcloud functions list --filter="$GCP_FUNCTION_NAME" --project="$GCP_PROJECT" --format="value(name)")
 INSTALL=true
 
 debug "Check if function already exist"
@@ -257,25 +282,25 @@ if ! [[ "${DYNATRACE_URL}" =~ $DYNATRACE_URL_REGEX ]]; then
   exit 1
 fi
 
-#remove last '/' from URL
+# shellcheck disable=SC2001 # remove last '/' from URL
 DYNATRACE_URL=$(echo "${DYNATRACE_URL}" | sed 's:/*$::')
 
 debug "Creating GCP Secret with Dynatrace URL and Dynatrace API token"
 info ""
 info "- create secrets [$DYNATRACE_URL_SECRET_NAME, $DYNATRACE_ACCESS_KEY_SECRET_NAME]"
 if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_URL_SECRET_NAME$" --format="value(name)" | tee -a "$FULL_LOG_FILE") ]]; then
-  printf "$DYNATRACE_URL" | gcloud secrets versions add $DYNATRACE_URL_SECRET_NAME --data-file=-
+  printf '%s' "$DYNATRACE_URL" | gcloud secrets versions add "$DYNATRACE_URL_SECRET_NAME" --data-file=-
   info "Secret [$DYNATRACE_URL_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed."
 else
-  printf "$DYNATRACE_URL" | gcloud secrets create $DYNATRACE_URL_SECRET_NAME --data-file=- --replication-policy=automatic
+  printf '%s' "$DYNATRACE_URL" | gcloud secrets create "$DYNATRACE_URL_SECRET_NAME" --data-file=- --replication-policy=automatic
 fi
 
 debug "Creating GCP Secret with Dynatrace URL and Dynatrace API token"
 if [[ $(gcloud secrets list --filter="name ~ $DYNATRACE_ACCESS_KEY_SECRET_NAME$" --format="value(name)" | tee -a "$FULL_LOG_FILE") ]]; then
-  printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets versions add $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=-
+  printf '%s' "$DYNATRACE_ACCESS_KEY" | gcloud secrets versions add "$DYNATRACE_ACCESS_KEY_SECRET_NAME" --data-file=-
   info "Secret [$DYNATRACE_ACCESS_KEY_SECRET_NAME] already exists, added new active version. You can delete previous versions manually if they are not needed."
 else
-  printf "$DYNATRACE_ACCESS_KEY" | gcloud secrets create $DYNATRACE_ACCESS_KEY_SECRET_NAME --data-file=- --replication-policy=automatic
+  printf '%s' "$DYNATRACE_ACCESS_KEY" | gcloud secrets create "$DYNATRACE_ACCESS_KEY_SECRET_NAME" --data-file=- --replication-policy=automatic
 fi
 
 debug "Check if Dynatrace Environment support API at least in version 1.230.0"
@@ -296,7 +321,7 @@ if [ "$INSTALL" == true ]; then
   debug "Creating PubSub topic"
   info ""
   info "- create the pubsub topic [$GCP_PUBSUB_TOPIC]"
-  if [[ $(gcloud pubsub topics list --filter=name:$GCP_PUBSUB_TOPIC --format="value(name)") ]]; then
+  if [[ $(gcloud pubsub topics list --filter=name:"$GCP_PUBSUB_TOPIC" --format="value(name)") ]]; then
       info "Topic [$GCP_PUBSUB_TOPIC] already exists, skipping"
   else
       gcloud pubsub topics create "$GCP_PUBSUB_TOPIC" | tee -a "$FULL_LOG_FILE"
@@ -310,22 +335,23 @@ if [ "$INSTALL" == true ]; then
   else
       readonly GCP_IAM_ROLE_TITLE="Dynatrace GCP Metrics Function"
       readonly GCP_IAM_ROLE_DESCRIPTION="Role for Dynatrace GCP function operating in metrics mode"
-      readonly GCP_IAM_ROLE_PERMISSIONS_STRING=$(IFS=, ; echo "${GCP_IAM_ROLE_PERMISSIONS[*]}")
-      gcloud iam roles create $GCP_IAM_ROLE --project="$GCP_PROJECT" --title="$GCP_IAM_ROLE_TITLE" --description="$GCP_IAM_ROLE_DESCRIPTION" --stage="GA" --permissions="$GCP_IAM_ROLE_PERMISSIONS_STRING" | tee -a "$FULL_LOG_FILE"
+      GCP_IAM_ROLE_PERMISSIONS_STRING=$(IFS=, ; echo "${GCP_IAM_ROLE_PERMISSIONS[*]}")
+      readonly GCP_IAM_ROLE_PERMISSIONS_STRING
+      gcloud iam roles create "$GCP_IAM_ROLE" --project="$GCP_PROJECT" --title="$GCP_IAM_ROLE_TITLE" --description="$GCP_IAM_ROLE_DESCRIPTION" --stage="GA" --permissions="$GCP_IAM_ROLE_PERMISSIONS_STRING" | tee -a "$FULL_LOG_FILE"
   fi
 
   debug "Creating GCP Service Account for Dynatrace integration"
   info ""
   info "- create service account [$GCP_SERVICE_ACCOUNT] with created role [roles/$GCP_IAM_ROLE]"
-  if [[ $(gcloud iam service-accounts list --filter=name:$GCP_SERVICE_ACCOUNT --format="value(name)") ]]; then
+  if [[ $(gcloud iam service-accounts list --filter=name:"$GCP_SERVICE_ACCOUNT" --format="value(name)") ]]; then
       info "Service account [$GCP_SERVICE_ACCOUNT] already exists, skipping"
   else
       gcloud iam service-accounts create "$GCP_SERVICE_ACCOUNT" >/dev/null
-      gcloud projects add-iam-policy-binding $GCP_PROJECT --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$GCP_IAM_ROLE" >/dev/null
-      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor >/dev/null
-      gcloud secrets add-iam-policy-binding $DYNATRACE_URL_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer >/dev/null
-      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor >/dev/null
-      gcloud secrets add-iam-policy-binding $DYNATRACE_ACCESS_KEY_SECRET_NAME --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer >/dev/null
+      gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$GCP_IAM_ROLE" >/dev/null
+      gcloud secrets add-iam-policy-binding "$DYNATRACE_URL_SECRET_NAME" --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor >/dev/null
+      gcloud secrets add-iam-policy-binding "$DYNATRACE_URL_SECRET_NAME" --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer >/dev/null
+      gcloud secrets add-iam-policy-binding "$DYNATRACE_ACCESS_KEY_SECRET_NAME" --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor >/dev/null
+      gcloud secrets add-iam-policy-binding "$DYNATRACE_ACCESS_KEY_SECRET_NAME" --member="serviceAccount:$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.viewer >/dev/null
   fi
 fi
 
@@ -342,8 +368,8 @@ info ""
 info "- checking activated extensions in Dynatrace"
 EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
-mv $TMP_FUNCTION_DIR $WORKING_DIR/$GCP_FUNCTION_NAME
-pushd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
+mv "$TMP_FUNCTION_DIR" "$WORKING_DIR/$GCP_FUNCTION_NAME"
+pushd "$WORKING_DIR/$GCP_FUNCTION_NAME" || exit
 
 debug "Verification GCP Function Interval"
 if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
@@ -375,13 +401,13 @@ SERVICES_WITH_FEATURE_SET_STR=$(services_setup_in_config "$SERVICES_WITH_FEATURE
 info "$SERVICES_WITH_FEATURE_SET_STR"
 
 debug "Upload selected extensions to Dynatrace environemnt"
-mkdir -p $WORKING_DIR/$GCP_FUNCTION_NAME/config/ | tee -a "$FULL_LOG_FILE"
+mkdir -p "$WORKING_DIR/$GCP_FUNCTION_NAME/config/" | tee -a "$FULL_LOG_FILE"
 info ""
 info "- choosing and uploading extensions to Dynatrace"
 upload_correct_extension_to_dynatrace "$SERVICES_WITH_FEATURE_SET_STR"
 
 debug "Prepare environemnt veriables for GCP Function"
-cd $WORKING_DIR/$GCP_FUNCTION_NAME || exit
+cd "$WORKING_DIR/$GCP_FUNCTION_NAME" || exit
 cat <<EOF > function_env_vars.yaml
 ACTIVATION_CONFIG: '$ACTIVATION_JSON'
 PRINT_METRIC_INGEST_INPUT: '$PRINT_METRIC_INGEST_INPUT'
@@ -421,7 +447,7 @@ gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_T
 debug "Uploading Dynatrace integration dashboard to GCP"
 info ""
 info "- create self monitoring dashboard"
-SELF_MONITORING_DASHBOARD_NAME=$(cat dashboards/dynatrace-gcp-function_self_monitoring.json | "$JQ" .displayName)
+SELF_MONITORING_DASHBOARD_NAME=$("$JQ" .displayName < dashboards/dynatrace-gcp-function_self_monitoring.json)
 if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORING_DASHBOARD_NAME" --format="value(displayName)") ]]; then
   info "Dashboard already exists, skipping"
 else

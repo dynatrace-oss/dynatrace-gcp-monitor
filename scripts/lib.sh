@@ -14,6 +14,7 @@
 #     limitations under the License.
 
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
+# shellcheck disable=SC2034  # Unused variables left for readability
 readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
 readonly EXTENSION_ZIP_REGEX="^(.*)-([0-9.]*).zip$"
 EXTENSIONS_TMPDIR=$(mktemp -d)
@@ -21,9 +22,6 @@ CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)
 WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FULL_LOG_FILE="${WORKING_DIR}/dynatrace_gcp_$(date '+%Y-%m-%d_%H:%M:%S').log"
 touch "$FULL_LOG_FILE"
-
-# schellchek SC2034 placeholder usage
-echo "$DYNATRACE_URL_REGEX" >/dev/null
 
 debug() {
   MESSAGE=$1
@@ -325,15 +323,15 @@ upload_extension_to_cluster() {
 }
 
 services_setup_in_config() {
-  SERVICES_FROM_ACTIVATION_CONFIG=$1
+  _SERVICES_FROM_ACTIVATION_CONFIG=$1
 
   # Add '/default_metrics' to service name when featureSet is missing
-  for i in "${!SERVICES_FROM_ACTIVATION_CONFIG[@]}"; do
-    if ! [[ "${SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]]; then
-      SERVICES_FROM_ACTIVATION_CONFIG[$i]="${SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default_metrics"
+  for i in "${!_SERVICES_FROM_ACTIVATION_CONFIG[*]}"; do
+    if ! [[ "${_SERVICES_FROM_ACTIVATION_CONFIG[$i]}" == *"/"* ]]; then
+      _SERVICES_FROM_ACTIVATION_CONFIG[$i]="${_SERVICES_FROM_ACTIVATION_CONFIG[$i]}/default_metrics"
     fi
   done
-  info "${SERVICES_FROM_ACTIVATION_CONFIG[*]}"
+  info "${_SERVICES_FROM_ACTIVATION_CONFIG[*]}"
 }
 
 activate_extension_on_cluster() {

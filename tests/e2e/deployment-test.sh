@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#     Copyright 2021 Dynatrace LLC
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ else
 fi
 
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | "$TEST_JQ" -r '.writerIdentity')
-gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member ${writerIdentity} --role roles/pubsub.publisher > /dev/null 2>&1
+gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member "${writerIdentity}" --role roles/pubsub.publisher > /dev/null 2>&1
 
 create_sample_app
 
@@ -99,7 +99,7 @@ activeGate:
 EOF
 "$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
-gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project ${GCP_PROJECT_ID}
+gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project "${GCP_PROJECT_ID}"
 
 cd ./e2e_test/helm-deployment-package || exit 1
 ./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
@@ -111,7 +111,7 @@ METRICS_CONTAINER_STATE=0
 LOGS_CONTAINER_STATE=0
 ACTIVEGATE_CONTAINER_STATE=0
 
-for i in {1..60}
+for _ in {1..60}
 do
   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
     check_container_state "dynatrace-gcp-function-metrics"
