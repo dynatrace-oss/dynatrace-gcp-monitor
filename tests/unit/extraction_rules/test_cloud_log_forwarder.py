@@ -67,8 +67,7 @@ def test_log_forwarder_attr_with_empty_forwarder(monkeypatch: MonkeyPatchFixture
     actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, json.dumps(test_record))
 
     # then
-    if not actual_output.get('cloud.log_forwarder'):
-        assert True
+    assert actual_output.get('cloud.log_forwarder') is None
 
 
 def test_log_forwarder_attr_with_empty_forwarder_and_pod(monkeypatch: MonkeyPatchFixture):
@@ -80,5 +79,4 @@ def test_log_forwarder_attr_with_empty_forwarder_and_pod(monkeypatch: MonkeyPatc
     actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, json.dumps(test_record))
 
     # then
-    if not actual_output.get('cloud.log_forwarder'):
-        assert True
+    assert actual_output.get('cloud.log_forwarder') is None

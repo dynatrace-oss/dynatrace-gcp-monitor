@@ -111,7 +111,7 @@ def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) ->
         if len(parsed_record[ATTRIBUTE_CONTENT]) > CONTENT_LENGTH_LIMIT:
             trimmed_len = CONTENT_LENGTH_LIMIT - len(DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED)
             parsed_record[ATTRIBUTE_CONTENT] = parsed_record[ATTRIBUTE_CONTENT][
-                                       :trimmed_len] + DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED
+                                               :trimmed_len] + DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED
             context.self_monitoring.records_with_too_long_content += 1
 
     return parsed_record
@@ -138,7 +138,7 @@ def _create_parsed_record(context: LogsProcessingContext, message_data: str):
 
 def _set_cloud_log_forwarder(parsed_record):
     cloud_log_forwarder = (
-            CLOUD_LOG_FORWARDER + "/pods/" + CLOUD_LOG_FORWARDER_POD) if CLOUD_LOG_FORWARDER_POD else CLOUD_LOG_FORWARDER
+                CLOUD_LOG_FORWARDER + "/pods/" + CLOUD_LOG_FORWARDER_POD) if CLOUD_LOG_FORWARDER and CLOUD_LOG_FORWARDER_POD else CLOUD_LOG_FORWARDER
     if cloud_log_forwarder:
         parsed_record["cloud.log_forwarder"] = cloud_log_forwarder
 
