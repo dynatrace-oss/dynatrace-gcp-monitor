@@ -397,14 +397,13 @@ validate_gcp_config_in_extensions
 debug "Select correct extensions depend on activation config"
 info ""
 info "- read activation config"
-SERVICES_WITH_FEATURE_SET_STR=$(services_setup_in_config "$SERVICES_WITH_FEATURE_SET")
-info "$SERVICES_WITH_FEATURE_SET_STR"
+info "$SERVICES_WITH_FEATURE_SET"
 
 debug "Upload selected extensions to Dynatrace environemnt"
 mkdir -p "$WORKING_DIR/$GCP_FUNCTION_NAME/config/" | tee -a "$FULL_LOG_FILE"
 info ""
 info "- choosing and uploading extensions to Dynatrace"
-upload_correct_extension_to_dynatrace "$SERVICES_WITH_FEATURE_SET_STR"
+upload_correct_extension_to_dynatrace "$SERVICES_WITH_FEATURE_SET"
 
 debug "Prepare environemnt veriables for GCP Function"
 cd "$WORKING_DIR/$GCP_FUNCTION_NAME" || exit

@@ -343,13 +343,12 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   debug "Select correct extensions depend on activation config"
   info ""
   info "- read activation config"
-  SERVICES_FROM_ACTIVATION_CONFIG_STR=$(services_setup_in_config "${SERVICES_FROM_ACTIVATION_CONFIG[*]}")
-  info "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
+  info "$SERVICES_FROM_ACTIVATION_CONFIG"
 
   debug "Upload selected extensions to Dynatrace environemnt"
   info ""
   info "- choosing and uploading extensions to Dynatrace" | tee -a "$FULL_LOG_FILE"
-  upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG_STR"
+  upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG"
 fi
 
 if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
