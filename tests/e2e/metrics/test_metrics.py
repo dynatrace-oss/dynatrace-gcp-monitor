@@ -46,4 +46,7 @@ def test_metrics_on_dynatrace():
     assert response_json['totalCount'] == 1
     # show full response on test fail
     print(response_json)
-    assert 5 in response_json['result'][0]['data'][0]['values']
+    execution_count_values = response_json['result'][0]['data'][0]['values']
+    execution_count_value = max(execution_count_values)
+    # from 18.02.2022 GCP metrics give bad values for function execution count; after 5 executions we get value 6 or 7 in metric value :(
+    assert execution_count_value >= 5
