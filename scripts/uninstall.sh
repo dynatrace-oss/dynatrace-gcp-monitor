@@ -43,6 +43,7 @@ if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo
 fi
 
+readonly GCP_PROJECT=$("$YQ" e '.googleCloud.required.gcpProjectId' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_SERVICE_ACCOUNT=$("$YQ" e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_PUBSUB_TOPIC=$("$YQ" e  '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_FUNCTION_NAME=$("$YQ" e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
@@ -50,23 +51,16 @@ readonly GCP_SCHEDULER_NAME=$("$YQ" e '.googleCloud.metrics.scheduler' $FUNCTION
 readonly DYNATRACE_URL_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-function Self monitoring"
+readonly GCP_FUNCTION_REGION=$("$YQ" e '.googleCloud.required.cloudFunctionRegion' $FUNCTION_ACTIVATION_CONFIG)
 
 GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
-echo
-DEFAULT_PROJECT=$(gcloud config get-value project)
-
-echo "Please provide the GCP project from which monitoring function should be removed. Default value: [$DEFAULT_PROJECT] (current project)"
-while ! [[ "${GCP_PROJECT}" =~ ^[a-z]{1}[a-z0-9-]{5,29}$ ]]; do
-    read -p "Enter GCP project ID: " -i $DEFAULT_PROJECT -e GCP_PROJECT
-done
-echo ""
 
 echo "- set current project to [$GCP_PROJECT]"
 gcloud config set project $GCP_PROJECT
 
 echo "Discovering instances to remove"
-REMOVE_FUNCTION=$(gcloud functions list --filter=name:$GCP_FUNCTION_NAME --format="value(name)")
+REMOVE_FUNCTION=$(gcloud functions list --filter=name:$GCP_FUNCTION_NAME --format="value(name)" --regions=$GCP_FUNCTION_REGION)
 if [[ $REMOVE_FUNCTION ]]; then
     echo "found function [$REMOVE_FUNCTION]"
 fi
@@ -130,7 +124,7 @@ if [[ $CONFIRM_DELETE =~ (y|Y) ]]; then
   if [[ $REMOVE_FUNCTION ]]; then
     for FUNCTION in $REMOVE_FUNCTION; do
       echo -e "Removing function [$FUNCTION]"
-      gcloud functions delete "$FUNCTION" --quiet
+      gcloud functions delete "$FUNCTION" --quiet --region=$GCP_FUNCTION_REGION
     done
   fi
   if [[ $REMOVE_TOPIC ]]; then
@@ -154,10 +148,10 @@ if [[ $CONFIRM_DELETE =~ (y|Y) ]]; then
   if [[ $REMOVE_SERVICE_ACCOUNT ]]; then
     for SERVICE_ACCOUNT in $REMOVE_SERVICE_ACCOUNT; do
       echo -e "Removing service account [$SERVICE_ACCOUNT] IAM role bindings"
-      ROLES=$(gcloud projects get-iam-policy $DEFAULT_PROJECT --flatten="bindings[].members" --format='value(bindings.role)' --filter="bindings.members:$SERVICE_ACCOUNT")
+      ROLES=$(gcloud projects get-iam-policy $GCP_PROJECT --flatten="bindings[].members" --format='value(bindings.role)' --filter="bindings.members:$SERVICE_ACCOUNT")
       for ROLE in $ROLES; do
         echo -e "Removing IAM role [$ROLE] for service account [$SERVICE_ACCOUNT]"
-        gcloud projects remove-iam-policy-binding $DEFAULT_PROJECT --role=$ROLE --member="serviceAccount:$SERVICE_ACCOUNT" --quiet >/dev/null
+        gcloud projects remove-iam-policy-binding $GCP_PROJECT --role=$ROLE --member="serviceAccount:$SERVICE_ACCOUNT" --quiet >/dev/null
       done
       echo -e "Removing service account [$SERVICE_ACCOUNT]"
       gcloud iam service-accounts delete "$SERVICE_ACCOUNT" --quiet
