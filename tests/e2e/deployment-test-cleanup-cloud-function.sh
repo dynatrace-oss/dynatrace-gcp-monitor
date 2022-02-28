@@ -15,7 +15,9 @@
 
 source ./tests/e2e/lib-tests.sh
 
-echo -e "Y" | ./e2e_test/uninstall.sh
+cd ./e2e_test || exit 1
+
+echo -e "Y" | ./uninstall.sh
 gcloud functions delete "$CLOUD_FUNCTION_NAME"
 
 # testing message
