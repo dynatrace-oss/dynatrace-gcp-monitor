@@ -15,7 +15,7 @@
 
 source ./tests/e2e/lib-tests.sh
 
-echo -e "$GCP_PROJECT_ID\nY" | ./e2e_test/uninstall.sh
+echo -e "$GCP_PROJECT_ID\nY\nY" | ./e2e_test/uninstall.sh
 gcloud functions delete "$CLOUD_FUNCTION_NAME"
 
 # testing message
