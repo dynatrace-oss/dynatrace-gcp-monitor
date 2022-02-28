@@ -114,7 +114,8 @@ echo -e
 echo -e "\e[93mWARNING: \e[37mAll of the resources listed above will be deleted."
 echo -e ""
 while ! [[ "${CONFIRM_DELETE}" =~ ^(y|n|Y|N)$ ]]; do
-    read -p -r "Do you want to continue (Y/n)?"  -e CONFIRM_DELETE
+    # shellcheck disable=SC2162
+    read -p "Do you want to continue (Y/n)?"  -e CONFIRM_DELETE
 done
 echo ""
 
