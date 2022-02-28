@@ -6,18 +6,21 @@ notifications:
   email:
     on_success: never
 stages:
-- shellcheck
-- tests
-- e2e-helm-deployment-test
-- e2e-cloud-function-deployment-test
-- github-deploy
-- docker-deploy
-- gcp-install-release
+  - shellcheck
+  - tests
+  - build
+  - e2e-helm-deployment-test
+  - e2e-cloud-function-deployment-test
+  - github-deploy
+  - docker-deploy
+  - gcp-install-release
 env:
   global:
   - TAG=$TRAVIS_TAG
   - VERSION_TAG=/^release-.*
   - DOCKER_CLI_EXPERIMENTAL=enabled
+  - GCP_PROJECT_ID="dynatrace-gcp-extension"
+  - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-function"
 jobs:
   include:
   - stage: shellcheck
@@ -38,24 +41,22 @@ jobs:
   - stage: tests
     name: Tests
     language: python
-
-    cache:
-      directories:
-        - "$HOME/.cache/pip"
-        - "$HOME/.wgetcache"
     python:
       - "3.8"
-    install:
-      - pip install -r src/requirements.txt
-      - pip install -r tests/requirements.txt
+    env:
+      - PYTHONPATH="$TRAVIS_BUILD_DIR/src:$TRAVIS_BUILD_DIR/tests"
     addons:
       apt:
         packages:
           - default-jre
-    env:
-      - PYTHONPATH="$TRAVIS_BUILD_DIR/src:$TRAVIS_BUILD_DIR/tests"
+    cache:
+      directories:
+        - "$HOME/.cache/pip"
+        - "$HOME/.wgetcache"
+    install:
+      - pip install -r src/requirements.txt
+      - pip install -r tests/requirements.txt
     script:
-      - echo $TRAVIS_BUILD_DIR
       - pytest tests/unit -v
       - pytest tests/integration/logs -v
 #       The cd is executed due to the fact that the wiremock instance initialized in the test is using
@@ -63,6 +64,37 @@ jobs:
       - |
           cd tests/integration/metrics
           pytest -v
+
+  - stage: build
+    name: Build
+    if: tag !~ /^release-.*
+    language: python
+    python:
+      - "3.8"
+    cache:
+      directories:
+        - "$HOME/.cache/pip"
+        - "$HOME/.wgetcache"
+    env:
+      - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+      - E2E=true
+    before_script:
+      # Install GCP SDK if not already cached
+      - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
+      - source $HOME/google-cloud-sdk/path.bash.inc
+      - gcloud version
+      - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
+      - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
+      - gcloud auth configure-docker
+    script:
+      # Put correct Version into files
+      - ./build/version.sh
+      - ./build/get_ext_tools.sh
+      - ./ext_tools/yq_linux_x64 e -i ".dockerImage |= \"${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}\"" k8s/helm-chart/dynatrace-gcp-function/values.yaml
+      - ./build/helm-package.sh
+      - ./build/docker-deploy.sh
+      - ./build/function-package.sh
+      - gsutil -m cp ./artefacts/* gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/
 
   - stage: docker-deploy
     name: Docker Hub deploy
@@ -79,14 +111,13 @@ jobs:
     cache:
       directories:
         - "$HOME/.wgetcache"
-
     install: skip
     language: minimal
     before_deploy:
-    - ./build/version.sh
-    - ./build/get_ext_tools.sh
-    - ./build/helm-package.sh
-    - ./build/function-package.sh
+      - ./build/version.sh
+      - ./build/get_ext_tools.sh
+      - ./build/helm-package.sh
+      - ./build/function-package.sh
     deploy:
       provider: releases
       file_glob: true
@@ -110,7 +141,6 @@ jobs:
     env:
       - CLOUDSDK_CORE_DISABLE_PROMPTS=1
       - IAM_SERVICE_ACCOUNT="dynatrace-gcp-sa-release"
-      - GCP_PROJECT_ID="dynatrace-gcp-extension"
       - DYNATRACE_URL_SECRET_NAME="DYNATRACE_RELEASE_URL"
       - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_RELEASE_ACCESS_KEY"
       - IAM_ROLE_METRCICS="dynatrace_gcp_release.metrics"
@@ -124,13 +154,11 @@ jobs:
       - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
       - source $HOME/google-cloud-sdk/path.bash.inc
       - gcloud version
-      - sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq
     before_script:
       - mkdir -p release
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out release/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file release/e2e-gcp-sa-key.json
     script:
-      - ./build/get_ext_tools.sh
       - ./scripts/deploy-function.sh
 
   - stage: e2e-helm-deployment-test
@@ -152,8 +180,6 @@ jobs:
       - LOG_ROUTER="e2e_test_log_router_${TRAVIS_BUILD_ID}"
       - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
       - K8S_CLUSTER="e2e-test-master"
-      - GCP_PROJECT_ID="dynatrace-gcp-extension"
-      - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-function"
       - E2E=true
       - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
       - secure: "muHGNxIK6fxTltIsGgms6v3dleuQ1LZyQmZIGQDSfQ5sfYDYEvR2xsabK237AipSSGppoVhc7S6ri8A/WNQautHUfdBOsVn1i7czzoPhELdOJkAiigXrI3kla68OTCiC0TPwWbIYOxzmiYDHZr+rYbA1773O0iyhWHiTVQerLMndn0wCFWUUnLbD1WfzdAxlfSo1rd7u81m8g4efLIUppo/fjfaxmVwvo1oIfensGVknyOE+gtSh/OpGdYfNeOqxoDGOoMe5bnCqibUoREXRzUZKGb6upxMMmW6E3hGG02kqle4jYjaC7Uiu2IVZsK38iAWNGwIRy21CIXNHn4R6we44n5JLH92aiRtVw8D/fDOnN2gWTtmdrvoB8YklbaYZBnDrGJxI6rESfeQjwD8ImWWKUJFUlwovKjNWhOw8RMhPVtPOuC00+F2UDq5NosrWYGUjLjaKFC/4nysOiK2DgsMBF/Mk1Ei1BDMYmcHQ7Jsrs8ys/kgPasV3Qs9xOuSJpF+AiwKPfI1R9bxYiORg70TNz62wPD7FlKWIVe0DvhrWcHCTpnrROabt6B0hUROfljCZe2H+j8HD9uCJCJHk5qP7llNVofVnz8w+s90wLEKpUNn2rVUH0fzffYM7YaLRPhzLEUJSQso3a7hXFfcoUow8OOPTmCgViGCfPjuy2zc="
@@ -170,15 +196,12 @@ jobs:
     before_script:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
-      - gcloud auth configure-docker
       - ./build/get_ext_tools.sh
       - ./tests/e2e/deployment-test-cleanup.sh
-      - ./build/version.sh
-      - ./build/helm-package.sh
-      - ./build/docker-deploy.sh
       - ./tests/e2e/before-deployment-test-helm-cleanup.sh
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
+      - mkdir -p ./artefacts/ && gsutil cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
       - travis_wait 60 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
@@ -196,7 +219,6 @@ jobs:
         - "$HOME/.cache/pip"
     env:
       - CLOUDSDK_CORE_DISABLE_PROMPTS=1
-      - GCP_PROJECT_ID="dynatrace-gcp-extension"
       - E2E=true
       - DYNATRACE_URL_SECRET_NAME="DYNATRACE_URL_${TRAVIS_BUILD_ID}"
       - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_ACCESS_KEY_${TRAVIS_BUILD_ID}"
@@ -218,10 +240,9 @@ jobs:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
       - ./build/get_ext_tools.sh
-      - ./build/version.sh
-      - ./build/function-package.sh
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
     script:
+      - mkdir -p ./artefacts/ && gsutil -m cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/* ./artefacts/
       - travis_wait 60 ./tests/e2e/execute-tests-cloud-function.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup-cloud-function.sh

@@ -35,7 +35,9 @@ mkdir ./e2e_test
 unzip -d ./e2e_test ./artefacts/function-deployment-package.zip
 cp ./artefacts/dynatrace-gcp-function.zip ./e2e_test
 
-ACTIVATION_CONFIG_FILE="./e2e_test/activation-config.yaml"
+ACTIVATION_CONFIG_FILE="./activation-config.yaml"
+
+cd ./e2e_test || exit 1
 
 cat <<EOF > activation.config.e2e.yaml
 googleCloud:
@@ -57,11 +59,8 @@ googleCloud:
     function: "${METRIC_FORWARDING_FUNCTION}"
     scheduler: "${CLOUD_SCHEDULER}"
 EOF
-"$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' activation-config.yaml activation.config.e2e.yaml
+"$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' "$ACTIVATION_CONFIG_FILE" activation.config.e2e.yaml
 
-cp activation-config.yaml "$ACTIVATION_CONFIG_FILE"
-
-cd ./e2e_test || exit 1
 echo "Deploying gcp cloud function"
 ./setup.sh --use-local-function-zip --auto-default
 

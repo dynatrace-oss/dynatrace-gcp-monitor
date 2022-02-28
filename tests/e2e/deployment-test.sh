@@ -83,7 +83,9 @@ rm -rf ./e2e_test
 mkdir ./e2e_test
 tar -C ./e2e_test -xf ./artefacts/helm-deployment-package.tar
 
-VALUES_FILE="./e2e_test/helm-deployment-package/dynatrace-gcp-function/values.yaml"
+VALUES_FILE="./dynatrace-gcp-function/values.yaml"
+
+cd ./e2e_test/helm-deployment-package || exit 1
 
 cat <<EOF > values.e2e.yaml
 gcpProjectId: "${GCP_PROJECT_ID}"
@@ -101,7 +103,6 @@ EOF
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project "${GCP_PROJECT_ID}"
 
-cd ./e2e_test/helm-deployment-package || exit 1
 ./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 
 # Verify containers running
