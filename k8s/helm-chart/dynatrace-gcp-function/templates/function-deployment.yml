@@ -193,6 +193,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: DYNATRACE_TIMEOUT_SECONDS
+        - name: CLOUD_LOG_FORWARDER
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: CLOUD_LOG_FORWARDER
         - name: REQUIRE_VALID_CERTIFICATE
           valueFrom:
             configMapKeyRef:
