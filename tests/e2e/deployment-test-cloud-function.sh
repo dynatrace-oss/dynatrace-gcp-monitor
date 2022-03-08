@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#     Copyright 2021 Dynatrace LLC
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ echo
 echo -n "Verifying deployment result"
 CLOUD_FUNCTION_STATE=0
 
-for i in {1..60}
+for _ in {1..60}
 do
   check_function_state "$METRIC_FORWARDING_FUNCTION"
   CLOUD_FUNCTION_STATE=$?

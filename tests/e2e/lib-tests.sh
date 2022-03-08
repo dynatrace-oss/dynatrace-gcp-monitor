@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+# shellcheck disable=SC2034  # Unused variables left for readability
 TEST_YQ=ext_tools/yq_linux_x64
 TEST_JQ=ext_tools/jq_linux_x64
 
@@ -25,7 +26,7 @@ create_sample_app() {
 }
 
 generate_load_on_sample_app() {
-  for i in {1..5}; do
+  for _ in {1..5}; do
     curl -s "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
     -H "Authorization: bearer $(gcloud auth print-identity-token)"
     echo

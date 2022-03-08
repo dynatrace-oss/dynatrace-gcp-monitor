@@ -14,10 +14,12 @@
 #     limitations under the License.
 
 WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./scripts/lib.sh
 source "$WORKING_DIR/lib.sh"
 init_ext_tools
 
-readonly FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | "$JQ" 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
+FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | "$JQ" 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
+readonly FUNCTION_REPOSITORY_RELEASE_URL
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -37,55 +39,63 @@ fi
 
 if [ ! -f $FUNCTION_ACTIVATION_CONFIG ]; then
     echo -e "INFO: Configuration file [$FUNCTION_ACTIVATION_CONFIG] missing, extracting default from release"
-    wget -q $FUNCTION_REPOSITORY_RELEASE_URL -O $WORKING_DIR/$FUNCTION_ZIP_PACKAGE
-    unzip -o -q $WORKING_DIR/$FUNCTION_ZIP_PACKAGE -d $TMP_FUNCTION_DIR || exit
-    mv $TMP_FUNCTION_DIR/$FUNCTION_ACTIVATION_CONFIG $FUNCTION_ACTIVATION_CONFIG
+    wget -q "$FUNCTION_REPOSITORY_RELEASE_URL" -O "$WORKING_DIR"/$FUNCTION_ZIP_PACKAGE
+    unzip -o -q "$WORKING_DIR"/$FUNCTION_ZIP_PACKAGE -d "$TMP_FUNCTION_DIR" || exit
+    mv "$TMP_FUNCTION_DIR"/$FUNCTION_ACTIVATION_CONFIG $FUNCTION_ACTIVATION_CONFIG
     echo
 fi
 
-readonly GCP_PROJECT=$("$YQ" e '.googleCloud.required.gcpProjectId' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_SERVICE_ACCOUNT=$("$YQ" e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_PUBSUB_TOPIC=$("$YQ" e  '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_FUNCTION_NAME=$("$YQ" e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
-readonly GCP_SCHEDULER_NAME=$("$YQ" e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
-readonly DYNATRACE_URL_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
-readonly DYNATRACE_ACCESS_KEY_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
+GCP_PROJECT=$("$YQ" e '.googleCloud.required.gcpProjectId' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_PROJECT
+GCP_SERVICE_ACCOUNT=$("$YQ" e '.googleCloud.common.serviceAccount' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SERVICE_ACCOUNT
+GCP_PUBSUB_TOPIC=$("$YQ" e  '.googleCloud.metrics.pubSubTopic' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_PUBSUB_TOPIC
+GCP_FUNCTION_NAME=$("$YQ" e '.googleCloud.metrics.function' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_NAME
+GCP_SCHEDULER_NAME=$("$YQ" e '.googleCloud.metrics.scheduler' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_SCHEDULER_NAME
+DYNATRACE_URL_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceUrlSecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_URL_SECRET_NAME
+DYNATRACE_ACCESS_KEY_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
+readonly DYNATRACE_ACCESS_KEY_SECRET_NAME
 readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-function Self monitoring"
-readonly GCP_FUNCTION_REGION=$("$YQ" e '.googleCloud.required.cloudFunctionRegion' $FUNCTION_ACTIVATION_CONFIG)
+GCP_FUNCTION_REGION=$("$YQ" e '.googleCloud.required.cloudFunctionRegion' $FUNCTION_ACTIVATION_CONFIG)
+readonly GCP_FUNCTION_REGION
 
 GCP_ACCOUNT=$(gcloud config get-value account)
 echo -e "You are now logged in as [$GCP_ACCOUNT]"
 
 echo "- set current project to [$GCP_PROJECT]"
-gcloud config set project $GCP_PROJECT
+gcloud config set project "$GCP_PROJECT"
 
 echo "Discovering instances to remove"
-REMOVE_FUNCTION=$(gcloud functions list --filter=name:$GCP_FUNCTION_NAME --format="value(name)" --regions=$GCP_FUNCTION_REGION)
+REMOVE_FUNCTION=$(gcloud functions list --filter=name:"$GCP_FUNCTION_NAME" --format="value(name)" --regions="$GCP_FUNCTION_REGION")
 if [[ $REMOVE_FUNCTION ]]; then
     echo "found function [$REMOVE_FUNCTION]"
 fi
 
-REMOVE_TOPIC=$(gcloud pubsub topics list --filter=name:$GCP_PUBSUB_TOPIC --format="value(name)")
+REMOVE_TOPIC=$(gcloud pubsub topics list --filter=name:"$GCP_PUBSUB_TOPIC" --format="value(name)")
 if [[ $REMOVE_TOPIC ]]; then
     echo "found pub/sub topic [$REMOVE_TOPIC]"
 fi
 
-REMOVE_SECRET_URL=$(gcloud secrets list --filter=name:$DYNATRACE_URL_SECRET_NAME --format="value(name)")
+REMOVE_SECRET_URL=$(gcloud secrets list --filter=name:"$DYNATRACE_URL_SECRET_NAME" --format="value(name)")
 if [[ $REMOVE_SECRET_URL ]]; then
     echo "found secret [$REMOVE_SECRET_URL]"
 fi
 
-REMOVE_SECRET_TOKEN=$(gcloud secrets list --filter=name:$DYNATRACE_ACCESS_KEY_SECRET_NAME --format="value(name)")
+REMOVE_SECRET_TOKEN=$(gcloud secrets list --filter=name:"$DYNATRACE_ACCESS_KEY_SECRET_NAME" --format="value(name)")
 if [[ $REMOVE_SECRET_TOKEN ]]; then
     echo "found secret [$REMOVE_SECRET_TOKEN]"
 fi
 
-REMOVE_SERVICE_ACCOUNT=$(gcloud iam service-accounts list --filter=name:$GCP_SERVICE_ACCOUNT --format="value(email)")
+REMOVE_SERVICE_ACCOUNT=$(gcloud iam service-accounts list --filter=name:"$GCP_SERVICE_ACCOUNT" --format="value(email)")
 if [[ $REMOVE_SERVICE_ACCOUNT ]]; then
     echo "found service account [$REMOVE_SERVICE_ACCOUNT]"
 fi
 
-REMOVE_JOB=$(gcloud scheduler jobs list --filter=name:$GCP_SCHEDULER_NAME --format="value(name)")
+REMOVE_JOB=$(gcloud scheduler jobs list --filter=name:"$GCP_SCHEDULER_NAME" --format="value(name)")
 if [[ $REMOVE_JOB ]]; then
     echo "found scheduler [$REMOVE_JOB]"
 fi
@@ -95,7 +105,7 @@ if [[ $REMOVE_DASHBOARD ]]; then
     echo "found dashboard [$REMOVE_DASHBOARD]"
 fi
 
-if ! [[ $REMOVE_DASHBOARD ]] & ! [[ $REMOVE_JOB ]] & ! [[ $REMOVE_FUNCTION ]] & ! [[ $REMOVE_SECRET_URL ]] & ! [[ $REMOVE_SECRET_TOKEN ]] & ! [[ $REMOVE_SERVICE_ACCOUNT ]]; then
+if ! [[ $REMOVE_DASHBOARD ]] && ! [[ $REMOVE_JOB ]] && ! [[ $REMOVE_FUNCTION ]] && ! [[ $REMOVE_SECRET_URL ]] && ! [[ $REMOVE_SECRET_TOKEN ]] && ! [[ $REMOVE_SERVICE_ACCOUNT ]]; then
     echo -e "\e[93mWARNING: \e[37mNo resources found. Operation canceled."
     exit
 fi
@@ -104,6 +114,7 @@ echo -e
 echo -e "\e[93mWARNING: \e[37mAll of the resources listed above will be deleted."
 echo -e ""
 while ! [[ "${CONFIRM_DELETE}" =~ ^(y|n|Y|N)$ ]]; do
+    # shellcheck disable=SC2162
     read -p "Do you want to continue (Y/n)?"  -e CONFIRM_DELETE
 done
 echo ""
@@ -124,7 +135,7 @@ if [[ $CONFIRM_DELETE =~ (y|Y) ]]; then
   if [[ $REMOVE_FUNCTION ]]; then
     for FUNCTION in $REMOVE_FUNCTION; do
       echo -e "Removing function [$FUNCTION]"
-      gcloud functions delete "$FUNCTION" --quiet --region=$GCP_FUNCTION_REGION
+      gcloud functions delete "$FUNCTION" --quiet --region="$GCP_FUNCTION_REGION"
     done
   fi
   if [[ $REMOVE_TOPIC ]]; then
@@ -148,10 +159,10 @@ if [[ $CONFIRM_DELETE =~ (y|Y) ]]; then
   if [[ $REMOVE_SERVICE_ACCOUNT ]]; then
     for SERVICE_ACCOUNT in $REMOVE_SERVICE_ACCOUNT; do
       echo -e "Removing service account [$SERVICE_ACCOUNT] IAM role bindings"
-      ROLES=$(gcloud projects get-iam-policy $GCP_PROJECT --flatten="bindings[].members" --format='value(bindings.role)' --filter="bindings.members:$SERVICE_ACCOUNT")
+      ROLES=$(gcloud projects get-iam-policy "$GCP_PROJECT" --flatten="bindings[].members" --format='value(bindings.role)' --filter="bindings.members:$SERVICE_ACCOUNT")
       for ROLE in $ROLES; do
         echo -e "Removing IAM role [$ROLE] for service account [$SERVICE_ACCOUNT]"
-        gcloud projects remove-iam-policy-binding $GCP_PROJECT --role=$ROLE --member="serviceAccount:$SERVICE_ACCOUNT" --quiet >/dev/null
+        gcloud projects remove-iam-policy-binding "$GCP_PROJECT" --role="$ROLE" --member="serviceAccount:$SERVICE_ACCOUNT" --quiet >/dev/null
       done
       echo -e "Removing service account [$SERVICE_ACCOUNT]"
       gcloud iam service-accounts delete "$SERVICE_ACCOUNT" --quiet
