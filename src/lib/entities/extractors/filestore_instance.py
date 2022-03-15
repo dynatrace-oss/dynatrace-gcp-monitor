@@ -81,7 +81,7 @@ def _filestore_instance_resp_to_monitored_entities(page: Dict[Text, Any], svc_de
     ]
 
 
-@entity_extractor("filestore_instance")
+@entity_extractor("filestore_instance", "file.googleapis.com")
 async def get_filestore_instance_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP filestore instance from google api. """
     url = f"https://file.googleapis.com/v1/projects/{project_id}/locations/-/instances"

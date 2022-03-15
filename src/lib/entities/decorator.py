@@ -18,13 +18,13 @@ from functools import wraps
 from typing import Dict, Iterable, Text
 
 from lib.context import MetricsContext
-from lib.entities.model import Entity, ExtractEntitesFunc
+from lib.entities.model import Entity, ExtractEntitiesFunc, EntitiesExtractorData
 from lib.metrics import GCPService
 
-entities_extractors: Dict[Text, ExtractEntitesFunc] = {}
+entities_extractors: Dict[Text, EntitiesExtractorData] = {}
 
 
-def entity_extractor(service_type: Text):
+def entity_extractor(service_type: Text, service_api: Text):
     """
     Denotes a function responsible for extracting additional info about GCP service.
 
@@ -33,7 +33,7 @@ def entity_extractor(service_type: Text):
     The decorator extends given function by uploading retrieved data to dynatrace server.
     """
 
-    def register_extractor(fun: ExtractEntitesFunc) -> ExtractEntitesFunc:
+    def register_extractor(fun: ExtractEntitiesFunc) -> ExtractEntitiesFunc:
         @wraps(fun)
         async def get_and_upload(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
             try:
@@ -44,7 +44,7 @@ def entity_extractor(service_type: Text):
 
             return entities
 
-        entities_extractors[service_type] = get_and_upload
+        entities_extractors[service_type] = EntitiesExtractorData(get_and_upload, service_api)
         return get_and_upload
 
     return register_extractor

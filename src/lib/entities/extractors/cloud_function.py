@@ -83,7 +83,7 @@ def _cloud_function_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: G
     ]
 
 
-@entity_extractor("cloud_function")
+@entity_extractor("cloud_function", "cloudfunctions.googleapis.com")
 async def get_cloud_function_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP cloud functions from google api. """
     url = f"https://cloudfunctions.googleapis.com/v1/projects/{project_id}/locations/-/functions"

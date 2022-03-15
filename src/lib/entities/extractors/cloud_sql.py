@@ -60,7 +60,7 @@ def _cloud_sql_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: GCPSer
     ]
 
 
-@entity_extractor("cloudsql_database")
+@entity_extractor("cloudsql_database", "sqladmin.googleapis.com")
 async def get_cloud_sql_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP Cloud SQL from google api. """
 
