@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#     Copyright 2021 Dynatrace LLC
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -16,14 +16,16 @@
 function run_deploy_and_tests() {
     TEST_TYPE=$1
 
-    export START_LOAD_GENERATION=$(date -u +%s%3N)
+    START_LOAD_GENERATION=$(date -u +%s%3N)
+    export START_LOAD_GENERATION
     export DEPLOYMENT_TYPE=$TEST_TYPE
 
     ./tests/e2e/deployment-test.sh "--${TEST_TYPE}"
 
     echo waiting 300sec
     sleep 300
-    export END_LOAD_GENERATION=$(date -u +%s%3N)
+    END_LOAD_GENERATION=$(date -u +%s%3N)
+    export END_LOAD_GENERATION
 
     if [[ $TEST_TYPE == 'all' ]]; then
         TEST_TYPE=''
