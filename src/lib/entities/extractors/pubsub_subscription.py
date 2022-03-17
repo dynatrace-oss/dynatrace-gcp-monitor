@@ -79,7 +79,7 @@ def _cloud_function_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: G
 
 
 @entity_extractor("pubsub_subscription", "pubsub.googleapis.com")
-async def get_cloud_function_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
+async def get_pubsub_subscription_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP cloud functions from google api. """
     url = f"https://pubsub.googleapis.com/v1/projects/{project_id}/subscriptions/"
     mapper_func = partial(_cloud_function_resp_to_monitored_entities, svc_def=svc_def)
