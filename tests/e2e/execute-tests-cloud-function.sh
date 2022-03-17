@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#     Copyright 2021 Dynatrace LLC
+#     Copyright 2022 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -13,9 +13,14 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-export START_LOAD_GENERATION=$(date -u +%s%3N)
+START_LOAD_GENERATION=$(date -u +%s%3N)
+export START_LOAD_GENERATION
+
 ./tests/e2e/deployment-test-cloud-function.sh
 sleep 300
-export END_LOAD_GENERATION=$(date -u +%s%3N)
+
+END_LOAD_GENERATION=$(date -u +%s%3N)
+export END_LOAD_GENERATION
+
 pytest "tests/e2e/extensions" -v
 pytest "tests/e2e/metrics" -v

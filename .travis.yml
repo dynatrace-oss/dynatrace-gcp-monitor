@@ -6,6 +6,7 @@ notifications:
   email:
     on_success: never
 stages:
+  - shellcheck
   - tests
   - build
   - e2e-helm-deployment-test
@@ -22,6 +23,21 @@ env:
   - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-function"
 jobs:
   include:
+  - stage: shellcheck
+    name: CheckStyle
+    language: minimal
+    script: |
+      status=0
+      for script in $(find . -iname "*.sh"); 
+      do
+        echo "Checking $script";
+        shellcheck -x "$script";
+        if [ $? -ne 0 ]; then
+          echo "ERROR: shellcheck failed at $script";
+          status=1;
+        fi;
+      done;
+      exit $status
   - stage: tests
     name: Tests
     language: python
