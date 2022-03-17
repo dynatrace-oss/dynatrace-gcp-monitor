@@ -234,8 +234,10 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             topology_tasks.append(topology_task)
             topology_task_services.append(service)
 
-    skipped_topology_services_string = ", ".join(skipped_topology_services)
-    context.log(project_id, f"Skipped fetching topology for disabled services: {skipped_topology_services_string}")
+    if skipped_topology_services:
+        skipped_topology_services_string = ", ".join(skipped_topology_services)
+        context.log(project_id, f"Skipped fetching topology for disabled services: {skipped_topology_services_string}")
+
     fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
 
     skipped_services_no_instances = []

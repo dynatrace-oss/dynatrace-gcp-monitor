@@ -48,11 +48,7 @@ class Entity:  # pylint: disable=R0902
 ExtractEntitiesFunc = Callable[[MetricsContext, str, GCPService], Iterable[Entity]]
 
 
+@dataclass(frozen=True)
 class EntitiesExtractorData:
-
     extractor: ExtractEntitiesFunc
     used_api: Text
-
-    def __init__(self, extractor, used_api):
-        self.extractor = extractor
-        self.used_api = used_api
