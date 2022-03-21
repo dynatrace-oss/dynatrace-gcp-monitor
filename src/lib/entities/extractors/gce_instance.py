@@ -110,8 +110,8 @@ def _cloud_function_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: G
     return entities
 
 
-@entity_extractor("gce_instance")
-async def get_cloud_function_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
+@entity_extractor("gce_instance", "compute.googleapis.com")
+async def get_gce_instance_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP cloud functions from google api. """
     zones = await fetch_zones(ctx, project_id)
 

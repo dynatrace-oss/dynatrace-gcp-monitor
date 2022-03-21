@@ -45,4 +45,10 @@ class Entity:  # pylint: disable=R0902
     dns_names: List[str]
 
 
-ExtractEntitesFunc = Callable[[MetricsContext, str, GCPService], Iterable[Entity]]
+ExtractEntitiesFunc = Callable[[MetricsContext, str, GCPService], Iterable[Entity]]
+
+
+@dataclass(frozen=True)
+class EntitiesExtractorData:
+    extractor: ExtractEntitiesFunc
+    used_api: Text

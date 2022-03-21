@@ -223,12 +223,21 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     fetch_metric_tasks = []
     topology_tasks = []
     topology_task_services = []
+    skipped_topology_services = set()
 
     for service in services:
         if service.name in entities_extractors:
-            topology_task = entities_extractors[service.name](context, project_id, service)
+            if entities_extractors[service.name].used_api in disabled_apis:
+                skipped_topology_services.add(service.name)
+                continue
+            topology_task = entities_extractors[service.name].extractor(context, project_id, service)
             topology_tasks.append(topology_task)
             topology_task_services.append(service)
+
+    if skipped_topology_services:
+        skipped_topology_services_string = ", ".join(skipped_topology_services)
+        context.log(project_id, f"Skipped fetching topology for disabled services: {skipped_topology_services_string}")
+
     fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
 
     skipped_services_no_instances = []
@@ -244,7 +253,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             api = metric.google_metric[:gcp_api_last_index]
             if api in disabled_apis:
                 skipped_disabled_apis.add(api)
-                continue # skip fetching the metrics because service API is disabled
+                continue  # skip fetching the metrics because service API is disabled
             fetch_metric_task = run_fetch_metric(
                 context=context,
                 project_id=project_id,
