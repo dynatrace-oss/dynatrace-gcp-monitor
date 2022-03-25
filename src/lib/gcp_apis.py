@@ -35,8 +35,8 @@ async def get_all_disabled_apis(context: MetricsContext, token: str, project_id:
             disabled_apis.update({disable_service.get("config", {}).get("name", "") for disable_service in disabled_services})
         return disabled_apis
     except ClientResponseError as e:
-        context.log(f'Disabled APIs call returned failed status code. {e}')
+        context.log(project_id, f'Disabled APIs call returned failed status code. {e}')
         return disabled_apis
     except Exception as e:
-        context.log(f'Cannot get disabled APIs: {GCP_SERVICE_USAGE_URL}/projects/{project_id}/services?filter=state:DISABLED. {e}')
+        context.log(project_id, f'Cannot get disabled APIs: {GCP_SERVICE_USAGE_URL}/projects/{project_id}/services?filter=state:DISABLED. {e}')
         return disabled_apis
