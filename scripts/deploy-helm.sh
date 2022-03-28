@@ -359,9 +359,9 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
     err "Default region not set. Set default region by running 'gcloud config set compute/region <REGION>'."
     exit 1
   fi
-  CONTAINERS_API=$(gcloud services list --enabled --filter=container.googleapis.com --project="$GCP_PROJECT")
-  if [[ -z "$CONTAINERS_API" ]]; then
-    debug "Enabling Containers API"
+  KUBERNETES_ENGINE_API=$(gcloud services list --enabled --filter=container.googleapis.com --project="$GCP_PROJECT")
+  if [[ -z "$KUBERNETES_ENGINE_API" ]]; then
+    debug "Enabling Kubernetes Engine API"
     gcloud services enable container.googleapis.com | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   fi
   info ""
