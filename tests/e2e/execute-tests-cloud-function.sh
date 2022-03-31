@@ -17,7 +17,7 @@ START_LOAD_GENERATION=$(date -u +%s%3N)
 export START_LOAD_GENERATION
 
 ./tests/e2e/deployment-test-cloud-function.sh
-sleep 420
+sleep 300
 
 END_LOAD_GENERATION=$(date -u +%s%3N)
 export END_LOAD_GENERATION
