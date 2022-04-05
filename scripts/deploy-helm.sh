@@ -21,6 +21,7 @@ init_ext_tools
 
 trap ctrl_c INT
 trap onFailure ERR
+set -o pipefail
 
 info "\033[1;34mDynatrace GCP integration on GKE"
 info "\033[0;37m"
