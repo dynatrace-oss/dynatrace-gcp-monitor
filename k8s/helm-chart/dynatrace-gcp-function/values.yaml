@@ -13,37 +13,43 @@
 #     limitations under the License.
 
 # COMMON VALUES
+
 # GCP project ID
 gcpProjectId: ""
 # deploymentType:
-# if set to metrics - deploy only one container to send GCP metrics to Dynatrace
-# if set to logs - deploy only one container to send GCP logs to Dynatrace
-# if set to all - deploy two containers to send GCP metrics and logs to Dynatrace
+# if set to 'metrics' - deploy only one container to send GCP metrics to Dynatrace
+# if set to 'logs' - deploy only one container to send GCP logs to Dynatrace
+# if set to 'all' - deploy two containers to send GCP metrics and logs to Dynatrace
 deploymentType: "all"
-# Dynatrace API token with permissions:
-# Deployment type 'all' or'logs'
+# Dynatrace API token with permissions, according to the deployment type
+# - for deployment type 'logs':
 # API v2: 'logs.ingest'
-# Deployment type 'all' or 'metrics'
+# - for deployment type 'metrics':
 # API v2: 'metrics.ingest', 'extensions.read', 'extensions.write', 'extensionConfigurations.read', 'extensionConfigurations.write', 'extensionEnvironment.read', 'extensionEnvironment.write'
 # API v1: 'ReadConfig', 'WriteConfig'
+# - for deployment type 'all':
+# All the above permissions
 dynatraceAccessKey: ""
-# Dynatrace environment endpoint, for example: SaaS: https://environment-id.live.dynatrace.com, Managed: https://cluster-id.managed.internal.dynatrace.com/e/environment-id
-# Needed for deployment type 'metrics'. For deployment 'all' and 'logs' in case when activeGate.useExisting is false
+# Dynatrace environment endpoint, for example:
+# - SaaS: https://<environment_id>.live.dynatrace.com
+# - Managed: https://<cluster_id>.managed.internal.dynatrace.com/e/<environment_id>
+# Used to ingest metrics, for deployment type 'metrics' and 'all'. For deployment 'logs', ONLY when activeGate.useExisting is false
 dynatraceUrl: ""
+
 
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
 
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
 #dynatraceLogIngestUrl endpoint used to ingest logs to Dynatrace:
-#  - for direct ingest through the Cluster API: https://<your_environment_ID>.live.dynatrace.com
+#  - for direct ingest through the Cluster API: https://environment_id>.live.dynatrace.com
 #  - for Environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
-#used ONLY when the activeGate.useExisting is true
+# Used ONLY when the activeGate.useExisting is true
 dynatraceLogIngestUrl: ""
 
 activeGate:
   #useExisting if you choose to use direct ingest through the Cluster API (available to all SaaS customers) or existing ActiveGate, put 'true' (default).
-  #If you choose new ActiveGate deployment, put 'false', the Active Gate will be deployed in k8s. In such case also the activeGate.dynatracePaasToken must be filled.
+  # If you choose new ActiveGate deployment, put 'false', the Active Gate will be deployed in k8s. In such case also the activeGate.dynatracePaasToken must be filled.
   useExisting: "true"
   #dynatracePaasToken PaaS token, generated in Dynatrace cluster.
   dynatracePaasToken: ""
