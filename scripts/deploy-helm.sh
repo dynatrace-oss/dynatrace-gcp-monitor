@@ -189,7 +189,7 @@ HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}"
 readonly HTTP_PROXY
 HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
 readonly HTTPS_PROXY
-readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
+readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
 
 SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
 
