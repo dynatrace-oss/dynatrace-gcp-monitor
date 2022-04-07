@@ -30,7 +30,9 @@ deploymentType: "all"
 # - for deployment type 'all':
 # All the above permissions
 dynatraceAccessKey: ""
-# Dynatrace environment endpoint, for example: SaaS: https://<environment_id>.live.dynatrace.com, Managed: https://<cluster_id>.managed.internal.dynatrace.com/e/<environment_id>
+# Dynatrace environment endpoint, for example:
+# - SaaS: https://<environment_id>.live.dynatrace.com
+# - Managed: https://<cluster_id>.managed.internal.dynatrace.com/e/<environment_id>
 # Used to ingest metrics, for deployment type 'metrics' and 'all'. For deployment 'logs', ONLY when activeGate.useExisting is false
 dynatraceUrl: ""
 
@@ -40,7 +42,7 @@ dynatraceUrl: ""
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
 #dynatraceLogIngestUrl endpoint used to ingest logs to Dynatrace:
-#  - for direct ingest through the Cluster API: https://<your_environment_id>.live.dynatrace.com
+#  - for direct ingest through the Cluster API: https://environment_id>.live.dynatrace.com
 #  - for Environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
 # Used ONLY when the activeGate.useExisting is true
 dynatraceLogIngestUrl: ""
