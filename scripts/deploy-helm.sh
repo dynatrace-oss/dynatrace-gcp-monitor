@@ -21,6 +21,7 @@ init_ext_tools
 
 trap ctrl_c INT
 trap onFailure ERR
+set -o pipefail
 
 info "\033[1;34mDynatrace GCP integration on GKE"
 info "\033[0;37m"
@@ -356,8 +357,8 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   fi
   info ""
   info "- Create and connect GKE Autopilot k8s cluster ${AUTOPILOT_CLUSTER_NAME}."
-  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
-  gcloud container clusters get-credentials "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+  gcloud container clusters get-credentials "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 fi
 
 debug "Creating dynatrace namespace into kubernetes cluster"

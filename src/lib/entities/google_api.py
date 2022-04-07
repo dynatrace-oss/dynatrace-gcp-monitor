@@ -50,13 +50,13 @@ async def generic_paging(
             return entities
 
         if resp.status >= 400:
-            ctx.log(f'Failed to retrieve information from googleapis. {url} {page}')
+            ctx.log(project_id, f'Failed to retrieve information from googleapis. {url} {page}')
             return entities
 
         try:
             entities.extend(mapper(page))
         except Exception as ex:
-            ctx.log(f"Failed to map response from googleapis. {url} {ex}")
+            ctx.log(project_id, f"Failed to map response from googleapis. {url} {ex}")
             return entities
 
         get_page = "nextPageToken" in page
