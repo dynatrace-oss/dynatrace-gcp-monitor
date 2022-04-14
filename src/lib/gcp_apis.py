@@ -18,9 +18,9 @@ from lib.context import MetricsContext
 GCP_SERVICE_USAGE_URL = "https://serviceusage.googleapis.com/v1/projects/"
 
 
-async def get_all_disabled_apis(context: MetricsContext, token: str, project_id: str):
+async def get_all_disabled_apis(context: MetricsContext, project_id: str):
     base_url = f"{GCP_SERVICE_USAGE_URL}{project_id}/services?filter=state:DISABLED"
-    headers = {"Authorization": "Bearer {token}".format(token=token)}
+    headers = context.create_gcp_request_headers(project_id)
     disabled_apis = set()
     try:
         response = await context.gcp_session.get(base_url, headers=headers, raise_for_status=True)
