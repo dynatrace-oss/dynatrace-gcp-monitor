@@ -176,6 +176,9 @@ readonly DYNATRACE_ACCESS_KEY
 DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}" | sed 's:/*$::')
 readonly DYNATRACE_URL
 DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}" | sed 's:/*$::')
+if [ -z "$DYNATRACE_LOG_INGEST_URL" ]; then
+  DYNATRACE_LOG_INGEST_URL=$DYNATRACE_URL
+fi
 readonly DYNATRACE_LOG_INGEST_URL
 USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.useExisting}")
 readonly USE_EXISTING_ACTIVE_GATE
