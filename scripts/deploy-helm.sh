@@ -181,7 +181,7 @@ HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}"
 readonly HTTP_PROXY
 HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
 readonly HTTPS_PROXY
-readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,256}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
+readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
 SA_NAME=$(helm show values ./dynatrace-gcp-function --jsonpath "{.serviceAccount}")
 readonly SA_NAME
 
