@@ -64,6 +64,8 @@ requireValidCertificate: "true"
 # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics/logs to Dynatrace properly.
 # Allowed values: "true"/"yes", "false"/"no"
 selfMonitoringEnabled: "false"
+# IAM service account name
+serviceAccount: "dynatrace-gcp-function-sa"
 # Dynatrace GCP function docker image. Using default value is advised,
 # but can be changed if there is a need to use customized image or specific, tagged version
 dockerImage: "dynatrace/dynatrace-gcp-function:v1-latest"

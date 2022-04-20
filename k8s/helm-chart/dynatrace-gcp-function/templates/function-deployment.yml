@@ -15,10 +15,10 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: dynatrace-gcp-function-sa
+  name: {{ .Values.serviceAccount }}
   namespace: {{ .Release.Namespace }}
   "annotations": {
-    "iam.gke.io/gcp-service-account" : dynatrace-gcp-function-sa@{{ .Values.gcpProjectId }}.iam.gserviceaccount.com
+    "iam.gke.io/gcp-service-account" : {{ .Values.serviceAccount }}@{{ .Values.gcpProjectId }}.iam.gserviceaccount.com
   }
 automountServiceAccountToken: false
 ---
@@ -43,7 +43,7 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/function-config.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/function-secret.yaml") . | sha256sum }}
     spec:
-      serviceAccountName: dynatrace-gcp-function-sa
+      serviceAccountName: {{ .Values.serviceAccount }}
       automountServiceAccountToken: false
       {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
       volumes:

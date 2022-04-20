@@ -71,12 +71,9 @@ check_dynatrace_docker_login() {
 
 print_help() {
   printf "
-usage: deploy-helm.sh [--service-account SA_NAME] [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--upgrade-extensions] [--auto-default] [--quiet]
+usage: deploy-helm.sh [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--upgrade-extensions] [--auto-default] [--quiet]
 
 arguments:
-    --service-account SA_NAME
-                            IAM service account name
-                            By default 'dynatrace-gcp-function-sa' will be used.
     --role-name ROLE_NAME
                             IAM role name prefix
                             By default 'dynatrace_function' will be used as prefix (e.g. dynatrace_function.metrics).
@@ -111,11 +108,6 @@ AUTOPILOT_CLUSTER_NAME="dynatrace-gcp-function"
 
 while (( "$#" )); do
     case "$1" in
-            "--service-account")
-                SA_NAME=$2
-                shift; shift
-            ;;
-
             "--role-name")
                 ROLE_NAME=$2
                 shift; shift
@@ -193,6 +185,8 @@ readonly HTTP_PROXY
 HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
 readonly HTTPS_PROXY
 readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
+SA_NAME=$(helm show values ./dynatrace-gcp-function --jsonpath "{.serviceAccount}")
+readonly SA_NAME
 
 SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
 
@@ -205,10 +199,6 @@ check_if_parameter_is_empty "$GCP_PROJECT" "Set correct gcpProjectId in values.y
 
 gcloud config set project "$GCP_PROJECT" | tee -a "$FULL_LOG_FILE"
 info "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]"
-
-if [ -z "$SA_NAME" ]; then
-  SA_NAME="dynatrace-gcp-function-sa"
-fi
 
 if [ -z "$ROLE_NAME" ]; then
   ROLE_NAME="dynatrace_function"
@@ -395,7 +385,7 @@ fi
 debug "Binding correct policies to Service Account"
 info ""
 info "- 3. Configure the IAM service account for Workload Identity."
-gcloud iam service-accounts add-iam-policy-binding "$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role roles/iam.workloadIdentityUser --member "serviceAccount:$GCP_PROJECT.svc.id.goog[$KUBERNETES_NAMESPACE/dynatrace-gcp-function-sa]" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+gcloud iam service-accounts add-iam-policy-binding "$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role roles/iam.workloadIdentityUser --member "serviceAccount:$GCP_PROJECT.svc.id.goog[$KUBERNETES_NAMESPACE/$SA_NAME]" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 
 info ""
 info "- 4. Create dynatrace-gcp-function IAM role(s)."
