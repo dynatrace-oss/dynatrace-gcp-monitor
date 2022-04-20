@@ -12,6 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+
 # COMMON VALUES
 
 # GCP project ID
@@ -30,10 +31,10 @@ deploymentType: "all"
 # - for deployment type 'all':
 # All the above permissions
 dynatraceAccessKey: ""
-# Dynatrace environment endpoint, for example:
+# Dynatrace endpoint to ingest metrics and logs, for example:
 # - SaaS: https://<environment_id>.live.dynatrace.com
 # - Managed: https://<cluster_id>.managed.internal.dynatrace.com/e/<environment_id>
-# Used to ingest metrics, for deployment type 'metrics' and 'all'. For deployment 'logs', ONLY when activeGate.useExisting is false
+# - Through an environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
 dynatraceUrl: ""
 
 
@@ -41,24 +42,21 @@ dynatraceUrl: ""
 
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
-#dynatraceLogIngestUrl endpoint used to ingest logs to Dynatrace:
-#  - for direct ingest through the Cluster API: https://environment_id>.live.dynatrace.com
-#  - for Environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
-# Used ONLY when the activeGate.useExisting is true
+#dynatraceLogIngestUrl OPTIONAL endpoint used to ingest logs to Dynatrace, if it's not wanted to ingest them through dynatraceUrl:
+# - for direct ingest through the Cluster API: https://<environment_id>.live.dynatrace.com
+# - for Environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
+# If not set and activeGate.useExisting is true, dynatraceUrl will be used
 dynatraceLogIngestUrl: ""
-
 activeGate:
   #useExisting if you choose to use direct ingest through the Cluster API (available to all SaaS customers) or existing ActiveGate, put 'true' (default).
-  # If you choose new ActiveGate deployment, put 'false', the Active Gate will be deployed in k8s. In such case also the activeGate.dynatracePaasToken must be filled.
+  # If you choose new ActiveGate deployment, put 'false'. The new Active Gate will be deployed in k8s and used to ingest logs. In such case, also the activeGate.dynatracePaasToken must be filled.
   useExisting: "true"
   #dynatracePaasToken PaaS token, generated in Dynatrace cluster.
   dynatracePaasToken: ""
 
 
-# METRICS VALUES - REQUIRED for 'metrics' and 'all' deployment
+# COMMON VALUES - DEFAULTS
 
-
-# COMMON VALUES - DEFAULT
 # requireValidCertificate: if true function requires valid SSL certificates when communicating with Dynatrace cluster
 # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate.
 # Allowed values: "true"/"yes", "false"/"no"
@@ -82,7 +80,9 @@ httpProxy: ""
 # httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
 httpsProxy: ""
 
-# LOGS VALUES - DEFAULT
+
+# LOGS VALUES - DEFAULTS
+
 # max content length of log event. Should be the same or lower than on cluster
 logIngestContentMaxLength: 8192
 # max length of log event attribute value. If it surpasses server limit, Content will be truncated
@@ -96,7 +96,9 @@ logIngestSendingWorkerExecutionPeriod: 60
 # Determines max age of forwarded log event. Should be the same or lower than on cluster
 logIngestEventMaxAgeSeconds: 86400
 
+
 # METRICS VALUES - DEFAULTS
+
 # printMetricIngestInput: if true function will output lines of metrics into stdout
 # Allowed values: "true"/"yes", "false"/"no"
 printMetricIngestInput: "false"
