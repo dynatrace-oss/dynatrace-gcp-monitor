@@ -15,7 +15,7 @@
 
 readonly EXTENSION_MANIFEST_FILE=extensions-list.txt
 # shellcheck disable=SC2034  # Unused variables left for readability
-readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/?)(\/e\/[a-z0-9-]{36}\/?)?$"
+readonly DYNATRACE_URL_REGEX="^(https?:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/?)(\/e\/[a-z0-9-]{1,36}\/?)?$"
 readonly EXTENSION_ZIP_REGEX="^(.*)-([0-9.]*).zip$"
 EXTENSIONS_TMPDIR=$(mktemp -d)
 CLUSTER_EXTENSIONS_TMPDIR=$(mktemp -d)

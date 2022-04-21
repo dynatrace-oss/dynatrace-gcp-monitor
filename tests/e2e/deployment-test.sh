@@ -98,12 +98,13 @@ dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 activeGate:
   useExisting: "false"
   dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
+serviceAccount: "${IAM_SERVICE_ACCOUNT}"
 EOF
 "$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project "${GCP_PROJECT_ID}"
 
-./deploy-helm.sh --service-account "${IAM_SERVICE_ACCOUNT}" --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
+./deploy-helm.sh --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 
 # Verify containers running
 echo
