@@ -67,7 +67,6 @@ jobs:
 
   - stage: build
     name: Build
-    if: tag !~ /^release-.*
     language: python
     python:
       - "3.8"
