@@ -135,7 +135,8 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         disabled_apis = {}
         disabled_projects = []
         for project_id in projects_ids:
-            disabled_apis = {project_id: await get_all_disabled_apis(context, token, project_id)}
+            await check_x_goog_user_project_header_permissions(context, project_id)
+            disabled_apis = {project_id: await get_all_disabled_apis(context, project_id)}
             if 'monitoring.googleapis.com' in disabled_apis[project_id]:
                 disabled_projects.append(project_id)
                 
@@ -171,7 +172,6 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
                                   disabled_apis: Set[str]):
     try:
         context.log(project_id, f"Starting processing...")
-        await check_x_goog_user_project_header_permissions(context, project_id)
         ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis)
         fetch_data_time = time.time() - context.start_processing_timestamp
         context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
