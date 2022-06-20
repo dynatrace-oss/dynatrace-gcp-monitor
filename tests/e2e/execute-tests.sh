@@ -22,6 +22,8 @@ function run_deploy_and_tests() {
 
     ./tests/e2e/deployment-test.sh "--${TEST_TYPE}"
 
+    echo "WLAD Deployment status $?"
+
     echo waiting 300sec
     sleep 300
     END_LOAD_GENERATION=$(date -u +%s%3N)
