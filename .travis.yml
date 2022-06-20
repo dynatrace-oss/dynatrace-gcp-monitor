@@ -178,7 +178,7 @@ jobs:
       - IAM_SERVICE_ACCOUNT="e2e-test-sa-${TRAVIS_BUILD_ID}"
       - LOG_ROUTER="e2e_test_log_router_${TRAVIS_BUILD_ID}"
       - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
-      - K8S_CLUSTER="e2e-test-master"
+      - K8S_CLUSTER="e2e-test-master-wlad"
       - E2E=true
       - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
       - secure: "muHGNxIK6fxTltIsGgms6v3dleuQ1LZyQmZIGQDSfQ5sfYDYEvR2xsabK237AipSSGppoVhc7S6ri8A/WNQautHUfdBOsVn1i7czzoPhELdOJkAiigXrI3kla68OTCiC0TPwWbIYOxzmiYDHZr+rYbA1773O0iyhWHiTVQerLMndn0wCFWUUnLbD1WfzdAxlfSo1rd7u81m8g4efLIUppo/fjfaxmVwvo1oIfensGVknyOE+gtSh/OpGdYfNeOqxoDGOoMe5bnCqibUoREXRzUZKGb6upxMMmW6E3hGG02kqle4jYjaC7Uiu2IVZsK38iAWNGwIRy21CIXNHn4R6we44n5JLH92aiRtVw8D/fDOnN2gWTtmdrvoB8YklbaYZBnDrGJxI6rESfeQjwD8ImWWKUJFUlwovKjNWhOw8RMhPVtPOuC00+F2UDq5NosrWYGUjLjaKFC/4nysOiK2DgsMBF/Mk1Ei1BDMYmcHQ7Jsrs8ys/kgPasV3Qs9xOuSJpF+AiwKPfI1R9bxYiORg70TNz62wPD7FlKWIVe0DvhrWcHCTpnrROabt6B0hUROfljCZe2H+j8HD9uCJCJHk5qP7llNVofVnz8w+s90wLEKpUNn2rVUH0fzffYM7YaLRPhzLEUJSQso3a7hXFfcoUow8OOPTmCgViGCfPjuy2zc="

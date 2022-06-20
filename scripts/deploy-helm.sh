@@ -439,7 +439,8 @@ info ""
 info "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME"
 
 debug "- WLAD $KUBERNETES_NAMESPACE"
-helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME"
+helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace "$KUBERNETES_NAMESPACE" --set clusterName="$CLUSTER_NAME"
+
 
 debug "Helm installation completed"
 info ""

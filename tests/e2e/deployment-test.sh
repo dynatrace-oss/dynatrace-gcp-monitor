@@ -19,6 +19,7 @@ source ./tests/e2e/lib-tests.sh
 check_container_state()
 {
   CONTAINER=$1
+  kubectl -n dynatrace get pods
   CONTAINER_STATE=$(kubectl -n dynatrace get pods -o=jsonpath="{.items[*].status.containerStatuses[?(@.name==\"${CONTAINER}\")].state}")
   if [[ "${CONTAINER_STATE}" != *"running"* ]]; then
     return 1
@@ -104,7 +105,7 @@ EOF
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project "${GCP_PROJECT_ID}"
 
-./deploy-helm.sh --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
+./deploy-helm.sh --role-name "${IAM_ROLE_PREFIX}"
 
 # Verify containers running
 echo
