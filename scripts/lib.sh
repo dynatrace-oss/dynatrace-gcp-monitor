@@ -28,6 +28,7 @@ debug() {
   echo -e | tee -a "$FULL_LOG_FILE" &> /dev/null
   echo -e "DEBUG: ${MESSAGE}" | tee -a "$FULL_LOG_FILE" &> /dev/null
   echo -e | tee -a "$FULL_LOG_FILE" &> /dev/null
+  echo -e "DEBUG: ${MESSAGE}"
 }
 
 info() {
