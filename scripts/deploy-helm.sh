@@ -437,7 +437,9 @@ fi
 debug "Installing Dynatrace Integration Helm Chart on selected kubernetes cluster"
 info ""
 info "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME"
-helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+
+debug "- WLAD $KUBERNETES_NAMESPACE"
+helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME"
 
 debug "Helm installation completed"
 info ""
