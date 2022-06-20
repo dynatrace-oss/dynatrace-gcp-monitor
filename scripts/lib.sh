@@ -41,6 +41,7 @@ warn() {
   echo -e | tee -a "$FULL_LOG_FILE"
   echo -e "\e[93mWARNING: \e[37m${MESSAGE}" | tee -a "$FULL_LOG_FILE"
   echo -e | tee -a "$FULL_LOG_FILE"
+  echo -e "\e[93mWARNING: \e[37m${MESSAGE}"
 }
 
 err() {
