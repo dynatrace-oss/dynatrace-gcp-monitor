@@ -19,7 +19,7 @@ env:
   - TAG=$TRAVIS_TAG
   - VERSION_TAG=/^release-.*
   - DOCKER_CLI_EXPERIMENTAL=enabled
-  - GCP_PROJECT_ID="dynatrace-gcp-extension-2"
+  - GCP_PROJECT_ID="dynatrace-gcp-extension"
   - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-function"
 jobs:
   include:
@@ -177,7 +177,7 @@ jobs:
       - PUBSUB_SUBSCRIPTION="e2e_test_subscription_${TRAVIS_BUILD_ID}"
       - IAM_SERVICE_ACCOUNT="e2e-test-sa-${TRAVIS_BUILD_ID}"
       - LOG_ROUTER="e2e_test_log_router_${TRAVIS_BUILD_ID}"
-      - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
+      - IAM_ROLE_PREFIX="ms_role3"
       - K8S_CLUSTER="e2e-test-master-wlad"
       - E2E=true
       - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
