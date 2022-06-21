@@ -91,11 +91,11 @@ spec:
             {{- end }}
           resources:
             requests:
-              memory: 512Mi
-              cpu: 1
-            limits:
               memory: 1024Mi
-              cpu: 1
+              cpu: 2
+            limits:
+              memory: 2048Mi
+              cpu: 4
           livenessProbe:
             httpGet:
               path: /rest/state

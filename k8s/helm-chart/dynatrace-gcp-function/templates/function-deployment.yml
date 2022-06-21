@@ -131,11 +131,11 @@ spec:
           name: gcp-config
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
             memory: "512Mi"
-            cpu: "500m"
+            cpu: "512m"
+          limits:
+            memory: "1024Mi"
+            cpu: "1024m"
         livenessProbe:
           httpGet:
             path: /health
@@ -254,11 +254,11 @@ spec:
           value: "8081"
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "500m"
+            memory: "512Mi"
+            cpu: "512m"
           limits:
-            memory: "256Mi"
-            cpu: "500m"
+            memory: "1024Mi"
+            cpu: "1024m"
         livenessProbe:
           httpGet:
             path: /health
