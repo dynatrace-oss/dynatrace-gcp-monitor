@@ -19,7 +19,7 @@ env:
   - TAG=$TRAVIS_TAG
   - VERSION_TAG=/^release-.*
   - DOCKER_CLI_EXPERIMENTAL=enabled
-  - GCP_PROJECT_ID="dynatrace-gcp-extension"
+  - GCP_PROJECT_ID="dynatrace-gcp-extension-2"
   - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-function"
 jobs:
   include:
