@@ -240,7 +240,8 @@ check_api_token() {
 
 check_s3_url() {
   if [ -z "$EXTENSION_S3_URL" ]; then
-    EXTENSION_S3_URL="https://dynatrace-gcp-extensions.s3.amazonaws.com"
+    # File exposed in a S3 bucket accessed through Cloudfront
+    EXTENSION_S3_URL="https://d1twjciptxxqvo.cloudfront.net"
   else
     warn "Development mode on: custom S3 url link."
   fi
