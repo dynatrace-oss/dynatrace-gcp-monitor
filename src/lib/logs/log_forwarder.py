@@ -94,7 +94,7 @@ def perform_pull(worker_state: WorkerState,
     response: PullResponse = subscriber_client.pull(pull_request)
 
     for received_message in response.received_messages:
-        # print(f"Received: {received_message.message.data}.")
+        print(f"Received: {received_message.message.data}.")
         message_job = _process_message(sfm_queue, received_message)
 
         if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
