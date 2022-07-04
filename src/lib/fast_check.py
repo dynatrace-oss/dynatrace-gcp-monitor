@@ -119,7 +119,8 @@ def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
     if len(dynatrace_access_key) >= 7:
         is_new_token = dynatrace_access_key.startswith("dt0c01.") and len(dynatrace_access_key) == 96
         if is_new_token:
-            return dynatrace_access_key[:10] + '*' * (len(dynatrace_access_key) - 13) + dynatrace_access_key[-3:]
+            # characters between dots are the public part of the token
+            return dynatrace_access_key.split('.')[1]
         else:
             return dynatrace_access_key[:3] + '*' * (len(dynatrace_access_key) - 6) + dynatrace_access_key[-3:]
     else:
@@ -128,7 +129,6 @@ def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
 
 async def check_dynatrace(logging_context: LoggingContext, project_id, dt_session: ClientSession, dynatrace_url, dynatrace_access_key):
     try:
-
         if not dynatrace_url or not dynatrace_access_key:
             logging_context.log(f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
                                      f'Add required secrets to Secret Manager.')
