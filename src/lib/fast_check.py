@@ -120,7 +120,7 @@ def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
         is_new_token = dynatrace_access_key.startswith("dt0c01.") and len(dynatrace_access_key) == 96
         if is_new_token:
             # characters between dots are the public part of the token
-            return dynatrace_access_key.split('.')[1]
+            return 'dt0c01.' + dynatrace_access_key.split('.')[1]
         else:
             return dynatrace_access_key[:3] + '*' * (len(dynatrace_access_key) - 6) + dynatrace_access_key[-3:]
     else:
