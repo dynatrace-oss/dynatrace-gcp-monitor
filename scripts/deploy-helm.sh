@@ -173,6 +173,9 @@ if [ -z "$DYNATRACE_LOG_INGEST_URL" ]; then
 fi
 readonly DYNATRACE_LOG_INGEST_URL
 USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.useExisting}")
+if [ -z "$USE_EXISTING_ACTIVE_GATE" ]; then
+  USE_EXISTING_ACTIVE_GATE=true
+fi
 readonly USE_EXISTING_ACTIVE_GATE
 DYNATRACE_PAAS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.dynatracePaasToken}")
 readonly DYNATRACE_PAAS_KEY
@@ -209,10 +212,6 @@ if [ -z "$KUBERNETES_NAMESPACE" ]; then
   KUBERNETES_NAMESPACE="dynatrace"
 fi
 
-if [ -z "$USE_EXISTING_ACTIVE_GATE" ]; then
-  USE_EXISTING_ACTIVE_GATE=true
-fi
-
 if [ -z "$DEPLOYMENT_TYPE" ]; then
   DEPLOYMENT_TYPE="all"
   info "Deploying metrics and logs ingest"
@@ -238,12 +237,10 @@ if [ -n "$USE_PROXY" ]; then
 fi
 
 debug "Check if any required parameter is empty"
-if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]] || [[ ($DEPLOYMENT_TYPE == logs && $USE_EXISTING_ACTIVE_GATE == false) ]]; then
-  check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
-  check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
-  check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
-  check_api_token "$DYNATRACE_URL"
-fi
+check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
+check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
+check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
+check_api_token "$DYNATRACE_URL"
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "/api/v2/extensions/schemas"); then
@@ -454,9 +451,7 @@ if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   info "kubectl -n $KUBERNETES_NAMESPACE logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics"
 fi
 
-if [[ $DEPLOYMENT_TYPE != "metrics" ]] && [[ $USE_EXISTING_ACTIVE_GATE != "true" ]]; then
-  # We can build a Log viewer link only when a Dynatrace url is set (when the option with ActiveGate deployment is chosen)
-  # When an existing ActiveGate is used we are not able to build the link - LOG_VIEWER is empty then.
+if [[ $DEPLOYMENT_TYPE != "metrics" ]]; then
   LOG_VIEWER="Log Viewer: ${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
 fi
 
