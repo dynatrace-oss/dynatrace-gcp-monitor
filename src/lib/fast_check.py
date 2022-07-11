@@ -138,9 +138,9 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
         token_metadata = await get_dynatrace_token_metadata(dt_session, logging_context, dynatrace_url, dynatrace_access_key)
         if token_metadata.get('name', None):
             logging_context.log(f"Token name: {token_metadata.get('name')}.")
-        if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
-            logging_context.log(f'Dynatrace API Token for project: \'{project_id}\' is not valid. '
-                                f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
+            if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
+                logging_context.log(f'Dynatrace API Token for project: \'{project_id}\' is not valid. '
+                                    f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
     except Exception as e:
         logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
 
