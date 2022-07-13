@@ -209,6 +209,10 @@ if [ -z "$KUBERNETES_NAMESPACE" ]; then
   KUBERNETES_NAMESPACE="dynatrace"
 fi
 
+if [ -z "$USE_EXISTING_ACTIVE_GATE" ]; then
+  USE_EXISTING_ACTIVE_GATE=true
+fi
+
 if [ -z "$DEPLOYMENT_TYPE" ]; then
   DEPLOYMENT_TYPE="all"
   info "Deploying metrics and logs ingest"
