@@ -191,6 +191,9 @@ readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/e
 SA_NAME=$(helm show values ./dynatrace-gcp-function --jsonpath "{.serviceAccount}")
 readonly SA_NAME
 VPC_NETWORK=$(helm show values ./dynatrace-gcp-function --jsonpath "{.vpcNetwork}")
+if [ -z "$VPC_NETWORK" ]; then
+  VPC_NETWORK="default"
+fi
 readonly VPC_NETWORK
 
 SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
