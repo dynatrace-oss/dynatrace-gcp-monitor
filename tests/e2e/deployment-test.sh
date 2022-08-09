@@ -96,7 +96,7 @@ logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
 dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 activeGate:
-  useExisting: "false"
+  useExisting: "true"
   dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
 serviceAccount: "${IAM_SERVICE_ACCOUNT}"
 EOF
@@ -111,7 +111,6 @@ echo
 echo -n "Verifying deployment result"
 METRICS_CONTAINER_STATE=0
 LOGS_CONTAINER_STATE=0
-ACTIVEGATE_CONTAINER_STATE=0
 
 for _ in {1..60}
 do
@@ -123,11 +122,9 @@ do
   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     check_container_state "dynatrace-gcp-function-logs"
     LOGS_CONTAINER_STATE=$?
-    check_container_state "dynatrace-activegate-gcpmon"
-    ACTIVEGATE_CONTAINER_STATE=$?
   fi
 
-  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
+  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
     break
   fi
 
@@ -140,7 +137,7 @@ kubectl -n dynatrace get pods
 
 generate_load_on_sample_app
 
-if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]] && [[ ${ACTIVEGATE_CONTAINER_STATE} == 0 ]]; then
+if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
   echo "Deployment completed successfully"
   exit 0
 else
