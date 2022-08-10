@@ -72,6 +72,7 @@ activation: |
     - service: api
       featureSets:
         - default_metrics
+    # - limited_response_codes
       vars:
         filter_conditions: ""
     # Google Apigee Environment
@@ -204,6 +205,7 @@ activation: |
     # - service: consumed_api
     #   featureSets:
     #     - default_metrics
+    #     - limited_response_codes
     #   vars:
     #     filter_conditions: ""
     # Google Consumer Quota
