@@ -121,6 +121,7 @@ gcpServicesYaml: |
     - service: api
       featureSets:
         - default_metrics
+    #     - limited_response_codes
       vars:
         filter_conditions: ""
     # Google Apigee Environment
@@ -252,7 +253,8 @@ gcpServicesYaml: |
     # Google Consumed API
     # - service: consumed_api
     #   featureSets:
-    #     - default_metrics
+    #     - default_metrics    
+    #     - limited_response_codes
     #   vars:
     #     filter_conditions: ""
     # Google Consumer Quota
