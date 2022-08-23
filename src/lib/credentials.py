@@ -142,6 +142,15 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
     response = await session.get(url, headers=headers)
     response_json = await response.json()
     all_projects = [project["projectId"] for project in response_json.get("projects", [])]
+    page_token = response_json.get("nextPageToken", "")  
+
+    while page_token != "": 
+        url_with_pageToken = url + "&pageToken=" + page_token
+        response = await session.get(url_with_pageToken, headers=headers)
+        response_json = await response.json()
+        all_projects.extend([project["projectId"] for project in response_json.get("projects", [])])
+        page_token = response_json.get("nextPageToken","") 
+
     if all_projects:
         context.log("Access to following projects: " + ", ".join(all_projects))
     else:
