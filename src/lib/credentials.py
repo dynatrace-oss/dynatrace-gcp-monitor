@@ -141,14 +141,14 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
     headers = {"Authorization": "Bearer {token}".format(token=token)}
     all_projects = [] 
     page_token = "" 
-    url_addition = "" 
+    next_page_url_suffix = "" 
 
     while True: 
-        response = await session.get(url+url_addition, headers=headers)
+        response = await session.get(url+next_page_url_suffix, headers=headers)
         response_json = await response.json()
         all_projects.extend([project["projectId"] for project in response_json.get("projects", [])])
         page_token = response_json.get("nextPageToken", "")
-        url_addition = "&pageToken=" + page_token
+        next_page_url_suffix = "&pageToken=" + page_token
         if(page_token == ""):
             break
 
