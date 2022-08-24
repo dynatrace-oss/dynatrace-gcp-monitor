@@ -139,17 +139,18 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
 async def get_all_accessible_projects(context: LoggingContext, session: ClientSession, token: str):
     url = _CLOUD_RESOURCE_MANAGER_ROOT + "/projects?filter=lifecycleState%3AACTIVE"
     headers = {"Authorization": "Bearer {token}".format(token=token)}
-    response = await session.get(url, headers=headers)
-    response_json = await response.json()
-    all_projects = [project["projectId"] for project in response_json.get("projects", [])]
-    page_token = response_json.get("nextPageToken", "")  
+    all_projects = [] 
+    page_token = "" 
+    url_addition = "" 
 
-    while page_token != "": 
-        url_with_pageToken = url + "&pageToken=" + page_token
-        response = await session.get(url_with_pageToken, headers=headers)
+    while True: 
+        response = await session.get(url+url_addition, headers=headers)
         response_json = await response.json()
         all_projects.extend([project["projectId"] for project in response_json.get("projects", [])])
-        page_token = response_json.get("nextPageToken","") 
+        page_token = response_json.get("nextPageToken", "")
+        url_addition = "&pageToken=" + page_token
+        if(page_token == ""):
+            break
 
     if all_projects:
         context.log("Access to following projects: " + ", ".join(all_projects))
