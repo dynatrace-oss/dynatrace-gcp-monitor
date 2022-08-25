@@ -1,5 +1,11 @@
 # Dynatrace Google Cloud Integration Hacking instructions
 
+Disclaimer:
+
+Please note that following instructions are supported by the community only. They serve as a guideline on what you can modify and/or extend for a better Dynatrace GCP monitoring experience.
+
+Feel free to share your ideas back with us, allowing everyone to benefit from the open source approach.
+
 ## Development environment setup
 
 To run worker function locally you have to have Python dev environment installed: `Python 3.8` with `pip` tool.
@@ -12,7 +18,7 @@ pip install -r tests\requirements.txt
 pip install --only-binary :all: cryptography==3.4.7 #cryptography library in Windows env requires this special handling or rustup installed
 ```
 
-##Running single local run
+## Running single local run
 Run `local_test.py` with env_vars set according to the table below. 
 
 To run metrics ingest worker function run `local_test.py` script file. 
@@ -20,7 +26,7 @@ This runs a single run, and then returns. Some expection may appear in Win env, 
 
 To run logs ingest worker function run `local_test.py` script file with `OPERATION_MODE` set to `Logs` 
 
-##Running periodic local run
+## Running periodic local run
 Run `run_docker.py` with env_vars set according to the table below.
 
 As opposed to `local_test.py`, this runs continuously.
@@ -79,7 +85,6 @@ Worker function execution can be tweaked with environment variables. In Google F
 Building custom extension for GCP service allows to customize metrics / dimensions that are ingested to Dynatrace AND/OR to ingest metrics for service not officially supported by Dynatrace extensions. 
 
 Limitations:
-* custom extensions for `dynatrace-gcp-function` are not supported by Dynatrace
 * custom extension will work **only** on Kubernetes deployment
 
 `dynatrace-gcp-function` uses Dynatrace Extension Framework 2.0 to package support for GCP Services (metrics, topology rules, dasboards etc). Latest version of official GCP extensions is listed in [extensions-list.txt](https://d1twjciptxxqvo.cloudfront.net/extensions-list.txt) manifest file.
@@ -88,25 +93,28 @@ Reference:
 * [Extension YAML file](https://www.dynatrace.com/support/help/extend-dynatrace/extensions20/extension-yaml)
 * [Sign extensions](https://www.dynatrace.com/support/help/extend-dynatrace/extensions20/sign-extension)
 
-As **an example**, I'll examplain how to customize `Google Compute Engine` extension. 
+### Tutorial: building custom extenion for GCE Virtual Machine
+As **an example**, the guide examplains how to customize `Google Compute Engine` extension. 
 
 Required tools:
-* IDE for yaml, (for example: `vscode` with `YAML` extension installed)
+* IDE for yaml, (for example: `vscode` with `YAML` extension installed for linting)
 * openssl
 * zip
 
-### Building custom extension
+#### 1. Get the name & version of latest extension artifact
+First, we'd need to get the name of the lastest version of the GCE extenion. This can be found on cloud bucket within extenion manifest file.
 
-#### 1. Get the name of latest `google-compute-engine` extension
 ```
 GCE_EXTENSION_VERSION=$(curl -s https://d1twjciptxxqvo.cloudfront.net/extensions-list.txt | grep google-compute-engine)
 ```
  
 #### 2. Download the extension
+Having latest version it's possible to download extenion zip file.
+
 ```
 wget https://d1twjciptxxqvo.cloudfront.net/${GCE_EXTENSION_VERSION}
 ```
-
+ 
 #### 3. Unzip extension
 ```
 unzip google-compute-engine-0.0.9.zip
@@ -127,12 +135,16 @@ code ./extension/extension.yaml
 * change the `version:` attribute to `version: 0.0.1`
 * change `author.name:` to the Developer name, for example `Pawel Siwek`
 * add custom dashboard for GCE, add attribute `dashboards.path` and point to the dashboard definition I've created dashboards `dashboards/gce.json`
-* within the `gcp.service` and `metrics` list leave only desired metrics & dimension, in my example:
+* within the `gcp.service` and `metrics` list leave only desired metrics & dimension, in the example:
     1) `cloud.gcp.compute_googleapis_com.instance.network.received_bytes_count`
     2) `cloud.gcp.compute_googleapis_com.instance.network.sent_bytes_count`
     3) `cloud.gcp.compute_googleapis_com.instance.cpu.utilization`
 
-the extension after customization will look following way:
+The extension after customization will look following way:
+
+<details>
+<summary>extension.yaml</summary>
+
 ```
 name: custom:com.dynatrace.extension.gce
 version: 0.0.2
@@ -329,6 +341,11 @@ gcp:
   featureSet: default_metrics
 
 ```
+</details>
+
+
+
+
 
 ####  6. Add dashboard 
 
@@ -343,6 +360,11 @@ code ./extension/dashboards/gce.json
 ```
 
 Sample dashboard for GCE:
+
+
+<details>
+<summary>gce-dashboard.json</summary>
+
 ```
 {
   "metadata": {
@@ -1039,6 +1061,7 @@ Sample dashboard for GCE:
   ]
 }
 ```
+</details>
 
 ####  7. Build Your developer certificate
 
