@@ -137,7 +137,7 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
 
 
 async def get_all_accessible_projects(context: LoggingContext, session: ClientSession, token: str):
-    url = _CLOUD_RESOURCE_MANAGER_ROOT + "/projects?filter=lifecycleState%3AACTIVE"
+    url = _CLOUD_RESOURCE_MANAGER_ROOT + "/projects?pageSize=1&filter=lifecycleState%3AACTIVE"
     headers = {"Authorization": "Bearer {token}".format(token=token)}
     all_projects = [] 
     page_token = "" 
