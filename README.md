@@ -13,7 +13,7 @@ If you already have previous version of `dynatrace-gcp-function` deployed, pleas
 ## Getting started
 There are two deployment options available, you can:
 - [Metrics and/or logs] [run it on Google Kubernetes Engine](https://www.dynatrace.com/support/help/shortlink/deploy-k8)  
-- [Metrics] [deploy a Google Cloud Function](https://www.dynatrace.com/support/help/shortlink/deploy-gcp)
+- [Metrics] [deploy a Google Cloud Function](https://www.dynatrace.com/support/help/shortlink/deploy-gcp) (not recommended for new installations)
 
 
 ## Pricing
