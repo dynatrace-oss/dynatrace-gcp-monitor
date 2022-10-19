@@ -126,10 +126,10 @@ spec:
         - name: HEALTH_CHECK_PORT
           value: "8080"
         - name: SCOPING_PROJECT_SUPPORT_ENABLED
-            valueFrom:
-              configMapKeyRef:
-                name: dynatrace-gcp-function-config
-                key: SCOPING_PROJECT_SUPPORT_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key: SCOPING_PROJECT_SUPPORT_ENABLED
         volumeMounts:
         - mountPath: /code/config/activation
           readOnly: true
