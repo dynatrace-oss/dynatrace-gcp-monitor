@@ -225,6 +225,8 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     topology_task_services = []
     skipped_topology_services = set()
 
+    scoping_project_support_enabled = os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE").upper() in ["TRUE", "YES"]
+
     for service in services:
         if service.name in entities_extractors:
             if entities_extractors[service.name].used_api in disabled_apis:
@@ -243,7 +245,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     skipped_services_no_instances = []
     skipped_disabled_apis = set()
     for service in services:
-        if service in topology_task_services:
+        if not scoping_project_support_enabled and service in topology_task_services:
             service_topology = fetch_topology_results[topology_task_services.index(service)]
             if not service_topology:
                 skipped_services_no_instances.append(f"{service.name}/{service.feature_set}")
@@ -251,7 +253,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         for metric in service.metrics:
             gcp_api_last_index = metric.google_metric.find("/")
             api = metric.google_metric[:gcp_api_last_index]
-            if api in disabled_apis:
+            if not scoping_project_support_enabled and api in disabled_apis:
                 skipped_disabled_apis.add(api)
                 continue  # skip fetching the metrics because service API is disabled
             fetch_metric_task = run_fetch_metric(
