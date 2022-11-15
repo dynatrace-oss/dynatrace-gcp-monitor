@@ -158,7 +158,7 @@ jobs:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out release/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file release/e2e-gcp-sa-key.json
     script:
-      - ./scripts/deploy-function.sh
+      - ./scripts/perform-deployment-function.sh
 
   - stage: e2e-helm-deployment-test
     name: E2E GCP helm deployment test
