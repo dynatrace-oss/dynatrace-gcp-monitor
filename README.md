@@ -8,7 +8,7 @@ This integration consists of K8s container and few auxiliary components. This se
 
 ## (legacy info) Cloud Function deployment is deprecated
 
-For earlier customers, there was also option to deploy integration as Cloud Function (instead of K8s container). This option is now deprecated and will only be supported until 31 December 2022. If you are using this kind of deployment, you should switch to K8s container soon.
+Up till now, there was an option to deploy GCP integration as Cloud Function (instead of K8s container). It is now deprecated and will only be supported till the end of 2022. If you are using this kind of deployment, you should switch to K8s container as soon as possible.
 
 We will provide migration guide shortly.
   
