@@ -16,19 +16,19 @@ We will provide migration guide shortly.
 If you already have previous version of `dynatrace-gcp-function` deployed, please refer to [migration guide](./MIGRATION-V1.md) before installing latest version.
 
 ## Pricing
-- Ingested metrics will consume DDUs. For more details [GCP service monitoring consumption](https://www.dynatrace.com/support/help/reference/monitoring-consumption-calculation/#expand-gcp-service-monitoring-consumption-104)
-- Ingested logs will consume DDUs. For more details [Log monitoring consumption](https://www.dynatrace.com/support/help/reference/monitoring-consumption-calculation/log-monitoring-consumption/)
+- Ingested metrics will consume DDUs. For more details [GCP service monitoring consumption](https://www.dynatrace.com/support/help/shortlink/metric-cost-calculation#calculation-details)
+- Ingested logs will consume DDUs. For more details [Log monitoring consumption](https://www.dynatrace.com/support/help/shortlink/calculate-log-consumption#how-log-monitoring-can-affect-your-ddu-consumption)
 
 ## Support
-Before you create a ticket check [troubleshooting guides](https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp) specific to your deployment.  
+Before you create a ticket check [troubleshooting guides](https://www.dynatrace.com/support/help/shortlink/deploy-k8#troubleshoot) specific to your deployment.  
 If you didn't find a solution please [contact Dynatrace support](https://www.dynatrace.com/support/contact-support/). 
 
 
 ## Additional resources
 - [Architecture overview of Kubernetes deployment](./docs/k8s.md)
-- [Monitoring multiple projects](https://www.dynatrace.com/support/help/technology-support/cloud-platforms/google-cloud-platform/monitor-gcp-services-and-logs-with-dynatrace/monitor-multiple-projects/)
+- [Monitoring multiple projects](https://www.dynatrace.com/support/help/shortlink/gcp-projects)
 - [Expand monitoring in a Kubernetes container](https://www.dynatrace.com/support/help/shortlink/expand-k8s)
-- [Self-monitoring in Google Cloud for metrics](https://www.dynatrace.com/support/help/shortlink/troubleshoot-gcp)
+- [Self-monitoring in Google Cloud for metrics](https://www.dynatrace.com/support/help/shortlink/self-mon-gcp)
 - [Self-monitoring for logs](docs/sfm_log.MD)
 - [Dynatrace Azure Log Forwarder](https://github.com/dynatrace-oss/dynatrace-azure-log-forwarder)
 - [Dynatrace AWS log forwarder](https://github.com/dynatrace-oss/dynatrace-aws-log-forwarder)
