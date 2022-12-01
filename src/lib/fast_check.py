@@ -17,8 +17,6 @@ import json
 import os
 import re
 import time
-import threading
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from queue import Queue
 from typing import NamedTuple, List, Optional
@@ -92,7 +90,6 @@ def valid_dynatrace_scopes(token_metadata: dict):
     token_scopes = token_metadata.get('scopes', [])
     return all(scope in token_scopes for scope in DYNATRACE_REQUIRED_TOKEN_SCOPES) if token_scopes else False
 
-
 def check_version(logging_context: LoggingContext):
     script_directory = os.path.dirname(os.path.realpath(__file__))
     version_file_path = os.path.join(script_directory, "./../version.txt")
@@ -100,9 +97,7 @@ def check_version(logging_context: LoggingContext):
         _version = version_file.readline()
         logging_context.log(f"Found version: {_version}")
 
-
-async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str,
-                                       dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
+async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:
         response = await dt_session.post(
             url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
@@ -142,8 +137,7 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
                           dynatrace_access_key):
     try:
         if not dynatrace_url or not dynatrace_access_key:
-            logging_context.log(
-                f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
+            logging_context.log(f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
                 f'Add required secrets to Secret Manager.')
             return None
         logging_context.log(f"Using [DYNATRACE_URL] Dynatrace endpoint: {dynatrace_url}")
@@ -216,6 +210,7 @@ class MetricsFastCheck:
             ready_to_monitor.append(project_id)
 
         if K8S_CONTAINER_NAME_PREFIX not in HOSTNAME:
+            print("############################### if block executed ###############################")
             dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
             dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
             await check_dynatrace(logging_context=self.logging_context,
@@ -230,11 +225,13 @@ class MetricsFastCheck:
         project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
         ready_to_monitor = []
-        tasks_to_check_ready_projects = []
+        start_time = time.time()
+        tasks_to_find_ready_projects = []
         for project_id in project_list:
-            tasks_to_check_ready_projects.append(self.is_project_ready_to_monitor(project_id, ready_to_monitor))
+            tasks_to_find_ready_projects.append(self.is_project_ready_to_monitor(project_id, ready_to_monitor))
 
-        await asyncio.gather(*tasks_to_check_ready_projects)
+        await asyncio.gather(*tasks_to_find_ready_projects)
+        print("--- %s seconds ---" % (time.time() - start_time))
 
         return FastCheckResult(projects=ready_to_monitor)
 
