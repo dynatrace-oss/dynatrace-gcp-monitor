@@ -74,10 +74,6 @@ DYNATRACE_REQUIRED_TOKEN_SCOPES = [
     'extensions.read'
 ]
 
-HOSTNAME = os.environ.get("HOSTNAME", "")
-
-K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-function"
-
 FastCheckResult = NamedTuple('FastCheckResult', [('projects', List[str])])
 
 
