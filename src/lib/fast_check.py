@@ -107,8 +107,7 @@ async def get_dynatrace_token_metadata(dt_session: ClientSession, context: Loggi
             verify_ssl=get_should_require_valid_certificate(),
             timeout=timeout)
         if response.status != 200:
-            context.log(
-                f'Unable to get Dynatrace token metadata: {response.status}, url: {response.url}, reason: {response.reason}')
+            context.log(f'Unable to get Dynatrace token metadata: {response.status}, url: {response.url}, reason: {response.reason}')
             return {}
 
         return await response.json()
@@ -129,17 +128,15 @@ def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
         return "Invalid Token"
 
 
-async def check_dynatrace(logging_context: LoggingContext, project_id, dt_session: ClientSession, dynatrace_url,
-                          dynatrace_access_key):
+async def check_dynatrace(logging_context: LoggingContext, project_id, dt_session: ClientSession, dynatrace_url, dynatrace_access_key):
     try:
         if not dynatrace_url or not dynatrace_access_key:
-            logging_context.log(f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
-                f'Add required secrets to Secret Manager.')
+            logging_context.log(f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.' 
+                                     f'Add required secrets to Secret Manager.')
             return None
         logging_context.log(f"Using [DYNATRACE_URL] Dynatrace endpoint: {dynatrace_url}")
         logging_context.log(f'Using [DYNATRACE_ACCESS_KEY]: {obfuscate_dynatrace_access_key(dynatrace_access_key)}.')
-        token_metadata = await get_dynatrace_token_metadata(dt_session, logging_context, dynatrace_url,
-                                                            dynatrace_access_key)
+        token_metadata = await get_dynatrace_token_metadata(dt_session, logging_context, dynatrace_url, dynatrace_access_key)
         if token_metadata.get('name', None):
             logging_context.log(f"Token name: {token_metadata.get('name')}.")
             if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
@@ -152,8 +149,7 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
 class MetricsFastCheck:
     check_dynatrace_already_executed = False
 
-    def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, token: str,
-                 logging_context: LoggingContext):
+    def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, token: str, logging_context: LoggingContext):
         self.gcp_session = gcp_session
         self.dt_session = dt_session
         self.logging_context = logging_context
@@ -176,8 +172,7 @@ class MetricsFastCheck:
                     params=query_params,
                     timeout=timeout)
                 if response.status != 200:
-                    self.logging_context.log(
-                        f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
+                    self.logging_context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
                     return []
 
                 response = await response.json()
