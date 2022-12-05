@@ -18,6 +18,10 @@ import yaml
 
 from lib.context import LoggingContext
 
+HOSTNAME = os.environ.get("HOSTNAME", "")
+
+K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-function"
+
 
 def chunks(full_list: List, chunk_size: int) -> List[List]:
     chunk_size = max(1, chunk_size)
@@ -51,3 +55,7 @@ def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml
             logging_context.error(f"No feature set in given {service} service.")
 
     return services_whitelist
+
+
+def is_deployment_running_inside_gke_container():
+    return K8S_CONTAINER_NAME_PREFIX in HOSTNAME

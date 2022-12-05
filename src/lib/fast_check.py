@@ -16,7 +16,6 @@ import asyncio
 import json
 import os
 import re
-import time
 from datetime import datetime
 from queue import Queue
 from typing import NamedTuple, List, Optional
@@ -31,6 +30,7 @@ from lib.gcp_apis import GCP_SERVICE_USAGE_URL
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder import create_logs_context
+from lib.utilities import is_deployment_running_inside_gke_container
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -209,8 +209,7 @@ class MetricsFastCheck:
         if all(result is not None for result in results):
             ready_to_monitor.append(project_id)
 
-        if K8S_CONTAINER_NAME_PREFIX not in HOSTNAME:
-            print("############################### if block executed ###############################")
+        if not is_deployment_running_inside_gke_container():
             dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
             dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
             await check_dynatrace(logging_context=self.logging_context,
@@ -225,13 +224,11 @@ class MetricsFastCheck:
         project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
         ready_to_monitor = []
-        start_time = time.time()
         tasks_to_find_ready_projects = []
         for project_id in project_list:
             tasks_to_find_ready_projects.append(self.is_project_ready_to_monitor(project_id, ready_to_monitor))
 
         await asyncio.gather(*tasks_to_find_ready_projects)
-        print("--- %s seconds ---" % (time.time() - start_time))
 
         return FastCheckResult(projects=ready_to_monitor)
 
