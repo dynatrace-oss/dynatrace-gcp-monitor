@@ -131,7 +131,7 @@ def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
 async def check_dynatrace(logging_context: LoggingContext, project_id, dt_session: ClientSession, dynatrace_url, dynatrace_access_key):
     try:
         if not dynatrace_url or not dynatrace_access_key:
-            logging_context.log(f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.' 
+            logging_context.log(f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
                                      f'Add required secrets to Secret Manager.')
             return None
         logging_context.log(f"Using [DYNATRACE_URL] Dynatrace endpoint: {dynatrace_url}")
@@ -147,7 +147,6 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
 
 
 class MetricsFastCheck:
-    check_dynatrace_already_executed = False
 
     def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, token: str, logging_context: LoggingContext):
         self.gcp_session = gcp_session
