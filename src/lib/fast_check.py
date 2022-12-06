@@ -30,7 +30,7 @@ from lib.gcp_apis import GCP_SERVICE_USAGE_URL
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder import create_logs_context
-from lib.utilities import is_deployment_running_inside_gke_container
+from lib.utilities import is_deployment_running_inside_cloud_function
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -183,7 +183,7 @@ class MetricsFastCheck:
             self.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
             return []
 
-    async def _check_services(self, project_id):
+    async def _get_services_ready_to_monitor(self, project_id):
         list_services_result = await self.list_services(project_id)
         service_names = [find_service_name(service['name']) for service in list_services_result]
         if not all(name in service_names for name in REQUIRED_SERVICES):
@@ -193,13 +193,13 @@ class MetricsFastCheck:
         return service_names
 
     async def is_project_ready_to_monitor(self, project_id, ready_to_monitor):
-        tasks = [self._check_services(project_id)]
 
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        results = self._get_services_ready_to_monitor(project_id)
+
         if all(result is not None for result in results):
             ready_to_monitor.append(project_id)
 
-        if not is_deployment_running_inside_gke_container():
+        if is_deployment_running_inside_cloud_function():
             dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
             dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
             await check_dynatrace(logging_context=self.logging_context,

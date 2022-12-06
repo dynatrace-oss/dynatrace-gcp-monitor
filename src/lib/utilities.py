@@ -57,5 +57,5 @@ def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml
     return services_whitelist
 
 
-def is_deployment_running_inside_gke_container():
-    return K8S_CONTAINER_NAME_PREFIX in HOSTNAME
+def is_deployment_running_inside_cloud_function():
+    return K8S_CONTAINER_NAME_PREFIX not in HOSTNAME
