@@ -10,8 +10,8 @@ This integration consists of K8s container and few auxiliary components. This se
 
 Up till now, there was an option to deploy GCP integration as Cloud Function (instead of K8s container). It is now deprecated and will only be supported till the end of 2022. If you are using this kind of deployment, you should switch to K8s container as soon as possible.
 
-We will provide migration guide shortly.
-  
+See [migration guide](https://www.dynatrace.com/support/help/shortlink/migrate-gcp-function-1-to-k8s-1).
+
 ## (legacy info) Migrating to 1.0.x from previous 0.1.x installations
 If you already have previous version of `dynatrace-gcp-function` deployed, please refer to [migration guide](./MIGRATION-V1.md) before installing latest version.
 
