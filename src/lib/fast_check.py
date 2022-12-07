@@ -194,9 +194,9 @@ class MetricsFastCheck:
 
     async def is_project_ready_to_monitor(self, project_id, ready_to_monitor):
 
-        results = await self._get_services_ready_to_monitor(project_id)
+        services_ready_to_monitor = await self._get_services_ready_to_monitor(project_id)
 
-        if all(result is not None for result in results):
+        if services_ready_to_monitor is not None:
             ready_to_monitor.append(project_id)
 
         if is_deployment_running_inside_cloud_function():
