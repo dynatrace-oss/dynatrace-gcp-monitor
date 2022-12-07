@@ -193,7 +193,6 @@ class MetricsFastCheck:
         return service_names
 
     async def is_project_ready_to_monitor(self, project_id, ready_to_monitor):
-
         services_ready_to_monitor = await self._get_services_ready_to_monitor(project_id)
 
         if services_ready_to_monitor is not None:
