@@ -194,7 +194,7 @@ class MetricsFastCheck:
 
     async def is_project_ready_to_monitor(self, project_id, ready_to_monitor):
 
-        results = self._get_services_ready_to_monitor(project_id)
+        results = await self._get_services_ready_to_monitor(project_id)
 
         if all(result is not None for result in results):
             ready_to_monitor.append(project_id)
