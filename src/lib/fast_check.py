@@ -215,7 +215,7 @@ class MetricsFastCheck:
 
         project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
-        ready_to_monitor = []
+        projects_ready_to_monitor = []
         tasks_to_find_ready_projects = []
         for project_id in project_list:
             tasks_to_find_ready_projects.append(self.is_project_ready_to_monitor(project_id))
@@ -223,9 +223,9 @@ class MetricsFastCheck:
         ready_project_task_results = await asyncio.gather(*tasks_to_find_ready_projects)
         for project_id, is_project_ready_to_monitor in ready_project_task_results:
             if is_project_ready_to_monitor:
-                ready_to_monitor.append(project_id)
+                projects_ready_to_monitor.append(project_id)
 
-        return FastCheckResult(projects=ready_to_monitor)
+        return FastCheckResult(projects=projects_ready_to_monitor)
 
 
 class LogsFastCheck:
