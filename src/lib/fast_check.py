@@ -192,11 +192,12 @@ class MetricsFastCheck:
             return None
         return service_names
 
-    async def is_project_ready_to_monitor(self, project_id, ready_to_monitor):
+    async def is_project_ready_to_monitor(self, project_id):
         services_ready_to_monitor = await self._get_services_ready_to_monitor(project_id)
 
+        is_project_ready_to_monitor = False
         if services_ready_to_monitor is not None:
-            ready_to_monitor.append(project_id)
+            is_project_ready_to_monitor = True
 
         if is_deployment_running_inside_cloud_function():
             dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
@@ -207,6 +208,8 @@ class MetricsFastCheck:
                                   dynatrace_url=dynatrace_url,
                                   dynatrace_access_key=dynatrace_access_key)
 
+        return project_id, is_project_ready_to_monitor
+
     async def execute(self) -> FastCheckResult:
         _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
 
@@ -215,9 +218,12 @@ class MetricsFastCheck:
         ready_to_monitor = []
         tasks_to_find_ready_projects = []
         for project_id in project_list:
-            tasks_to_find_ready_projects.append(self.is_project_ready_to_monitor(project_id, ready_to_monitor))
+            tasks_to_find_ready_projects.append(self.is_project_ready_to_monitor(project_id))
 
-        await asyncio.gather(*tasks_to_find_ready_projects)
+        ready_project_task_results = await asyncio.gather(*tasks_to_find_ready_projects)
+        for project_id, is_project_ready_to_monitor in ready_project_task_results:
+            if is_project_ready_to_monitor:
+                ready_to_monitor.append(project_id)
 
         return FastCheckResult(projects=ready_to_monitor)
 
