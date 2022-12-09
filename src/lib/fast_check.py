@@ -19,7 +19,6 @@ import re
 from datetime import datetime
 from queue import Queue
 from typing import NamedTuple, List, Optional
-from urllib.parse import urljoin
 
 from aiohttp import ClientSession
 
@@ -163,7 +162,7 @@ class MetricsFastCheck:
                 if next_token:
                     query_params["pageToken"] = next_token
                 response = await self.gcp_session.get(
-                    urljoin(GCP_SERVICE_USAGE_URL + f'{project_id}/services'),
+                    GCP_SERVICE_USAGE_URL + f'/projects/{project_id}/services',
                     headers={
                         "Authorization": f'Bearer {self.token}'
                     },
