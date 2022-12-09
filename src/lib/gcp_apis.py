@@ -11,15 +11,17 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import os
+
 from aiohttp import ClientResponseError
 
 from lib.context import MetricsContext
 
-GCP_SERVICE_USAGE_URL = "https://serviceusage.googleapis.com/v1/projects/"
+GCP_SERVICE_USAGE_URL = os.environ.get("GCP_SERVICE_USAGE_URL", "https://serviceusage.googleapis.com/v1")
 
 
 async def get_all_disabled_apis(context: MetricsContext, project_id: str):
-    base_url = f"{GCP_SERVICE_USAGE_URL}{project_id}/services?filter=state:DISABLED"
+    base_url = f"{GCP_SERVICE_USAGE_URL}/projects/{project_id}/services?filter=state:DISABLED"
     headers = context.create_gcp_request_headers(project_id)
     disabled_apis = set()
     try:
