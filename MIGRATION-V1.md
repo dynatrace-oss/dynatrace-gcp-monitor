@@ -2,20 +2,19 @@
 
 Upgrading existing `dynatrace-gcp-function` installations (either K8S or Cloud Function deployment) from 0.1.x is not supported.
 Existing old 0.1.x deployments need to be deleted and new 1.0.x installation needs to be deployed.
-New wersion (1.0.x) of `dynatrace-gcp-function` is using [Extensions 2.0](https://www.dynatrace.com/support/help/extend-dynatrace/extensions20/) and requires Dynatrace version 1.230 or higher.
-Required permissions for Dynatrace API token has changed in 1.0.x
-If you want to reuse previous Dynatrace API token in new deployment modify its permissions (see [Dynatrace documentation](https://www.dynatrace.com/support/help/setup-and-configuration/setup-on-cloud-platforms/google-cloud-platform/set-up-integration-gcp/) for details).
+New wersion (1.0.x) of `dynatrace-gcp-function` is using [Extensions 2.0](https://www.dynatrace.com/support/help/shortlink/extensions20) and requires Dynatrace version 1.230 or higher.
+Required permissions for Dynatrace API token has changed in 1.0.x - you need to create a new token (see [Dynatrace documentation](https://www.dynatrace.com/support/help/shortlink/deploy-k8#api) for details).
 
 ## K8S deployment
-Uninstall old helm release and install new version as described in [Dynatrace documentation](https://www.dynatrace.com/support/help/shortlink/deploy-k8#type)
+Uninstall old helm release and install new version as described in [Dynatrace documentation](https://www.dynatrace.com/support/help/shortlink/deploy-k8)
 
-## Cloud Function deployment
+## Cloud Function deployment (DEPRECATED)
 Run uninstall script:
 ```shell script
 wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/scripts/uninstall.sh -O uninstall.sh ; chmod a+x uninstall.sh ; ./uninstall.sh
 ```
 Remove old configuration file (actovation-config.yaml)
-Install new `dynatrace-gcp-function` deployment following instructions in [Dynatrace documentation](https://www.dynatrace.com/support/help/setup-and-configuration/setup-on-cloud-platforms/google-cloud-platform/set-up-integration-gcp/deploy-as-gcp-function/) 
+Install new `dynatrace-gcp-function` deployment following instructions in [Dynatrace documentation](https://www.dynatrace.com/support/help/shortlink/deploy-gcp) 
 
 ## Dynatrace environment cleanup
 There might be some Dynatrace dashboards and/or alerts left from previous 0.1.x installations. They need to be deleted manually.
