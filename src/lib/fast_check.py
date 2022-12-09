@@ -164,7 +164,7 @@ class MetricsFastCheck:
                 if next_token:
                     query_params["pageToken"] = next_token
                 response = await self.gcp_session.get(
-                    urljoin(GCP_SERVICE_USAGE_URL, f'{project_id}/services'),
+                    urljoin(GCP_SERVICE_USAGE_URL + f'{project_id}/services'),
                     headers={
                         "Authorization": f'Bearer {self.token}'
                     },

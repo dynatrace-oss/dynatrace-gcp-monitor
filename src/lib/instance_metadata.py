@@ -24,7 +24,7 @@ from aiohttp import ClientSession
 
 from lib.context import LoggingContext
 
-METADATA_URL = f'http://metadata.google.internal/computeMetadata/v1/'
+METADATA_URL = os.environ.get('GCP_METADATA_URL', 'http://metadata.google.internal/computeMetadata/v1')
 
 InstanceMetadata = namedtuple('InstanceMetadata', [
     'project_id',
@@ -47,7 +47,7 @@ class InstanceMetadataCheck:
     async def _get_metadata(self, url_path: str, timeout: Optional[int] = 2):
         try:
             response = await self.gcp_session.get(
-                urljoin(METADATA_URL, url_path),
+                METADATA_URL + url_path,
                 headers={
                     "Authorization": f'Bearer {self.token}',
                     'Metadata-Flavor': 'Google'
@@ -62,22 +62,22 @@ class InstanceMetadataCheck:
             return None
 
     async def project_id(self):
-        await self._get_metadata('project/project-id')
+        await self._get_metadata('/project/project-id')
 
     async def running_container(self):
-        return await self._get_metadata('instance/hostname')
+        return await self._get_metadata('/instance/hostname')
 
     async def token_scopes(self):
-        return await self._get_metadata('instance/service-accounts/default/scopes')
+        return await self._get_metadata('/instance/service-accounts/default/scopes')
 
     async def service_accounts(self):
-        return await self._get_metadata('instance/service-accounts')
+        return await self._get_metadata('/instance/service-accounts')
 
     async def audience(self):
-        return await self._get_metadata('instance/service-accounts/default/identity?audience=https://accounts.google.com')
+        return await self._get_metadata('/instance/service-accounts/default/identity?audience=https://accounts.google.com')
 
     async def zone(self):
-        return await self._get_metadata('instance/zone')
+        return await self._get_metadata('/instance/zone')
 
     async def execute(self) -> Optional[InstanceMetadata]:
         if self._gcp_deployment():
