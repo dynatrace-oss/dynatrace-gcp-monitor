@@ -104,6 +104,8 @@ EOF
 
 # Install necessary plugin
 gcloud components install gke-gcloud-auth-plugin
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+gcloud components update
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project "${GCP_PROJECT_ID}"
 
 ./deploy-helm.sh --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
