@@ -17,7 +17,7 @@ import os
 import socket
 from collections import namedtuple
 from typing import Optional
-from urllib.parse import urljoin, urlparse
+from urllib.parse import  urlparse
 
 import jwt
 from aiohttp import ClientSession
@@ -58,7 +58,7 @@ class InstanceMetadataCheck:
                 return None
             return await response.text()
         except Exception as e:
-            self.logging_context.log(f'Cannot get instance metadata: {urljoin(METADATA_URL, url_path)}. {e}')
+            self.logging_context.log(f'Cannot get instance metadata: {METADATA_URL + url_path}. {e}')
             return None
 
     async def project_id(self):

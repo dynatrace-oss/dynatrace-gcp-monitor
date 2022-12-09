@@ -36,7 +36,8 @@ class ExtensionsFetcher:
 
     async def execute(self) -> ExtensionsFetchResult:
         extension_name_to_version_dict = await self._get_extensions_dict_from_dynatrace_cluster()
-        activation_yaml = read_activation_yaml()
+        self.yaml = read_activation_yaml()
+        activation_yaml = self.yaml
         activation_config_per_service = get_activation_config_per_service(activation_yaml)
         feature_sets_from_activation_config = load_activated_feature_sets(self.logging_context, activation_yaml)
 
