@@ -129,16 +129,20 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
             scheduled_execution_id=context.scheduled_execution_id
         )
 
+        scoping_project_support_enabled = os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE").upper() in ["TRUE", "YES"]
+
         if not projects_ids:
             projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
         disabled_apis = {}
         disabled_projects = []
-        for project_id in projects_ids:
-            await check_x_goog_user_project_header_permissions(context, project_id)
-            disabled_apis = {project_id: await get_all_disabled_apis(context, project_id)}
-            if 'monitoring.googleapis.com' in disabled_apis[project_id]:
-                disabled_projects.append(project_id)
+
+        if not scoping_project_support_enabled:
+            for project_id in projects_ids:
+                await check_x_goog_user_project_header_permissions(context, project_id)
+                disabled_apis = {project_id: await get_all_disabled_apis(context, project_id)}
+                if 'monitoring.googleapis.com' in disabled_apis[project_id]:
+                    disabled_projects.append(project_id)
                 
         if disabled_projects:
             context.log(f"monitoring.googleapis.com API disabled in the projects: " + ", ".join(disabled_projects) + ", that projects will not be monitored")
@@ -151,7 +155,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         context.start_processing_timestamp = time.time()
 
         process_project_metrics_tasks = [
-            process_project_metrics(context, project_id, services, disabled_apis.get(project_id, set()))
+            process_project_metrics(context, project_id, services, disabled_apis.get(project_id, set()), scoping_project_support_enabled)
             for project_id
             in projects_ids
         ]
@@ -169,10 +173,10 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str]):
+                                  disabled_apis: Set[str], scoping_project_support_enabled: bool):
     try:
         context.log(project_id, f"Starting processing...")
-        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis)
+        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis, scoping_project_support_enabled)
         fetch_data_time = time.time() - context.start_processing_timestamp
         context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
@@ -219,13 +223,11 @@ async def _check_x_goog_user_project_header_permissions(context: MetricsContext,
 
 
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str]) -> List[IngestLine]:
+                                  disabled_apis: Set[str], scoping_project_support_enabled: bool) -> List[IngestLine]:
     fetch_metric_tasks = []
     topology_tasks = []
     topology_task_services = []
     skipped_topology_services = set()
-
-    scoping_project_support_enabled = os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE").upper() in ["TRUE", "YES"]
 
     for service in services:
         if service.name in entities_extractors:
