@@ -102,12 +102,9 @@ serviceAccount: "${IAM_SERVICE_ACCOUNT}"
 EOF
 "$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
+# TODO: Improve. Temporary fix
 # Check if gke auth necessary plugin is installed
-if ! [[ $(gke-gcloud-auth-plugin --version) ]]; then
-  err "gke-gcloud-auth-plugin not installed. Run 'gcloud components install gke-gcloud-auth-plugin' to install it"
-  err "For more information, visit: https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke"
-  exit 1
-fi
+gcloud components install gke-gcloud-auth-plugin
 # Until GKE 1.26 release, we need to tell GKE to use the new auth plugin
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 gcloud components update
