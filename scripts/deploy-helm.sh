@@ -376,14 +376,16 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
 fi
 
 # Check if gke auth necessary plugin is installed
+# Until GKE 1.26 release, we also need to tell GKE to use the new auth plugin
 if ! [[ $(gke-gcloud-auth-plugin --version) ]]; then
-  err "gke-gcloud-auth-plugin not installed. Run 'gcloud components install gke-gcloud-auth-plugin' to install it"
-  err "For more information, visit: https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke"
+  info "gke-gcloud-auth-plugin not installed. Run the following commands to install it:"
+  info "gcloud components install gke-gcloud-auth-plugin"
+  info "export USE_GKE_GCLOUD_AUTH_PLUGIN=True"
+  info "gcloud components update"
+  info ""
+  info "For more information, visit: https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke"
   exit 1
 fi
-# Until GKE 1.26 release, we need to tell GKE to use the new auth plugin
-export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-gcloud components update
 
 debug "Creating dynatrace namespace into kubernetes cluster"
 info ""
