@@ -366,9 +366,6 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   fi
   info ""
   info "- Create and connect GKE Autopilot k8s cluster ${AUTOPILOT_CLUSTER_NAME}."
-  gcloud components install gke-gcloud-auth-plugin
-  export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-  gcloud components update
   gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" --network "${VPC_NETWORK}" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   gcloud container clusters get-credentials "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 fi
@@ -385,7 +382,7 @@ fi
 debug "Creating GCP Service Account for kubernetes"
 info ""
 info "- 2. Create IAM service account."
-if [[ $(gcloud iam service-accounts list --filter="name ~ serviceAccounts/$SA_NAME@" --project="$GCP_PROJECT" --format="value(name)") ]]; then
+if [[ $(gcloud iam service-accounts list --filter="name ~ serviceAccounts/$SA_NAMESA_NAME@" --project="$GCP_PROJECT" --format="value(name)") ]]; then
   info "Service Account [$SA_NAME] already exists, skipping"
 else
   gcloud iam service-accounts create "$SA_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE} 
