@@ -343,7 +343,7 @@ activate_extension_on_cluster() {
     if [ "${UPGRADE_EXTENSIONS}" == "Y" ]; then
       upload_extension_to_cluster "${EXTENSION_ZIP}" "${EXTENSION_VERSION}"
     else
-      warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT##*:} installed on the cluster, remove the option '--without-extension-upgrade' to upgrade to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
+      warn "Extension not uploaded. Current active extension ${EXTENSION_NAME}:${EXTENSION_IN_DT##*:} installed on the cluster, remove the option '--without-extensions-upgrade' to upgrade to: ${EXTENSION_NAME}:${EXTENSION_VERSION}"
       ((AMOUNT_OF_EXTENSIONS_TO_UPLOAD-=1))
     fi
   elif [ "$(versionNumber "${EXTENSION_VERSION}")" -lt "$(versionNumber "${EXTENSION_IN_DT##*:}")" ]; then

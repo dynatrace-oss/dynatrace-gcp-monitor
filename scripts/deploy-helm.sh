@@ -71,7 +71,7 @@ check_dynatrace_docker_login() {
 
 print_help() {
   printf "
-usage: deploy-helm.sh [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--without-extension-upgrade] [--auto-default] [--quiet]
+usage: deploy-helm.sh [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--without-extensions-upgrade] [--auto-default] [--quiet]
 
 arguments:
     --role-name ROLE_NAME
@@ -82,7 +82,7 @@ arguments:
     --autopilot-cluster-name CLUSTER_NAME
                             Name of new GKE Autopilot cluster to be created if '--create-autopilot-cluster option' was selected.
                             By default 'dynatrace-gcp-function' will be used.
-    --without-extension-upgrade
+    --without-extensions-upgrade
                             Keep existing versions of present extensions, and install latest versions for the rest of the selected extensions, if they are not present.
                             By default, this is not set, so extensions will be upgrade
     -n, --namespace
@@ -124,7 +124,7 @@ while (( "$#" )); do
                 shift; shift
             ;;
 
-            "--without-extension-upgrade")
+            "--without-extensions-upgrade")
                 UPGRADE_EXTENSIONS="N"
                 shift
             ;;
@@ -332,7 +332,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   info "- checking activated extensions in Dynatrace"
   EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
-  # If --without-extension-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for versions that are currently active on the cluster.
+  # If --without-extensions-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for versions that are currently active on the cluster.
   if [[ "$UPGRADE_EXTENSIONS" == "N" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
     debug "Downloading activated extensions from Dynatrace environment"
     info ""

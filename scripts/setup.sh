@@ -28,10 +28,10 @@ info "\033[0;37m"
 
 print_help() {
   printf "
-usage: setup.sh [--without-extension-upgrade] [--auto-default]
+usage: setup.sh [--without-extensions-upgrade] [--auto-default]
 
 arguments:
-    --without-extension-upgrade
+    --without-extensions-upgrade
                             Keep existing versions of present extensions, and install latest versions for the rest of the selected extensions, if they are not present.
     -d, --auto-default
                             Disable all interactive prompts when running gcloud commands.
@@ -47,7 +47,7 @@ test_req_unzip
 
 while (( "$#" )); do
     case "$1" in
-            "--without-extension-upgrade")
+            "--without-extensions-upgrade")
                 UPGRADE_EXTENSIONS="N"
                 shift
             ;;
@@ -385,7 +385,7 @@ else
   GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL_MIN} * * * *"
 fi
 
-# If --without-extension-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
+# If --without-extensions-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
 if [[ "$UPGRADE_EXTENSIONS" == "N" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
   debug "Downloading activated extensions from Dynatrace environment"
   info ""
