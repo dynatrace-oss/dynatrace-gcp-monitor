@@ -71,7 +71,7 @@ check_dynatrace_docker_login() {
 
 print_help() {
   printf "
-usage: deploy-helm.sh [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--upgrade-extensions] [--auto-default] [--quiet]
+usage: deploy-helm.sh [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--without-extensions-upgrade] [--auto-default] [--quiet]
 
 arguments:
     --role-name ROLE_NAME
@@ -82,10 +82,11 @@ arguments:
     --autopilot-cluster-name CLUSTER_NAME
                             Name of new GKE Autopilot cluster to be created if '--create-autopilot-cluster option' was selected.
                             By default 'dynatrace-gcp-function' will be used.
-    --upgrade-extensions
-                            Upgrade all extensions into dynatrace cluster
+    --without-extensions-upgrade
+                            Keep existing versions of present extensions, and install latest versions for the rest of the selected extensions, if they are not present.
+                            By default, this is not set, so extensions will be upgrade
     -n, --namespace
-                            Kubernetes namespace, by default dynatrace
+                            Kubernetes namespace, by default 'dynatrace'.
     -d, --auto-default
                             Disable all interactive prompts when running gcloud commands.
                             If input is required, defaults will be used, or an error will be raised.
@@ -123,8 +124,8 @@ while (( "$#" )); do
                 shift; shift
             ;;
 
-            "--upgrade-extensions")
-                UPGRADE_EXTENSIONS="Y"
+            "--without-extensions-upgrade")
+                UPGRADE_EXTENSIONS="N"
                 shift
             ;;
 
@@ -210,6 +211,10 @@ info "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]"
 
 if [ -z "$ROLE_NAME" ]; then
   ROLE_NAME="dynatrace_function"
+fi
+
+if [ -z "$UPGRADE_EXTENSIONS" ]; then
+  UPGRADE_EXTENSIONS="Y"
 fi
 
 debug "Selecting deployment type"
@@ -322,13 +327,13 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   info "- downloading extensions"
   get_extensions_zip_packages
 
-  debug "Checking installed extension version on Dynatrace environemnt"
+  debug "Checking installed extension version on Dynatrace environment"
   info ""
   info "- checking activated extensions in Dynatrace"
   EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
-  # If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
-  if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
+  # If --without-extensions-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for versions that are currently active on the cluster.
+  if [[ "$UPGRADE_EXTENSIONS" == "N" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
     debug "Downloading activated extensions from Dynatrace environment"
     info ""
     info "- downloading active extensions from Dynatrace"

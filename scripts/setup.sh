@@ -28,11 +28,11 @@ info "\033[0;37m"
 
 print_help() {
   printf "
-usage: setup.sh [--upgrade-extensions] [--auto-default]
+usage: setup.sh [--without-extensions-upgrade] [--auto-default]
 
 arguments:
-    --upgrade-extensions
-                            Upgrade all extensions into dynatrace cluster
+    --without-extensions-upgrade
+                            Keep existing versions of present extensions, and install latest versions for the rest of the selected extensions, if they are not present.
     -d, --auto-default
                             Disable all interactive prompts when running gcloud commands.
                             If input is required, defaults will be used, or an error will be raised.
@@ -47,8 +47,8 @@ test_req_unzip
 
 while (( "$#" )); do
     case "$1" in
-            "--upgrade-extensions")
-                UPGRADE_EXTENSIONS="Y"
+            "--without-extensions-upgrade")
+                UPGRADE_EXTENSIONS="N"
                 shift
             ;;
 
@@ -178,6 +178,10 @@ readonly GCP_IAM_ROLE_PERMISSIONS=(
 SELF_MONITORING_ENABLED=$("$YQ" e '.googleCloud.common.selfMonitoringEnabled' $FUNCTION_ACTIVATION_CONFIG)
 readonly SELF_MONITORING_ENABLED
 EXTENSIONS_FROM_CLUSTER=""
+
+if [ -z "$UPGRADE_EXTENSIONS" ]; then
+  UPGRADE_EXTENSIONS="Y"
+fi
 
 shopt -s nullglob
 
@@ -381,8 +385,8 @@ else
   GCP_SCHEDULER_CRON="*/${QUERY_INTERVAL_MIN} * * * *"
 fi
 
-# If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
-if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
+# If --without-extensions-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
+if [[ "$UPGRADE_EXTENSIONS" == "N" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
   debug "Downloading activated extensions from Dynatrace environment"
   info ""
   info "- downloading active extensions from Dynatrace"
