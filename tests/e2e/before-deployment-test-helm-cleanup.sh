@@ -14,10 +14,10 @@
 #     limitations under the License.
 
 # New GKE auth plugin is needed
-gcloud components install gke-gcloud-auth-plugin
+#gcloud components install gke-gcloud-auth-plugin
 # Until GKE 1.26 release, we need to explicitly tell GKE to use it
-export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-gcloud components update
+#export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+#gcloud components update
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project "${GCP_PROJECT_ID}"
 helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs --no-run-if-empty -L1 helm -n dynatrace uninstall --timeout 10m
