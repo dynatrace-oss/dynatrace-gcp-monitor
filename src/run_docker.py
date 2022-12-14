@@ -13,7 +13,9 @@
 #     limitations under the License.
 import asyncio
 import os
+import random
 import threading
+import time
 from typing import Optional, List, NamedTuple
 
 from aiohttp import web, ClientSession
@@ -130,20 +132,25 @@ async def run_metrics_fetcher_forever():
         return
 
     while True:
-        logging_context.log('Single loop run started')
-
-        timer_for_next_polling_task = asyncio.sleep(QUERY_INTERVAL_SEC)
+        logging_context.log(f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
+        start_time_s = time.time()
 
         polling_task = async_dynatrace_gcp_extension(
             project_ids=pre_launch_check_result.projects, services=pre_launch_check_result.services)
 
         try:
-            await asyncio.wait_for(asyncio.gather(timer_for_next_polling_task, polling_task), QUERY_TIMEOUT_SEC)
+            await asyncio.wait_for(polling_task, QUERY_TIMEOUT_SEC)
         except asyncio.exceptions.TimeoutError:
-            logging_context.error(f'Single loop run timed out, {QUERY_TIMEOUT_SEC}s')
+            logging_context.error(f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
 
-        # if polling was longer -> then timer_for_next_polling_task has already finished, loop will run again immediately
-        # if polling was shorter -> then timer_for_next_polling_task will still sleep a little, and then loop will run again
+        end_time_s = time.time()
+        polling_duration = end_time_s - start_time_s
+        logging_context.log(f"Polling finished after {polling_duration}s")
+
+        if polling_duration < QUERY_INTERVAL_SEC:
+            time_until_next_polling = QUERY_INTERVAL_SEC - polling_duration
+            logging_context.log(f'Next polling in {time_until_next_polling}s')
+            await asyncio.sleep(time_until_next_polling)
 
 
 def run_loop_forever():
@@ -187,6 +194,9 @@ logging_context = LoggingContext(None)
 logging_context.log("Dynatrace function for Google Cloud Platform monitoring\n")
 
 logging_context.log("Setting up... \n")
+
+asyncio.run(run_metrics_fetcher_forever())
+
 app = web.Application()
 app.add_routes([web.get('/health', health)])
 
