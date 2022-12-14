@@ -52,6 +52,3 @@ def test_query_loop_timeout(mock_metrics_pre_launch_check):
 
             assert mock_async_dynatrace_gcp_extension.call_count == 2
 
-    # mock_async_dynatrace_gcp_extension = AsyncMock(wraps=async_dynatrace_gcp_extension_long_worker_mock)
-    # run_docker.async_dynatrace_gcp_extension = mock_async_dynatrace_gcp_extension
-
