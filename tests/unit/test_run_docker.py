@@ -39,7 +39,8 @@ def test_query_loop_timeout(mock_metrics_pre_launch_check):
     run_docker.QUERY_TIMEOUT_SEC = 3
     run_loop_for = 5
 
-    # should timeout after 3s; so we should get executions: 0s and 3s
+    # should timeout after 3s; so we should get 2 executions: 0s and 3s
+    # if timeout does not happen then it would be 5 executions or more
 
     async def async_dynatrace_gcp_extension_long_worker_mock(project_ids, services):
         await asyncio.sleep(run_docker.QUERY_TIMEOUT_SEC + 1)
