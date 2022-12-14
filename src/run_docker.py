@@ -13,7 +13,6 @@
 #     limitations under the License.
 import asyncio
 import os
-import random
 import threading
 import time
 from typing import Optional, List, NamedTuple
@@ -194,9 +193,6 @@ logging_context = LoggingContext(None)
 logging_context.log("Dynatrace function for Google Cloud Platform monitoring\n")
 
 logging_context.log("Setting up... \n")
-
-asyncio.run(run_metrics_fetcher_forever())
-
 app = web.Application()
 app.add_routes([web.get('/health', health)])
 
