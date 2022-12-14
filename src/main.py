@@ -35,7 +35,8 @@ from lib.gcp_apis import get_all_disabled_apis
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
-from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
+from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets, \
+    ConfigurationParameters
 
 
 def dynatrace_gcp_extension(event, context):
@@ -129,15 +130,14 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
             scheduled_execution_id=context.scheduled_execution_id
         )
 
-        scoping_project_support_enabled = os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE").upper() in ["TRUE", "YES"]
-
         if not projects_ids:
             projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
         disabled_apis = {}
         disabled_projects = []
 
-        if not scoping_project_support_enabled:
+        # Using metrics scope feature, checking disabled apis in every project is not needed
+        if not ConfigurationParameters.scoping_project_support_enabled:
             for project_id in projects_ids:
                 await check_x_goog_user_project_header_permissions(context, project_id)
                 disabled_apis = {project_id: await get_all_disabled_apis(context, project_id)}
@@ -155,7 +155,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         context.start_processing_timestamp = time.time()
 
         process_project_metrics_tasks = [
-            process_project_metrics(context, project_id, services, disabled_apis.get(project_id, set()), scoping_project_support_enabled)
+            process_project_metrics(context, project_id, services, disabled_apis.get(project_id, set()))
             for project_id
             in projects_ids
         ]
@@ -173,10 +173,10 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str], scoping_project_support_enabled: bool):
+                                  disabled_apis: Set[str]):
     try:
         context.log(project_id, f"Starting processing...")
-        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis, scoping_project_support_enabled)
+        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis)
         fetch_data_time = time.time() - context.start_processing_timestamp
         context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
@@ -223,7 +223,7 @@ async def _check_x_goog_user_project_header_permissions(context: MetricsContext,
 
 
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str], scoping_project_support_enabled: bool) -> List[IngestLine]:
+                                  disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_tasks = []
     topology_tasks = []
     topology_task_services = []
@@ -247,7 +247,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     skipped_services_no_instances = []
     skipped_disabled_apis = set()
     for service in services:
-        if not scoping_project_support_enabled and service in topology_task_services:
+        if not ConfigurationParameters.scoping_project_support_enabled and service in topology_task_services:
             service_topology = fetch_topology_results[topology_task_services.index(service)]
             if not service_topology:
                 skipped_services_no_instances.append(f"{service.name}/{service.feature_set}")
@@ -255,7 +255,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         for metric in service.metrics:
             gcp_api_last_index = metric.google_metric.find("/")
             api = metric.google_metric[:gcp_api_last_index]
-            if not scoping_project_support_enabled and api in disabled_apis:
+            if not ConfigurationParameters.scoping_project_support_enabled and api in disabled_apis:
                 skipped_disabled_apis.add(api)
                 continue  # skip fetching the metrics because service API is disabled
             fetch_metric_task = run_fetch_metric(

@@ -51,3 +51,8 @@ def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml
             logging_context.error(f"No feature set in given {service} service.")
 
     return services_whitelist
+
+
+class ConfigurationParameters:
+    scoping_project_support_enabled = os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE")\
+                                          .upper() in ["TRUE", "YES"]
