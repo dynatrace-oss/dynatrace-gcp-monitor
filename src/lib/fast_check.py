@@ -127,12 +127,12 @@ def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
         return "Invalid Token"
 
 
-async def check_dynatrace(logging_context: LoggingContext, project_id, dt_session: ClientSession, dynatrace_url, dynatrace_access_key):
+async def check_dynatrace(logging_context: LoggingContext, project_id: str, dt_session: ClientSession, dynatrace_url: str, dynatrace_access_key: str) -> bool:
     try:
         if not dynatrace_url or not dynatrace_access_key:
             logging_context.log(f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
                                      f'Add required secrets to Secret Manager.')
-            return None
+            return False
         logging_context.log(f"Using [DYNATRACE_URL] Dynatrace endpoint: {dynatrace_url}")
         logging_context.log(f'Using [DYNATRACE_ACCESS_KEY]: {obfuscate_dynatrace_access_key(dynatrace_access_key)}.')
         token_metadata = await get_dynatrace_token_metadata(dt_session, logging_context, dynatrace_url, dynatrace_access_key)
@@ -141,8 +141,12 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
             if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
                 logging_context.log(f'Dynatrace API Token for project: \'{project_id}\' is not valid. '
                                     f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
+                return False
+            return True
+        return False
     except Exception as e:
         logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
+        return False
 
 
 class MetricsFastCheck:
@@ -174,7 +178,7 @@ class MetricsFastCheck:
                     return []
 
                 response = await response.json()
-                services.extend([map(lambda s: s["config"]["name"], response.get('services', []))])
+                services.extend(map(lambda s: s["config"]["name"], response.get('services', [])))
                 next_token = response.get('nextPageToken', None)
                 fetch_next_page = next_token is not None
             return services
@@ -192,15 +196,6 @@ class MetricsFastCheck:
 
     async def is_project_ready_to_monitor(self, project_id):
         is_project_ready_to_monitor = await self._check_services_required_to_monitor(project_id)
-
-        if is_deployment_running_inside_cloud_function():
-            dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
-            dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
-            await check_dynatrace(logging_context=self.logging_context,
-                                  project_id=get_project_id_from_environment(),
-                                  dt_session=self.dt_session,
-                                  dynatrace_url=dynatrace_url,
-                                  dynatrace_access_key=dynatrace_access_key)
 
         return project_id, is_project_ready_to_monitor
 
