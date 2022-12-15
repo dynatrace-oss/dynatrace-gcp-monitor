@@ -28,7 +28,7 @@ _METADATA_FLAVOR_VALUE = "Google"
 _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 
 _SECRET_ROOT = 'https://secretmanager.googleapis.com/v1'
-_CLOUD_RESOURCE_MANAGER_ROOT =  os.environ.get('GCP_CLOUD_RESOURCE_MANAGER', 'https://cloudresourcemanager.googleapis.com/v1')
+_CLOUD_RESOURCE_MANAGER_ROOT =  os.environ.get('GCP_CLOUD_RESOURCE_MANAGER_URL', 'https://cloudresourcemanager.googleapis.com/v1')
 
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_NAME", "DYNATRACE_ACCESS_KEY")
 _DYNATRACE_URL_SECRET_NAME = os.environ.get("DYNATRACE_URL_SECRET_NAME", "DYNATRACE_URL")
