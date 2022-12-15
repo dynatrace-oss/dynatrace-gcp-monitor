@@ -51,6 +51,23 @@ check_dynatrace_log_ingest_url() {
   fi
 }
 
+check_activegate_state() {
+  RUNNING_RESPONSE_ON_NORMAL_CLUSTERS="RUNNING"
+  RUNNING_RESPONSE_ON_DOK_CLUSTERS="\"RUNNING\"" #APM-379036 different responses returned - to be fixed in bug APM-380143
+
+  if [[ $USE_EXISTING_ACTIVE_GATE == true ]]; then
+    ACTIVE_GATE_CONNECTIVITY=Y
+    ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health" --connect-timeout 20) || ACTIVE_GATE_CONNECTIVITY=N
+    if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]; then
+      warn "Unable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL to check if ActiveGate is running. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
+    fi
+    if [[ "$ACTIVE_GATE_STATE" != "$RUNNING_RESPONSE_ON_NORMAL_CLUSTERS" && "$ACTIVE_GATE_STATE" != "$RUNNING_RESPONSE_ON_DOK_CLUSTERS" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]; then
+      err "ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
+      exit 1
+    fi
+  fi
+}
+
 check_dynatrace_docker_login() {
   check_if_parameter_is_empty "$DYNATRACE_PAAS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
 
@@ -308,17 +325,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     exit 1
   fi
 
-  if [[ $USE_EXISTING_ACTIVE_GATE == true ]]; then
-    ACTIVE_GATE_CONNECTIVITY=Y
-    ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health" --connect-timeout 20) || ACTIVE_GATE_CONNECTIVITY=N
-    if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]; then
-      warn "Unable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL to check if ActiveGate is running. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
-    fi
-    if [[ "$ACTIVE_GATE_STATE" != "RUNNING" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]; then
-      err "ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
-      exit 1
-    fi
-  fi
+  check_activegate_state
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
@@ -402,7 +409,7 @@ info "- 2. Create IAM service account."
 if [[ $(gcloud iam service-accounts list --filter="name ~ serviceAccounts/$SA_NAME@" --project="$GCP_PROJECT" --format="value(name)") ]]; then
   info "Service Account [$SA_NAME] already exists, skipping"
 else
-  gcloud iam service-accounts create "$SA_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE} 
+  gcloud iam service-accounts create "$SA_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 fi
 
 debug "Binding correct policies to Service Account"
