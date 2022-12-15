@@ -88,7 +88,7 @@ check_dynatrace_docker_login() {
 
 print_help() {
   printf "
-usage: deploy-helm.sh [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--upgrade-extensions] [--auto-default] [--quiet]
+usage: deploy-helm.sh [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--without-extensions-upgrade] [--auto-default] [--quiet]
 
 arguments:
     --role-name ROLE_NAME
@@ -99,10 +99,11 @@ arguments:
     --autopilot-cluster-name CLUSTER_NAME
                             Name of new GKE Autopilot cluster to be created if '--create-autopilot-cluster option' was selected.
                             By default 'dynatrace-gcp-function' will be used.
-    --upgrade-extensions
-                            Upgrade all extensions into dynatrace cluster
+    --without-extensions-upgrade
+                            Keep existing versions of present extensions, and install latest versions for the rest of the selected extensions, if they are not present.
+                            By default, this is not set, so extensions will be upgrade
     -n, --namespace
-                            Kubernetes namespace, by default dynatrace
+                            Kubernetes namespace, by default 'dynatrace'.
     -d, --auto-default
                             Disable all interactive prompts when running gcloud commands.
                             If input is required, defaults will be used, or an error will be raised.
@@ -140,8 +141,8 @@ while (( "$#" )); do
                 shift; shift
             ;;
 
-            "--upgrade-extensions")
-                UPGRADE_EXTENSIONS="Y"
+            "--without-extensions-upgrade")
+                UPGRADE_EXTENSIONS="N"
                 shift
             ;;
 
@@ -180,16 +181,19 @@ done
 
 GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
 DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
-DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}")
+DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}" | sed 's/[\r\n\t ]//g')
 readonly DYNATRACE_ACCESS_KEY
-DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}" | sed 's:/*$::')
+DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}" | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
 readonly DYNATRACE_URL
-DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}" | sed 's:/*$::')
+DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}" | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
 if [ -z "$DYNATRACE_LOG_INGEST_URL" ]; then
   DYNATRACE_LOG_INGEST_URL=$DYNATRACE_URL
 fi
 readonly DYNATRACE_LOG_INGEST_URL
 USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.useExisting}")
+if [ -z "$USE_EXISTING_ACTIVE_GATE" ]; then
+  USE_EXISTING_ACTIVE_GATE=true
+fi
 readonly USE_EXISTING_ACTIVE_GATE
 DYNATRACE_PAAS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.dynatracePaasToken}")
 readonly DYNATRACE_PAAS_KEY
@@ -204,6 +208,11 @@ readonly HTTPS_PROXY
 readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
 SA_NAME=$(helm show values ./dynatrace-gcp-function --jsonpath "{.serviceAccount}")
 readonly SA_NAME
+VPC_NETWORK=$(helm show values ./dynatrace-gcp-function --jsonpath "{.vpcNetwork}")
+if [ -z "$VPC_NETWORK" ]; then
+  VPC_NETWORK="default"
+fi
+readonly VPC_NETWORK
 
 SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
 
@@ -221,13 +230,13 @@ if [ -z "$ROLE_NAME" ]; then
   ROLE_NAME="dynatrace_function"
 fi
 
+if [ -z "$UPGRADE_EXTENSIONS" ]; then
+  UPGRADE_EXTENSIONS="Y"
+fi
+
 debug "Selecting deployment type"
 if [ -z "$KUBERNETES_NAMESPACE" ]; then
   KUBERNETES_NAMESPACE="dynatrace"
-fi
-
-if [ -z "$USE_EXISTING_ACTIVE_GATE" ]; then
-  USE_EXISTING_ACTIVE_GATE=true
 fi
 
 if [ -z "$DEPLOYMENT_TYPE" ]; then
@@ -255,12 +264,10 @@ if [ -n "$USE_PROXY" ]; then
 fi
 
 debug "Check if any required parameter is empty"
-if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]] || [[ ($DEPLOYMENT_TYPE == logs && $USE_EXISTING_ACTIVE_GATE == false) ]]; then
-  check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
-  check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
-  check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
-  check_api_token "$DYNATRACE_URL"
-fi
+check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
+check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
+check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
+check_api_token "$DYNATRACE_URL"
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "/api/v2/extensions/schemas"); then
@@ -327,13 +334,13 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   info "- downloading extensions"
   get_extensions_zip_packages
 
-  debug "Checking installed extension version on Dynatrace environemnt"
+  debug "Checking installed extension version on Dynatrace environment"
   info ""
   info "- checking activated extensions in Dynatrace"
   EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
-  # If --upgrade option is not set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for version that is currently active on the cluster.
-  if [[ "$UPGRADE_EXTENSIONS" != "Y" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
+  # If --without-extensions-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for versions that are currently active on the cluster.
+  if [[ "$UPGRADE_EXTENSIONS" == "N" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
     debug "Downloading activated extensions from Dynatrace environment"
     info ""
     info "- downloading active extensions from Dynatrace"
@@ -356,6 +363,18 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG"
 fi
 
+# Check if gke auth necessary plugin is installed
+# Until GKE 1.26 release, we also need to tell GKE to use the new auth plugin
+if ! [[ $(gke-gcloud-auth-plugin --version) ]]; then
+  err "gke-gcloud-auth-plugin not installed. Run the following commands to install it:"
+  info "gcloud components install gke-gcloud-auth-plugin"
+  info "export USE_GKE_GCLOUD_AUTH_PLUGIN=True"
+  info "gcloud components update"
+  info ""
+  info "For more information, visit: https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke"
+  exit 1
+fi
+
 if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   debug "Creating Autopilot GKE Cluster"
   SELECTED_REGION=$(gcloud config get-value compute/region 2>/dev/null | tee -a "$FULL_LOG_FILE")
@@ -371,7 +390,7 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   fi
   info ""
   info "- Create and connect GKE Autopilot k8s cluster ${AUTOPILOT_CLUSTER_NAME}."
-  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" --network "${VPC_NETWORK}" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   gcloud container clusters get-credentials "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 fi
 
@@ -461,9 +480,7 @@ if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   info "kubectl -n $KUBERNETES_NAMESPACE logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics"
 fi
 
-if [[ $DEPLOYMENT_TYPE != "metrics" ]] && [[ $USE_EXISTING_ACTIVE_GATE != "true" ]]; then
-  # We can build a Log viewer link only when a Dynatrace url is set (when the option with ActiveGate deployment is chosen)
-  # When an existing ActiveGate is used we are not able to build the link - LOG_VIEWER is empty then.
+if [[ $DEPLOYMENT_TYPE != "metrics" ]]; then
   LOG_VIEWER="Log Viewer: ${DYNATRACE_URL}/ui/log-monitoring?query=cloud.provider%3D%22gcp%22"
 fi
 

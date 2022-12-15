@@ -30,6 +30,7 @@ from lib.gcp_apis import GCP_SERVICE_USAGE_URL
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder import create_logs_context
+from lib.utilities import is_deployment_running_inside_cloud_function
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -138,9 +139,9 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
         token_metadata = await get_dynatrace_token_metadata(dt_session, logging_context, dynatrace_url, dynatrace_access_key)
         if token_metadata.get('name', None):
             logging_context.log(f"Token name: {token_metadata.get('name')}.")
-        if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
-            logging_context.log(f'Dynatrace API Token for project: \'{project_id}\' is not valid. '
-                                f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
+            if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
+                logging_context.log(f'Dynatrace API Token for project: \'{project_id}\' is not valid. '
+                                    f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
     except Exception as e:
         logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
 
@@ -182,7 +183,7 @@ class MetricsFastCheck:
             self.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
             return []
 
-    async def _check_services(self, project_id):
+    async def _get_services_ready_to_monitor(self, project_id):
         list_services_result = await self.list_services(project_id)
         service_names = [find_service_name(service['name']) for service in list_services_result]
         if not all(name in service_names for name in REQUIRED_SERVICES):
@@ -191,20 +192,14 @@ class MetricsFastCheck:
             return None
         return service_names
 
-    async def execute(self) -> FastCheckResult:
-        _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
+    async def is_project_ready_to_monitor(self, project_id):
+        services_ready_to_monitor = await self._get_services_ready_to_monitor(project_id)
 
-        project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
+        is_project_ready_to_monitor = False
+        if services_ready_to_monitor is not None:
+            is_project_ready_to_monitor = True
 
-        ready_to_monitor = []
-        for project_id in project_list:
-            tasks = [self._check_services(project_id)]
-
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-
-            if all(result is not None for result in results):
-                ready_to_monitor.append(project_id)
-
+        if is_deployment_running_inside_cloud_function():
             dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
             dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
             await check_dynatrace(logging_context=self.logging_context,
@@ -213,7 +208,24 @@ class MetricsFastCheck:
                                   dynatrace_url=dynatrace_url,
                                   dynatrace_access_key=dynatrace_access_key)
 
-        return FastCheckResult(projects=ready_to_monitor)
+        return project_id, is_project_ready_to_monitor
+
+    async def execute(self) -> FastCheckResult:
+        _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
+
+        project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
+
+        projects_ready_to_monitor = []
+        tasks_to_find_ready_projects = []
+        for project_id in project_list:
+            tasks_to_find_ready_projects.append(self.is_project_ready_to_monitor(project_id))
+
+        ready_project_task_results = await asyncio.gather(*tasks_to_find_ready_projects)
+        for project_id, is_project_ready_to_monitor in ready_project_task_results:
+            if is_project_ready_to_monitor:
+                projects_ready_to_monitor.append(project_id)
+
+        return FastCheckResult(projects=projects_ready_to_monitor)
 
 
 class LogsFastCheck:

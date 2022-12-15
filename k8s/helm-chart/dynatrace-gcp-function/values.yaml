@@ -57,6 +57,8 @@ activeGate:
 
 # COMMON VALUES - DEFAULTS
 
+# vcpNetwork: name of an existing VPC Network in which the autopilot cluster will be deployed. By default or when empty, the network named 'default' is used
+vpcNetwork: "default"
 # requireValidCertificate: if true function requires valid SSL certificates when communicating with Dynatrace cluster
 # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate.
 # Allowed values: "true"/"yes", "false"/"no"
@@ -119,6 +121,7 @@ gcpServicesYaml: |
     - service: api
       featureSets:
         - default_metrics
+    #     - limited_response_codes
       vars:
         filter_conditions: ""
     # Google Apigee Environment
@@ -250,7 +253,8 @@ gcpServicesYaml: |
     # Google Consumed API
     # - service: consumed_api
     #   featureSets:
-    #     - default_metrics
+    #     - default_metrics    
+    #     - limited_response_codes
     #   vars:
     #     filter_conditions: ""
     # Google Consumer Quota
