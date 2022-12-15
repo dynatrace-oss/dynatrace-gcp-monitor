@@ -153,7 +153,7 @@ class MetricsFastCheck:
         self.logging_context = logging_context
         self.token = token
 
-    async def list_services(self, project_id: str, timeout: Optional[int] = 2):
+    async def list_services(self, project_id: str, timeout: Optional[int] = 20):
         fetch_next_page = True
         next_token = None
         services = []
@@ -174,7 +174,7 @@ class MetricsFastCheck:
                     return []
 
                 response = await response.json()
-                services.extend(response.get('services', []))
+                services.extend([map(lambda s: s["config"]["name"], response.get('services', []))])
                 next_token = response.get('nextPageToken', None)
                 fetch_next_page = next_token is not None
             return services
@@ -182,21 +182,16 @@ class MetricsFastCheck:
             self.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
             return []
 
-    async def _get_services_ready_to_monitor(self, project_id):
-        list_services_result = await self.list_services(project_id)
-        service_names = [find_service_name(service['name']) for service in list_services_result]
+    async def _check_services_required_to_monitor(self, project_id: str) -> bool:
+        service_names = await self.list_services(project_id)
         if not all(name in service_names for name in REQUIRED_SERVICES):
             self.logging_context.log(f'Cannot monitor project: \'{project_id}\'. '
                                      f'Enable required services: {REQUIRED_SERVICES}')
-            return None
-        return service_names
+            return False
+        return True
 
     async def is_project_ready_to_monitor(self, project_id):
-        services_ready_to_monitor = await self._get_services_ready_to_monitor(project_id)
-
-        is_project_ready_to_monitor = False
-        if services_ready_to_monitor is not None:
-            is_project_ready_to_monitor = True
+        is_project_ready_to_monitor = await self._check_services_required_to_monitor(project_id)
 
         if is_deployment_running_inside_cloud_function():
             dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)

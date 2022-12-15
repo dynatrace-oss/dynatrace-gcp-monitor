@@ -124,7 +124,7 @@ async def health(request):
 def run_metrics():
     pre_launch_check_result = loop.run_until_complete(metrics_pre_launch_check())
     if pre_launch_check_result:
-        loop.create_task(scheduling_loop(pre_launch_check_result))
+        task = loop.create_task(scheduling_loop(pre_launch_check_result))
         run_loop_forever()
 
 
