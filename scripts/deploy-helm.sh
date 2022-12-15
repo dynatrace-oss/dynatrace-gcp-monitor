@@ -382,7 +382,7 @@ fi
 debug "Creating GCP Service Account for kubernetes"
 info ""
 info "- 2. Create IAM service account."
-if [[ $(gcloud iam service-accounts list --filter="name ~ serviceAccounts/$SA_NAME@" --project="$GCP_PROJECT" --format="value(name)") ]]; then
+if [[ $(gcloud iam service-accounts list --filter="name ~ serviceAccounts/$SA_NAMESA_NAME@" --project="$GCP_PROJECT" --format="value(name)") ]]; then
   info "Service Account [$SA_NAME] already exists, skipping"
 else
   gcloud iam service-accounts create "$SA_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE} 
