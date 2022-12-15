@@ -134,10 +134,15 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
 
         disabled_apis = {}
         disabled_projects = []
+        tasks_to_check_if_project_is_disabled = []
         for project_id in projects_ids:
-            await check_x_goog_user_project_header_permissions(context, project_id)
-            disabled_apis = {project_id: await get_all_disabled_apis(context, project_id)}
-            if 'monitoring.googleapis.com' in disabled_apis[project_id]:
+            tasks_to_check_if_project_is_disabled.append(
+                check_if_project_is_disabled_and_get_disabled_api_set(context, project_id))
+
+        results = await asyncio.gather(*tasks_to_check_if_project_is_disabled)
+        for project_id, is_project_disabled, disabled_api_set in results:
+            disabled_apis.update(disabled_api_set)
+            if is_project_disabled:
                 disabled_projects.append(project_id)
                 
         if disabled_projects:
@@ -166,6 +171,15 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         await dt_session.close()
 
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
+
+
+async def check_if_project_is_disabled_and_get_disabled_api_set(context: MetricsContext, project_id: str):
+    await check_x_goog_user_project_header_permissions(context, project_id)
+    disabled_api_set = {project_id: await get_all_disabled_apis(context, project_id)}
+    is_project_disabled = False
+    if 'monitoring.googleapis.com' in disabled_api_set[project_id]:
+        is_project_disabled = True
+    return project_id, is_project_disabled, disabled_api_set
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
