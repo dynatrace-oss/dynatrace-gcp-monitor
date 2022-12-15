@@ -125,14 +125,9 @@ async def health(request):
 
 
 async def run_metrics_fetcher_forever():
-    pre_launch_check_result = await metrics_pre_launch_check()
-    if not pre_launch_check_result:
-        logging_context.log('Pre_launch_check failed, monitoring loop will not start')
-        return
 
-    while True:
+    async def run_single_polling_with_timeout(pre_launch_check_result):
         logging_context.log(f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
-        start_time_s = time.time()
 
         polling_task = async_dynatrace_gcp_extension(
             project_ids=pre_launch_check_result.projects, services=pre_launch_check_result.services)
@@ -142,14 +137,26 @@ async def run_metrics_fetcher_forever():
         except asyncio.exceptions.TimeoutError:
             logging_context.error(f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
 
+    async def sleep_until_next_polling(current_polling_duration_s):
+        sleep_time = QUERY_INTERVAL_SEC - current_polling_duration_s
+        if sleep_time < 0: sleep_time = 0
+        logging_context.log(f'Next polling in {sleep_time}s')
+        await asyncio.sleep(sleep_time)
+
+    pre_launch_check_result = await metrics_pre_launch_check()
+    if not pre_launch_check_result:
+        logging_context.log('Pre_launch_check failed, monitoring loop will not start')
+        return
+
+    while True:
+        start_time_s = time.time()
+        await run_single_polling_with_timeout(pre_launch_check_result)
         end_time_s = time.time()
+
         polling_duration = end_time_s - start_time_s
         logging_context.log(f"Polling finished after {polling_duration}s")
 
-        if polling_duration < QUERY_INTERVAL_SEC:
-            time_until_next_polling = QUERY_INTERVAL_SEC - polling_duration
-            logging_context.log(f'Next polling in {time_until_next_polling}s')
-            await asyncio.sleep(time_until_next_polling)
+        await sleep_until_next_polling(polling_duration)
 
 
 def run_loop_forever():
