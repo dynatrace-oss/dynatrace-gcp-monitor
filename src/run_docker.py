@@ -14,6 +14,7 @@
 import asyncio
 import os
 import threading
+import time
 from typing import Optional, List, NamedTuple
 
 from aiohttp import web, ClientSession
@@ -26,13 +27,15 @@ from lib.extensions_fetcher import ExtensionsFetchResult, ExtensionsFetcher
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
+from lib.metrics import GCPService
 from lib.self_monitoring import import_self_monitoring_dashboard
 from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode
 
 OPERATION_MODE = OperationMode.from_environment_string(os.environ.get("OPERATION_MODE", None)) or OperationMode.Metrics
 HEALTH_CHECK_PORT = get_int_environment_value("HEALTH_CHECK_PORT", 8080)
-QUERY_INTERVAL_MIN = get_query_interval_minutes()
+QUERY_INTERVAL_SEC = get_query_interval_minutes() * 60
+QUERY_TIMEOUT_SEC = (get_query_interval_minutes() + 2) * 60
 
 # USED TO TEST ON WINDOWS MACHINE
 # policy = asyncio.WindowsSelectorEventLoopPolicy()
@@ -40,14 +43,7 @@ QUERY_INTERVAL_MIN = get_query_interval_minutes()
 
 loop = asyncio.get_event_loop()
 
-PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('projects', List[str]), ('services', List[str])])
-
-
-async def scheduling_loop(pre_launch_check_result: PreLaunchCheckResult):
-    while True:
-        loop.create_task(async_dynatrace_gcp_extension(project_ids=pre_launch_check_result.projects,
-                                                       services=pre_launch_check_result.services))
-        await asyncio.sleep(60 * QUERY_INTERVAL_MIN)
+PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('projects', List[str]), ('services', List[GCPService])])
 
 
 async def metrics_pre_launch_check() -> Optional[PreLaunchCheckResult]:
@@ -55,10 +51,17 @@ async def metrics_pre_launch_check() -> Optional[PreLaunchCheckResult]:
         token = await create_token(logging_context, gcp_session)
         if not token:
             logging_context.log(f'Monitoring disabled. Unable to acquire authorization token.')
-        fast_check_result = await metrics_initial_check(gcp_session, dt_session, token) if token else None
-        extensions_fetch_result = await extensions_fetch(gcp_session, dt_session, token) if fast_check_result else None
-    return PreLaunchCheckResult(projects=fast_check_result.projects,
-                                services=extensions_fetch_result.services) if fast_check_result and extensions_fetch_result else None
+            return None
+
+        fast_check_result = await metrics_initial_check(gcp_session, dt_session, token)
+        if not fast_check_result:
+            return None
+
+        extensions_fetch_result = await extensions_fetch(gcp_session, dt_session, token)
+        if not extensions_fetch_result:
+            return None
+
+    return PreLaunchCheckResult(projects=fast_check_result.projects, services=extensions_fetch_result.services)
 
 
 async def metrics_initial_check(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[FastCheckResult]:
@@ -121,11 +124,39 @@ async def health(request):
     return web.Response(status=200)
 
 
-def run_metrics():
-    pre_launch_check_result = loop.run_until_complete(metrics_pre_launch_check())
-    if pre_launch_check_result:
-        task = loop.create_task(scheduling_loop(pre_launch_check_result))
-        run_loop_forever()
+async def run_metrics_fetcher_forever():
+
+    async def run_single_polling_with_timeout(pre_launch_check_result):
+        logging_context.log(f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
+
+        polling_task = async_dynatrace_gcp_extension(
+            project_ids=pre_launch_check_result.projects, services=pre_launch_check_result.services)
+
+        try:
+            await asyncio.wait_for(polling_task, QUERY_TIMEOUT_SEC)
+        except asyncio.exceptions.TimeoutError:
+            logging_context.error(f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
+
+    async def sleep_until_next_polling(current_polling_duration_s):
+        sleep_time = QUERY_INTERVAL_SEC - current_polling_duration_s
+        if sleep_time < 0: sleep_time = 0
+        logging_context.log(f'Next polling in {sleep_time}s')
+        await asyncio.sleep(sleep_time)
+
+    pre_launch_check_result = await metrics_pre_launch_check()
+    if not pre_launch_check_result:
+        logging_context.log('Pre_launch_check failed, monitoring loop will not start')
+        return
+
+    while True:
+        start_time_s = time.time()
+        await run_single_polling_with_timeout(pre_launch_check_result)
+        end_time_s = time.time()
+
+        polling_duration = end_time_s - start_time_s
+        logging_context.log(f"Polling finished after {polling_duration}s")
+
+        await sleep_until_next_polling(polling_duration)
 
 
 def run_loop_forever():
@@ -184,7 +215,7 @@ loop.run_until_complete(import_self_monitoring_dashboards(instance_metadata))
 logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
 
 if OPERATION_MODE == OperationMode.Metrics:
-    run_metrics()
+    asyncio.run(run_metrics_fetcher_forever())
 
 elif OPERATION_MODE == OperationMode.Logs:
     threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
