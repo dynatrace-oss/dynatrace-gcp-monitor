@@ -52,3 +52,4 @@ def test_flatten_and_enrich_metric_results_all_additional_dimensions():
                            DimensionValue(name="entity.dns_name", value="dns.name"),
                            DimensionValue(name="entity.example_property", value="example_value")]
     assert set(expected_dimensions) == set(ingest_line.dimension_values)
+

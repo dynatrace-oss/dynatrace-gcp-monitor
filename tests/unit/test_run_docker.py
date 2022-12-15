@@ -7,11 +7,7 @@ import run_docker
 
 
 def asyncio_run_with_timeout(coro, timeout_s):
-    async def task_wrapper():
-        task = asyncio.create_task(coro)
-        await asyncio.wait_for(task, timeout_s)
-
-    asyncio.run(task_wrapper())
+    asyncio.run(asyncio.wait_for(coro, timeout_s))
 
 
 @mock.patch('run_docker.async_dynatrace_gcp_extension')
