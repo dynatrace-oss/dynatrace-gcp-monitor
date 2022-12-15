@@ -87,8 +87,8 @@ Limitations:
 `dynatrace-gcp-function` uses Dynatrace Extension Framework 2.0 to package support for GCP Services (metrics, topology rules, dashboards etc). The latest version of official GCP extensions is listed in [extensions-list.txt](https://d1twjciptxxqvo.cloudfront.net/extensions-list.txt) manifest file.
 
 Reference:
-* [Extension YAML file](https://www.dynatrace.com/support/help/extend-dynatrace/extensions20/extension-yaml)
-* [Sign extensions](https://www.dynatrace.com/support/help/extend-dynatrace/extensions20/sign-extension)
+* [Extension YAML file](https://www.dynatrace.com/support/help/shortlink/extension-yaml)
+* [Sign extensions](https://www.dynatrace.com/support/help/shortlink/sign-extension)
 
 ### Tutorial: building the custom extension for GCE Virtual Machine
 As **an example**, the guide explains how to customize `Google Compute Engine` extension. 
@@ -1063,7 +1063,7 @@ Sample dashboard for GCE:
 ####  7. Build Your developer certificate
 
 Follow the guide
-[Sign extensions](https://www.dynatrace.com/support/help/extend-dynatrace/extensions20/sign-extension) to build the developer key and **upload** the root certificate to the Dynatrace cluster
+[Sign extensions](https://www.dynatrace.com/support/help/shortlink/sign-extension) to build the developer key and **upload** the root certificate to the Dynatrace cluster
 
 Build the root certificate
 Add the root certificate to the Dynatrace credential vault 
@@ -1099,6 +1099,6 @@ You can double-check if `Google Compute Engine` dashboard included in the new ex
 #### 10. Activate configuration
 The custom extension contains metrics for `gce_instance` service and `default_metrics` feature set. You should make sure that this featureSet is activated. 
 
-Follow the guide [Set up the Dynatrace GCP metric integration on a GKE cluster](https://www.dynatrace.com/support/help/how-to-use-dynatrace/infrastructure-monitoring/cloud-platform-monitoring/google-cloud-platform-monitoring/alternative-deployment-scenarios/set-up-gcp-integration-metrics-only)
+Follow the guide [Set up the Dynatrace GCP metric integration on a GKE cluster](https://www.dynatrace.com/support/help/shortlink/metric-gke)
 
 Make sure that `gce_instance`.`default_metrics` featureSet is enabled in `values.yaml`. If not, please add it and upgrade the HELM release.
