@@ -24,7 +24,7 @@ from lib.context import LoggingContext, get_int_environment_value, SfmDashboards
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_url, fetch_dynatrace_api_key
 
 from lib.extensions_fetcher import ExtensionsFetchResult, ExtensionsFetcher
-from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
+from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck, check_version, check_dynatrace
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
 from lib.metrics import GCPService
@@ -71,12 +71,29 @@ async def metrics_initial_check(gcp_session: ClientSession, dt_session: ClientSe
         token=token,
         logging_context=logging_context
     ).execute()
+
+    project_id_owner = get_project_id_from_environment()
+
+    dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+    dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+    check_version(logging_context=logging_context)
+
+    if not await check_dynatrace(logging_context=logging_context,
+                          project_id=project_id_owner,
+                          dt_session=dt_session,
+                          dynatrace_url=dynatrace_url,
+                          dynatrace_access_key=dynatrace_api_key
+                          ):
+        logging_context.log(f"Can't access Dynatrace.")
+        return None
+
     if fast_check_result.projects:
         logging_context.log(f'Monitoring enabled for the following projects: {fast_check_result.projects}')
         return fast_check_result
     else:
         logging_context.log("Monitoring disabled. Check your project(s) settings.")
         return None
+
 
 
 async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[ExtensionsFetchResult]:

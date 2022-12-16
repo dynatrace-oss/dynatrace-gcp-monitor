@@ -20,7 +20,7 @@ import traceback
 from datetime import datetime
 from os import listdir
 from os.path import isfile
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Union
 
 import yaml
 
@@ -43,7 +43,7 @@ def dynatrace_gcp_extension(event, context):
     Starting point for installation as a GCP function. See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
     """
     try:
-        asyncio.run(handle_event(event, context))
+        asyncio.run(query_metrics(None, load_supported_services(context)))
     except Exception as e:
         traceback.print_exc()
         raise e
@@ -58,16 +58,9 @@ async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None,
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
     logging_context = LoggingContext(execution_identifier)
     logging_context.log(f'Starting execution for project(s): {project_ids}' if project_ids else "Starting execution")
-    event_context = {
-        'timestamp': timestamp_utc_iso,
-        'event_id': timestamp_utc.timestamp(),
-        'event_type': 'test',
-        'execution_id': execution_identifier
-    }
-    data = {'data': '', 'publishTime': timestamp_utc_iso}
 
     start_time = time.time()
-    await handle_event(data, event_context, project_ids, services)
+    await query_metrics(execution_identifier, services)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
@@ -76,16 +69,8 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, event_context, projects_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
-    if isinstance(event_context, Dict):
-        # for k8s installation
-        context = LoggingContext(event_context.get("execution_id", None))
-    else:
-        context = LoggingContext(None)
-
-    if not services:
-        # load services for GCP Function
-        services = load_supported_services(context)
+async def query_metrics(execution_id: Union[str, None], services: Optional[List[GCPService]] = None):
+    context = LoggingContext(execution_id)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         setup_start_time = time.time()
