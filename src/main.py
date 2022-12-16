@@ -28,15 +28,15 @@ from lib.clientsession_provider import init_dt_client_session, init_gcp_client_s
 from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
-from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_all_disabled_apis
-from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
+from lib.metric_ingest import fetch_metric, push_ingest_lines
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
 
+GCP_MONITORING_URL = os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
 
 def dynatrace_gcp_extension(event, context):
     """
@@ -119,26 +119,13 @@ async def query_metrics(execution_id: Union[str, None], services: Optional[List[
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
-        disabled_apis = {}
-        disabled_projects = []
-        for project_id in projects_ids:
-            await check_x_goog_user_project_header_permissions(context, project_id)
-            disabled_apis = {project_id: await get_all_disabled_apis(context, project_id)}
-            if 'monitoring.googleapis.com' in disabled_apis[project_id]:
-                disabled_projects.append(project_id)
-                
-        if disabled_projects:
-            context.log(f"monitoring.googleapis.com API disabled in the projects: " + ", ".join(disabled_projects) + ", that projects will not be monitored")
-            for disabled_project in disabled_projects:
-                projects_ids.remove(disabled_project)
-
         setup_time = (time.time() - setup_start_time)
         context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}
 
         context.start_processing_timestamp = time.time()
 
         process_project_metrics_tasks = [
-            process_project_metrics(context, project_id, services, disabled_apis.get(project_id, set()))
+            process_project_metrics(context, project_id, services)
             for project_id
             in projects_ids
         ]
@@ -155,11 +142,10 @@ async def query_metrics(execution_id: Union[str, None], services: Optional[List[
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
 
-async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str]):
+async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService]):
     try:
         context.log(project_id, f"Starting processing...")
-        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis)
+        ingest_lines = await fetch_ingest_lines_task(context, project_id, services)
         fetch_data_time = time.time() - context.start_processing_timestamp
         context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
@@ -186,7 +172,7 @@ async def _check_x_goog_user_project_header_permissions(context: MetricsContext,
         context.use_x_goog_user_project_header[project_id] = False
         return
 
-    url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
+    url = f"{GCP_MONITORING_URL}/projects/{project_id}/metricDescriptors"
     params = [('pageSize', 1)]
     headers = {
         "Authorization": "Bearer {token}".format(token=context.token),
@@ -205,36 +191,17 @@ async def _check_x_goog_user_project_header_permissions(context: MetricsContext,
         context.log(project_id, f"Unexpected response when checking 'x-goog-user-project' header: {str(page)}")
 
 
-async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str]) -> List[IngestLine]:
+async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService]) -> List[IngestLine]:
     fetch_metric_tasks = []
-    topology_tasks = []
-    topology_task_services = []
-    skipped_topology_services = set()
 
-    for service in services:
-        if service.name in entities_extractors:
-            if entities_extractors[service.name].used_api in disabled_apis:
-                skipped_topology_services.add(service.name)
-                continue
-            topology_task = entities_extractors[service.name].extractor(context, project_id, service)
-            topology_tasks.append(topology_task)
-            topology_task_services.append(service)
+    await check_x_goog_user_project_header_permissions(context, project_id)
 
-    if skipped_topology_services:
-        skipped_topology_services_string = ", ".join(skipped_topology_services)
-        context.log(project_id, f"Skipped fetching topology for disabled services: {skipped_topology_services_string}")
+    disabled_apis = await get_all_disabled_apis(context, project_id)
+    if 'monitoring.googleapis.com' in disabled_apis:
+        context.log(f"monitoring.googleapis.com API disabled in the project {project_id}, that project will not be monitored")
 
-    fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
-
-    skipped_services_no_instances = []
     skipped_disabled_apis = set()
     for service in services:
-        if service in topology_task_services:
-            service_topology = fetch_topology_results[topology_task_services.index(service)]
-            if not service_topology:
-                skipped_services_no_instances.append(f"{service.name}/{service.feature_set}")
-                continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
             gcp_api_last_index = metric.google_metric.find("/")
             api = metric.google_metric[:gcp_api_last_index]
@@ -249,16 +216,12 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             )
             fetch_metric_tasks.append(fetch_metric_task)
 
-    if skipped_services_no_instances:
-        skipped_services_string = ', '.join(skipped_services_no_instances)
-        context.log(project_id, f"Skipped fetching metrics for {skipped_services_string} due to no instances detected")
     if skipped_disabled_apis:
         skipped_disabled_apis_string = ", ".join(skipped_disabled_apis)
         context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
-    entity_id_map = build_entity_id_map(fetch_topology_results)
-    flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
+    flat_metric_results = [item for items in fetch_metric_results for item in items]
     return flat_metric_results
 
 

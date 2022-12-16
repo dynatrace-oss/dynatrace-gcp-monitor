@@ -11,7 +11,6 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-import json
 import os
 import time
 from datetime import timezone, datetime
@@ -19,8 +18,6 @@ from http.client import InvalidURL
 from typing import Dict, List, Any
 
 from lib.context import MetricsContext, LoggingContext, DynatraceConnectivity
-from lib.entities.ids import _create_mmh3_hash
-from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 
@@ -191,10 +188,9 @@ async def fetch_metric(
         for time_serie in page['timeSeries']:
             typed_value_key = extract_typed_value_key(time_serie)
             dimensions = create_dimensions(context, service.name, time_serie, dt_dimensions_mapping)
-            entity_id = create_entity_id(service, time_serie)
 
             for point in time_serie['points']:
-                line = convert_point_to_ingest_line(dimensions, metric, point, typed_value_key, entity_id)
+                line = convert_point_to_ingest_line(dimensions, metric, point, typed_value_key)
                 if line:
                     lines.append(line)
 
@@ -268,67 +264,12 @@ def create_dimensions(context: MetricsContext, service_name: str, time_serie: Di
 
     return dt_dimensions
 
-def flatten_and_enrich_metric_results(
-        context: MetricsContext,
-        fetch_metric_results: List[List[IngestLine]],
-        entity_id_map: Dict[str, Entity]
-) -> List[IngestLine]:
-    results = []
-
-    entity_dimension_prefix = "entity."
-    for ingest_lines in fetch_metric_results:
-        for ingest_line in ingest_lines:
-            entity = entity_id_map.get(ingest_line.entity_id, None)
-            if entity:
-                if entity.dns_names:
-                    dimension_value = create_dimension(
-                        name=entity_dimension_prefix + "dns_name",
-                        value=entity.dns_names[0],
-                        context=context
-                    )
-                    ingest_line.dimension_values.append(dimension_value)
-
-                if entity.ip_addresses:
-                    dimension_value = create_dimension(
-                        name=entity_dimension_prefix + "ip_address",
-                        value=entity.ip_addresses[0],
-                        context=context
-                    )
-                    ingest_line.dimension_values.append(dimension_value)
-
-                for cd_property in entity.properties:
-                    dimension_value = create_dimension(
-                        name=entity_dimension_prefix + cd_property.key.replace(" ", "_").lower(),
-                        value=cd_property.value,
-                        context=context
-                    )
-                    ingest_line.dimension_values.append(dimension_value)
-
-            results.append(ingest_line)
-
-    return results
-
-
-def create_entity_id(service: GCPService, time_serie):
-    resource = time_serie['resource']
-    resource_labels = resource.get('labels', {})
-    parts = [service.name]
-    for dimension in service.dimensions:
-        key = dimension.key_for_create_entity_id
-
-        dimension_value = resource_labels.get(key)
-        if dimension_value:
-            parts.append(dimension_value)
-    entity_id = _create_mmh3_hash(parts)
-    return entity_id
-
 
 def convert_point_to_ingest_line(
         dimensions: List[DimensionValue],
         metric: Metric,
         point: Dict,
-        typed_value_key: str,
-        entity_id: str
+        typed_value_key: str
 ) -> IngestLine:
     # Why endtime? see https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeInterval
     timestamp_iso = point['interval']['endTime']
@@ -344,7 +285,6 @@ def convert_point_to_ingest_line(
     line = None
     if value:
         line = IngestLine(
-            entity_id=entity_id,
             metric_name=metric.dynatrace_name,
             metric_type=metric.dynatrace_metric_type,
             value=value,

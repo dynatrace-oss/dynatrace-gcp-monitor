@@ -31,7 +31,6 @@ class DimensionValue:
 
 @dataclass(frozen=True)
 class IngestLine:
-    entity_id: Text
     metric_name: Text
     metric_type: Text
     value: Any
