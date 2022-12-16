@@ -125,7 +125,6 @@ async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
 
 
 async def run_metrics_fetcher_forever():
-
     async def run_single_polling_with_timeout(pre_launch_check_result):
         logging_context.log(f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
 
@@ -167,6 +166,7 @@ def run_loop_forever():
         webserver.close_and_cleanup(loop)
         loop.close()
 
+
 def main():
     print_dynatrace_logo()
 
@@ -186,6 +186,7 @@ def main():
         threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
         LogsFastCheck(logging_context, instance_metadata).execute()
         run_logs(logging_context, instance_metadata, loop)
+
 
 if __name__ == '__main__':
     main()
