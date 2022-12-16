@@ -141,9 +141,10 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
 
         results = await asyncio.gather(*tasks_to_check_if_project_is_disabled)
         for project_id, is_project_disabled, disabled_api_set in results:
-            disabled_apis.update(disabled_api_set)
             if is_project_disabled:
                 disabled_projects.append(project_id)
+            else:
+                disabled_apis.update({project_id: disabled_api_set})
                 
         if disabled_projects:
             context.log(f"monitoring.googleapis.com API disabled in the projects: " + ", ".join(disabled_projects) + ", that projects will not be monitored")
@@ -175,9 +176,9 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
 
 async def check_if_project_is_disabled_and_get_disabled_api_set(context: MetricsContext, project_id: str):
     await check_x_goog_user_project_header_permissions(context, project_id)
-    disabled_api_set = {project_id: await get_all_disabled_apis(context, project_id)}
+    disabled_api_set = await get_all_disabled_apis(context, project_id)
     is_project_disabled = False
-    if 'monitoring.googleapis.com' in disabled_api_set[project_id]:
+    if 'monitoring.googleapis.com' in disabled_api_set:
         is_project_disabled = True
     return project_id, is_project_disabled, disabled_api_set
 
