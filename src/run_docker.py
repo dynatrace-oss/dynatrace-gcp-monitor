@@ -17,8 +17,9 @@ import threading
 import time
 from typing import Optional, List, NamedTuple
 
-from aiohttp import web, ClientSession
+from aiohttp import ClientSession
 
+from webserver import webserver
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_url, fetch_dynatrace_api_key
@@ -29,6 +30,7 @@ from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
 from lib.metrics import GCPService
 from lib.self_monitoring import import_self_monitoring_dashboard
+from lib.utilities import print_dynatrace_logo
 from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode
 
@@ -120,10 +122,6 @@ async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
                 await import_self_monitoring_dashboard(context=sfm_dashboards_context)
 
 
-async def health(request):
-    return web.Response(status=200)
-
-
 async def run_metrics_fetcher_forever():
 
     async def run_single_polling_with_timeout(pre_launch_check_result):
@@ -164,50 +162,16 @@ def run_loop_forever():
         loop.run_forever()
     finally:
         print("Closing AsyncIO loop...")
-        loop.run_until_complete(app.shutdown())
-        loop.run_until_complete(runner.cleanup())
-        loop.run_until_complete(app.cleanup())
+        webserver.close_and_cleanup(loop)
         loop.close()
 
 
-print("                      ,,,,,..")
-print("                  ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.")
-print("               ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,")
-print("            .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,     ,,")
-print("          ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,    .,,,,")
-print("       ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,     ,,,,,,,.")
-print("    .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    ,,,,,,,,,,,")
-print("  ,,,,,,,,,,,,,,,,,......  ......,,,,,,,    .,,,,,,,,,,,,,")
-print(",,                                        ,,,,,,,,,,,,,,,,")
-print(",,,,,,,,,,,,,,,,,                        .,,,,,,,,,,,,,,,,")
-print(",,,,,,,,,,,,,,,,,                        .,,,,,,,,,,,,,,,,.")
-print(",,,,,,,,,,,,,,,,,       Dynatrace        .,,,,,,,,,,,,,,,,.")
-print(",,,,,,,,,,,,,,,,, dynatrace-gcp-function .,,,,,,,,,,,,,,,,,")
-print(",,,,,,,,,,,,,,,,,                        .,,,,,,,,,,,,,,,,,")
-print(",,,,,,,,,,,,,,,,,                        ,,,,,,,,,,,,,,,,,,")
-print(",,,,,,,,,,,,,,,,,                        ,,,,,,,,,,,,,,,,,,")
-print(".,,,,,,,,,,,,,,,                         ,,,,,,,,,,,,,,,,,")
-print(".,,,,,,,,,,,,,    .,,,,,,,,,,,,,,,,,,.   ,,,,,,,,,,,,,,,")
-print(" ,,,,,,,,,,     ,,,,,,,,,,,,,,,,,,,,,,  .,,,,,,,,,,,,.")
-print(" ,,,,,,,     ,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,,,,,,,,")
-print(" ,,,,,    .,,,,,,,,,,,,,,,,,,,,,,,,,,.  ,,,,,,,,")
-print("  ,     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,,,,")
-print("     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,")
-print("")
+print_dynatrace_logo()
 
 logging_context = LoggingContext(None)
+logging_context.log("GCP Monitor - Dynatrace integration for Google Cloud Platform monitoring\n")
 
-logging_context.log("Dynatrace function for Google Cloud Platform monitoring\n")
-
-logging_context.log("Setting up... \n")
-app = web.Application()
-app.add_routes([web.get('/health', health)])
-
-# setup webapp
-runner = web.AppRunner(app)
-loop.run_until_complete(runner.setup())
-site = web.TCPSite(runner, '0.0.0.0', HEALTH_CHECK_PORT)
-loop.run_until_complete(site.start())
+webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
 
 instance_metadata = loop.run_until_complete(run_instance_metadata_check())
 loop.run_until_complete(import_self_monitoring_dashboards(instance_metadata))
@@ -215,7 +179,7 @@ loop.run_until_complete(import_self_monitoring_dashboards(instance_metadata))
 logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
 
 if OPERATION_MODE == OperationMode.Metrics:
-    asyncio.run(run_metrics_fetcher_forever())
+    loop.run_until_complete(run_metrics_fetcher_forever())
 
 elif OPERATION_MODE == OperationMode.Logs:
     threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
