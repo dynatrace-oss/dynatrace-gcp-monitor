@@ -12,8 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import aiohttp
-
 from lib.entities.model import CdProperty
 from lib.metric_ingest import *
 from main import build_entity_id_map
@@ -40,7 +38,7 @@ def test_create_dimension_too_long_dimension():
 
 
 def test_flatten_and_enrich_metric_results_all_additional_dimensions():
-    context_mock = MetricsContext(aiohttp.ClientSession(), aiohttp.ClientSession(), "", "", datetime.utcnow(), 0, "", "", False, False, None)
+    context_mock = MetricsContext(None, None, "", "", datetime.utcnow(), 0, "", "", False, False, None)
     metric_results = [[IngestLine("entity_id", "m1", "count", 1, 10000, [])]]
     entity_id_map = build_entity_id_map([[Entity("entity_id", "", "", ip_addresses=["1.1.1.1", "0.0.0.0"], listen_ports=[],
                                          favicon_url="", dtype="", properties=[CdProperty("Example property", "example_value")],
