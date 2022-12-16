@@ -20,6 +20,36 @@ from lib.context import MetricsContext
 GCP_SERVICE_USAGE_URL = os.environ.get("GCP_SERVICE_USAGE_URL", "https://serviceusage.googleapis.com/v1")
 
 
+async def get_all_enabled_apis(context: MetricsContext, project_id: str):
+    fetch_next_page = True
+    next_token = None
+    services = []
+    try:
+        while fetch_next_page:
+            query_params = {"filter": "state:ENABLED"}
+            if next_token:
+                query_params["pageToken"] = next_token
+            response = await context.gcp_session.get(
+                GCP_SERVICE_USAGE_URL + f'/projects/{project_id}/services',
+                headers={
+                    "Authorization": f'Bearer {context.token}'
+                },
+                params=query_params)
+            if response.status != 200:
+                context.logging_context.log(
+                    f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
+                return None
+
+            response = await response.json()
+            services.extend(map(lambda s: s["config"]["name"], response.get('services', [])))
+            next_token = response.get('nextPageToken', None)
+            fetch_next_page = next_token is not None
+        return services
+    except Exception as e:
+        context.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
+        return None
+
+
 async def get_all_disabled_apis(context: MetricsContext, project_id: str):
     base_url = f"{GCP_SERVICE_USAGE_URL}/projects/{project_id}/services?filter=state:DISABLED"
     headers = context.create_gcp_request_headers(project_id)

@@ -99,7 +99,7 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
         = context.dynatrace_ingest_lines_ok_count.get(project_id, 0) + ingest_response_json.get("linesOk", 0)
     context.dynatrace_ingest_lines_invalid_count[project_id] \
         = context.dynatrace_ingest_lines_invalid_count.get(project_id, 0) + ingest_response_json.get("linesInvalid", 0)
-    context.log(project_id, f"Ingest response: {ingest_response_json}")
+#    context.log(project_id, f"Ingest response: {ingest_response_json}")
     await log_invalid_lines(context, ingest_response_json, lines_batch)
 
 

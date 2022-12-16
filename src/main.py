@@ -30,7 +30,7 @@ from lib.credentials import create_token, get_project_id_from_environment, fetch
     get_all_accessible_projects
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
-from lib.gcp_apis import get_all_disabled_apis
+from lib.gcp_apis import get_all_enabled_apis
 from lib.metric_ingest import fetch_metric, push_ingest_lines
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
@@ -69,7 +69,7 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def query_metrics(execution_id: Union[str, None], services: Optional[List[GCPService]] = None):
+async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
     context = LoggingContext(execution_id)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -196,8 +196,8 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
     await check_x_goog_user_project_header_permissions(context, project_id)
 
-    disabled_apis = await get_all_disabled_apis(context, project_id)
-    if 'monitoring.googleapis.com' in disabled_apis:
+    enabled_apis = await get_all_enabled_apis(context, project_id)
+    if enabled_apis is None or 'monitoring.googleapis.com' not in enabled_apis:
         context.log(f"monitoring.googleapis.com API disabled in the project {project_id}, that project will not be monitored")
 
     skipped_disabled_apis = set()
@@ -205,7 +205,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         for metric in service.metrics:
             gcp_api_last_index = metric.google_metric.find("/")
             api = metric.google_metric[:gcp_api_last_index]
-            if api in disabled_apis:
+            if enabled_apis is None or api not in enabled_apis:
                 skipped_disabled_apis.add(api)
                 continue  # skip fetching the metrics because service API is disabled
             fetch_metric_task = run_fetch_metric(
