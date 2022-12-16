@@ -174,7 +174,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
     # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
 
-async def check_if_project_is_disabled_and_get_disabled_api_set(context: MetricsContext, project_id: str) -> tuple[str, bool, set]:
+async def check_if_project_is_disabled_and_get_disabled_api_set(context: MetricsContext, project_id: str) -> [str, bool, set]:
     await check_x_goog_user_project_header_permissions(context, project_id)
     disabled_api_set = await get_all_disabled_apis(context, project_id)
     is_project_disabled = False
