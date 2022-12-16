@@ -47,6 +47,8 @@ loop = asyncio.get_event_loop()
 
 PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('projects', List[str]), ('services', List[GCPService])])
 
+logging_context = LoggingContext(None)
+
 
 async def metrics_pre_launch_check() -> Optional[PreLaunchCheckResult]:
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -165,23 +167,25 @@ def run_loop_forever():
         webserver.close_and_cleanup(loop)
         loop.close()
 
+def main():
+    print_dynatrace_logo()
 
-print_dynatrace_logo()
+    logging_context.log("GCP Monitor - Dynatrace integration for Google Cloud Platform monitoring\n")
 
-logging_context = LoggingContext(None)
-logging_context.log("GCP Monitor - Dynatrace integration for Google Cloud Platform monitoring\n")
+    webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
 
-webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
+    instance_metadata = loop.run_until_complete(run_instance_metadata_check())
+    loop.run_until_complete(import_self_monitoring_dashboards(instance_metadata))
 
-instance_metadata = loop.run_until_complete(run_instance_metadata_check())
-loop.run_until_complete(import_self_monitoring_dashboards(instance_metadata))
+    logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
 
-logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
+    if OPERATION_MODE == OperationMode.Metrics:
+        loop.run_until_complete(run_metrics_fetcher_forever())
 
-if OPERATION_MODE == OperationMode.Metrics:
-    loop.run_until_complete(run_metrics_fetcher_forever())
+    elif OPERATION_MODE == OperationMode.Logs:
+        threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
+        LogsFastCheck(logging_context, instance_metadata).execute()
+        run_logs(logging_context, instance_metadata, loop)
 
-elif OPERATION_MODE == OperationMode.Logs:
-    threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
-    LogsFastCheck(logging_context, instance_metadata).execute()
-    run_logs(logging_context, instance_metadata, loop)
+if __name__ == '__main__':
+    main()
