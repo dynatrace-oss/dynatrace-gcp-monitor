@@ -4,7 +4,11 @@ if: fork = false
 
 notifications:
   email:
+    recipients:
+      - team-public-cloud@dynatrace.com
+    if: branch = master
     on_success: never
+    on_failure: always
 stages:
   - shellcheck
   - tests
