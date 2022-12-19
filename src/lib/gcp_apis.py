@@ -15,6 +15,7 @@ import asyncio
 import os
 
 from aiohttp import ClientResponseError
+from typing import Set, List, Dict, Tuple
 
 from lib.context import MetricsContext
 
@@ -46,7 +47,7 @@ async def _get_all_disabled_apis(context: MetricsContext, project_id: str):
 
 
 # This function return all the disabled projects that Service Account has access to and all disabled apis of the enabled projects
-async def get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids) -> [list, dict]:
+async def get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids) -> Tuple[List[str], Dict[str, Set]]:
     disabled_projects = []
     disabled_apis = {}
     tasks_to_check_if_project_is_disabled = []
@@ -64,7 +65,7 @@ async def get_disabled_projects_and_disabled_apis_by_project_id(context, project
     return disabled_projects, disabled_apis
 
 
-async def _check_if_project_is_disabled_and_get_disabled_api_set(context: MetricsContext, project_id: str) -> [str, bool, set]:
+async def _check_if_project_is_disabled_and_get_disabled_api_set(context: MetricsContext, project_id: str) -> Tuple[str, bool, Set[str]]:
     try:
         await _check_x_goog_user_project_header_permissions(context, project_id)
     except Exception as e:
