@@ -167,7 +167,7 @@ async def _check_x_goog_user_project_header_permissions(context: MetricsContext,
     service_usage_booking = os.environ['SERVICE_USAGE_BOOKING'] if 'SERVICE_USAGE_BOOKING' in os.environ.keys() \
         else 'source'
     if service_usage_booking.casefold().strip() != 'destination':
-        context.log(project_id, "Using SERVICE_USAGE_BOOKING = source")
+        # context.log(project_id, "Using SERVICE_USAGE_BOOKING = source")
         context.use_x_goog_user_project_header[project_id] = False
         return
 
@@ -195,7 +195,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
     await check_x_goog_user_project_header_permissions(context, project_id)
 
-    enabled_apis = await get_all_enabled_apis(context, project_id)
+    enabled_apis = await get_all_enabled_apis(context.gcp_session, context.token, context, project_id)
     if enabled_apis is None or 'monitoring.googleapis.com' not in enabled_apis:
         context.log(f"monitoring.googleapis.com API disabled in the project {project_id}, that project will not be monitored")
 

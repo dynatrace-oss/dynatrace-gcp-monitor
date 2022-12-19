@@ -25,7 +25,7 @@ from aiohttp import ClientSession
 from lib.context import LoggingContext, get_should_require_valid_certificate
 from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fetch_dynatrace_api_key, \
     get_project_id_from_environment
-from lib.gcp_apis import GCP_SERVICE_USAGE_URL
+from lib.gcp_apis import GCP_SERVICE_USAGE_URL, get_all_enabled_apis
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder import create_logs_context
@@ -158,33 +158,8 @@ class MetricsFastCheck:
         self.token = token
 
     async def list_services(self, project_id: str, timeout: Optional[int] = 20):
-        fetch_next_page = True
-        next_token = None
-        services = []
-        try:
-            while fetch_next_page:
-                query_params = {"filter": "state:ENABLED"}
-                if next_token:
-                    query_params["pageToken"] = next_token
-                response = await self.gcp_session.get(
-                    GCP_SERVICE_USAGE_URL + f'/projects/{project_id}/services',
-                    headers={
-                        "Authorization": f'Bearer {self.token}'
-                    },
-                    params=query_params,
-                    timeout=timeout)
-                if response.status != 200:
-                    self.logging_context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
-                    return []
-
-                response = await response.json()
-                services.extend(map(lambda s: s["config"]["name"], response.get('services', [])))
-                next_token = response.get('nextPageToken', None)
-                fetch_next_page = next_token is not None
-            return services
-        except Exception as e:
-            self.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
-            return []
+        services = await get_all_enabled_apis(self.gcp_session, self.token, self.logging_context, project_id, timeout)
+        return services if services is not None else []
 
     async def _check_services_required_to_monitor(self, project_id: str) -> bool:
         service_names = await self.list_services(project_id)

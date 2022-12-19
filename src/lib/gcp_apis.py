@@ -12,15 +12,19 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import os
+from typing import Optional
 
+import aiohttp
 from aiohttp import ClientResponseError
+from aiohttp.helpers import sentinel
 
-from lib.context import MetricsContext
+from lib.context import MetricsContext, LoggingContext
 
 GCP_SERVICE_USAGE_URL = os.environ.get("GCP_SERVICE_USAGE_URL", "https://serviceusage.googleapis.com/v1")
 
 
-async def get_all_enabled_apis(context: MetricsContext, project_id: str):
+async def get_all_enabled_apis(gcp_session: aiohttp.ClientSession, token: str,  logging_context: LoggingContext,
+                               project_id: str, timeout: Optional[int] = sentinel):
     fetch_next_page = True
     next_token = None
     services = []
@@ -29,14 +33,15 @@ async def get_all_enabled_apis(context: MetricsContext, project_id: str):
             query_params = {"filter": "state:ENABLED"}
             if next_token:
                 query_params["pageToken"] = next_token
-            response = await context.gcp_session.get(
+            response = await gcp_session.get(
                 GCP_SERVICE_USAGE_URL + f'/projects/{project_id}/services',
                 headers={
-                    "Authorization": f'Bearer {context.token}'
+                    "Authorization": f'Bearer {token}'
                 },
-                params=query_params)
+                params=query_params,
+                timeout=timeout)
             if response.status != 200:
-                context.logging_context.log(
+                logging_context.log(
                     f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
                 return None
 
@@ -46,7 +51,7 @@ async def get_all_enabled_apis(context: MetricsContext, project_id: str):
             fetch_next_page = next_token is not None
         return services
     except Exception as e:
-        context.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
+        logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
         return None
 
 
