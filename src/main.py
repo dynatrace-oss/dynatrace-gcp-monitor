@@ -20,7 +20,7 @@ import traceback
 from datetime import datetime
 from os import listdir
 from os.path import isfile
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 import yaml
 
@@ -31,7 +31,7 @@ from lib.credentials import create_token, get_project_id_from_environment, fetch
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
-from lib.gcp_apis import get_all_disabled_apis
+from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
@@ -132,14 +132,8 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         if not projects_ids:
             projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
-        disabled_apis = {}
-        disabled_projects = []
-        for project_id in projects_ids:
-            await check_x_goog_user_project_header_permissions(context, project_id)
-            disabled_apis = {project_id: await get_all_disabled_apis(context, project_id)}
-            if 'monitoring.googleapis.com' in disabled_apis[project_id]:
-                disabled_projects.append(project_id)
-                
+        disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
+
         if disabled_projects:
             context.log(f"monitoring.googleapis.com API disabled in the projects: " + ", ".join(disabled_projects) + ", that projects will not be monitored")
             for disabled_project in disabled_projects:
@@ -151,7 +145,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         context.start_processing_timestamp = time.time()
 
         process_project_metrics_tasks = [
-            process_project_metrics(context, project_id, services, disabled_apis.get(project_id, set()))
+            process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()))
             for project_id
             in projects_ids
         ]
@@ -179,43 +173,6 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
         await push_ingest_lines(context, project_id, ingest_lines)
     except Exception as e:
         context.t_exception(f"Failed to finish processing due to {e}")
-
-
-async def check_x_goog_user_project_header_permissions(context: MetricsContext, project_id: str):
-    try:
-        await _check_x_goog_user_project_header_permissions(context, project_id)
-    except Exception as e:
-        context.log(project_id, f"Unexpected exception when checking 'x-goog-user-project' header: {e}")
-
-
-async def _check_x_goog_user_project_header_permissions(context: MetricsContext, project_id: str):
-    if project_id in context.use_x_goog_user_project_header:
-        return
-
-    service_usage_booking = os.environ['SERVICE_USAGE_BOOKING'] if 'SERVICE_USAGE_BOOKING' in os.environ.keys() \
-        else 'source'
-    if service_usage_booking.casefold().strip() != 'destination':
-        context.log(project_id, "Using SERVICE_USAGE_BOOKING = source")
-        context.use_x_goog_user_project_header[project_id] = False
-        return
-
-    url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
-    params = [('pageSize', 1)]
-    headers = {
-        "Authorization": "Bearer {token}".format(token=context.token),
-        "x-goog-user-project": project_id
-    }
-    resp = await context.gcp_session.get(url=url, params=params, headers=headers)
-    page = await resp.json()
-
-    if resp.status == 200:
-        context.use_x_goog_user_project_header[project_id] = True
-        context.log(project_id, "Using SERVICE_USAGE_BOOKING = destination")
-    elif resp.status == 403 and 'serviceusage.services.use' in page['error']['message']:
-        context.use_x_goog_user_project_header[project_id] = False
-        context.log(project_id, "Ignoring destination SERVICE_USAGE_BOOKING. Missing permission: 'serviceusage.services.use'")
-    else:
-        context.log(project_id, f"Unexpected response when checking 'x-goog-user-project' header: {str(page)}")
 
 
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
