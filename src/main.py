@@ -28,7 +28,6 @@ from lib.clientsession_provider import init_dt_client_session, init_gcp_client_s
 from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
-from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_all_enabled_apis
 from lib.metric_ingest import fetch_metric, push_ingest_lines
@@ -223,19 +222,6 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
     flat_metric_results = [item for items in fetch_metric_results for item in items]
     return flat_metric_results
-
-
-def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str, Entity]:
-    result = {}
-    for result_set in fetch_topology_results:
-        for entity in result_set:
-            # Ensure order of entries to avoid "flipping" when choosing the first one for dimension value
-            entity.dns_names.sort()
-            entity.ip_addresses.sort()
-            entity.tags.sort()
-            entity.listen_ports.sort()
-            result[entity.id] = entity
-    return result
 
 
 def load_supported_services(context: LoggingContext) -> List[GCPService]:
