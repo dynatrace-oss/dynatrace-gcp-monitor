@@ -11,6 +11,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import asyncio
 import os
 import time
 from datetime import timezone, datetime
@@ -20,6 +21,7 @@ from typing import Dict, List, Any
 from lib.context import MetricsContext, LoggingContext, DynatraceConnectivity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
+from lib.mint_buffer import MintBuffer
 
 UNIT_10TO2PERCENT = "10^2.%"
 MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
@@ -39,34 +41,38 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
     lines_sent = 0
     maximum_lines_threshold = context.maximum_metric_data_points_per_minute
     start_time = time.time()
+    throttle_time = time.time()
     try:
         lines_batch = []
         for result in fetch_metric_results:
             lines_batch.append(result)
             lines_sent += 1
             if len(lines_batch) >= context.metric_ingest_batch_size:
-                await _push_to_dynatrace(context, project_id, lines_batch)
+                await push_to_dynatrace(context, project_id, lines_batch)
                 lines_batch = []
-            if lines_sent >= maximum_lines_threshold:
-                await _push_to_dynatrace(context, project_id, lines_batch)
-                lines_dropped_count = len(fetch_metric_results) - maximum_lines_threshold
-                context.dynatrace_ingest_lines_dropped_count[project_id] = \
-                    context.dynatrace_ingest_lines_dropped_count.get(project_id, 0) + lines_dropped_count
-                context.log(project_id, f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
-                return
+            # if lines_sent >= maximum_lines_threshold:
+            #     await asyncio.sleep(60 - time.time() - throttle_time)
+            #     throttle_time = time.time()
+            # if lines_sent >= maximum_lines_threshold:
+            #     await push_to_dynatrace(context, project_id, lines_batch)
+            #     lines_dropped_count = len(fetch_metric_results) - maximum_lines_threshold
+            #     context.dynatrace_ingest_lines_dropped_count[project_id] = \
+            #         context.dynatrace_ingest_lines_dropped_count.get(project_id, 0) + lines_dropped_count
+            #     context.log(project_id, f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
+            #     return
         if lines_batch:
-            await _push_to_dynatrace(context, project_id, lines_batch)
+            await push_to_dynatrace(context, project_id, lines_batch)
     except Exception as e:
         if isinstance(e, InvalidURL):
             context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
         context.log(project_id, f"Failed to push ingest lines to Dynatrace due to {type(e).__name__} {e}")
     finally:
         push_data_time = time.time() - start_time
-        context.push_to_dynatrace_execution_time[project_id] = push_data_time
-        context.log(project_id, f"Finished uploading metric ingest lines to Dynatrace in {push_data_time} s")
+        context.push_to_dynatrace_execution_time.setdefault(project_id, 0)
+        context.push_to_dynatrace_execution_time[project_id] += push_data_time
 
 
-async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_batch: List[IngestLine]):
+async def push_to_dynatrace(context: MetricsContext, project_id: str, lines_batch: List[IngestLine]):
     ingest_input = "\n".join([line.to_string() for line in lines_batch])
     if context.print_metric_ingest_input:
         context.log("Ingest input is: ")
@@ -138,7 +144,8 @@ async def fetch_metric(
         context: MetricsContext,
         project_id: str,
         service: GCPService,
-        metric: Metric
+        metric: Metric,
+        mint_buffer: MintBuffer
 ) -> List[IngestLine]:
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
@@ -172,7 +179,7 @@ async def fetch_metric(
 
     should_fetch = True
 
-    lines = []
+    #lines = []
     while should_fetch:
         context.gcp_metric_request_count[project_id] = context.gcp_metric_request_count.get(project_id, 0) + 1
 
@@ -192,7 +199,8 @@ async def fetch_metric(
             for point in time_serie['points']:
                 line = convert_point_to_ingest_line(dimensions, metric, point, typed_value_key)
                 if line:
-                    lines.append(line)
+                    await mint_buffer.push([line])
+                    #lines.append(line)
 
         next_page_token = page.get('nextPageToken', None)
         if next_page_token:
@@ -200,8 +208,8 @@ async def fetch_metric(
         else:
             should_fetch = False
 
-    return lines
-
+    #return lines
+    return []
 
 def update_params(next_page_token, params):
     replace_index = -1

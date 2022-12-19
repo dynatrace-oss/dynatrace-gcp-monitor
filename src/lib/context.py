@@ -11,7 +11,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-
+import asyncio
 import enum
 import os
 import traceback
@@ -301,6 +301,9 @@ class MetricsContext(SfmContext):
         self.setup_execution_time = {}
         self.fetch_gcp_data_execution_time = {}
         self.push_to_dynatrace_execution_time = {}
+
+        self._sem = asyncio.Semaphore(20)
+        self._next_time = 0.0
 
     def create_gcp_request_headers(self, project_id: str) -> Dict:
         headers = {

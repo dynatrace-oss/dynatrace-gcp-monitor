@@ -18,6 +18,7 @@ import os
 import time
 import traceback
 from datetime import datetime
+from functools import partial
 from os import listdir
 from os.path import isfile
 from typing import Dict, List, Optional, Set, Union
@@ -32,6 +33,7 @@ from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_all_enabled_apis
 from lib.metric_ingest import fetch_metric, push_ingest_lines
 from lib.metrics import GCPService, Metric, IngestLine
+from lib.mint_buffer import MintBuffer
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
 
@@ -113,7 +115,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
             dynatrace_url=dynatrace_url,
             print_metric_ingest_input=print_metric_ingest_input,
             self_monitoring_enabled=self_monitoring_enabled,
-            scheduled_execution_id=context.scheduled_execution_id
+            scheduled_execution_id=context.scheduled_execution_id,
         )
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
@@ -148,7 +150,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
         fetch_data_time = time.time() - context.start_processing_timestamp
         context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
-        await push_ingest_lines(context, project_id, ingest_lines)
+        # await push_ingest_lines(context, project_id, ingest_lines)
     except Exception as e:
         context.t_exception(f"Failed to finish processing due to {e}")
 
@@ -200,6 +202,9 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         context.log(f"monitoring.googleapis.com API disabled in the project {project_id}, that project will not be monitored")
 
     skipped_disabled_apis = set()
+
+    mint_buffer = MintBuffer(partial(push_ingest_lines, context, project_id), context)
+
     for service in services:
         for metric in service.metrics:
             gcp_api_last_index = metric.google_metric.find("/")
@@ -211,7 +216,8 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                 context=context,
                 project_id=project_id,
                 service=service,
-                metric=metric
+                metric=metric,
+                mint_buffer=mint_buffer
             )
             fetch_metric_tasks.append(fetch_metric_task)
 
@@ -220,6 +226,10 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
+    await mint_buffer.flush(True)
+    await mint_buffer.wait_for_all()
+    context.log(project_id, f"Finished uploading metric ingest lines to Dynatrace")
+
     flat_metric_results = [item for items in fetch_metric_results for item in items]
     return flat_metric_results
 
@@ -277,10 +287,11 @@ async def run_fetch_metric(
         context: MetricsContext,
         project_id: str,
         service: GCPService,
-        metric: Metric
+        metric: Metric,
+        mint_buffer: MintBuffer
 ):
     try:
-        return await fetch_metric(context, project_id, service, metric)
+        return await fetch_metric(context, project_id, service, metric, mint_buffer)
     except Exception as e:
         context.log(project_id, f"Failed to finish task for [{metric.google_metric}], reason is {type(e).__name__} {e}")
         return []
