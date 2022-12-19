@@ -46,7 +46,7 @@ async def _get_all_disabled_apis(context: MetricsContext, project_id: str):
 
 
 # This function return all the disabled projects that Service Account has access to and all disabled apis of the enabled projects
-async def get_disabled_projects_and_disabled_apis(context, projects_ids) -> [list, dict]:
+async def get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids) -> [list, dict]:
     disabled_projects = []
     disabled_apis = {}
     tasks_to_check_if_project_is_disabled = []

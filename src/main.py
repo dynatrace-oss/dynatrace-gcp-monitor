@@ -31,7 +31,7 @@ from lib.credentials import create_token, get_project_id_from_environment, fetch
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
-from lib.gcp_apis import get_disabled_projects_and_disabled_apis
+from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
@@ -132,9 +132,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         if not projects_ids:
             projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
-        disabled_projects = []
-        disabled_apis = {}
-        disabled_projects, disabled_apis = await get_disabled_projects_and_disabled_apis(context, projects_ids)
+        disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
         if disabled_projects:
             context.log(f"monitoring.googleapis.com API disabled in the projects: " + ", ".join(disabled_projects) + ", that projects will not be monitored")
@@ -147,7 +145,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         context.start_processing_timestamp = time.time()
 
         process_project_metrics_tasks = [
-            process_project_metrics(context, project_id, services, disabled_apis.get(project_id, set()))
+            process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()))
             for project_id
             in projects_ids
         ]
