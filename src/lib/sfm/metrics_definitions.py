@@ -25,7 +25,7 @@ class SfmMetric:
 
 
 class SFMMetricDynatraceRequestCount(SfmMetric):
-    name_for_key = "request_count"
+    key = SELF_MONITORING_METRIC_PREFIX + "/request_count"
     value = {}
     description = "GCP Monitoring API request count [per project]"
 
@@ -34,11 +34,10 @@ class SFMMetricDynatraceRequestCount(SfmMetric):
 
     def generate_time_series(self, context, interval):
         time_series = []
-        key = SELF_MONITORING_METRIC_PREFIX + "/" + self.name_for_key
 
         for status_code, count in self.value.items():
             time_series.append(create_time_serie(
-                context, key,
+                context, self.key,
                 {
                     "response_code": str(status_code),
                     "function_name": context.function_name,
@@ -67,7 +66,7 @@ class SFMMetricGCPMetricRequestCount(SfmMetric):
 
 
 class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
-    name_for_key = "ingest_lines"
+    key = SELF_MONITORING_METRIC_PREFIX + "/ingest_lines"
     value = {}
     description = "Dynatrace MINT accepted lines count [per project]"
 
@@ -76,11 +75,10 @@ class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
 
     def generate_time_series(self, context, interval) -> List[dict]:
         time_series = []
-        key = SELF_MONITORING_METRIC_PREFIX + "/" + self.name_for_key
 
         for project_id, count in self.value.items():
             time_series.append(create_time_serie(
-                context, key,
+                context, self.key,
                 {
                     "function_name": context.function_name,
                     "dynatrace_tenant_url": context.dynatrace_url,
@@ -95,7 +93,7 @@ class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
 
 
 class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
-    name_for_key = "ingest_lines"
+    key = SELF_MONITORING_METRIC_PREFIX + "/ingest_lines"
     value = {}
     description = "Dynatrace MINT invalid lines count [per project]"
 
@@ -104,10 +102,9 @@ class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
 
     def generate_time_series(self, context, interval):
         time_series = []
-        key = SELF_MONITORING_METRIC_PREFIX + "/" + self.name_for_key
         for project_id, count in self.value.items():
             time_series.append(create_time_serie(
-                context, key,
+                context, self.key,
                 {
                     "function_name": context.function_name,
                     "dynatrace_tenant_url": context.dynatrace_url,
@@ -122,7 +119,7 @@ class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
 
 
 class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
-    name_for_key = "ingest_lines"
+    key = SELF_MONITORING_METRIC_PREFIX + "ingest_lines"
     value = {}
     description = "Dynatrace MINT dropped lines count [per project]"
 
@@ -131,10 +128,9 @@ class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
 
     def generate_time_series(self, context, interval):
         time_series = []
-        key = SELF_MONITORING_METRIC_PREFIX + "/" + self.name_for_key
         for project_id, count in self.value.items():
             time_series.append(create_time_serie(
-                context, key,
+                context, self.key,
                 {
                     "function_name": context.function_name,
                     "dynatrace_tenant_url": context.dynatrace_url,
@@ -149,7 +145,7 @@ class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
 
 
 class SFMMetricSetupExecutionTime(SfmMetric):
-    name_for_key = "phase_execution_time"
+    key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
     value = {}
     description = "Setup execution time"
 
@@ -158,10 +154,9 @@ class SFMMetricSetupExecutionTime(SfmMetric):
 
     def generate_time_series(self, context, interval):
         time_series = []
-        key = SELF_MONITORING_METRIC_PREFIX + "/" + self.name_for_key
         for project_id, time in self.value.items():
             time_series.append(create_time_serie(
-                context, key,
+                context, self.key,
                 {
                     "function_name": context.function_name,
                     "dynatrace_tenant_url": context.dynatrace_url,
@@ -177,7 +172,7 @@ class SFMMetricSetupExecutionTime(SfmMetric):
 
 
 class SFMMetricFetchGCPDataExecutionTime(SfmMetric):
-    name_for_key = "phase_execution_time"
+    key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
     value = {}
     description = "Fetch GCP data execution time [per project]"
 
@@ -186,10 +181,9 @@ class SFMMetricFetchGCPDataExecutionTime(SfmMetric):
 
     def generate_time_series(self, context, interval):
         time_series = []
-        key = SELF_MONITORING_METRIC_PREFIX + "/" + self.name_for_key
         for project_id, time in self.value.items():
             time_series.append(create_time_serie(
-                context, key,
+                context, self.key,
                 {
                     "function_name": context.function_name,
                     "dynatrace_tenant_url": context.dynatrace_url,
@@ -205,7 +199,7 @@ class SFMMetricFetchGCPDataExecutionTime(SfmMetric):
 
 
 class SFMMetricPushToDynatraceExecutionTime(SfmMetric):
-    name_for_key = "phase_execution_time"
+    key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
     value = {}
     description = "Push data to Dynatrace execution time [per project]"
 
@@ -214,10 +208,9 @@ class SFMMetricPushToDynatraceExecutionTime(SfmMetric):
 
     def generate_time_series(self, context, interval):
         time_series = []
-        key = SELF_MONITORING_METRIC_PREFIX + "/" + self.name_for_key
         for project_id, time in self.value.items():
             time_series.append(create_time_serie(
-                context, key,
+                context, self.key,
                 {
                     "function_name": context.function_name,
                     "dynatrace_tenant_url": context.dynatrace_url,
@@ -233,7 +226,7 @@ class SFMMetricPushToDynatraceExecutionTime(SfmMetric):
 
 
 class SFMMetricDynatraceConnectivity(SfmMetric):
-    name_for_key = "connectivity"
+    key = SELF_MONITORING_METRIC_PREFIX + "/connectivity"
     value = None
     description = "Dynatrace Connectivity"
 
@@ -241,9 +234,8 @@ class SFMMetricDynatraceConnectivity(SfmMetric):
         self.value = value
 
     def generate_time_series(self, context, interval):
-        key = SELF_MONITORING_METRIC_PREFIX + "/" + self.name_for_key
         return [create_time_serie(
-            context, key,
+            context, self.key,
             {
                 "function_name": context.function_name,
                 "dynatrace_tenant_url": context.dynatrace_url,
