@@ -34,7 +34,7 @@ from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
-from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
+from lib.self_monitoring import log_self_monitoring_metrics, push_self_monitoring
 from lib.sfm.metrics_definitions import SfmKeys
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
 
@@ -154,7 +154,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
         context.log(f"Fetched and pushed GCP data in {time.time() - context.start_processing_timestamp} s")
 
-        log_self_monitoring_data(context)
+        log_self_monitoring_metrics(context)
         if context.self_monitoring_enabled:
             await push_self_monitoring(context)
 

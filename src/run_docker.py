@@ -29,7 +29,7 @@ from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
 from lib.metrics import GCPService
-from lib.self_monitoring import import_self_monitoring_dashboard
+from lib.sfm.dashboards import import_self_monitoring_dashboard
 from lib.utilities import print_dynatrace_logo
 from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode
