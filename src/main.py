@@ -35,6 +35,7 @@ from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
+from lib.sfm.metrics_definitions import SfmKeys
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
 
 
@@ -140,7 +141,8 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
                 projects_ids.remove(disabled_project)
 
         setup_time = (time.time() - setup_start_time)
-        context.setup_execution_time = {project_id: setup_time for project_id in projects_ids}
+        for project_id in projects_ids:
+            context.sfm[SfmKeys.setup_execution_time].update(project_id, setup_time)
 
         context.start_processing_timestamp = time.time()
 
@@ -168,7 +170,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
         context.log(project_id, f"Starting processing...")
         ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis)
         fetch_data_time = time.time() - context.start_processing_timestamp
-        context.fetch_gcp_data_execution_time[project_id] = fetch_data_time
+        context.sfm[SfmKeys.fetch_gcp_data_execution_time].update(project_id, fetch_data_time)
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
         await push_ingest_lines(context, project_id, ingest_lines)
     except Exception as e:
