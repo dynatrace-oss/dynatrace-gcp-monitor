@@ -49,7 +49,7 @@ def dynatrace_gcp_extension(event, context):
         raise e
 
 
-async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
+async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = None):
     """
     Used in docker or for tests
     """
@@ -57,7 +57,7 @@ async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None,
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
     logging_context = LoggingContext(execution_identifier)
-    logging_context.log(f'Starting execution for project(s): {project_ids}' if project_ids else "Starting execution")
+    logging_context.log("Starting execution")
     event_context = {
         'timestamp': timestamp_utc_iso,
         'event_id': timestamp_utc.timestamp(),
@@ -67,7 +67,7 @@ async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None,
     data = {'data': '', 'publishTime': timestamp_utc_iso}
 
     start_time = time.time()
-    await handle_event(data, event_context, project_ids, services)
+    await handle_event(data, event_context, services)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
@@ -76,7 +76,7 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, event_context, projects_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
+async def handle_event(event: Dict, event_context, services: Optional[List[GCPService]] = None):
     if isinstance(event_context, Dict):
         # for k8s installation
         context = LoggingContext(event_context.get("execution_id", None))
@@ -129,8 +129,7 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
             scheduled_execution_id=context.scheduled_execution_id
         )
 
-        if not projects_ids:
-            projects_ids = await get_all_accessible_projects(context, gcp_session, token)
+        projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
         disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
