@@ -128,12 +128,13 @@ def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
         return "Invalid Token"
 
 
-async def check_dynatrace(logging_context: LoggingContext, project_id, dt_session: ClientSession, dynatrace_url, dynatrace_access_key):
+async def check_dynatrace(logging_context: LoggingContext, project_id: str, dt_session: ClientSession,
+                          dynatrace_url: str, dynatrace_access_key: str) -> bool:
     try:
         if not dynatrace_url or not dynatrace_access_key:
             logging_context.log(f'ERROR No Dynatrace secrets: DYNATRACE_URL, DYNATRACE_ACCESS_KEY for project: {project_id}.'
                                      f'Add required secrets to Secret Manager.')
-            return None
+            return False
         logging_context.log(f"Using [DYNATRACE_URL] Dynatrace endpoint: {dynatrace_url}")
         logging_context.log(f'Using [DYNATRACE_ACCESS_KEY]: {obfuscate_dynatrace_access_key(dynatrace_access_key)}.')
         token_metadata = await get_dynatrace_token_metadata(dt_session, logging_context, dynatrace_url, dynatrace_access_key)
@@ -142,8 +143,12 @@ async def check_dynatrace(logging_context: LoggingContext, project_id, dt_sessio
             if token_metadata.get('revoked', None) or not valid_dynatrace_scopes(token_metadata):
                 logging_context.log(f'Dynatrace API Token for project: \'{project_id}\' is not valid. '
                                     f'Check expiration time and required token scopes: {DYNATRACE_REQUIRED_TOKEN_SCOPES}')
+                return False
+            return True
+        return False
     except Exception as e:
         logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
+        return False
 
 
 class MetricsFastCheck:
@@ -154,61 +159,22 @@ class MetricsFastCheck:
         self.logging_context = logging_context
         self.token = token
 
-    async def list_services(self, project_id: str, timeout: Optional[int] = 2):
-        fetch_next_page = True
-        next_token = None
-        services = []
-        try:
-            while fetch_next_page:
-                query_params = {"filter": "state:ENABLED"}
-                if next_token:
-                    query_params["pageToken"] = next_token
-                response = await self.gcp_session.get(
-                    urljoin(GCP_SERVICE_USAGE_URL, f'{project_id}/services'),
-                    headers={
-                        "Authorization": f'Bearer {self.token}'
-                    },
-                    params=query_params,
-                    timeout=timeout)
-                if response.status != 200:
-                    self.logging_context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
-                    return []
-
-                response = await response.json()
-                services.extend(response.get('services', []))
-                next_token = response.get('nextPageToken', None)
-                fetch_next_page = next_token is not None
-            return services
-        except Exception as e:
-            self.logging_context.log(f'Unable to get project: {project_id} services list. Error details: {e}')
-            return []
-
-    async def _get_services_ready_to_monitor(self, project_id):
-        list_services_result = await self.list_services(project_id)
-        service_names = [find_service_name(service['name']) for service in list_services_result]
-        if not all(name in service_names for name in REQUIRED_SERVICES):
-            self.logging_context.log(f'Cannot monitor project: \'{project_id}\'. '
-                                     f'Enable required services: {REQUIRED_SERVICES}')
-            return None
-        return service_names
-
     async def is_project_ready_to_monitor(self, project_id):
-        services_ready_to_monitor = await self._get_services_ready_to_monitor(project_id)
+        is_project_ready = False
+        try:
+            if is_deployment_running_inside_cloud_function():
+                dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
+                dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
+                if await check_dynatrace(logging_context=self.logging_context,
+                                         project_id=get_project_id_from_environment(),
+                                         dt_session=self.dt_session,
+                                         dynatrace_url=dynatrace_url,
+                                         dynatrace_access_key=dynatrace_access_key):
+                    is_project_ready = True
+        except Exception as e:
+            self.logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
 
-        is_project_ready_to_monitor = False
-        if services_ready_to_monitor is not None:
-            is_project_ready_to_monitor = True
-
-        if is_deployment_running_inside_cloud_function():
-            dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
-            dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
-            await check_dynatrace(logging_context=self.logging_context,
-                                  project_id=get_project_id_from_environment(),
-                                  dt_session=self.dt_session,
-                                  dynatrace_url=dynatrace_url,
-                                  dynatrace_access_key=dynatrace_access_key)
-
-        return project_id, is_project_ready_to_monitor
+        return project_id, is_project_ready
 
     async def execute(self) -> FastCheckResult:
         _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
@@ -221,8 +187,8 @@ class MetricsFastCheck:
             tasks_to_find_ready_projects.append(self.is_project_ready_to_monitor(project_id))
 
         ready_project_task_results = await asyncio.gather(*tasks_to_find_ready_projects)
-        for project_id, is_project_ready_to_monitor in ready_project_task_results:
-            if is_project_ready_to_monitor:
+        for project_id, is_project_ready in ready_project_task_results:
+            if is_project_ready:
                 projects_ready_to_monitor.append(project_id)
 
         return FastCheckResult(projects=projects_ready_to_monitor)

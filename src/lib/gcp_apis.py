@@ -21,6 +21,11 @@ from lib.context import MetricsContext
 
 GCP_SERVICE_USAGE_URL = "https://serviceusage.googleapis.com/v1/projects/"
 
+REQUIRED_SERVICES = [
+    "monitoring.googleapis.com",
+    "cloudresourcemanager.googleapis.com"
+]
+
 
 async def _get_all_disabled_apis(context: MetricsContext, project_id: str):
     base_url = f"{GCP_SERVICE_USAGE_URL}{project_id}/services?filter=state:DISABLED"
@@ -73,7 +78,7 @@ async def _check_if_project_is_disabled_and_get_disabled_api_set(context: Metric
 
     disabled_api_set = await _get_all_disabled_apis(context, project_id)
     is_project_disabled = False
-    if 'monitoring.googleapis.com' in disabled_api_set:
+    if any(required_service in disabled_api_set for required_service in REQUIRED_SERVICES):
         is_project_disabled = True
     return project_id, is_project_disabled, disabled_api_set
 

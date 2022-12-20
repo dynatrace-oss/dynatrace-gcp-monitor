@@ -31,7 +31,7 @@ from lib.credentials import create_token, get_project_id_from_environment, fetch
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
-from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
+from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id, REQUIRED_SERVICES
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
@@ -104,12 +104,14 @@ async def handle_event(event: Dict, event_context, services: Optional[List[GCPSe
         dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         check_version(logging_context=context)
-        await check_dynatrace(logging_context=context,
-                              project_id=project_id_owner,
-                              dt_session=dt_session,
-                              dynatrace_url=dynatrace_url,
-                              dynatrace_access_key=dynatrace_api_key
-                              )
+        if not await check_dynatrace(logging_context=context,
+                                     project_id=project_id_owner,
+                                     dt_session=dt_session,
+                                     dynatrace_url=dynatrace_url,
+                                     dynatrace_access_key=dynatrace_api_key):
+            context.log("Dynatrace not accessible, skipping metric query")
+            return
+
         query_interval_min = get_query_interval_minutes()
 
         print_metric_ingest_input = os.environ.get("PRINT_METRIC_INGEST_INPUT", "FALSE").upper() in ["TRUE", "YES"]
@@ -134,7 +136,8 @@ async def handle_event(event: Dict, event_context, services: Optional[List[GCPSe
         disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
         if disabled_projects:
-            context.log(f"monitoring.googleapis.com API disabled in the projects: " + ", ".join(disabled_projects) + ", that projects will not be monitored")
+            context.log(f"Cannot monitor projects: {disabled_projects}. "
+                        f"Enable required services to do so: {REQUIRED_SERVICES}")
             for disabled_project in disabled_projects:
                 projects_ids.remove(disabled_project)
 
