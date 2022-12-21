@@ -15,7 +15,7 @@ from datetime import datetime
 
 from lib.context import MetricsContext
 from lib.self_monitoring import batch_time_series, create_self_monitoring_time_series
-from lib.sfm.metrics_definitions import SfmKeys
+from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 
 expected_timeseries = {'timeSeries': [
     {'resource': {'type': 'generic_task',

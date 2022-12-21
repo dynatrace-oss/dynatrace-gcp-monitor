@@ -19,7 +19,7 @@ from typing import Optional, List, NamedTuple
 
 from aiohttp import ClientSession
 
-from webserver import webserver
+from lib.webserver import webserver
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_url, fetch_dynatrace_api_key

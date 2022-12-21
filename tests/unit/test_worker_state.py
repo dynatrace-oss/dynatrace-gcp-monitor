@@ -18,7 +18,7 @@ from typing import NewType, Any
 
 from lib.logs import worker_state
 from lib.logs.log_forwarder_variables import SENDING_WORKER_EXECUTION_PERIOD_SECONDS
-from lib.logs.log_sfm_metrics import LogSelfMonitoring
+from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 from lib.logs.logs_processor import LogProcessingJob
 from lib.logs.metadata_engine import ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CONTENT, ATTRIBUTE_SEVERITY
 from lib.logs.worker_state import WorkerState

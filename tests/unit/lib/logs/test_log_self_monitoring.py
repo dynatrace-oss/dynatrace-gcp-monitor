@@ -2,7 +2,7 @@ from queue import Queue
 
 from lib.context import DynatraceConnectivity, LogsSfmContext
 from lib.logs.log_self_monitoring import create_self_monitoring_time_series
-from lib.logs.log_sfm_metrics import LogSelfMonitoring
+from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 
 
 context = LogsSfmContext("project_id", "http://localhost:9011", "dynatrace-gcp-log-forwarder-sub", "token", "", Queue(),

@@ -119,7 +119,7 @@ class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
 
 
 class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
-    key = SELF_MONITORING_METRIC_PREFIX + "ingest_lines"
+    key = SELF_MONITORING_METRIC_PREFIX + "/ingest_lines"
     value = {}
     description = "Dynatrace MINT dropped lines count [per project]"
 
