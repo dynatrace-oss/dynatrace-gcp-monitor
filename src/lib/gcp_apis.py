@@ -43,7 +43,7 @@ async def _get_all_disabled_apis(context: MetricsContext, project_id: str):
                 params=query_params)
             if response.status != 200:
                 context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
-                return None
+                return disabled_apis
             response = await response.json()
             disabled_apis.extend(map(lambda s: s["config"]["name"], response.get('services', [])))
             next_token = response.get('nextPageToken', None)
