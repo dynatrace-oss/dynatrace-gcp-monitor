@@ -16,7 +16,7 @@ import json
 from typing import Dict, List
 
 from lib.context import SfmContext, MetricsContext
-from lib.metric_descriptor import SELF_MONITORING_METRIC_PREFIX
+from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_PREFIX
 from lib.utilities import chunks
 
 

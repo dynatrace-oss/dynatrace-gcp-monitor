@@ -2,7 +2,7 @@ import enum
 from abc import abstractmethod
 from typing import List
 
-from lib.metric_descriptor import SELF_MONITORING_METRIC_PREFIX
+from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_PREFIX
 from lib.sfm.metrics_timeserie import create_time_serie
 
 

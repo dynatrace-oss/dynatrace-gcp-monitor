@@ -20,10 +20,10 @@ from typing import Optional, Dict
 
 import aiohttp
 
-from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
-from lib.logs.log_sfm_metrics import LogSelfMonitoring
-from lib.metric_descriptor import SELF_MONITORING_METRIC_MAP
-from lib.sfm.metrics_definitions import *
+from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
+from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
+from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_MAP
+from lib.sfm.for_metrics.metrics_definitions import *
 from operation_mode import OperationMode
 
 LOG_THROTTLING_LIMIT_PER_MESSAGE = 10
