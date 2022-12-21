@@ -26,7 +26,6 @@ from aiohttp import ClientSession
 from lib.context import LoggingContext, get_should_require_valid_certificate
 from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fetch_dynatrace_api_key, \
     get_project_id_from_environment
-from lib.gcp_apis import GCP_SERVICE_USAGE_URL
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder import create_logs_context
@@ -86,12 +85,14 @@ def valid_dynatrace_scopes(token_metadata: dict):
     token_scopes = token_metadata.get('scopes', [])
     return all(scope in token_scopes for scope in DYNATRACE_REQUIRED_TOKEN_SCOPES) if token_scopes else False
 
+
 def check_version(logging_context: LoggingContext):
     script_directory = os.path.dirname(os.path.realpath(__file__))
     version_file_path = os.path.join(script_directory, "./../version.txt")
     with open(version_file_path) as version_file:
         _version = version_file.readline()
         logging_context.log(f"Found version: {_version}")
+
 
 async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:

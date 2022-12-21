@@ -55,7 +55,7 @@ def setup_test_variables(resource_path_root):
     lib.credentials._CLOUD_RESOURCE_MANAGER_ROOT = f"http://localhost:{MOCKED_API_PORT}/v1"
     lib.credentials._SECRET_ROOT = f"http://localhost:{MOCKED_API_PORT}/v1"
     lib.metric_ingest._MONITORING_ROOT = f"http://localhost:{MOCKED_API_PORT}/v3"
-    lib.gcp_apis.GCP_SERVICE_USAGE_URL = f"http://localhost:{MOCKED_API_PORT}/v4/"
+    lib.gcp_apis._GCP_SERVICE_USAGE_URL = f"http://localhost:{MOCKED_API_PORT}/v4/"
     lib.entities.extractors.cloud_sql._SQL_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
     lib.entities.google_api._GCP_COMPUTE_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
     lib.entities.extractors.gce_instance._GCP_COMPUTE_ENDPOINT = f"http://localhost:{MOCKED_API_PORT}"
