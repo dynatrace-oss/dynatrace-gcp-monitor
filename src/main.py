@@ -104,13 +104,12 @@ async def handle_event(event: Dict, event_context, services: Optional[List[GCPSe
         dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         check_version(logging_context=context)
-        if not await check_dynatrace(logging_context=context,
-                                     project_id=project_id_owner,
-                                     dt_session=dt_session,
-                                     dynatrace_url=dynatrace_url,
-                                     dynatrace_access_key=dynatrace_api_key):
-            context.log("Dynatrace not accessible, skipping metric query")
-            return
+        await check_dynatrace(logging_context=context,
+                              project_id=project_id_owner,
+                              dt_session=dt_session,
+                              dynatrace_url=dynatrace_url,
+                              dynatrace_access_key=dynatrace_api_key)
+
 
         query_interval_min = get_query_interval_minutes()
 
