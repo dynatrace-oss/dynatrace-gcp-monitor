@@ -26,7 +26,7 @@ def log_self_monitoring_metrics(context: MetricsContext):
 
 
 async def push_self_monitoring(context: MetricsContext):
-    time_series = create_self_monitoring_time_series(context)
+    time_series = create_sfm_timeseries_datapoints(context)
     await push_self_monitoring_time_series(context, time_series)
 
 
@@ -134,12 +134,12 @@ def extract_label_keys(metric_descriptor: Dict):
     return sorted([label.get("key", "") for label in metric_descriptor.get("labels", [])])
 
 
-def create_self_monitoring_time_series(context: MetricsContext) -> Dict:
+def create_sfm_timeseries_datapoints(context: MetricsContext) -> Dict:
     interval = {"endTime": context.execution_time.isoformat() + "Z"}
     time_series = []
 
     for key, sfm_metric in context.sfm.items():
-        time_series.extend(sfm_metric.generate_time_series(context, interval))
+        time_series.extend(sfm_metric.generate_timeseries_datapoints(context, interval))
 
     return {"timeSeries": time_series}
 

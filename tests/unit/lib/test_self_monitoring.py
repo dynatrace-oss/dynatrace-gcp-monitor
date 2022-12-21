@@ -14,7 +14,7 @@
 from datetime import datetime
 
 from lib.context import MetricsContext
-from lib.self_monitoring import batch_time_series, create_self_monitoring_time_series
+from lib.self_monitoring import batch_time_series, create_sfm_timeseries_datapoints
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 
 expected_timeseries = {'timeSeries': [
@@ -110,7 +110,7 @@ def test_create_self_monitoring_time_series():
     context.sfm[SfmKeys.fetch_gcp_data_execution_time].update("project123", 322)
     context.sfm[SfmKeys.push_to_dynatrace_execution_time].update("project123", 323)
 
-    timeseries = create_self_monitoring_time_series(context)
+    timeseries = create_sfm_timeseries_datapoints(context)
 
     assert timeseries == expected_timeseries
 
