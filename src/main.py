@@ -72,6 +72,9 @@ def is_yaml_file(f: str) -> bool:
 
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
     context = LoggingContext(execution_id)
+    if not services:
+        # Load services for GCP Function and for tests
+        services = load_supported_services(context)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         setup_start_time = time.time()
