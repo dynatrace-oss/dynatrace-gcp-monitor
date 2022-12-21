@@ -19,7 +19,7 @@ from typing import Set, List, Dict, Tuple
 
 from lib.context import MetricsContext
 
-GCP_SERVICE_USAGE_URL = "https://serviceusage.googleapis.com/v1/projects/"
+GCP_SERVICE_USAGE_URL = "https://serviceusage.googleapis.com/v1"
 
 REQUIRED_SERVICES = [
     "monitoring.googleapis.com",
@@ -28,20 +28,26 @@ REQUIRED_SERVICES = [
 
 
 async def _get_all_disabled_apis(context: MetricsContext, project_id: str):
-    base_url = f"{GCP_SERVICE_USAGE_URL}{project_id}/services?filter=state:DISABLED"
+    fetch_next_page = True
+    next_token = None
     headers = context.create_gcp_request_headers(project_id)
-    disabled_apis = set()
+    disabled_apis = []
     try:
-        response = await context.gcp_session.get(base_url, headers=headers, raise_for_status=True)
-        disabled_services_json = await response.json()
-        disabled_services = disabled_services_json.get("services", [])
-        disabled_apis.update({disable_service.get("config", {}).get("name", "") for disable_service in disabled_services})
-        while disabled_services_json.get("nextPageToken"):
-            url = f"{base_url}&pageToken={disabled_services_json['nextPageToken']}"
-            response = await context.gcp_session.get(url, headers=headers, raise_for_status=True)
-            disabled_services_json = await response.json()
-            disabled_services = disabled_services_json.get("services", [])
-            disabled_apis.update({disable_service.get("config", {}).get("name", "") for disable_service in disabled_services})
+        while fetch_next_page:
+            query_params = {"filter": "state:DISABLED", "pageSize": "200"}
+            if next_token:
+                query_params["pageToken"] = next_token
+            response = await context.gcp_session.get(
+                GCP_SERVICE_USAGE_URL + f'/projects/{project_id}/services',
+                headers=headers,
+                params=query_params)
+            if response.status != 200:
+                context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
+                return None
+            response = await response.json()
+            disabled_apis.extend(map(lambda s: s["config"]["name"], response.get('services', [])))
+            next_token = response.get('nextPageToken', None)
+            fetch_next_page = next_token is not None
         return disabled_apis
     except ClientResponseError as e:
         context.log(project_id, f'Disabled APIs call returned failed status code. {e}')
@@ -76,11 +82,11 @@ async def _check_if_project_is_disabled_and_get_disabled_api_set(context: Metric
     except Exception as e:
         context.log(project_id, f"Unexpected exception when checking 'x-goog-user-project' header: {e}")
 
-    disabled_api_set = await _get_all_disabled_apis(context, project_id)
+    disabled_apis = await _get_all_disabled_apis(context, project_id)
     is_project_disabled = False
-    if any(required_service in disabled_api_set for required_service in REQUIRED_SERVICES):
+    if any(required_service in disabled_apis for required_service in REQUIRED_SERVICES):
         is_project_disabled = True
-    return project_id, is_project_disabled, disabled_api_set
+    return project_id, is_project_disabled, disabled_apis
 
 
 async def _check_x_goog_user_project_header_permissions(context: MetricsContext, project_id: str):
