@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 
-def create_time_serie(
+def create_timeseries_datapoint(
         context,
         metric_type: str,
         metric_labels: Dict,

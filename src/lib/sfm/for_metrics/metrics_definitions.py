@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import List
 
 from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_PREFIX
-from lib.sfm.metrics_timeserie import create_time_serie
+from lib.sfm.metrics_timeseries_datatpoint import create_timeseries_datapoint
 
 
 class SfmKeys(enum.Enum):
@@ -36,7 +36,7 @@ class SFMMetricDynatraceRequestCount(SfmMetric):
         time_series = []
 
         for status_code, count in self.value.items():
-            time_series.append(create_time_serie(
+            time_series.append(create_timeseries_datapoint(
                 context, self.key,
                 {
                     "response_code": str(status_code),
@@ -53,7 +53,7 @@ class SFMMetricDynatraceRequestCount(SfmMetric):
 
 
 class SFMMetricGCPMetricRequestCount(SfmMetric):
-    name_for_key = None
+    key = None
     value = {}
     description = "GCP Monitoring API request count [per project]"
 
@@ -77,7 +77,7 @@ class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
         time_series = []
 
         for project_id, count in self.value.items():
-            time_series.append(create_time_serie(
+            time_series.append(create_timeseries_datapoint(
                 context, self.key,
                 {
                     "function_name": context.function_name,
@@ -103,7 +103,7 @@ class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
     def generate_time_series(self, context, interval):
         time_series = []
         for project_id, count in self.value.items():
-            time_series.append(create_time_serie(
+            time_series.append(create_timeseries_datapoint(
                 context, self.key,
                 {
                     "function_name": context.function_name,
@@ -129,7 +129,7 @@ class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
     def generate_time_series(self, context, interval):
         time_series = []
         for project_id, count in self.value.items():
-            time_series.append(create_time_serie(
+            time_series.append(create_timeseries_datapoint(
                 context, self.key,
                 {
                     "function_name": context.function_name,
@@ -155,7 +155,7 @@ class SFMMetricSetupExecutionTime(SfmMetric):
     def generate_time_series(self, context, interval):
         time_series = []
         for project_id, time in self.value.items():
-            time_series.append(create_time_serie(
+            time_series.append(create_timeseries_datapoint(
                 context, self.key,
                 {
                     "function_name": context.function_name,
@@ -182,7 +182,7 @@ class SFMMetricFetchGCPDataExecutionTime(SfmMetric):
     def generate_time_series(self, context, interval):
         time_series = []
         for project_id, time in self.value.items():
-            time_series.append(create_time_serie(
+            time_series.append(create_timeseries_datapoint(
                 context, self.key,
                 {
                     "function_name": context.function_name,
@@ -209,7 +209,7 @@ class SFMMetricPushToDynatraceExecutionTime(SfmMetric):
     def generate_time_series(self, context, interval):
         time_series = []
         for project_id, time in self.value.items():
-            time_series.append(create_time_serie(
+            time_series.append(create_timeseries_datapoint(
                 context, self.key,
                 {
                     "function_name": context.function_name,
@@ -234,7 +234,7 @@ class SFMMetricDynatraceConnectivity(SfmMetric):
         self.value = value
 
     def generate_time_series(self, context, interval):
-        return [create_time_serie(
+        return [create_timeseries_datapoint(
             context, self.key,
             {
                 "function_name": context.function_name,
