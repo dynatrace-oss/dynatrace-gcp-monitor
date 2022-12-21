@@ -40,10 +40,11 @@ from lib.utilities import read_activation_yaml, get_activation_config_per_servic
 
 def dynatrace_gcp_extension(event, context):
     """
-    Starting point for installation as a GCP function. See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
+    Starting point for installation as a GCP function.
+    See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
     """
     try:
-        asyncio.run(handle_event(event, context))
+        asyncio.run(query_metrics(None, load_supported_services(context)))
     except Exception as e:
         traceback.print_exc()
         raise e
@@ -51,23 +52,16 @@ def dynatrace_gcp_extension(event, context):
 
 async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = None):
     """
-    Used in docker or for tests
+    Starting point for installation as an autopilot cluster and for tests.
     """
     timestamp_utc = datetime.utcnow()
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
     logging_context = LoggingContext(execution_identifier)
     logging_context.log("Starting execution")
-    event_context = {
-        'timestamp': timestamp_utc_iso,
-        'event_id': timestamp_utc.timestamp(),
-        'event_type': 'test',
-        'execution_id': execution_identifier
-    }
-    data = {'data': '', 'publishTime': timestamp_utc_iso}
 
     start_time = time.time()
-    await handle_event(data, event_context, services)
+    await query_metrics(execution_identifier, services)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
@@ -76,16 +70,8 @@ def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
 
-async def handle_event(event: Dict, event_context, services: Optional[List[GCPService]] = None):
-    if isinstance(event_context, Dict):
-        # for k8s installation
-        context = LoggingContext(event_context.get("execution_id", None))
-    else:
-        context = LoggingContext(None)
-
-    if not services:
-        # load services for GCP Function
-        services = load_supported_services(context)
+async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
+    context = LoggingContext(execution_id)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         setup_start_time = time.time()
@@ -109,7 +95,6 @@ async def handle_event(event: Dict, event_context, services: Optional[List[GCPSe
                               dt_session=dt_session,
                               dynatrace_url=dynatrace_url,
                               dynatrace_access_key=dynatrace_api_key)
-
 
         query_interval_min = get_query_interval_minutes()
 
@@ -160,7 +145,7 @@ async def handle_event(event: Dict, event_context, services: Optional[List[GCPSe
         await gcp_session.close()
         await dt_session.close()
 
-    # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
+    # Noise on Windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],

@@ -19,7 +19,7 @@ from typing import Set, List, Dict, Tuple
 
 from lib.context import MetricsContext
 
-GCP_SERVICE_USAGE_URL = "https://serviceusage.googleapis.com/v1"
+_GCP_SERVICE_USAGE_URL = "https://serviceusage.googleapis.com/v1"
 
 REQUIRED_SERVICES = [
     "monitoring.googleapis.com",
@@ -30,17 +30,18 @@ REQUIRED_SERVICES = [
 async def _get_all_disabled_apis(context: MetricsContext, project_id: str):
     fetch_next_page = True
     next_token = None
+    url = _GCP_SERVICE_USAGE_URL + f'/projects/{project_id}/services'
     headers = context.create_gcp_request_headers(project_id)
+    params = {"filter": "state:DISABLED", "pageSize": 200}
     disabled_apis = []
     try:
         while fetch_next_page:
-            query_params = {"filter": "state:DISABLED", "pageSize": "200"}
             if next_token:
-                query_params["pageToken"] = next_token
+                params["pageToken"] = next_token
             response = await context.gcp_session.get(
-                GCP_SERVICE_USAGE_URL + f'/projects/{project_id}/services',
+                url=url,
                 headers=headers,
-                params=query_params)
+                params=params)
             if response.status != 200:
                 context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
                 return disabled_apis
@@ -53,7 +54,7 @@ async def _get_all_disabled_apis(context: MetricsContext, project_id: str):
         context.log(project_id, f'Disabled APIs call returned failed status code. {e}')
         return disabled_apis
     except Exception as e:
-        context.log(project_id, f'Cannot get disabled APIs: {GCP_SERVICE_USAGE_URL}/projects/{project_id}/services?filter=state:DISABLED. {e}')
+        context.log(project_id, f'Cannot get disabled APIs: {_GCP_SERVICE_USAGE_URL}/projects/{project_id}/services?filter=state:DISABLED. {e}')
         return disabled_apis
 
 
