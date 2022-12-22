@@ -131,12 +131,14 @@ spec:
           name: gcp-config
         resources:
           requests:
-            memory: "1024Mi"
-            cpu: "1000m"
+            memory: "512Mi"
+            cpu: "250m"
+            ephemeral-storage: "1Gi"
         livenessProbe:
           httpGet:
             path: /health
             port: 8080
+          timeoutSeconds: 10
         startupProbe:
           httpGet:
             path: /health
@@ -251,12 +253,14 @@ spec:
           value: "8081"
         resources:
           requests:
-            memory: "1024Mi"
-            cpu: "1000m"
+            memory: "256Mi"
+            cpu: "500m"
+            ephemeral-storage: "1Gi"
         livenessProbe:
           httpGet:
             path: /health
             port: 8081
+          timeoutSeconds: 10
         startupProbe:
           httpGet:
             path: /health
