@@ -138,12 +138,15 @@ spec:
           httpGet:
             path: /health
             port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 20
           timeoutSeconds: 10
         startupProbe:
           httpGet:
             path: /health
             port: 8080
           initialDelaySeconds: 10
+          timeoutSeconds: 10
       {{- end }}
       {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
       - image: {{ .Values.dockerImage | quote }}
@@ -260,12 +263,15 @@ spec:
           httpGet:
             path: /health
             port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 20
           timeoutSeconds: 10
         startupProbe:
           httpGet:
             path: /health
             port: 8081
           initialDelaySeconds: 10
+          timeoutSeconds: 10
       {{- if (eq .Values.activeGate.useExisting "false") }}
       initContainers:
         - name: init-active-gate-service
