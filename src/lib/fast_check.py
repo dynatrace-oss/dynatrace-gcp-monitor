@@ -161,21 +161,19 @@ class MetricsFastCheck:
         self.token = token
 
     async def is_project_ready_to_monitor(self, project_id):
-        is_project_ready = False
         try:
             if is_deployment_running_inside_cloud_function():
                 dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
                 dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
-                if await check_dynatrace(logging_context=self.logging_context,
-                                         project_id=get_project_id_from_environment(),
-                                         dt_session=self.dt_session,
-                                         dynatrace_url=dynatrace_url,
-                                         dynatrace_access_key=dynatrace_access_key):
-                    is_project_ready = True
+                await check_dynatrace(logging_context=self.logging_context,
+                                      project_id=get_project_id_from_environment(),
+                                      dt_session=self.dt_session,
+                                      dynatrace_url=dynatrace_url,
+                                      dynatrace_access_key=dynatrace_access_key)
         except Exception as e:
             self.logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
-
-        return project_id, is_project_ready
+            return project_id, False
+        return project_id, True
 
     async def execute(self) -> FastCheckResult:
         _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
