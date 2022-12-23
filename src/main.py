@@ -44,8 +44,7 @@ def dynatrace_gcp_extension(event, context):
     See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
     """
     try:
-        logging_context = LoggingContext(context)
-        asyncio.run(query_metrics(None, load_supported_services(logging_context)))
+        asyncio.run(query_metrics(None, None))
     except Exception as e:
         traceback.print_exc()
         raise e
