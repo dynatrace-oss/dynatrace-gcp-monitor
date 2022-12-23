@@ -25,7 +25,7 @@ def log_self_monitoring_metrics(context: MetricsContext):
         context.log("SFM", f"{sfm_metric.description}: {sfm_metric.value}")
 
 
-async def push_self_monitoring(context: MetricsContext):
+async def push_self_monitoring_metrics(context: MetricsContext):
     time_series = create_sfm_timeseries_datapoints(context)
     await push_self_monitoring_time_series(context, time_series)
 
