@@ -12,7 +12,6 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-import enum
 import os
 import traceback
 from datetime import datetime, timedelta
@@ -21,12 +20,23 @@ from typing import Optional, Dict
 
 import aiohttp
 
-from lib.logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
-from lib.logs.log_sfm_metrics import LogSelfMonitoring
-from lib.metric_descriptor import SELF_MONITORING_METRIC_MAP
+from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
+from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
+from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_MAP
+from lib.sfm.for_metrics.metrics_definitions import *
 from operation_mode import OperationMode
 
 LOG_THROTTLING_LIMIT_PER_MESSAGE = 10
+
+
+class DynatraceConnectivity(enum.Enum):
+    Ok = 0
+    ExpiredToken = 1
+    WrongToken = 2
+    WrongURL = 3
+    InvalidInput = 4
+    TooManyRequests = 5
+    Other = 6
 
 
 def get_int_environment_value(key: str, default_value: int) -> int:
@@ -253,6 +263,24 @@ class LogsSfmContext(SfmContext):
 
 
 class MetricsContext(SfmContext):
+
+    sfm: [SfmKeys, SfmMetric] = {
+        # to send new metric, just create definition class and add it here
+        # this does not handle metric descriptor unfortunately but if you
+        # add metric it should work without it
+        SfmKeys.dynatrace_connectivity: SFMMetricDynatraceConnectivity(),
+        SfmKeys.gcp_metric_request_count: SFMMetricGCPMetricRequestCount(),
+        SfmKeys.dynatrace_ingest_lines_ok_count: SFMMetricDynatraceIngestLinesOkCount(),
+        SfmKeys.dynatrace_ingest_lines_invalid_count: SFMMetricDynatraceIngestLinesInvalidCount(),
+        SfmKeys.dynatrace_ingest_lines_dropped_count: SFMMetricDynatraceIngestLinesDroppedCount(),
+        SfmKeys.setup_execution_time: SFMMetricSetupExecutionTime(),
+        SfmKeys.fetch_gcp_data_execution_time: SFMMetricFetchGCPDataExecutionTime(),
+        SfmKeys.push_to_dynatrace_execution_time: SFMMetricPushToDynatraceExecutionTime(),
+        SfmKeys.dynatrace_request_count: SFMMetricDynatraceRequestCount(),
+    }
+
+    dynatrace_connectivity = None
+
     def __init__(
             self,
             gcp_session: aiohttp.ClientSession,
@@ -286,21 +314,12 @@ class MetricsContext(SfmContext):
         self.metric_ingest_batch_size = get_int_environment_value("METRIC_INGEST_BATCH_SIZE", 1000)
         self.use_x_goog_user_project_header = {project_id_owner: False}
 
-        # self monitoring data
-        self.dynatrace_request_count = {}
-        self.dynatrace_connectivity = DynatraceConnectivity.Ok
-
-        self.gcp_metric_request_count = {}
-
-        self.dynatrace_ingest_lines_ok_count = {}
-        self.dynatrace_ingest_lines_invalid_count = {}
-        self.dynatrace_ingest_lines_dropped_count = {}
-
+        self.update_dt_connectivity_status(DynatraceConnectivity.Ok)
         self.start_processing_timestamp = 0
 
-        self.setup_execution_time = {}
-        self.fetch_gcp_data_execution_time = {}
-        self.push_to_dynatrace_execution_time = {}
+    def update_dt_connectivity_status(self, status: DynatraceConnectivity):
+        self.sfm[SfmKeys.dynatrace_connectivity].update(status)
+        self.dynatrace_connectivity = status
 
     def create_gcp_request_headers(self, project_id: str) -> Dict:
         headers = {
@@ -313,12 +332,3 @@ class MetricsContext(SfmContext):
 
         return headers
 
-
-class DynatraceConnectivity(enum.Enum):
-    Ok = 0
-    ExpiredToken = 1
-    WrongToken = 2
-    WrongURL = 3
-    InvalidInput = 4
-    TooManyRequests = 5
-    Other = 6
