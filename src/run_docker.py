@@ -19,7 +19,7 @@ from typing import Optional, List, NamedTuple
 
 from aiohttp import ClientSession
 
-from webserver import webserver
+from lib.webserver import webserver
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_url, fetch_dynatrace_api_key
@@ -29,7 +29,7 @@ from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
 from lib.metrics import GCPService
-from lib.self_monitoring import import_self_monitoring_dashboard
+from lib.sfm.dashboards import import_self_monitoring_dashboard
 from lib.utilities import print_dynatrace_logo
 from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode

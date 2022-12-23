@@ -11,7 +11,6 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-import json
 import os
 import time
 from datetime import timezone, datetime
@@ -23,6 +22,7 @@ from lib.entities.ids import _create_mmh3_hash
 from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
+from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 
 UNIT_10TO2PERCENT = "10^2.%"
 MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
@@ -53,19 +53,18 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
             if lines_sent >= maximum_lines_threshold:
                 await _push_to_dynatrace(context, project_id, lines_batch)
                 lines_dropped_count = len(fetch_metric_results) - maximum_lines_threshold
-                context.dynatrace_ingest_lines_dropped_count[project_id] = \
-                    context.dynatrace_ingest_lines_dropped_count.get(project_id, 0) + lines_dropped_count
+                context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, lines_dropped_count)
                 context.log(project_id, f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
                 return
         if lines_batch:
             await _push_to_dynatrace(context, project_id, lines_batch)
     except Exception as e:
         if isinstance(e, InvalidURL):
-            context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
+            context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)
         context.log(project_id, f"Failed to push ingest lines to Dynatrace due to {type(e).__name__} {e}")
     finally:
         push_data_time = time.time() - start_time
-        context.push_to_dynatrace_execution_time[project_id] = push_data_time
+        context.sfm[SfmKeys.push_to_dynatrace_execution_time].update(project_id, push_data_time)
         context.log(project_id, f"Finished uploading metric ingest lines to Dynatrace in {push_data_time} s")
 
 
@@ -86,22 +85,24 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
     )
 
     if ingest_response.status == 401:
-        context.dynatrace_connectivity = DynatraceConnectivity.ExpiredToken
+        context.update_dt_connectivity_status(DynatraceConnectivity.ExpiredToken)
         raise Exception("Expired token")
     elif ingest_response.status == 403:
-        context.dynatrace_connectivity = DynatraceConnectivity.WrongToken
+        context.update_dt_connectivity_status(DynatraceConnectivity.WrongToken)
         raise Exception("Wrong token - missing 'Ingest metrics using API V2' permission")
     elif ingest_response.status == 404 or ingest_response.status == 405:
-        context.dynatrace_connectivity = DynatraceConnectivity.WrongURL
+        context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)
         raise Exception(f"Wrong URL {dt_url}")
 
     ingest_response_json = await ingest_response.json()
-    context.dynatrace_request_count[ingest_response.status] \
-        = context.dynatrace_request_count.get(ingest_response.status, 0) + 1
-    context.dynatrace_ingest_lines_ok_count[project_id] \
-        = context.dynatrace_ingest_lines_ok_count.get(project_id, 0) + ingest_response_json.get("linesOk", 0)
-    context.dynatrace_ingest_lines_invalid_count[project_id] \
-        = context.dynatrace_ingest_lines_invalid_count.get(project_id, 0) + ingest_response_json.get("linesInvalid", 0)
+
+    lines_ok = ingest_response_json.get("linesOk", 0)
+    lines_invalid = ingest_response_json.get("linesInvalid", 0)
+
+    context.sfm[SfmKeys.dynatrace_request_count].increment(ingest_response.status)
+    context.sfm[SfmKeys.dynatrace_ingest_lines_ok_count].update(project_id, lines_ok)
+    context.sfm[SfmKeys.dynatrace_ingest_lines_invalid_count].update(project_id, lines_invalid)
+
     context.log(project_id, f"Ingest response: {ingest_response_json}")
     await log_invalid_lines(context, ingest_response_json, lines_batch)
 
@@ -177,7 +178,7 @@ async def fetch_metric(
 
     lines = []
     while should_fetch:
-        context.gcp_metric_request_count[project_id] = context.gcp_metric_request_count.get(project_id, 0) + 1
+        context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
         url = f"{_MONITORING_ROOT}/projects/{project_id}/timeSeries"
         resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
