@@ -31,7 +31,7 @@ from lib.credentials import create_token, get_project_id_from_environment, fetch
 from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
-from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id, REQUIRED_SERVICES
+from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_data, push_self_monitoring
@@ -52,7 +52,7 @@ def dynatrace_gcp_extension(event, context):
 
 async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = None):
     """
-    Starting point for installation as an autopilot cluster and for tests.
+    Starting point for installation as a cluster and for tests.
     """
     timestamp_utc = datetime.utcnow()
     timestamp_utc_iso = timestamp_utc.isoformat()
@@ -64,10 +64,6 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
     await query_metrics(execution_identifier, services)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
-
-
-def is_yaml_file(f: str) -> bool:
-    return f.endswith(".yml") or f.endswith(".yaml")
 
 
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
@@ -123,8 +119,6 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
         if disabled_projects:
-            context.log(f"Cannot monitor projects: {disabled_projects}. "
-                        f"Enable required services to do so: {REQUIRED_SERVICES}")
             for disabled_project in disabled_projects:
                 projects_ids.remove(disabled_project)
 
@@ -149,6 +143,10 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         await dt_session.close()
 
     # Noise on Windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
+
+
+def is_yaml_file(f: str) -> bool:
+    return f.endswith(".yml") or f.endswith(".yaml")
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],

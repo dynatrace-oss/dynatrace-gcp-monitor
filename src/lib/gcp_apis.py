@@ -87,6 +87,7 @@ async def _check_if_project_is_disabled_and_get_disabled_api_set(context: Metric
     is_project_disabled = False
     if any(required_service in disabled_apis for required_service in REQUIRED_SERVICES):
         is_project_disabled = True
+        context.log(project_id, f"Cannot monitor project. Enable required services to do so: {REQUIRED_SERVICES}")
     return project_id, is_project_disabled, disabled_apis
 
 
