@@ -128,8 +128,7 @@ async def run_metrics_fetcher_forever():
     async def run_single_polling_with_timeout(pre_launch_check_result):
         logging_context.log(f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
 
-        polling_task = async_dynatrace_gcp_extension(
-            project_ids=pre_launch_check_result.projects, services=pre_launch_check_result.services)
+        polling_task = async_dynatrace_gcp_extension(services=pre_launch_check_result.services)
 
         try:
             await asyncio.wait_for(polling_task, QUERY_TIMEOUT_SEC)

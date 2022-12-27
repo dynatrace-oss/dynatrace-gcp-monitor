@@ -41,51 +41,36 @@ from lib.utilities import read_activation_yaml, get_activation_config_per_servic
 
 def dynatrace_gcp_extension(event, context):
     """
-    Starting point for installation as a GCP function. See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
+    Starting point for installation as a GCP function.
+    See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
     """
     try:
-        asyncio.run(handle_event(event, context))
+        asyncio.run(query_metrics(None, None))
     except Exception as e:
         traceback.print_exc()
         raise e
 
 
-async def async_dynatrace_gcp_extension(project_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
+async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = None):
     """
-    Used in docker or for tests
+    Starting point for installation as a cluster and for tests.
     """
     timestamp_utc = datetime.utcnow()
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
     logging_context = LoggingContext(execution_identifier)
-    logging_context.log(f'Starting execution for project(s): {project_ids}' if project_ids else "Starting execution")
-    event_context = {
-        'timestamp': timestamp_utc_iso,
-        'event_id': timestamp_utc.timestamp(),
-        'event_type': 'test',
-        'execution_id': execution_identifier
-    }
-    data = {'data': '', 'publishTime': timestamp_utc_iso}
+    logging_context.log("Starting execution")
 
     start_time = time.time()
-    await handle_event(data, event_context, project_ids, services)
+    await query_metrics(execution_identifier, services)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}\n")
 
 
-def is_yaml_file(f: str) -> bool:
-    return f.endswith(".yml") or f.endswith(".yaml")
-
-
-async def handle_event(event: Dict, event_context, projects_ids: Optional[List[str]] = None, services: Optional[List[GCPService]] = None):
-    if isinstance(event_context, Dict):
-        # for k8s installation
-        context = LoggingContext(event_context.get("execution_id", None))
-    else:
-        context = LoggingContext(None)
-
+async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
+    context = LoggingContext(execution_id)
     if not services:
-        # load services for GCP Function
+        # Load services for GCP Function and for tests
         services = load_supported_services(context)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -109,8 +94,8 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
                               project_id=project_id_owner,
                               dt_session=dt_session,
                               dynatrace_url=dynatrace_url,
-                              dynatrace_access_key=dynatrace_api_key
-                              )
+                              dynatrace_access_key=dynatrace_api_key)
+
         query_interval_min = get_query_interval_minutes()
 
         print_metric_ingest_input = os.environ.get("PRINT_METRIC_INGEST_INPUT", "FALSE").upper() in ["TRUE", "YES"]
@@ -130,13 +115,11 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
             scheduled_execution_id=context.scheduled_execution_id
         )
 
-        if not projects_ids:
-            projects_ids = await get_all_accessible_projects(context, gcp_session, token)
+        projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
         disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
         if disabled_projects:
-            context.log(f"monitoring.googleapis.com API disabled in the projects: " + ", ".join(disabled_projects) + ", that projects will not be monitored")
             for disabled_project in disabled_projects:
                 projects_ids.remove(disabled_project)
 
@@ -161,7 +144,11 @@ async def handle_event(event: Dict, event_context, projects_ids: Optional[List[s
         await gcp_session.close()
         await dt_session.close()
 
-    # Noise on windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
+    # Noise on Windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
+
+
+def is_yaml_file(f: str) -> bool:
+    return f.endswith(".yml") or f.endswith(".yaml")
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],

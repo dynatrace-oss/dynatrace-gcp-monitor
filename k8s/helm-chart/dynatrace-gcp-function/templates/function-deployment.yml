@@ -131,20 +131,21 @@ spec:
           name: gcp-config
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
             memory: "512Mi"
-            cpu: "500m"
+            cpu: "250m"
+            ephemeral-storage: "1Gi"
         livenessProbe:
           httpGet:
             path: /health
             port: 8080
+          initialDelaySeconds: 30
+          timeoutSeconds: 15
         startupProbe:
           httpGet:
             path: /health
             port: 8080
           initialDelaySeconds: 10
+          timeoutSeconds: 15
       {{- end }}
       {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
       - image: {{ .Values.dockerImage | quote }}
@@ -256,18 +257,19 @@ spec:
           requests:
             memory: "256Mi"
             cpu: "500m"
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
+            ephemeral-storage: "1Gi"
         livenessProbe:
           httpGet:
             path: /health
             port: 8081
+          initialDelaySeconds: 30
+          timeoutSeconds: 15
         startupProbe:
           httpGet:
             path: /health
             port: 8081
           initialDelaySeconds: 10
+          timeoutSeconds: 15
       {{- if (eq .Values.activeGate.useExisting "false") }}
       initContainers:
         - name: init-active-gate-service
