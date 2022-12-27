@@ -183,7 +183,7 @@ def main():
 
     if OPERATION_MODE == OperationMode.Metrics:
         #loop.run_until_complete(run_metrics_fetcher_forever())
-        await run_metrics_fetcher_forever()
+        asyncio.run(run_metrics_fetcher_forever())
 
     elif OPERATION_MODE == OperationMode.Logs:
         #threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
