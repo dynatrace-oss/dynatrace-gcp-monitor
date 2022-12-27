@@ -159,6 +159,7 @@ async def run_metrics_fetcher_forever():
 
 def run_loop_forever():
     try:
+        webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
         loop.run_forever()
     finally:
         print("Closing AsyncIO loop...")
@@ -171,18 +172,21 @@ def main():
 
     logging_context.log("GCP Monitor - Dynatrace integration for Google Cloud Platform monitoring\n")
 
-    webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
+    #webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
 
     instance_metadata = loop.run_until_complete(run_instance_metadata_check())
     loop.run_until_complete(import_self_monitoring_dashboards(instance_metadata))
 
     logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
 
+    threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
+
     if OPERATION_MODE == OperationMode.Metrics:
-        loop.run_until_complete(run_metrics_fetcher_forever())
+        #loop.run_until_complete(run_metrics_fetcher_forever())
+        run_metrics_fetcher_forever()
 
     elif OPERATION_MODE == OperationMode.Logs:
-        threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
+        #threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
         LogsFastCheck(logging_context, instance_metadata).execute()
         run_logs(logging_context, instance_metadata, loop)
 
