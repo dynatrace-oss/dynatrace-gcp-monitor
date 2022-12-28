@@ -157,7 +157,7 @@ async def run_metrics_fetcher_forever():
         await sleep_until_next_polling(polling_duration)
 
 
-def run_loop_forever():
+async def run_loop_forever():
     try:
         webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
         loop.run_forever()
@@ -172,8 +172,6 @@ def main():
 
     logging_context.log("GCP Monitor - Dynatrace integration for Google Cloud Platform monitoring\n")
 
-    #webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
-
     instance_metadata = loop.run_until_complete(run_instance_metadata_check())
     loop.run_until_complete(import_self_monitoring_dashboards(instance_metadata))
 
@@ -182,11 +180,8 @@ def main():
     threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
 
     if OPERATION_MODE == OperationMode.Metrics:
-        #loop.run_until_complete(run_metrics_fetcher_forever())
-        asyncio.run(run_metrics_fetcher_forever())
-
+        loop.run_until_complete(run_metrics_fetcher_forever())
     elif OPERATION_MODE == OperationMode.Logs:
-        #threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
         LogsFastCheck(logging_context, instance_metadata).execute()
         run_logs(logging_context, instance_metadata, loop)
 
