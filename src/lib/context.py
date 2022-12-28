@@ -63,7 +63,7 @@ def get_query_interval_minutes() -> int:
 
 class LoggingContext:
     def __init__(self, scheduled_execution_id: Optional[str]):
-        self.scheduled_execution_id: str = scheduled_execution_id[0:8] if scheduled_execution_id else None
+        self.scheduled_execution_id: str = scheduled_execution_id[0:12] if scheduled_execution_id else None
         self.throttled_log_call_count = dict()
 
     def error(self, *args):
@@ -117,9 +117,13 @@ class LoggingContext:
             context_strings.append(f"[{self.scheduled_execution_id}]")
         for arg in args[:-1]:
             context_strings.append(f"[{arg}]")
-        context_section = " ".join(context_strings)
+        context_section = "".join(context_strings)
 
-        print(f"{timestamp_utc_iso} {context_section} : {message}")
+        full_log = timestamp_utc_iso
+        if context_section: full_log += " " + context_section
+        full_log += " " + message
+
+        print(full_log)
 
     def __check_if_message_exceeded_limit(self, message: str):
         log_calls_performed = self.throttled_log_call_count.get(message, 0)
