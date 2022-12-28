@@ -15,13 +15,10 @@ import asyncio
 import json
 from typing import Dict, List
 
-from lib import context_provider
 from lib.context import SfmContext, MetricsContext
 from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_PREFIX
 from lib.sfm.for_metrics.metrics_definitions import SfmMetric
-from lib.sfm.for_other.loop_timeout_metric import SFMMetricLoopTimeouts
 from lib.utilities import chunks
-from run_docker import logging_context
 
 
 def log_self_monitoring_metrics(context: MetricsContext):
@@ -149,13 +146,3 @@ def create_sfm_timeseries_datapoints(sfm_metrics: List[SfmMetric], context: Metr
 
     return {"timeSeries": time_series}
 
-
-async def sfm_send_loop_timeouts(finished_before_timeout: bool):
-    context = context_provider.METRICS_CONTEXT
-    if context is None:
-        logging_context.log("Wanted to push SFM timeouts SFM metric but context not available")
-        return
-
-    timeouts_metric = SFMMetricLoopTimeouts()
-    timeouts_metric.update(finished_before_timeout)
-    await sfm_push_metrics([timeouts_metric], context)

@@ -19,7 +19,10 @@ from typing import Optional, List, NamedTuple
 
 from aiohttp import ClientSession
 
-from lib.self_monitoring import sfm_send_loop_timeouts
+from lib import context_provider
+from lib.self_monitoring import sfm_push_metrics
+from lib.sfm.for_other.loop_timeout_metric import SFMMetricLoopTimeouts
+
 from lib.webserver import webserver
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes
@@ -126,6 +129,16 @@ async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
 
 
 async def run_metrics_fetcher_forever():
+    async def sfm_send_loop_timeouts(finished_before_timeout: bool):
+        context = context_provider.METRICS_CONTEXT
+        if context is None:
+            logging_context.log("Wanted to push SFM timeouts SFM metric but context not available")
+            return
+
+        timeouts_metric = SFMMetricLoopTimeouts()
+        timeouts_metric.update(finished_before_timeout)
+        await sfm_push_metrics([timeouts_metric], context)
+
     async def run_single_polling_with_timeout(pre_launch_check_result):
         logging_context.log('MAIN_LOOP', f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
 
