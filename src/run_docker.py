@@ -157,7 +157,7 @@ async def run_metrics_fetcher_forever():
         await sleep_until_next_polling(polling_duration)
 
 
-async def run_loop_forever():
+def run_loop_forever():
     try:
         webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
         loop.run_forever()
