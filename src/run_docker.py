@@ -158,8 +158,7 @@ async def run_metrics_fetcher_forever():
 
 def main():
     threading.Thread(target=run_webserver_on_asyncio_loop_forever,
-                     args=(loop,),
-                     name="AioHttpLoopWaiterThread",
+                     name="WebserverThread",
                      daemon=True).start()
 
     print_dynatrace_logo()
