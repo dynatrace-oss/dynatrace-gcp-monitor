@@ -150,7 +150,7 @@ def create_sfm_timeseries_datapoints(sfm_metrics: List[SfmMetric], context: Metr
     return {"timeSeries": time_series}
 
 
-async def send_loop_timeouts_sfm(finished_before_timeout: bool):
+async def sfm_send_loop_timeouts(finished_before_timeout: bool):
     context = context_provider.METRICS_CONTEXT
     if context is None:
         logging_context.log("Wanted to push SFM timeouts SFM metric but context not available")

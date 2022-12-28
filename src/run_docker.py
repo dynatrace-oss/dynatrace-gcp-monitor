@@ -19,7 +19,7 @@ from typing import Optional, List, NamedTuple
 
 from aiohttp import ClientSession
 
-from lib.self_monitoring import send_loop_timeouts_sfm
+from lib.self_monitoring import sfm_send_loop_timeouts
 from lib.webserver import webserver
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes
@@ -133,10 +133,10 @@ async def run_metrics_fetcher_forever():
 
         try:
             await asyncio.wait_for(polling_task, QUERY_TIMEOUT_SEC)
-            await send_loop_timeouts_sfm(True)
+            await sfm_send_loop_timeouts(True)
         except asyncio.exceptions.TimeoutError:
             logging_context.error('MAIN_LOOP', f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
-            await send_loop_timeouts_sfm(False)
+            await sfm_send_loop_timeouts(False)
 
     async def sleep_until_next_polling(current_polling_duration_s):
         sleep_time = QUERY_INTERVAL_SEC - current_polling_duration_s
