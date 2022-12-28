@@ -15,25 +15,31 @@ import asyncio
 import json
 from typing import Dict, List
 
+from lib import context_provider
 from lib.context import SfmContext, MetricsContext
 from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_PREFIX
+from lib.sfm.for_metrics.metrics_definitions import SfmMetric
+from lib.sfm.for_other.loop_timeout_metric import SFMMetricLoopTimeouts
 from lib.utilities import chunks
+from run_docker import logging_context
 
 
 def log_self_monitoring_metrics(context: MetricsContext):
+    sfm_entries: List[str] = []
     for key, sfm_metric in context.sfm.items():
-        context.log("SFM", f"{sfm_metric.description}: {sfm_metric.value}")
+        sfm_entries.append(f"[{sfm_metric.description}: {sfm_metric.value}]")
+    context.log("SFM", "Metrics SFM: " + ", ".join(sfm_entries))
 
 
-async def push_self_monitoring_metrics(context: MetricsContext):
-    time_series = create_sfm_timeseries_datapoints(context)
+async def sfm_push_metrics(sfm_metrics: List[SfmMetric], context: MetricsContext):
+    prepared_keys: List[str] = [sfm_metric.key for sfm_metric in sfm_metrics]
+    context.log(f"Pushing SFM metrics: {prepared_keys}")
+    time_series = create_sfm_timeseries_datapoints(sfm_metrics, context)
     await push_self_monitoring_time_series(context, time_series)
 
 
 async def push_self_monitoring_time_series(context: SfmContext, time_series: Dict):
     try:
-        context.log(f"Pushing self monitoring time series to GCP Monitor...")
-        await create_metric_descriptors_if_missing(context)
         for single_series in batch_time_series(time_series):
             await push_single_self_monitoring_time_series(context, False, single_series)
     except Exception as e:
@@ -66,11 +72,11 @@ async def push_single_self_monitoring_time_series(context: SfmContext, is_retry:
         context.log(
             f"Failed to push self monitoring time series, error is: {status} => {self_monitoring_response_json}")
     else:
-        context.log(f"Finished pushing self monitoring time series to GCP Monitor")
+        context.log(f"Successful pushing of SFM time series to GCP Monitor")
     self_monitoring_response.close()
 
 
-async def create_metric_descriptors_if_missing(context: SfmContext):
+async def sfm_create_descriptors_if_missing(context: SfmContext):
     try:
         dynatrace_metrics_descriptors = await context.gcp_session.request(
             'GET',
@@ -134,12 +140,22 @@ def extract_label_keys(metric_descriptor: Dict):
     return sorted([label.get("key", "") for label in metric_descriptor.get("labels", [])])
 
 
-def create_sfm_timeseries_datapoints(context: MetricsContext) -> Dict:
+def create_sfm_timeseries_datapoints(sfm_metrics: List[SfmMetric], context: MetricsContext) -> Dict:
     interval = {"endTime": context.execution_time.isoformat() + "Z"}
     time_series = []
 
-    for key, sfm_metric in context.sfm.items():
+    for sfm_metric in sfm_metrics:
         time_series.extend(sfm_metric.generate_timeseries_datapoints(context, interval))
 
     return {"timeSeries": time_series}
 
+
+async def send_loop_timeouts_sfm(finished_before_timeout: bool):
+    context = context_provider.METRICS_CONTEXT
+    if context is None:
+        logging_context.log("Wanted to push SFM timeouts SFM metric but context not available")
+        return
+
+    timeouts_metric = SFMMetricLoopTimeouts()
+    timeouts_metric.update(finished_before_timeout)
+    await sfm_push_metrics([timeouts_metric], context)

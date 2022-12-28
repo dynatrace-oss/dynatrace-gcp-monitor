@@ -19,6 +19,7 @@ from typing import Optional, List, NamedTuple
 
 from aiohttp import ClientSession
 
+from lib.self_monitoring import send_loop_timeouts_sfm
 from lib.webserver import webserver
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes
@@ -126,24 +127,26 @@ async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
 
 async def run_metrics_fetcher_forever():
     async def run_single_polling_with_timeout(pre_launch_check_result):
-        logging_context.log(f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
+        logging_context.log('MAIN_LOOP', f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
 
         polling_task = async_dynatrace_gcp_extension(services=pre_launch_check_result.services)
 
         try:
             await asyncio.wait_for(polling_task, QUERY_TIMEOUT_SEC)
+            await send_loop_timeouts_sfm(True)
         except asyncio.exceptions.TimeoutError:
-            logging_context.error(f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
+            logging_context.error('MAIN_LOOP', f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
+            await send_loop_timeouts_sfm(False)
 
     async def sleep_until_next_polling(current_polling_duration_s):
         sleep_time = QUERY_INTERVAL_SEC - current_polling_duration_s
         if sleep_time < 0: sleep_time = 0
-        logging_context.log(f'Next polling in {sleep_time}s')
+        logging_context.log('MAIN_LOOP', f'Next polling in {round(sleep_time, 2)}s')
         await asyncio.sleep(sleep_time)
 
     pre_launch_check_result = await metrics_pre_launch_check()
     if not pre_launch_check_result:
-        logging_context.log('Pre_launch_check failed, monitoring loop will not start')
+        logging_context.log('MAIN_LOOP', 'Pre_launch_check failed, monitoring loop will not start')
         return
 
     while True:
@@ -152,7 +155,7 @@ async def run_metrics_fetcher_forever():
         end_time_s = time.time()
 
         polling_duration = end_time_s - start_time_s
-        logging_context.log(f"Polling finished after {polling_duration}s")
+        logging_context.log('MAIN_LOOP', f"Polling finished after {round(polling_duration, 2)}s")
 
         await sleep_until_next_polling(polling_duration)
 
