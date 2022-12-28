@@ -180,7 +180,7 @@ def main():
     threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
 
     if OPERATION_MODE == OperationMode.Metrics:
-        loop.run_until_complete(run_metrics_fetcher_forever())
+        asyncio.run_coroutine_threadsafe(run_metrics_fetcher_forever(), loop)
     elif OPERATION_MODE == OperationMode.Logs:
         LogsFastCheck(logging_context, instance_metadata).execute()
         run_logs(logging_context, instance_metadata, loop)
