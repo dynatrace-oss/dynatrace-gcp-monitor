@@ -23,9 +23,8 @@ from lib import context_provider
 from lib.self_monitoring import sfm_push_metrics
 from lib.sfm.for_other.loop_timeout_metric import SFMMetricLoopTimeouts
 
-from lib.webserver import webserver
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
-from lib.context import LoggingContext, get_int_environment_value, SfmDashboardsContext, get_query_interval_minutes
+from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_url, fetch_dynatrace_api_key
 
 from lib.extensions_fetcher import ExtensionsFetchResult, ExtensionsFetcher
@@ -35,11 +34,11 @@ from lib.logs.log_forwarder import run_logs
 from lib.metrics import GCPService
 from lib.sfm.dashboards import import_self_monitoring_dashboard
 from lib.utilities import print_dynatrace_logo
+from lib.webserver.webserver import run_webserver_on_asyncio_loop_forever
 from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode
 
 OPERATION_MODE = OperationMode.from_environment_string(os.environ.get("OPERATION_MODE", None)) or OperationMode.Metrics
-HEALTH_CHECK_PORT = get_int_environment_value("HEALTH_CHECK_PORT", 8080)
 QUERY_INTERVAL_SEC = get_query_interval_minutes() * 60
 QUERY_TIMEOUT_SEC = (get_query_interval_minutes() + 2) * 60
 
@@ -173,32 +172,23 @@ async def run_metrics_fetcher_forever():
         await sleep_until_next_polling(polling_duration)
 
 
-def run_loop_forever():
-    try:
-        loop.run_forever()
-    finally:
-        print("Closing AsyncIO loop...")
-        webserver.close_and_cleanup(loop)
-        loop.close()
-
-
 def main():
+    threading.Thread(target=run_webserver_on_asyncio_loop_forever,
+                     name="WebserverThread",
+                     daemon=True).start()
+
     print_dynatrace_logo()
 
     logging_context.log("GCP Monitor - Dynatrace integration for Google Cloud Platform monitoring\n")
 
-    webserver.setup_webserver_on_asyncio_loop(loop, HEALTH_CHECK_PORT)
-
-    instance_metadata = loop.run_until_complete(run_instance_metadata_check())
-    loop.run_until_complete(import_self_monitoring_dashboards(instance_metadata))
+    instance_metadata = asyncio.run(run_instance_metadata_check())
+    asyncio.run(import_self_monitoring_dashboards(instance_metadata))
 
     logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
 
     if OPERATION_MODE == OperationMode.Metrics:
-        loop.run_until_complete(run_metrics_fetcher_forever())
-
+        asyncio.run(run_metrics_fetcher_forever())
     elif OPERATION_MODE == OperationMode.Logs:
-        threading.Thread(target=run_loop_forever, name="AioHttpLoopWaiterThread", daemon=True).start()
         LogsFastCheck(logging_context, instance_metadata).execute()
         run_logs(logging_context, instance_metadata, loop)
 
