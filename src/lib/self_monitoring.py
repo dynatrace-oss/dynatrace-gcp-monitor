@@ -13,6 +13,7 @@
 #     limitations under the License.
 import asyncio
 import json
+from datetime import datetime
 from typing import Dict, List
 
 from lib.context import SfmContext, MetricsContext
@@ -28,10 +29,10 @@ def log_self_monitoring_metrics(context: MetricsContext):
     context.log("SFM", "Metrics SFM: " + ", ".join(sfm_entries))
 
 
-async def sfm_push_metrics(sfm_metrics: List[SfmMetric], context: MetricsContext):
+async def sfm_push_metrics(sfm_metrics: List[SfmMetric], context: SfmContext, metrics_endtime: datetime):
     prepared_keys: List[str] = [sfm_metric.key for sfm_metric in sfm_metrics]
     context.log(f"Pushing SFM metrics: {prepared_keys}")
-    time_series = create_sfm_timeseries_datapoints(sfm_metrics, context)
+    time_series = create_sfm_timeseries_datapoints(sfm_metrics, context, metrics_endtime)
     await push_self_monitoring_time_series(context, time_series)
 
 
@@ -137,8 +138,8 @@ def extract_label_keys(metric_descriptor: Dict):
     return sorted([label.get("key", "") for label in metric_descriptor.get("labels", [])])
 
 
-def create_sfm_timeseries_datapoints(sfm_metrics: List[SfmMetric], context: MetricsContext) -> Dict:
-    interval = {"endTime": context.execution_time.isoformat() + "Z"}
+def create_sfm_timeseries_datapoints(sfm_metrics: List[SfmMetric], context: SfmContext, endtime: datetime) -> Dict:
+    interval = {"endTime": endtime.isoformat() + "Z"}
     time_series = []
 
     for sfm_metric in sfm_metrics:

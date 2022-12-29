@@ -24,8 +24,8 @@ from typing import Dict, List, Optional, Set
 
 import yaml
 
-from lib import context_provider
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
+from lib.configuration import config
 from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
@@ -74,83 +74,77 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         # Load services for GCP Function and for tests
         services = load_supported_services(context)
 
-    gcp_session = init_gcp_client_session()
-    dt_session = init_dt_client_session()
+    async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
+        setup_start_time = time.time()
+        token = await create_token(context, gcp_session)
 
-    setup_start_time = time.time()
-    token = await create_token(context, gcp_session)
+        if token is None:
+            context.log("Cannot proceed without authorization token, stopping the execution")
+            return
+        if not isinstance(token, str):
+            raise Exception(f"Failed to fetch access token, got non string value: {token}")
 
-    if token is None:
-        context.log("Cannot proceed without authorization token, stopping the execution")
-        return
-    if not isinstance(token, str):
-        raise Exception(f"Failed to fetch access token, got non string value: {token}")
+        context.log("Successfully obtained access token")
 
-    context.log("Successfully obtained access token")
+        project_id_owner = get_project_id_from_environment()
 
-    project_id_owner = get_project_id_from_environment()
+        dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+        dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+        check_version(logging_context=context)
+        await check_dynatrace(logging_context=context,
+                              project_id=project_id_owner,
+                              dt_session=dt_session,
+                              dynatrace_url=dynatrace_url,
+                              dynatrace_access_key=dynatrace_api_key)
 
-    dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-    dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-    check_version(logging_context=context)
-    await check_dynatrace(logging_context=context,
-                          project_id=project_id_owner,
-                          dt_session=dt_session,
-                          dynatrace_url=dynatrace_url,
-                          dynatrace_access_key=dynatrace_api_key)
+        query_interval_min = get_query_interval_minutes()
 
-    query_interval_min = get_query_interval_minutes()
+        context = MetricsContext(
+            gcp_session=gcp_session,
+            dt_session=dt_session,
+            project_id_owner=project_id_owner,
+            token=token,
+            execution_time=datetime.utcnow(),
+            execution_interval_seconds=60 * query_interval_min,
+            dynatrace_api_key=dynatrace_api_key,
+            dynatrace_url=dynatrace_url,
+            print_metric_ingest_input=config.print_metric_ingest_input(),
+            self_monitoring_enabled=config.self_monitoring_enabled(),
+            scheduled_execution_id=context.scheduled_execution_id
+        )
 
-    print_metric_ingest_input = os.environ.get("PRINT_METRIC_INGEST_INPUT", "FALSE").upper() in ["TRUE", "YES"]
-    self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
+        projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
-    context = MetricsContext(
-        gcp_session=gcp_session,
-        dt_session=dt_session,
-        project_id_owner=project_id_owner,
-        token=token,
-        execution_time=datetime.utcnow(),
-        execution_interval_seconds=60 * query_interval_min,
-        dynatrace_api_key=dynatrace_api_key,
-        dynatrace_url=dynatrace_url,
-        print_metric_ingest_input=print_metric_ingest_input,
-        self_monitoring_enabled=self_monitoring_enabled,
-        scheduled_execution_id=context.scheduled_execution_id
-    )
+        disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
-    if context_provider.METRICS_CONTEXT is not None:
-        await context_provider.METRICS_CONTEXT.cleanup()
-    context_provider.METRICS_CONTEXT = context
+        if disabled_projects:
+            for disabled_project in disabled_projects:
+                projects_ids.remove(disabled_project)
 
-    projects_ids = await get_all_accessible_projects(context, gcp_session, token)
+        setup_time = (time.time() - setup_start_time)
+        for project_id in projects_ids:
+            context.sfm[SfmKeys.setup_execution_time].update(project_id, setup_time)
 
-    disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
+        context.start_processing_timestamp = time.time()
 
-    if disabled_projects:
-        for disabled_project in disabled_projects:
-            projects_ids.remove(disabled_project)
+        process_project_metrics_tasks = [
+            process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()))
+            for project_id
+            in projects_ids
+        ]
+        await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
+        context.log(f"Fetched and pushed GCP data in {time.time() - context.start_processing_timestamp} s")
 
-    setup_time = (time.time() - setup_start_time)
-    for project_id in projects_ids:
-        context.sfm[SfmKeys.setup_execution_time].update(project_id, setup_time)
+        log_self_monitoring_metrics(context)
+        if context.self_monitoring_enabled:
+            context.log("Self monitoring update to GCP Monitoring")
+            await sfm_create_descriptors_if_missing(context)
+            await sfm_push_metrics(context.sfm.values(), context, context.execution_time)
+        else:
+            context.log("SFM disabled, will not push SFM metrics")
 
-    context.start_processing_timestamp = time.time()
-
-    process_project_metrics_tasks = [
-        process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()))
-        for project_id
-        in projects_ids
-    ]
-    await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
-    context.log(f"Fetched and pushed GCP data in {time.time() - context.start_processing_timestamp} s")
-
-    log_self_monitoring_metrics(context)
-    if context.self_monitoring_enabled:
-        context.log("Self monitoring update to GCP Monitoring")
-        await sfm_create_descriptors_if_missing(context)
-        await sfm_push_metrics(context.sfm.values(), context)
-    else:
-        context.log("SFM disabled, will not push SFM metrics")
+        await gcp_session.close()
+        await dt_session.close()
 
     # Noise on Windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 

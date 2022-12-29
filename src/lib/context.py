@@ -336,7 +336,3 @@ class MetricsContext(SfmContext):
 
         return headers
 
-    async def cleanup(self):
-        await self.dt_session.close()
-        await self.gcp_session.close()
-

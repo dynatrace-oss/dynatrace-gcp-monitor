@@ -10,9 +10,14 @@ def asyncio_run_with_timeout(coro, timeout_s):
     asyncio.run(asyncio.wait_for(coro, timeout_s))
 
 
+@mock.patch('run_docker.sfm_send_loop_timeouts')
 @mock.patch('run_docker.async_dynatrace_gcp_extension')
 @mock.patch('run_docker.metrics_pre_launch_check')
-def test_query_loop_correct_interval(mock_metrics_pre_launch_check, mock_async_dynatrace_gcp_extension: AsyncMock):
+def test_query_loop_correct_interval(
+        mock_metrics_pre_launch_check,
+        mock_async_dynatrace_gcp_extension: AsyncMock,
+        mock_sfm_send_loop_timeouts: AsyncMock,
+    ):
     mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(projects=[], services=[])
 
     run_docker.QUERY_INTERVAL_SEC = 3
@@ -25,10 +30,15 @@ def test_query_loop_correct_interval(mock_metrics_pre_launch_check, mock_async_d
         pass
 
     assert mock_async_dynatrace_gcp_extension.call_count == 3
+    mock_sfm_send_loop_timeouts.assert_called_with(True)
 
 
+@mock.patch('run_docker.sfm_send_loop_timeouts')
 @mock.patch('run_docker.metrics_pre_launch_check')
-def test_query_loop_timeout(mock_metrics_pre_launch_check):
+def test_query_loop_timeout(
+        mock_metrics_pre_launch_check,
+        mock_sfm_send_loop_timeouts: AsyncMock,
+    ):
     mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(projects=[], services=[])
 
     run_docker.QUERY_INTERVAL_SEC = 1
@@ -49,4 +59,6 @@ def test_query_loop_timeout(mock_metrics_pre_launch_check):
             pass
 
         assert mock_async_dynatrace_gcp_extension.call_count == 2
+
+    mock_sfm_send_loop_timeouts.assert_called_with(False)
 
