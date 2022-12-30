@@ -20,6 +20,7 @@ import time
 import jwt
 from aiohttp import ClientSession
 
+from lib.configuration import config
 from lib.context import LoggingContext
 
 _METADATA_ROOT = "http://metadata.google.internal/computeMetadata/v1"
@@ -95,7 +96,7 @@ async def create_default_service_account_token(context: LoggingContext, session:
 
 
 def get_project_id_from_environment():
-    return os.environ.get("GCP_PROJECT")
+    return config.project_id()
 
 
 async def create_token(context: LoggingContext, session: ClientSession):

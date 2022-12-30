@@ -25,6 +25,7 @@ from typing import Dict, List, Optional, Set
 import yaml
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
+from lib.configuration import config
 from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
@@ -34,7 +35,7 @@ from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
 from lib.metrics import GCPService, Metric, IngestLine
-from lib.self_monitoring import log_self_monitoring_metrics, push_self_monitoring_metrics
+from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
 
@@ -64,7 +65,7 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
     start_time = time.time()
     await query_metrics(execution_identifier, services)
     elapsed_time = time.time() - start_time
-    logging_context.log(f"Execution took {elapsed_time}\n")
+    logging_context.log(f"Execution took {elapsed_time}")
 
 
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
@@ -98,9 +99,6 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         query_interval_min = get_query_interval_minutes()
 
-        print_metric_ingest_input = os.environ.get("PRINT_METRIC_INGEST_INPUT", "FALSE").upper() in ["TRUE", "YES"]
-        self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
-
         context = MetricsContext(
             gcp_session=gcp_session,
             dt_session=dt_session,
@@ -110,8 +108,8 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
             execution_interval_seconds=60 * query_interval_min,
             dynatrace_api_key=dynatrace_api_key,
             dynatrace_url=dynatrace_url,
-            print_metric_ingest_input=print_metric_ingest_input,
-            self_monitoring_enabled=self_monitoring_enabled,
+            print_metric_ingest_input=config.print_metric_ingest_input(),
+            self_monitoring_enabled=config.self_monitoring_enabled(),
             scheduled_execution_id=context.scheduled_execution_id
         )
 
@@ -139,7 +137,11 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         log_self_monitoring_metrics(context)
         if context.self_monitoring_enabled:
-            await push_self_monitoring_metrics(context)
+            context.log("Self monitoring update to GCP Monitoring")
+            await sfm_create_descriptors_if_missing(context)
+            await sfm_push_metrics(context.sfm.values(), context, context.execution_time)
+        else:
+            context.log("SFM disabled, will not push SFM metrics")
 
         await gcp_session.close()
         await dt_session.close()

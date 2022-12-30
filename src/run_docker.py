@@ -15,20 +15,24 @@ import asyncio
 import os
 import threading
 import time
+from datetime import datetime
 from typing import Optional, List, NamedTuple
 
 from aiohttp import ClientSession
 
+from lib import credentials
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
-from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes
+from lib.configuration import config
+from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes, SfmContext
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_url, fetch_dynatrace_api_key
-
 from lib.extensions_fetcher import ExtensionsFetchResult, ExtensionsFetcher
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
 from lib.metrics import GCPService
+from lib.self_monitoring import sfm_push_metrics
 from lib.sfm.dashboards import import_self_monitoring_dashboard
+from lib.sfm.for_other.loop_timeout_metric import SFMMetricLoopTimeouts
 from lib.utilities import print_dynatrace_logo
 from lib.webserver.webserver import run_webserver_on_asyncio_loop_forever
 from main import async_dynatrace_gcp_extension
@@ -123,26 +127,46 @@ async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
                 await import_self_monitoring_dashboard(context=sfm_dashboards_context)
 
 
+async def sfm_send_loop_timeouts(finished_before_timeout: bool):
+    async with init_gcp_client_session() as gcp_session:
+        token = await create_token(logging_context, gcp_session)
+        context = SfmContext(
+            project_id_owner=config.project_id(),
+            dynatrace_api_key=await credentials.fetch_dynatrace_api_key(gcp_session, config.project_id(), token),
+            dynatrace_url=await credentials.fetch_dynatrace_url(gcp_session, config.project_id(), token),
+            token=token,
+            scheduled_execution_id=None,
+            self_monitoring_enabled=config.self_monitoring_enabled(),
+            sfm_metric_map={},
+            gcp_session=gcp_session,
+        )
+        timeouts_metric = SFMMetricLoopTimeouts()
+        timeouts_metric.update(finished_before_timeout)
+        await sfm_push_metrics([timeouts_metric], context, datetime.utcnow())
+
+
 async def run_metrics_fetcher_forever():
     async def run_single_polling_with_timeout(pre_launch_check_result):
-        logging_context.log(f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
+        logging_context.log('MAIN_LOOP', f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
 
         polling_task = async_dynatrace_gcp_extension(services=pre_launch_check_result.services)
 
         try:
             await asyncio.wait_for(polling_task, QUERY_TIMEOUT_SEC)
+            await sfm_send_loop_timeouts(True)
         except asyncio.exceptions.TimeoutError:
-            logging_context.error(f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
+            logging_context.error('MAIN_LOOP', f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
+            await sfm_send_loop_timeouts(False)
 
     async def sleep_until_next_polling(current_polling_duration_s):
         sleep_time = QUERY_INTERVAL_SEC - current_polling_duration_s
         if sleep_time < 0: sleep_time = 0
-        logging_context.log(f'Next polling in {sleep_time}s')
+        logging_context.log('MAIN_LOOP', f'Next polling in {round(sleep_time, 2)}s')
         await asyncio.sleep(sleep_time)
 
     pre_launch_check_result = await metrics_pre_launch_check()
     if not pre_launch_check_result:
-        logging_context.log('Pre_launch_check failed, monitoring loop will not start')
+        logging_context.log('MAIN_LOOP', 'Pre_launch_check failed, monitoring loop will not start')
         return
 
     while True:
@@ -151,7 +175,7 @@ async def run_metrics_fetcher_forever():
         end_time_s = time.time()
 
         polling_duration = end_time_s - start_time_s
-        logging_context.log(f"Polling finished after {polling_duration}s")
+        logging_context.log('MAIN_LOOP', f"Polling finished after {round(polling_duration, 2)}s")
 
         await sleep_until_next_polling(polling_duration)
 

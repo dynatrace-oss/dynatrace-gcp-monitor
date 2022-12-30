@@ -19,6 +19,11 @@ class SfmKeys(enum.Enum):
 
 
 class SfmMetric:
+    @property
+    @abstractmethod
+    def key(self):
+        pass
+
     @abstractmethod
     def generate_timeseries_datapoints(self, context, interval) -> List[dict]:
         pass

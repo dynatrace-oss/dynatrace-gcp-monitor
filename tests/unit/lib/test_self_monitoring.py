@@ -85,12 +85,13 @@ expected_timeseries = {'timeSeries': [
 
 
 def test_create_self_monitoring_time_series():
+    execution_time = datetime.fromisoformat("2022-12-19T14:38:53")
     context = MetricsContext(
         gcp_session=None,
         dt_session=None,
         project_id_owner=None,
         token=None,
-        execution_time=datetime.fromisoformat("2022-12-19T14:38:53"),
+        execution_time=execution_time,
         execution_interval_seconds=30,
         dynatrace_api_key=None,
         dynatrace_url=None,
@@ -110,7 +111,7 @@ def test_create_self_monitoring_time_series():
     context.sfm[SfmKeys.fetch_gcp_data_execution_time].update("project123", 322)
     context.sfm[SfmKeys.push_to_dynatrace_execution_time].update("project123", 323)
 
-    timeseries = create_sfm_timeseries_datapoints(context)
+    timeseries = create_sfm_timeseries_datapoints(context.sfm.values(), context, execution_time)
 
     assert timeseries == expected_timeseries
 
