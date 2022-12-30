@@ -36,6 +36,7 @@ from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNE
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 from lib.self_monitoring import push_self_monitoring_time_series
 
+SFM_WORKER_EXECUTION_TIMEOUT_SECONDS = (SFM_WORKER_EXECUTION_PERIOD_SECONDS + 2) * 60
 
 def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_list: List[LogSelfMonitoring]):
     for sfm in sfm_list:
@@ -61,11 +62,32 @@ def put_sfm_into_queue(context: LogsContext):
 
 
 async def create_sfm_worker_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+
+    async def run_sfm_loop_with_timeout():
+        self_monitoring = LogSelfMonitoring()
+        sfm_loop_task = _loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata)
+        try:
+            await asyncio.wait_for(sfm_loop_task, SFM_WORKER_EXECUTION_TIMEOUT_SECONDS)
+        except asyncio.exceptions.TimeoutError:
+            logging_context.exception(f'SFM loop timed out and was stopped, timeout: {SFM_WORKER_EXECUTION_TIMEOUT_SECONDS}s')
+
+    async def sleep_until_next_polling():
+        sleep_time = SFM_WORKER_EXECUTION_PERIOD_SECONDS - sfm_loop_duration
+        if sleep_time < 0:
+            sleep_time = 0
+        logging_context.log(f'Next SFM loop in {sleep_time}s')
+        await asyncio.sleep(sleep_time)
+
     while True:
         try:
-            await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
-            self_monitoring = LogSelfMonitoring()
-            asyncio.get_event_loop().create_task(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
+            start_time_s = time.time()
+            run_sfm_loop_with_timeout()
+            end_time_s = time.time()
+
+            sfm_loop_duration = end_time_s - start_time_s
+            logging_context.log(f"SFM loop finished after {sfm_loop_duration}s")
+
+            await sleep_until_next_polling()
         except Exception:
             logging_context.exception("Logs Self Monitoring Worker Loop Exception:")
 
