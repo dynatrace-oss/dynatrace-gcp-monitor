@@ -221,8 +221,8 @@ def update_params(next_page_token, params):
         params.append(next_page_token_tuple)
 
 
-def extract_typed_value_key(time_serie):
-    value_type = time_serie['valueType'].upper()
+def extract_typed_value_key(time_series):
+    value_type = time_series['valueType'].upper()
     typed_value_key = TYPED_VALUE_KEY_MAPPING.get(value_type, None)
     if typed_value_key is None:
         raise Exception(f"Value type {value_type} is not supported")
@@ -243,25 +243,25 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
 
 
 
-def create_dimensions(context: MetricsContext, service_name: str, time_serie: Dict, dt_dimensions_mapping: DtDimensionsMap) -> List[DimensionValue]:
+def create_dimensions(context: MetricsContext, service_name: str, time_series: Dict, dt_dimensions_mapping: DtDimensionsMap) -> List[DimensionValue]:
     dt_dimensions = []
 
     #"gcp.resource.type" is required to easily differentiate services with the same metric set e.g. internal_tcp_lb_rule and internal_udp_lb_rule
     dt_dimensions.append(create_dimension("gcp.resource.type", service_name, context))
 
-    metric_labels = time_serie.get('metric', {}).get('labels', {})
+    metric_labels = time_series.get('metric', {}).get('labels', {})
     for short_source_label, dim_value in metric_labels.items():
         mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metric.labels.{short_source_label}", short_source_label)
         for dt_dim_label in mapped_dt_dim_labels:
             dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
-    resource_labels = time_serie.get('resource', {}).get('labels', {})
+    resource_labels = time_series.get('resource', {}).get('labels', {})
     for short_source_label, dim_value in resource_labels.items():
         mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"resource.labels.{short_source_label}", short_source_label)
         for dt_dim_label in mapped_dt_dim_labels:
             dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
-    system_labels = time_serie.get('metadata', {}).get('systemLabels', {})
+    system_labels = time_series.get('metadata', {}).get('systemLabels', {})
     for short_source_label, dim_value in system_labels.items():
         mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metadata.systemLabels.{short_source_label}", short_source_label)
         for dt_dim_label in mapped_dt_dim_labels:
@@ -310,8 +310,8 @@ def flatten_and_enrich_metric_results(
     return results
 
 
-def create_entity_id(service: GCPService, time_serie):
-    resource = time_serie['resource']
+def create_entity_id(service: GCPService, time_series):
+    resource = time_series['resource']
     resource_labels = resource.get('labels', {})
     parts = [service.name]
     for dimension in service.dimensions:
