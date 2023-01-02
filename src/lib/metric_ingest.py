@@ -189,13 +189,13 @@ async def fetch_metric(
         if 'timeSeries' not in page:
             break
 
-        for time_serie in page['timeSeries']:
-            typed_value_key = extract_typed_value_key(time_serie)
-            dimensions = create_dimensions(context, service.name, time_serie, dt_dimensions_mapping)
-            entity_id = create_entity_id(service, time_serie)
+        for single_time_series in page['timeSeries']:
+            typed_value_key = extract_typed_value_key(single_time_series)
+            dimensions = create_dimensions(context, service.name, single_time_series, dt_dimensions_mapping)
+            entity_id = create_entity_id(service, single_time_series)
 
-            for point in time_serie['points']:
-                line = convert_point_to_ingest_line(dimensions, metric, point, typed_value_key, entity_id)
+            for point in single_time_series['points']:
+                line = convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
                 if line:
                     lines.append(line)
 
@@ -325,6 +325,7 @@ def create_entity_id(service: GCPService, time_serie):
 
 
 def convert_point_to_ingest_line(
+        context: MetricsContext,
         dimensions: List[DimensionValue],
         metric: Metric,
         point: Dict,
@@ -341,8 +342,14 @@ def convert_point_to_ingest_line(
 
     timestamp_datetime = timestamp_parsed.replace(tzinfo=timezone.utc)
     timestamp = int(timestamp_datetime.timestamp() * 1000)
-    value = extract_value(point, typed_value_key, metric)
+
+    value = None
     line = None
+    try:
+        value = extract_value(point, typed_value_key, metric)
+    except Exception as e:
+        context.log(f"Failed to extract value from data point: {point}, due to {type(e).__name__} {e}")
+
     if value:
         line = IngestLine(
             entity_id=entity_id,
@@ -405,7 +412,8 @@ def extract_value(point, typed_value_key: str, metric: Metric):
             linear_bucket_options = bucket_options['linearBuckets']
             num_finite_buckets = linear_bucket_options['numFiniteBuckets']
 
-            if bucket_counts_length < num_finite_buckets and min_bucket != 0:
+            if bucket_counts_length < num_finite_buckets and min_bucket != 0 \
+                    and 'offset' in linear_bucket_options and 'width' in linear_bucket_options:
                 offset = linear_bucket_options["offset"]
                 width = linear_bucket_options["width"]
 
