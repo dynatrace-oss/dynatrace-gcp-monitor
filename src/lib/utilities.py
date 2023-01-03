@@ -86,3 +86,8 @@ def print_dynatrace_logo():
     print("  ,     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,,,,")
     print("     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,")
     print("")
+
+
+class ConfigurationParameters:
+    scoping_project_support_enabled = os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE")\
+                                          .upper() in ["TRUE", "YES"]

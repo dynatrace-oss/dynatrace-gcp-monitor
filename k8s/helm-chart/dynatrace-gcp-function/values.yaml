@@ -81,6 +81,10 @@ useProxy: ""
 httpProxy: ""
 # httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
 httpsProxy: ""
+# scopingProjectSupportEnabled: set to true when metrics scope is configured. Metrics will be collected from all monitored projects,
+# but topology fetch will not, so we need to bypass the verification in case there are instances of a service in monitored projects
+# and not in the scoping project.
+scopingProjectSupportEnabled: "false"
 
 
 # LOGS VALUES - DEFAULTS
