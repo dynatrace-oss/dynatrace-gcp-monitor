@@ -140,6 +140,7 @@ spec:
             port: 8080
           initialDelaySeconds: 30
           timeoutSeconds: 15
+          periodSeconds: 90
         startupProbe:
           httpGet:
             path: /health
