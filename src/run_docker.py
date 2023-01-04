@@ -179,11 +179,13 @@ async def run_metrics_fetcher_forever():
 
         await sleep_until_next_polling(polling_duration)
 
+def simple_function():
+    asyncio.run(run_metrics_fetcher_forever())
 
 def main():
     threading.Thread(target=run_webserver_on_asyncio_loop_forever,
                      name="WebserverThread",
-                     daemon=True).start()
+                     daemon=False).start()
 
     print_dynatrace_logo()
 
@@ -195,7 +197,11 @@ def main():
     logging_context.log(f"Operation mode: {OPERATION_MODE.name}")
 
     if OPERATION_MODE == OperationMode.Metrics:
-        asyncio.run(run_metrics_fetcher_forever())
+        metric_thread = threading.Thread(target=simple_function,
+                     name="MetricServerThread",
+                     daemon=True)
+        metric_thread.start()
+        metric_thread.join()
     elif OPERATION_MODE == OperationMode.Logs:
         LogsFastCheck(logging_context, instance_metadata).execute()
         run_logs(logging_context, instance_metadata, loop)
