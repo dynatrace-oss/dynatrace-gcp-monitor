@@ -132,7 +132,7 @@ spec:
         resources:
           requests:
             memory: "512Mi"
-            cpu: "250m"
+            cpu: "1000m"
             ephemeral-storage: "1Gi"
         livenessProbe:
           httpGet:
