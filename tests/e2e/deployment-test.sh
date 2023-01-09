@@ -99,6 +99,18 @@ activeGate:
   useExisting: "true"
   dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
 serviceAccount: "${IAM_SERVICE_ACCOUNT}"
+gcpServicesYaml: |
+  services:
+    - service: cloud_function
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: cloud_run_revision
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
 EOF
 "$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 

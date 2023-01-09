@@ -50,3 +50,30 @@ def test_metrics_on_dynatrace():
     execution_count_value = max(execution_count_values)
     # from 18.02.2022 GCP metrics give bad values for function execution count; after 5 executions we get value 6 or 7 in metric value :(
     assert execution_count_value >= 5
+
+
+def test_metrics_from_different_project_on_dynatrace():
+    # Cloud Run revision already existing in project dynatrace-gcp-extension-2,
+    # with a scheduler job querying it every 5 minutes.
+    # request_count metric should return at least 1
+    print(f"Try to receive request_count metric of Cloud Run revision from Dynatrace (start_time={os.environ['START_LOAD_GENERATION']} ,end_time={os.environ['END_LOAD_GENERATION']})")
+
+    url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/metrics/query"
+    params = {'from': os.environ['START_LOAD_GENERATION'],
+              'to': os.environ['END_LOAD_GENERATION'],
+              'metricSelector': f"cloud.gcp.run_googleapis_com.request_count:filter(eq(gcp.instance.name, {os.environ['CLOUD_RUN_REVISION_NAME']}),eq(gcp.project.id, {os.environ['GCP_PROJECT_ID']}))",
+              'resolution': 'Inf'
+              }
+    headers = {
+        'Authorization': f"Api-Token {os.environ['DYNATRACE_ACCESS_KEY']}"
+    }
+    response = requests.get(url, params=params, headers=headers)
+    assert response.status_code == 200
+    response_json = response.json()
+    assert 'totalCount' in response_json
+    assert response_json['totalCount'] == 1
+    # show full response on test fail
+    print(response_json)
+    request_count_values = response_json['result'][0]['data'][0]['values']
+    request_count_value = max(request_count_values)
+    assert request_count_value >= 1
