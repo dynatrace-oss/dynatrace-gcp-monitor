@@ -61,7 +61,7 @@ def test_metrics_from_different_project_on_dynatrace():
     url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/metrics/query"
     params = {'from': os.environ['START_LOAD_GENERATION'],
               'to': os.environ['END_LOAD_GENERATION'],
-              'metricSelector': f"cloud.gcp.run_googleapis_com.request_count:filter(eq(gcp.instance.name, {os.environ['CLOUD_RUN_REVISION_NAME']}),eq(gcp.project.id, {os.environ['GCP_PROJECT_ID']}))",
+              'metricSelector': f"cloud.gcp.run_googleapis_com.request_count:filter(eq(gcp.instance.name, {os.environ['CLOUD_RUN_REVISION_NAME']}),eq(gcp.project.id, {os.environ['GCP_PROJECT_2_ID']}))",
               'resolution': 'Inf'
               }
     headers = {
