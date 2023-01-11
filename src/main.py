@@ -38,7 +38,7 @@ from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets, \
-    ConfigurationParameters
+    ConfigurationParameters, is_yaml_file, extract_technology_name
 
 
 def dynatrace_gcp_extension(event, context):
@@ -72,7 +72,7 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
     context = LoggingContext(execution_id)
     if not services:
-        # Load services for GCP Function and for tests
+        # Load services for GCP Function
         services = load_supported_services(context)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -152,10 +152,6 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         await dt_session.close()
 
     # Noise on Windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
-
-
-def is_yaml_file(f: str) -> bool:
-    return f.endswith(".yml") or f.endswith(".yaml")
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
@@ -269,30 +265,23 @@ def load_supported_services(context: LoggingContext) -> List[GCPService]:
 
                 for service_yaml in config_yaml.get("gcp", {}):
                     service_name = service_yaml.get("service", "None")
-                    featureSet = service_yaml.get("featureSet", "default_metrics")
+                    feature_set = service_yaml.get("featureSet", "default_metrics")
                     # If whitelist of services exists and current service is not present in it, skip
                     # If whitelist is empty - no services explicitly selected - load all available
                     whitelist_exists = feature_sets_from_activation_config.__len__() > 0
-                    if f'{service_name}/{featureSet}' in feature_sets_from_activation_config or not whitelist_exists:
+                    if f'{service_name}/{feature_set}' in feature_sets_from_activation_config or not whitelist_exists:
                         activation = activation_config_per_service.get(service_name, {})
                         services.append(GCPService(tech_name=technology_name, **service_yaml, activation=activation))
 
         except Exception as error:
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
             continue
-    featureSets = [f"{service.name}/{service.feature_set}" for service in services]
-    if featureSets:
-        context.log("Selected feature sets: " + ", ".join(featureSets))
+    feature_sets = [f"{service.name}/{service.feature_set}" for service in services]
+    if feature_sets:
+        context.log("Selected feature sets: " + ", ".join(feature_sets))
     else:
         context.log("Empty feature sets. GCP services not monitored.")
     return services
-
-
-def extract_technology_name(config_yaml):
-    technology_name = config_yaml.get("technology", {})
-    if isinstance(technology_name, Dict):
-        technology_name = technology_name.get("name", "N/A")
-    return technology_name
 
 
 async def run_fetch_metric(
