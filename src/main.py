@@ -20,7 +20,7 @@ import traceback
 from datetime import datetime
 from os import listdir
 from os.path import isfile
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 import yaml
 
@@ -38,7 +38,7 @@ from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets, \
-    ConfigurationParameters, is_yaml_file, extract_technology_name
+    is_yaml_file, extract_technology_name
 
 
 def dynatrace_gcp_extension(event, context):
@@ -116,10 +116,12 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
+        scoping_project_support_enabled = config.scoping_project_support_enabled()
         disabled_projects = []
         disabled_apis_by_project_id = {}
+
         # Using metrics scope feature, checking disabled apis in every project is not needed
-        if not ConfigurationParameters.scoping_project_support_enabled:
+        if not scoping_project_support_enabled:
             disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
         if disabled_projects:
@@ -170,27 +172,13 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_tasks = []
-    topology_tasks = []
+    scoping_project_support_enabled = config.scoping_project_support_enabled()
     topology_task_services = []
-    skipped_topology_services = set()
     fetch_topology_results = ()
 
     # Using metrics scope feature, fetching topology is not needed
-    if not ConfigurationParameters.scoping_project_support_enabled:
-        for service in services:
-            if service.name in entities_extractors:
-                if entities_extractors[service.name].used_api in disabled_apis:
-                    skipped_topology_services.add(service.name)
-                    continue
-                topology_task = entities_extractors[service.name].extractor(context, project_id, service)
-                topology_tasks.append(topology_task)
-                topology_task_services.append(service)
-
-        if skipped_topology_services:
-            skipped_topology_services_string = ", ".join(skipped_topology_services)
-            context.log(project_id, f"Skipped fetching topology for disabled services: {skipped_topology_services_string}")
-
-        fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
+    if not scoping_project_support_enabled:
+        topology_task_services, fetch_topology_results = fetch_topology(context, project_id, services, disabled_apis)
 
     # Using metrics scope feature, topology_task_services and disabled_apis will be empty, so no filtering is applied
     # and all metrics from all projects are collected
@@ -227,6 +215,32 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     entity_id_map = build_entity_id_map(fetch_topology_results)
     flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
     return flat_metric_results
+
+
+def fetch_topology(context: MetricsContext, project_id: str, services: List[GCPService], disabled_apis: Set[str])\
+        -> Tuple[List[GCPService], Tuple]:
+    topology_task_services = []
+
+    skipped_topology_services = set()
+    topology_tasks = []
+
+    for service in services:
+        if service.name in entities_extractors:
+            if entities_extractors[service.name].used_api in disabled_apis:
+                skipped_topology_services.add(service.name)
+                continue
+            topology_task = entities_extractors[service.name].extractor(context, project_id, service)
+            topology_tasks.append(topology_task)
+            topology_task_services.append(service)
+
+    if skipped_topology_services:
+        skipped_topology_services_string = ", ".join(skipped_topology_services)
+        context.log(project_id,
+                    f"Skipped fetching topology for disabled services: {skipped_topology_services_string}")
+
+    fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
+
+    return topology_task_services, fetch_topology_results
 
 
 def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str, Entity]:
