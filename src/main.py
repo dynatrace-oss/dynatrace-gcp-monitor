@@ -178,7 +178,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
     # Using metrics scope feature, fetching topology is not needed
     if not scoping_project_support_enabled:
-        topology_task_services, fetch_topology_results = fetch_topology(context, project_id, services, disabled_apis)
+        topology_task_services, fetch_topology_results = await fetch_topology(context, project_id, services, disabled_apis)
 
     # Using metrics scope feature, topology_task_services and disabled_apis will be empty, so no filtering is applied
     # and all metrics from all projects are collected
@@ -217,10 +217,9 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     return flat_metric_results
 
 
-def fetch_topology(context: MetricsContext, project_id: str, services: List[GCPService], disabled_apis: Set[str])\
+async def fetch_topology(context: MetricsContext, project_id: str, services: List[GCPService], disabled_apis: Set[str])\
         -> Tuple[List[GCPService], Tuple]:
     topology_task_services = []
-
     skipped_topology_services = set()
     topology_tasks = []
 
