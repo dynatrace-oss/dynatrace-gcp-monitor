@@ -138,6 +138,7 @@ class DtDimensionsMap:
         dt_dimension_sorted_list = sorted(dt_dimensions_set)
         return dt_dimension_sorted_list
 
+
 async def fetch_metric(
         context: MetricsContext,
         project_id: str,
@@ -242,12 +243,10 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
     return DimensionValue(name, string_value)
 
 
-
 def create_dimensions(context: MetricsContext, service_name: str, time_series: Dict, dt_dimensions_mapping: DtDimensionsMap) -> List[DimensionValue]:
-    dt_dimensions = []
-
-    #"gcp.resource.type" is required to easily differentiate services with the same metric set e.g. internal_tcp_lb_rule and internal_udp_lb_rule
-    dt_dimensions.append(create_dimension("gcp.resource.type", service_name, context))
+    # "gcp.resource.type" is required to easily differentiate services with the same metric set
+    # e.g. internal_tcp_lb_rule and internal_udp_lb_rule
+    dt_dimensions = [create_dimension("gcp.resource.type", service_name, context)]
 
     metric_labels = time_series.get('metric', {}).get('labels', {})
     for short_source_label, dim_value in metric_labels.items():
@@ -268,6 +267,7 @@ def create_dimensions(context: MetricsContext, service_name: str, time_series: D
             dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
     return dt_dimensions
+
 
 def flatten_and_enrich_metric_results(
         context: MetricsContext,

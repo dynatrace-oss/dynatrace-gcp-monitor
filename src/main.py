@@ -122,7 +122,8 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         # Using metrics scope feature, checking disabled apis in every project is not needed
         if not scoping_project_support_enabled:
-            disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
+            disabled_projects, disabled_apis_by_project_id = \
+                await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
         if disabled_projects:
             for disabled_project in disabled_projects:
@@ -173,26 +174,23 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                                   disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_tasks = []
     scoping_project_support_enabled = config.scoping_project_support_enabled()
-    #topology_task_services = []
-    #fetch_topology_results = ()
-    topology: Dict[GCPService, Tuple] = {}
+    topology: Dict[GCPService, List[Entity]] = {}
 
-    # Using metrics scope feature, fetching topology is not needed
+    # Topology fetching: retrieving additional instances info about enabled services
+    # Using metrics scope feature, fetching topology is not needed,
+    # because we can't fetch details from instances in other projects
     if not scoping_project_support_enabled:
-        #topology_task_services, fetch_topology_results = await fetch_topology(context, project_id, services, disabled_apis)
         topology = await fetch_topology(context, project_id, services, disabled_apis)
 
-    # Using metrics scope feature, topology_task_services and disabled_apis will be empty, so no filtering is applied
-    # and all metrics from all projects are collected
-    skipped_services_no_instances = []
+    # Using metrics scope feature, topology and disabled_apis will be empty, so no filtering is applied
+    # and metrics from all projects are being collected
+    skipped_services_with_no_instances = []
     skipped_disabled_apis = set()
+
     for service in services:
-        if service in topology.items():
-            #service_topology = fetch_topology_results[topology_task_services.index(service)]
-            service_topology = topology[service]
-            if not service_topology:
-                skipped_services_no_instances.append(f"{service.name}/{service.feature_set}")
-                continue  # skip fetching the metrics because there are no instances
+        if service in topology.keys() and not topology[service]:
+            skipped_services_with_no_instances.append(f"{service.name}/{service.feature_set}")
+            continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
             gcp_api_last_index = metric.google_metric.find("/")
             api = metric.google_metric[:gcp_api_last_index]
@@ -207,44 +205,44 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             )
             fetch_metric_tasks.append(fetch_metric_task)
 
-    if skipped_services_no_instances:
-        skipped_services_string = ', '.join(skipped_services_no_instances)
+    if skipped_services_with_no_instances:
+        skipped_services_string = ', '.join(skipped_services_with_no_instances)
         context.log(project_id, f"Skipped fetching metrics for {skipped_services_string} due to no instances detected")
     if skipped_disabled_apis:
         skipped_disabled_apis_string = ", ".join(skipped_disabled_apis)
         context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
-    #entity_id_map = build_entity_id_map(fetch_topology_results)
     entity_id_map = build_entity_id_map(topology.values())
     flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
     return flat_metric_results
 
 
 async def fetch_topology(context: MetricsContext, project_id: str, services: List[GCPService], disabled_apis: Set[str])\
-        -> Dict[GCPService, Tuple]:
-    topology_services = []
+        -> Dict[GCPService, List[Entity]]:
     topology_tasks = []
-    skipped_topology_services = set()
-    topology: Dict[GCPService, Tuple] = {}
+    enabled_topology_services = []
+    disabled_topology_services = set()
+    topology: Dict[GCPService, List[Entity]] = {}
 
+    # Identify enabled services and create tasks for fetching their topology
     for service in services:
         if service.name in entities_extractors:
-            if entities_extractors[service.name].used_api in disabled_apis:
-                skipped_topology_services.add(service.name)
-                continue
-            topology_task = entities_extractors[service.name].extractor(context, project_id, service)
-            topology_tasks.append(topology_task)
-            topology_services.append(service)
+            if entities_extractors[service.name].used_api not in disabled_apis:
+                topology_task = entities_extractors[service.name].extractor(context, project_id, service)
+                topology_tasks.append(topology_task)
+                enabled_topology_services.append(service)
+            else:
+                disabled_topology_services.add(service.name)
 
-    if skipped_topology_services:
-        skipped_topology_services_string = ", ".join(skipped_topology_services)
+    if disabled_topology_services:
+        disabled_topology_services_string = ", ".join(disabled_topology_services)
         context.log(project_id,
-                    f"Skipped fetching topology for disabled services: {skipped_topology_services_string}")
+                    f"Skipped fetching topology for disabled services: {disabled_topology_services_string}")
 
     topology_tasks_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
 
-    for index, service in enumerate(topology_services):
+    for index, service in enumerate(enabled_topology_services):
         topology[service] = topology_tasks_results[index]
 
     return topology
