@@ -173,20 +173,23 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                                   disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_tasks = []
     scoping_project_support_enabled = config.scoping_project_support_enabled()
-    topology_task_services = []
-    fetch_topology_results = ()
+    #topology_task_services = []
+    #fetch_topology_results = ()
+    topology: Dict[GCPService, Tuple] = {}
 
     # Using metrics scope feature, fetching topology is not needed
     if not scoping_project_support_enabled:
-        topology_task_services, fetch_topology_results = await fetch_topology(context, project_id, services, disabled_apis)
+        #topology_task_services, fetch_topology_results = await fetch_topology(context, project_id, services, disabled_apis)
+        topology = await fetch_topology(context, project_id, services, disabled_apis)
 
     # Using metrics scope feature, topology_task_services and disabled_apis will be empty, so no filtering is applied
     # and all metrics from all projects are collected
     skipped_services_no_instances = []
     skipped_disabled_apis = set()
     for service in services:
-        if service in topology_task_services:
-            service_topology = fetch_topology_results[topology_task_services.index(service)]
+        if service in topology.items():
+            #service_topology = fetch_topology_results[topology_task_services.index(service)]
+            service_topology = topology[service]
             if not service_topology:
                 skipped_services_no_instances.append(f"{service.name}/{service.feature_set}")
                 continue  # skip fetching the metrics because there are no instances
@@ -212,16 +215,18 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
-    entity_id_map = build_entity_id_map(fetch_topology_results)
+    #entity_id_map = build_entity_id_map(fetch_topology_results)
+    entity_id_map = build_entity_id_map(topology.values())
     flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
     return flat_metric_results
 
 
 async def fetch_topology(context: MetricsContext, project_id: str, services: List[GCPService], disabled_apis: Set[str])\
-        -> Tuple[List[GCPService], Tuple]:
-    topology_task_services = []
-    skipped_topology_services = set()
+        -> Dict[GCPService, Tuple]:
+    topology_services = []
     topology_tasks = []
+    skipped_topology_services = set()
+    topology: Dict[GCPService, Tuple] = {}
 
     for service in services:
         if service.name in entities_extractors:
@@ -230,16 +235,19 @@ async def fetch_topology(context: MetricsContext, project_id: str, services: Lis
                 continue
             topology_task = entities_extractors[service.name].extractor(context, project_id, service)
             topology_tasks.append(topology_task)
-            topology_task_services.append(service)
+            topology_services.append(service)
 
     if skipped_topology_services:
         skipped_topology_services_string = ", ".join(skipped_topology_services)
         context.log(project_id,
                     f"Skipped fetching topology for disabled services: {skipped_topology_services_string}")
 
-    fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
+    topology_tasks_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
 
-    return topology_task_services, fetch_topology_results
+    for index, service in enumerate(topology_services):
+        topology[service] = topology_tasks_results[index]
+
+    return topology
 
 
 def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str, Entity]:
