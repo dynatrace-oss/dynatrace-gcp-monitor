@@ -28,6 +28,10 @@ class SfmMetric:
     def generate_timeseries_datapoints(self, context, interval) -> List[dict]:
         pass
 
+    @abstractmethod
+    def reset(self):
+        pass
+
 
 class SFMMetricDynatraceRequestCount(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/request_count"
@@ -56,6 +60,9 @@ class SFMMetricDynatraceRequestCount(SfmMetric):
 
         return time_series
 
+    def reset(self):
+        self.value = {}
+
 
 class SFMMetricGCPMetricRequestCount(SfmMetric):
     key = None
@@ -68,6 +75,11 @@ class SFMMetricGCPMetricRequestCount(SfmMetric):
     def generate_timeseries_datapoints(self, context, interval):
         # no timeseries generated before, preserving behaviour!!!
         return []
+
+    def reset(self):
+        self.value = {}
+
+
 
 
 class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
@@ -96,6 +108,9 @@ class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
                 }]))
         return time_series
 
+    def reset(self):
+        self.value = {}
+
 
 class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/ingest_lines"
@@ -121,6 +136,9 @@ class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
                     "value": {"int64Value": count}
                 }]))
         return time_series
+
+    def reset(self):
+        self.value = {}
 
 
 class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
@@ -148,6 +166,8 @@ class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
                 }]))
         return time_series
 
+    def reset(self):
+        self.value = {}
 
 class SFMMetricSetupExecutionTime(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
@@ -175,6 +195,8 @@ class SFMMetricSetupExecutionTime(SfmMetric):
                 "DOUBLE"))
         return time_series
 
+    def reset(self):
+        self.value = {}
 
 class SFMMetricFetchGCPDataExecutionTime(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
@@ -201,6 +223,9 @@ class SFMMetricFetchGCPDataExecutionTime(SfmMetric):
                 }],
                 "DOUBLE"))
         return time_series
+
+    def reset(self):
+        self.value = {}
 
 
 class SFMMetricPushToDynatraceExecutionTime(SfmMetric):
@@ -229,6 +254,9 @@ class SFMMetricPushToDynatraceExecutionTime(SfmMetric):
                 "DOUBLE"))
         return time_series
 
+    def reset(self):
+        self.value = {}
+
 
 class SFMMetricDynatraceConnectivity(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/connectivity"
@@ -250,3 +278,6 @@ class SFMMetricDynatraceConnectivity(SfmMetric):
                 "interval": interval,
                 "value": {"int64Value": 1}
             }])]
+
+    def reset(self):
+        self.value = None
