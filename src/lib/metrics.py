@@ -150,7 +150,7 @@ class GCPService:
         object.__setattr__(self, "monitoring_filter", monitoring_filter)
 
     def __hash__(self):
-        return hash((self.name, self.technology_name, self.feature_set, self.dimensions, self.metrics, self.monitoring_filter, self.activation))
+        return hash((self.name, self.technology_name, self.feature_set, self.monitoring_filter, self.activation))
 
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'
