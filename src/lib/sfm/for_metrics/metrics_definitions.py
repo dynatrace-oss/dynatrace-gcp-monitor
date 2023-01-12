@@ -80,8 +80,6 @@ class SFMMetricGCPMetricRequestCount(SfmMetric):
         self.value = {}
 
 
-
-
 class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/ingest_lines"
     value = {}
@@ -169,6 +167,7 @@ class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
     def reset(self):
         self.value = {}
 
+
 class SFMMetricSetupExecutionTime(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
     value = {}
@@ -197,6 +196,7 @@ class SFMMetricSetupExecutionTime(SfmMetric):
 
     def reset(self):
         self.value = {}
+
 
 class SFMMetricFetchGCPDataExecutionTime(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
