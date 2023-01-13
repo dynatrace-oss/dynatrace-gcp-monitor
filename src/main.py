@@ -116,12 +116,11 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
-        scoping_project_support_enabled = config.scoping_project_support_enabled()
         disabled_projects = []
         disabled_apis_by_project_id = {}
 
         # Using metrics scope feature, checking disabled apis in every project is not needed
-        if not scoping_project_support_enabled:
+        if not config.scoping_project_support_enabled():
             disabled_projects, disabled_apis_by_project_id = \
                 await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
@@ -173,13 +172,12 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_tasks = []
-    scoping_project_support_enabled = config.scoping_project_support_enabled()
     topology: Dict[GCPService, List[Entity]] = {}
 
     # Topology fetching: retrieving additional instances info about enabled services
     # Using metrics scope feature, fetching topology is not needed,
     # because we can't fetch details from instances in other projects
-    if not scoping_project_support_enabled:
+    if not config.scoping_project_support_enabled():
         topology = await fetch_topology(context, project_id, services, disabled_apis)
 
     # Using metrics scope feature, topology and disabled_apis will be empty, so no filtering is applied
@@ -188,7 +186,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     skipped_disabled_apis = set()
 
     for service in services:
-        if service in topology.keys() and not topology[service]:
+        if service in topology and not topology[service]:
             skipped_services_with_no_instances.append(f"{service.name}/{service.feature_set}")
             continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
