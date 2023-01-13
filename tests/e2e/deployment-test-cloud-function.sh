@@ -39,26 +39,9 @@ ACTIVATION_CONFIG_FILE="./activation-config.yaml"
 
 cd ./e2e_test || exit 1
 
-cat <<EOF > activation.config.e2e.yaml
-googleCloud:
-  required:
-    gcpProjectId: "${GCP_PROJECT_ID}"
-    dynatraceTenantUrl: "${DYNATRACE_URL}"
-    dynatraceApiToken: "${DYNATRACE_ACCESS_KEY}"
-    cloudFunctionSize: s
-    cloudFunctionRegion: us-central1
-    preferredAppEngineRegion: us-central
-  common:
-    dynatraceUrlSecretName: "${DYNATRACE_URL_SECRET_NAME}"
-    dynatraceAccessKeySecretName: "${DYNATRACE_ACCESS_KEY_SECRET_NAME}"
-    serviceAccount: "${IAM_SERVICE_ACCOUNT}"
-    iamRole: "${IAM_ROLE_METRCICS}"
-    requireValidCertificate: false
-  metrics:
-    pubSubTopic: "${PUBSUB_TOPIC}"
-    function: "${METRIC_FORWARDING_FUNCTION}"
-    scheduler: "${CLOUD_SCHEDULER}"
-EOF
+# Create activation.config.e2e.yaml including lines to be replaced. Adding cloud run revision to list of default services
+create_activation_config_e2e_file
+
 "$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' "$ACTIVATION_CONFIG_FILE" activation.config.e2e.yaml
 
 echo "Deploying gcp cloud function"

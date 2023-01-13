@@ -12,7 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import os
-from typing import List
+from typing import List, Dict
 
 import yaml
 
@@ -55,6 +55,17 @@ def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml
             logging_context.error(f"No feature set in given {service} service.")
 
     return services_whitelist
+
+
+def is_yaml_file(f: str) -> bool:
+    return f.endswith(".yml") or f.endswith(".yaml")
+
+
+def extract_technology_name(config_yaml):
+    technology_name = config_yaml.get("technology", {})
+    if isinstance(technology_name, Dict):
+        technology_name = technology_name.get("name", "N/A")
+    return technology_name
 
 
 def is_deployment_running_inside_cloud_function():

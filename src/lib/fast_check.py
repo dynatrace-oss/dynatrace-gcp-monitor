@@ -18,7 +18,7 @@ import os
 import re
 from datetime import datetime
 from queue import Queue
-from typing import NamedTuple, List, Optional
+from typing import NamedTuple, List, Optional, Tuple
 from urllib.parse import urljoin
 
 from aiohttp import ClientSession
@@ -43,7 +43,8 @@ METRICS_CONFIGURATION_FLAGS = [
     "SERVICE_USAGE_BOOKING",
     "USE_PROXY",
     "SELF_MONITORING_ENABLED",
-    "QUERY_INTERVAL_MIN"
+    "QUERY_INTERVAL_MIN",
+    "SCOPING_PROJECT_SUPPORT_ENABLED"
 ]
 
 LOGS_CONFIGURATION_FLAGS = [
@@ -74,10 +75,6 @@ DYNATRACE_REQUIRED_TOKEN_SCOPES = [
 ]
 
 FastCheckResult = NamedTuple('FastCheckResult', [('projects', List[str])])
-
-
-def find_service_name(service):
-    return service_name_pattern.match(service).group(2) if service_name_pattern.match(service) else None
 
 
 def valid_dynatrace_scopes(token_metadata: dict):
@@ -160,7 +157,7 @@ class MetricsFastCheck:
         self.logging_context = logging_context
         self.token = token
 
-    async def is_project_ready_to_monitor(self, project_id):
+    async def is_project_ready_to_monitor(self, project_id: str) -> Tuple[str, bool]:
         try:
             if is_deployment_running_inside_cloud_function():
                 dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)

@@ -13,6 +13,7 @@
 #     limitations under the License.
 import asyncio
 import os
+import platform
 import threading
 import time
 from datetime import datetime
@@ -43,8 +44,9 @@ QUERY_INTERVAL_SEC = get_query_interval_minutes() * 60
 QUERY_TIMEOUT_SEC = (get_query_interval_minutes() + 2) * 60
 
 # USED TO TEST ON WINDOWS MACHINE
-# policy = asyncio.WindowsSelectorEventLoopPolicy()
-# asyncio.set_event_loop_policy(policy)
+if platform.system() == 'Windows':
+    policy = asyncio.WindowsSelectorEventLoopPolicy()
+    asyncio.set_event_loop_policy(policy)
 
 loop = asyncio.get_event_loop()
 
