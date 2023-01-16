@@ -268,23 +268,6 @@ class LogsSfmContext(SfmContext):
 
 class MetricsContext(SfmContext):
 
-    sfm: [SfmKeys, SfmMetric] = {
-        # to send new metric, just create definition class and add it here
-        # this does not handle metric descriptor unfortunately but if you
-        # add metric it should work without it
-        SfmKeys.dynatrace_connectivity: SFMMetricDynatraceConnectivity(),
-        SfmKeys.gcp_metric_request_count: SFMMetricGCPMetricRequestCount(),
-        SfmKeys.dynatrace_ingest_lines_ok_count: SFMMetricDynatraceIngestLinesOkCount(),
-        SfmKeys.dynatrace_ingest_lines_invalid_count: SFMMetricDynatraceIngestLinesInvalidCount(),
-        SfmKeys.dynatrace_ingest_lines_dropped_count: SFMMetricDynatraceIngestLinesDroppedCount(),
-        SfmKeys.setup_execution_time: SFMMetricSetupExecutionTime(),
-        SfmKeys.fetch_gcp_data_execution_time: SFMMetricFetchGCPDataExecutionTime(),
-        SfmKeys.push_to_dynatrace_execution_time: SFMMetricPushToDynatraceExecutionTime(),
-        SfmKeys.dynatrace_request_count: SFMMetricDynatraceRequestCount(),
-    }
-
-    dynatrace_connectivity = None
-
     def __init__(
             self,
             gcp_session: aiohttp.ClientSession,
@@ -309,6 +292,21 @@ class MetricsContext(SfmContext):
             sfm_metric_map=SELF_MONITORING_METRIC_MAP,
             gcp_session=gcp_session
         )
+        self.sfm: [SfmKeys, SfmMetric] = {
+            # to send new metric, just create definition class and add it here
+            # this does not handle metric descriptor unfortunately but if you
+            # add metric it should work without it
+            SfmKeys.dynatrace_connectivity: SFMMetricDynatraceConnectivity(),
+            SfmKeys.gcp_metric_request_count: SFMMetricGCPMetricRequestCount(),
+            SfmKeys.dynatrace_ingest_lines_ok_count: SFMMetricDynatraceIngestLinesOkCount(),
+            SfmKeys.dynatrace_ingest_lines_invalid_count: SFMMetricDynatraceIngestLinesInvalidCount(),
+            SfmKeys.dynatrace_ingest_lines_dropped_count: SFMMetricDynatraceIngestLinesDroppedCount(),
+            SfmKeys.setup_execution_time: SFMMetricSetupExecutionTime(),
+            SfmKeys.fetch_gcp_data_execution_time: SFMMetricFetchGCPDataExecutionTime(),
+            SfmKeys.push_to_dynatrace_execution_time: SFMMetricPushToDynatraceExecutionTime(),
+            SfmKeys.dynatrace_request_count: SFMMetricDynatraceRequestCount(),
+        }
+        self.dynatrace_connectivity = None
         self.dt_session = dt_session
         self.execution_time = execution_time.replace(microsecond=0)
         self.execution_interval = timedelta(seconds=execution_interval_seconds)
@@ -320,6 +318,7 @@ class MetricsContext(SfmContext):
 
         self.update_dt_connectivity_status(DynatraceConnectivity.Ok)
         self.start_processing_timestamp = 0
+
 
     def update_dt_connectivity_status(self, status: DynatraceConnectivity):
         self.sfm[SfmKeys.dynatrace_connectivity].update(status)
