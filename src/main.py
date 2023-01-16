@@ -20,7 +20,7 @@ import traceback
 from datetime import datetime
 from os import listdir
 from os.path import isfile
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Iterable
 
 import yaml
 
@@ -29,7 +29,6 @@ from lib.configuration import config
 from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
-from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
@@ -37,7 +36,9 @@ from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enric
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
-from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
+from lib.topology.topology import fetch_topology, build_entity_id_map
+from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets, \
+    is_yaml_file, extract_technology_name
 
 
 def dynatrace_gcp_extension(event, context):
@@ -71,7 +72,7 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
     context = LoggingContext(execution_id)
     if not services:
-        # Load services for GCP Function and for tests
+        # Load services for GCP Function
         services = load_supported_services(context)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -115,7 +116,13 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
-        disabled_projects, disabled_apis_by_project_id = await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
+        disabled_projects = []
+        disabled_apis_by_project_id = {}
+
+        # Using metrics scope feature, checking disabled apis in every project is not needed
+        if not config.scoping_project_support_enabled():
+            disabled_projects, disabled_apis_by_project_id = \
+                await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
         if disabled_projects:
             for disabled_project in disabled_projects:
@@ -149,10 +156,6 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
     # Noise on Windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
 
-def is_yaml_file(f: str) -> bool:
-    return f.endswith(".yml") or f.endswith(".yaml")
-
-
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str]):
     try:
@@ -169,33 +172,23 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_tasks = []
-    topology_tasks = []
-    topology_task_services = []
-    skipped_topology_services = set()
+    topology: Dict[GCPService, Iterable[Entity]] = {}
 
-    for service in services:
-        if service.name in entities_extractors:
-            if entities_extractors[service.name].used_api in disabled_apis:
-                skipped_topology_services.add(service.name)
-                continue
-            topology_task = entities_extractors[service.name].extractor(context, project_id, service)
-            topology_tasks.append(topology_task)
-            topology_task_services.append(service)
+    # Topology fetching: retrieving additional instances info about enabled services
+    # Using metrics scope feature, fetching topology is not needed,
+    # because we can't fetch details from instances in other projects
+    if not config.scoping_project_support_enabled():
+        topology = await fetch_topology(context, project_id, services, disabled_apis)
 
-    if skipped_topology_services:
-        skipped_topology_services_string = ", ".join(skipped_topology_services)
-        context.log(project_id, f"Skipped fetching topology for disabled services: {skipped_topology_services_string}")
-
-    fetch_topology_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
-
-    skipped_services_no_instances = []
+    # Using metrics scope feature, topology and disabled_apis will be empty, so no filtering is applied
+    # and metrics from all projects are being collected
+    skipped_services_with_no_instances = []
     skipped_disabled_apis = set()
+
     for service in services:
-        if service in topology_task_services:
-            service_topology = fetch_topology_results[topology_task_services.index(service)]
-            if not service_topology:
-                skipped_services_no_instances.append(f"{service.name}/{service.feature_set}")
-                continue  # skip fetching the metrics because there are no instances
+        if service in topology and not topology[service]:
+            skipped_services_with_no_instances.append(f"{service.name}/{service.feature_set}")
+            continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
             gcp_api_last_index = metric.google_metric.find("/")
             api = metric.google_metric[:gcp_api_last_index]
@@ -210,30 +203,17 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             )
             fetch_metric_tasks.append(fetch_metric_task)
 
-    if skipped_services_no_instances:
-        skipped_services_string = ', '.join(skipped_services_no_instances)
+    if skipped_services_with_no_instances:
+        skipped_services_string = ', '.join(skipped_services_with_no_instances)
         context.log(project_id, f"Skipped fetching metrics for {skipped_services_string} due to no instances detected")
     if skipped_disabled_apis:
         skipped_disabled_apis_string = ", ".join(skipped_disabled_apis)
         context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
-    entity_id_map = build_entity_id_map(fetch_topology_results)
+    entity_id_map = build_entity_id_map(list(topology.values()))
     flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
     return flat_metric_results
-
-
-def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str, Entity]:
-    result = {}
-    for result_set in fetch_topology_results:
-        for entity in result_set:
-            # Ensure order of entries to avoid "flipping" when choosing the first one for dimension value
-            entity.dns_names.sort()
-            entity.ip_addresses.sort()
-            entity.tags.sort()
-            entity.listen_ports.sort()
-            result[entity.id] = entity
-    return result
 
 
 def load_supported_services(context: LoggingContext) -> List[GCPService]:
@@ -259,30 +239,23 @@ def load_supported_services(context: LoggingContext) -> List[GCPService]:
 
                 for service_yaml in config_yaml.get("gcp", {}):
                     service_name = service_yaml.get("service", "None")
-                    featureSet = service_yaml.get("featureSet", "default_metrics")
+                    feature_set = service_yaml.get("featureSet", "default_metrics")
                     # If whitelist of services exists and current service is not present in it, skip
                     # If whitelist is empty - no services explicitly selected - load all available
                     whitelist_exists = feature_sets_from_activation_config.__len__() > 0
-                    if f'{service_name}/{featureSet}' in feature_sets_from_activation_config or not whitelist_exists:
+                    if f'{service_name}/{feature_set}' in feature_sets_from_activation_config or not whitelist_exists:
                         activation = activation_config_per_service.get(service_name, {})
                         services.append(GCPService(tech_name=technology_name, **service_yaml, activation=activation))
 
         except Exception as error:
             context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
             continue
-    featureSets = [f"{service.name}/{service.feature_set}" for service in services]
-    if featureSets:
-        context.log("Selected feature sets: " + ", ".join(featureSets))
+    feature_sets = [f"{service.name}/{service.feature_set}" for service in services]
+    if feature_sets:
+        context.log("Selected feature sets: " + ", ".join(feature_sets))
     else:
         context.log("Empty feature sets. GCP services not monitored.")
     return services
-
-
-def extract_technology_name(config_yaml):
-    technology_name = config_yaml.get("technology", {})
-    if isinstance(technology_name, Dict):
-        technology_name = technology_name.get("name", "N/A")
-    return technology_name
 
 
 async def run_fetch_metric(

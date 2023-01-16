@@ -81,6 +81,8 @@ useProxy: ""
 httpProxy: ""
 # httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
 httpsProxy: ""
+# scopingProjectSupportEnabled: set to true when metrics scope is configured, so metrics will be collected from all monitored projects.
+scopingProjectSupportEnabled: "false"
 
 
 # LOGS VALUES - DEFAULTS

@@ -56,6 +56,8 @@ googleCloud:
     # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly.
     # Allowed values: true/yes, false/no
     selfMonitoringEnabled: false
+    # scopingProjectSupportEnabled: set to true when metrics scope is configured, so metrics will be collected from all monitored projects.
+    scopingProjectSupportEnabled: false
   metrics:
     # Name of the Pub/Sub topic for metric function
     pubSubTopic: dynatrace-gcp-service-invocation

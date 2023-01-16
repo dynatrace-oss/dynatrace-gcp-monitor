@@ -87,19 +87,9 @@ VALUES_FILE="./dynatrace-gcp-function/values.yaml"
 
 cd ./e2e_test/helm-deployment-package || exit 1
 
-cat <<EOF > values.e2e.yaml
-gcpProjectId: "${GCP_PROJECT_ID}"
-deploymentType: "${DEPLOYMENT_TYPE}"
-dynatraceAccessKey: "${DYNATRACE_ACCESS_KEY}"
-dynatraceUrl: "${DYNATRACE_URL}"
-logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
-requireValidCertificate: "false"
-dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
-activeGate:
-  useExisting: "true"
-  dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
-serviceAccount: "${IAM_SERVICE_ACCOUNT}"
-EOF
+# Create values.e2e.yaml including lines to be replaced. Adding cloud run revision to list of default services
+create_values_e2e_file
+
 "$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
 gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 --project "${GCP_PROJECT_ID}"
