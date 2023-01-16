@@ -26,7 +26,7 @@ def log_self_monitoring_metrics(context: MetricsContext):
     sfm_entries: List[str] = []
     for key, sfm_metric in context.sfm.items():
         sfm_entries.append(f"[{sfm_metric.description}: {sfm_metric.value}]")
-    context.log("SFM", "Metrics SFM: " + ",\n\t".join(sfm_entries))
+    context.log("SFM", "Metrics SFM: ".join(sfm_entries))
 
 
 async def sfm_push_metrics(sfm_metrics: List[SfmMetric], context: SfmContext, metrics_endtime: datetime):
