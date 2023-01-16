@@ -65,6 +65,7 @@ class SFMMetricGCPMetricRequestCount(SfmMetric):
 
     def __init__(self):
         self.value = {}
+
     def increment(self, project):
         self.value[project] = self.value.get(project, 0) + 1
 
@@ -79,6 +80,7 @@ class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
 
     def __init__(self):
         self.value = {}
+
     def update(self, project, lines: int):
         self.value[project] = self.value.get(project, 0) + lines
 
@@ -107,6 +109,7 @@ class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
 
     def __init__(self):
         self.value = {}
+
     def update(self, project, lines: int):
         self.value[project] = self.value.get(project, 0) + lines
 
@@ -162,7 +165,6 @@ class SFMMetricSetupExecutionTime(SfmMetric):
 
     def __init__(self):
         self.value = {}
-
 
     def update(self, project, time):
         self.value[project] = time
