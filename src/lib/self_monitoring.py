@@ -34,12 +34,6 @@ async def sfm_push_metrics(sfm_metrics: List[SfmMetric], context: SfmContext, me
     context.log(f"Pushing SFM metrics: {prepared_keys}")
     time_series = create_sfm_timeseries_datapoints(sfm_metrics, context, metrics_endtime)
     await push_self_monitoring_time_series(context, time_series)
-    sfm_reset_values(sfm_metrics)
-
-
-def sfm_reset_values(sfm_metrics: List[SfmMetric]):
-    for value in sfm_metrics:
-        value.reset()
 
 
 async def push_self_monitoring_time_series(context: SfmContext, time_series: Dict):
