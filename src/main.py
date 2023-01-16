@@ -20,7 +20,7 @@ import traceback
 from datetime import datetime
 from os import listdir
 from os.path import isfile
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Iterable
 
 import yaml
 
@@ -29,7 +29,6 @@ from lib.configuration import config
 from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes
 from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
-from lib.entities import entities_extractors
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
@@ -37,6 +36,7 @@ from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enric
 from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
+from lib.topology.topology import fetch_topology, build_entity_id_map
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets, \
     is_yaml_file, extract_technology_name
 
@@ -172,7 +172,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_tasks = []
-    topology: Dict[GCPService, List[Entity]] = {}
+    topology: Dict[GCPService, Iterable[Entity]] = {}
 
     # Topology fetching: retrieving additional instances info about enabled services
     # Using metrics scope feature, fetching topology is not needed,
@@ -211,52 +211,9 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
-    entity_id_map = build_entity_id_map(topology.values())
+    entity_id_map = build_entity_id_map(list(topology.values()))
     flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
     return flat_metric_results
-
-
-async def fetch_topology(context: MetricsContext, project_id: str, services: List[GCPService], disabled_apis: Set[str])\
-        -> Dict[GCPService, List[Entity]]:
-    topology_tasks = []
-    enabled_topology_services = []
-    disabled_topology_services = set()
-    topology: Dict[GCPService, List[Entity]] = {}
-
-    # Identify enabled services and create tasks for fetching their topology
-    for service in services:
-        if service.name in entities_extractors:
-            if entities_extractors[service.name].used_api not in disabled_apis:
-                topology_task = entities_extractors[service.name].extractor(context, project_id, service)
-                topology_tasks.append(topology_task)
-                enabled_topology_services.append(service)
-            else:
-                disabled_topology_services.add(service.name)
-
-    if disabled_topology_services:
-        disabled_topology_services_string = ", ".join(disabled_topology_services)
-        context.log(project_id,
-                    f"Skipped fetching topology for disabled services: {disabled_topology_services_string}")
-
-    topology_tasks_results = await asyncio.gather(*topology_tasks, return_exceptions=True)
-
-    for index, service in enumerate(enabled_topology_services):
-        topology[service] = topology_tasks_results[index]
-
-    return topology
-
-
-def build_entity_id_map(fetch_topology_results: List[List[Entity]]) -> Dict[str, Entity]:
-    result = {}
-    for result_set in fetch_topology_results:
-        for entity in result_set:
-            # Ensure order of entries to avoid "flipping" when choosing the first one for dimension value
-            entity.dns_names.sort()
-            entity.ip_addresses.sort()
-            entity.tags.sort()
-            entity.listen_ports.sort()
-            result[entity.id] = entity
-    return result
 
 
 def load_supported_services(context: LoggingContext) -> List[GCPService]:
