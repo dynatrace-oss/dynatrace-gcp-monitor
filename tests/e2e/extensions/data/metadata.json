@@ -1,6 +1,6 @@
 [
     {
-        "key": "cloud.gcp.logging.googleapis.com.log_entry_count.gauge",
+        "key": "cloud.gcp.logging.googleapis.com.log_entry_count",
         "metadata": {
             "displayName": "Log entries",
             "unit": "Count"
