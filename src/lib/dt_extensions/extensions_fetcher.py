@@ -97,13 +97,7 @@ class ExtensionsFetcher:
 
     async def _get_service_configs_for_extension(self, extension_name: str, extension_version: str,
                                                  activation_config_per_service, feature_sets_from_activation_config) -> (List[GCPService], List):
-        if extension_name in EXTENSIONS_CACHE_BY_NAME and EXTENSIONS_CACHE_BY_NAME[extension_name].version == extension_version:
-            extension_configuration = EXTENSIONS_CACHE_BY_NAME[extension_name].definition
-        else:
-            self.logging_context.log(f"Downloading extension {extension_name} ({extension_version})")
-            extension_zip = await self._get_extension_zip_from_dynatrace_cluster(extension_name, extension_version)
-            extension_configuration = self._load_extension_config_from_zip(extension_name, extension_zip) if extension_zip else {}
-            EXTENSIONS_CACHE_BY_NAME[extension_name] = ExtensionCacheEntry(extension_version, extension_configuration)
+        extension_configuration = await self.get_extension_configuration_from_cache_or_download(extension_name, extension_version)
 
         if "gcp" not in extension_configuration:
             self.logging_context.log(f"Incorrect extension fetched from Dynatrace cluster. {extension_name}-{extension_version} has no 'gcp' section and will be skipped")
@@ -120,6 +114,16 @@ class ExtensionsFetcher:
             else:
                 not_configured_services.append(feature_set)
         return configured_services, not_configured_services
+
+    async def get_extension_configuration_from_cache_or_download(self, extension_name, extension_version):
+        if extension_name in EXTENSIONS_CACHE_BY_NAME and EXTENSIONS_CACHE_BY_NAME[extension_name].version == extension_version:
+            extension_configuration = EXTENSIONS_CACHE_BY_NAME[extension_name].definition
+        else:
+            self.logging_context.log(f"Downloading extension {extension_name} ({extension_version})")
+            extension_zip = await self._get_extension_zip_from_dynatrace_cluster(extension_name, extension_version)
+            extension_configuration = self._load_extension_config_from_zip(extension_name, extension_zip) if extension_zip else {}
+            EXTENSIONS_CACHE_BY_NAME[extension_name] = ExtensionCacheEntry(extension_version, extension_configuration)
+        return extension_configuration
 
     async def _get_extension_zip_from_dynatrace_cluster(self, extension_name, extension_version) -> Optional[bytes]:
         url = f"{self.dynatrace_url.rstrip('/')}/api/v2/extensions/{extension_name}/{extension_version}"
