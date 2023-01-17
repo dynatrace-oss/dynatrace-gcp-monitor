@@ -26,6 +26,10 @@ from lib.utilities import read_activation_yaml, get_activation_config_per_servic
 ExtensionsFetchResult = NamedTuple('ExtensionsFetchResult', [('services', List[GCPService])])
 
 
+ExtensionCacheEntry = NamedTuple('ExtensionCacheEntry', [('version', str), ('definition', Dict)])
+EXTENSIONS_CACHE_BY_NAME: Dict[str, ExtensionCacheEntry] = {}
+
+
 class ExtensionsFetcher:
 
     def __init__(self, dt_session: ClientSession, dynatrace_url: str, dynatrace_access_key: str, logging_context: LoggingContext):
@@ -49,7 +53,8 @@ class ExtensionsFetcher:
             configured_services.extend(configured_services_for_extension)
             not_configured_services.extend(not_configured_services_for_extension)
         if not_configured_services:
-            self.logging_context.log(f"Following services from extensions are filtered out, because not found in 'gcpServicesYaml': {not_configured_services}")
+            self.logging_context.log(f"Following services (enabled in extensions) are filtered out,"
+                                     f" because not enabled in deployment config: {not_configured_services}")
         return ExtensionsFetchResult(services=configured_services)
 
     async def _get_extensions_dict_from_dynatrace_cluster(self) -> Dict[str, str]:
@@ -92,8 +97,14 @@ class ExtensionsFetcher:
 
     async def _get_service_configs_for_extension(self, extension_name: str, extension_version: str,
                                                  activation_config_per_service, feature_sets_from_activation_config) -> (List[GCPService], List):
-        extension_zip = await self._get_extension_zip_from_dynatrace_cluster(extension_name, extension_version)
-        extension_configuration = self._load_extension_config_from_zip(extension_name, extension_zip) if extension_zip else {}
+        if extension_name in EXTENSIONS_CACHE_BY_NAME and EXTENSIONS_CACHE_BY_NAME[extension_name].version == extension_version:
+            extension_configuration = EXTENSIONS_CACHE_BY_NAME[extension_name].definition
+        else:
+            self.logging_context.log(f"Downloading extension {extension_name} ({extension_version})")
+            extension_zip = await self._get_extension_zip_from_dynatrace_cluster(extension_name, extension_version)
+            extension_configuration = self._load_extension_config_from_zip(extension_name, extension_zip) if extension_zip else {}
+            EXTENSIONS_CACHE_BY_NAME[extension_name] = ExtensionCacheEntry(extension_version, extension_configuration)
+
         if "gcp" not in extension_configuration:
             self.logging_context.log(f"Incorrect extension fetched from Dynatrace cluster. {extension_name}-{extension_version} has no 'gcp' section and will be skipped")
             return []

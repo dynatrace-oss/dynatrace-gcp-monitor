@@ -22,7 +22,7 @@ from assertpy import assert_that
 from pytest_mock import MockerFixture
 
 from lib.context import LoggingContext
-from lib.extensions_fetcher import ExtensionsFetcher
+from lib.dt_extensions.extensions_fetcher import ExtensionsFetcher
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 ACTIVATION_CONFIG = "{services: [{service: gce_instance, featureSets: [default_metrics, agent], vars: {filter_conditions: 'resource.labels.instance_name=starts_with(\"test\")'}},\

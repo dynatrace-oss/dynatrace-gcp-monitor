@@ -25,8 +25,8 @@ from lib import credentials
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes, SfmContext
-from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_url, fetch_dynatrace_api_key
-from lib.extensions_fetcher import ExtensionsFetchResult, ExtensionsFetcher
+from lib.credentials import create_token, get_project_id_from_environment
+from lib.dt_extensions.dt_extensions import extensions_fetch, prepare_services_config_for_next_polling
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
@@ -88,23 +88,6 @@ async def metrics_initial_check(gcp_session: ClientSession, dt_session: ClientSe
         return None
 
 
-async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[ExtensionsFetchResult]:
-    extension_fetcher_result = await ExtensionsFetcher(
-        dt_session=dt_session,
-        dynatrace_url=await fetch_dynatrace_url(gcp_session, get_project_id_from_environment(), token),
-        dynatrace_access_key=await fetch_dynatrace_api_key(gcp_session, get_project_id_from_environment(), token),
-        logging_context=logging_context
-    ).execute()
-
-    if extension_fetcher_result.services:
-        feature_sets_names = [f"{service.name}/{service.feature_set}" for service in extension_fetcher_result.services]
-        logging_context.log(f'Monitoring enabled for the following fetched extensions feature sets: {feature_sets_names}')
-        return extension_fetcher_result
-    else:
-        logging_context.log("Monitoring disabled. Check configured extensions.")
-        return None
-
-
 async def run_instance_metadata_check() -> Optional[InstanceMetadata]:
     async with init_gcp_client_session() as gcp_session:
         token = await create_token(logging_context, gcp_session)
@@ -148,10 +131,9 @@ async def sfm_send_loop_timeouts(finished_before_timeout: bool):
 
 
 async def run_metrics_fetcher_forever():
-    async def run_single_polling_with_timeout(pre_launch_check_result):
+    async def run_single_polling_with_timeout(services):
         logging_context.log('MAIN_LOOP', f'Single polling started, timeout {QUERY_TIMEOUT_SEC}, polling interval {QUERY_INTERVAL_SEC}')
-
-        polling_task = async_dynatrace_gcp_extension(services=pre_launch_check_result.services)
+        polling_task = async_dynatrace_gcp_extension(services=services)
 
         try:
             await asyncio.wait_for(polling_task, QUERY_TIMEOUT_SEC)
@@ -160,26 +142,39 @@ async def run_metrics_fetcher_forever():
             logging_context.error('MAIN_LOOP', f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
             await sfm_send_loop_timeouts(False)
 
-    async def sleep_until_next_polling(current_polling_duration_s):
-        sleep_time = QUERY_INTERVAL_SEC - current_polling_duration_s
-        if sleep_time < 0: sleep_time = 0
-        logging_context.log('MAIN_LOOP', f'Next polling in {round(sleep_time, 2)}s')
-        await asyncio.sleep(sleep_time)
-
     pre_launch_check_result = await metrics_pre_launch_check()
     if not pre_launch_check_result:
         logging_context.log('MAIN_LOOP', 'Pre_launch_check failed, monitoring loop will not start')
         return
 
+    services = pre_launch_check_result.services
+    new_services_from_extensions_task = None
+
     while True:
         start_time_s = time.time()
-        await run_single_polling_with_timeout(pre_launch_check_result)
+
+        if config.keep_refreshing_extensions_config():
+            new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services))
+
+        await run_single_polling_with_timeout(services)
+
+        if config.keep_refreshing_extensions_config():
+            logging_context.log('MAIN_LOOP', 'Swapping services config')
+            services = await new_services_from_extensions_task
+
         end_time_s = time.time()
 
         polling_duration = end_time_s - start_time_s
         logging_context.log('MAIN_LOOP', f"Polling finished after {round(polling_duration, 2)}s")
 
         await sleep_until_next_polling(polling_duration)
+
+
+async def sleep_until_next_polling(current_polling_duration_s):
+    sleep_time = QUERY_INTERVAL_SEC - current_polling_duration_s
+    if sleep_time < 0: sleep_time = 0
+    logging_context.log('MAIN_LOOP', f'Next polling in {round(sleep_time, 2)}s')
+    await asyncio.sleep(sleep_time)
 
 
 def main():

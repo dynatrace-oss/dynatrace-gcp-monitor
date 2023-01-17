@@ -117,6 +117,8 @@ class Metric:
 @dataclass(frozen=True)
 class GCPService:
     """Describes singular GCP service to ingest data from."""
+    # IMPORTANT! this object is only for one combination of object/featureSet!
+    # If you have 2 featureSets enabled for some service you will have 2 such objects
 
     name: Text
     technology_name: Text
