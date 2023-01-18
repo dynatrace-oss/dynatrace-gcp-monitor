@@ -130,6 +130,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-function-config
               key: SCOPING_PROJECT_SUPPORT_ENABLED
+        - name:   KEEP_REFRESHING_EXTENSIONS_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-function-config
+              key:   KEEP_REFRESHING_EXTENSIONS_CONFIG
         volumeMounts:
         - mountPath: /code/config/activation
           readOnly: true
