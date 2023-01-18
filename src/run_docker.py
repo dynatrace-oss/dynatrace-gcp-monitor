@@ -159,7 +159,7 @@ async def run_metrics_fetcher_forever():
         await run_single_polling_with_timeout(services)
 
         if config.keep_refreshing_extensions_config():
-            logging_context.log('MAIN_LOOP', 'Swapping services config')
+            logging_context.log('MAIN_LOOP', 'Refreshing services config')
             services = await new_services_from_extensions_task
 
         end_time_s = time.time()
