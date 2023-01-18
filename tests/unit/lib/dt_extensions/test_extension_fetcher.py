@@ -14,6 +14,7 @@
 
 import asyncio
 import re
+import unittest.mock
 from typing import NewType, Any
 
 import pytest
@@ -101,3 +102,43 @@ async def test_empty_activation_config(mocker: MockerFixture, monkeypatch: Monke
                                          for gcp_service_config in result.services}
     assert_that(feature_sets_to_filter_conditions).is_equal_to({})
 
+
+@pytest.mark.asyncio
+async def test_extensions_cache():
+    extensions_fetcher = ExtensionsFetcher(None, None, None, LoggingContext("TEST"))
+
+    ext_1_name = "ext_1_name"
+    ext_1_ver1 = "1.00"
+    ext_1_ver2 = "1.02"
+
+    ext_2_name = "ext_1_name_2"
+    ext_2_ver_1 = "1.00"
+
+    fetching_call = extensions_fetcher._fetch_extension_configuration_from_dt = unittest.mock.AsyncMock()
+
+    # EXTENSION 1
+    #cache miss
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_1_name, ext_1_ver1)
+    #cache hit
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_1_name, ext_1_ver1)
+    #cache miss
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_1_name, ext_1_ver2)
+    #cache hits
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_1_name, ext_1_ver2)
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_1_name, ext_1_ver2)
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_1_name, ext_1_ver2)
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_1_name, ext_1_ver2)
+
+    # EXTENSION 2
+    #cache miss
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_2_name, ext_2_ver_1)
+    #cache hit
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_2_name, ext_2_ver_1)
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_2_name, ext_2_ver_1)
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_2_name, ext_2_ver_1)
+    await extensions_fetcher.get_extension_configuration_from_cache_or_download(ext_2_name, ext_2_ver_1)
+
+    assert fetching_call.call_count == 3
+    assert fetching_call.call_args_list[0].args == (ext_1_name, ext_1_ver1)
+    assert fetching_call.call_args_list[1].args == (ext_1_name, ext_1_ver2)
+    assert fetching_call.call_args_list[2].args == (ext_2_name, ext_1_ver1)

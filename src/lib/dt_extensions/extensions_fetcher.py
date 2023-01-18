@@ -120,9 +120,13 @@ class ExtensionsFetcher:
             extension_configuration = EXTENSIONS_CACHE_BY_NAME[extension_name].definition
         else:
             self.logging_context.log(f"Downloading extension {extension_name} ({extension_version})")
-            extension_zip = await self._get_extension_zip_from_dynatrace_cluster(extension_name, extension_version)
-            extension_configuration = self._load_extension_config_from_zip(extension_name, extension_zip) if extension_zip else {}
+            extension_configuration = await self._fetch_extension_configuration_from_dt(extension_name, extension_version)
             EXTENSIONS_CACHE_BY_NAME[extension_name] = ExtensionCacheEntry(extension_version, extension_configuration)
+        return extension_configuration
+
+    async def _fetch_extension_configuration_from_dt(self, extension_name, extension_version):
+        extension_zip = await self._get_extension_zip_from_dynatrace_cluster(extension_name, extension_version)
+        extension_configuration = self._load_extension_config_from_zip(extension_name, extension_zip) if extension_zip else {}
         return extension_configuration
 
     async def _get_extension_zip_from_dynatrace_cluster(self, extension_name, extension_version) -> Optional[bytes]:
