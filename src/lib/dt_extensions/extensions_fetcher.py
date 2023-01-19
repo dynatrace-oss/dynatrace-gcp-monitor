@@ -119,7 +119,7 @@ class ExtensionsFetcher:
         if extension_name in EXTENSIONS_CACHE_BY_NAME and EXTENSIONS_CACHE_BY_NAME[extension_name].version == extension_version:
             extension_configuration = EXTENSIONS_CACHE_BY_NAME[extension_name].definition
         else:
-            self.logging_context.log(f"Downloading extension {extension_name} ({extension_version})")
+            self.logging_context.log(f"Downloading and preparing extension {extension_name} ({extension_version})")
             extension_configuration = await self._fetch_extension_configuration_from_dt(extension_name, extension_version)
             EXTENSIONS_CACHE_BY_NAME[extension_name] = ExtensionCacheEntry(extension_version, extension_configuration)
         return extension_configuration
