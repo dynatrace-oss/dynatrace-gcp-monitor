@@ -7,7 +7,8 @@ RUN pip install -r ./requirements.txt
 
 FROM python:3.8-slim-buster
 
-ENV VERSION_TAG
+ARG VERSION_TAG_ARG
+ENV VERSION_TAG=$VERSION_TAG_ARG
 
 LABEL name="dynatrace-gcp-function" \
       vendor="Dynatrace LLC" \
