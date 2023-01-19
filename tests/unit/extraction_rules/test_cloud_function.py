@@ -55,7 +55,7 @@ debug_text_record_expected_output = {
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: json.dumps(debug_text_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions',
-    'faas.id': 'j22o0ucdhpop',
+    'faas.id': '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-function',
     'faas.name': 'dynatrace-gcp-function'
 }
 
