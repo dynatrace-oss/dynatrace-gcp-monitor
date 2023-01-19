@@ -18,7 +18,7 @@ from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
     ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_IDENTITY, \
-    ATTRIBUTE_AUDIT_RESULT
+    ATTRIBUTE_AUDIT_RESULT, ATTRIBUTE_CLOUD_FUNCTION_ID, ATTRIBUTE_CLOUD_FUNCTION_NAME
 from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 timestamp = datetime.utcnow().isoformat() + "Z"
@@ -55,8 +55,8 @@ debug_text_record_expected_output = {
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: json.dumps(debug_text_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions',
-    'faas.id': '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-function',
-    'faas.name': 'dynatrace-gcp-function'
+    ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-function',
+    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-function'
 }
 
 notice_json_record = {
@@ -99,8 +99,8 @@ notice_json_record_expected_output = {
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: json.dumps(notice_json_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/clouderrorreporting.googleapis.com%2Finsights',
-    'faas.id': '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-function',
-    'faas.name': 'dynatrace-gcp-function'
+    ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-function',
+    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-function'
 }
 
 error_proto_record = {
@@ -151,8 +151,8 @@ error_proto_record_expected_output = {
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: json.dumps(error_proto_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
-    'faas.id': '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/europe-central2/functions/dynatrace-gcp-function',
-    'faas.name': 'dynatrace-gcp-function'
+    ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/europe-central2/functions/dynatrace-gcp-function',
+    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-function'
 }
 
 
