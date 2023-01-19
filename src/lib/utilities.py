@@ -22,7 +22,7 @@ HOSTNAME = os.environ.get("HOSTNAME", "")
 
 K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-function"
 
-RELEASE_VERSION = os.environ.get("VERSION_TAG", "")
+RELEASE_VERSION = os.environ.get("TRAVIS_TAG", "")
 
 
 def chunks(full_list: List, chunk_size: int) -> List[List]:

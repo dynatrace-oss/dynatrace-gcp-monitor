@@ -7,8 +7,8 @@ RUN pip install -r ./requirements.txt
 
 FROM python:3.8-slim-buster
 
-ARG VERSION_TAG_ARG
-ENV VERSION_TAG=$VERSION_TAG_ARG
+ARG TRAVIS_TAG_ARG
+ENV TRAVIS_TAG=$TRAVIS_TAG_ARG
 
 LABEL name="dynatrace-gcp-function" \
       vendor="Dynatrace LLC" \
