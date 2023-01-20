@@ -31,8 +31,10 @@ class SfmMetric:
 
 class SFMMetricDynatraceRequestCount(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/request_count"
-    value = {}
     description = "GCP Monitoring API request count [per project]"
+
+    def __init__(self):
+        self.value = {}
 
     def increment(self, status):
         self.value[status] = self.value.get(status, 0) + 1
@@ -59,8 +61,10 @@ class SFMMetricDynatraceRequestCount(SfmMetric):
 
 class SFMMetricGCPMetricRequestCount(SfmMetric):
     key = None
-    value = {}
     description = "GCP Monitoring API request count [per project]"
+
+    def __init__(self):
+        self.value = {}
 
     def increment(self, project):
         self.value[project] = self.value.get(project, 0) + 1
@@ -72,8 +76,10 @@ class SFMMetricGCPMetricRequestCount(SfmMetric):
 
 class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/ingest_lines"
-    value = {}
     description = "Dynatrace MINT accepted lines count [per project]"
+
+    def __init__(self):
+        self.value = {}
 
     def update(self, project, lines: int):
         self.value[project] = self.value.get(project, 0) + lines
@@ -99,8 +105,10 @@ class SFMMetricDynatraceIngestLinesOkCount(SfmMetric):
 
 class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/ingest_lines"
-    value = {}
     description = "Dynatrace MINT invalid lines count [per project]"
+
+    def __init__(self):
+        self.value = {}
 
     def update(self, project, lines: int):
         self.value[project] = self.value.get(project, 0) + lines
@@ -125,8 +133,10 @@ class SFMMetricDynatraceIngestLinesInvalidCount(SfmMetric):
 
 class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/ingest_lines"
-    value = {}
     description = "Dynatrace MINT dropped lines count [per project]"
+
+    def __init__(self):
+        self.value = {}
 
     def update(self, project, lines: int):
         self.value[project] = self.value.get(project, 0) + lines
@@ -151,8 +161,10 @@ class SFMMetricDynatraceIngestLinesDroppedCount(SfmMetric):
 
 class SFMMetricSetupExecutionTime(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
-    value = {}
     description = "Setup execution time"
+
+    def __init__(self):
+        self.value = {}
 
     def update(self, project, time):
         self.value[project] = time
@@ -178,8 +190,10 @@ class SFMMetricSetupExecutionTime(SfmMetric):
 
 class SFMMetricFetchGCPDataExecutionTime(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
-    value = {}
     description = "Fetch GCP data execution time [per project]"
+
+    def __init__(self):
+        self.value = {}
 
     def update(self, project, time):
         self.value[project] = time
@@ -205,8 +219,10 @@ class SFMMetricFetchGCPDataExecutionTime(SfmMetric):
 
 class SFMMetricPushToDynatraceExecutionTime(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/phase_execution_time"
-    value = {}
     description = "Push data to Dynatrace execution time [per project]"
+
+    def __init__(self):
+        self.value = {}
 
     def update(self, project, time):
         self.value[project] = time
@@ -232,8 +248,10 @@ class SFMMetricPushToDynatraceExecutionTime(SfmMetric):
 
 class SFMMetricDynatraceConnectivity(SfmMetric):
     key = SELF_MONITORING_METRIC_PREFIX + "/connectivity"
-    value = None
     description = "Dynatrace Connectivity"
+
+    def __init__(self):
+        self.value = {}
 
     def update(self, value):
         self.value = value

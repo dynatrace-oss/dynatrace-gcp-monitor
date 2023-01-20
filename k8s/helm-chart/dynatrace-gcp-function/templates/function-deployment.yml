@@ -141,21 +141,21 @@ spec:
           name: gcp-config
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "250m"
-            ephemeral-storage: "1Gi"
+            memory: "1536Mi"
+            cpu: "1.25"
+            ephemeral-storage: "2Gi"
         livenessProbe:
           httpGet:
             path: /health
             port: 8080
           initialDelaySeconds: 30
-          timeoutSeconds: 15
+          timeoutSeconds: 120
         startupProbe:
           httpGet:
             path: /health
             port: 8080
-          initialDelaySeconds: 10
-          timeoutSeconds: 15
+          initialDelaySeconds: 30
+          timeoutSeconds: 120
       {{- end }}
       {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
       - image: {{ .Values.dockerImage | quote }}

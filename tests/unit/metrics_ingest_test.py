@@ -14,7 +14,7 @@
 
 from lib.entities.model import CdProperty
 from lib.metric_ingest import *
-from main import build_entity_id_map
+from lib.topology.topology import build_entity_id_map
 
 
 def test_create_dimension_correct_values():
