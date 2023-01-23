@@ -83,6 +83,8 @@ httpProxy: ""
 httpsProxy: ""
 # scopingProjectSupportEnabled: set to true when metrics scope is configured, so metrics will be collected from all monitored projects.
 scopingProjectSupportEnabled: "false"
+# keepRefreshingExtensionsConfig: if true, will fetch enabled extensions from DT on each polling, otherwise will only fetch once during startup
+keepRefreshingExtensionsConfig: "true"
 
 
 # LOGS VALUES - DEFAULTS

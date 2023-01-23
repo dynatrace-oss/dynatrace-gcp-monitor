@@ -31,10 +31,9 @@ _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 _SECRET_ROOT = 'https://secretmanager.googleapis.com/v1'
 _CLOUD_RESOURCE_MANAGER_ROOT = "https://cloudresourcemanager.googleapis.com/v1"
 
-_DYNATRACE_ACCESS_KEY_SECRET_NAME = os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_NAME", "DYNATRACE_ACCESS_KEY")
-_DYNATRACE_URL_SECRET_NAME = os.environ.get("DYNATRACE_URL_SECRET_NAME", "DYNATRACE_URL")
-_DYNATRACE_LOG_INGEST_URL_SECRET_NAME = os.environ.get("DYNATRACE_LOG_INGEST_URL_SECRET_NAME",
-                                                       "DYNATRACE_LOG_INGEST_URL")
+_DYNATRACE_ACCESS_KEY_SECRET_NAME = config.dynatrace_access_key_secret_name()
+_DYNATRACE_URL_SECRET_NAME = config.dynatrace_url_secret_name()
+_DYNATRACE_LOG_INGEST_URL_SECRET_NAME = config.dynatrace_log_ingest_url_secret_name()
 
 
 async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str, ):
@@ -100,8 +99,7 @@ def get_project_id_from_environment():
 
 
 async def create_token(context: LoggingContext, session: ClientSession):
-    credentials_path = os.environ[
-        'GOOGLE_APPLICATION_CREDENTIALS'] if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ.keys() else ""
+    credentials_path = config.credentials_path()
 
     if credentials_path:
         context.log(f"Using credentials from {credentials_path}")

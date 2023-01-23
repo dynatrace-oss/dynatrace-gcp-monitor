@@ -15,3 +15,24 @@ def scoping_project_support_enabled():
 
 def project_id():
     return os.environ.get("GCP_PROJECT")
+
+
+def credentials_path():
+    return os.environ['GOOGLE_APPLICATION_CREDENTIALS'] if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ.keys() else ""
+
+
+def dynatrace_access_key_secret_name():
+    return os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_NAME", "DYNATRACE_ACCESS_KEY")
+
+
+def dynatrace_url_secret_name():
+    return os.environ.get("DYNATRACE_URL_SECRET_NAME", "DYNATRACE_URL")
+
+
+def dynatrace_log_ingest_url_secret_name():
+    return os.environ.get("DYNATRACE_LOG_INGEST_URL_SECRET_NAME", "DYNATRACE_LOG_INGEST_URL")
+
+
+def keep_refreshing_extensions_config():
+    return os.environ.get("KEEP_REFRESHING_EXTENSIONS_CONFIG", "TRUE").upper() in ["TRUE", "YES"]
+
