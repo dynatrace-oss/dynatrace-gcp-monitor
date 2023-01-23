@@ -22,6 +22,7 @@ HOSTNAME = os.environ.get("HOSTNAME", "")
 
 K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-function"
 
+
 def chunks(full_list: List, chunk_size: int) -> List[List]:
     chunk_size = max(1, chunk_size)
     return [full_list[i:i + chunk_size] for i in range(0, len(full_list), chunk_size)]
