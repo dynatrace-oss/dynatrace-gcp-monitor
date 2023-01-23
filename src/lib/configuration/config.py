@@ -38,4 +38,4 @@ def keep_refreshing_extensions_config():
 
 
 def release_tag():
-    return os.environ.get("RELEASE_TAG", "1.x.x")
+    return os.environ.get("RELEASE_TAG", "version value not provided")
