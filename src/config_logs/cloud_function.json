@@ -13,7 +13,7 @@
       "attributes": [
         {
           "key": "faas.id",
-          "pattern": "labels.execution_id"
+          "pattern": "join('', ['//cloudfunctions.googleapis.com/projects/', resource.labels.project_id, '/locations/', resource.labels.region, '/functions/', resource.labels.function_name])"
         },
         {
           "key": "faas.name",

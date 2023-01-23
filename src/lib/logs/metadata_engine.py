@@ -64,6 +64,10 @@ ATTRIBUTE_GCP_INSTANCE_NAME = "gcp.instance.name"
 
 ATTRIBUTE_GCP_RESOURCE_TYPE = "gcp.resource.type"
 
+ATTRIBUTE_CLOUD_FUNCTION_ID = "faas.id"
+
+ATTRIBUTE_CLOUD_FUNCTION_NAME = "faas.name"
+
 DEFAULT_RULE_NAME = "default"
 
 COMMON_RULE_NAME = "common"
