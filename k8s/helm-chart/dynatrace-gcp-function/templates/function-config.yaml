@@ -27,6 +27,7 @@ data:
   HTTPS_PROXY: {{ .Values.httpsProxy | quote }}
   {{- end }}
   SCOPING_PROJECT_SUPPORT_ENABLED: {{ .Values.scopingProjectSupportEnabled | quote }}
+  KEEP_REFRESHING_EXTENSIONS_CONFIG: {{ .Values.keepRefreshingExtensionsConfig | quote }}
   {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
   PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
   SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}

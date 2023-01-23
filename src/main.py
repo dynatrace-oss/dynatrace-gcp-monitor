@@ -171,7 +171,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str]) -> List[IngestLine]:
-    fetch_metric_tasks = []
+    fetch_metric_coros = []
     topology: Dict[GCPService, Iterable[Entity]] = {}
 
     # Topology fetching: retrieving additional instances info about enabled services
@@ -195,13 +195,15 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             if api in disabled_apis:
                 skipped_disabled_apis.add(api)
                 continue  # skip fetching the metrics because service API is disabled
-            fetch_metric_task = run_fetch_metric(
+            fetch_metric_coro = run_fetch_metric(
                 context=context,
                 project_id=project_id,
                 service=service,
                 metric=metric
             )
-            fetch_metric_tasks.append(fetch_metric_task)
+            fetch_metric_coros.append(fetch_metric_coro)
+
+    context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")
 
     if skipped_services_with_no_instances:
         skipped_services_string = ', '.join(skipped_services_with_no_instances)
@@ -210,7 +212,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         skipped_disabled_apis_string = ", ".join(skipped_disabled_apis)
         context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
-    fetch_metric_results = await asyncio.gather(*fetch_metric_tasks, return_exceptions=True)
+    fetch_metric_results = await asyncio.gather(*fetch_metric_coros, return_exceptions=True)
     entity_id_map = build_entity_id_map(list(topology.values()))
     flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
     return flat_metric_results

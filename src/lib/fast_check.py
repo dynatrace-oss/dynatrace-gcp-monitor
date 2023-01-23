@@ -44,7 +44,8 @@ METRICS_CONFIGURATION_FLAGS = [
     "USE_PROXY",
     "SELF_MONITORING_ENABLED",
     "QUERY_INTERVAL_MIN",
-    "SCOPING_PROJECT_SUPPORT_ENABLED"
+    "SCOPING_PROJECT_SUPPORT_ENABLED",
+    "KEEP_REFRESHING_EXTENSIONS_CONFIG",
 ]
 
 LOGS_CONFIGURATION_FLAGS = [
@@ -173,7 +174,7 @@ class MetricsFastCheck:
         return project_id, True
 
     async def execute(self) -> FastCheckResult:
-        _check_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
+        _print_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
 
         project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
@@ -196,7 +197,7 @@ class LogsFastCheck:
         self.logging_context = logging_context
 
     def execute(self):
-        _check_configuration_flags(self.logging_context, LOGS_CONFIGURATION_FLAGS)
+        _print_configuration_flags(self.logging_context, LOGS_CONFIGURATION_FLAGS)
         check_version(self.logging_context)
         self.logging_context.log("Sending the startup message")
         container_name = self.instance_metadata.hostname if self.instance_metadata else "local deployment"
@@ -209,7 +210,7 @@ class LogsFastCheck:
         send_logs(create_logs_context(Queue()), [], json.dumps([fast_check_event]))
 
 
-def _check_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):
+def _print_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):
     configuration_flag_values = []
     for key in flags_to_check:
         value = os.environ.get(key, None)
