@@ -22,9 +22,6 @@ HOSTNAME = os.environ.get("HOSTNAME", "")
 
 K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-function"
 
-RELEASE_VERSION = os.environ.get("TRAVIS_TAG", "")
-
-
 def chunks(full_list: List, chunk_size: int) -> List[List]:
     chunk_size = max(1, chunk_size)
     return [full_list[i:i + chunk_size] for i in range(0, len(full_list), chunk_size)]
@@ -72,10 +69,6 @@ def extract_technology_name(config_yaml):
 
 def is_deployment_running_inside_cloud_function():
     return K8S_CONTAINER_NAME_PREFIX not in HOSTNAME
-
-
-def get_release_version():
-    return RELEASE_VERSION
 
 
 def print_dynatrace_logo():

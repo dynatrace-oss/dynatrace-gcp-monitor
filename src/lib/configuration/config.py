@@ -36,3 +36,6 @@ def dynatrace_log_ingest_url_secret_name():
 def keep_refreshing_extensions_config():
     return os.environ.get("KEEP_REFRESHING_EXTENSIONS_CONFIG", "TRUE").upper() in ["TRUE", "YES"]
 
+
+def release_tag():
+    return os.environ.get("RELEASE_TAG", "1.x.x")
