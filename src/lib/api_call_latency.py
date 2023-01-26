@@ -1,7 +1,7 @@
 from src.lib.context import LoggingContext
 
 
-class ApiCallLatency(object):
+class ApiCallLatency:
     _instance = None
     _value = {}
 
