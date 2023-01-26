@@ -24,6 +24,8 @@ from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING,
     DimensionValue, IngestLine
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 
+from src.lib.api_call_latency import ApiCallLatency
+
 UNIT_10TO2PERCENT = "10^2.%"
 MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
 MAX_DIMENSION_VALUE_LENGTH = os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
@@ -73,7 +75,8 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
     if context.print_metric_ingest_input:
         context.log("Ingest input is: ")
         context.log(ingest_input)
-    dt_url=f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
+    dt_url = f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
+    req_start_time = time.time()
     ingest_response = await context.dt_session.post(
         url=dt_url,
         headers={
@@ -83,6 +86,7 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
         data=ingest_input,
         verify_ssl=context.require_valid_certificate
     )
+    ApiCallLatency.update(dt_url, time.time() - req_start_time)
 
     if ingest_response.status == 401:
         context.update_dt_connectivity_status(DynatraceConnectivity.ExpiredToken)
@@ -182,7 +186,9 @@ async def fetch_metric(
         context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
         url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
+        req_start_time = time.time()
         resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
+        ApiCallLatency.update(GCP_MONITORING_URL, time.time() - req_start_time)
         page = await resp.json()
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
         if 'error' in page:

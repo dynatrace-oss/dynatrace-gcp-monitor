@@ -13,6 +13,7 @@
 #     limitations under the License.
 import asyncio
 import json
+import time
 from datetime import datetime
 from typing import Dict, List
 
@@ -20,6 +21,8 @@ from lib.context import SfmContext, MetricsContext
 from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_PREFIX
 from lib.sfm.for_metrics.metrics_definitions import SfmMetric
 from lib.utilities import chunks
+
+from src.lib.api_call_latency import ApiCallLatency
 
 
 def log_self_monitoring_metrics(context: MetricsContext):
@@ -53,12 +56,14 @@ def batch_time_series(time_series: Dict) -> List[Dict]:
 
 
 async def push_single_self_monitoring_time_series(context: SfmContext, is_retry: bool, time_series: Dict):
+    req_start_time = time.time()
     self_monitoring_response = await context.gcp_session.request(
         "POST",
         url=f"https://monitoring.googleapis.com/v3/projects/{context.project_id_owner}/timeSeries",
         data=json.dumps(time_series),
         headers={"Authorization": "Bearer {token}".format(token=context.token)}
     )
+    ApiCallLatency.update("https://monitoring.googleapis.com/v3", time.time() - req_start_time)
     status = self_monitoring_response.status
     if status == 500 and not is_retry:
         context.log(

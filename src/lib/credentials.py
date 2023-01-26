@@ -23,6 +23,8 @@ from aiohttp import ClientSession
 from lib.configuration import config
 from lib.context import LoggingContext
 
+from src.lib.api_call_latency import ApiCallLatency
+
 _METADATA_ROOT = os.environ.get('GCP_METADATA_URL', 'http://metadata.google.internal/computeMetadata/v1')
 _METADATA_FLAVOR_HEADER = "metadata-flavor"
 _METADATA_FLAVOR_VALUE = "Google"
@@ -82,7 +84,9 @@ async def create_default_service_account_token(context: LoggingContext, session:
     """
     url = _METADATA_ROOT + "/instance/service-accounts/{0}/token".format("default")
     try:
+        req_start_time = time.time()
         response = await session.get(url, headers=_METADATA_HEADERS)
+        ApiCallLatency.update(_METADATA_ROOT, time.time() - req_start_time)
         if response.status >= 300:
             body = await response.text()
             context.log(f"Failed to authorize with Service Account from Metadata Service, response is {response.status} => {body}")
@@ -129,9 +133,10 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
     }
     assertion_signed = jwt.encode(assertion, key, 'RS256').decode('utf-8')
     request = {'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer', 'assertion': assertion_signed}
-
+    req_start_time = time.time()
     async with session.post(uri, data=request) as resp:
         response = await resp.json()
+        ApiCallLatency.update(uri, time.time() - req_start_time)
         return response["access_token"]
 
 
@@ -141,8 +146,10 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
     all_projects = []
     params = {"filter": "lifecycleState:ACTIVE"}
 
-    while True: 
+    while True:
+        req_start_time = time.time()
         response = await session.get(url, headers=headers, params=params)
+        ApiCallLatency.update(_CLOUD_RESOURCE_MANAGER_ROOT, time.time() - req_start_time)
         response_json = await response.json()
         all_projects.extend([project["projectId"] for project in response_json.get("projects", [])])
         page_token = response_json.get("nextPageToken", "")
