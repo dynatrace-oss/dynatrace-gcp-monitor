@@ -19,7 +19,7 @@ from typing import Set, List, Dict, Tuple
 
 from lib.context import MetricsContext
 
-_GCP_SERVICE_USAGE_URL = "https://serviceusage.googleapis.com/v1"
+_GCP_SERVICE_USAGE_URL = os.environ.get("GCP_SERVICE_USAGE_URL", "https://serviceusage.googleapis.com/v1")
 
 REQUIRED_SERVICES = [
     "monitoring.googleapis.com",
