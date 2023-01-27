@@ -16,7 +16,7 @@ import os
 
 import aiohttp
 
-from src.lib.api_call_latency import ApiCallLatency
+from lib.api_call_latency import ApiCallLatency
 
 
 async def on_request_start(session, trace_config_ctx, params):
@@ -25,7 +25,7 @@ async def on_request_start(session, trace_config_ctx, params):
 
 async def on_request_end(session, trace_config_ctx, params):
     elapsed = asyncio.get_event_loop().time() - trace_config_ctx.start
-    ApiCallLatency.update(params.url.raw_host, elapsed)
+    ApiCallLatency.update(f"{params.url.scheme}://{params.url.raw_host}/", elapsed)
 
 
 trace_config = aiohttp.TraceConfig()
