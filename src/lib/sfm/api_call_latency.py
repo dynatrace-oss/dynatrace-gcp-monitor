@@ -1,8 +1,9 @@
 from lib.context import LoggingContext
+from collections import defaultdict
 
 
 class ApiCallLatency:
-    _value = {}
+    _value = defaultdict(list)
 
     @staticmethod
     def update(api_url, time):
@@ -10,7 +11,6 @@ class ApiCallLatency:
             ApiCallLatency._value[api_url].append(time)
         else:
             ApiCallLatency._value[api_url] = [time]
-
 
     @staticmethod
     def print_statistics(context: LoggingContext):
