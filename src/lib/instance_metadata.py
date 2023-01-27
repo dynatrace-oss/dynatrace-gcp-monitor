@@ -23,8 +23,9 @@ import jwt
 from aiohttp import ClientSession
 
 from lib.context import LoggingContext
+from lib.configuration import config
 
-METADATA_URL = os.environ.get('GCP_METADATA_URL', 'http://metadata.google.internal/computeMetadata/v1')
+METADATA_URL = config.gcp_metadata_url()
 
 InstanceMetadata = namedtuple('InstanceMetadata', [
     'project_id',

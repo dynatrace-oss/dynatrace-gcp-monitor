@@ -39,3 +39,24 @@ def keep_refreshing_extensions_config():
 
 def release_tag():
     return os.environ.get("RELEASE_TAG", "version value not provided")
+
+
+def gcp_metadata_url():
+    return os.environ.get('GCP_METADATA_URL', 'http://metadata.google.internal/computeMetadata/v1')
+
+
+def gcp_cloud_resource_manager_url():
+    return os.environ.get('GCP_CLOUD_RESOURCE_MANAGER_URL', 'https://cloudresourcemanager.googleapis.com/v1')
+
+
+def gcp_service_usage_url():
+    return os.environ.get("GCP_SERVICE_USAGE_URL", "https://serviceusage.googleapis.com/v1")
+
+
+def gcp_metadata_url():
+    return os.environ.get('GCP_METADATA_URL', 'http://metadata.google.internal/computeMetadata/v1')
+
+def gcp_monitoring_url():
+    return os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
+
+

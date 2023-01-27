@@ -23,12 +23,13 @@ from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
+from lib.configuration import config
 
 UNIT_10TO2PERCENT = "10^2.%"
 MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
 MAX_DIMENSION_VALUE_LENGTH = os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
 
-GCP_MONITORING_URL = os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
+GCP_MONITORING_URL = config.gcp_monitoring_url()
 
 
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):

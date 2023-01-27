@@ -23,13 +23,14 @@ from aiohttp import ClientSession
 from lib.configuration import config
 from lib.context import LoggingContext
 
-_METADATA_ROOT = os.environ.get('GCP_METADATA_URL', 'http://metadata.google.internal/computeMetadata/v1')
+
+_METADATA_ROOT = config.gcp_metadata_url()
 _METADATA_FLAVOR_HEADER = "metadata-flavor"
 _METADATA_FLAVOR_VALUE = "Google"
 _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 
 _SECRET_ROOT = 'https://secretmanager.googleapis.com/v1'
-_CLOUD_RESOURCE_MANAGER_ROOT =  os.environ.get('GCP_CLOUD_RESOURCE_MANAGER_URL', 'https://cloudresourcemanager.googleapis.com/v1')
+_CLOUD_RESOURCE_MANAGER_ROOT = config.gcp_cloud_resource_manager_url()
 
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = config.dynatrace_access_key_secret_name()
 _DYNATRACE_URL_SECRET_NAME = config.dynatrace_url_secret_name()
