@@ -150,7 +150,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
             await sfm_push_metrics(context.sfm.values(), context, context.execution_time)
         else:
             context.log("SFM disabled, will not push SFM metrics")
-        ApiCallLatency.generate_statistics(context)
+        ApiCallLatency.print_statistics(context)
         await gcp_session.close()
         await dt_session.close()
 

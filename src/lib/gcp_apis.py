@@ -20,8 +20,6 @@ from typing import Set, List, Dict, Tuple
 
 from lib.context import MetricsContext
 
-from src.lib.api_call_latency import ApiCallLatency
-
 _GCP_SERVICE_USAGE_URL = os.environ.get("GCP_SERVICE_USAGE_URL", "https://serviceusage.googleapis.com/v1")
 
 REQUIRED_SERVICES = [
@@ -41,12 +39,10 @@ async def _get_all_disabled_apis(context: MetricsContext, project_id: str):
         while fetch_next_page:
             if next_token:
                 params["pageToken"] = next_token
-            req_start_time = time.time()
             response = await context.gcp_session.get(
                 url=url,
                 headers=headers,
                 params=params)
-            ApiCallLatency.update(_GCP_SERVICE_USAGE_URL, time.time() - req_start_time)
             if response.status != 200:
                 context.log(f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
                 return disabled_apis

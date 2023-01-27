@@ -11,15 +11,31 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
+import asyncio
 import os
 
 import aiohttp
 
+from src.lib.api_call_latency import ApiCallLatency
+
+
+async def on_request_start(session, trace_config_ctx, params):
+    trace_config_ctx.start = asyncio.get_event_loop().time()
+
+
+async def on_request_end(session, trace_config_ctx, params):
+    elapsed = asyncio.get_event_loop().time() - trace_config_ctx.start
+    ApiCallLatency.update(params.url.raw_host, elapsed)
+
+
+trace_config = aiohttp.TraceConfig()
+trace_config.on_request_start.append(on_request_start)
+trace_config.on_request_end.append(on_request_end)
+
 
 def init_dt_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trust_env=(os.environ.get("USE_PROXY", "").upper() in ["ALL", "DT_ONLY"]))
+    return aiohttp.ClientSession(trace_configs=[trace_config], trust_env=(os.environ.get("USE_PROXY", "").upper() in ["ALL", "DT_ONLY"]))
 
 
 def init_gcp_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trust_env=(os.environ.get("USE_PROXY", "").upper() in ["ALL", "GCP_ONLY"]))
+    return aiohttp.ClientSession(trace_configs=[trace_config], trust_env=(os.environ.get("USE_PROXY", "").upper() in ["ALL", "GCP_ONLY"]))

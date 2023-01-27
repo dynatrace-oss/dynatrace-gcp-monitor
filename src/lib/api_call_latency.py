@@ -2,7 +2,6 @@ from src.lib.context import LoggingContext
 
 
 class ApiCallLatency:
-    _instance = None
     _value = {}
 
     @staticmethod
@@ -14,7 +13,7 @@ class ApiCallLatency:
 
 
     @staticmethod
-    def generate_statistics(context: LoggingContext):
+    def print_statistics(context: LoggingContext):
         for api_url, times in ApiCallLatency._value.items():
             context.log(f"Url: {api_url}, min: {min(times):.3}s, avg: { sum(times) / len(times):.3}s, max: {max(times):.3}s")
         ApiCallLatency._value = {}
