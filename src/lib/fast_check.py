@@ -21,6 +21,7 @@ from datetime import datetime
 from queue import Queue
 from typing import NamedTuple, List, Optional, Tuple
 
+import aiohttp
 from aiohttp import ClientSession
 
 from lib.context import LoggingContext, get_should_require_valid_certificate
@@ -97,6 +98,7 @@ def check_version(logging_context: LoggingContext):
 async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:
         req_start_time = time.time()
+
         response = await dt_session.post(
             url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
             headers={
