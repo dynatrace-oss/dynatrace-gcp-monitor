@@ -1,4 +1,4 @@
-from src.lib.context import LoggingContext
+from lib.context import LoggingContext
 
 
 class ApiCallLatency:
