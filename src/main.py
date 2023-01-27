@@ -39,7 +39,7 @@ from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.topology.topology import fetch_topology, build_entity_id_map
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets, \
     is_yaml_file, extract_technology_name
-from lib.api_call_latency import ApiCallLatency
+from lib.sfm.api_call_latency import ApiCallLatency
 
 
 def dynatrace_gcp_extension(event, context):
