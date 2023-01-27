@@ -16,7 +16,7 @@ import os
 
 import aiohttp
 
-from lib.api_call_latency import ApiCallLatency
+from lib.sfm.api_call_latency import ApiCallLatency
 
 
 async def on_request_start(session, trace_config_ctx, params):
