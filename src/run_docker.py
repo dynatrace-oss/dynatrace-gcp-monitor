@@ -185,6 +185,7 @@ def main():
     print_dynatrace_logo()
 
     logging_context.log("GCP Monitor - Dynatrace integration for Google Cloud Platform monitoring\n")
+    logging_context.log(f"Release version: {config.release_tag()}")
 
     instance_metadata = asyncio.run(run_instance_metadata_check())
     asyncio.run(import_self_monitoring_dashboards(instance_metadata))

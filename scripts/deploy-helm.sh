@@ -423,7 +423,7 @@ if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   debug "Creating or updating GCP IAM role with gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml"
   if [[ $(gcloud iam roles list --filter="name ~ $ROLE_NAME.logs" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     info "Updating existing IAM role $ROLE_NAME.logs. It was probably created for previous GCP integration deployment and you can safely replace it."
-    gcloud iam roles update $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+    gcloud iam roles update --quiet $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   else
     gcloud iam roles create $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   fi
@@ -433,7 +433,7 @@ if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   debug "Creating or updating GCP IAM role with gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml"
   if [[ $(gcloud iam roles list --filter="name ~ $ROLE_NAME.metrics" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     info "Updating existing IAM role $ROLE_NAME.metrics. It was probably created for previous GCP integration deployment and you can safely replace it."
-    gcloud iam roles update $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+    gcloud iam roles update --quiet $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   else
     gcloud iam roles create $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   fi

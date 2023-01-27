@@ -62,6 +62,7 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
     logging_context = LoggingContext(execution_identifier)
+    logging_context.log(f"GCP Monitor - Release version: {config.release_tag()}")
     logging_context.log("Starting execution")
 
     start_time = time.time()
