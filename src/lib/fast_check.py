@@ -21,7 +21,6 @@ from datetime import datetime
 from queue import Queue
 from typing import NamedTuple, List, Optional, Tuple
 
-import aiohttp
 from aiohttp import ClientSession
 
 from lib.context import LoggingContext, get_should_require_valid_certificate
@@ -31,8 +30,6 @@ from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder import create_logs_context
 from lib.utilities import is_deployment_running_inside_cloud_function
-
-from src.lib.api_call_latency import ApiCallLatency
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -97,8 +94,6 @@ def check_version(logging_context: LoggingContext):
 
 async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:
-        req_start_time = time.time()
-
         response = await dt_session.post(
             url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
             headers={
@@ -110,7 +105,6 @@ async def get_dynatrace_token_metadata(dt_session: ClientSession, context: Loggi
             },
             verify_ssl=get_should_require_valid_certificate(),
             timeout=timeout)
-        ApiCallLatency.update(f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup", time.time() - req_start_time)
         if response.status != 200:
             context.log(f'Unable to get Dynatrace token metadata: {response.status}, url: {response.url}, reason: {response.reason}')
             return {}

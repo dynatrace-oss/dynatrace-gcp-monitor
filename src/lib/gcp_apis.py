@@ -13,7 +13,6 @@
 #     limitations under the License.
 import asyncio
 import os
-import time
 
 from aiohttp import ClientResponseError
 from typing import Set, List, Dict, Tuple
