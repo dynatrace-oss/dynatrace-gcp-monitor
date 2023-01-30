@@ -93,7 +93,7 @@ class InstanceMetadataCheck:
             results = await asyncio.gather(*metadata, return_exceptions=True)
 
             if not all(result is None for result in results):
-                audience = jwt.decode(results[4], verify=False, algorithms=['HS256']) if results[4] else ''
+                audience = jwt.decode(results[4], options={"verify_signature": False}) if results[4] else ''
                 # zone = "projects/<projectID>/zones/us-central1-c"
                 zone = results[5].split("/")[-1] if results[5] else "us-east1"
                 metadata = InstanceMetadata(
