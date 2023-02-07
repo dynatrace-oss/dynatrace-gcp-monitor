@@ -204,6 +204,7 @@ gcpServicesYaml: |
     - service: cloudsql_database
       featureSets:
         - default_metrics
+      #   - postgresqlinsights
       vars:
         filter_conditions: ""
     # Google Cloud Trace
