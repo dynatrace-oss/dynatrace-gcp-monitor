@@ -81,11 +81,11 @@ while (( "$#" )); do
 done
 
 if [[ -z "$GCP_FUNCTION_RELEASE_VERSION" ]]; then
-  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/latest/download/dynatrace-gcp-function.zip"
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-monitor/releases/latest/download/dynatrace-gcp-monitor.zip"
 else
-  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/${GCP_FUNCTION_RELEASE_VERSION}/dynatrace-gcp-function.zip"
+  FUNCTION_REPOSITORY_RELEASE_URL="https://github.com/dynatrace-oss/dynatrace-gcp-monitor/releases/download/${GCP_FUNCTION_RELEASE_VERSION}/dynatrace-gcp-monitor.zip"
 fi
-readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
+readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-monitor.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 # shellcheck disable=SC2034  # Unused variables left for readability
 API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
@@ -157,7 +157,7 @@ HTTPS_PROXY=$("$YQ" e '.googleCloud.common.httpsProxy' $FUNCTION_ACTIVATION_CONF
 readonly HTTPS_PROXY
 GCP_IAM_ROLE=$("$YQ" e '.googleCloud.common.iamRole' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_IAM_ROLE
-# Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-function-metrics-role.yaml`
+# Should be equal to ones in `gcp_iam_roles\dynatrace-gcp-monitor-metrics-role.yaml`
 readonly GCP_IAM_ROLE_PERMISSIONS=(
   resourcemanager.projects.get
   serviceusage.services.list
@@ -261,7 +261,7 @@ elif [[ "$SERVING_APP_ENGINE" != "SERVING"  ]]; then
   exit
 fi
 
-debug "Select size of GCP Function"
+debug "Select size of Cloud Function"
 if [ "$INSTALL" == true ]; then
   check_if_parameter_is_empty "$GCP_FUNCTION_SIZE" "'.googleCloud.required.cloudFunctionSize'" "Please set proper value in ./activation-config.yaml or delete it to fetch latest version automatically"
 
@@ -340,7 +340,7 @@ if [ "$INSTALL" == true ]; then
       info "Role [$GCP_IAM_ROLE] already exists, skipping"
   else
       readonly GCP_IAM_ROLE_TITLE="Dynatrace GCP Metrics Function"
-      readonly GCP_IAM_ROLE_DESCRIPTION="Role for Dynatrace GCP function operating in metrics mode"
+      readonly GCP_IAM_ROLE_DESCRIPTION="Role for Dynatrace GCP Monitor operating in metrics mode"
       GCP_IAM_ROLE_PERMISSIONS_STRING=$(IFS=, ; echo "${GCP_IAM_ROLE_PERMISSIONS[*]}")
       readonly GCP_IAM_ROLE_PERMISSIONS_STRING
       gcloud iam roles create "$GCP_IAM_ROLE" --project="$GCP_PROJECT" --title="$GCP_IAM_ROLE_TITLE" --description="$GCP_IAM_ROLE_DESCRIPTION" --stage="GA" --permissions="$GCP_IAM_ROLE_PERMISSIONS_STRING" | tee -a "$FULL_LOG_FILE"
@@ -377,7 +377,7 @@ EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 mv "$TMP_FUNCTION_DIR" "$WORKING_DIR/$GCP_FUNCTION_NAME"
 pushd "$WORKING_DIR/$GCP_FUNCTION_NAME" || exit
 
-debug "Verification GCP Function Interval"
+debug "Verification Cloud Function Interval"
 if [ "$QUERY_INTERVAL_MIN" -lt 1 ] || [ "$QUERY_INTERVAL_MIN" -gt 6 ]; then
   info "Invalid value of 'googleCloud.metrics.queryInterval', defaulting to 3"
   GCP_FUNCTION_TIMEOUT=180
@@ -411,7 +411,7 @@ info ""
 info "- choosing and uploading extensions to Dynatrace"
 upload_correct_extension_to_dynatrace "$SERVICES_WITH_FEATURE_SET"
 
-debug "Prepare environemnt veriables for GCP Function"
+debug "Prepare environemnt veriables for Cloud Function"
 cd "$WORKING_DIR/$GCP_FUNCTION_NAME" || exit
 cat <<EOF > function_env_vars.yaml
 ACTIVATION_CONFIG: '$ACTIVATION_JSON'
@@ -431,7 +431,7 @@ FUNCTION_REGION: '$GCP_FUNCTION_REGION'
 EOF
 
 if [ "$INSTALL" == true ]; then
-  debug "Installing Dynatrace integration on GCP Function"
+  debug "Installing Dynatrace integration on Cloud Function"
   info ""
   info "- deploying the function \e[1;92m[$GCP_FUNCTION_NAME]\e[0m"
   gcloud functions -q deploy "$GCP_FUNCTION_NAME" --region "$GCP_FUNCTION_REGION" --entry-point=dynatrace_gcp_extension --runtime=python38 --memory="$GCP_FUNCTION_MEMORY"  --trigger-topic="$GCP_PUBSUB_TOPIC" --service-account="$GCP_SERVICE_ACCOUNT@$GCP_PROJECT.iam.gserviceaccount.com" --ingress-settings=internal-only --timeout="$GCP_FUNCTION_TIMEOUT" --env-vars-file function_env_vars.yaml | tee -a "$FULL_LOG_FILE"
@@ -453,11 +453,11 @@ gcloud scheduler jobs create pubsub "$GCP_SCHEDULER_NAME" --topic="$GCP_PUBSUB_T
 debug "Uploading Dynatrace integration dashboard to GCP"
 info ""
 info "- create self monitoring dashboard"
-SELF_MONITORING_DASHBOARD_NAME=$("$JQ" .displayName < dashboards/dynatrace-gcp-function_self_monitoring.json)
+SELF_MONITORING_DASHBOARD_NAME=$("$JQ" .displayName < dashboards/dynatrace-gcp-monitor_self_monitoring.json)
 if [[ $(gcloud monitoring dashboards  list --filter=displayName:"$SELF_MONITORING_DASHBOARD_NAME" --format="value(displayName)") ]]; then
   info "Dashboard already exists, skipping"
 else
-  gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-function_self_monitoring.json | tee -a "$FULL_LOG_FILE"
+  gcloud monitoring dashboards create --config-from-file=dashboards/dynatrace-gcp-monitor_self_monitoring.json | tee -a "$FULL_LOG_FILE"
 fi
 
 debug "Cleaning all temporary files "

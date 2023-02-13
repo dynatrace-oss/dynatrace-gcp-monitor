@@ -1,5 +1,5 @@
 {
-    "displayName": "dynatrace-gcp-function Self monitoring",
+    "displayName": "dynatrace-gcp-monitor Self monitoring",
     "gridLayout": {
       "columns": "2",
       "widgets": [

@@ -50,9 +50,9 @@ Worker function execution can be tweaked with environment variables. In Google F
 | HTTPS_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |  |
 | MAX_DIMENSION_NAME_LENGTH | The maximum length of the dimension name sent to the MINT API. Longer names are truncated to the value indicated. Allowed values: positive integers. | 100 |
 | MAX_DIMENSION_VALUE_LENGTH | The maximum length of the dimension value sent to the MINT API. Longer values are truncated to the value indicated. Allowed values: positive integers. | 250 |
-| SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly. Allowed values: `true`/`yes`, `false`/`no` | `false` |
+| SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-monitor processes and sends metrics to Dynatrace properly. Allowed values: `true`/`yes`, `false`/`no` | `false` |
 | QUERY_INTERVAL_MIN | Metrics polling interval in minutes. Allowed values: 1 - 6 | 3 |
-| ACTIVATION_CONFIG | Dimension filtering config (see `gcpServicesYaml` property in [values.yaml](https://github.com/dynatrace-oss/dynatrace-gcp-function/blob/master/k8s/helm-chart/dynatrace-gcp-function/values.yaml) file) minified to single line json |  |
+| ACTIVATION_CONFIG | Dimension filtering config (see `gcpServicesYaml` property in [values.yaml](https://github.com/dynatrace-oss/dynatrace-gcp-monitor/blob/master/k8s/helm-chart/dynatrace-gcp-monitor/values.yaml) file) minified to single line json |  |
 
 ### Log processing configuration variables
 
@@ -84,7 +84,7 @@ Building a custom extension for GCP service allows customizing metrics/dimension
 Limitations:
 * the custom extension will work **only** on Kubernetes deployment
 
-`dynatrace-gcp-function` uses Dynatrace Extension Framework 2.0 to package support for GCP Services (metrics, topology rules, dashboards etc). The latest version of official GCP extensions is listed in [extensions-list.txt](https://d1twjciptxxqvo.cloudfront.net/extensions-list.txt) manifest file.
+`dynatrace-gcp-monitor` uses Dynatrace Extension Framework 2.0 to package support for GCP Services (metrics, topology rules, dashboards etc). The latest version of official GCP extensions is listed in [extensions-list.txt](https://d1twjciptxxqvo.cloudfront.net/extensions-list.txt) manifest file.
 
 Reference:
 * [Extension YAML file](https://www.dynatrace.com/support/help/shortlink/extension-yaml)

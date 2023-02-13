@@ -71,7 +71,7 @@ check_activegate_state() {
 check_dynatrace_docker_login() {
   check_if_parameter_is_empty "$DYNATRACE_PAAS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
 
-  DOCKER_LOGIN=$(helm template dynatrace-gcp-function --show-only templates/active-gate-statefulset.yaml | tr '\015' '\n' | grep "envid:" | awk '{print $2}')
+  DOCKER_LOGIN=$(helm template dynatrace-gcp-monitor --show-only templates/active-gate-statefulset.yaml | tr '\015' '\n' | grep "envid:" | awk '{print $2}')
 
   if RESPONSE=$(curl -ksS -w "%{http_code}" -o /dev/null -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/"); then
     if [[ $RESPONSE == "200" ]]; then
@@ -95,10 +95,10 @@ arguments:
                             IAM role name prefix
                             By default 'dynatrace_function' will be used as prefix (e.g. dynatrace_function.metrics).
     --create-autopilot-cluster
-                            Create new GKE Autopilot cluster and deploy dynatrace-gcp-function into it.
+                            Create new GKE Autopilot cluster and deploy dynatrace-gcp-monitor into it.
     --autopilot-cluster-name CLUSTER_NAME
                             Name of new GKE Autopilot cluster to be created if '--create-autopilot-cluster option' was selected.
-                            By default 'dynatrace-gcp-function' will be used.
+                            By default 'dynatrace-gcp-monitor' will be used.
     --without-extensions-upgrade
                             Keep existing versions of present extensions, and install latest versions for the rest of the selected extensions, if they are not present.
                             By default, this is not set, so extensions will be upgrade
@@ -122,7 +122,7 @@ test_req_kubectl
 test_req_helm
 
 CMD_OUT_PIPE="/dev/stdout"
-AUTOPILOT_CLUSTER_NAME="dynatrace-gcp-function"
+AUTOPILOT_CLUSTER_NAME="dynatrace-gcp-monitor"
 
 while (( "$#" )); do
     case "$1" in
@@ -179,42 +179,42 @@ while (( "$#" )); do
     esac
 done
 
-GCP_PROJECT=$(helm show values ./dynatrace-gcp-function --jsonpath "{.gcpProjectId}")
-DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.deploymentType}")
-DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceAccessKey}" | sed 's/[\r\n\t ]//g')
+GCP_PROJECT=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.gcpProjectId}")
+DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.deploymentType}")
+DYNATRACE_ACCESS_KEY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.dynatraceAccessKey}" | sed 's/[\r\n\t ]//g')
 readonly DYNATRACE_ACCESS_KEY
-DYNATRACE_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceUrl}" | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
+DYNATRACE_URL=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.dynatraceUrl}" | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
 readonly DYNATRACE_URL
-DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-function --jsonpath "{.dynatraceLogIngestUrl}" | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
+DYNATRACE_LOG_INGEST_URL=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.dynatraceLogIngestUrl}" | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
 if [ -z "$DYNATRACE_LOG_INGEST_URL" ]; then
   DYNATRACE_LOG_INGEST_URL=$DYNATRACE_URL
 fi
 readonly DYNATRACE_LOG_INGEST_URL
-USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.useExisting}")
+USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.activeGate.useExisting}")
 if [ -z "$USE_EXISTING_ACTIVE_GATE" ]; then
   USE_EXISTING_ACTIVE_GATE=true
 fi
 readonly USE_EXISTING_ACTIVE_GATE
-DYNATRACE_PAAS_KEY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.activeGate.dynatracePaasToken}")
+DYNATRACE_PAAS_KEY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.activeGate.dynatracePaasToken}")
 readonly DYNATRACE_PAAS_KEY
-LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-function --jsonpath "{.logsSubscriptionId}")
+LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.logsSubscriptionId}")
 readonly LOGS_SUBSCRIPTION_ID
-USE_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.useProxy}")
+USE_PROXY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.useProxy}")
 readonly USE_PROXY
-HTTP_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpProxy}")
+HTTP_PROXY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.httpProxy}")
 readonly HTTP_PROXY
-HTTPS_PROXY=$(helm show values ./dynatrace-gcp-function --jsonpath "{.httpsProxy}")
+HTTPS_PROXY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.httpsProxy}")
 readonly HTTPS_PROXY
 readonly ACTIVE_GATE_TARGET_URL_REGEX="^https:\/\/[-a-zA-Z0-9@:%._+~=]{1,255}\/e\/[-a-z0-9]{1,36}[\/]{0,1}$"
-SA_NAME=$(helm show values ./dynatrace-gcp-function --jsonpath "{.serviceAccount}")
+SA_NAME=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.serviceAccount}")
 readonly SA_NAME
-VPC_NETWORK=$(helm show values ./dynatrace-gcp-function --jsonpath "{.vpcNetwork}")
+VPC_NETWORK=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.vpcNetwork}")
 if [ -z "$VPC_NETWORK" ]; then
   VPC_NETWORK="default"
 fi
 readonly VPC_NETWORK
 
-SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-function/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
+SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-monitor/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
 
 API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 
@@ -224,7 +224,7 @@ debug "Setting GCP project"
 check_if_parameter_is_empty "$GCP_PROJECT" "Set correct gcpProjectId in values.yaml"
 
 gcloud config set project "$GCP_PROJECT" | tee -a "$FULL_LOG_FILE"
-info "- Deploying dynatrace-gcp-function in [$GCP_PROJECT]"
+info "- Deploying dynatrace-gcp-monitor in [$GCP_PROJECT]"
 
 if [ -z "$ROLE_NAME" ]; then
   ROLE_NAME="dynatrace_function"
@@ -418,24 +418,24 @@ info "- 3. Configure the IAM service account for Workload Identity."
 gcloud iam service-accounts add-iam-policy-binding "$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role roles/iam.workloadIdentityUser --member "serviceAccount:$GCP_PROJECT.svc.id.goog[$KUBERNETES_NAMESPACE/$SA_NAME]" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 
 info ""
-info "- 4. Create dynatrace-gcp-function IAM role(s)."
+info "- 4. Create dynatrace-gcp-monitor IAM role(s)."
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  debug "Creating or updating GCP IAM role with gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml"
+  debug "Creating or updating GCP IAM role with gcp_iam_roles/dynatrace-gcp-monitor-logs-role.yaml"
   if [[ $(gcloud iam roles list --filter="name ~ $ROLE_NAME.logs" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     info "Updating existing IAM role $ROLE_NAME.logs. It was probably created for previous GCP integration deployment and you can safely replace it."
-    gcloud iam roles update --quiet $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+    gcloud iam roles update --quiet $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-monitor-logs-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   else
-    gcloud iam roles create $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+    gcloud iam roles create $ROLE_NAME.logs --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-monitor-logs-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   fi
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  debug "Creating or updating GCP IAM role with gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml"
+  debug "Creating or updating GCP IAM role with gcp_iam_roles/dynatrace-gcp-monitor-metrics-role.yaml"
   if [[ $(gcloud iam roles list --filter="name ~ $ROLE_NAME.metrics" --project="$GCP_PROJECT" --format="value(name)") ]]; then
     info "Updating existing IAM role $ROLE_NAME.metrics. It was probably created for previous GCP integration deployment and you can safely replace it."
-    gcloud iam roles update --quiet $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+    gcloud iam roles update --quiet $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-monitor-metrics-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   else
-    gcloud iam roles create $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+    gcloud iam roles create $ROLE_NAME.metrics --project="$GCP_PROJECT" --file=gcp_iam_roles/dynatrace-gcp-monitor-metrics-role.yaml | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   fi
 fi
 
@@ -466,18 +466,18 @@ fi
 
 debug "Installing Dynatrace Integration Helm Chart on selected kubernetes cluster"
 info ""
-info "- 7. Install dynatrace-gcp-function with helm chart in $CLUSTER_NAME"
-helm upgrade dynatrace-gcp-function ./dynatrace-gcp-function --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+info "- 7. Install dynatrace-gcp-monitor with helm chart in $CLUSTER_NAME"
+helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 
 debug "Helm installation completed"
 info ""
 info "\e[92m- Deployment complete, check if containers are running:\e[37m"
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  info "kubectl -n $KUBERNETES_NAMESPACE logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-logs"
+  info "kubectl -n $KUBERNETES_NAMESPACE logs -l app=dynatrace-gcp-monitor -c dynatrace-gcp-monitor-logs"
 fi
 
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
-  info "kubectl -n $KUBERNETES_NAMESPACE logs -l app=dynatrace-gcp-function -c dynatrace-gcp-function-metrics"
+  info "kubectl -n $KUBERNETES_NAMESPACE logs -l app=dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics"
 fi
 
 if [[ $DEPLOYMENT_TYPE != "metrics" ]]; then

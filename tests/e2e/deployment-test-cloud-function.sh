@@ -33,7 +33,7 @@ create_sample_app
 rm -rf ./e2e_test
 mkdir ./e2e_test
 unzip -d ./e2e_test ./artefacts/function-deployment-package.zip
-cp ./artefacts/dynatrace-gcp-function.zip ./e2e_test
+cp ./artefacts/dynatrace-gcp-monitor.zip ./e2e_test
 
 ACTIVATION_CONFIG_FILE="./activation-config.yaml"
 

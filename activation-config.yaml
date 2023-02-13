@@ -53,7 +53,7 @@ googleCloud:
     # Set the proxy addresses. To be used in conjunction with USE_PROXY.
     httpProxy: ""
     httpsProxy: ""
-    # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics to Dynatrace properly.
+    # Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-monitor processes and sends metrics to Dynatrace properly.
     # Allowed values: true/yes, false/no
     selfMonitoringEnabled: false
     # scopingProjectSupportEnabled: set to true when metrics scope is configured, so metrics will be collected from all monitored projects.
@@ -62,10 +62,10 @@ googleCloud:
     # Name of the Pub/Sub topic for metric function
     pubSubTopic: dynatrace-gcp-service-invocation
     # Name of the metric forwarding function 
-    function: dynatrace-gcp-function
+    function: dynatrace-gcp-monitor
     # Name of the metric forwarding Cloud Scheduler instance
     scheduler: dynatrace-gcp-schedule
-    # dynatrace-gcp-function execution interval in minutes (1 - 6)
+    # dynatrace-gcp-monitor execution interval in minutes (1 - 6)
     queryInterval: 3
 activation: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax
