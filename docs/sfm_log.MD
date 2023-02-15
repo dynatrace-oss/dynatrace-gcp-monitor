@@ -19,6 +19,6 @@ By default (if this option is not enabled) custom metrics won't be sent to GCP.
 ### Self-monitoring dashboard for logs
 If self monitoring is enabled, the self monitoring dashboard can be added in GCP:
 ```shell script
-wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-function/master/src/dashboards/dynatrace-gcp-function-log-self-monitoring
-gcloud monitoring dashboards create --config-from-file=dynatrace-gcp-function-log-self-monitoring
+wget https://raw.githubusercontent.com/dynatrace-oss/dynatrace-gcp-monitor/master/src/dashboards/dynatrace-gcp-monitor-log-self-monitoring
+gcloud monitoring dashboards create --config-from-file=dynatrace-gcp-monitor-log-self-monitoring
 ```

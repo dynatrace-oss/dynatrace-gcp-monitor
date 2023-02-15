@@ -1,5 +1,5 @@
-title: E2E docker publish dynatrace-gcp-function
-description: Role for Dynatrace GCP function Docker Publish
+title: E2E docker publish dynatrace-gcp-monitor
+description: Role for Dynatrace GCP Monitor Docker Publish
 stage: GA
 includedPermissions:
   - storage.buckets.get

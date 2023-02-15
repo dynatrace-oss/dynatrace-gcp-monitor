@@ -20,7 +20,7 @@ from lib.context import LoggingContext
 
 HOSTNAME = os.environ.get("HOSTNAME", "")
 
-K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-function"
+K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-monitor"
 
 
 def chunks(full_list: List, chunk_size: int) -> List[List]:

@@ -1,6 +1,6 @@
 # Dynatrace integration for Google Cloud Platform monitoring
 
-This is the home of `dynatrace-gcp-function` which provides the mechanism to pull all [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) and  [Cloud logs](https://cloud.google.com/logging/docs)  into Dynatrace. 
+This is the home of `dynatrace-gcp-monitor` which provides the mechanism to pull all [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) and  [Cloud logs](https://cloud.google.com/logging/docs)  into Dynatrace. 
 
 This integration consists of K8s container and few auxiliary components. This setup will be running in your GCP project and will be pushing data to Dynatrace. We provide bash script that will deploy all necessary elements.
 
@@ -13,7 +13,7 @@ Up till now, there was an option to deploy GCP integration as Cloud Function (in
 See [migration guide](https://www.dynatrace.com/support/help/shortlink/migrate-gcp-function-1-to-k8s-1).
 
 ## (legacy info) Migrating to 1.0.x from previous 0.1.x installations
-If you already have previous version of `dynatrace-gcp-function` deployed, please refer to [migration guide](./MIGRATION-V1.md) before installing latest version.
+If you already have previous version of `dynatrace-gcp-monitor` deployed, please refer to [migration guide](./MIGRATION-V1.md) before installing latest version.
 
 ## Pricing
 - Ingested metrics will consume DDUs. For more details [GCP service monitoring consumption](https://www.dynatrace.com/support/help/shortlink/metric-cost-calculation#which-built-in-metrics-consume-ddus)
@@ -39,4 +39,4 @@ See [CONTRIBUTING](CONTRIBUTING.md) for details on submitting changes.
 
 ## License
 
-`dynatrace-gcp-function` is under Apache 2.0 license. See [LICENSE](LICENSE.md) for details.
+`dynatrace-gcp-monitor` is under Apache 2.0 license. See [LICENSE](LICENSE.md) for details.

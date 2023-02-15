@@ -127,7 +127,7 @@ test_req_unzip() {
 
 test_req_kubectl() {
   if ! command -v kubectl &>/dev/null; then
-    err 'Kubernetes CLI is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install kubectl in the most convenient way to you:
+    err 'Kubernetes CLI is required to deploy the Dynatrace GCP Monitor. Go to following link in your browser and install kubectl in the most convenient way to you:
     https://kubernetes.io/docs/tasks/tools/'
     exit
   fi
@@ -135,7 +135,7 @@ test_req_kubectl() {
 
 test_req_helm() {
   if ! command -v helm &>/dev/null; then
-    err 'Helm is required to deploy the Dynatrace GCP Function. Go to following link in your browser and install Helm in the most convenient way to you:
+    err 'Helm is required to deploy the Dynatrace GCP Monitor. Go to following link in your browser and install Helm in the most convenient way to you:
     https://helm.sh/docs/intro/install/'
     exit
   fi

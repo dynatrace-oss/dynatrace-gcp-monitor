@@ -63,14 +63,14 @@ vpcNetwork: "default"
 # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate.
 # Allowed values: "true"/"yes", "false"/"no"
 requireValidCertificate: "true"
-# Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-function processes and sends metrics/logs to Dynatrace properly.
+# Send custom metrics to GCP to diagnose quickly if your dynatrace-gcp-monitor processes and sends metrics/logs to Dynatrace properly.
 # Allowed values: "true"/"yes", "false"/"no"
 selfMonitoringEnabled: "false"
 # IAM service account name
-serviceAccount: "dynatrace-gcp-function-sa"
-# Dynatrace GCP function docker image. Using default value is advised,
+serviceAccount: "dynatrace-gcp-monitor-sa"
+# Dynatrace GCP Monitor docker image. Using default value is advised,
 # but can be changed if there is a need to use customized image or specific, tagged version
-dockerImage: "dynatrace/dynatrace-gcp-function:v1-latest"
+dockerImage: "dynatrace/dynatrace-gcp-monitor:v1-latest"
 # useProxy: depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
 # if set to ALL: proxy settings will be used for requests to Dynatrace and GCP API
 # if set to DT_ONLY: proxy settings will be used only for requests to Dynatrace or to an existing Active Gate (activeGate.useExisting true)
