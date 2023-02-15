@@ -18,14 +18,14 @@ mkdir -p artefacts
 mkdir -p ./helm-deployment-package/gcp_iam_roles
 mkdir -p ./helm-deployment-package/ext_tools
 
-cp -r ./k8s/helm-chart/dynatrace-gcp-function ./helm-deployment-package
+cp -r ./k8s/helm-chart/dynatrace-gcp-monitor ./helm-deployment-package
 
 cp ./scripts/lib.sh ./helm-deployment-package
 cp ./scripts/deploy-helm.sh ./helm-deployment-package
 cp ./ext_tools/* ./helm-deployment-package/ext_tools/
 
-cp ./gcp_iam_roles/dynatrace-gcp-function-metrics-role.yaml ./helm-deployment-package/gcp_iam_roles/
-cp ./gcp_iam_roles/dynatrace-gcp-function-logs-role.yaml ./helm-deployment-package/gcp_iam_roles/
+cp ./gcp_iam_roles/dynatrace-gcp-monitor-metrics-role.yaml ./helm-deployment-package/gcp_iam_roles/
+cp ./gcp_iam_roles/dynatrace-gcp-monitor-logs-role.yaml ./helm-deployment-package/gcp_iam_roles/
 
 cp ./src/version.txt ./helm-deployment-package/version.txt
 

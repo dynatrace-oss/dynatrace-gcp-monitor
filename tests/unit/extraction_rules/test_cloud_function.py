@@ -32,7 +32,7 @@ debug_text_record = {
     "receiveTimestamp": "2021-04-13T10:27:11.946869081Z",
     "resource": {
         "labels": {
-            "function_name": "dynatrace-gcp-function",
+            "function_name": "dynatrace-gcp-monitor",
             "project_id": "dynatrace-gcp-extension",
             "region": "us-central1"
         },
@@ -51,12 +51,12 @@ debug_text_record_expected_output = {
     ATTRIBUTE_GCP_REGION: 'us-central1',
     ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
-    ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-function',
+    ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-monitor',
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: json.dumps(debug_text_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions',
-    ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-function',
-    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-function'
+    ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-monitor',
+    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor'
 }
 
 notice_json_record = {
@@ -79,7 +79,7 @@ notice_json_record = {
      "labels": {
        "region": "us-central1",
        "project_id": "dynatrace-gcp-extension",
-       "function_name": "dynatrace-gcp-function"
+       "function_name": "dynatrace-gcp-monitor"
      }
    },
    "timestamp": timestamp,
@@ -95,12 +95,12 @@ notice_json_record_expected_output = {
     ATTRIBUTE_GCP_REGION: 'us-central1',
     ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
-    ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-function',
+    ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-monitor',
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: json.dumps(notice_json_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/clouderrorreporting.googleapis.com%2Finsights',
-    ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-function',
-    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-function'
+    ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-monitor',
+    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor'
 }
 
 error_proto_record = {
@@ -121,7 +121,7 @@ error_proto_record = {
   "resource": {
     "type": "cloud_function",
     "labels": {
-      "function_name": "dynatrace-gcp-function",
+      "function_name": "dynatrace-gcp-monitor",
       "project_id": "dynatrace-gcp-extension",
       "region": "europe-central2"
     }
@@ -147,12 +147,12 @@ error_proto_record_expected_output = {
     ATTRIBUTE_GCP_REGION: 'europe-central2',
     ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
-    ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-function',
+    ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-monitor',
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: json.dumps(error_proto_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
-    ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/europe-central2/functions/dynatrace-gcp-function',
-    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-function'
+    ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/europe-central2/functions/dynatrace-gcp-monitor',
+    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor'
 }
 
 

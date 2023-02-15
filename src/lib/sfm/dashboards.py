@@ -8,9 +8,9 @@ from operation_mode import OperationMode
 
 async def import_self_monitoring_dashboard(context: SfmDashboardsContext):
     if context.operation_mode == OperationMode.Metrics:
-        dashboard_filename = "dynatrace-gcp-function_self_monitoring.json"
+        dashboard_filename = "dynatrace-gcp-monitor_self_monitoring.json"
     elif context.operation_mode == OperationMode.Logs:
-        dashboard_filename = "dynatrace-gcp-function-log-self-monitoring.json"
+        dashboard_filename = "dynatrace-gcp-monitor-log-self-monitoring.json"
     else:
         context.log(f"Lack of self monitoring dashboard for '{context.operation_mode}' operation mode")
         return

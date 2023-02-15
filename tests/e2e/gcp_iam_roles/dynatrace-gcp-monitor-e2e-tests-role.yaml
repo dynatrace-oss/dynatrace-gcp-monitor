@@ -1,5 +1,5 @@
-title: E2E tests dynatrace-gcp-function
-description: Role for Dynatrace GCP function E2E tests
+title: E2E tests dynatrace-gcp-monitor
+description: Role for Dynatrace GCP Monitor E2E tests
 stage: GA
 includedPermissions:
   - pubsub.subscriptions.delete
