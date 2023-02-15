@@ -34,7 +34,6 @@ from lib.metrics import GCPService
 from lib.self_monitoring import sfm_push_metrics
 from lib.sfm.dashboards import import_self_monitoring_dashboard
 from lib.sfm.for_other.loop_timeout_metric import SFMMetricLoopTimeouts
-from lib.utilities import print_dynatrace_logo
 from lib.webserver.webserver import run_webserver_on_asyncio_loop_forever
 from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode
@@ -182,8 +181,7 @@ def main():
                      name="WebserverThread",
                      daemon=True).start()
 
-    print_dynatrace_logo()
-
+    logging_context.log("Dynatrace GCP Monitor startup")
     logging_context.log("GCP Monitor - Dynatrace integration for Google Cloud Platform monitoring\n")
     logging_context.log(f"Release version: {config.release_tag()}")
 
