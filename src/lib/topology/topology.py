@@ -47,9 +47,9 @@ def choose_services_for_topology_fetch(
     msg_chosen_services = ", ".join([service.name for service in services_for_topology_fetch])
     msg_disabled_topology_services = ", ".join(disabled_topology_services)
     msg_no_extractor_services = ", ".join(no_extractor_services)
-    context.log(project_id, f"Services chosen for topology fetch (fetching additional resource info to create Dynatrace entities): [{msg_chosen_services}];"
+    context.log(project_id, f"Services chosen for topology fetch (fetching additional resource info to enrich Dynatrace entities): [{msg_chosen_services}];"
                             f" skipped services (disabled APIs=these services are disabled in this GCP project): [{msg_disabled_topology_services}]; "
-                            f" skipped services (entity extractors not yet implemented in GCP Monitor): [{msg_no_extractor_services}]")
+                            f" skipped services (entity extractors not yet implemented in GCP Monitor, no enrichement): [{msg_no_extractor_services}]")
 
     return services_for_topology_fetch
 
