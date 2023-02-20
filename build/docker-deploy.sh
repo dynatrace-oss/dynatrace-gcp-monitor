@@ -16,7 +16,7 @@ set -eu
 
 #build container
 ./build/version.sh
-docker build -t dynatrace/dynatrace-gcp-monitor:v1-latest --build-arg RELEASE_TAG_ARG="${TAG}" .
+docker build -t dynatrace/dynatrace-gcp-function:v1-latest --build-arg RELEASE_TAG_ARG="${TAG}" .
 
 #tag container
 if [[ "${PUSH:-}" == "true" ]]; then
@@ -24,10 +24,10 @@ if [[ "${PUSH:-}" == "true" ]]; then
     touch ~/.docker/config.json && chmod 0600 ~/.docker/config.json
     base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
 
-    docker tag dynatrace/dynatrace-gcp-monitor:v1-latest "dynatrace/dynatrace-gcp-monitor:${TAG}"
-    docker push dynatrace/dynatrace-gcp-monitor:v1-latest
-    docker push "dynatrace/dynatrace-gcp-monitor:${TAG}"
+    docker tag dynatrace/dynatrace-gcp-function:v1-latest "dynatrace/dynatrace-gcp-function:${TAG}"
+    docker push dynatrace/dynatrace-gcp-function:v1-latest
+    docker push "dynatrace/dynatrace-gcp-function:${TAG}"
 elif [[ "${PUSH:-}" != "true" && "${E2E:-}" == "true" ]]; then
-    docker tag dynatrace/dynatrace-gcp-monitor:v1-latest "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
+    docker tag dynatrace/dynatrace-gcp-function:v1-latest "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
     docker push "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 fi
