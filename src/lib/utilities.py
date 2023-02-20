@@ -20,7 +20,7 @@ from lib.context import LoggingContext
 
 HOSTNAME = os.environ.get("HOSTNAME", "")
 
-K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-function"
+K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-monitor"
 
 
 def chunks(full_list: List, chunk_size: int) -> List[List]:
@@ -70,30 +70,3 @@ def extract_technology_name(config_yaml):
 
 def is_deployment_running_inside_cloud_function():
     return K8S_CONTAINER_NAME_PREFIX not in HOSTNAME
-
-
-def print_dynatrace_logo():
-    print("                      ,,,,,..")
-    print("                  ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.")
-    print("               ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,")
-    print("            .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,     ,,")
-    print("          ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,    .,,,,")
-    print("       ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,     ,,,,,,,.")
-    print("    .,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.    ,,,,,,,,,,,")
-    print("  ,,,,,,,,,,,,,,,,,......  ......,,,,,,,    .,,,,,,,,,,,,,")
-    print(",,                                        ,,,,,,,,,,,,,,,,")
-    print(",,,,,,,,,,,,,,,,,                        .,,,,,,,,,,,,,,,,")
-    print(",,,,,,,,,,,,,,,,,                        .,,,,,,,,,,,,,,,,.")
-    print(",,,,,,,,,,,,,,,,,       Dynatrace        .,,,,,,,,,,,,,,,,.")
-    print(",,,,,,,,,,,,,,,,, dynatrace-gcp-function .,,,,,,,,,,,,,,,,,")
-    print(",,,,,,,,,,,,,,,,,                        .,,,,,,,,,,,,,,,,,")
-    print(",,,,,,,,,,,,,,,,,                        ,,,,,,,,,,,,,,,,,,")
-    print(",,,,,,,,,,,,,,,,,                        ,,,,,,,,,,,,,,,,,,")
-    print(".,,,,,,,,,,,,,,,                         ,,,,,,,,,,,,,,,,,")
-    print(".,,,,,,,,,,,,,    .,,,,,,,,,,,,,,,,,,.   ,,,,,,,,,,,,,,,")
-    print(" ,,,,,,,,,,     ,,,,,,,,,,,,,,,,,,,,,,  .,,,,,,,,,,,,.")
-    print(" ,,,,,,,     ,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,,,,,,,,")
-    print(" ,,,,,    .,,,,,,,,,,,,,,,,,,,,,,,,,,.  ,,,,,,,,")
-    print("  ,     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,,,,")
-    print("     ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,  ,,,,")
-    print("")

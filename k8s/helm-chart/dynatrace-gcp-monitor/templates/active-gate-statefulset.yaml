@@ -82,7 +82,7 @@ spec:
             - name: DT_INTERNAL_PROXY
               valueFrom:
                 configMapKeyRef:
-                  name: dynatrace-gcp-function-config
+                  name: dynatrace-gcp-monitor-config
               {{- if .Values.httpsProxy }}
                   key: HTTPS_PROXY
               {{- else }}

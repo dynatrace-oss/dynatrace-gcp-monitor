@@ -32,7 +32,7 @@ _GCP_COMPUTE_ENDPOINT = "https://compute.googleapis.com"
 
 
 def _extract_label(gfun_name: Text, group_index: int) -> Text:
-    """Attempt to extract part of gcp function name.
+    """Attempt to extract part of Cloud Function name.
 
     0 -> Full name
     1 -> project_id

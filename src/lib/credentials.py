@@ -128,7 +128,7 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
         "exp": str(now + 60 * 60),
         "iat": str(now)
     }
-    assertion_signed = jwt.encode(assertion, key, 'RS256').decode('utf-8')
+    assertion_signed = jwt.encode(assertion, key, 'RS256')
     request = {'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer', 'assertion': assertion_signed}
     async with session.post(uri, data=request) as resp:
         response = await resp.json()

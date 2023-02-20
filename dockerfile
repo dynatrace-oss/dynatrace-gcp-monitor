@@ -10,12 +10,12 @@ FROM python:3.8-slim-buster
 ARG RELEASE_TAG_ARG
 ENV RELEASE_TAG=$RELEASE_TAG_ARG
 
-LABEL name="dynatrace-gcp-function" \
+LABEL name="dynatrace-gcp-monitor" \
       vendor="Dynatrace LLC" \
       maintainer="Dynatrace Open Source" \
       version="1.x" \
       release="1" \
-      url="https://github.com/dynatrace-oss/dynatrace-gcp-function/" \
+      url="https://github.com/dynatrace-oss/dynatrace-gcp-monitor/" \
       summary="Dynatrace function for Google Cloud Platform monitoring. This project is maintained by Dynatrace as Open Source Project." \
       description="Dynatrace function for Google Cloud Platform provides the mechanism to pull Google Cloud metrics and logs into Dynatrace."
 
