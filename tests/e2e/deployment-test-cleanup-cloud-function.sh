@@ -32,3 +32,14 @@ for extension in ${INSTALLED_EXTENSIONS}; do
     curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/${VERSION}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '"\(.extensionName):\(.version)"'
     echo
 done
+
+echo "FUNCTIONS. LIST OF ROLES:"
+gcloud iam roles list "${GCP_PROJECT}"
+echo "DELETING ${IAM_ROLE_PREFIX}"
+echo "============"
+
+gcloud iam roles delete "${IAM_ROLE_PREFIX}.logs" --project="${GCP_PROJECT_ID}" > /dev/null
+gcloud iam roles delete "${IAM_ROLE_PREFIX}.metrics" --project="${GCP_PROJECT_ID}" > /dev/null
+
+echo "FUNCTIONS>AFTER DELETE. LIST OF ROLES:"
+gcloud iam roles list "${GCP_PROJECT}"
