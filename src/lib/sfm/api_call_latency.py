@@ -11,7 +11,6 @@ class ApiCallLatency:
 
     @staticmethod
     def print_statistics(context: LoggingContext):
-        print("Print_statistics has been called :)")
         for api_url, times in ApiCallLatency._value.items():
             context.log(
                 f"Api call latency: [url - {api_url}], [number_of_calls - {len(times)}], "
