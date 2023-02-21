@@ -25,6 +25,16 @@ create_sample_app() {
   --source ./tests/e2e/sample_app/ > /dev/null 2>&1
 }
 
+check_container_state()
+{
+  CONTAINER=$1
+  CONTAINER_STATE=$(kubectl -n dynatrace get pods -o=jsonpath="{.items[*].status.containerStatuses[?(@.name==\"${CONTAINER}\")].state}")
+  if [[ "${CONTAINER_STATE}" != *"running"* ]]; then
+    return 1
+  fi
+  return 0
+}
+
 generate_load_on_sample_app() {
   for _ in {1..5}; do
     curl -s "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \

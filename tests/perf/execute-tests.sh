@@ -12,34 +12,9 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-
+#
 source ./tests/e2e/lib-tests.sh
 
-while (( "$#" )); do
-    case "$1" in
-            "--logs")
-                DEPLOYMENT_TYPE="logs"
-                shift
-            ;;
-
-            "--metrics")
-                DEPLOYMENT_TYPE="metrics"
-                shift
-            ;;
-
-            "--all")
-                DEPLOYMENT_TYPE="all"
-                shift
-            ;;
-
-            *)
-            echo "Unknown param $1"
-            print_help
-            exit 1
-    esac
-done
-
-# Create Pub/Sub topic and subscription.
 gcloud config set project "${GCP_PROJECT_ID}"
 
 if [[ $(gcloud pubsub topics list --filter=name:"${PUBSUB_TOPIC}" --format="value(name)") ]]; then
@@ -59,22 +34,19 @@ if [[ $(gcloud logging sinks  list --filter=name:"${LOG_ROUTER}" --format="value
     echo "Log Router [${LOG_ROUTER}] already exists, skipping"
 else
   gcloud logging sinks create "${LOG_ROUTER}" "pubsub.googleapis.com/projects/${GCP_PROJECT_ID}/topics/${PUBSUB_TOPIC}" \
-    --log-filter="resource.type=\"cloud_function\" AND resource.labels.function_name=\"${CLOUD_FUNCTION_NAME}\"" --description="Simple Sink for E2E tests" > /dev/null 2>&1
+    --log-filter="resource.type=\"cloud_function\" AND resource.labels.function_name=\"${CLOUD_FUNCTION_NAME}\"" --description="Simple Sink for Perf tests" > /dev/null 2>&1
 fi
 
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | "$TEST_JQ" -r '.writerIdentity')
 gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member "${writerIdentity}" --role roles/pubsub.publisher > /dev/null 2>&1
 
-create_sample_app
-
-# Run helm deployment.
-rm -rf ./e2e_test
-mkdir ./e2e_test
-tar -C ./e2e_test -xf ./artefacts/helm-deployment-package.tar
+rm -rf ./perf_test
+mkdir ./perf_test
+tar -C ./perf_test -xf ./artefacts/helm-deployment-package.tar
 
 VALUES_FILE="./dynatrace-gcp-monitor/values.yaml"
 
-cd ./e2e_test/helm-deployment-package || exit 1
+cd ./perf_test/helm-deployment-package || exit 1
 
 # Create values.e2e.yaml including lines to be replaced. Adding cloud run revision to list of default services
 create_values_e2e_file
@@ -93,17 +65,10 @@ LOGS_CONTAINER_STATE=0
 
 for _ in {1..60}
 do
-  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
-    check_container_state "dynatrace-gcp-monitor-metrics"
-    METRICS_CONTAINER_STATE=$?
-  fi
+  check_container_state "dynatrace-gcp-monitor-metrics"
+  METRICS_CONTAINER_STATE=$?
 
-  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
-    check_container_state "dynatrace-gcp-monitor-logs"
-    LOGS_CONTAINER_STATE=$?
-  fi
-
-  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+  if [[ ${METRICS_CONTAINER_STATE} == 0 ]]; then
     break
   fi
 
