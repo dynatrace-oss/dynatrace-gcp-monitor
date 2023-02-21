@@ -273,13 +273,13 @@ spec:
             path: /health
             port: 8081
           initialDelaySeconds: 30
-          timeoutSeconds: 15
+          timeoutSeconds: 60
         startupProbe:
           httpGet:
             path: /health
             port: 8081
-          initialDelaySeconds: 10
-          timeoutSeconds: 15
+          initialDelaySeconds: 30
+          timeoutSeconds: 60
       {{- if (eq .Values.activeGate.useExisting "false") }}
       initContainers:
         - name: init-active-gate-service
