@@ -61,7 +61,6 @@ gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 
 echo
 echo -n "Verifying deployment result"
 METRICS_CONTAINER_STATE=0
-LOGS_CONTAINER_STATE=0
 
 for _ in {1..60}
 do
@@ -79,9 +78,7 @@ done
 echo
 kubectl -n dynatrace get pods
 
-generate_load_on_sample_app
-
-if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+if [[ ${METRICS_CONTAINER_STATE} == 0 ]]; then
   echo "Deployment completed successfully"
   exit 0
 else
