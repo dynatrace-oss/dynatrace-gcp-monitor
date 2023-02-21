@@ -16,3 +16,4 @@ src/config/
 .wgetcache
 ext_tools/
 !ext_tools/*.txt
+src/dev_local_run.py

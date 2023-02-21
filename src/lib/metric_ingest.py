@@ -23,12 +23,13 @@ from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
+from lib.configuration import config
 
 UNIT_10TO2PERCENT = "10^2.%"
 MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
 MAX_DIMENSION_VALUE_LENGTH = os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
 
-_MONITORING_ROOT = "https://monitoring.googleapis.com/v3"
+GCP_MONITORING_URL = config.gcp_monitoring_url()
 
 
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
@@ -73,7 +74,7 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
     if context.print_metric_ingest_input:
         context.log("Ingest input is: ")
         context.log(ingest_input)
-    dt_url=f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
+    dt_url = f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
     ingest_response = await context.dt_session.post(
         url=dt_url,
         headers={
@@ -181,7 +182,7 @@ async def fetch_metric(
     while should_fetch:
         context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
-        url = f"{_MONITORING_ROOT}/projects/{project_id}/timeSeries"
+        url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
         resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
