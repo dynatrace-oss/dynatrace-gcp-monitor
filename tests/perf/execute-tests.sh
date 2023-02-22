@@ -68,7 +68,7 @@ for _ in {1..60}
 do
   check_container_state "dynatrace-gcp-monitor-metrics"
 
-  sleep 10
+  sleep 12
   echo -n "."
 done
 
