@@ -62,14 +62,11 @@ echo
 echo -n "Verifying deployment result"
 METRICS_CONTAINER_STATE=0
 
+kubectl set env deployment dynatrace-gcp-monitor -n dynatrace GCP_PROJECT_ID="fake-project-0"
+echo "Container state:"
 for _ in {1..60}
 do
   check_container_state "dynatrace-gcp-monitor-metrics"
-  METRICS_CONTAINER_STATE=$?
-
-  if [[ ${METRICS_CONTAINER_STATE} == 0 ]]; then
-    break
-  fi
 
   sleep 10
   echo -n "."
