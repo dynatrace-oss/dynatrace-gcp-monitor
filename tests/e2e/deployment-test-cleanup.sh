@@ -15,7 +15,7 @@
 
 source ./tests/e2e/lib-tests.sh
 
-helm -n dynatrace ls --all --short | grep dynatrace-gcp-function | xargs -L1 helm -n dynatrace uninstall --timeout 10m
+helm -n dynatrace ls --all --short | grep dynatrace-gcp-monitor | xargs -L1 helm -n dynatrace uninstall --timeout 10m
 
 gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}"
 gcloud pubsub topics delete "${PUBSUB_TOPIC}"

@@ -83,7 +83,7 @@ rm -rf ./e2e_test
 mkdir ./e2e_test
 tar -C ./e2e_test -xf ./artefacts/helm-deployment-package.tar
 
-VALUES_FILE="./dynatrace-gcp-function/values.yaml"
+VALUES_FILE="./dynatrace-gcp-monitor/values.yaml"
 
 cd ./e2e_test/helm-deployment-package || exit 1
 
@@ -105,12 +105,12 @@ LOGS_CONTAINER_STATE=0
 for _ in {1..60}
 do
   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
-    check_container_state "dynatrace-gcp-function-metrics"
+    check_container_state "dynatrace-gcp-monitor-metrics"
     METRICS_CONTAINER_STATE=$?
   fi
 
   if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
-    check_container_state "dynatrace-gcp-function-logs"
+    check_container_state "dynatrace-gcp-monitor-logs"
     LOGS_CONTAINER_STATE=$?
   fi
 

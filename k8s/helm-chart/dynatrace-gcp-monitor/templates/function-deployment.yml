@@ -25,19 +25,19 @@ automountServiceAccountToken: false
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dynatrace-gcp-function
+  name: dynatrace-gcp-monitor
   namespace: {{ .Release.Namespace }}
   labels:
-    app: dynatrace-gcp-function
+    app: dynatrace-gcp-monitor
 spec:
   selector:
     matchLabels:
-      app: dynatrace-gcp-function
+      app: dynatrace-gcp-monitor
   replicas: 1
   template:
     metadata:
       labels:
-        app: dynatrace-gcp-function
+        app: dynatrace-gcp-monitor
       annotations:
         "version" : "1"
         checksum/config: {{ include (print $.Template.BasePath "/function-config.yaml") . | sha256sum }}
@@ -49,7 +49,7 @@ spec:
       volumes:
       - name: gcp-config
         configMap:
-          name: dynatrace-gcp-function-config
+          name: dynatrace-gcp-monitor-config
           items:
           - key: GCP_SERVICES_YAML
             path: "gcp_services.yaml"
@@ -57,7 +57,7 @@ spec:
       containers:
       {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
       - image: {{ .Values.dockerImage | quote }}
-        name: dynatrace-gcp-function-metrics      
+        name: dynatrace-gcp-monitor-metrics
         imagePullPolicy: Always
         env:
         - name: OPERATION_MODE
@@ -65,38 +65,38 @@ spec:
         - name: PRINT_METRIC_INGEST_INPUT
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: PRINT_METRIC_INGEST_INPUT
         - name: GCP_PROJECT
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: GCP_PROJECT
         - name: REQUIRE_VALID_CERTIFICATE
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: REQUIRE_VALID_CERTIFICATE
         - name: SERVICE_USAGE_BOOKING
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: SERVICE_USAGE_BOOKING
         {{- if (.Values.useProxy) }}
         - name: USE_PROXY
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: USE_PROXY
         - name: HTTP_PROXY
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: HTTP_PROXY
         - name: HTTPS_PROXY
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: HTTPS_PROXY
         {{- end }}
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
@@ -106,34 +106,34 @@ spec:
         - name: DYNATRACE_URL
           valueFrom:
             secretKeyRef:
-              name: dynatrace-gcp-function-secret
+              name: dynatrace-gcp-monitor-secret
               key: url
         - name: DYNATRACE_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: dynatrace-gcp-function-secret
+              name: dynatrace-gcp-monitor-secret
               key: access-key
         - name: SELF_MONITORING_ENABLED
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: SELF_MONITORING_ENABLED
         - name: QUERY_INTERVAL_MIN
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: QUERY_INTERVAL_MIN
         - name: HEALTH_CHECK_PORT
           value: "8080"
         - name: SCOPING_PROJECT_SUPPORT_ENABLED
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: SCOPING_PROJECT_SUPPORT_ENABLED
         - name:   KEEP_REFRESHING_EXTENSIONS_CONFIG
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key:   KEEP_REFRESHING_EXTENSIONS_CONFIG
         volumeMounts:
         - mountPath: /code/config/activation
@@ -159,7 +159,7 @@ spec:
       {{- end }}
       {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
       - image: {{ .Values.dockerImage | quote }}
-        name: dynatrace-gcp-function-logs
+        name: dynatrace-gcp-monitor-logs
         imagePullPolicy: Always
         env:
         - name: OPERATION_MODE
@@ -167,52 +167,52 @@ spec:
         - name: GCP_PROJECT
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: GCP_PROJECT
         - name: LOGS_SUBSCRIPTION_ID
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: LOGS_SUBSCRIPTION_ID
         - name: DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH
         - name: DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH
         - name: DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS
         - name: DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE
         - name: DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD
         - name: DYNATRACE_TIMEOUT_SECONDS
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: DYNATRACE_TIMEOUT_SECONDS
         - name: CLOUD_LOG_FORWARDER
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: CLOUD_LOG_FORWARDER
         - name: REQUIRE_VALID_CERTIFICATE
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: REQUIRE_VALID_CERTIFICATE
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
           value: DYNATRACE_ACCESS_KEY
@@ -221,29 +221,29 @@ spec:
         - name: DYNATRACE_LOG_INGEST_URL
           valueFrom:
             secretKeyRef:
-              name: dynatrace-gcp-function-secret
+              name: dynatrace-gcp-monitor-secret
               key: log-ingest-url
         - name: DYNATRACE_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: dynatrace-gcp-function-secret
+              name: dynatrace-gcp-monitor-secret
               key: access-key
         - name: SELF_MONITORING_ENABLED
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: SELF_MONITORING_ENABLED
         {{- if (.Values.useProxy) }}
         - name: USE_PROXY
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               key: USE_PROXY
         # the PubSub uses gPRC so both variables have to be set
         - name: HTTP_PROXY
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               {{- if .Values.httpProxy }}
               key: HTTP_PROXY
               {{- else }}
@@ -252,7 +252,7 @@ spec:
         - name: HTTPS_PROXY
           valueFrom:
             configMapKeyRef:
-              name: dynatrace-gcp-function-config
+              name: dynatrace-gcp-monitor-config
               {{- if .Values.httpsProxy }}
               key: HTTPS_PROXY
               {{- else }}
@@ -273,13 +273,13 @@ spec:
             path: /health
             port: 8081
           initialDelaySeconds: 30
-          timeoutSeconds: 15
+          timeoutSeconds: 60
         startupProbe:
           httpGet:
             path: /health
             port: 8081
-          initialDelaySeconds: 10
-          timeoutSeconds: 15
+          initialDelaySeconds: 30
+          timeoutSeconds: 60
       {{- if (eq .Values.activeGate.useExisting "false") }}
       initContainers:
         - name: init-active-gate-service

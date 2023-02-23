@@ -18,10 +18,10 @@ WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$WORKING_DIR/lib.sh"
 init_ext_tools
 
-FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-function/releases" -H "Accept: application/vnd.github.v3+json" | "$JQ" 'map(select(.assets[].name == "dynatrace-gcp-function.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-function.zip") | .browser_download_url' -r)
+FUNCTION_REPOSITORY_RELEASE_URL=$(curl -s "https://api.github.com/repos/dynatrace-oss/dynatrace-gcp-monitor/releases" -H "Accept: application/vnd.github.v3+json" | "$JQ" 'map(select(.assets[].name == "dynatrace-gcp-monitor.zip" and .prerelease != true)) | sort_by(.created_at) | last | .assets[] | select( .name =="dynatrace-gcp-monitor.zip") | .browser_download_url' -r)
 readonly FUNCTION_REPOSITORY_RELEASE_URL
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
-readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-function.zip
+readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-monitor.zip
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TMP_FUNCTION_DIR=$(mktemp -d)
 
@@ -59,7 +59,7 @@ DYNATRACE_URL_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceUrlSecretName'
 readonly DYNATRACE_URL_SECRET_NAME
 DYNATRACE_ACCESS_KEY_SECRET_NAME=$("$YQ" e '.googleCloud.common.dynatraceAccessKeySecretName' $FUNCTION_ACTIVATION_CONFIG)
 readonly DYNATRACE_ACCESS_KEY_SECRET_NAME
-readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-function Self monitoring"
+readonly SELF_MONITORING_DASHBOARD_NAME="dynatrace-gcp-monitor Self monitoring"
 GCP_FUNCTION_REGION=$("$YQ" e '.googleCloud.required.cloudFunctionRegion' $FUNCTION_ACTIVATION_CONFIG)
 readonly GCP_FUNCTION_REGION
 

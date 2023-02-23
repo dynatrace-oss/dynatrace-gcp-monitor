@@ -39,11 +39,12 @@ from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.topology.topology import fetch_topology, build_entity_id_map
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets, \
     is_yaml_file, extract_technology_name
+from lib.sfm.api_call_latency import ApiCallLatency
 
 
 def dynatrace_gcp_extension(event, context):
     """
-    Starting point for installation as a GCP function.
+    Starting point for installation as a function.
     See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
     """
     try:
@@ -55,7 +56,7 @@ def dynatrace_gcp_extension(event, context):
 
 async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = None):
     """
-    Starting point for installation as a cluster and for tests.
+    Starting point for installation as a cluster.
     """
     timestamp_utc = datetime.utcnow()
     timestamp_utc_iso = timestamp_utc.isoformat()
@@ -73,7 +74,7 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
     context = LoggingContext(execution_id)
     if not services:
-        # Load services for GCP Function
+        # Load services for Cloud Function
         services = load_supported_services(context)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -150,7 +151,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
             await sfm_push_metrics(context.sfm.values(), context, context.execution_time)
         else:
             context.log("SFM disabled, will not push SFM metrics")
-
+        ApiCallLatency.print_statistics(context)
         await gcp_session.close()
         await dt_session.close()
 

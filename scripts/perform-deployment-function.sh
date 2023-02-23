@@ -16,7 +16,7 @@
 mkdir -p release
 cd release/ || exit
 
-wget -q "https://github.com/dynatrace-oss/dynatrace-gcp-function/releases/download/${TRAVIS_TAG}/function-deployment-package.zip" -O function-deployment-package.zip; unzip function-deployment-package.zip; chmod a+x ./*.sh;
+wget -q "https://github.com/dynatrace-oss/dynatrace-gcp-monitor/releases/download/${TRAVIS_TAG}/function-deployment-package.zip" -O function-deployment-package.zip; unzip function-deployment-package.zip; chmod a+x ./*.sh;
 
 cat <<EOF > activation.config.release.yaml
 googleCloud:
