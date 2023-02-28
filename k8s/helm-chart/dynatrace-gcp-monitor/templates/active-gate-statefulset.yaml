@@ -37,6 +37,15 @@ type: kubernetes.io/dockerconfigjson
 data:
   .dockerconfigjson: {{ template "imagePullSecret" . }}
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dynatrace-activegate-gcpmon-auth-token
+  namespace: {{ .Release.Namespace }}
+type: Opaque
+data:
+  auth-token: {{ template "activeGateAuthToken" . }}
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -89,6 +98,9 @@ spec:
                   key: HTTP_PROXY
               {{- end }}
             {{- end }}
+          volumeMounts:
+            - name: dynatrace-activegate-gcpmon-auth-token
+              mountPath: /var/lib/dynatrace/secrets/tokens
           resources:
             requests:
               memory: 512Mi
@@ -114,6 +126,10 @@ spec:
             failureThreshold: 2
       imagePullSecrets:
         - name: dynatrace-activegate-gcpmon-pullsecret
+      volumes:
+        - name: dynatrace-activegate-gcpmon-auth-token
+          secret:
+            secretName: dynatrace-activegate-gcpmon-auth-token
   updateStrategy:
     type: RollingUpdate
   {{- end }}

@@ -36,6 +36,15 @@
 {{- end }}
 {{- end }}
 
+{{/*
+    ActiveGate Auth Token
+*/}}
+{{- define "activeGateAuthToken" }}
+    {{- with .Values }}
+        {{- printf "%s" .activeGate.dynatraceAuthToken }}
+    {{- end }}
+{{- end }}
+
 
 {{/*
     Active Gate Docker image name. Taken from Dynatrace cluster. Example environment-id.live.dynatrace.com/linux/activegate.
