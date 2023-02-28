@@ -13,6 +13,7 @@
 #     limitations under the License.
 import os
 import time
+import asyncio
 from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List, Any
@@ -40,25 +41,32 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
     if not fetch_metric_results:
         context.log(project_id, "Skipping push due to no data to push")
 
-    lines_sent = 0
-    maximum_lines_threshold = context.maximum_metric_data_points_per_minute
     start_time = time.time()
     try:
         lines_batch = []
+        tasks_to_push_lines = []
         for result in fetch_metric_results:
             lines_batch.append(result)
-            lines_sent += 1
             if len(lines_batch) >= context.metric_ingest_batch_size:
-                await _push_to_dynatrace(context, project_id, lines_batch)
+                tasks_to_push_lines.append(_push_to_dynatrace(context, project_id, lines_batch))
                 lines_batch = []
-            if lines_sent >= maximum_lines_threshold:
-                await _push_to_dynatrace(context, project_id, lines_batch)
-                lines_dropped_count = len(fetch_metric_results) - maximum_lines_threshold
-                context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, lines_dropped_count)
-                context.log(project_id, f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
-                return
+
         if lines_batch:
-            await _push_to_dynatrace(context, project_id, lines_batch)
+            tasks_to_push_lines.append(_push_to_dynatrace(context, project_id, lines_batch))
+
+        push_buffer = []
+
+        if len(tasks_to_push_lines) <= config.concurrent_push_request_to_dynatrace_buffer_size():
+            await asyncio.gather(*tasks_to_push_lines, return_exceptions=True)
+        else:
+            for task in tasks_to_push_lines:
+                if len(push_buffer) == config.concurrent_push_request_to_dynatrace_buffer_size():
+                    await asyncio.gather(*push_buffer, return_exceptions=True)
+                    push_buffer = []
+                else:
+                    push_buffer.append(task)
+            if push_buffer:
+                await asyncio.gather(*push_buffer, return_exceptions=True)
     except Exception as e:
         if isinstance(e, InvalidURL):
             context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)

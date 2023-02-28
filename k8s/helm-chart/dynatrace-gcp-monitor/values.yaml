@@ -85,6 +85,12 @@ httpsProxy: ""
 scopingProjectSupportEnabled: "false"
 # keepRefreshingExtensionsConfig: if true, will fetch enabled extensions from DT on each polling, otherwise will only fetch once during startup
 keepRefreshingExtensionsConfig: "true"
+# concurrentPushRequestToDynatraceBufferSize: Dynatrace can handle multiple concurrent requests to ingest metrics at once depending on worker threads available in the Dynatrace tenant.
+# 10 - means, ten requests at a time
+# Allowed values: 10 - 300
+# Unintentional increase of this value might cause issues!
+concurrentPushRequestToDynatraceBufferSize: 10
+
 
 
 # LOGS VALUES - DEFAULTS

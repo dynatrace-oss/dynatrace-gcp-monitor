@@ -135,6 +135,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key:   KEEP_REFRESHING_EXTENSIONS_CONFIG
+        - name: CONCURRENT_PUSH_REQUEST_TO_DYNATRACE_BUFFER_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: CONCURRENT_PUSH_REQUEST_TO_DYNATRACE_BUFFER_SIZE
         volumeMounts:
         - mountPath: /code/config/activation
           readOnly: true

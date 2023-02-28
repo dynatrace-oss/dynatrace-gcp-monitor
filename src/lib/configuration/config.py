@@ -37,6 +37,10 @@ def keep_refreshing_extensions_config():
     return os.environ.get("KEEP_REFRESHING_EXTENSIONS_CONFIG", "TRUE").upper() in ["TRUE", "YES"]
 
 
+def concurrent_push_request_to_dynatrace_buffer_size():
+    return os.environ.get("CONCURRENT_PUSH_REQUEST_TO_DYNATRACE_BUFFER_SIZE", 10)
+
+
 def release_tag():
     return os.environ.get("RELEASE_TAG", "version value not provided")
 
@@ -55,5 +59,8 @@ def gcp_service_usage_url():
 
 def gcp_monitoring_url():
     return os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
+
+
+
 
 
