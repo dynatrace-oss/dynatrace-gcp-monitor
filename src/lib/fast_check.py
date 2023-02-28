@@ -19,7 +19,6 @@ import re
 from datetime import datetime
 from queue import Queue
 from typing import NamedTuple, List, Optional, Tuple
-from urllib.parse import urljoin
 
 from aiohttp import ClientSession
 

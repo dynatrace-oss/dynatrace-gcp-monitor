@@ -18,8 +18,9 @@ from aiohttp import ClientResponseError
 from typing import Set, List, Dict, Tuple
 
 from lib.context import MetricsContext
+from lib.configuration import config
 
-_GCP_SERVICE_USAGE_URL = "https://serviceusage.googleapis.com/v1"
+_GCP_SERVICE_USAGE_URL = config.gcp_service_usage_url()
 
 REQUIRED_SERVICES = [
     "monitoring.googleapis.com",

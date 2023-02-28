@@ -23,13 +23,14 @@ from aiohttp import ClientSession
 from lib.configuration import config
 from lib.context import LoggingContext
 
-_METADATA_ROOT = "http://metadata.google.internal/computeMetadata/v1"
+
+_METADATA_ROOT = config.gcp_metadata_url()
 _METADATA_FLAVOR_HEADER = "metadata-flavor"
 _METADATA_FLAVOR_VALUE = "Google"
 _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 
 _SECRET_ROOT = 'https://secretmanager.googleapis.com/v1'
-_CLOUD_RESOURCE_MANAGER_ROOT = "https://cloudresourcemanager.googleapis.com/v1"
+_CLOUD_RESOURCE_MANAGER_ROOT = config.gcp_cloud_resource_manager_url()
 
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = config.dynatrace_access_key_secret_name()
 _DYNATRACE_URL_SECRET_NAME = config.dynatrace_url_secret_name()
@@ -129,7 +130,6 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
     }
     assertion_signed = jwt.encode(assertion, key, 'RS256')
     request = {'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer', 'assertion': assertion_signed}
-
     async with session.post(uri, data=request) as resp:
         response = await resp.json()
         return response["access_token"]
@@ -141,7 +141,7 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
     all_projects = []
     params = {"filter": "lifecycleState:ACTIVE"}
 
-    while True: 
+    while True:
         response = await session.get(url, headers=headers, params=params)
         response_json = await response.json()
         all_projects.extend([project["projectId"] for project in response_json.get("projects", [])])
