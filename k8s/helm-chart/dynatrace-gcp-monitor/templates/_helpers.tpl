@@ -37,11 +37,11 @@
 {{- end }}
 
 {{/*
-    ActiveGate Auth Token
+    ActiveGate Auth Token, generated via API, used by AG to connect to cluster.
 */}}
 {{- define "activeGateAuthToken" }}
     {{- with .Values }}
-        {{- printf "%s" .activeGate.dynatraceAuthToken }}
+        {{- printf "%s" .activeGate.dynatraceAuthToken | b64enc }}
     {{- end }}
 {{- end }}
 

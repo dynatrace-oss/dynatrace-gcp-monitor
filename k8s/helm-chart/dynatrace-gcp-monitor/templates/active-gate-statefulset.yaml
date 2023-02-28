@@ -40,7 +40,7 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dynatrace-activegate-gcpmon-auth-token
+  name: dynatrace-activegate-gcpmon-auth-token-secret
   namespace: {{ .Release.Namespace }}
 type: Opaque
 data:
@@ -99,7 +99,7 @@ spec:
               {{- end }}
             {{- end }}
           volumeMounts:
-            - name: dynatrace-activegate-gcpmon-auth-token
+            - name: dynatrace-activegate-gcpmon-auth-token-volume
               mountPath: /var/lib/dynatrace/secrets/tokens
           resources:
             requests:
@@ -127,9 +127,9 @@ spec:
       imagePullSecrets:
         - name: dynatrace-activegate-gcpmon-pullsecret
       volumes:
-        - name: dynatrace-activegate-gcpmon-auth-token
+        - name: dynatrace-activegate-gcpmon-auth-token-volume
           secret:
-            secretName: dynatrace-activegate-gcpmon-auth-token
+            secretName: dynatrace-activegate-gcpmon-auth-token-secret
   updateStrategy:
     type: RollingUpdate
   {{- end }}
