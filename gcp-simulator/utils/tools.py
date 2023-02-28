@@ -26,41 +26,30 @@ def get_env():
     )
 
 
-def generate_points(p, i, sample, resolution, start, end, limit):
-    points = []
-    for s in range(sample * resolution + start, end, resolution):
-        if limit <= 0:
-            limit -= 1
-            break
+def create_point(s, p, i, resolution):
+    point_t = Point()
 
-        point_t = Point()
-        point_t.interval.startTime = (
-            datetime.datetime.fromtimestamp(s, datetime.timezone.utc)
-            .isoformat()
-            .replace("+00:00", "Z")
-        )
-        point_t.interval.endTime = (
-            datetime.datetime.fromtimestamp(s + resolution, datetime.timezone.utc)
-            .isoformat()
-            .replace("+00:00", "Z")
-        )
-        point_t.value.int64Value = str(
-            int(
-                round(
-                    ((s + p * 10000 + i) % (resolution * 5)) / (resolution * 5.0) * 100
-                )
-            )
-        )
-        points.append(point_t)
-        limit -= 1
+    point_t.interval.startTime = datetime.datetime.fromtimestamp(s, datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+    point_t.interval.endTime = datetime.datetime.fromtimestamp(s+resolution, datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+    point_t.value.int64Value = str(int(round(((s+p*10000+i) % (resolution * 5)) / (resolution * 5.0) * 100)))
 
-    return limit, points
+    return point_t
 
 
-def create_metric(metric_type, metric_labels, res_dims, t):
+def create_res_dims(resource_labels, project_id, sub_projects, p, i):
+    res_dims = {}
+    for rl in resource_labels:
+        if rl.startswith("project"):
+            res_dims[rl] = project_id + (f"-subproject-{p}" if sub_projects > 1 else "")
+        else:
+            res_dims[rl] = f"{rl}-instance-{i}"
+
+        return res_dims
+
+def create_metric(metric_labels, metric_type, t, res_dims):
     m_dims = {}
-    for metric_label in metric_labels:
-        m_dims[metric_label] = f"{metric_label}-{t}"
+    for ml in metric_labels:
+        m_dims[ml] = f"{ml}-{t}"
 
     metric_t = Metric()
 
@@ -72,48 +61,7 @@ def create_metric(metric_type, metric_labels, res_dims, t):
 
     return metric_t
 
-
-def create_resource_dims(resource_labels, p, sub_projects, i, project_id):
-    res_dims = {}
-    for resource_label in resource_labels:
-        if resource_label.startswith("project"):
-            res_dims[resource_label] = project_id + (
-                f"-subproject-{p}" if sub_projects > 1 else ""
-            )
-            continue
-
-        res_dims[resource_label] = f"{resource_label}-instance-{i}"
-
-    return res_dims
-
-
-def find_labels(group_by_fields):
-    resource_labels = set(
-        map(
-            lambda x: x.replace("resource.labels.", ""),
-            filter(lambda x: x.startswith("resource.labels"), group_by_fields),
-        )
-    )
-    metric_labels = set(
-        map(
-            lambda x: x.replace("metric.labels.", ""),
-            filter(lambda x: x.startswith("metric.labels"), group_by_fields),
-        )
-    )
-
-    return resource_labels, metric_labels
-
-
-def calc_depth(
-    metric_tuples,
-    instances,
-    sub_projects,
-    metric_labels,
-    pagination,
-    start,
-    end,
-    resolution,
-):
+def calc_depth(metric_tuples, instances, sub_projects, metric_labels, pagination, start, end, resolution):
     samples = int((end - start) / resolution)
     requested_metric_tuples = metric_tuples if len(metric_labels) > 0 else 1
     offset = pagination.offset
@@ -126,3 +74,9 @@ def calc_depth(
     sub_project = int(offset % sub_projects)
 
     return requested_metric_tuples, metric_tuple, instance, sub_project, sample
+
+def find_labels(group_by_fields):
+    resource_labels = set(map(lambda x: x.replace("resource.labels.", ""), filter(lambda x: x.startswith("resource.labels"), group_by_fields)))
+    metric_labels = set(map(lambda x: x.replace("metric.labels.", ""), filter(lambda x: x.startswith("metric.labels"), group_by_fields)))
+
+    return resource_labels, metric_labels

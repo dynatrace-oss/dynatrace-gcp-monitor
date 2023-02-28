@@ -2,7 +2,7 @@ from dataclasses import field
 from typing import List, Dict
 import random
 import asyncio
-
+from dataclasses import dataclass, field
 
 class Latency:
     def __init__(self, latency_ms: int, jitter_ms: int):
@@ -16,26 +16,30 @@ class Latency:
             + self.jitter_ms / 2000.0 * random.gammavariate(1, 0.5)
         )
 
-
+@dataclass
 class Metadata:
     type: str = ""
     labels: Dict[str, str] = field(default_factory=dict)
 
 
+@dataclass()
 class Value:
     int64Value: str = ""
 
 
+@dataclass()
 class Interval:
     startTime: str = None
     endTime: str = None
 
 
+@dataclass()
 class Point:
     interval: Interval = field(default_factory=Interval)
     value: Value = field(default_factory=Value)
 
 
+@dataclass
 class Metric:
     metric: Metadata = field(default_factory=Metadata)
     resource: Metadata = field(default_factory=Metadata)
@@ -44,56 +48,22 @@ class Metric:
     valueType: str = "INT64"
 
 
+@dataclass
 class TS:
     timeSeries: List[Metric] = field(default_factory=list)
     unit: str = "1"
     nextPageToken: str = None
 
-
-class Dimension:
-    value: str = None
-    key: str = None
-
-
-class GcpOptions:
-    ingestDelay: int = 240
-    samplePeriod: int = 60
-    valueType: str = "INT64"
-    metricKind: str = "GAUGE"
-    unit: str = "1"
-
-
-class ServiceMetric:
-    value: str = None
-    key: str = None
-    type: str = None
-    gcpOptions: GcpOptions = None
-    dimensions: List[Dimension] = field(default_factory=list)
-
-
-class Service:
-    service: str
-    featureSet: str = None
-    gcpMonitoringFilter: str = None
-    dimensions: List[Dimension] = field(default_factory=list)
-    metrics: List[ServiceMetric] = field(default_factory=list)
-
-
 class Pagination:
-    offset: int
-    page_size: int
-
-    def __init__(self, page_size: int = 50, offset: int = 0):
+    def __init__(self,  page_size: int = 50, offset: int = 0):
         self.offset: int = offset
         self.page_size = page_size
 
-    def update(self, page_size: int = 0, pageToken: str = "next-page-token-0"):
-        return Pagination(
-            page_size or self.page_size, int(pageToken.replace("next-page-token-", ""))
-        )
+    def update(self, pageSize: int = 0, pageToken: str = "next-page-token-0"):
+        return Pagination(pageSize or self.page_size,  int(pageToken.replace("next-page-token-", "")))
 
     def filter(self, data: list):
-        return data[self.offset : self.offset + self.page_size]
+        return data[self.offset:self.offset + self.page_size]
 
     def apply(self, data, data_key: str):
         response = data if type(data) == dict else vars(data)
@@ -101,11 +71,11 @@ class Pagination:
         response[data_key] = self.filter(response[data_key])
         if token:
             response["nextPageToken"] = token
-
         return data
+
 
     def next_token(self, data: list):
         if len(data) > self.offset + self.page_size:
             return "next-page-token-" + str(self.offset + self.page_size)
-
-        return None
+        else:
+            return None
