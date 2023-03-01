@@ -53,7 +53,7 @@ class Metric:
 class TS:
     timeSeries: List[Metric] = field(default_factory=list)
     unit: str = "1"
-    nextPageToken: str = None
+    nextPageToken: str = Optional[str]
 
 
 class Pagination:
