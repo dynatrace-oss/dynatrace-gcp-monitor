@@ -1,15 +1,14 @@
 import re
 import time
 
-from utils.resources import Metric, TS, Pagination
-from typing import List, Dict
+from utils.resources import Latency, TS, Pagination
+from typing import List
 
 import dateutil.parser
 import jwt
 from fastapi import FastAPI, Query, Depends
 from starlette.responses import Response
-from utils.tools import get_env, create_point, create_res_dims, create_metric, calc_depth, find_labels
-from utils.resources import Latency
+from utils.lib import *
 
 (
     PROJECTS,

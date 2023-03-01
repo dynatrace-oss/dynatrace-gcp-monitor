@@ -29,9 +29,19 @@ def get_env():
 def create_point(s, p, i, resolution):
     point_t = Point()
 
-    point_t.interval.startTime = datetime.datetime.fromtimestamp(s, datetime.timezone.utc).isoformat().replace("+00:00", "Z")
-    point_t.interval.endTime = datetime.datetime.fromtimestamp(s+resolution, datetime.timezone.utc).isoformat().replace("+00:00", "Z")
-    point_t.value.int64Value = str(int(round(((s+p*10000+i) % (resolution * 5)) / (resolution * 5.0) * 100)))
+    point_t.interval.startTime = (
+        datetime.datetime.fromtimestamp(s, datetime.timezone.utc)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
+    point_t.interval.endTime = (
+        datetime.datetime.fromtimestamp(s + resolution, datetime.timezone.utc)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
+    point_t.value.int64Value = str(
+        int(round(((s + p * 10000 + i) % (resolution * 5)) / (resolution * 5.0) * 100))
+    )
 
     return point_t
 
@@ -45,6 +55,7 @@ def create_res_dims(resource_labels, project_id, sub_projects, p, i):
             res_dims[rl] = f"{rl}-instance-{i}"
 
         return res_dims
+
 
 def create_metric(metric_labels, metric_type, t, res_dims):
     m_dims = {}
@@ -61,7 +72,17 @@ def create_metric(metric_labels, metric_type, t, res_dims):
 
     return metric_t
 
-def calc_depth(metric_tuples, instances, sub_projects, metric_labels, pagination, start, end, resolution):
+
+def calc_depth(
+    metric_tuples,
+    instances,
+    sub_projects,
+    metric_labels,
+    pagination,
+    start,
+    end,
+    resolution,
+):
     samples = int((end - start) / resolution)
     requested_metric_tuples = metric_tuples if len(metric_labels) > 0 else 1
     offset = pagination.offset
@@ -75,8 +96,19 @@ def calc_depth(metric_tuples, instances, sub_projects, metric_labels, pagination
 
     return requested_metric_tuples, metric_tuple, instance, sub_project, sample
 
+
 def find_labels(group_by_fields):
-    resource_labels = set(map(lambda x: x.replace("resource.labels.", ""), filter(lambda x: x.startswith("resource.labels"), group_by_fields)))
-    metric_labels = set(map(lambda x: x.replace("metric.labels.", ""), filter(lambda x: x.startswith("metric.labels"), group_by_fields)))
+    resource_labels = set(
+        map(
+            lambda x: x.replace("resource.labels.", ""),
+            filter(lambda x: x.startswith("resource.labels"), group_by_fields),
+        )
+    )
+    metric_labels = set(
+        map(
+            lambda x: x.replace("metric.labels.", ""),
+            filter(lambda x: x.startswith("metric.labels"), group_by_fields),
+        )
+    )
 
     return resource_labels, metric_labels

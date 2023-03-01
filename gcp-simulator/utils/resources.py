@@ -4,6 +4,7 @@ import random
 import asyncio
 from dataclasses import dataclass, field
 
+
 class Latency:
     def __init__(self, latency_ms: int, jitter_ms: int):
         self.latency_ms = latency_ms
@@ -15,6 +16,7 @@ class Latency:
             self.latency_ms / 1000.0
             + self.jitter_ms / 2000.0 * random.gammavariate(1, 0.5)
         )
+
 
 @dataclass
 class Metadata:
@@ -54,16 +56,19 @@ class TS:
     unit: str = "1"
     nextPageToken: str = None
 
+
 class Pagination:
-    def __init__(self,  page_size: int = 50, offset: int = 0):
+    def __init__(self, page_size: int = 50, offset: int = 0):
         self.offset: int = offset
         self.page_size = page_size
 
     def update(self, pageSize: int = 0, pageToken: str = "next-page-token-0"):
-        return Pagination(pageSize or self.page_size,  int(pageToken.replace("next-page-token-", "")))
+        return Pagination(
+            pageSize or self.page_size, int(pageToken.replace("next-page-token-", ""))
+        )
 
     def filter(self, data: list):
-        return data[self.offset:self.offset + self.page_size]
+        return data[self.offset : self.offset + self.page_size]
 
     def apply(self, data, data_key: str):
         response = data if type(data) == dict else vars(data)
@@ -72,7 +77,6 @@ class Pagination:
         if token:
             response["nextPageToken"] = token
         return data
-
 
     def next_token(self, data: list):
         if len(data) > self.offset + self.page_size:

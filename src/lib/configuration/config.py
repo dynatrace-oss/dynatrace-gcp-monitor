@@ -42,32 +42,16 @@ def release_tag():
 
 
 def gcp_metadata_url():
-    DEV_URL = os.environ.get("DEV_URL", None)
-    if DEV_URL:
-        return "http://localhost:8080/metadata.google.internal/computeMetadata/v1"
-
     return os.environ.get('GCP_METADATA_URL', 'http://metadata.google.internal/computeMetadata/v1')
 
 
 def gcp_cloud_resource_manager_url():
-    DEV_URL = os.environ.get("DEV_URL", None)
-    if DEV_URL:
-        return "http://localhost:8080/cloudresourcemanager.googleapis.com/v1"
-
     return os.environ.get('GCP_CLOUD_RESOURCE_MANAGER_URL', 'https://cloudresourcemanager.googleapis.com/v1')
 
 
 def gcp_service_usage_url():
-    DEV_URL = os.environ.get("DEV_URL", None)
-    if DEV_URL:
-        return "http://localhost:8080/serviceusage.googleapis.com/v1"
-
     return os.environ.get("GCP_SERVICE_USAGE_URL", "https://serviceusage.googleapis.com/v1")
 
 
 def gcp_monitoring_url():
-    DEV_URL = os.environ.get("DEV_URL", None)
-    if DEV_URL:
-        return  "http://localhost:8080/monitoring.googleapis.com/v3"
-    
     return os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
