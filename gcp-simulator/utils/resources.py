@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import List, Dict, Optional
+from typing import List, Dict
 import random
 import asyncio
 from dataclasses import dataclass, field
@@ -11,30 +11,31 @@ class Latency:
         self.jitter_ms = jitter_ms
 
     async def delay(self):
+
         await asyncio.sleep(
             self.latency_ms / 1000.0
             + self.jitter_ms / 2000.0 * random.gammavariate(1, 0.5)
         )
 
 
-@dataclass
+@dataclass()
 class Metadata:
     type: str = ""
     labels: Dict[str, str] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass()
 class Value:
-    int64Value: str = ""
+    int64Value: str = None
 
 
-@dataclass
+@dataclass()
 class Interval:
-    startTime: str = ""
-    endTime: str = ""
+    startTime: str = None
+    endTime: str = None
 
 
-@dataclass
+@dataclass()
 class Point:
     interval: Interval = field(default_factory=Interval)
     value: Value = field(default_factory=Value)
@@ -53,7 +54,7 @@ class Metric:
 class TS:
     timeSeries: List[Metric] = field(default_factory=list)
     unit: str = "1"
-    nextPageToken: str = Optional[str]
+    nextPageToken: str = None
 
 
 class Pagination:
