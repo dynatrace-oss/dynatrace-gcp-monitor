@@ -45,6 +45,7 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
     try:
         lines_batch = []
         tasks_to_push_lines = []
+        print(f"Fetch metric results size - {len(fetch_metric_results)}")
         for result in fetch_metric_results:
             lines_batch.append(result)
             if len(lines_batch) >= context.metric_ingest_batch_size:
@@ -55,16 +56,14 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
             tasks_to_push_lines.append(_push_to_dynatrace(context, project_id, lines_batch))
 
         push_buffer = []
-
         if len(tasks_to_push_lines) <= config.concurrent_push_request_to_dynatrace_buffer_size():
             await asyncio.gather(*tasks_to_push_lines, return_exceptions=True)
         else:
             for task in tasks_to_push_lines:
+                push_buffer.append(task)
                 if len(push_buffer) == config.concurrent_push_request_to_dynatrace_buffer_size():
                     await asyncio.gather(*push_buffer, return_exceptions=True)
                     push_buffer = []
-                else:
-                    push_buffer.append(task)
             if push_buffer:
                 await asyncio.gather(*push_buffer, return_exceptions=True)
     except Exception as e:
@@ -102,6 +101,8 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
     elif ingest_response.status == 404 or ingest_response.status == 405:
         context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)
         raise Exception(f"Wrong URL {dt_url}")
+    elif ingest_response.status == 429:
+        context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
 
     ingest_response_json = await ingest_response.json()
 
