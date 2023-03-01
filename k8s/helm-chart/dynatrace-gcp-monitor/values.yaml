@@ -89,7 +89,7 @@ keepRefreshingExtensionsConfig: "true"
 # 10 - means, ten requests at a time
 # Allowed values: 10 - 300
 # Unintentional increase of this value might cause issues!
-concurrentPushRequestToDynatraceBufferSize: 10
+concurrentPushRequestToDynatraceBufferSize: 1
 
 
 
