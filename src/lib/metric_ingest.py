@@ -55,16 +55,13 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
             tasks_to_push_lines.append(_push_to_dynatrace(context, project_id, lines_batch))
 
         push_buffer = []
-        if len(tasks_to_push_lines) <= int(config.concurrent_push_request_to_dynatrace_buffer_size()):
-            await asyncio.gather(*tasks_to_push_lines, return_exceptions=True)
-        else:
-            for task in tasks_to_push_lines:
-                push_buffer.append(task)
-                if len(push_buffer) == config.concurrent_push_request_to_dynatrace_buffer_size():
-                    await asyncio.gather(*push_buffer, return_exceptions=True)
-                    push_buffer = []
-            if push_buffer:
+        for task in tasks_to_push_lines:
+            push_buffer.append(task)
+            if len(push_buffer) == config.concurrent_push_request_to_dynatrace_buffer_size():
                 await asyncio.gather(*push_buffer, return_exceptions=True)
+                push_buffer = []
+        if push_buffer:
+            await asyncio.gather(*push_buffer, return_exceptions=True)
     except Exception as e:
         if isinstance(e, InvalidURL):
             context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)

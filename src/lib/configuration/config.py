@@ -59,8 +59,3 @@ def gcp_service_usage_url():
 
 def gcp_monitoring_url():
     return os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
-
-
-
-
-
