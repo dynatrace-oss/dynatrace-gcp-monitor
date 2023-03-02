@@ -38,7 +38,7 @@ def keep_refreshing_extensions_config():
 
 
 def concurrent_push_request_to_dynatrace_buffer_size():
-    return os.environ.get("CONCURRENT_PUSH_REQUEST_TO_DYNATRACE_BUFFER_SIZE", 1)
+    return os.environ.get("CONCURRENT_PUSH_REQUEST_TO_DYNATRACE_BUFFER_SIZE", 10)
 
 
 def release_tag():
