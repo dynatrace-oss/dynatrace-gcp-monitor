@@ -40,13 +40,11 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
     if not fetch_metric_results:
         context.log(project_id, "Skipping push due to no data to push")
 
-    lines_sent = 0
     start_time = time.time()
     try:
         lines_batch = []
         for result in fetch_metric_results:
             lines_batch.append(result)
-            lines_sent += 1
             if len(lines_batch) >= context.metric_ingest_batch_size:
                 await _push_to_dynatrace(context, project_id, lines_batch)
                 lines_batch = []
