@@ -280,13 +280,4 @@ spec:
             port: 8081
           initialDelaySeconds: 30
           timeoutSeconds: 60
-      {{- if (eq .Values.activeGate.useExisting "false") }}
-      initContainers:
-        - name: init-active-gate-service
-          image: busybox:1.33.1
-          command: [ 'sh', '-c', "until nslookup dynatrace-activegate-gcpmon-clusterip; do echo waiting for AG service; sleep 2; done" ]
-        - name: init-active-gate
-          image: radial/busyboxplus:curl
-          command: [ 'sh', '-c', 'until [ $(curl  https://dynatrace-activegate-gcpmon-clusterip:9999/rest/state -k)  == "RUNNING" ];do echo "Checking for Running Status";echo "Response = $AG_RESPONE.";sleep 2;done;echo "AG running"' ]
-       {{- end }}
       {{- end }}
