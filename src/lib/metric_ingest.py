@@ -41,7 +41,6 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
         context.log(project_id, "Skipping push due to no data to push")
 
     lines_sent = 0
-    maximum_lines_threshold = context.maximum_metric_data_points_per_minute
     start_time = time.time()
     try:
         lines_batch = []
@@ -51,12 +50,6 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
             if len(lines_batch) >= context.metric_ingest_batch_size:
                 await _push_to_dynatrace(context, project_id, lines_batch)
                 lines_batch = []
-            if lines_sent >= maximum_lines_threshold:
-                await _push_to_dynatrace(context, project_id, lines_batch)
-                lines_dropped_count = len(fetch_metric_results) - maximum_lines_threshold
-                context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, lines_dropped_count)
-                context.log(project_id, f"Number of metric lines exceeded maximum {maximum_lines_threshold}, dropped {lines_dropped_count} lines")
-                return
         if lines_batch:
             await _push_to_dynatrace(context, project_id, lines_batch)
     except Exception as e:
@@ -94,6 +87,8 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
     elif ingest_response.status == 404 or ingest_response.status == 405:
         context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)
         raise Exception(f"Wrong URL {dt_url}")
+    elif ingest_response.status == 429:
+        context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
 
     ingest_response_json = await ingest_response.json()
 
