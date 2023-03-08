@@ -1,0 +1,4 @@
+uvicorn
+jwt
+python-dateutil
+fastapi
