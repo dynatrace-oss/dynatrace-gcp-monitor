@@ -41,7 +41,7 @@ class Point:
     value: Value = field(default_factory=Value)
 
 
-@dataclass
+@dataclass()
 class Metric:
     metric: Metadata = field(default_factory=Metadata)
     resource: Metadata = field(default_factory=Metadata)
@@ -50,7 +50,7 @@ class Metric:
     valueType: str = "INT64"
 
 
-@dataclass
+@dataclass()
 class TS:
     timeSeries: List[Metric] = field(default_factory=list)
     unit: str = "1"
