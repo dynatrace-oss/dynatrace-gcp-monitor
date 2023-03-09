@@ -25,8 +25,7 @@ create_sample_app() {
   --source ./tests/e2e/sample_app/ > /dev/null 2>&1
 }
 
-check_container_state()
-{
+check_container_state() {
   CONTAINER=$1
   CONTAINER_STATE=$(kubectl -n dynatrace get pods -o=jsonpath="{.items[*].status.containerStatuses[?(@.name==\"${CONTAINER}\")].state}")
   echo "$CONTAINER_STATE"
@@ -34,6 +33,39 @@ check_container_state()
     return 1
   fi
   return 0
+}
+
+check_deployment_status() {
+  METRICS_CONTAINER_STATE=0
+  LOGS_CONTAINER_STATE=0
+
+  for _ in {1..60}
+  do
+    if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
+      check_container_state "dynatrace-gcp-monitor-metrics"
+      METRICS_CONTAINER_STATE=$?
+    fi
+
+    if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
+      check_container_state "dynatrace-gcp-monitor-logs"
+      LOGS_CONTAINER_STATE=$?
+    fi
+
+    if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+      break
+    fi
+
+    sleep 10
+    echo -n "."
+  done
+
+  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
+    echo "Deployment completed successfully"
+    exit 0
+  else
+    echo "Deployment failed"
+    exit 1
+  fi
 }
 
 generate_load_on_sample_app() {
