@@ -61,10 +61,9 @@ check_deployment_status() {
 
   if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
     echo "Deployment completed successfully"
-    exit 0
   else
     echo "Deployment failed"
-    exit 1
+    return 1
   fi
 }
 

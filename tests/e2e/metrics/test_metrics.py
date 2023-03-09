@@ -28,7 +28,7 @@ def test_environment_vars():
 
 def test_metrics_on_dynatrace():
     print(f"Try to receive execution_count metric from Dynatrace in 5 min (start_time={os.environ['START_LOAD_GENERATION']} ,end_time={os.environ['END_LOAD_GENERATION']})")
-    time.sleep(10*60)
+    time.sleep(5*60)
 
     url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/metrics/query"
     params = {'from': os.environ['START_LOAD_GENERATION'],
