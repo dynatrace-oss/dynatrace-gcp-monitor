@@ -29,3 +29,4 @@ includedPermissions:
   - scheduler.jobs.delete
   - secretmanager.secrets.delete
   - monitoring.dashboards.delete
+  - logging.views.access
