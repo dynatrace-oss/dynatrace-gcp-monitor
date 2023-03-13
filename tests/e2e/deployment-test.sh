@@ -121,7 +121,7 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
 
   echo "Wait until logs will be vissible in GCP: 30s"
   echo 30
-  log_query="
+  LOG_QUERY="
     timestamp<=\"$begin_timestamp\" AND
     timestamp>=\"$end_timestamp\" AND
     resource.type=k8s_container AND
@@ -133,6 +133,6 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
     severity>=DEFAULT AND
     textPayload:Polling finished after
   "
-  local logs=`gcloud beta logging read "$log_query" --format=json`
-  echo "$logs" | "$TEST_JQ" '.[].textPayload'
+  PERF_LOGS=`gcloud beta logging read "$LOG_QUERY" --format=json`
+  echo "$PERF_LOGS" | "$TEST_JQ" '.[].textPayload'
 fi
