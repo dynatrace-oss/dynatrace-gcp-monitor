@@ -120,16 +120,16 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
   end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
 
   echo "Wait until logs will be vissible in GCP: 30s"
-  echo 30
+  sleep 30
   LOG_QUERY="
-    timestamp<=\"$begin_timestamp\" AND
-    timestamp>=\"$end_timestamp\" AND
+    timestamp>=\"$begin_timestamp\" AND
+    timestamp<=\"$end_timestamp\" AND
     resource.type=k8s_container AND
     resource.labels.project_id=$GCP_PROJECT_ID AND
     resource.labels.location=us-central1 AND
     resource.labels.cluster_name=$K8S_CLUSTER AND
     resource.labels.namespace_name=dynatrace AND
-    labels.k8s-pod/app=dynatrace-gcp-function AND
+    labels.k8s-pod/app=dynatrace-gcp-monitor AND
     severity>=DEFAULT AND
     textPayload:Polling finished after
   "
