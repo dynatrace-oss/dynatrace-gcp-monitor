@@ -134,5 +134,5 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
     textPayload:Polling finished after
   "
   local logs=`gcloud beta logging read "$log_query" --format=json`
-  echo $logs | "$TEST_JQ" '.[].textPayload'
+  echo "$logs" | "$TEST_JQ" '.[].textPayload'
 fi
