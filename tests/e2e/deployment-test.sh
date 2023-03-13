@@ -104,6 +104,7 @@ generate_load_on_sample_app
 if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
   echo "#####PERFOMANCE TEST#####"
   begin_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
+  echo "Started at: $begin_timestamp"
 
   echo "Setting variables to use GCP simulator"
   kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace GCP_PROJECT_ID="fake-project-0" \
@@ -118,9 +119,10 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
   echo "Waiting 360s"
   sleep 360
   end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
+  echo "Ended at: $end_timestamp"
 
-  echo "Wait until logs will be vissible in GCP: 30s"
-  sleep 30
+  echo "Wait until logs will be vissible in GCP: 120s"
+  sleep 120
   LOG_QUERY="
     timestamp>=\"$begin_timestamp\" AND
     timestamp<=\"$end_timestamp\" AND
