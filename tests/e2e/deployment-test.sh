@@ -115,8 +115,8 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
 
   check_deployment_status || exit 1
 
-  echo "Waiting 120s"
-  sleep 120
+  echo "Waiting 360s"
+  sleep 360
   end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
 
   echo "Wait until logs will be vissible in GCP: 30s"
