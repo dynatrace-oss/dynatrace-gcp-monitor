@@ -35,7 +35,6 @@ service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$"
 METRICS_CONFIGURATION_FLAGS = [
     "PRINT_METRIC_INGEST_INPUT",
     "GOOGLE_APPLICATION_CREDENTIALS",
-    "MAXIMUM_METRIC_DATA_POINTS_PER_MINUTE",
     "METRIC_INGEST_BATCH_SIZE",
     "GCP_PROJECT",
     "REQUIRE_VALID_CERTIFICATE",
