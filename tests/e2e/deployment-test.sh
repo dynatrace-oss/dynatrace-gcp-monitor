@@ -133,6 +133,6 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
     severity>=DEFAULT AND
     textPayload:Polling finished after
   "
-  PERF_LOGS=`gcloud beta logging read "$LOG_QUERY" --format=json`
+  PERF_LOGS=$(gcloud beta logging read "$LOG_QUERY" --format=json)
   echo "$PERF_LOGS" | "$TEST_JQ" '.[].textPayload'
 fi
