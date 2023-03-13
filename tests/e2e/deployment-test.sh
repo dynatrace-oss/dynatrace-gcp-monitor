@@ -76,6 +76,11 @@ VALUES_FILE="./dynatrace-gcp-monitor/values.yaml"
 
 cd ./e2e_test/helm-deployment-package || exit 1
 
+if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
+  echo "Add permission to read logs for perf test"
+  echo "  - logging.views.access" >> ./gcp_iam_roles/dynatrace-gcp-monitor-metrics-role.yaml
+fi
+
 # Create values.e2e.yaml including lines to be replaced. Adding cloud run revision to list of default services
 create_values_e2e_file
 
@@ -128,7 +133,6 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
     severity>=DEFAULT AND
     textPayload:Polling finished after
   "
-  gcloud beta logging read "$log_query" --format=json | "$TEST_JQ" '.[].textPayload'
+  local logs=`gcloud beta logging read "$log_query" --format=json`
+  echo $logs | "$TEST_JQ" '.[].textPayload'
 fi
-
-
