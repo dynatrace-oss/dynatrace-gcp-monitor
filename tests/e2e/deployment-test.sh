@@ -77,6 +77,7 @@ VALUES_FILE="./dynatrace-gcp-monitor/values.yaml"
 cd ./e2e_test/helm-deployment-package || exit 1
 
 if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
+  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/logging.viewAccessor" >/dev/null
   echo "Add permission to read logs for perf test"
   echo "  - logging.views.access" >> ./gcp_iam_roles/dynatrace-gcp-monitor-metrics-role.yaml
 fi
