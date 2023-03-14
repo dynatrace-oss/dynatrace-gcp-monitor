@@ -76,12 +76,6 @@ VALUES_FILE="./dynatrace-gcp-monitor/values.yaml"
 
 cd ./e2e_test/helm-deployment-package || exit 1
 
-if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
-  gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT_ID.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/logging.viewAccessor" >/dev/null
-  echo "Add permission to read logs for perf test"
-  echo "  - logging.views.access" >> ./gcp_iam_roles/dynatrace-gcp-monitor-metrics-role.yaml
-fi
-
 # Create values.e2e.yaml including lines to be replaced. Adding cloud run revision to list of default services
 create_values_e2e_file
 
