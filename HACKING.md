@@ -97,31 +97,20 @@ Required tools:
 * openssl
 * zip
 
-#### 1. Get the name & version of the latest extension artifact
-First, we'd need to get the name of the latest version of the GCE extension. This can be found on the cloud bucket within extension manifest file.
+#### 1. Download the extension
+Go to [Dynatrace Hub](https://www.dynatrace.com/hub/?query=google) and select the GCE extension. Under the `Versions` tab, we can select the latest version and download it.
 
+#### 2. Unzip the extension
 ```
-GCE_EXTENSION_VERSION=$(curl -s https://d1twjciptxxqvo.cloudfront.net/extensions-list.txt | grep google-compute-engine)
-```
- 
-#### 2. Download the extension
-Having the latest version it's possible to download the extension zip file.
-
-```
-wget https://d1twjciptxxqvo.cloudfront.net/${GCE_EXTENSION_VERSION}
-```
- 
-#### 3. Unzip the extension
-```
-unzip google-compute-engine-0.0.9.zip
+unzip [DOWNLOADED_EXTENSION].zip
 ```
 
-#### 4. Unzip extension definition
+#### 3. Unzip extension definition
 ```
 mkdir extension && unzip extension.zip -d ./extension
 ```
 
-#### 5. Customize extension definition
+#### 4. Customize extension definition
 
 ```
 code ./extension/extension.yaml
@@ -340,10 +329,7 @@ gcp:
 </details>
 
 
-
-
-
-####  6. Add dashboard 
+####  5. Add dashboard 
 
 create directory `dashboards`
 ```
@@ -1059,7 +1045,7 @@ Sample dashboard for GCE:
 ```
 </details>
 
-####  7. Build Your developer certificate
+####  6. Build Your developer certificate
 
 Follow the guide
 [Sign extensions](https://www.dynatrace.com/support/help/shortlink/sign-extension) to build the developer key and **upload** the root certificate to the Dynatrace cluster
