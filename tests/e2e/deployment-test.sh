@@ -63,7 +63,6 @@ else
 fi
 
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | "$TEST_JQ" -r '.writerIdentity')
-gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member "${writerIdentity}" --role roles/pubsub.publisher > /dev/null 2>&1
 
 create_sample_app
 
@@ -116,8 +115,8 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
   end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
   echo "Ended at: $end_timestamp"
 
-  echo "Wait until logs will be vissible in GCP: 120s"
-  sleep 120
+  # echo "Wait until logs will be vissible in GCP: 120s"
+  # sleep 120
   LOG_QUERY="
     timestamp>=\"$begin_timestamp\" AND
     timestamp<=\"$end_timestamp\" AND
