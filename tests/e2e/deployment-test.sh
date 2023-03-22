@@ -63,6 +63,7 @@ else
 fi
 
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | "$TEST_JQ" -r '.writerIdentity')
+gcloud pubsub topics add-iam-policy-binding "${PUBSUB_TOPIC}" --member "${writerIdentity}" --role roles/pubsub.publisher > /dev/null 2>&1
 
 create_sample_app
 
@@ -127,7 +128,7 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
     resource.labels.namespace_name=dynatrace AND
     labels.k8s-pod/app=dynatrace-gcp-monitor AND
     severity>=DEFAULT AND
-    textPayload:Polling finished after
+    textPayload: (\"Polling finished after\" OR \"Metrics SFM\")
   "
   PERF_LOGS=$(gcloud beta logging read "$LOG_QUERY" --format=json)
   echo "$PERF_LOGS" | "$TEST_JQ" '.[].textPayload'
