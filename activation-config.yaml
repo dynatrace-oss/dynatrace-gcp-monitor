@@ -519,3 +519,14 @@ activation: |
     #     - default_metrics
     #   vars:
     #     filter_conditions: ""
+    # Google AlloyDB for PostgreSQL
+    # - service: alloydb_database
+    #   featureSets:
+    #     - insights_metrics
+    #   vars:
+    #     filter_conditions: ""
+    # - service: alloydb_instance
+    #   featureSets:
+    #     - default_metrics
+    #   vars:
+    #     filter_conditions: ""
