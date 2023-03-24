@@ -16,8 +16,9 @@ notifications:
     on_failure: always
     template:
       - "Build has failed:"
-      - "<%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) by %{author} %{result} in %{duration}"
-      - "With a message: %{message}"
+      - "%{repository_name}: <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) by %{author} %{result} in %{duration}"
+      - "On branch %{branch}, after commit: %{commit_message}"
+      - "Travis message: %{message}"
 stages:
   - shellcheck
   - tests
