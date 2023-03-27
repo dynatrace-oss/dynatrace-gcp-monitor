@@ -112,6 +112,7 @@ async def test_metric_authorization_header():
     assert_that(matched_request.requests).is_not_empty()
 
     result: RequestResponseRequest = matched_request.requests[0]
+
     assert_that(result.headers['Authorization']).is_equal_to(f"Api-Token {AUTHORIZATION_KEY}")
 
 
