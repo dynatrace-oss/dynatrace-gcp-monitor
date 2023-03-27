@@ -28,6 +28,7 @@ create_sample_app() {
 check_container_state() {
   CONTAINER=$1
   CONTAINER_STATE=$(kubectl -n dynatrace get pods -o=jsonpath="{.items[*].status.containerStatuses[?(@.name==\"${CONTAINER}\")].state}")
+  echo
   echo "$CONTAINER_STATE"
   if [[ "${CONTAINER_STATE}" != *"running"* ]]; then
     return 1
