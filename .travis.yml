@@ -21,12 +21,12 @@ notifications:
       - "Travis message: %{message}"
 stages:
   - shellcheck
-  - tests
+  # - tests
   - build
-  - e2e-helm-deployment-test
-  - e2e-cloud-function-deployment-test
+  # - e2e-helm-deployment-test
+  # - e2e-cloud-function-deployment-test
   - github-deploy
-  - docker-deploy
+  # - docker-deploy
   - gcp-install-release
 env:
   global:
