@@ -87,7 +87,7 @@ gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 
 
 # Verify containers running
 echo
-echo -n "Verifying deployment result"
+echo "Verifying deployment result"
 check_deployment_status || exit 1
 
 echo
@@ -108,6 +108,18 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
       GCP_MONITORING_URL="http://${GCP_SIMULATOR_IP}/monitoring.googleapis.com/v3" \
       GCP_SECRET_ROOT="http://${GCP_SIMULATOR_IP}/secretmanager.googleapis.com/v1"
 
+  echo "Wait until previous pod will be terminated"
+  for _ in {1..60}
+  do
+    PODS_COUNT=$(kubectl -n dynatrace get pods -o=json | $TEST_JQ -j '.items | length')
+    if [[ $PODS_COUNT == 1 ]]; then
+      break
+    fi
+
+    sleep 10
+    echo -n "."
+  done
+
   check_deployment_status || exit 1
   echo "Started at: $begin_timestamp"
 
@@ -116,8 +128,6 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
   end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
   echo "Ended at: $end_timestamp"
 
-  # echo "Wait until logs will be vissible in GCP: 120s"
-  # sleep 120
   LOG_QUERY="
     timestamp>=\"$begin_timestamp\" AND
     timestamp<=\"$end_timestamp\" AND
