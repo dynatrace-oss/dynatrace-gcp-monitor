@@ -141,5 +141,8 @@ if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
     textPayload: (\"Polling finished after\" OR \"Metrics SFM\")
   "
   PERF_LOGS=$(gcloud beta logging read "$LOG_QUERY" --format=json)
+  if [[ $PERF_LOGS == "[]" ]]; then
+    exit 1
+  fi
   echo "$PERF_LOGS" | "$TEST_JQ" '.[].textPayload'
 fi
