@@ -37,47 +37,47 @@ env:
   - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-monitor"
 jobs:
   include:
-  # - stage: shellcheck
-  #   name: CheckStyle
-  #   language: minimal
-  #   script: |
-  #     status=0
-  #     for script in $(find . -iname "*.sh"); 
-  #     do
-  #       echo "Checking $script";
-  #       shellcheck -x "$script";
-  #       if [ $? -ne 0 ]; then
-  #         echo "ERROR: shellcheck failed at $script";
-  #         status=1;
-  #       fi;
-  #     done;
-  #     exit $status
-  # - stage: tests
-  #   name: Tests
-  #   language: python
-  #   python:
-  #     - "3.8"
-  #   env:
-  #     - PYTHONPATH="$TRAVIS_BUILD_DIR/src:$TRAVIS_BUILD_DIR/tests"
-  #   addons:
-  #     apt:
-  #       packages:
-  #         - default-jre
-  #   cache:
-  #     directories:
-  #       - "$HOME/.cache/pip"
-  #       - "$HOME/.wgetcache"
-  #   install:
-  #     - pip install -r src/requirements.txt
-  #     - pip install -r tests/requirements.txt
-  #   script:
-  #     - pytest tests/unit -v
-  #     - pytest tests/integration/logs -v
+  - stage: shellcheck
+    name: CheckStyle
+    language: minimal
+    script: |
+      status=0
+      for script in $(find . -iname "*.sh"); 
+      do
+        echo "Checking $script";
+        shellcheck -x "$script";
+        if [ $? -ne 0 ]; then
+          echo "ERROR: shellcheck failed at $script";
+          status=1;
+        fi;
+      done;
+      exit $status
+  - stage: tests
+    name: Tests
+    language: python
+    python:
+      - "3.8"
+    env:
+      - PYTHONPATH="$TRAVIS_BUILD_DIR/src:$TRAVIS_BUILD_DIR/tests"
+    addons:
+      apt:
+        packages:
+          - default-jre
+    cache:
+      directories:
+        - "$HOME/.cache/pip"
+        - "$HOME/.wgetcache"
+    install:
+      - pip install -r src/requirements.txt
+      - pip install -r tests/requirements.txt
+    script:
+      - pytest tests/unit -v
+      - pytest tests/integration/logs -v
 #       The cd is executed due to the fact that the wiremock instance initialized in the test is using
 #       the mappings (folder mappings) and the files ( __files) in the current execution dir.
-      # - |
-      #     cd tests/integration/metrics
-      #     pytest -v
+      - |
+          cd tests/integration/metrics
+          pytest -v
 
   - stage: build
     name: Build
@@ -109,14 +109,14 @@ jobs:
       - ./build/function-package.sh
       - gsutil -m cp ./artefacts/* gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/
 
-  # - stage: docker-deploy
-  #   name: Docker Hub deploy
-  #   if: tag =~ /^release-.*
-  #   language: minimal
-  #   script:
-  #     - ./build/version.sh
-  #     - ./build/docker-deploy.sh
-  #   env: PUSH=true
+  - stage: docker-deploy
+    name: Docker Hub deploy
+    if: tag =~ /^release-.*
+    language: minimal
+    script:
+      - ./build/version.sh
+      - ./build/docker-deploy.sh
+    env: PUSH=true
 
   - stage: github-deploy
     name: GitHub deploy
