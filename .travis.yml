@@ -1,3 +1,37 @@
+os: linux
+dist: xenial
+if: fork = false
+
+notifications:
+  email:
+    recipients:
+      - team-public-cloud@dynatrace.com
+    if: branch = master
+    on_success: never
+    on_failure: always
+  slack:
+    secure: IG7blrkCS9NWE75A2s72okTxp/6wowyJIVMatD6yNaToGGTStmXCGrNoPska2Vvd6FLMsnfHerZwndDeS0VOJ3/5hmfW8znVB03cfW+rzin5lSecNNYztwO0Cm2p5M3a31+xOs8Nlxh4rckp6hRxMAn0G09aZt6hdqH8OD0Z5LN1NATkhIj4NK67ItnUxULyCZ9ecfJey1bf+kJJyLVTZcn5J17evJgGxReiiOIoUMdpDLBJiFSG8nyi5aVUeHfVlLBqecyCfqR96SIfWSz2gmg9Rwdpq6dwVNjKubXcOX72iYSFHXDx1cGNZGJ5a34LTDRUa7sgFt4euJnCygeUYSG2N+I23O24IjamQZYD4r4ueP97Yi/FkNVr847As/3gANhcL65/IcKILyL6ytfgBmgNjp1qSVv+lpAHYxngiWJXgfhgsby3CUkUC6JrKIzHE7FHNq5L9kDIKlYowk6iF7YArYIjBgmL2dWvuwLTiMsJu/0MCYLmsWW2t5PF7WR1hS62tDsJt6DD1Hm30wqI73+JhvfmKChLuNrYWVCb1/yDPGCxcbI7njJR3+hBfoa7P2EugkiJme+2xegag9/x05xnJ5CxaxohitdA4LriLxED2HUUVnQehp1hempZkpaWTqr5C+R6NyzDSKUz+K8wJHEI9rlpUE4wJxwE39Asr2Y=
+    if: branch = master
+    on_success: never
+    on_failure: always
+    template:
+      - "Build has failed:"
+      - "%{repository_name}: <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) by %{author} %{result} in %{duration}"
+      - "On branch %{branch}, after commit: %{commit_message}"
+      - "Travis message: %{message}"
+stages:
+  - shellcheck
+  - tests
+  - build
+  - e2e-helm-deployment-test
+  - e2e-cloud-function-deployment-test
+  - github-deploy
+  - docker-deploy
+  - gcp-install-release
+env:
+  global:
+  - TAG=$TRAVIS_TAG
+  - VERSION_TAG=/^release-.*
   - DOCKER_CLI_EXPERIMENTAL=enabled
   - GCP_PROJECT_ID="dynatrace-gcp-extension"
   - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-monitor"
