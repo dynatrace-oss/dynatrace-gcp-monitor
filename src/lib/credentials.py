@@ -23,7 +23,6 @@ from aiohttp import ClientSession
 from lib.configuration import config
 from lib.context import LoggingContext
 
-
 _METADATA_ROOT = config.gcp_metadata_url()
 _METADATA_FLAVOR_HEADER = "metadata-flavor"
 _METADATA_FLAVOR_VALUE = "Google"
@@ -128,7 +127,8 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
         "exp": str(now + 60 * 60),
         "iat": str(now)
     }
-    assertion_signed = jwt.encode(assertion, key, 'RS256')
+    # The utf-8 decode is needed for tests
+    assertion_signed = jwt.encode(assertion, key, 'RS256').decode("utf-8")
     request = {'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer', 'assertion': assertion_signed}
     async with session.post(uri, data=request) as resp:
         response = await resp.json()
