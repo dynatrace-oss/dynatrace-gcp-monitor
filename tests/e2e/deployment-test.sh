@@ -96,7 +96,7 @@ kubectl -n dynatrace get pods
 generate_load_on_sample_app
 
 
-if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
+if [[ $TRAVIS_BRANCH == 'master' ]]; then
   echo "#####PERFOMANCE TEST#####"
   begin_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
 
