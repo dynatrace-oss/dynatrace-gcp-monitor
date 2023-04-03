@@ -51,41 +51,6 @@ check_dynatrace_log_ingest_url() {
   fi
 }
 
-check_activegate_state() {
-  RUNNING_RESPONSE_ON_NORMAL_CLUSTERS="RUNNING"
-  RUNNING_RESPONSE_ON_DOK_CLUSTERS="\"RUNNING\"" #APM-379036 different responses returned - to be fixed in bug APM-380143
-
-  if [[ $USE_EXISTING_ACTIVE_GATE == true ]]; then
-    ACTIVE_GATE_CONNECTIVITY=Y
-    ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health" --connect-timeout 20) || ACTIVE_GATE_CONNECTIVITY=N
-    if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]; then
-      warn "Unable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL to check if ActiveGate is running. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
-    fi
-    if [[ "$ACTIVE_GATE_STATE" != "$RUNNING_RESPONSE_ON_NORMAL_CLUSTERS" && "$ACTIVE_GATE_STATE" != "$RUNNING_RESPONSE_ON_DOK_CLUSTERS" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]; then
-      err "ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
-      exit 1
-    fi
-  fi
-}
-
-check_dynatrace_docker_login() {
-  check_if_parameter_is_empty "$DYNATRACE_PAAS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
-
-  DOCKER_LOGIN=$(helm template dynatrace-gcp-monitor --show-only templates/active-gate-statefulset.yaml | tr '\015' '\n' | grep "envid:" | awk '{print $2}')
-
-  if RESPONSE=$(curl -ksS -w "%{http_code}" -o /dev/null -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/"); then
-    if [[ $RESPONSE == "200" ]]; then
-      info "Successfully logged to Dynatrace cluster Docker registry"
-      info "The ActiveGate will be deployed in k8s cluster"
-    else
-      err "Couldn't log to Dynatrace cluster Docker registry. Is your PaaS token a valid one?"
-      exit 1
-    fi
-  else
-    warn "Failed to connect to Dynatrace endpoint ($DYNATRACE_URL) to check Docker registry login. It can be ignored if Dynatrace does not allow public access."
-  fi
-}
-
 print_help() {
   printf "
 usage: deploy-helm.sh [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--without-extensions-upgrade] [--auto-default] [--quiet]
@@ -184,13 +149,6 @@ if [ -z "$DYNATRACE_LOG_INGEST_URL" ]; then
   DYNATRACE_LOG_INGEST_URL=$DYNATRACE_URL
 fi
 readonly DYNATRACE_LOG_INGEST_URL
-USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.activeGate.useExisting}")
-if [ -z "$USE_EXISTING_ACTIVE_GATE" ]; then
-  USE_EXISTING_ACTIVE_GATE=true
-fi
-readonly USE_EXISTING_ACTIVE_GATE
-DYNATRACE_PAAS_KEY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.activeGate.dynatracePaasToken}")
-readonly DYNATRACE_PAAS_KEY
 LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.logsSubscriptionId}")
 readonly LOGS_SUBSCRIPTION_ID
 USE_PROXY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.useProxy}")
@@ -271,12 +229,8 @@ fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
-  if [[ $USE_EXISTING_ACTIVE_GATE == false ]]; then
-    debug "Checking Docker login to Dynatrace"
-    check_dynatrace_docker_login
-  else
-    info "Using an existing Active Gate"
-    check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
+  if [[ -n $DYNATRACE_LOG_INGEST_URL ]]; then
+    info "Sending logs through selected dynatraceLogIngestUrl"
     check_url "$DYNATRACE_LOG_INGEST_URL" "$DYNATRACE_URL_REGEX" "$ACTIVE_GATE_TARGET_URL_REGEX" \
       "Not correct dynatraceLogIngestUrl. Example of proper endpoint used to ingest logs to Dynatrace:\n
         - for direct ingest through the Cluster API: https://<your_environment_ID>.live.dynatrace.com\n
@@ -315,7 +269,6 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     exit 1
   fi
 
-  check_activegate_state
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
