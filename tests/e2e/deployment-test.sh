@@ -97,6 +97,7 @@ generate_load_on_sample_app
 
 
 if [[ $TRAVIS_BRANCH == 'master' ]]; then
+  echo
   echo "#####PERFOMANCE TEST#####"
   begin_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
 
@@ -108,7 +109,7 @@ if [[ $TRAVIS_BRANCH == 'master' ]]; then
       GCP_MONITORING_URL="http://${GCP_SIMULATOR_IP}/monitoring.googleapis.com/v3" \
       GCP_SECRET_ROOT="http://${GCP_SIMULATOR_IP}/secretmanager.googleapis.com/v1"
 
-  echo "Wait until previous pod will be terminated"
+  echo "Wait until previous pod terminates"
   for _ in {1..60}
   do
     PODS_COUNT=$(kubectl -n dynatrace get pods -o=json | $TEST_JQ -j '.items | length')
@@ -145,4 +146,5 @@ if [[ $TRAVIS_BRANCH == 'master' ]]; then
     exit 1
   fi
   echo "$PERF_LOGS" | "$TEST_JQ" '.[].textPayload'
+  echo "#####PERFOMANCE TEST ENDED#####"
 fi
