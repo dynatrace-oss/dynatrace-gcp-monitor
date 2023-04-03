@@ -143,8 +143,9 @@ if [[ $TRAVIS_BRANCH == 'master' ]]; then
   "
   PERF_LOGS=$(gcloud beta logging read "$LOG_QUERY" --format=json)
   if [[ $PERF_LOGS == "[]" ]]; then
+    echo "No logs"
     exit 1
   fi
-  echo "$PERF_LOGS" | "$TEST_JQ" '.[].textPayload'
+  echo "$PERF_LOGS" | "$TEST_JQ" '.[-2,-1].textPayload'
   echo "#####PERFOMANCE TEST ENDED#####"
 fi
