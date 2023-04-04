@@ -85,9 +85,6 @@ dynatraceUrl: "${DYNATRACE_URL}"
 logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
 dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
-activeGate:
-  useExisting: "true"
-  dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
 serviceAccount: "${IAM_SERVICE_ACCOUNT}"
 scopingProjectSupportEnabled: "true"
 gcpServicesYaml: |

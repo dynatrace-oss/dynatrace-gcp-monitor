@@ -238,50 +238,6 @@ check_api_token() {
   fi
 }
 
-check_s3_url() {
-  if [ -z "$EXTENSION_S3_URL" ]; then
-    # File exposed in a S3 bucket accessed through Cloudfront
-    EXTENSION_S3_URL="https://d1twjciptxxqvo.cloudfront.net"
-  else
-    warn "Development mode on: custom S3 url link."
-  fi
-}
-
-validate_gcp_config_in_extensions() {
-  cd "${EXTENSIONS_TMPDIR}" || exit
-  for EXTENSION_ZIP in *.zip; do
-    unzip "${EXTENSION_ZIP}" -d "$EXTENSION_ZIP-tmp" | tee -a "$FULL_LOG_FILE" >/dev/null
-    cd "$EXTENSION_ZIP-tmp" || exit
-    unzip "extension.zip" "extension.yaml" | tee -a "$FULL_LOG_FILE" >/dev/null
-    if [[ $("$YQ" e 'has("gcp")' extension.yaml) == "false" ]]; then
-      warn "- Extension $EXTENSION_ZIP definition is incorrect. The definition must contain 'gcp' section. The extension won't be uploaded."
-      rm -rf "../${EXTENSION_ZIP}"
-    elif [[ $("$YQ" e '.gcp.[] | has("featureSet")' extension.yaml) =~ "false" ]]; then
-      warn "- Extension $EXTENSION_ZIP definition is incorrect. Every service requires defined featureSet"
-      rm -rf "../${EXTENSION_ZIP}"
-    else
-      echo -n "." | tee -a "$FULL_LOG_FILE"
-    fi
-    cd ..
-    rm -r "$EXTENSION_ZIP-tmp"
-  done
-  cd "${WORKING_DIR}" || exit
-}
-
-get_extensions_zip_packages() {
-  curl -O "${EXTENSION_S3_URL}/${EXTENSION_MANIFEST_FILE}" | tee -a "$FULL_LOG_FILE" &> /dev/null
-  EXTENSIONS_LIST=$(grep "^google.*\.zip" <"$EXTENSION_MANIFEST_FILE" | tee -a "$FULL_LOG_FILE")
-  if [ -z "$EXTENSIONS_LIST" ]; then
-    err "Empty extensions manifest file downloaded"
-    exit 1
-  fi
-
-  echo "${EXTENSIONS_LIST}" | while IFS= read -r EXTENSION_FILE_NAME; do
-    echo -n "." | tee -a "$FULL_LOG_FILE"
-    (cd "${EXTENSIONS_TMPDIR}" && curl -s -O "${EXTENSION_S3_URL}/${EXTENSION_FILE_NAME}")
-  done
-}
-
 get_activated_extensions_on_cluster() {
   if RESPONSE=$(dt_api "/api/v2/extensions?pageSize=100"); then
     EXTENSIONS=$(echo "${RESPONSE}" | sed -r 's/<<HTTP_CODE>>.*$//' | "$JQ" -r '.extensions[] | select(.extensionName) | "\(.extensionName):\(.version)"')
@@ -374,62 +330,47 @@ get_extensions_from_dynatrace() {
   rm -rf "${CLUSTER_EXTENSIONS_TMPDIR}"
 }
 
-upload_correct_extension_to_dynatrace() {
-  SERVICES_FROM_ACTIVATION_CONFIG_STR=$1
+get_and_install_extensions() {
+  debug "Getting and Installing Dynatrace GCP Extensions List"
 
-  cd "${EXTENSIONS_TMPDIR}" || exit
+  info ""
+  info "- Getting list of google extensions available on environment"
+  LIST_OF_GOOGLE_EXTENSIONS=$(dt_api "/api/v2/extensions?name=google")
 
-  AMOUNT_OF_EXTENSIONS_TO_UPLOAD=0
-  AMOUNT_OF_NOT_UPLOADED_EXTENSIONS=0
-  AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS=0
-
-  for EXTENSION_ZIP in *.zip; do
-    EXTENSION_FILE_NAME="$(basename "$EXTENSION_ZIP" .zip)"
-
-    unzip -j -q "$EXTENSION_ZIP" "extension.zip"
-    unzip -p -q "extension.zip" "extension.yaml" >"$EXTENSION_FILE_NAME".yaml
-
-    EXTENSION_GCP_CONFIG=$("$YQ" e '.gcp' "$EXTENSION_FILE_NAME".yaml)
-
-    # Get all service/featureSet pairs defined in extensions
-    SERVICES_FROM_EXTENSIONS=$(echo "$EXTENSION_GCP_CONFIG" | "$YQ" e -j | "$JQ" -r 'to_entries[] | "\(.value.service)/\(.value.featureSet)"' 2>/dev/null | tee -a "$FULL_LOG_FILE")
-
-    for SERVICE_FROM_EXTENSION in $SERVICES_FROM_EXTENSIONS; do
-      # Check if service should be monitored
-      if [[ "$SERVICES_FROM_ACTIVATION_CONFIG_STR" == *"$SERVICE_FROM_EXTENSION"* ]]; then
-        if [ -n "$GCP_FUNCTION_NAME" ]; then
-          CONFIG_NAME=$("$YQ" e '.name' "$EXTENSION_FILE_NAME".yaml)
-          if [[ "$CONFIG_NAME" =~ ^.*\.(.*)$ ]]; then
-            echo "gcp:" >"$WORKING_DIR"/"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
-            echo "$EXTENSION_GCP_CONFIG" >>"$WORKING_DIR"/"$GCP_FUNCTION_NAME"/config/"${BASH_REMATCH[1]}".yaml
-          fi
-        fi
-        ((AMOUNT_OF_EXTENSIONS_TO_UPLOAD+=1))
-        activate_extension_on_cluster "$EXTENSIONS_FROM_CLUSTER" "$EXTENSION_ZIP"
-        break
-      fi
-      echo -n "." | tee -a "$FULL_LOG_FILE"
-    done
-    rm extension.zip
-    rm "$EXTENSION_FILE_NAME".yaml
-    rm "$EXTENSION_ZIP"
-  done
-
-  if [[ "$AMOUNT_OF_EXTENSIONS_TO_UPLOAD" -eq "$AMOUNT_OF_NOT_UPLOADED_EXTENSIONS" ]]; then
-    err "Uploading all GCP extensions to Dynatrace failed. It can be a temporary problem with the cluster. Please run deployment script again in a while."
-    exit 1
-  fi
-
-  if [[ "$AMOUNT_OF_EXTENSIONS_TO_UPLOAD" -eq "$AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS" ]]; then
-    err "Activating all GCP extensions on Dynatrace failed. It can be a temporary problem with the cluster. Please try activate your extensions on the cluster manually in a while."
+  GOOGLE_EXTENSIONS_ON_TENANT=$(echo "$LIST_OF_GOOGLE_EXTENSIONS" | jq -r '.totalCount')
+  
+  if [ "$GOOGLE_EXTENSIONS_ON_TENANT" -gt 0 ]; then
+      info ""
+      info "- There are alredy google extensions enabled on the tenant."
   else
-    AMOUNT_OF_ALL_FAILED_EXTENSIONS=$((AMOUNT_OF_NOT_UPLOADED_EXTENSIONS + AMOUNT_OF_NOT_ACTIVATED_EXTENSIONS))
-    if [[ "$AMOUNT_OF_EXTENSIONS_TO_UPLOAD" -eq "$AMOUNT_OF_ALL_FAILED_EXTENSIONS" ]]; then
-      err "Uploading and activating GCP extensions on Dynatrace failed.
-      It can be a temporary problem with the cluster. Please run deployment script again in a while.
-      For not activated but uploaded extensions - please try activate them on the cluster manually in a while."
-    fi
-  fi
+    info "- Activating default google extensions..."
+    DEFAULT_GOOGLE_EXTENSIONS=(
+      "com.dynatrace.extension.google-api"
+      "com.dynatrace.extension.google-app-engine"
+      "com.dynatrace.extension.google-bigquery"
+      "com.dynatrace.extension.google-cloud-functions"
+      "com.dynatrace.extension.google-cloud-storage"
+      "com.dynatrace.extension.google-compute-engine"
+      "com.dynatrace.extension.google-datastore"
+      "com.dynatrace.extension.google-filestore"
+      "com.dynatrace.extension.google-kubernetes-engine"
+      "com.dynatrace.extension.google-load-balancing"
+      "com.dynatrace.extension.google-pubsub"
+      "com.dynatrace.extension.google-pubsub-lite"
+      "com.dynatrace.extension.google-sql")
 
-  cd "${WORKING_DIR}" || exit
+    for GOOGLE_EXT in "${DEFAULT_GOOGLE_EXTENSIONS[@]}"
+      do
+        extensionName=$(echo "$GOOGLE_EXT" | tr -d '"')
+        info "Activating ${extensionName}..."
+        EXTENSION_DATA=$(dt_api "/api/v2/hub/extensions2/${extensionName}")
+        version=$(echo "$EXTENSION_DATA" | jq '.extension2Details.recommendedCatalogVersion' | tr -d '"')
+        dt_api "/api/v2/hub/extensions2/${extensionName}/actions/addToEnvironment?extensionVersion=${version}" "POST" ""
+      done
+
+    info ""
+    info "- Default set of extensions have been activated on the tenant."
+    info "- For more extensiosn available for your tenant, please visit: https://www.dynatrace.com/hub"
+
+  fi
 }

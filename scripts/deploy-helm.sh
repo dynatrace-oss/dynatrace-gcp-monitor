@@ -51,41 +51,6 @@ check_dynatrace_log_ingest_url() {
   fi
 }
 
-check_activegate_state() {
-  RUNNING_RESPONSE_ON_NORMAL_CLUSTERS="RUNNING"
-  RUNNING_RESPONSE_ON_DOK_CLUSTERS="\"RUNNING\"" #APM-379036 different responses returned - to be fixed in bug APM-380143
-
-  if [[ $USE_EXISTING_ACTIVE_GATE == true ]]; then
-    ACTIVE_GATE_CONNECTIVITY=Y
-    ACTIVE_GATE_STATE=$(curl -ksS "${DYNATRACE_LOG_INGEST_URL}/rest/health" --connect-timeout 20) || ACTIVE_GATE_CONNECTIVITY=N
-    if [[ "$ACTIVE_GATE_CONNECTIVITY" != "Y" ]]; then
-      warn "Unable to connect to ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL to check if ActiveGate is running. It can be ignored if ActiveGate host network configuration does not allow access from outside of k8s cluster."
-    fi
-    if [[ "$ACTIVE_GATE_STATE" != "$RUNNING_RESPONSE_ON_NORMAL_CLUSTERS" && "$ACTIVE_GATE_STATE" != "$RUNNING_RESPONSE_ON_DOK_CLUSTERS" && "$ACTIVE_GATE_CONNECTIVITY" == "Y" ]]; then
-      err "ActiveGate endpoint $DYNATRACE_LOG_INGEST_URL is not reporting RUNNING state. Please validate 'dynatraceLogIngestUrl' parameter value and ActiveGate host health."
-      exit 1
-    fi
-  fi
-}
-
-check_dynatrace_docker_login() {
-  check_if_parameter_is_empty "$DYNATRACE_PAAS_KEY" ".activeGate.dynatracePaasToken, Since the .activeGate.useExisting is false you have to generate and fill PaaS token in the Values file"
-
-  DOCKER_LOGIN=$(helm template dynatrace-gcp-monitor --show-only templates/active-gate-statefulset.yaml | tr '\015' '\n' | grep "envid:" | awk '{print $2}')
-
-  if RESPONSE=$(curl -ksS -w "%{http_code}" -o /dev/null -u "${DOCKER_LOGIN}:${DYNATRACE_PAAS_KEY}" "${DYNATRACE_URL}/v2/"); then
-    if [[ $RESPONSE == "200" ]]; then
-      info "Successfully logged to Dynatrace cluster Docker registry"
-      info "The ActiveGate will be deployed in k8s cluster"
-    else
-      err "Couldn't log to Dynatrace cluster Docker registry. Is your PaaS token a valid one?"
-      exit 1
-    fi
-  else
-    warn "Failed to connect to Dynatrace endpoint ($DYNATRACE_URL) to check Docker registry login. It can be ignored if Dynatrace does not allow public access."
-  fi
-}
-
 print_help() {
   printf "
 usage: deploy-helm.sh [--role-name ROLE_NAME] [--create-autopilot-cluster] [--autopilot-cluster-name CLUSTER_NAME] [--without-extensions-upgrade] [--auto-default] [--quiet]
@@ -161,12 +126,6 @@ while (( "$#" )); do
                 shift
             ;;
 
-            "--s3-url")
-                # shellcheck disable=SC2034  # Unused variables left for readability
-                EXTENSION_S3_URL=$2
-                shift; shift
-            ;;
-
             "-h" | "--help")
                 print_help
                 exit 0
@@ -190,13 +149,6 @@ if [ -z "$DYNATRACE_LOG_INGEST_URL" ]; then
   DYNATRACE_LOG_INGEST_URL=$DYNATRACE_URL
 fi
 readonly DYNATRACE_LOG_INGEST_URL
-USE_EXISTING_ACTIVE_GATE=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.activeGate.useExisting}")
-if [ -z "$USE_EXISTING_ACTIVE_GATE" ]; then
-  USE_EXISTING_ACTIVE_GATE=true
-fi
-readonly USE_EXISTING_ACTIVE_GATE
-DYNATRACE_PAAS_KEY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.activeGate.dynatracePaasToken}")
-readonly DYNATRACE_PAAS_KEY
 LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.logsSubscriptionId}")
 readonly LOGS_SUBSCRIPTION_ID
 USE_PROXY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.useProxy}")
@@ -214,11 +166,7 @@ if [ -z "$VPC_NETWORK" ]; then
 fi
 readonly VPC_NETWORK
 
-SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-monitor/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
-
-API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
-
-check_s3_url
+API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"' '"hub.read"' '"hub.write"' '"hub.install"')
 
 debug "Setting GCP project"
 check_if_parameter_is_empty "$GCP_PROJECT" "Set correct gcpProjectId in values.yaml"
@@ -281,12 +229,8 @@ fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
-  if [[ $USE_EXISTING_ACTIVE_GATE == false ]]; then
-    debug "Checking Docker login to Dynatrace"
-    check_dynatrace_docker_login
-  else
-    info "Using an existing Active Gate"
-    check_if_parameter_is_empty "$DYNATRACE_LOG_INGEST_URL" "DYNATRACE_LOG_INGEST_URL"
+  if [[ -n $DYNATRACE_LOG_INGEST_URL ]]; then
+    info "Sending logs through selected dynatraceLogIngestUrl"
     check_url "$DYNATRACE_LOG_INGEST_URL" "$DYNATRACE_URL_REGEX" "$ACTIVE_GATE_TARGET_URL_REGEX" \
       "Not correct dynatraceLogIngestUrl. Example of proper endpoint used to ingest logs to Dynatrace:\n
         - for direct ingest through the Cluster API: https://<your_environment_ID>.live.dynatrace.com\n
@@ -325,14 +269,9 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
     exit 1
   fi
 
-  check_activegate_state
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
-  debug "Downloading Dynatrace GCP Extensions from S3"
-  info ""
-  info "- downloading extensions"
-  get_extensions_zip_packages
 
   debug "Checking installed extension version on Dynatrace environment"
   info ""
@@ -341,26 +280,13 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
 
   # If --without-extensions-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for versions that are currently active on the cluster.
   if [[ "$UPGRADE_EXTENSIONS" == "N" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
-    debug "Downloading activated extensions from Dynatrace environment"
     info ""
-    info "- downloading active extensions from Dynatrace"
-    get_extensions_from_dynatrace "$EXTENSIONS_FROM_CLUSTER"
+    info "- Some google extensions have already been activated in Dynatrace."
+    info "- No new extensions will be activated."
+  else
+    get_and_install_extensions
   fi
 
-  debug "Validation all downloaded extensions"
-  info ""
-  info "- validating extensions"
-  validate_gcp_config_in_extensions
-
-  debug "Select correct extensions depend on activation config"
-  info ""
-  info "- read activation config"
-  info "$SERVICES_FROM_ACTIVATION_CONFIG"
-
-  debug "Upload selected extensions to Dynatrace environemnt"
-  info ""
-  info "- choosing and uploading extensions to Dynatrace" | tee -a "$FULL_LOG_FILE"
-  upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG"
 fi
 
 # Check if gke auth necessary plugin is installed
