@@ -126,12 +126,6 @@ while (( "$#" )); do
                 shift
             ;;
 
-            "--s3-url")
-                # shellcheck disable=SC2034  # Unused variables left for readability
-                EXTENSION_S3_URL=$2
-                shift; shift
-            ;;
-
             "-h" | "--help")
                 print_help
                 exit 0
@@ -172,11 +166,7 @@ if [ -z "$VPC_NETWORK" ]; then
 fi
 readonly VPC_NETWORK
 
-SERVICES_FROM_ACTIVATION_CONFIG=$("$YQ" e '.gcpServicesYaml' ./dynatrace-gcp-monitor/values.yaml | "$YQ" e -j '.services[]' - | "$JQ" -r '. | "\(.service)/\(.featureSets[])"')
-
-API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
-
-check_s3_url
+API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"' '"hub.read"' '"hub.write"' '"hub.install"')
 
 debug "Setting GCP project"
 check_if_parameter_is_empty "$GCP_PROJECT" "Set correct gcpProjectId in values.yaml"
@@ -282,10 +272,6 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 fi
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
-  debug "Downloading Dynatrace GCP Extensions from S3"
-  info ""
-  info "- downloading extensions"
-  get_extensions_zip_packages
 
   debug "Checking installed extension version on Dynatrace environment"
   info ""
@@ -294,26 +280,13 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
 
   # If --without-extensions-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for versions that are currently active on the cluster.
   if [[ "$UPGRADE_EXTENSIONS" == "N" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
-    debug "Downloading activated extensions from Dynatrace environment"
     info ""
-    info "- downloading active extensions from Dynatrace"
-    get_extensions_from_dynatrace "$EXTENSIONS_FROM_CLUSTER"
+    info "- Some google extensions have already been activated in Dynatrace."
+    info "- No new extensions will be activated."
+  else
+    get_and_install_extensions
   fi
 
-  debug "Validation all downloaded extensions"
-  info ""
-  info "- validating extensions"
-  validate_gcp_config_in_extensions
-
-  debug "Select correct extensions depend on activation config"
-  info ""
-  info "- read activation config"
-  info "$SERVICES_FROM_ACTIVATION_CONFIG"
-
-  debug "Upload selected extensions to Dynatrace environemnt"
-  info ""
-  info "- choosing and uploading extensions to Dynatrace" | tee -a "$FULL_LOG_FILE"
-  upload_correct_extension_to_dynatrace "$SERVICES_FROM_ACTIVATION_CONFIG"
 fi
 
 # Check if gke auth necessary plugin is installed

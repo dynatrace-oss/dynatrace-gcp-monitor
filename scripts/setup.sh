@@ -52,12 +52,6 @@ while (( "$#" )); do
                 shift
             ;;
 
-            "--s3-url")
-                # shellcheck disable=SC2034  # Unused variables left for readability
-                EXTENSION_S3_URL=$2
-                shift; shift
-            ;;
-
             "--use-local-function-zip")
                 USE_LOCAL_FUNCTION_ZIP="Y"
                 shift
@@ -88,9 +82,7 @@ fi
 readonly FUNCTION_ZIP_PACKAGE=dynatrace-gcp-monitor.zip
 readonly FUNCTION_ACTIVATION_CONFIG=activation-config.yaml
 # shellcheck disable=SC2034  # Unused variables left for readability
-API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
-
-check_s3_url
+API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"' '"hub.read"' '"hub.write"' '"hub.install"')
 
 debug "Downloading function sources from GitHub release"
 if [[ "$USE_LOCAL_FUNCTION_ZIP" != "Y" ]]; then
@@ -364,11 +356,6 @@ fi
 debug "Dynatrace API token validation"
 check_api_token "$DYNATRACE_URL" "$DYNATRACE_ACCESS_KEY"
 
-debug "Downloading Dynatrace GCP Extensions from S3"
-info ""
-info "- downloading extensions"
-get_extensions_zip_packages
-
 debug "Checking installed extension version on Dynatrace environemnt"
 info ""
 info "- checking activated extensions in Dynatrace"
@@ -395,21 +382,7 @@ if [[ "$UPGRADE_EXTENSIONS" == "N" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
   get_extensions_from_dynatrace "$EXTENSIONS_FROM_CLUSTER"
 fi
 
-debug "Validation all downloaded extensions"
-info ""
-info "- validating extensions"
-validate_gcp_config_in_extensions
-
-debug "Select correct extensions depend on activation config"
-info ""
-info "- read activation config"
-info "$SERVICES_WITH_FEATURE_SET"
-
-debug "Upload selected extensions to Dynatrace environemnt"
-mkdir -p "$WORKING_DIR/$GCP_FUNCTION_NAME/config/" | tee -a "$FULL_LOG_FILE"
-info ""
-info "- choosing and uploading extensions to Dynatrace"
-upload_correct_extension_to_dynatrace "$SERVICES_WITH_FEATURE_SET"
+get_and_install_extensions
 
 debug "Prepare environemnt veriables for Cloud Function"
 cd "$WORKING_DIR/$GCP_FUNCTION_NAME" || exit
