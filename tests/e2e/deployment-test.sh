@@ -15,17 +15,6 @@
 
 source ./tests/e2e/lib-tests.sh
 
-
-check_container_state()
-{
-  CONTAINER=$1
-  CONTAINER_STATE=$(kubectl -n dynatrace get pods -o=jsonpath="{.items[*].status.containerStatuses[?(@.name==\"${CONTAINER}\")].state}")
-  if [[ "${CONTAINER_STATE}" != *"running"* ]]; then
-    return 1
-  fi
-  return 0
-}
-
 while (( "$#" )); do
     case "$1" in
             "--logs")
@@ -98,39 +87,65 @@ gcloud container clusters get-credentials "${K8S_CLUSTER}" --region us-central1 
 
 # Verify containers running
 echo
-echo -n "Verifying deployment result"
-METRICS_CONTAINER_STATE=0
-LOGS_CONTAINER_STATE=0
-
-for _ in {1..60}
-do
-  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
-    check_container_state "dynatrace-gcp-monitor-metrics"
-    METRICS_CONTAINER_STATE=$?
-  fi
-
-  if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
-    check_container_state "dynatrace-gcp-monitor-logs"
-    LOGS_CONTAINER_STATE=$?
-  fi
-
-  if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
-    break
-  fi
-
-  sleep 10
-  echo -n "."
-done
+echo "Verifying deployment result"
+check_deployment_status || exit 1
 
 echo
 kubectl -n dynatrace get pods
 
 generate_load_on_sample_app
 
-if [[ ${METRICS_CONTAINER_STATE} == 0 ]] && [[ ${LOGS_CONTAINER_STATE} == 0 ]]; then
-  echo "Deployment completed successfully"
-  exit 0
-else
-  echo "Deployment failed"
-  exit 1
+
+if [[ $TRAVIS_BRANCH == 'master' ]]; then
+  echo
+  echo "#####PERFOMANCE TEST#####"
+  begin_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
+
+  echo "Setting variables to use GCP simulator"
+  kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace GCP_PROJECT_ID="fake-project-0" \
+      GCP_METADATA_URL="http://${GCP_SIMULATOR_IP}/metadata.google.internal/computeMetadata/v1" \
+      GCP_CLOUD_RESOURCE_MANAGER_URL="http://${GCP_SIMULATOR_IP}/cloudresourcemanager.googleapis.com/v1" \
+      GCP_SERVICE_USAGE_URL="http://${GCP_SIMULATOR_IP}/serviceusage.googleapis.com/v1" \
+      GCP_MONITORING_URL="http://${GCP_SIMULATOR_IP}/monitoring.googleapis.com/v3" \
+      GCP_SECRET_ROOT="http://${GCP_SIMULATOR_IP}/secretmanager.googleapis.com/v1"
+
+  echo "Wait until previous pod terminates"
+  for _ in {1..60}
+  do
+    PODS_COUNT=$(kubectl -n dynatrace get pods -o=json | $TEST_JQ -j '.items | length')
+    if [[ $PODS_COUNT == 1 ]]; then
+      break
+    fi
+
+    sleep 10
+    echo -n "."
+  done
+
+  check_deployment_status || exit 1
+  echo "Started at: $begin_timestamp"
+
+  echo "Waiting 360s"
+  sleep 360
+  end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
+  echo "Ended at: $end_timestamp"
+
+  LOG_QUERY="
+    timestamp>=\"$begin_timestamp\" AND
+    timestamp<=\"$end_timestamp\" AND
+    resource.type=k8s_container AND
+    resource.labels.project_id=$GCP_PROJECT_ID AND
+    resource.labels.location=us-central1 AND
+    resource.labels.cluster_name=$K8S_CLUSTER AND
+    resource.labels.namespace_name=dynatrace AND
+    labels.k8s-pod/app=dynatrace-gcp-monitor AND
+    severity>=DEFAULT AND
+    textPayload: (\"Polling finished after\" OR \"Metrics SFM\")
+  "
+  PERF_LOGS=$(gcloud beta logging read "$LOG_QUERY" --format=json)
+  if [[ $PERF_LOGS == "[]" ]]; then
+    echo "No logs"
+    exit 1
+  fi
+  echo "$PERF_LOGS" | "$TEST_JQ" '.[-2,-1].textPayload'
+  echo "#####PERFOMANCE TEST ENDED#####"
 fi
