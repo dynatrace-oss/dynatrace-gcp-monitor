@@ -13,15 +13,19 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-import os
+
 import re
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import List, Text, Any, Dict
+from lib.configuration import config
 
 VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
 VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 
+ALLOWED_METRIC_DIMENSION_VALUE_LENGTH = config.gcp_allowed_metric_dimension_value_length()
+ALLOWED_METRIC_KEY_LENGTH = config.gcp_allowed_metric_key_length()
+ALLOWED_METRIC_DIMENSION_KEY_LENGTH = config.gcp_allowed_metric_dimension_key_length()
 
 @dataclass(frozen=True)
 class DimensionValue:
@@ -39,7 +43,7 @@ class IngestLine:
     dimension_values: List[DimensionValue]
 
     def dimensions_string(self) -> str:
-        dimension_values = [f'{dimension_value.name}="{dimension_value.value}"'
+        dimension_values = [f'{dimension_value.name[0:ALLOWED_METRIC_DIMENSION_KEY_LENGTH]}="{dimension_value.value[0:ALLOWED_METRIC_DIMENSION_VALUE_LENGTH]}"'
                             for dimension_value
                             in self.dimension_values
                             if dimension_value.value != ""]  # MINT rejects line with empty dimension value
@@ -51,7 +55,7 @@ class IngestLine:
     def to_string(self) -> str:
         separator = ',' if self.metric_type == 'gauge' else '='
         metric_type = self.metric_type if self.metric_type != 'count' else 'count,delta'
-        return f"{self.metric_name}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}"
+        return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}"
 
 
 @dataclass(frozen=True)
