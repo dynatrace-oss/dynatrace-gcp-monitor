@@ -55,3 +55,15 @@ def gcp_service_usage_url():
 
 def gcp_monitoring_url():
     return os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
+
+
+def gcp_allowed_metric_dimension_value_length():
+    return os.environ.get("ALLOWED_METRIC_DIMENSION_VALUE_LENGTH", 250)
+
+
+def gcp_allowed_metric_dimension_key_length():
+    return os.environ.get("ALLOWED_METRIC_DIMENSION_KEY_LENGTH", 100)
+
+
+def gcp_allowed_metric_key_length():
+    return os.environ.get("ALLOWED_METRIC_KEY_LENGTH", 250)

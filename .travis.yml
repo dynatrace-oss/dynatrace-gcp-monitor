@@ -24,7 +24,6 @@ stages:
   - tests
   - build
   - e2e-helm-deployment-test
-  - e2e-cloud-function-deployment-test
   - github-deploy
   - docker-deploy
   - gcp-install-release
@@ -215,6 +214,7 @@ jobs:
       - travis_wait 60 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
+  exclude:
   - stage: e2e-cloud-function-deployment-test
     name: E2E GCP Cloud Function deployment test
     sudo: required

@@ -49,6 +49,10 @@ def get_oauth_token():
 
 
 def test_logs_on_dynatrace():
+    # Tenants with Grail already enabled experienced some changes with logs related operations.
+    # To query logs via API, a new OAuth token is required, instead of the same
+    # DT Token with logs-reading scope.
+    # More info: https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication/account-api-authentication
     url = f"{os.environ.get('DYNATRACE_URL').rstrip('/')}/api/v2/logs/search"
     params = {
         'from': os.environ.get('START_LOAD_GENERATION'),
