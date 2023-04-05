@@ -341,7 +341,7 @@ get_and_install_extensions() {
   
   if [ "$GOOGLE_EXTENSIONS_ON_TENANT" -gt 0 ]; then
       info ""
-      info "- There are alredy google extensions enabled on the tenant."
+      info "- There are some google extensions already enabled on the tenant."
   else
     info "- Activating default google extensions..."
     DEFAULT_GOOGLE_EXTENSIONS=(
@@ -349,6 +349,7 @@ get_and_install_extensions() {
       "com.dynatrace.extension.google-app-engine"
       "com.dynatrace.extension.google-bigquery"
       "com.dynatrace.extension.google-cloud-functions"
+      "com.dynatrace.extension.google-cloud-run"
       "com.dynatrace.extension.google-cloud-storage"
       "com.dynatrace.extension.google-compute-engine"
       "com.dynatrace.extension.google-datastore"
@@ -370,7 +371,7 @@ get_and_install_extensions() {
 
     info ""
     info "- Default set of extensions have been activated on the tenant."
-    info "- For more extensiosn available for your tenant, please visit: https://www.dynatrace.com/hub"
+    info "- To manage all available extensions, please go to the hub in your tenant."
 
   fi
 }
