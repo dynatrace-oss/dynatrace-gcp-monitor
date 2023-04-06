@@ -368,12 +368,13 @@ perfomance_test() {
     echo "Wait until previous pod terminates"
     for _ in {1..60}
     do
+      sleep 10
+
       PODS_COUNT=$(kubectl -n dynatrace get pods -o=json | $TEST_JQ -j '.items | length')
       if [[ $PODS_COUNT == 1 ]]; then
         break
       fi
 
-      sleep 10
       echo -n "."
     done
 
