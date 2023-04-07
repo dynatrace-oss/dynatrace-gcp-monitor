@@ -384,7 +384,7 @@ performance_test() {
     begin_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
     echo "Started at: $begin_timestamp"
 
-    echo "Waiting 360s"
+    echo "Waiting 360s, so at least one polling can happen"
     sleep 360
     end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
     echo "Ended at: $end_timestamp"
@@ -401,9 +401,10 @@ performance_test() {
       severity>=DEFAULT AND
       textPayload: (\"Polling finished after\" OR \"Metrics SFM\")
     "
+    echo "Searching GCP Monitor logs for info about polling duration"
     PERF_LOGS=$(gcloud beta logging read "$LOG_QUERY" --format=json)
     if [[ $PERF_LOGS == "[]" ]]; then
-      echo "No logs"
+      echo "Logs about polling finished not found"
       exit 1
     fi
     echo "$PERF_LOGS" | "$TEST_JQ" '.[-2,-1].textPayload'
