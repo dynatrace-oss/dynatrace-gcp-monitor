@@ -352,9 +352,9 @@ activation: |
 EOF
 }
 
-perfomance_test() {
+performance_test() {
     echo
-    echo "#####PERFOMANCE TEST#####"
+    echo "#####PERFORMANCE TEST#####"
 
     echo "Setting variables to use GCP simulator"
     kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace GCP_PROJECT_ID="fake-project-0" \
@@ -407,5 +407,5 @@ perfomance_test() {
       exit 1
     fi
     echo "$PERF_LOGS" | "$TEST_JQ" '.[-2,-1].textPayload'
-    echo "#####PERFOMANCE TEST ENDED#####"
+    echo "#####PERFORMANCE TEST ENDED#####"
 }
