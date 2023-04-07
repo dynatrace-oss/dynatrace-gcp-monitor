@@ -34,7 +34,7 @@ function run_deploy_and_tests() {
 
     set -e
     pytest "tests/e2e/${TEST_TYPE}" -v
-    if [[ $TRAVIS_BRANCH == 'PCLOUDS-1718-add-perf-test' ]]; then
+    if [[ $TRAVIS_BRANCH == 'master' ]]; then
         perfomance_test
     fi
 }
