@@ -12,6 +12,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+source ./tests/e2e/lib-tests.sh
 
 function run_deploy_and_tests() {
     TEST_TYPE=$1
@@ -33,6 +34,9 @@ function run_deploy_and_tests() {
 
     set -e
     pytest "tests/e2e/${TEST_TYPE}" -v
+    if [[ $TRAVIS_BRANCH == 'master' ]]; then
+        performance_test
+    fi
 }
 
 if [[ $TRAVIS_EVENT_TYPE == 'cron' ]] || [[ $1 == 'separate' ]]; then

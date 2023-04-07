@@ -85,6 +85,9 @@ dynatraceUrl: "${DYNATRACE_URL}"
 logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
 dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
+activeGate:
+  useExisting: "true"
+  dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
 serviceAccount: "${IAM_SERVICE_ACCOUNT}"
 scopingProjectSupportEnabled: "true"
 gcpServicesYaml: |
@@ -347,4 +350,63 @@ activation: |
       vars:
         filter_conditions: ""
 EOF
+}
+
+performance_test() {
+    echo
+    echo "#####PERFORMANCE TEST#####"
+
+    echo "Setting variables to use GCP simulator"
+    kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace GCP_PROJECT_ID="fake-project-0" \
+        GCP_METADATA_URL="http://${GCP_SIMULATOR_IP}/metadata.google.internal/computeMetadata/v1" \
+        GCP_CLOUD_RESOURCE_MANAGER_URL="http://${GCP_SIMULATOR_IP}/cloudresourcemanager.googleapis.com/v1" \
+        GCP_SERVICE_USAGE_URL="http://${GCP_SIMULATOR_IP}/serviceusage.googleapis.com/v1" \
+        GCP_MONITORING_URL="http://${GCP_SIMULATOR_IP}/monitoring.googleapis.com/v3" \
+        GCP_SECRET_ROOT="http://${GCP_SIMULATOR_IP}/secretmanager.googleapis.com/v1"
+
+    echo "Wait until previous pod terminates"
+    for _ in {1..60}
+    do
+      sleep 10
+
+      PODS_COUNT=$(kubectl -n dynatrace get pods -o=json | $TEST_JQ -j '.items | length')
+      if [[ $PODS_COUNT == 1 ]]; then
+        break
+      fi
+
+      echo -n "."
+    done
+
+    echo
+    kubectl -n dynatrace get pods
+
+    check_deployment_status || exit 1
+    begin_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
+    echo "Started at: $begin_timestamp"
+
+    echo "Waiting 360s, so at least one polling can happen"
+    sleep 360
+    end_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
+    echo "Ended at: $end_timestamp"
+
+    LOG_QUERY="
+      timestamp>=\"$begin_timestamp\" AND
+      timestamp<=\"$end_timestamp\" AND
+      resource.type=k8s_container AND
+      resource.labels.project_id=$GCP_PROJECT_ID AND
+      resource.labels.location=us-central1 AND
+      resource.labels.cluster_name=$K8S_CLUSTER AND
+      resource.labels.namespace_name=dynatrace AND
+      labels.k8s-pod/app=dynatrace-gcp-monitor AND
+      severity>=DEFAULT AND
+      textPayload: (\"Polling finished after\" OR \"Metrics SFM\")
+    "
+    echo "Searching GCP Monitor logs for info about polling duration"
+    PERF_LOGS=$(gcloud beta logging read "$LOG_QUERY" --format=json)
+    if [[ $PERF_LOGS == "[]" ]]; then
+      echo "Logs about polling finished not found"
+      exit 1
+    fi
+    echo "$PERF_LOGS" | "$TEST_JQ" '.[-2,-1].textPayload'
+    echo "#####PERFORMANCE TEST ENDED#####"
 }
