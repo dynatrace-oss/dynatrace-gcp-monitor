@@ -355,7 +355,6 @@ EOF
 perfomance_test() {
     echo
     echo "#####PERFOMANCE TEST#####"
-    begin_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
 
     echo "Setting variables to use GCP simulator"
     kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace GCP_PROJECT_ID="fake-project-0" \
@@ -378,9 +377,11 @@ perfomance_test() {
       echo -n "."
     done
 
+    echo
     kubectl -n dynatrace get pods
 
     check_deployment_status || exit 1
+    begin_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%6NZ")
     echo "Started at: $begin_timestamp"
 
     echo "Waiting 360s"
