@@ -34,7 +34,7 @@ function run_deploy_and_tests() {
 
     set -e
     pytest "tests/e2e/${TEST_TYPE}" -v
-    if [[ $TRAVIS_BRANCH == 'master' ]]; then
+    if [[ $TRAVIS_BRANCH == 'master' ]] && [[ $TEST_TYPE != 'logs' ]]; then
         performance_test
     fi
 }
