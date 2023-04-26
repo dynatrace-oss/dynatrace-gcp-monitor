@@ -65,5 +65,7 @@ def test_logs_on_dynatrace():
     }
     resp = requests.get(url, params=params, headers=headers)
 
+    print("DEBUG params:", params)
+    print("DEBUG result:",resp.json())
     assert resp.status_code == 200
     assert len(resp.json()['results']) == 5
