@@ -65,6 +65,9 @@ serviceAccount: "dynatrace-gcp-monitor-sa"
 # Dynatrace GCP Monitor docker image. Using default value is advised,
 # but can be changed if there is a need to use customized image or specific, tagged version
 dockerImage: "dynatrace/dynatrace-gcp-monitor:v1-latest"
+# The image of th container is pulled by default from Docker hub. If the image is cloned into private registry imagePullSecrets may be required
+#  Allowed values: name of the valid registry credentials secret
+#imagePullSecrets: registry-credential-secret
 # useProxy: depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
 # if set to ALL: proxy settings will be used for requests to Dynatrace and GCP API
 # if set to DT_ONLY: proxy settings will be used only for requests to Dynatrace or to an existing Active Gate (activeGate.useExisting true)
@@ -95,7 +98,11 @@ logIngestRequestMaxSize: 1048576
 logIngestSendingWorkerExecutionPeriod: 60
 # Determines max age of forwarded log event. Should be the same or lower than on cluster
 logIngestEventMaxAgeSeconds: 86400
-
+logResources:
+  requests:
+    memory: "256Mi"
+    cpu: "500m"
+    ephemeral-storage: "1Gi"
 
 # METRICS VALUES - DEFAULTS
 
@@ -111,6 +118,11 @@ serviceUsageBooking: "source"
 queryInterval: 3
 #clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh
 clusterName: ""
+metricResources:
+  requests:
+    memory: "1536Mi"
+    cpu: "1.25"
+    ephemeral-storage: "2Gi"
 # configuration file for GCP services - uncommented services will be monitored
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax

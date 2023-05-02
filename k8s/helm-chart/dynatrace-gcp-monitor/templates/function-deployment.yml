@@ -54,6 +54,10 @@ spec:
           - key: GCP_SERVICES_YAML
             path: "gcp_services.yaml"
       {{- end }}
+      {{- if (.Values.imagePullSecrets) }}      
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}      
       containers:
       {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
       - image: {{ .Values.dockerImage | quote }}
@@ -139,11 +143,7 @@ spec:
         - mountPath: /code/config/activation
           readOnly: true
           name: gcp-config
-        resources:
-          requests:
-            memory: "1536Mi"
-            cpu: "1.25"
-            ephemeral-storage: "2Gi"
+        resources: {{- toYaml .Values.metricResources | nindent 12 }}
         livenessProbe:
           httpGet:
             path: /health
@@ -156,6 +156,11 @@ spec:
             port: 8080
           initialDelaySeconds: 30
           timeoutSeconds: 120
+        securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            runAsNonRoot: true
+            runAsUser: 1001
       {{- end }}
       {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
       - image: {{ .Values.dockerImage | quote }}
@@ -263,11 +268,7 @@ spec:
         {{- end }}
         - name: HEALTH_CHECK_PORT
           value: "8081"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "500m"
-            ephemeral-storage: "1Gi"
+        resources: {{- toYaml .Values.logResources | nindent 12 }}
         livenessProbe:
           httpGet:
             path: /health
@@ -280,4 +281,9 @@ spec:
             port: 8081
           initialDelaySeconds: 30
           timeoutSeconds: 60
+        securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            runAsNonRoot: true
+            runAsUser: 1001          
       {{- end }}
