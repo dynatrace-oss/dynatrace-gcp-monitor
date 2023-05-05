@@ -17,6 +17,7 @@ import pytest
 import json
 from pathlib import Path
 import requests
+import time
 
 TEST_DATA_DIR = Path(__file__).resolve().parent / 'data'
 
@@ -32,6 +33,7 @@ def test_environment_vars():
 
 @pytest.mark.parametrize("metric_selector", testdata, ids=[i['key'] for i in testdata])
 def test_metrics_on_dynatrace(metric_selector):
+    time.sleep(100)
     url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/settings/objects"
     params = {
         'schemaIds': 'builtin:metric.metadata',
