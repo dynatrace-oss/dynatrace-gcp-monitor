@@ -17,7 +17,6 @@ includedPermissions:
   - container.namespaces.get
   - container.pods.get
   - container.pods.list
-  - container.replicaSets.get
   - container.replicaSets.getScale
   - container.replicaSets.getStatus
   - container.replicaSets.list
@@ -29,8 +28,6 @@ includedPermissions:
   - container.serviceAccounts.create
   - container.serviceAccounts.delete
   - container.serviceAccounts.get
-  - container.services.get
-  - container.statefulSets.get
   - iam.roles.create
   - iam.roles.list
   - iam.roles.update
