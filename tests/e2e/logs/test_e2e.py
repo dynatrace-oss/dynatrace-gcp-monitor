@@ -14,7 +14,6 @@
 
 import os
 import requests
-import time
 
 
 def test_environment_vars():
@@ -53,7 +52,6 @@ def test_logs_on_dynatrace():
     # To query logs via API, a new OAuth token is required, instead of the same
     # DT Token with logs-reading scope.
     # More info: https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication/account-api-authentication
-    time.sleep(100)
     url = f"{os.environ.get('DYNATRACE_URL').rstrip('/')}/api/v2/logs/search"
     params = {
         'from': os.environ.get('START_LOAD_GENERATION'),
