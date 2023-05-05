@@ -13,13 +13,13 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-START_LOAD_GENERATION=$(date -d "+2 hours" -u +%s%3N)
+START_LOAD_GENERATION=$(date -d "+1 hour" -u +%s%3N)
 export START_LOAD_GENERATION
 
 ./tests/e2e/deployment-test-cloud-function.sh
 sleep 300
 
-END_LOAD_GENERATION=$(date -d "+2 hours" -u +%s%3N)
+END_LOAD_GENERATION=$(date -d "+1 hour" -u +%s%3N)
 export END_LOAD_GENERATION
 
 pytest "tests/e2e/extensions" -v
