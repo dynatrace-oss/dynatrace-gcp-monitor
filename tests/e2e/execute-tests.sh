@@ -17,6 +17,12 @@ source ./tests/e2e/lib-tests.sh
 function run_deploy_and_tests() {
     TEST_TYPE=$1
 
+    echo "Getting cluster time: "
+    curl -s -w "\n%{http_code}" ${DYNATRACE_URL}api/v1/time | {
+        read body
+        jq . <<< "$body"
+    }
+
     START_LOAD_GENERATION=$(date -u +%s%3N)
     export START_LOAD_GENERATION
     echo "Started load generation at ${START_LOAD_GENERATION}"
