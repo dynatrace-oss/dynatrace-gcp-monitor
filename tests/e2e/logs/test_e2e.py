@@ -52,7 +52,7 @@ def test_logs_on_dynatrace():
     # To query logs via API, a new OAuth token is required, instead of the same
     # DT Token with logs-reading scope.
     # More info: https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication/account-api-authentication
-    time.sleep(60)
+    time.sleep(600)
     url = f"{os.environ.get('DYNATRACE_URL').rstrip('/')}/api/v2/logs/search"
     time_on_cluster_url=f"{os.environ.get('DYNATRACE_URL').rstrip('/')}/api/v1/time"
     time_on_cluster = requests.get(time_on_cluster_url, params={}, headers={})
