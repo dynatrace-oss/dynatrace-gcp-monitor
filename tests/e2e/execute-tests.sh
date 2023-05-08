@@ -17,15 +17,8 @@ source ./tests/e2e/lib-tests.sh
 function run_deploy_and_tests() {
     TEST_TYPE=$1
 
-    echo "Getting cluster time: "
-    curl -s -w "\n%{http_code}" ${DYNATRACE_URL}api/v1/time | {
-        read body
-        jq . <<< "$body"
-    }
-
     START_LOAD_GENERATION=$(date -u +%s%3N)
     export START_LOAD_GENERATION
-    echo "Started load generation at ${START_LOAD_GENERATION}"
     export DEPLOYMENT_TYPE=$TEST_TYPE
 
     ./tests/e2e/deployment-test.sh "--${TEST_TYPE}"
@@ -34,7 +27,6 @@ function run_deploy_and_tests() {
     sleep 300
     END_LOAD_GENERATION=$(date -u +%s%3N)
     export END_LOAD_GENERATION
-    echo "Finished load generation at ${END_LOAD_GENERATION}"
 
     if [[ $TEST_TYPE == 'all' ]]; then
         TEST_TYPE=''
