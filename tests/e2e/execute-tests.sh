@@ -17,7 +17,7 @@ source ./tests/e2e/lib-tests.sh
 function run_deploy_and_tests() {
     TEST_TYPE=$1
 
-    START_LOAD_GENERATION=$(date -u +%s%3N)
+    START_LOAD_GENERATION=$(date -d "+2 hours" -u +%s%3N)
     export START_LOAD_GENERATION
     echo "Started load generation at ${START_LOAD_GENERATION}"
     export DEPLOYMENT_TYPE=$TEST_TYPE
@@ -26,7 +26,7 @@ function run_deploy_and_tests() {
 
     echo waiting 300sec
     sleep 300
-    END_LOAD_GENERATION=$(date -u +%s%3N)
+    END_LOAD_GENERATION=$(date -d "+2 hours" -u +%s%3N)
     export END_LOAD_GENERATION
     echo "Finished load generation at ${END_LOAD_GENERATION}"
 
