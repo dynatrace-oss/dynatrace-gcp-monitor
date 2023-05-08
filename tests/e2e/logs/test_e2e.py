@@ -53,6 +53,12 @@ def test_logs_on_dynatrace():
     # DT Token with logs-reading scope.
     # More info: https://www.dynatrace.com/support/help/dynatrace-api/basics/dynatrace-api-authentication/account-api-authentication
     url = f"{os.environ.get('DYNATRACE_URL').rstrip('/')}/api/v2/logs/search"
+    time_on_cluster=f"{os.environ.get('DYNATRACE_URL').rstrip('/')}/api/v1/time"
+
+    print(f"Time on cluster: {time_on_cluster}")
+    print(f"START_LOAD_GENERATION: {os.environ.get('START_LOAD_GENERATION')}")
+    print(f"END_LOAD_GENERATION: {os.environ.get('END_LOAD_GENERATION')}")
+
     params = {
         'from': os.environ.get('START_LOAD_GENERATION'),
         'to': os.environ.get('END_LOAD_GENERATION'),
