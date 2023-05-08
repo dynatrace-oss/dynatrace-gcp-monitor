@@ -19,6 +19,7 @@ function run_deploy_and_tests() {
 
     START_LOAD_GENERATION=$(date -u +%s%3N)
     export START_LOAD_GENERATION
+    echo "Started load generation at ${START_LOAD_GENERATION}"
     export DEPLOYMENT_TYPE=$TEST_TYPE
 
     ./tests/e2e/deployment-test.sh "--${TEST_TYPE}"
@@ -27,6 +28,7 @@ function run_deploy_and_tests() {
     sleep 300
     END_LOAD_GENERATION=$(date -u +%s%3N)
     export END_LOAD_GENERATION
+    echo "Finished load generation at ${END_LOAD_GENERATION}"
 
     if [[ $TEST_TYPE == 'all' ]]; then
         TEST_TYPE=''

@@ -14,7 +14,6 @@
 #     limitations under the License.
 
 START_LOAD_GENERATION=$(date -u +%s%3N)
-echo "Started load generation at ${START_LOAD_GENERATION}"
 export START_LOAD_GENERATION
 
 ./tests/e2e/deployment-test-cloud-function.sh
@@ -22,7 +21,6 @@ sleep 300
 
 END_LOAD_GENERATION=$(date -u +%s%3N)
 export END_LOAD_GENERATION
-echo "Finished load generation at ${END_LOAD_GENERATION}"
 
 pytest "tests/e2e/extensions" -v
 pytest "tests/e2e/metrics" -v
