@@ -17,9 +17,6 @@ includedPermissions:
   - container.namespaces.get
   - container.pods.get
   - container.pods.list
-  - container.replicaSets.getScale
-  - container.replicaSets.getStatus
-  - container.replicaSets.list
   - container.secrets.create
   - container.secrets.delete
   - container.secrets.get
