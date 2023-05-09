@@ -33,13 +33,13 @@ def test_environment_vars():
 
 def get_oauth_token():
     # Travis CI does not allow placing splaces in scope value. 
-    # Escape char wil not be converted on server, so, & used instead. 
+    # Escape char wil not be converted on server, so, \ with whitespace used instead. 
     oauth_url = str(os.environ.get('OAUTH_URL_E2E'))
     data = {
         "grant_type": str(os.environ.get("OAUTH_GRANT_TYPE_E2E")),
         "client_id": str(os.environ.get("OAUTH_CLIENT_ID_E2E")),
         "client_secret": str(os.environ.get("OAUTH_CLIENT_SECRET_E2E")),
-        "scope": str(os.environ.get("OAUTH_CLIENT_SCOPE_E2E")).replace("&", " ")
+        "scope": str(os.environ.get("OAUTH_CLIENT_SCOPE_E2E")).replace("\ ", " ")
     }
     headers = {
         "Content-type": "application/x-www-form-urlencoded"
