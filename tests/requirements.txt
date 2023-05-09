@@ -6,3 +6,4 @@ pytest-mock==3.6.1
 assertpy==1.1
 cryptography==39.0.1
 pytz==2022.2.1
+urllib3==1.26.6
