@@ -23,4 +23,8 @@ WORKDIR /code
 COPY --from=build /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/site-packages
 COPY src/ .
 COPY LICENSE.md /licenses/
+
+RUN adduser --disabled-password gcp-monitor && chown -R gcp-monitor /code
+USER gcp-monitor
+
 CMD [ "python", "-u", "./run_docker.py" ]
