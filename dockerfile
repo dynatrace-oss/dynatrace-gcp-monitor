@@ -1,11 +1,11 @@
-FROM python:3.9.17-slim-bullseye AS build
+FROM python:3.8-slim-buster AS build
 RUN apt-get update && apt-get install -y build-essential libffi-dev
 RUN pip install --upgrade pip
 COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
 
 
-FROM python:3.9.17-slim-bullseye
+FROM python:3.8-slim-buster
 
 ARG RELEASE_TAG_ARG
 ENV RELEASE_TAG=$RELEASE_TAG_ARG
