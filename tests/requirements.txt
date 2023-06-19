@@ -4,6 +4,6 @@ wiremock==2.1.3
 pytest-resource-path==1.3.0
 pytest-mock==3.6.1
 assertpy==1.1
-cryptography==39.0.1
+cryptography==41.0.0
 pytz==2022.2.1
 urllib3==1.26.6
