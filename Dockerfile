@@ -1,5 +1,6 @@
 FROM python:3.8-slim-bookworm AS build
-RUN apt-get update && apt-get install -y build-essential libffi-dev
+RUN apt-get update
+RUN apt-get install -y build-essential libffi-dev
 RUN pip install --upgrade pip
 COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
