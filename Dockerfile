@@ -1,6 +1,4 @@
 FROM python:3.8-slim AS build
-#Clean cache
-RUN rm -r /var/lib/apt/lists/*
 RUN apt-get update
 RUN apt-get install -y build-essential libffi-dev
 RUN pip install --upgrade pip
