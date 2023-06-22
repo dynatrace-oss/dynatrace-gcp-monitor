@@ -3,7 +3,8 @@ FROM python:3.8-bookworm AS build
 RUN rm -rf /var/lib/apt/lists/*
 # runtime dependencies
 RUN apt-get clean
-RUN apt-get upgrade
+RUN apt-get update -y
+RUN apt-get upgrade -y
 RUN apt-get install -y apt-transport-https
 RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing -y
 RUN set -eux; \
