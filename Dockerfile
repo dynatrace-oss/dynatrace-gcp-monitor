@@ -1,6 +1,7 @@
 FROM python:3.8-bookworm AS build
 
 RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /var/lib/apt/lists/partial
 # runtime dependencies
 RUN apt-get clean;
 RUN set -eux; \
