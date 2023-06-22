@@ -6,7 +6,7 @@ RUN apt-get clean;
 RUN set -eux; \
     apt-get update;
 RUN set -eux; \
-        \ apt-get install -y --no-install-recommends \
+        apt-get install -y --no-install-recommends \
 		build-essential \
 		libffi-dev;
 RUN pip install --upgrade pip
