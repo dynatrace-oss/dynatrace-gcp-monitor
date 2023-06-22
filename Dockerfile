@@ -1,5 +1,5 @@
 FROM python:3.8-bookworm AS build
-
+RUN grep Suite /var/lib/apt/lists/*Release
 RUN rm -rf /var/lib/apt/lists/*
 RUN rm -rf /var/lib/apt/periodic/*
 RUN rm -rf /var/lib/apt/mirrors/*
