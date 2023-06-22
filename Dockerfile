@@ -3,10 +3,10 @@ FROM python:3.8-bookworm AS build
 RUN rm -rf /var/lib/apt/lists/*
 # runtime dependencies
 RUN apt-get clean
-RUN apt-get update -y && true
+RUN apt-get update -y || apt-get update
 RUN apt-get upgrade -y
 RUN apt-get install -y apt-transport-https
-RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing -y && true
+RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing -y || true
 RUN set -eux; \
         apt-get install -y --no-install-recommends \
 		build-essential \
