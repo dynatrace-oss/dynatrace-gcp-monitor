@@ -4,7 +4,7 @@ RUN rm -rf /var/lib/apt/lists/*
 # runtime dependencies
 RUN apt-get clean;
 RUN set -eux; \
-    apt-get update;
+    apt-get update -o Acquire::CompressionTypes::Order::=gz
 RUN set -eux; \
         apt-get install -y --no-install-recommends \
 		build-essential \
