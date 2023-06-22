@@ -1,15 +1,12 @@
 FROM python:3.8-bookworm AS build
 
-
+RUN rm -rf /var/lib/apt/lists/*
 # runtime dependencies
+RUN apt-get clean;
 RUN set -eux; \
-    apt-get clean; \
-	apt-get update && apt-get install -y --no-install-recommends \
+    apt-get update && apt-get install -y --no-install-recommends \
 		build-essential \
-		libffi-dev \
-	; \
-	rm -rf /var/lib/apt/lists/*
-
+		libffi-dev;
 RUN pip install --upgrade pip
 COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
