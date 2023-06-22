@@ -1,4 +1,4 @@
-FROM 3.8-bookworm AS build
+FROM python:3.8-bookworm AS build
 
 
 # runtime dependencies
@@ -15,7 +15,7 @@ COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
 
 
-FROM 3.8.17-bookworm
+FROM python:3.8-bookworm
 
 ARG RELEASE_TAG_ARG
 ENV RELEASE_TAG=$RELEASE_TAG_ARG
