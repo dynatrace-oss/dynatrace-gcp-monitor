@@ -1,4 +1,4 @@
-FROM python:3.8 AS build
+FROM 3.8-slim-buster  AS build
 
 
 # runtime dependencies
@@ -15,7 +15,7 @@ COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
 
 
-FROM python:3.8
+FROM 3.8-slim-buster
 
 ARG RELEASE_TAG_ARG
 ENV RELEASE_TAG=$RELEASE_TAG_ARG
