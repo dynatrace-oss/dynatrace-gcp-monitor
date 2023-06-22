@@ -1,6 +1,15 @@
 FROM python:3.8-slim AS build
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends build-essential libffi-dev
+
+
+# runtime dependencies
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		build-essential \
+		libffi-dev \
+	; \
+	rm -rf /var/lib/apt/lists/*
+
 RUN pip install --upgrade pip
 COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
