@@ -1,6 +1,8 @@
 FROM python:3.8-bookworm AS build
 
 RUN rm -rf /var/lib/apt/lists/*
+RUN rm -rf /var/lib/apt/periodic/*
+RUN rm -rf /var/lib/apt/mirrors/*
 # runtime dependencies
 RUN apt-get clean
 RUN apt-get update -y || apt-get update
