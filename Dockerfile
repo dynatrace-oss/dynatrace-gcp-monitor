@@ -1,8 +1,9 @@
-FROM 3.8-slim  AS build
+FROM 3.8-bookworm AS build
 
 
 # runtime dependencies
 RUN set -eux; \
+    apt-get clean; \
 	apt-get update && apt-get install -y --no-install-recommends \
 		build-essential \
 		libffi-dev \
@@ -14,7 +15,7 @@ COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
 
 
-FROM 3.8-slim
+FROM 3.8.17-bookworm
 
 ARG RELEASE_TAG_ARG
 ENV RELEASE_TAG=$RELEASE_TAG_ARG
