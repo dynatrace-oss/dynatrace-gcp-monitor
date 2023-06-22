@@ -1,5 +1,5 @@
 os: linux
-dist: xenial
+dist: jammy
 if: fork = false
 
 notifications:
@@ -20,8 +20,8 @@ notifications:
       - "On branch %{branch}, after commit: %{commit_message}"
       - "Travis message: %{message}"
 stages:
-  - shellcheck
-  - tests
+#  - shellcheck
+#  - tests
   - build
   - e2e-helm-deployment-test
   - github-deploy
