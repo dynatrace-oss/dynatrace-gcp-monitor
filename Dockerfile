@@ -1,9 +1,9 @@
 FROM python:3.8-bookworm AS build
 
 RUN rm -rf /var/lib/apt/lists/*
-RUN rm -rf /var/lib/apt/lists/partial
 # runtime dependencies
-RUN apt-get clean;
+RUN apt-get clean
+RUN apt-get upgrade
 RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing
 RUN set -eux; \
         apt-get install -y --no-install-recommends \
