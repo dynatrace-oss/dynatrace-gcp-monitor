@@ -4,7 +4,8 @@ RUN rm -rf /var/lib/apt/lists/*
 # runtime dependencies
 RUN apt-get clean
 RUN apt-get upgrade
-RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing
+RUN apt-get install -y apt-transport-https
+RUN apt-get update -o Acquire::CompressionTypes::Order::=gz --fix-missing -y
 RUN set -eux; \
         apt-get install -y --no-install-recommends \
 		build-essential \
