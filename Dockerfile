@@ -1,10 +1,9 @@
-FROM 3.8-slim-bullseye  AS build
+FROM python:3.8-slim-buster  AS build
 
 
 # runtime dependencies
 RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
+	apt-get update && apt-get install -y --no-install-recommends \
 		build-essential \
 		libffi-dev \
 	; \
@@ -15,7 +14,7 @@ COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
 
 
-FROM 3.8-slim-bullseye
+FROM python:3.8-slim-buster
 
 ARG RELEASE_TAG_ARG
 ENV RELEASE_TAG=$RELEASE_TAG_ARG
