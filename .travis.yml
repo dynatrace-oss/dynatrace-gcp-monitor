@@ -117,7 +117,7 @@ jobs:
   - stage: github-deploy
     name: GitHub deploy
 #    if: tag =~ /^release-.*
-    language: python
+    language: generic
     python:
       - "3.8"
     cache:
