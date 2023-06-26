@@ -109,7 +109,7 @@ jobs:
   - stage: docker-deploy
     name: Docker Hub deploy
     if: tag =~ /^release-.*
-    language: minimal
+    language: general
     script:
       - ./build/version.sh
       - ./build/docker-deploy.sh
