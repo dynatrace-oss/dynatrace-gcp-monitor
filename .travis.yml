@@ -121,6 +121,7 @@ jobs:
     cache:
       directories:
         - "$HOME/.wgetcache"
+    install: false
     before_deploy:
       - ./build/version.sh
       - ./build/get_ext_tools.sh
