@@ -116,7 +116,7 @@ jobs:
     env: PUSH=true
   - stage: github-deploy
     name: GitHub deploy
-#    if: tag =~ /^release-.*
+    if: tag =~ /^release-.*
     language: generic
     python:
       - "3.8"
