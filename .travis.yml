@@ -127,12 +127,13 @@ jobs:
       - ./build/get_ext_tools.sh
       - ./build/helm-package.sh
       - ./build/function-package.sh
-#      - apt-get update -qy
-#      - apt-get install -y ruby-dev
+      - apt-get update -qy
+      - apt-get install -y ruby-dev
       - gem install dpl-releases -v 1.10.17.travis.6637.6
-#      - gem install dpl
-#      - gem install faraday -v 1.8.0
+      - gem install dpl
+      - gem install faraday -v 1.8.0
 #      gem install dpl --pre
+    install: skip
     deploy:
       provider: releases
       file_glob: true
