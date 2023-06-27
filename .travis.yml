@@ -39,7 +39,7 @@ jobs:
   include:
   - stage: shellcheck
     name: CheckStyle
-    language: minimal
+    language: generic
     script: |
       status=0
       for script in $(find . -iname "*.sh"); 
@@ -127,6 +127,7 @@ jobs:
       - ./build/get_ext_tools.sh
       - ./build/helm-package.sh
       - ./build/function-package.sh
+      - gem install dpl --pre
     deploy:
       provider: releases
       file_glob: true
