@@ -117,6 +117,7 @@ jobs:
     env: PUSH=true
   - stage: github-deploy
     name: GitHub deploy
+    sudo: required
 #    if: tag =~ /^release-.*
     language: generic
     cache:
