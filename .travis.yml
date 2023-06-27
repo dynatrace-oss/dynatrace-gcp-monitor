@@ -1,7 +1,6 @@
 os: linux
 dist: jammy
 if: fork = false
-group: edge
 language: generic
 
 notifications:
@@ -123,7 +122,6 @@ jobs:
     cache:
       directories:
         - "$HOME/.wgetcache"
-    install: skip
     before_deploy:
       - ./build/version.sh
       - ./build/get_ext_tools.sh
@@ -135,7 +133,6 @@ jobs:
       api_key: $GITHUB_RELEASE_API_KEY
       file: "./artefacts/*"
       skip_cleanup: true
-      edge: true
       on:
         tags: true
   - stage: gcp-install-release
