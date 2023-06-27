@@ -1,6 +1,7 @@
 os: linux
 dist: jammy
 if: fork = false
+group: edge
 language: generic
 
 notifications:
@@ -134,6 +135,7 @@ jobs:
       api_key: $GITHUB_RELEASE_API_KEY
       file: "./artefacts/*"
       skip_cleanup: true
+      edge: true
       on:
         tags: true
   - stage: gcp-install-release
