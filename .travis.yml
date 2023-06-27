@@ -1,7 +1,7 @@
 os: linux
 dist: jammy
 if: fork = false
-"language": generic
+language: generic
 
 notifications:
   email:
