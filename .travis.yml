@@ -1,6 +1,7 @@
 os: linux
 dist: jammy
 if: fork = false
+"language": generic
 
 notifications:
   email:
@@ -109,7 +110,7 @@ jobs:
   - stage: docker-deploy
     name: Docker Hub deploy
     if: tag =~ /^release-.*
-    language: general
+    language: generic
     script:
       - ./build/version.sh
       - ./build/docker-deploy.sh
