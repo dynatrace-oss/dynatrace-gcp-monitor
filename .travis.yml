@@ -1,5 +1,12 @@
 os: linux
-dist: jammy
+dist: focal
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable'
+    packages:
+    - Docker
+    - docker-compose
 if: fork = false
 language: generic
 
@@ -130,11 +137,11 @@ jobs:
       - ./build/function-package.sh
 
 #      gem install dpl --pre
-    install:
-      - sudo apt-get update -qy
-      - sudo apt-get install -y ruby-dev
-      - gem install dpl-releases -v 1.10.17.travis.6637.6
-      - gem install faraday -v 2.7.7
+#    install:
+#      - sudo apt-get update -qy
+#      - sudo apt-get install -y ruby-dev
+#      - gem install dpl-releases -v 1.10.17.travis.6637.6
+#      - gem install faraday -v 2.7.7
     deploy:
       provider: releases
       file_glob: true
