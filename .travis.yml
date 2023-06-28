@@ -184,7 +184,7 @@ jobs:
     script:
       - ./scripts/perform-deployment-function.sh
   - stage: e2e-helm-deployment-test
-    name: E2E GCP helm deployment test WLAD.
+    name: E2E GCP helm deployment test.
     sudo: required
     language: python
     python:
