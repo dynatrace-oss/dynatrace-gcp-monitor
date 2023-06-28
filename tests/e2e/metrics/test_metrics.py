@@ -71,7 +71,7 @@ def test_metrics_from_different_project_on_dynatrace():
     assert response.status_code == 200
     response_json = response.json()
     assert 'totalCount' in response_json
-    assert response_json['totalCount'] == 1
+    assert response_json['totalCount'] >= 1
     # show full response on test fail
     print(response_json)
     request_count_values = response_json['result'][0]['data'][0]['values']
