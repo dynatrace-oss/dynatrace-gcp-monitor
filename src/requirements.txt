@@ -3,7 +3,7 @@ aiohttp==3.8.4
 aiodns==2.0.0
 mmh3==2.5.1
 PyJWT==2.4.0
-cryptography==41.0.0
+cryptography==41.0.2
 PyYAML==5.4
 # logs
 google-cloud-pubsub==2.4.0
