@@ -123,6 +123,8 @@ metricResources:
     memory: "1536Mi"
     cpu: "1.25"
     ephemeral-storage: "2Gi"
+# metricAutodiscovery if true gcp service metrics will be automaticly discovered and monitored.
+metricAutodiscovery: "true"
 # configuration file for GCP services - uncommented services will be monitored
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax
@@ -338,10 +340,10 @@ gcpServicesYaml: |
     - service: gce_instance
       featureSets:
        - default_metrics
-      #  - agent
-      #  - firewallinsights
-      #  - istio
-      #  - uptime_check
+       - agent
+       - firewallinsights
+       - istio
+       - uptime_check
       vars:
         filter_conditions: ""
     # Google VM Instance VM Flow
