@@ -9,7 +9,7 @@ from lib.metrics import Metric
 
 logging_context = LoggingContext(None)
 projectID="dynatrace-gcp-extension"
-discovered_resource_type="gcs_bucket"
+discovered_resource_type="cloud_function"
 
 extension_to_gcp_identifires = {"Firebase": ["firebasehosting","firebasedatabase"]}
 
@@ -130,7 +130,7 @@ async def enrich_services_autodiscovery(gcp_services_list,gcp_session,token):
     print("Start AutoDiscovery")
 
 
-    bucket_gcp_services =  list(filter(lambda x: "gcs_bucket" in x.name, gcp_services_list[0]))
+    bucket_gcp_services =  list(filter(lambda x: discovered_resource_type in x.name, gcp_services_list[0]))
     existing_metric_list = [metric for service in bucket_gcp_services for metric in service.metrics]
     all_metrics_list = await get_metric_descriptors(gcp_session,token)
 
@@ -144,7 +144,7 @@ async def enrich_services_autodiscovery(gcp_services_list,gcp_session,token):
     print(f"Adding metrics: [{[metric.google_metric for metric in missing_metrics_list]}]")
 
     for service in gcp_services_list[0]:
-            if service.name == "gcs_bucket":
+            if service.name == discovered_resource_type:
                 service.metrics.extend(missing_metrics_list)
     
     
