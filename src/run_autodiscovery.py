@@ -13,7 +13,7 @@ from lib.configuration import config
 
 logging_context = LoggingContext(None)
 projectID="dynatrace-gcp-extension"
-discovered_resource_type="gce_instance"
+discovered_resource_type="cloud_function"
 
 
 
@@ -118,8 +118,8 @@ def type_metrickind_caster(metrickind: str, valuetype: str) -> str:
 def metric_name_parse(metric_name: str,metric_type: str) -> str:
    # . -> _
    # / -> .
-   metric_name = re.replace(r'\.','_',metric_name)
-   metric_name = re.replace(r'/','.',metric_name)
+   metric_name.replace(r'\.','_')
+   metric_name.replace(r'/','.')
    return metric_name
 
 async def init_session():

@@ -340,10 +340,10 @@ gcpServicesYaml: |
     - service: gce_instance
       featureSets:
        - default_metrics
-       - agent
-       - firewallinsights
-       - istio
-       - uptime_check
+      #  - agent
+      #  - firewallinsights
+      #  - istio
+      #  - uptime_check
       vars:
         filter_conditions: ""
     # Google VM Instance VM Flow
