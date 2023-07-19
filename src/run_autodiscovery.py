@@ -23,13 +23,13 @@ class MetricMetadata:
     # IMPORTANT! this object is only for one combination of object/featureSet!
     # If you have 2 featureSets enabled for some service you will have 2 such objects
 
-    displayName: Text
+    display_name: Text
     description: Text
     unit: Text
     tags: List[Text]
     dimensions: List[Dict[Text,Text]]
-    metricProperties: Dict[Text,Any]
-    schemaId: Text
+    metric_properties: Dict[Text,Any]
+    schema_id: Text
     scope: Text
 
 
@@ -47,13 +47,13 @@ class MetricMetadata:
     def to_json(self):
         return json.dumps({
             "scope": self.scope,
-            "schema.Id": self.schemaId,
+            "schema.Id": self.schema_id,
             "value": {
-                "displayName": self.displayName,
+                "displayName": self.display_name,
                 "description": self.description,
                 "unit": self.unit,
                 "tags": self.tags,
-                "metricProperties": self.metricProperties,
+                "metricProperties": self.metric_properties,
                 "dimensions": self.dimensions
             }
         })
@@ -115,12 +115,12 @@ def type_metrickind_caster(metrickind: str, valuetype: str) -> str:
         return ""
 
     
-def name_parse(name: str) -> str:
+def metric_name_parse(metric_name: str,metric_type: str) -> str:
    # . -> _
    # / -> .
-   out = re.sub(r'\.','_',name)
-   fin = re.sub(r'/','.',out)
-   return fin
+   metric_name = re.replace(r'\.','_',metric_name)
+   metric_name = re.replace(r'/','.',metric_name)
+   return metric_name
 
 async def init_session():
     async with init_gcp_client_session() as gcp_session:
@@ -128,7 +128,7 @@ async def init_session():
         if token:
             await get_metric_descriptors(gcp_session,token)
         else:
-            logging_context.log(f'Unable to acquire authorization token.')
+            logging_context.log('Unable to acquire authorization token.')
 
 
 async def _sent_metadata_to_dt(dynatrace_url: Text,dynatrace_access_key, dt_session, metric_metadata_list):
@@ -159,13 +159,11 @@ async def get_metric_descriptors(gcp_session,token):
     url = f"https://monitoring.googleapis.com/v3/projects/{projectID}/metricDescriptors"
     resp = await gcp_session.request('GET', url=url, headers=headers)
     page = await resp.json()
-    #with open('metricDescriptors.json', 'w') as f:
-    #    json.dump(page, f,indent=4)
 
     metric_yaml = [
         {
             "value": x.get("type"),
-            "key":  "cloud.gcp." + name_parse(x.get("type")),
+            "key":  "cloud.gcp." + metric_name_parse(x.get("type"),type_metrickind_caster(x.get("metricKind"),x.get("valueType"))),
             "displayName":  x.get("displayName"),
             "name": x.get("displayName"),
             "description": x.get("description"),
@@ -186,9 +184,11 @@ async def get_metric_descriptors(gcp_session,token):
             "monitored_resources_types": x.get("monitoredResourceTypes",[])
         } for x in page["metricDescriptors"]]
     
-  
+    
 
-    metric_list = [(Metric(**x), x.get("monitored_resources_types"),x) for x in metric_yaml]
+
+
+    metric_list = [(Metric(**x), x.get("monitored_resources_types"),x) for x in metric_yaml if x.get("gcpOptions").get("valueType").upper() != "STRING" ]
     discovered_resource_type_list = list(filter(lambda x: discovered_resource_type in x[1], metric_list))
     return discovered_resource_type_list
 
