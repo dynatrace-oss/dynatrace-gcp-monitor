@@ -2,16 +2,61 @@ import asyncio
 import json
 import os
 import re
+
+from dataclasses import dataclass
 from lib.clientsession_provider import init_gcp_client_session
-from lib.context import LoggingContext
-from lib.credentials import create_token
+from lib.context import LoggingContext, MetricsContext, get_should_require_valid_certificate
+from lib.credentials import create_token, fetch_dynatrace_api_key, fetch_dynatrace_url
 from lib.metrics import Metric
+from typing import List, Text, Any, Dict
+from lib.configuration import config
 
 logging_context = LoggingContext(None)
 projectID="dynatrace-gcp-extension"
-discovered_resource_type="cloud_function"
+discovered_resource_type="gce_instance"
 
-extension_to_gcp_identifires = {"Firebase": ["firebasehosting","firebasedatabase"]}
+
+
+@dataclass(frozen=True)
+class MetricMetadata:
+    """Describes singular GCP service to ingest data from."""
+    # IMPORTANT! this object is only for one combination of object/featureSet!
+    # If you have 2 featureSets enabled for some service you will have 2 such objects
+
+    displayName: Text
+    description: Text
+    unit: Text
+    tags: List[Text]
+    dimensions: List[Dict[Text,Text]]
+    metricProperties: Dict[Text,Any]
+    schemaId: Text
+    scope: Text
+
+
+    def __init__(self, **kwargs):
+        object.__setattr__(self, "displayName", kwargs.get("displayName", ""))
+        object.__setattr__(self, "description", kwargs.get("description", ""))
+        object.__setattr__(self, "unit", kwargs.get("unit", "Unspecified"))
+        object.__setattr__(self, "tags", kwargs.get("tags", []))
+        object.__setattr__(self, "dimensions", kwargs.get("dimensions", []))
+        object.__setattr__(self, "metricProperties", kwargs.get("metricProperties", []))
+
+        object.__setattr__(self, "schemaId", kwargs.get("schemaId","builtin:metric.metadata"))
+        object.__setattr__(self,"scope","metric-"+kwargs.get("key", "").replace(":", "."))
+
+    def to_json(self):
+        return json.dumps({
+            "scope": self.scope,
+            "schema.Id": self.schemaId,
+            "value": {
+                "displayName": self.displayName,
+                "description": self.description,
+                "unit": self.unit,
+                "tags": self.tags,
+                "metricProperties": self.metricProperties,
+                "dimensions": self.dimensions
+            }
+        })
 
 
 def unit_caster(unit: str) -> str:
@@ -86,6 +131,27 @@ async def init_session():
             logging_context.log(f'Unable to acquire authorization token.')
 
 
+async def _sent_metadata_to_dt(dynatrace_url: Text,dynatrace_access_key, dt_session, metric_metadata_list):
+    data_input = "\n".join([metadata.to_json() for metadata in metric_metadata_list])
+
+    dt_url = f"{dynatrace_url.rstrip('/')}/api/v2/settings/objects"
+    response = await dt_session.post(
+        url=dt_url,
+        headers={
+            "Authorization": f"Api-Token {dynatrace_access_key}",
+            "Content-Type": "application/json"
+        },
+        data=data_input,
+        verify_ssl=get_should_require_valid_certificate()
+    )
+
+    if response.status != 200:
+        print("Error During sending metadata meterics")
+        return False
+    else:
+        return True
+
+
 async def get_metric_descriptors(gcp_session,token):
     headers = {
     "Accept": "application/json",
@@ -93,8 +159,8 @@ async def get_metric_descriptors(gcp_session,token):
     url = f"https://monitoring.googleapis.com/v3/projects/{projectID}/metricDescriptors"
     resp = await gcp_session.request('GET', url=url, headers=headers)
     page = await resp.json()
-    with open('metricDescriptors.json', 'w') as f:
-        json.dump(page, f,indent=4)
+    #with open('metricDescriptors.json', 'w') as f:
+    #    json.dump(page, f,indent=4)
 
     metric_yaml = [
         {
@@ -102,6 +168,7 @@ async def get_metric_descriptors(gcp_session,token):
             "key":  "cloud.gcp." + name_parse(x.get("type")),
             "displayName":  x.get("displayName"),
             "name": x.get("displayName"),
+            "description": x.get("description"),
             "type": type_metrickind_caster(x.get("metricKind"),x.get("valueType")),
             "gcpOptions":
                 {
@@ -121,12 +188,12 @@ async def get_metric_descriptors(gcp_session,token):
     
   
 
-    metric_list = [(Metric(**x), x.get("monitored_resources_types")) for x in metric_yaml]
+    metric_list = [(Metric(**x), x.get("monitored_resources_types"),x) for x in metric_yaml]
     discovered_resource_type_list = list(filter(lambda x: discovered_resource_type in x[1], metric_list))
     return discovered_resource_type_list
 
 
-async def enrich_services_autodiscovery(gcp_services_list,gcp_session,token):
+async def enrich_services_autodiscovery(gcp_services_list,gcp_session,dt_session,token):
     print("Start AutoDiscovery")
 
 
@@ -135,18 +202,26 @@ async def enrich_services_autodiscovery(gcp_services_list,gcp_session,token):
     all_metrics_list = await get_metric_descriptors(gcp_session,token)
 
 
-    missing_metrics_list = [metric[0] for metric in all_metrics_list if metric[0].google_metric not in [existing_metric.google_metric for existing_metric in existing_metric_list]]
+    missing_metrics_list = [metric for metric in all_metrics_list if metric[0].google_metric not in [existing_metric.google_metric for existing_metric in existing_metric_list]]
 
 
     print(f"In Extension we have this amount of metrics: {len(existing_metric_list)}" )
     print(f"Resource type: {discovered_resource_type} have this amount of metrics: {len(all_metrics_list)}" )
     print(f"Adding {len(missing_metrics_list)} metrics")
-    print(f"Adding metrics: [{[metric.google_metric for metric in missing_metrics_list]}]")
+    print(f"Adding metrics: [{[metric[0].google_metric for metric in missing_metrics_list]}]")
 
     for service in gcp_services_list[0]:
             if service.name == discovered_resource_type:
-                service.metrics.extend(missing_metrics_list)
+                service.metrics.extend([metric[0] for metric in missing_metrics_list])
     
+
+    print(f"Adding Metadata to metrics")
+    dynatrace_url = await fetch_dynatrace_url(gcp_session, config.project_id(), token),
+    dynatrace_access_key=await fetch_dynatrace_api_key(gcp_session, config.project_id(), token),
+
+    metric_metadata_list = [MetricMetadata(**(x[2])) for x in missing_metrics_list]
+    #Metadata Metrics
+    #ret = await _sent_metadata_to_dt(dynatrace_url[0],dynatrace_access_key,dt_session,metric_metadata_list)
     
     return gcp_services_list
 

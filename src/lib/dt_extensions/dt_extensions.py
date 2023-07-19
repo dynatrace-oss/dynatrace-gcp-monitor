@@ -27,7 +27,7 @@ async def prepare_services_config_for_next_polling(current_services: List[GCPSer
                 raise Exception('Extension fetch failed')
             
             if config.metric_autodiscovery():
-                extensions_fetch_result = await enrich_services_autodiscovery(extensions_fetch_result,gcp_session,token)
+                extensions_fetch_result = await enrich_services_autodiscovery(extensions_fetch_result,gcp_session,dt_session,token)
             
             return extensions_fetch_result.services
     except Exception as e:
