@@ -1,5 +1,5 @@
 # metrics
-aiohttp==3.8.4
+aiohttp==3.8.5
 aiodns==2.0.0
 mmh3==2.5.1
 PyJWT==2.4.0
