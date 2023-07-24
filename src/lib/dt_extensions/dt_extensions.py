@@ -9,8 +9,6 @@ from lib.credentials import fetch_dynatrace_url, fetch_dynatrace_api_key, create
 from lib.dt_extensions.extensions_fetcher import ExtensionsFetchResult, ExtensionsFetcher
 from lib.metrics import GCPService
 
-
-
 logging_context = LoggingContext("EXTENSIONS")
 
 
@@ -24,7 +22,7 @@ async def prepare_services_config_for_next_polling(current_services: List[GCPSer
             extensions_fetch_result = await extensions_fetch(gcp_session, dt_session, token)
             if not extensions_fetch_result:
                 raise Exception('Extension fetch failed')
-            
+
             return extensions_fetch_result.services
     except Exception as e:
         logging_context.error(f'Failed to prepare new services configuration from extensions, will reuse previous configuration; {str(e)}')
