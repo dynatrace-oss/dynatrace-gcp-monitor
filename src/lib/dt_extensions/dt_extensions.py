@@ -10,7 +10,6 @@ from lib.dt_extensions.extensions_fetcher import ExtensionsFetchResult, Extensio
 from lib.metrics import GCPService
 
 
-from run_autodiscovery import *
 
 logging_context = LoggingContext("EXTENSIONS")
 
@@ -25,9 +24,6 @@ async def prepare_services_config_for_next_polling(current_services: List[GCPSer
             extensions_fetch_result = await extensions_fetch(gcp_session, dt_session, token)
             if not extensions_fetch_result:
                 raise Exception('Extension fetch failed')
-            
-            if config.metric_autodiscovery():
-                extensions_fetch_result = await enrich_services_autodiscovery(extensions_fetch_result,gcp_session,dt_session,token)
             
             return extensions_fetch_result.services
     except Exception as e:
