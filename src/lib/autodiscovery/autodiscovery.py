@@ -1,135 +1,26 @@
 import os
-import re
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from typing import List
 
 from aiohttp import ClientSession
-from lib.clientsession_provider import init_gcp_client_session
 
+from lib.autodiscovery.gcp_metrics_descriptor import GCPMetricDescriptor
+from lib.clientsession_provider import init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext
 from lib.credentials import create_token
 from lib.metrics import GCPService, Metric
 
-logging_context = LoggingContext(None)
+logging_context = LoggingContext("AUTODISCOVERY")
 
 
-discovered_resource_type = os.environ.get("AUTODISCOVERY_RESOURCE_TYPE", "cloud_function")
+discovered_resource_type = os.environ.get("AUTODISCOVERY_RESOURCE_TYPE", "gce_instance")
 
 
-GCP_UNIT_CONVERSION_MAP = {
-    "1": "Count",
-    "count": "Count",
-    "Count": "Count",
-    "{operation}": "Count",
-    "{packet}": "Count",
-    "{packets}": "Count",
-    "{request}": "Count",
-    "{port}": "Count",
-    "{connection}": "Count",
-    "{devices}": "Count",
-    "{errors}": "Count",
-    "{cpu}": "Count",
-    "{query}": "Count",
-    "{inode}": "Count",
-    "s": "Second",
-    "s{idle}": "Second",
-    "sec": "Second",
-    "By": "Byte",
-    "Byte": "Byte",
-    "bytes": "Byte",
-    "By/s": "BytePerSecond",
-    "kBy": "KiloBytePerSecond",
-    "GBy.s": "GigaBytePerSecond",
-    "GiBy": "GigaByte",
-    "GBy": "GigaByte",
-    "MiBy": "MegaByte",
-    "ns": "NanoSecond",
-    "us": "MicroSecond",
-    "usec": "MicroSecond",
-    "ms": "MilliSecond",
-    "milliseconds": "MilliSecond",
-    "us{CPU}": "MicroSecond",
-    "10^2.%": "Percent",
-    "%": "Percent",
-    "percent": "Percent",
-    "1/s": "PerSecond",
-    "frames/seconds": "PerSecond",
-    "s{CPU}": "Second",
-    "s{uptime}": "Second",
-    "{dBm}": "DecibelMilliWatt",
-}
-
-
-@dataclass()
-class GCPMetricDescriptor:
-    """Represents a Google Cloud Platform (GCP) Metric Descriptor."""
-
-    @dataclass()
-    class Options:
-        ingestDelay: int
-        samplePeriod: int
-        valueType: str
-        metricKind: str
-        unit: str
-
-    @dataclass()
-    class Dimension:
-        key: str
-        value: str
-
-    value: str
-    key: str
-    display_name: str
-    name: str
-    description: str
-    type: str
-    gcpOptions: Options
-    dimensions: List[Dimension]
-    monitored_resources_types: str
-
-    @staticmethod
-    def _cast_metric_key_to_dt_format(metric_name: str) -> str:
-        metric_name = re.sub(r"\.", "_", metric_name)
-        metric_name = re.sub(r"/", ".", metric_name)
-        return metric_name
-
-    @staticmethod
-    def _cast_metric_kind_to_dt_format(metric_kind: str, value_type: str) -> str:
-        if metric_kind == "GAUGE" or (metric_kind == "DELTA" and value_type == "DISTRIBUTION"):
-            return "gauge"
-        elif metric_kind == "DELTA" and value_type != "DISTRIBUTION":
-            return "count,delta"
-        return ""
-
-    def __init__(self, **kwargs):
-        self.value = kwargs.get("type", "")
-        self.key = "cloud.gcp." + self._cast_metric_key_to_dt_format(kwargs.get("type", ""))
-        self.display_name = kwargs.get("displayName", "")
-        self.name = kwargs.get("displayName", "")
-        self.description = kwargs.get("description", "")
-        self.type = self._cast_metric_kind_to_dt_format(
-            kwargs.get("metricKind", ""), kwargs.get("valueType", "")
-        )
-        self.gcpOptions = GCPMetricDescriptor.Options(
-            ingestDelay=int(kwargs.get("metadata", {}).get("ingestDelay", "60s")[:-1]),
-            samplePeriod=int(kwargs.get("metadata", {}).get("samplePeriod", "60s")[:-1]),
-            valueType=kwargs.get("valueType", ""),
-            metricKind=kwargs.get("metricKind", ""),
-            unit=GCP_UNIT_CONVERSION_MAP.get(kwargs.get("unit", ""), "Unspecified"),
-        )
-        self.dimensions = [
-            GCPMetricDescriptor.Dimension(
-                key=dimension.get("key"),
-                value="label:metric.labels." + dimension.get("key"),
-            )
-            for dimension in kwargs.get("labels") or []
-        ]
-        self.monitored_resources_types = kwargs.get("monitoredResourceTypes", [])
-
-
-async def get_metric_descriptors(gcp_session, token) -> List[GCPMetricDescriptor]:
+async def get_metric_descriptors(
+    gcp_session: ClientSession, token: str
+) -> List[GCPMetricDescriptor]:
     project_id = config.project_id()
     headers = {"Accept": "application/json", "Authorization": f"Bearer {token}"}
     url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
@@ -179,7 +70,6 @@ async def enrich_services_autodiscovery(
     for descriptor in discovered_metric_descriptors:
         if descriptor.value not in existing_metric_names:
             missing_metrics_list.append(Metric(**asdict(descriptor)))
-    print(missing_metrics_list)
     logging_context.log(f"In Extension we have this amount of metrics: {len(existing_metric_list)}")
     logging_context.log(
         f"Resource type: {discovered_resource_type} have this amount of metrics: {len(discovered_metric_descriptors)}"
@@ -195,7 +85,7 @@ async def enrich_services_autodiscovery(
 
     end_time = time.time()
 
-    print(f"Elapsed time in autodiscovery: {end_time-start_time} s")
+    logging_context.log(f"Elapsed time in autodiscovery: {end_time-start_time} s")
     return gcp_services_list
 
 
