@@ -24,13 +24,23 @@ async def get_metric_descriptors(
     project_id = config.project_id()
     headers = {"Accept": "application/json", "Authorization": f"Bearer {token}"}
     url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
+    params = {}
 
-    response = await gcp_session.request("GET", url=url, headers=headers)
+    response = await gcp_session.request("GET", url=url, headers=headers, params=params)
     response = await response.json()
 
-    discovered_metrics_descriptors = [
-        GCPMetricDescriptor(**descriptor) for descriptor in response["metricDescriptors"]
-    ]
+    discovered_metrics_descriptors = []
+
+    while True:
+        discovered_metrics_descriptors.extend(
+            [GCPMetricDescriptor(**descriptor) for descriptor in response.get("metricDescriptors",[])]
+        )
+
+        page_token = response.get("nextPageToken", "")
+        params["pageToken"] = page_token
+        if page_token == "":
+            break
+
     discovered_metrics_descriptors = list(
         filter(
             lambda descriptor: descriptor.gcpOptions.valueType.upper() != "STRING",
@@ -46,7 +56,7 @@ async def get_metric_descriptors(
     return discovered_metrics_descriptors
 
 
-async def enrich_services_autodiscovery(
+async def run_autodiscovery(
     gcp_services_list: List[GCPService], gcp_session: ClientSession, token: str
 ):
     start_time = time.time()
@@ -70,9 +80,9 @@ async def enrich_services_autodiscovery(
     for descriptor in discovered_metric_descriptors:
         if descriptor.value not in existing_metric_names:
             missing_metrics_list.append(Metric(**asdict(descriptor)))
-    logging_context.log(f"In Extension we have this amount of metrics: {len(existing_metric_list)}")
+    logging_context.log(f"In Extension have: {len(existing_metric_list)} metrics")
     logging_context.log(
-        f"Resource type: {discovered_resource_type} have this amount of metrics: {len(discovered_metric_descriptors)}"
+        f"Discovered Resource type : {discovered_resource_type} have metrics: {len(discovered_metric_descriptors)} metrics"
     )
     logging_context.log(f"Adding {len(missing_metrics_list)} metrics")
     logging_context.log(
@@ -89,7 +99,7 @@ async def enrich_services_autodiscovery(
     return gcp_services_list
 
 
-async def prepare_services_autodiscovery_polling(
+async def enrich_services_with_autodiscovery_metrics(
     current_services: List[GCPService],
 ) -> List[GCPService]:
     try:
@@ -98,7 +108,7 @@ async def prepare_services_autodiscovery_polling(
             if not token:
                 raise Exception("Failed to fetch token")
 
-            autodiscovery_fetch_result = await enrich_services_autodiscovery(
+            autodiscovery_fetch_result = await run_autodiscovery(
                 current_services, gcp_session, token
             )
 

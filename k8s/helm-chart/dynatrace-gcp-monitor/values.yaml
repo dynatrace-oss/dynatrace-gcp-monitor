@@ -123,7 +123,7 @@ metricResources:
     memory: "1536Mi"
     cpu: "1.25"
     ephemeral-storage: "2Gi"
-# metricAutodiscovery if true gcp service metrics will be automaticly discovered and monitored.
+# metricAutodiscovery: If true additional metrics not listed in extensions will be automatically detected and monitored
 metricAutodiscovery: "true"
 # configuration file for GCP services - uncommented services will be monitored
 gcpServicesYaml: |
