@@ -41,6 +41,10 @@ class IngestLine:
     value: Any
     timestamp: int
     dimension_values: List[DimensionValue]
+    displayName: str = ""
+    description: str = ""
+    unit: str = ""
+    include_metadata: bool = False
 
     def dimensions_string(self) -> str:
         dimension_values = [f'{dimension_value.name[0:ALLOWED_METRIC_DIMENSION_KEY_LENGTH]}="{dimension_value.value[0:ALLOWED_METRIC_DIMENSION_VALUE_LENGTH]}"'
@@ -51,11 +55,15 @@ class IngestLine:
         if dimensions:
             dimensions = "," + dimensions
         return dimensions
-
+    
     def to_string(self) -> str:
         separator = ',' if self.metric_type == 'gauge' else '='
         metric_type = self.metric_type if self.metric_type != 'count' else 'count,delta'
-        return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}"
+        metadata = ""
+        if self.include_metadata:
+            metric_t = self.metric_type if  self.metric_type != 'count,delta' else 'count'
+            metadata = f"\n#{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]} {metric_t} dt.meta.displayname=\"{self.displayName}\",dt.meta.description=\"{self.description}\",dt.meta.unit=\"{self.unit}\""
+        return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}{metadata}"
 
 
 @dataclass(frozen=True)
@@ -91,6 +99,8 @@ class Metric:
     sample_period_seconds: timedelta
     value_type: str
     metric_type: str
+    autodiscovered: bool
+    description: str
 
     def __init__(self, **kwargs):
         gcp_options = kwargs.get("gcpOptions", {})
@@ -102,6 +112,8 @@ class Metric:
         object.__setattr__(self, "dynatrace_metric_type", kwargs.get("type", ""))
         object.__setattr__(self, "unit", kwargs.get("gcpOptions", {}).get("unit", None))
         object.__setattr__(self, "value_type", gcp_options.get("valueType", ""))
+        object.__setattr__(self, "autodiscovered", kwargs.get("autodiscovered", False))
+        object.__setattr__(self, "description", kwargs.get("description", ""))
 
         object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 

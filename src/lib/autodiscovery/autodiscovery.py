@@ -33,7 +33,10 @@ async def get_metric_descriptors(
 
     while True:
         discovered_metrics_descriptors.extend(
-            [GCPMetricDescriptor(**descriptor) for descriptor in response.get("metricDescriptors",[])]
+            [
+                GCPMetricDescriptor(**descriptor)
+                for descriptor in response.get("metricDescriptors", [])
+            ]
         )
 
         page_token = response.get("nextPageToken", "")
@@ -79,7 +82,11 @@ async def run_autodiscovery(
 
     for descriptor in discovered_metric_descriptors:
         if descriptor.value not in existing_metric_names:
-            missing_metrics_list.append(Metric(**asdict(descriptor)))
+            metric_fields = asdict(descriptor)
+            metric_fields["autodiscovered"] = True
+            autodiscovered_metric = Metric(**(metric_fields))
+            missing_metrics_list.append(autodiscovered_metric)
+
     logging_context.log(f"In Extension have: {len(existing_metric_list)} metrics")
     logging_context.log(
         f"Discovered Resource type : {discovered_resource_type} have metrics: {len(discovered_metric_descriptors)} metrics"
