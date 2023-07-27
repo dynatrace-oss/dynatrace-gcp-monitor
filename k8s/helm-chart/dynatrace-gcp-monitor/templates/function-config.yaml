@@ -32,6 +32,7 @@ data:
   PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
   SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
   QUERY_INTERVAL_MIN: {{ .Values.queryInterval | quote }}
+  METRIC_AUTODISCOVERY: {{ .Values.metricAutodiscovery | quote }}
   GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
   {{- end }}
   {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}

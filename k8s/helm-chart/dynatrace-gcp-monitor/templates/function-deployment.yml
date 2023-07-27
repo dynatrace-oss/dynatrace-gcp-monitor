@@ -71,6 +71,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: PRINT_METRIC_INGEST_INPUT
+        - name: METRIC_AUTODISCOVERY
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: METRIC_AUTODISCOVERY
         - name: GCP_PROJECT
           valueFrom:
             configMapKeyRef:
