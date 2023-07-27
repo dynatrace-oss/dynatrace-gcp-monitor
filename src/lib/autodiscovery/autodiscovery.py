@@ -8,8 +8,9 @@ from aiohttp import ClientSession
 from lib.autodiscovery.gcp_metrics_descriptor import GCPMetricDescriptor
 from lib.clientsession_provider import init_gcp_client_session
 from lib.configuration import config
-from lib.context import LoggingContext
-from lib.credentials import create_token
+from lib.context import LoggingContext, MetricsContext, get_query_interval_minutes
+from lib.credentials import create_token, fetch_dynatrace_api_key, fetch_dynatrace_url, get_all_accessible_projects, get_project_id_from_environment
+from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metrics import GCPService, Metric
 
 logging_context = LoggingContext("AUTODISCOVERY")
@@ -19,9 +20,46 @@ discovered_resource_type = os.environ.get("AUTODISCOVERY_RESOURCE_TYPE", "gce_in
 
 
 async def get_metric_descriptors(
-    gcp_session: ClientSession, token: str
+    gcp_session: ClientSession, dt_session: ClientSession, token: str
 ) -> List[GCPMetricDescriptor]:
     project_id = config.project_id()
+
+    project_id_owner = get_project_id_from_environment()
+
+    dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+    dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+    
+    query_interval_min = get_query_interval_minutes()
+
+    context = MetricsContext(
+        gcp_session=gcp_session,
+        dt_session=dt_session,
+        project_id_owner=project_id_owner,
+        token=token,
+        execution_time=datetime.utcnow(),
+        execution_interval_seconds=60 * query_interval_min,
+        dynatrace_api_key=dynatrace_api_key,
+        dynatrace_url=dynatrace_url,
+        print_metric_ingest_input=config.print_metric_ingest_input(),
+        self_monitoring_enabled=config.self_monitoring_enabled(),
+        scheduled_execution_id=context.scheduled_execution_id
+    )
+
+    projects_ids = await get_all_accessible_projects(context, gcp_session, token)
+
+    disabled_projects = []
+    disabled_apis_by_project_id = {}
+
+    # Using metrics scope feature, checking disabled apis in every project is not needed
+    if not config.scoping_project_support_enabled():
+        disabled_projects, disabled_apis_by_project_id = \
+            await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
+
+    if disabled_projects:
+        for disabled_project in disabled_projects:
+                projects_ids.remove(disabled_project)
+
+
     headers = {"Accept": "application/json", "Authorization": f"Bearer {token}"}
     url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
     params = {}
