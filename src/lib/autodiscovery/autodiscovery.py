@@ -80,9 +80,9 @@ async def run_autodiscovery(
     for descriptor in discovered_metric_descriptors:
         if descriptor.value not in existing_metric_names:
             missing_metrics_list.append(Metric(**asdict(descriptor)))
-    logging_context.log(f"In Extension have: {len(existing_metric_list)} metrics")
+    logging_context.log(f"In the extension there are {len(existing_metric_list)} metrics")
     logging_context.log(
-        f"Discovered Resource type : {discovered_resource_type} have metrics: {len(discovered_metric_descriptors)} metrics"
+        f"Discovered Resource type {discovered_resource_type} has {len(discovered_metric_descriptors)} metrics"
     )
     logging_context.log(f"Adding {len(missing_metrics_list)} metrics")
     logging_context.log(
