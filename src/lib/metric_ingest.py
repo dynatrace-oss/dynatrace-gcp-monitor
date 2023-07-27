@@ -352,10 +352,10 @@ def convert_point_to_ingest_line(
             value=value,
             timestamp=timestamp,
             dimension_values=dimensions.copy(),
-            displayName=metric.name,
-            unit=metric.unit,
+            meta_display_name=metric.name,
+            meta_unit=metric.unit,
             include_metadata=metric.autodiscovered,
-            description=metric.description
+            meta_description=metric.description
 
         )
     return line

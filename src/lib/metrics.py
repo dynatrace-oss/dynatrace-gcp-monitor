@@ -41,9 +41,9 @@ class IngestLine:
     value: Any
     timestamp: int
     dimension_values: List[DimensionValue]
-    displayName: str = ""
-    description: str = ""
-    unit: str = ""
+    meta_display_name: str = ""
+    meta_description: str = ""
+    meta_unit: str = ""
     include_metadata: bool = False
 
     def dimensions_string(self) -> str:
@@ -59,10 +59,12 @@ class IngestLine:
     def to_string(self) -> str:
         separator = ',' if self.metric_type == 'gauge' else '='
         metric_type = self.metric_type if self.metric_type != 'count' else 'count,delta'
+
         metadata = ""
         if self.include_metadata:
-            metric_t = self.metric_type if  self.metric_type != 'count,delta' else 'count'
-            metadata = f"\n#{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]} {metric_t} dt.meta.displayname=\"{self.displayName}\",dt.meta.description=\"{self.description}\",dt.meta.unit=\"{self.unit}\""
+            metric_metadata_type = "count" if "count" in metric_type else metric_type
+            
+            metadata = f"\n#{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]} {metric_metadata_type} dt.meta.displayname=\"{self.meta_display_name}\",dt.meta.description=\"{self.meta_description}\",dt.meta.unit=\"{self.meta_unit}\""
         return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}{metadata}"
 
 
