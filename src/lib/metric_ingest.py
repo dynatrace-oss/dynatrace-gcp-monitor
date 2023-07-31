@@ -351,12 +351,7 @@ def convert_point_to_ingest_line(
             metric_type=metric.dynatrace_metric_type,
             value=value,
             timestamp=timestamp,
-            dimension_values=dimensions.copy(),
-            meta_display_name=metric.name,
-            meta_unit=metric.unit,
-            include_metadata=metric.autodiscovered,
-            meta_description=metric.description
-
+            dimension_values=dimensions.copy()
         )
     return line
 
