@@ -4,6 +4,7 @@ import time
 from dataclasses import asdict
 from typing import List
 
+
 from aiohttp import ClientResponse, ClientSession
 
 from lib.autodiscovery.gcp_metrics_descriptor import GCPMetricDescriptor
@@ -78,7 +79,7 @@ async def send_metadata(missing_metrics_list: List[Metric], gcp_session: ClientS
             )
 
 
-#
+
 async def get_metric_descriptors(
     gcp_session: ClientSession, token: str
 ) -> List[GCPMetricDescriptor]:
@@ -148,9 +149,9 @@ async def run_autodiscovery(
             autodiscovered_metric = Metric(**(metric_fields))
             missing_metrics_list.append(autodiscovered_metric)
 
-    logging_context.log(f"In Extension have: {len(existing_metric_list)} metrics")
+    logging_context.log(f"In the extension there are {len(existing_metric_list)} metrics")
     logging_context.log(
-        f"Discovered Resource type : {discovered_resource_type} have metrics: {len(discovered_metric_descriptors)} metrics"
+        f"Discovered Resource type {discovered_resource_type} has {len(discovered_metric_descriptors)} metrics"
     )
     logging_context.log(f"Adding {len(missing_metrics_list)} metrics")
     logging_context.log(
@@ -163,6 +164,7 @@ async def run_autodiscovery(
 
     logging_context.log(f"Adding Metadata")
     await send_metadata(missing_metrics_list, gcp_session, token)
+
     end_time = time.time()
 
     logging_context.log(f"Elapsed time in autodiscovery: {end_time-start_time} s")
