@@ -4,7 +4,6 @@ import time
 from dataclasses import asdict
 from typing import List
 
-
 from aiohttp import ClientResponse, ClientSession
 
 from lib.autodiscovery.gcp_metrics_descriptor import GCPMetricDescriptor
@@ -20,64 +19,59 @@ logging_context = LoggingContext("AUTODISCOVERY")
 discovered_resource_type = os.environ.get("AUTODISCOVERY_RESOURCE_TYPE", "gce_instance")
 
 
+async def _create_metric_metadata(metric):
+    metric_name = metric.dynatrace_name[:250]
+    display_name = "[Autodiscovered] " + (metric.name[:280] if metric.name else metric_name)
+    description = (
+        metric.description[:65535] if metric.description else "Unspecified Metric Description"
+    )
+    unit = metric.unit
+
+    return {
+        "scope": f"metric-{metric_name}",
+        "schemaId": "builtin:metric.metadata",
+        "value": {
+            "displayName": display_name,
+            "description": description,
+            "unit": unit,
+            "dimensions": [],
+            "tags": [],
+            "sourceEntityType": "cloud:gcp:gce_instance",
+        },
+    }
+
+
 async def send_metadata(missing_metrics_list: List[Metric], gcp_session: ClientSession, token: str):
-    to_send = []
+    metadata_list = [await _create_metric_metadata(metric) for metric in missing_metrics_list]
 
-    for metric in missing_metrics_list:
-        metric_name = metric.dynatrace_name[0:250]
-        display_name = (
-            "[Autodiscovered] " + metric.name[0:280] if len(metric.name) >= 1 else metric_name
-        )
-        description = (
-            metric.description[0:65535]
-            if len(metric.description) >= 1
-            else "Unspecified Metric Description"
-        )
-        unit = metric.unit
-        to_send.append(
-            {
-                "scope": f"metric-{metric_name}",
-                "schemaId": "builtin:metric.metadata",
-                "value": {
-                    "displayName": f"{display_name}",
-                    "description": f"{description}",
-                    "unit": f"{unit}",
-                    "dimensions": [],
-                    "tags": [],
-                    "sourceEntityType": "cloud:gcp:gce_instance",
-                },
-            }
-        )
-
-    dynatrace_api_key = (await fetch_dynatrace_api_key(gcp_session, config.project_id(), token),)
-    dynatrace_url = (await fetch_dynatrace_url(gcp_session, config.project_id(), token),)
-    dt_url = f"{dynatrace_url[0].rstrip('/')}/api/v2/settings/objects"
+    dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session, config.project_id(), token)
+    dynatrace_url = await fetch_dynatrace_url(gcp_session, config.project_id(), token)
+    dt_url = f"{dynatrace_url.rstrip('/')}/api/v2/settings/objects"
 
     async with init_dt_client_session() as dt_session:
         response = await dt_session.post(
             url=dt_url,
             headers={
-                "Authorization": f"Api-Token {dynatrace_api_key[0]}",
+                "Authorization": f"Api-Token {dynatrace_api_key}",
                 "Content-Type": "application/json; charset=utf-8",
                 "Accept": "application/json; charset=utf-8",
             },
-            data=json.dumps(to_send),
+            data=json.dumps(metadata_list),
         )
 
         if response.status != 200:
-            content_response = await response.content.read(n=-1)
-            data_string = content_response.decode("utf-8")
-            rrr = json.loads(data_string)
-            response_body = data_string
+            json_response = await response.json()
             if response.status == 207:
-                response_body = []
-                for x in rrr:
-                    if x.get("code", 200) != 200:
-                        response_body.append(x)
+                response_body = [
+                    line_response
+                    for line_response in json_response
+                    if line_response.get("code", 200) != 200
+                ]
+            else:
+                response_body = json_response
             raise Exception(
-                f"Failed to send custom metic metadata to Dynatrace. Response code: {response.status}. Response body: {response_body}"
+                f"Failed to send custom metric metadata to Dynatrace. Response code: {response.status}. Response body: {response_body}"
             )
-
 
 
 async def get_metric_descriptors(
