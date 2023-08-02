@@ -84,15 +84,29 @@ class GCPMetricDescriptor:
             return "count,delta"
         return ""
 
+    @staticmethod
+    def _get_key_metric_sufix(metric_name: str, data_type: str) -> str:
+        if (
+            metric_name.endswith("_count") or metric_name.endswith(".count")
+        ) and data_type == "gauge":
+            return ".gauge"
+
+        return ""
+
     def __init__(self, **kwargs):
         self.value = kwargs.get("type", "")
-        self.key = "cloud.gcp." + self._cast_metric_key_to_dt_format(kwargs.get("type", ""))
-        self.display_name = kwargs.get("displayName", "")
-        self.name = kwargs.get("displayName", "")
-        self.description = kwargs.get("description", "")
         self.type = self._cast_metric_kind_to_dt_format(
             kwargs.get("metricKind", ""), kwargs.get("valueType", "")
         )
+        self.key = (
+            "cloud.gcp."
+            + self._cast_metric_key_to_dt_format(kwargs.get("type", ""))
+            + self._get_key_metric_sufix(kwargs.get("type", ""), self.type)
+        )
+        self.display_name = kwargs.get("displayName", "")
+        self.name = kwargs.get("displayName", "")
+        self.description = kwargs.get("description", "")
+
         self.gcpOptions = GCPMetricDescriptor.Options(
             ingestDelay=int(kwargs.get("metadata", {}).get("ingestDelay", "60s")[:-1]),
             samplePeriod=int(kwargs.get("metadata", {}).get("samplePeriod", "60s")[:-1]),

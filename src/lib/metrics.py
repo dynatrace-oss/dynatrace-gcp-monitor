@@ -1,6 +1,6 @@
 """This module contains data class definitions describing metrics."""
 
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2023 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 ALLOWED_METRIC_DIMENSION_VALUE_LENGTH = config.gcp_allowed_metric_dimension_value_length()
 ALLOWED_METRIC_KEY_LENGTH = config.gcp_allowed_metric_key_length()
 ALLOWED_METRIC_DIMENSION_KEY_LENGTH = config.gcp_allowed_metric_dimension_key_length()
+ALLOWED_METRIC_DISPLAY_NAME_LENGTH = config.gcp_allowed_metric_display_name()
+ALLOWED_METRIC_DESCRIPTION_LENGTH = config.gcp_allowed_metric_description()
+ALLOWED_METRIC_UNIT_NAME_LENGTH = config.gcp_allowed_metric_unit_name()
+
 
 @dataclass(frozen=True)
 class DimensionValue:
@@ -41,6 +45,10 @@ class IngestLine:
     value: Any
     timestamp: int
     dimension_values: List[DimensionValue]
+    meta_display_name: str = ""
+    meta_description: str = ""
+    meta_unit: str = ""
+    include_metadata: bool = False
 
     def dimensions_string(self) -> str:
         dimension_values = [f'{dimension_value.name[0:ALLOWED_METRIC_DIMENSION_KEY_LENGTH]}="{dimension_value.value[0:ALLOWED_METRIC_DIMENSION_VALUE_LENGTH]}"'
@@ -55,7 +63,22 @@ class IngestLine:
     def to_string(self) -> str:
         separator = ',' if self.metric_type == 'gauge' else '='
         metric_type = self.metric_type if self.metric_type != 'count' else 'count,delta'
-        return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}"
+
+        metadata = ""
+        if self.include_metadata:
+            metric_metadata_type_string = "count" if "count" in metric_type else metric_type
+            display_name_string = (
+                f"[Autodiscovered] {self.meta_display_name}"[:ALLOWED_METRIC_DISPLAY_NAME_LENGTH]
+                if len(self.meta_display_name) > 0
+                else f"[Autodiscovered] {self.metric_name}"[:ALLOWED_METRIC_DISPLAY_NAME_LENGTH]
+            )
+            metadata = f'\n#{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]} {metric_metadata_type_string} \
+            dt.meta.displayname="{display_name_string}",\
+            dt.meta.description="{self.meta_description[:ALLOWED_METRIC_DESCRIPTION_LENGTH]}",\
+            dt.meta.unit="{self.meta_unit[:ALLOWED_METRIC_UNIT_NAME_LENGTH]}"'
+
+
+        return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}{metadata}"
 
 
 @dataclass(frozen=True)

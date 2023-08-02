@@ -97,6 +97,19 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
     context.sfm[SfmKeys.dynatrace_ingest_lines_ok_count].update(project_id, lines_ok)
     context.sfm[SfmKeys.dynatrace_ingest_lines_invalid_count].update(project_id, lines_invalid)
 
+
+    # Discarding warnings about monotonic counters
+    warnings = ingest_response_json.get("warnings", {}).get("warningLines", [])
+
+    filtered_warnings = [
+        warning
+        for warning in warnings
+        if not warning.get("warning", "").endswith("Note that monotonic counters are deprecated.")
+    ]
+
+    if ingest_response_json.get("warnings") and isinstance(ingest_response_json["warnings"], dict):
+        ingest_response_json["warnings"]["warningLines"] = filtered_warnings
+
     context.log(project_id, f"Ingest response: {ingest_response_json}")
     await log_invalid_lines(context, ingest_response_json, lines_batch)
 
@@ -351,7 +364,12 @@ def convert_point_to_ingest_line(
             metric_type=metric.dynatrace_metric_type,
             value=value,
             timestamp=timestamp,
-            dimension_values=dimensions.copy()
+            dimension_values=dimensions.copy(),
+            meta_display_name=metric.name,
+            meta_unit=metric.unit,
+            include_metadata=metric.autodiscovered,
+            meta_description=metric.description
+
         )
     return line
 

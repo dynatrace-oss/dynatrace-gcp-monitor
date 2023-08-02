@@ -71,3 +71,12 @@ def gcp_allowed_metric_dimension_key_length():
 
 def gcp_allowed_metric_key_length():
     return os.environ.get("ALLOWED_METRIC_KEY_LENGTH", 250)
+
+def gcp_allowed_metric_display_name():
+     return os.environ.get("ALLOWED_METRIC_DISPLAY_NAME_LENGTH", 300)
+
+def gcp_allowed_metric_description():
+     return os.environ.get("ALLOWED_METRIC_DESCRIPTION_LENGTH", 65535)
+
+def gcp_allowed_metric_unit_name():
+     return os.environ.get("ALLOWED_METRIC_UNIT_NAME_LENGTH", 63)
