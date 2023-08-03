@@ -82,7 +82,8 @@ class GCPMetricDescriptor:
             return "gauge"
         elif metric_kind == "DELTA" and value_type != "DISTRIBUTION":
             return "count,delta"
-        return ""
+        else:
+            raise Exception("Unknown metric type")
 
     @staticmethod
     def _get_key_metric_sufix(metric_name: str, data_type: str) -> str:
@@ -90,10 +91,15 @@ class GCPMetricDescriptor:
             metric_name.endswith("_count") or metric_name.endswith(".count")
         ) and data_type == "gauge":
             return ".gauge"
-
+        if (
+            not metric_name.endswith("_count")
+            and not metric_name.endswith(".count")
+            and data_type == "count"
+        ):
+            return ".count"
         return ""
 
-    def __init__(self, **kwargs):
+    def _metric_parse(self, **kwargs):
         self.value = kwargs.get("type", "")
         self.type = self._cast_metric_kind_to_dt_format(
             kwargs.get("metricKind", ""), kwargs.get("valueType", "")
@@ -122,3 +128,9 @@ class GCPMetricDescriptor:
             for dimension in kwargs.get("labels") or []
         ]
         self.monitored_resources_types = kwargs.get("monitoredResourceTypes", [])
+
+    def __init__(self, **kwargs):
+        try:
+            self._metric_parse(**kwargs)
+        except Exception as e:
+            raise Exception(f"Error for metric name: {self.value} " + str(e))

@@ -45,40 +45,55 @@ class IngestLine:
     value: Any
     timestamp: int
     dimension_values: List[DimensionValue]
-    meta_display_name: str = ""
-    meta_description: str = ""
-    meta_unit: str = ""
-    include_metadata: bool = False
 
     def dimensions_string(self) -> str:
-        dimension_values = [f'{dimension_value.name[0:ALLOWED_METRIC_DIMENSION_KEY_LENGTH]}="{dimension_value.value[0:ALLOWED_METRIC_DIMENSION_VALUE_LENGTH]}"'
-                            for dimension_value
-                            in self.dimension_values
-                            if dimension_value.value != ""]  # MINT rejects line with empty dimension value
+        dimension_values = [
+            f'{dimension_value.name[0:ALLOWED_METRIC_DIMENSION_KEY_LENGTH]}="{dimension_value.value[0:ALLOWED_METRIC_DIMENSION_VALUE_LENGTH]}"'
+            for dimension_value in self.dimension_values
+            if dimension_value.value != ""
+        ]  # MINT rejects line with empty dimension value
         dimensions = ",".join(dimension_values)
         if dimensions:
             dimensions = "," + dimensions
         return dimensions
 
     def to_string(self) -> str:
-        separator = ',' if self.metric_type == 'gauge' else '='
-        metric_type = self.metric_type if self.metric_type != 'count' else 'count,delta'
-
-        metadata = ""
-        if self.include_metadata:
-            metric_metadata_type_string = "count" if "count" in metric_type else metric_type
-            display_name_string = (
-                f"[Autodiscovered] {self.meta_display_name}"[:ALLOWED_METRIC_DISPLAY_NAME_LENGTH]
-                if len(self.meta_display_name) > 0
-                else f"[Autodiscovered] {self.metric_name}"[:ALLOWED_METRIC_DISPLAY_NAME_LENGTH]
-            )
-            metadata = f'\n#{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]} {metric_metadata_type_string} \
-            dt.meta.displayname="{display_name_string}",\
-            dt.meta.description="{self.meta_description[:ALLOWED_METRIC_DESCRIPTION_LENGTH]}",\
-            dt.meta.unit="{self.meta_unit[:ALLOWED_METRIC_UNIT_NAME_LENGTH]}"'
+        separator = "," if self.metric_type == "gauge" else "="
+        metric_type = self.metric_type if self.metric_type != "count" else "count,delta"
+        return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}"
 
 
-        return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}{metadata}"
+@dataclass(frozen=True)
+class MetadataIngestLine(IngestLine):
+    metric_name: str
+    metric_type: str
+    meta_metric_display_name: str
+    meta_metric_description: str
+    meta_metric_unit: str
+
+    def __init__(self, **kwargs):
+        object.__setattr__(self, "metric_name", kwargs.get("metric_name", ""))
+        object.__setattr__(
+            self,
+            "metric_type",
+            "count" if "count" in kwargs.get("metric_type", "") else kwargs.get("metric_type", ""),
+        )
+        object.__setattr__(
+            self,
+            "meta_metric_display_name",
+            f"[Autodiscovered] {kwargs.get('metric_display_name', '')}"
+            if len(kwargs.get("metric_display_name", "")) > 0
+            else f"[Autodiscovered] {kwargs.get('metric_display_name', '')}",
+        )
+        object.__setattr__(self, "meta_metric_description", kwargs.get("metric_description", ""))
+        object.__setattr__(self, "meta_metric_unit", kwargs.get("metric_unit", ""))
+
+    def to_string(self) -> str:
+        return (f'#{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]} {self.metric_type} '
+        f'dt.meta.displayname="{self.meta_metric_display_name[:ALLOWED_METRIC_DISPLAY_NAME_LENGTH]}",'
+        f'dt.meta.description="{self.meta_metric_description[:ALLOWED_METRIC_DESCRIPTION_LENGTH]}",'
+        f'dt.meta.unit="{self.meta_metric_unit[:ALLOWED_METRIC_UNIT_NAME_LENGTH]}"')
+
 
 
 @dataclass(frozen=True)
@@ -114,7 +129,7 @@ class Metric:
     sample_period_seconds: timedelta
     value_type: str
     metric_type: str
-    autodiscovered: bool
+    include_metadata: bool
     description: str
 
     def __init__(self, **kwargs):
@@ -127,7 +142,7 @@ class Metric:
         object.__setattr__(self, "dynatrace_metric_type", kwargs.get("type", ""))
         object.__setattr__(self, "unit", kwargs.get("gcpOptions", {}).get("unit", None))
         object.__setattr__(self, "value_type", gcp_options.get("valueType", ""))
-        object.__setattr__(self, "autodiscovered", kwargs.get("autodiscovered", False))
+        object.__setattr__(self, "include_metadata", kwargs.get("include_metadata", False))
         object.__setattr__(self, "description", kwargs.get("description", ""))
 
         object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])

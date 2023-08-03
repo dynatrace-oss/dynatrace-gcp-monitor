@@ -33,7 +33,7 @@ from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
-from lib.metrics import GCPService, Metric, IngestLine
+from lib.metrics import GCPService, MetadataIngestLine, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.topology.topology import fetch_topology, build_entity_id_map
@@ -174,6 +174,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_coros = []
+    metrics_metadata = []
     topology: Dict[GCPService, Iterable[Entity]] = {}
 
     # Topology fetching: retrieving additional instances info about enabled services
@@ -205,6 +206,16 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             )
             fetch_metric_coros.append(fetch_metric_coro)
 
+            if metric.include_metadata:
+                metrics_metadata.append(MetadataIngestLine(
+                    metric_name = metric.dynatrace_name,
+                    metric_type = metric.dynatrace_metric_type,
+                    metric_display_name=metric.name,
+                    metric_description=metric.description,
+                    metric_unit=metric.unit,
+                ))
+
+
     context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")
 
     if skipped_services_with_no_instances:
@@ -217,6 +228,8 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     fetch_metric_results = await asyncio.gather(*fetch_metric_coros, return_exceptions=True)
     entity_id_map = build_entity_id_map(list(topology.values()))
     flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
+
+    flat_metric_results.extend(metrics_metadata)
     return flat_metric_results
 
 

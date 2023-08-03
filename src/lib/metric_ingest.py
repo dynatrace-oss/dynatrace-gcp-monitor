@@ -99,15 +99,18 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
 
 
     # Discarding warnings about monotonic counters
-    warnings = ingest_response_json.get("warnings", {}).get("warningLines", [])
+    if ingest_response_json.get("warnings") and isinstance(
+        ingest_response_json.get("warnings"), dict
+    ):
+        warnings = ingest_response_json.get("warnings", {}).get("warningLines", [])
 
-    filtered_warnings = [
-        warning
-        for warning in warnings
-        if not warning.get("warning", "").endswith("Note that monotonic counters are deprecated.")
-    ]
-
-    if ingest_response_json.get("warnings") and isinstance(ingest_response_json["warnings"], dict):
+        filtered_warnings = [
+            warning
+            for warning in warnings
+            if not warning.get("warning", "").endswith(
+                "Note that monotonic counters are deprecated."
+            )
+        ]
         ingest_response_json["warnings"]["warningLines"] = filtered_warnings
 
     context.log(project_id, f"Ingest response: {ingest_response_json}")
@@ -364,12 +367,7 @@ def convert_point_to_ingest_line(
             metric_type=metric.dynatrace_metric_type,
             value=value,
             timestamp=timestamp,
-            dimension_values=dimensions.copy(),
-            meta_display_name=metric.name,
-            meta_unit=metric.unit,
-            include_metadata=metric.autodiscovered,
-            meta_description=metric.description
-
+            dimension_values=dimensions.copy()
         )
     return line
 

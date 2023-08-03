@@ -32,12 +32,13 @@ async def get_metric_descriptors(
     discovered_metrics_descriptors = []
 
     while True:
-        discovered_metrics_descriptors.extend(
-            [
-                GCPMetricDescriptor(**descriptor)
-                for descriptor in response.get("metricDescriptors", [])
-            ]
-        )
+        partly_discovered_metrics = []
+        for descriptor in response.get("metricDescriptors", []):
+            try:
+                partly_discovered_metrics.append( GCPMetricDescriptor(**descriptor))
+            except Exception as error:
+                logging_context.log(f"Failed to load autodiscovered metric. Details: {error}")
+        discovered_metrics_descriptors.extend(partly_discovered_metrics)
 
         page_token = response.get("nextPageToken", "")
         params["pageToken"] = page_token
@@ -83,7 +84,7 @@ async def run_autodiscovery(
     for descriptor in discovered_metric_descriptors:
         if descriptor.value not in existing_metric_names:
             metric_fields = asdict(descriptor)
-            metric_fields["autodiscovered"] = True
+            metric_fields["include_metadata"] = True
             autodiscovered_metric = Metric(**(metric_fields))
             missing_metrics_list.append(autodiscovered_metric)
 
