@@ -82,6 +82,8 @@ class GCPMetricDescriptor:
             return "gauge"
         elif metric_kind == "DELTA" and value_type != "DISTRIBUTION":
             return "count,delta"
+        elif metric_kind == "CUMULATIVE":
+            return "count,delta"
         else:
             raise Exception("Unknown metric type")
 
@@ -94,7 +96,7 @@ class GCPMetricDescriptor:
         if (
             not metric_name.endswith("_count")
             and not metric_name.endswith(".count")
-            and data_type == "count"
+            and (data_type == "count" or data_type == "count,delta")
         ):
             return ".count"
         return ""
