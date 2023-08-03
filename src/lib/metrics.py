@@ -83,7 +83,7 @@ class MetadataIngestLine(IngestLine):
             "meta_metric_display_name",
             f"[Autodiscovered] {kwargs.get('metric_display_name', '')}"
             if len(kwargs.get("metric_display_name", "")) > 0
-            else f"[Autodiscovered] {kwargs.get('metric_display_name', '')}",
+            else f"[Autodiscovered] {kwargs.get('metric_name', '')}",
         )
         object.__setattr__(self, "meta_metric_description", kwargs.get("metric_description", ""))
         object.__setattr__(self, "meta_metric_unit", kwargs.get("metric_unit", ""))
