@@ -1,15 +1,22 @@
+import asyncio
+from datetime import datetime
 import os
 import time
 from dataclasses import asdict
-from typing import List
+from typing import List, NamedTuple, Dict
 
 from aiohttp import ClientSession
-
 from lib.autodiscovery.gcp_metrics_descriptor import GCPMetricDescriptor
-from lib.clientsession_provider import init_gcp_client_session
+from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, MetricsContext, get_query_interval_minutes
-from lib.credentials import create_token, fetch_dynatrace_api_key, fetch_dynatrace_url, get_all_accessible_projects, get_project_id_from_environment
+from lib.credentials import (
+    create_token,
+    fetch_dynatrace_api_key,
+    fetch_dynatrace_url,
+    get_all_accessible_projects,
+    get_project_id_from_environment,
+)
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metrics import GCPService, Metric
 
@@ -18,17 +25,22 @@ logging_context = LoggingContext("AUTODISCOVERY")
 
 discovered_resource_type = os.environ.get("AUTODISCOVERY_RESOURCE_TYPE", "gce_instance")
 
+FetchMetricDescriptorsResult = NamedTuple(
+    "FetchMetricDescriptorsResult",
+    [("project_id", str), ("metric_descriptor", GCPMetricDescriptor)],
+)
 
-async def get_metric_descriptors(
-    gcp_session: ClientSession, dt_session: ClientSession, token: str
-) -> List[GCPMetricDescriptor]:
-    project_id = config.project_id()
 
+async def get_project_ids(gcp_session: ClientSession, dt_session: ClientSession, token: str):
     project_id_owner = get_project_id_from_environment()
 
-    dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-    dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-    
+    dynatrace_api_key = await fetch_dynatrace_api_key(
+        gcp_session=gcp_session, project_id=project_id_owner, token=token
+    )
+    dynatrace_url = await fetch_dynatrace_url(
+        gcp_session=gcp_session, project_id=project_id_owner, token=token
+    )
+
     query_interval_min = get_query_interval_minutes()
 
     context = MetricsContext(
@@ -42,24 +54,27 @@ async def get_metric_descriptors(
         dynatrace_url=dynatrace_url,
         print_metric_ingest_input=config.print_metric_ingest_input(),
         self_monitoring_enabled=config.self_monitoring_enabled(),
-        scheduled_execution_id=context.scheduled_execution_id
+        scheduled_execution_id=logging_context.scheduled_execution_id,
     )
 
     projects_ids = await get_all_accessible_projects(context, gcp_session, token)
-
     disabled_projects = []
-    disabled_apis_by_project_id = {}
 
-    # Using metrics scope feature, checking disabled apis in every project is not needed
     if not config.scoping_project_support_enabled():
-        disabled_projects, disabled_apis_by_project_id = \
-            await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
+        disabled_project, _ = await get_disabled_projects_and_disabled_apis_by_project_id(
+            context, projects_ids
+        )
 
     if disabled_projects:
         for disabled_project in disabled_projects:
-                projects_ids.remove(disabled_project)
+            projects_ids.remove(disabled_project)
+
+    return projects_ids
 
 
+async def run_fetch_metric_descriptors(
+    gcp_session: ClientSession, token: str, project_id: str
+) -> List[FetchMetricDescriptorsResult]:
     headers = {"Accept": "application/json", "Authorization": f"Bearer {token}"}
     url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
     params = {}
@@ -67,39 +82,56 @@ async def get_metric_descriptors(
     response = await gcp_session.request("GET", url=url, headers=headers, params=params)
     response = await response.json()
 
-    discovered_metrics_descriptors = []
-
+    project_discovered_metrics = []
     while True:
-        partly_discovered_metrics = []
         for descriptor in response.get("metricDescriptors", []):
             try:
-                partly_discovered_metrics.append( GCPMetricDescriptor(**descriptor))
+                metric_descriptor = GCPMetricDescriptor(**descriptor, project_id=project_id)
+                if (
+                    metric_descriptor.gcpOptions.valueType.upper() != "STRING"
+                    and discovered_resource_type in metric_descriptor.monitored_resources_types
+                ):
+                    project_discovered_metrics.append(metric_descriptor)
             except Exception as error:
-                logging_context.log(f"Failed to load autodiscovered metric. Details: {error}")
-        discovered_metrics_descriptors.extend(partly_discovered_metrics)
+                logging_context.log(
+                    f"Failed to load autodiscovered metric for project {project_id}. Details: {error}"
+                )
 
         page_token = response.get("nextPageToken", "")
         params["pageToken"] = page_token
         if page_token == "":
             break
+    return [
+        FetchMetricDescriptorsResult(project_id, metric_descriptor)
+        for metric_descriptor in project_discovered_metrics
+    ]
 
-    discovered_metrics_descriptors = list(
-        filter(
-            lambda descriptor: descriptor.gcpOptions.valueType.upper() != "STRING",
-            discovered_metrics_descriptors,
+
+async def get_metric_descriptors(
+    gcp_session: ClientSession, dt_session: ClientSession, token: str
+) -> Dict[GCPMetricDescriptor, List[str]]:
+    project_ids = await get_project_ids(gcp_session, dt_session, token)
+
+    fetch_coros = []
+    for project_id in project_ids:
+        fetch_coros.append(run_fetch_metric_descriptors(gcp_session, token, project_id))
+
+    fetch_metrics_descriptor_results = await asyncio.gather(*fetch_coros, return_exceptions=True)
+
+    metric_per_project = {}
+    for fetch_reslut in fetch_metrics_descriptor_results:
+        metric_per_project.setdefault(fetch_reslut.metric_descriptor, []).append(
+            fetch_reslut.project_id
         )
-    )
-    discovered_metrics_descriptors = list(
-        filter(
-            lambda descriptor: discovered_resource_type in descriptor.monitored_resources_types,
-            discovered_metrics_descriptors,
-        )
-    )
-    return discovered_metrics_descriptors
+
+    return metric_per_project
 
 
 async def run_autodiscovery(
-    gcp_services_list: List[GCPService], gcp_session: ClientSession, token: str
+    gcp_services_list: List[GCPService],
+    gcp_session: ClientSession,
+    dt_session: ClientSession,
+    token: str,
 ):
     start_time = time.time()
     logging_context.log("Adding metrics using autodiscovery")
@@ -112,18 +144,19 @@ async def run_autodiscovery(
     for service in bucket_gcp_services:
         existing_metric_list.extend(service.metrics)
 
-    discovered_metric_descriptors = await get_metric_descriptors(gcp_session, token)
+    discovered_metric_descriptors = await get_metric_descriptors(gcp_session, dt_session, token)
 
-    existing_metric_names = [
-        existing_metric.google_metric for existing_metric in existing_metric_list
-    ]
+    existing_metric_names = {}
+    for existing_metric in existing_metric_list:
+        existing_metric_names[existing_metric.google_metric] = None
+
     missing_metrics_list = []
 
-    for descriptor in discovered_metric_descriptors:
+    for descriptor, project_ids in discovered_metric_descriptors.items():
         if descriptor.value not in existing_metric_names:
             metric_fields = asdict(descriptor)
-            metric_fields["include_metadata"] = True
-            autodiscovered_metric = Metric(**(metric_fields))
+            metric_fields["autodiscovered_metric"] = True
+            autodiscovered_metric = Metric(**(metric_fields), project_ids=project_ids)
             missing_metrics_list.append(autodiscovered_metric)
 
     logging_context.log(f"In the extension there are {len(existing_metric_list)} metrics")
@@ -149,13 +182,13 @@ async def enrich_services_with_autodiscovery_metrics(
     current_services: List[GCPService],
 ) -> List[GCPService]:
     try:
-        async with init_gcp_client_session() as gcp_session:
+        async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
             token = await create_token(logging_context, gcp_session)
             if not token:
                 raise Exception("Failed to fetch token")
 
             autodiscovery_fetch_result = await run_autodiscovery(
-                current_services, gcp_session, token
+                current_services, gcp_session, dt_session, token
             )
 
             return autodiscovery_fetch_result

@@ -193,27 +193,29 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             skipped_services_with_no_instances.append(f"{service.name}/{service.feature_set}")
             continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
-            gcp_api_last_index = metric.google_metric.find("/")
-            api = metric.google_metric[:gcp_api_last_index]
-            if api in disabled_apis:
-                skipped_disabled_apis.add(api)
-                continue  # skip fetching the metrics because service API is disabled
-            fetch_metric_coro = run_fetch_metric(
-                context=context,
-                project_id=project_id,
-                service=service,
-                metric=metric
-            )
-            fetch_metric_coros.append(fetch_metric_coro)
+            # Fetch metric only if it's metric from extensions or is autodiscovered in project_id
+            if not metric.autodiscovered_metric or project_id in metric.project_ids:
+                gcp_api_last_index = metric.google_metric.find("/")
+                api = metric.google_metric[:gcp_api_last_index]
+                if api in disabled_apis:
+                    skipped_disabled_apis.add(api)
+                    continue  # skip fetching the metrics because service API is disabled
+                fetch_metric_coro = run_fetch_metric(
+                    context=context,
+                    project_id=project_id,
+                    service=service,
+                    metric=metric
+                )
+                fetch_metric_coros.append(fetch_metric_coro)
 
-            if metric.include_metadata:
-                metrics_metadata.append(MetadataIngestLine(
-                    metric_name = metric.dynatrace_name,
-                    metric_type = metric.dynatrace_metric_type,
-                    metric_display_name=metric.name,
-                    metric_description=metric.description,
-                    metric_unit=metric.unit,
-                ))
+                if metric.autodiscovered_metric:
+                    metrics_metadata.append(MetadataIngestLine(
+                        metric_name = metric.dynatrace_name,
+                        metric_type = metric.dynatrace_metric_type,
+                        metric_display_name=metric.name,
+                        metric_description=metric.description,
+                        metric_unit=metric.unit,
+                    ))
 
 
     context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")

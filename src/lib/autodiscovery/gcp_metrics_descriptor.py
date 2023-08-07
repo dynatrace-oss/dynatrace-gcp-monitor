@@ -45,7 +45,7 @@ GCP_UNIT_CONVERSION_MAP = {
 }
 
 
-@dataclass()
+@dataclass(unsafe_hash=True)
 class GCPMetricDescriptor:
     """Represents a Google Cloud Platform (GCP) Metric Descriptor."""
 
