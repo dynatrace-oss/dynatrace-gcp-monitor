@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
 GCP_UNIT_CONVERSION_MAP = {
     "1": "Count",
@@ -45,22 +45,24 @@ GCP_UNIT_CONVERSION_MAP = {
 }
 
 
-@dataclass(unsafe_hash=True)
+@dataclass(frozen=True)
+class GCPMetricDescriptorOptions:
+    ingestDelay: int
+    samplePeriod: int
+    valueType: str
+    metricKind: str
+    unit: str
+
+
+@dataclass(frozen=True, order=True)
+class GCPMetricDescriptorDimension:
+    key: str
+    value: str
+
+
+@dataclass(frozen=True)
 class GCPMetricDescriptor:
     """Represents a Google Cloud Platform (GCP) Metric Descriptor."""
-
-    @dataclass()
-    class Options:
-        ingestDelay: int
-        samplePeriod: int
-        valueType: str
-        metricKind: str
-        unit: str
-
-    @dataclass()
-    class Dimension:
-        key: str
-        value: str
 
     value: str
     key: str
@@ -68,9 +70,9 @@ class GCPMetricDescriptor:
     name: str
     description: str
     type: str
-    gcpOptions: Options
-    dimensions: List[Dimension]
-    monitored_resources_types: str
+    gcpOptions: GCPMetricDescriptorOptions
+    dimensions: Tuple[GCPMetricDescriptorDimension, ...]
+    monitored_resources_types: Tuple[str, ...]
 
     @staticmethod
     def _cast_metric_key_to_dt_format(metric_name: str) -> str:
@@ -85,10 +87,10 @@ class GCPMetricDescriptor:
         elif metric_kind == "CUMULATIVE":
             return "count,delta"
         else:
-            raise Exception("Unknown metric type")
+            raise Exception(f"Unknown metric type {metric_kind}")
 
     @staticmethod
-    def _get_key_metric_sufix(metric_name: str, data_type: str) -> str:
+    def _get_key_metric_suffix(metric_name: str, data_type: str) -> str:
         if (
             metric_name.endswith("_count") or metric_name.endswith(".count")
         ) and data_type == "gauge":
@@ -101,38 +103,49 @@ class GCPMetricDescriptor:
             return ".count"
         return ""
 
-    def _metric_parse(self, **kwargs):
-        self.value = kwargs.get("type", "")
-        self.type = self._cast_metric_kind_to_dt_format(
+    @classmethod
+    def create(cls, **kwargs):
+        value = kwargs.get("type", "")
+        type_ = cls._cast_metric_kind_to_dt_format(
             kwargs.get("metricKind", ""), kwargs.get("valueType", "")
         )
-        self.key = (
+        key = (
             "cloud.gcp."
-            + self._cast_metric_key_to_dt_format(kwargs.get("type", ""))
-            + self._get_key_metric_sufix(kwargs.get("type", ""), self.type)
+            + cls._cast_metric_key_to_dt_format(kwargs.get("type", ""))
+            + cls._get_key_metric_suffix(kwargs.get("type", ""), type_)
         )
-        self.display_name = kwargs.get("displayName", "")
-        self.name = kwargs.get("displayName", "")
-        self.description = kwargs.get("description", "")
+        display_name = kwargs.get("displayName", "")
+        name = kwargs.get("displayName", "")
+        description = kwargs.get("description", "")
 
-        self.gcpOptions = GCPMetricDescriptor.Options(
+        gcp_options = GCPMetricDescriptorOptions(
             ingestDelay=int(kwargs.get("metadata", {}).get("ingestDelay", "60s")[:-1]),
             samplePeriod=int(kwargs.get("metadata", {}).get("samplePeriod", "60s")[:-1]),
             valueType=kwargs.get("valueType", ""),
             metricKind=kwargs.get("metricKind", ""),
             unit=GCP_UNIT_CONVERSION_MAP.get(kwargs.get("unit", ""), "Unspecified"),
         )
-        self.dimensions = [
-            GCPMetricDescriptor.Dimension(
-                key=dimension.get("key"),
-                value="label:metric.labels." + dimension.get("key"),
+        dimensions = tuple(
+            sorted(
+                [
+                    GCPMetricDescriptorDimension(
+                        key=dimension.get("key"),
+                        value="label:metric.labels." + dimension.get("key"),
+                    )
+                    for dimension in kwargs.get("labels") or []
+                ]
             )
-            for dimension in kwargs.get("labels") or []
-        ]
-        self.monitored_resources_types = kwargs.get("monitoredResourceTypes", [])
+        )
+        monitored_resources_types = tuple(sorted(kwargs.get("monitoredResourceTypes", [])))
 
-    def __init__(self, **kwargs):
-        try:
-            self._metric_parse(**kwargs)
-        except Exception as e:
-            raise Exception(f"Error for metric name: {self.value} " + str(e))
+        return cls(
+            value=value,
+            key=key,
+            display_name=display_name,
+            name=name,
+            description=description,
+            type=type_,
+            gcpOptions=gcp_options,
+            dimensions=dimensions,
+            monitored_resources_types=monitored_resources_types,
+        )

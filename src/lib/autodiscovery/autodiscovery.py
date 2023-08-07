@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+from itertools import chain
 import os
 import time
 from dataclasses import asdict
@@ -86,7 +87,7 @@ async def run_fetch_metric_descriptors(
     while True:
         for descriptor in response.get("metricDescriptors", []):
             try:
-                metric_descriptor = GCPMetricDescriptor(**descriptor, project_id=project_id)
+                metric_descriptor = GCPMetricDescriptor.create(**descriptor, project_id=project_id)
                 if (
                     metric_descriptor.gcpOptions.valueType.upper() != "STRING"
                     and discovered_resource_type in metric_descriptor.monitored_resources_types
@@ -117,9 +118,10 @@ async def get_metric_descriptors(
         fetch_coros.append(run_fetch_metric_descriptors(gcp_session, token, project_id))
 
     fetch_metrics_descriptor_results = await asyncio.gather(*fetch_coros, return_exceptions=True)
+    flattened_results = list(chain.from_iterable(fetch_metrics_descriptor_results))
 
     metric_per_project = {}
-    for fetch_reslut in fetch_metrics_descriptor_results:
+    for fetch_reslut in flattened_results:
         metric_per_project.setdefault(fetch_reslut.metric_descriptor, []).append(
             fetch_reslut.project_id
         )
