@@ -26,7 +26,6 @@ async def get_metric_descriptors(
     url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
     params = {}
 
-
     discovered_metrics_descriptors = []
 
     while True:
@@ -38,7 +37,7 @@ async def get_metric_descriptors(
 
         for descriptor in response_json.get("metricDescriptors", []):
             try:
-                partly_discovered_metrics.append( GCPMetricDescriptor(**descriptor))
+                partly_discovered_metrics.append(GCPMetricDescriptor(**descriptor))
             except Exception as error:
                 logging_context.log(f"Failed to load autodiscovered metric. Details: {error}")
         discovered_metrics_descriptors.extend(partly_discovered_metrics)
