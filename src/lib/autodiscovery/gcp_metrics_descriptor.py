@@ -82,17 +82,37 @@ class GCPMetricDescriptor:
             return "gauge"
         elif metric_kind == "DELTA" and value_type != "DISTRIBUTION":
             return "count,delta"
+        elif metric_kind == "CUMULATIVE":
+            return "count,delta"
+        else:
+            raise Exception("Unknown metric type")
+
+    @staticmethod
+    def _get_key_metric_sufix(metric_name: str, data_type: str) -> str:
+        if metric_name.endswith(("_count", ".count")) and data_type == "gauge":
+            return ".gauge"
+        if (
+            not metric_name.endswith("_count")
+            and not metric_name.endswith(".count")
+            and (data_type in ("count", "count,delta"))
+        ):
+            return ".count"
         return ""
 
-    def __init__(self, **kwargs):
+    def _metric_parse(self, **kwargs):
         self.value = kwargs.get("type", "")
-        self.key = "cloud.gcp." + self._cast_metric_key_to_dt_format(kwargs.get("type", ""))
-        self.display_name = kwargs.get("displayName", "")
-        self.name = kwargs.get("displayName", "")
-        self.description = kwargs.get("description", "")
         self.type = self._cast_metric_kind_to_dt_format(
             kwargs.get("metricKind", ""), kwargs.get("valueType", "")
         )
+        self.key = (
+            "cloud.gcp."
+            + self._cast_metric_key_to_dt_format(kwargs.get("type", ""))
+            + self._get_key_metric_sufix(kwargs.get("type", ""), self.type)
+        )
+        self.display_name = kwargs.get("displayName", "")
+        self.name = kwargs.get("displayName", "")
+        self.description = kwargs.get("description", "")
+
         self.gcpOptions = GCPMetricDescriptor.Options(
             ingestDelay=int(kwargs.get("metadata", {}).get("ingestDelay", "60s")[:-1]),
             samplePeriod=int(kwargs.get("metadata", {}).get("samplePeriod", "60s")[:-1]),
@@ -108,3 +128,9 @@ class GCPMetricDescriptor:
             for dimension in kwargs.get("labels") or []
         ]
         self.monitored_resources_types = kwargs.get("monitoredResourceTypes", [])
+
+    def __init__(self, **kwargs):
+        try:
+            self._metric_parse(**kwargs)
+        except Exception as e:
+            raise Exception(f"Error for metric name: {self.value} " + str(e))

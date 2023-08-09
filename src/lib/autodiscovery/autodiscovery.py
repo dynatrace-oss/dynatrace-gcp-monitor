@@ -26,17 +26,23 @@ async def get_metric_descriptors(
     url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
     params = {}
 
-    response = await gcp_session.request("GET", url=url, headers=headers, params=params)
-    response = await response.json()
-
     discovered_metrics_descriptors = []
 
     while True:
-        discovered_metrics_descriptors.extend(
-            [GCPMetricDescriptor(**descriptor) for descriptor in response.get("metricDescriptors",[])]
-        )
+        partly_discovered_metrics = []
 
-        page_token = response.get("nextPageToken", "")
+        response = await gcp_session.request("GET", url=url, headers=headers, params=params)
+        response.raise_for_status()
+        response_json = await response.json()
+
+        for descriptor in response_json.get("metricDescriptors", []):
+            try:
+                partly_discovered_metrics.append(GCPMetricDescriptor(**descriptor))
+            except Exception as error:
+                logging_context.log(f"Failed to load autodiscovered metric. Details: {error}")
+        discovered_metrics_descriptors.extend(partly_discovered_metrics)
+
+        page_token = response_json.get("nextPageToken", "")
         params["pageToken"] = page_token
         if page_token == "":
             break
@@ -79,7 +85,11 @@ async def run_autodiscovery(
 
     for descriptor in discovered_metric_descriptors:
         if descriptor.value not in existing_metric_names:
-            missing_metrics_list.append(Metric(**asdict(descriptor)))
+            metric_fields = asdict(descriptor)
+            metric_fields["include_metadata"] = True
+            autodiscovered_metric = Metric(**(metric_fields))
+            missing_metrics_list.append(autodiscovered_metric)
+
     logging_context.log(f"In the extension there are {len(existing_metric_list)} metrics")
     logging_context.log(
         f"Discovered Resource type {discovered_resource_type} has {len(discovered_metric_descriptors)} metrics"

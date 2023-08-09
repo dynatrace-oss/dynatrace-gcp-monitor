@@ -1,6 +1,6 @@
 """This module contains data class definitions describing metrics."""
 
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2023 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 ALLOWED_METRIC_DIMENSION_VALUE_LENGTH = config.gcp_allowed_metric_dimension_value_length()
 ALLOWED_METRIC_KEY_LENGTH = config.gcp_allowed_metric_key_length()
 ALLOWED_METRIC_DIMENSION_KEY_LENGTH = config.gcp_allowed_metric_dimension_key_length()
+ALLOWED_METRIC_DISPLAY_NAME_LENGTH = config.gcp_allowed_metric_display_name()
+ALLOWED_METRIC_DESCRIPTION_LENGTH = config.gcp_allowed_metric_description()
+ALLOWED_METRIC_UNIT_NAME_LENGTH = config.gcp_allowed_metric_unit_name()
+
 
 @dataclass(frozen=True)
 class DimensionValue:
@@ -43,19 +47,53 @@ class IngestLine:
     dimension_values: List[DimensionValue]
 
     def dimensions_string(self) -> str:
-        dimension_values = [f'{dimension_value.name[0:ALLOWED_METRIC_DIMENSION_KEY_LENGTH]}="{dimension_value.value[0:ALLOWED_METRIC_DIMENSION_VALUE_LENGTH]}"'
-                            for dimension_value
-                            in self.dimension_values
-                            if dimension_value.value != ""]  # MINT rejects line with empty dimension value
+        dimension_values = [
+            f'{dimension_value.name[0:ALLOWED_METRIC_DIMENSION_KEY_LENGTH]}="{dimension_value.value[0:ALLOWED_METRIC_DIMENSION_VALUE_LENGTH]}"'
+            for dimension_value in self.dimension_values
+            if dimension_value.value != ""
+        ]  # MINT rejects line with empty dimension value
         dimensions = ",".join(dimension_values)
         if dimensions:
             dimensions = "," + dimensions
         return dimensions
 
     def to_string(self) -> str:
-        separator = ',' if self.metric_type == 'gauge' else '='
-        metric_type = self.metric_type if self.metric_type != 'count' else 'count,delta'
+        separator = "," if self.metric_type == "gauge" else "="
+        metric_type = self.metric_type if self.metric_type != "count" else "count,delta"
         return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}"
+
+
+@dataclass(frozen=True)
+class MetadataIngestLine(IngestLine):
+    metric_name: str
+    metric_type: str
+    meta_metric_display_name: str
+    meta_metric_description: str
+    meta_metric_unit: str
+
+    def __init__(self, **kwargs):
+        object.__setattr__(self, "metric_name", kwargs.get("metric_name", ""))
+        object.__setattr__(
+            self,
+            "metric_type",
+            "count" if "count" in kwargs.get("metric_type", "") else kwargs.get("metric_type", ""),
+        )
+        object.__setattr__(
+            self,
+            "meta_metric_display_name",
+            f"[Autodiscovered] {kwargs.get('metric_display_name', '')}"
+            if len(kwargs.get("metric_display_name", "")) > 0
+            else f"[Autodiscovered] {kwargs.get('metric_name', '')}",
+        )
+        object.__setattr__(self, "meta_metric_description", kwargs.get("metric_description", ""))
+        object.__setattr__(self, "meta_metric_unit", kwargs.get("metric_unit", ""))
+
+    def to_string(self) -> str:
+        return (f'#{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]} {self.metric_type} '
+        f'dt.meta.displayname="{self.meta_metric_display_name[:ALLOWED_METRIC_DISPLAY_NAME_LENGTH]}",'
+        f'dt.meta.description="{self.meta_metric_description[:ALLOWED_METRIC_DESCRIPTION_LENGTH]}",'
+        f'dt.meta.unit="{self.meta_metric_unit[:ALLOWED_METRIC_UNIT_NAME_LENGTH]}"')
+
 
 
 @dataclass(frozen=True)
@@ -91,6 +129,8 @@ class Metric:
     sample_period_seconds: timedelta
     value_type: str
     metric_type: str
+    include_metadata: bool
+    description: str
 
     def __init__(self, **kwargs):
         gcp_options = kwargs.get("gcpOptions", {})
@@ -102,6 +142,8 @@ class Metric:
         object.__setattr__(self, "dynatrace_metric_type", kwargs.get("type", ""))
         object.__setattr__(self, "unit", kwargs.get("gcpOptions", {}).get("unit", None))
         object.__setattr__(self, "value_type", gcp_options.get("valueType", ""))
+        object.__setattr__(self, "include_metadata", kwargs.get("include_metadata", False))
+        object.__setattr__(self, "description", kwargs.get("description", ""))
 
         object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 
