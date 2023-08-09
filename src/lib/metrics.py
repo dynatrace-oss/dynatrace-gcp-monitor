@@ -175,6 +175,7 @@ class GCPService:
     metrics = List[Metric]
     monitoring_filter: Text
     activation: Dict[Text, Any]
+    is_configured: bool
 
     def __init__(self, **kwargs):
         object.__setattr__(self, "name", kwargs.get("service", ""))
@@ -198,6 +199,7 @@ class GCPService:
         monitoring_filter = VARIABLE_BRACKETS_PATTERN.sub('', monitoring_filter)
         monitoring_filter = VARIABLE_VAR_PATTERN.sub('', monitoring_filter)
         object.__setattr__(self, "monitoring_filter", monitoring_filter)
+        object.__setattr__(self, "is_configured",  kwargs.get("is_configured", True))
 
     def __hash__(self):
         return hash((self.name, self.technology_name, self.feature_set, self.monitoring_filter))
