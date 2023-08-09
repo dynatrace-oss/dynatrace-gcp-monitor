@@ -80,12 +80,13 @@ async def run_fetch_metric_descriptors(
     url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
     params = {}
 
-    response = await gcp_session.request("GET", url=url, headers=headers, params=params)
-    response = await response.json()
-
     project_discovered_metrics = []
     while True:
-        for descriptor in response.get("metricDescriptors", []):
+        response = await gcp_session.request("GET", url=url, headers=headers, params=params)
+        response.raise_for_status()
+        response_json = await response.json()
+
+        for descriptor in response_json.get("metricDescriptors", []):
             try:
                 metric_descriptor = GCPMetricDescriptor.create(**descriptor, project_id=project_id)
                 if (
@@ -98,7 +99,7 @@ async def run_fetch_metric_descriptors(
                     f"Failed to load autodiscovered metric for project {project_id}. Details: {error}"
                 )
 
-        page_token = response.get("nextPageToken", "")
+        page_token = response_json.get("nextPageToken", "")
         params["pageToken"] = page_token
         if page_token == "":
             break
