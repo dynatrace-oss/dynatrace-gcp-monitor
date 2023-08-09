@@ -220,6 +220,16 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                     ))
 
 
+            if metric.include_metadata:
+                metrics_metadata.append(MetadataIngestLine(
+                    metric_name = metric.dynatrace_name,
+                    metric_type = metric.dynatrace_metric_type,
+                    metric_display_name=metric.name,
+                    metric_description=metric.description,
+                    metric_unit=metric.unit,
+                ))
+
+
     context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")
 
     if skipped_services_with_no_instances:

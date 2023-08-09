@@ -90,15 +90,13 @@ class GCPMetricDescriptor:
             raise Exception(f"Unknown metric type {metric_kind}")
 
     @staticmethod
-    def _get_key_metric_suffix(metric_name: str, data_type: str) -> str:
-        if (
-            metric_name.endswith("_count") or metric_name.endswith(".count")
-        ) and data_type == "gauge":
+    def _get_key_metric_sufix(metric_name: str, data_type: str) -> str:
+        if metric_name.endswith(("_count", ".count")) and data_type == "gauge":
             return ".gauge"
         if (
             not metric_name.endswith("_count")
             and not metric_name.endswith(".count")
-            and (data_type == "count" or data_type == "count,delta")
+            and (data_type in ("count", "count,delta"))
         ):
             return ".count"
         return ""
