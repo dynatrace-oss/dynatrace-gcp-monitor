@@ -114,13 +114,13 @@ async def get_metric_descriptors(
     project_ids = await get_project_ids(gcp_session, dt_session, token)
 
     fetch_coros = []
+    metric_per_project = {}
     for project_id in project_ids:
         fetch_coros.append(run_fetch_metric_descriptors(gcp_session, token, project_id))
 
     fetch_metrics_descriptor_results = await asyncio.gather(*fetch_coros, return_exceptions=True)
     flattened_results = list(chain.from_iterable(fetch_metrics_descriptor_results))
 
-    metric_per_project = {}
     for fetch_reslut in flattened_results:
         metric_per_project.setdefault(fetch_reslut.metric_descriptor, []).append(
             fetch_reslut.project_id
