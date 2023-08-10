@@ -86,17 +86,14 @@ class GCPMetricDescriptor:
             return "count,delta"
         elif metric_kind == "CUMULATIVE":
             return "count,delta"
-        else:
-            raise Exception(f"Unknown metric type {metric_kind}")
+        raise Exception(f"Unknown metric type: {metric_kind}")
 
     @staticmethod
     def _get_key_metric_suffix(metric_name: str, data_type: str) -> str:
         if metric_name.endswith(("_count", ".count")) and data_type == "gauge":
             return ".gauge"
-        if (
-            not metric_name.endswith("_count")
-            and not metric_name.endswith(".count")
-            and (data_type in ("count", "count,delta"))
+        if not metric_name.endswith(("_count", ".count")) and (
+            data_type in ("count", "count,delta")
         ):
             return ".count"
         return ""
@@ -104,13 +101,13 @@ class GCPMetricDescriptor:
     @classmethod
     def create(cls, **kwargs):
         value = kwargs.get("type", "")
-        type_ = cls._cast_metric_kind_to_dt_format(
+        metric_type = cls._cast_metric_kind_to_dt_format(
             kwargs.get("metricKind", ""), kwargs.get("valueType", "")
         )
         key = (
             "cloud.gcp."
             + cls._cast_metric_key_to_dt_format(kwargs.get("type", ""))
-            + cls._get_key_metric_suffix(kwargs.get("type", ""), type_)
+            + cls._get_key_metric_suffix(kwargs.get("type", ""), metric_type)
         )
         display_name = kwargs.get("displayName", "")
         name = kwargs.get("displayName", "")
@@ -142,7 +139,7 @@ class GCPMetricDescriptor:
             display_name=display_name,
             name=name,
             description=description,
-            type=type_,
+            type=metric_type,
             gcpOptions=gcp_options,
             dimensions=dimensions,
             monitored_resources_types=monitored_resources_types,

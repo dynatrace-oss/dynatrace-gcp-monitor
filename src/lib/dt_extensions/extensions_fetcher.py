@@ -1,4 +1,4 @@
-#   Copyright 2021 Dynatrace LLC
+#   Copyright 2023 Dynatrace LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -110,7 +110,9 @@ class ExtensionsFetcher:
             feature_set = f"{service_name}/{service.get('featureSet')}"
             activation = activation_config_per_service.get(service_name, {})
             is_configured = feature_set in feature_sets_from_activation_config
-            all_services.append(GCPService(**service, activation=activation,is_configured=is_configured))
+            all_services.append(
+                GCPService(**service, activation=activation, is_configured=is_configured)
+            )
             if not is_configured:
                 not_configured_services.append(feature_set)
         return all_services, not_configured_services

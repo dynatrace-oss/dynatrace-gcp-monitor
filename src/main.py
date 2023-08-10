@@ -1,4 +1,4 @@
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2023 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -203,21 +203,20 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                     skipped_disabled_apis.add(api)
                     continue  # skip fetching the metrics because service API is disabled
                 fetch_metric_coro = run_fetch_metric(
-                    context=context,
-                    project_id=project_id,
-                    service=service,
-                    metric=metric
+                    context=context, project_id=project_id, service=service, metric=metric
                 )
                 fetch_metric_coros.append(fetch_metric_coro)
 
                 if metric.autodiscovered_metric:
-                    metrics_metadata.append(MetadataIngestLine(
-                        metric_name = metric.dynatrace_name,
-                        metric_type = metric.dynatrace_metric_type,
-                        metric_display_name=metric.name,
-                        metric_description=metric.description,
-                        metric_unit=metric.unit,
-                    ))
+                    metrics_metadata.append(
+                        MetadataIngestLine(
+                            metric_name=metric.dynatrace_name,
+                            metric_type=metric.dynatrace_metric_type,
+                            metric_display_name=metric.name,
+                            metric_description=metric.description,
+                            metric_unit=metric.unit,
+                        )
+                    )
 
     context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")
 

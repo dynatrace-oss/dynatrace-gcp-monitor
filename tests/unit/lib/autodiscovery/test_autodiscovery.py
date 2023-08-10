@@ -85,7 +85,6 @@ async def test_get_metric_descriptors(get_project_ids_mock, config_mock):
     result = await get_metric_descriptors(gcp_session_mock, dt_session_mock, token_mock)
     result = list(result.items())
 
-    print(result)
     assert len(result) == 1
     assert sorted(result[0][1], reverse=True) == ["test_project_id", "other_project_id"]
     assert result[0][0].value == "cloudfunctions.googleapis.com/function/sample_metric"

@@ -96,7 +96,7 @@ async def run_fetch_metric_descriptors(
                     project_discovered_metrics.append(metric_descriptor)
             except Exception as error:
                 logging_context.log(
-                    f"Failed to load autodiscovered metric for project {project_id}. Details: {error}"
+                    f"Failed to load autodiscovered metric for project: {project_id}. Details: {error}"
                 )
 
         page_token = response_json.get("nextPageToken", "")
@@ -114,12 +114,12 @@ async def get_metric_descriptors(
 ) -> Dict[GCPMetricDescriptor, List[str]]:
     project_ids = await get_project_ids(gcp_session, dt_session, token)
 
-    fetch_coros = []
+    metric_fetch_coroutines = []
     metric_per_project = {}
     for project_id in project_ids:
-        fetch_coros.append(run_fetch_metric_descriptors(gcp_session, token, project_id))
+        metric_fetch_coroutines.append(run_fetch_metric_descriptors(gcp_session, token, project_id))
 
-    fetch_metrics_descriptor_results = await asyncio.gather(*fetch_coros, return_exceptions=True)
+    fetch_metrics_descriptor_results = await asyncio.gather(*metric_fetch_coroutines, return_exceptions=True)
     flattened_results = list(chain.from_iterable(fetch_metrics_descriptor_results))
 
     for fetch_reslut in flattened_results:
@@ -139,12 +139,12 @@ async def run_autodiscovery(
     start_time = time.time()
     logging_context.log("Adding metrics using autodiscovery")
 
-    bucket_gcp_services = list(
+    filtered_gcp_extension_services = list(
         filter(lambda x: discovered_resource_type in x.name, gcp_services_list)
     )
 
     existing_metric_list = []
-    for service in bucket_gcp_services:
+    for service in filtered_gcp_extension_services:
         existing_metric_list.extend(service.metrics)
 
     discovered_metric_descriptors = await get_metric_descriptors(gcp_session, dt_session, token)
