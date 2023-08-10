@@ -189,6 +189,8 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     skipped_disabled_apis = set()
 
     for service in services:
+        if not service.is_configured:
+             continue  # skip disabled services
         if service in topology and not topology[service]:
             skipped_services_with_no_instances.append(f"{service.name}/{service.feature_set}")
             continue  # skip fetching the metrics because there are no instances
