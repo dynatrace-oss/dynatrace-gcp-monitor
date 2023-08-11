@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 from itertools import chain
 import os
+import threading
 import time
 from dataclasses import asdict
 from typing import List, NamedTuple, Dict
@@ -200,3 +201,16 @@ async def enrich_services_with_autodiscovery_metrics(
             f"Failed to prepare autodiscovery new services metrics, will reuse from configuration file; {str(e)}"
         )
         return current_services
+
+
+async def run_autodiscovery_loop_forever(condition_lock: threading.Condition, services: List[GCPService]):
+
+    condition_lock = condition_lock
+    services = services
+
+    while True:
+        with condition_lock:
+
+
+
+            condition_lock.wait(timeout=120)

@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Dict, Optional, List
 
 from aiohttp import ClientSession
 
@@ -12,7 +12,7 @@ from lib.metrics import GCPService
 logging_context = LoggingContext("EXTENSIONS")
 
 
-async def prepare_services_config_for_next_polling(current_services: List[GCPService]) -> List[GCPService]:
+async def prepare_services_config_for_next_polling(current_services: List[GCPService], current_extension_versions: Dict[str,str]) -> ExtensionsFetchResult:
     try:
         async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
             token = await create_token(logging_context, gcp_session)
@@ -23,10 +23,10 @@ async def prepare_services_config_for_next_polling(current_services: List[GCPSer
             if not extensions_fetch_result:
                 raise Exception('Extension fetch failed')
 
-            return extensions_fetch_result.services
+            return extensions_fetch_result
     except Exception as e:
         logging_context.error(f'Failed to prepare new services configuration from extensions, will reuse previous configuration; {str(e)}')
-        return current_services
+        return ExtensionsFetchResult(current_services,current_extension_versions)
 
 
 async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[ExtensionsFetchResult]:
