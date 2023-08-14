@@ -33,7 +33,6 @@ class AutodiscoveryManager:
         self.time_since_last_autodiscovery = datetime.now()
 
     async def _try_refresh_autodiscovery_task(self, services, new_extension_versions_hash):
-        print("Refreshing autodiscovery task as it is done!")
         self.autodiscovered_metrics_cache = await self.autodiscovery_task
         self.autodiscovery_task = asyncio.create_task(
             enrich_services_with_autodiscovery_metrics(services)
