@@ -6,7 +6,6 @@ from itertools import chain
 from typing import Dict, List, NamedTuple
 
 from aiohttp import ClientSession
-
 from lib.autodiscovery.gcp_metrics_descriptor import GCPMetricDescriptor
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
