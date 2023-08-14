@@ -129,8 +129,9 @@ class Metric:
     sample_period_seconds: timedelta
     value_type: str
     metric_type: str
-    include_metadata: bool
+    autodiscovered_metric: bool
     description: str
+    project_ids: List[str]
 
     def __init__(self, **kwargs):
         gcp_options = kwargs.get("gcpOptions", {})
@@ -142,8 +143,9 @@ class Metric:
         object.__setattr__(self, "dynatrace_metric_type", kwargs.get("type", ""))
         object.__setattr__(self, "unit", kwargs.get("gcpOptions", {}).get("unit", None))
         object.__setattr__(self, "value_type", gcp_options.get("valueType", ""))
-        object.__setattr__(self, "include_metadata", kwargs.get("include_metadata", False))
+        object.__setattr__(self, "autodiscovered_metric", kwargs.get("autodiscovered_metric", False))
         object.__setattr__(self, "description", kwargs.get("description", ""))
+        object.__setattr__(self, "project_ids", kwargs.get("project_ids", []))
 
         object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 
@@ -173,6 +175,7 @@ class GCPService:
     metrics = List[Metric]
     monitoring_filter: Text
     activation: Dict[Text, Any]
+    is_enabled: bool
 
     def __init__(self, **kwargs):
         object.__setattr__(self, "name", kwargs.get("service", ""))
@@ -196,6 +199,7 @@ class GCPService:
         monitoring_filter = VARIABLE_BRACKETS_PATTERN.sub('', monitoring_filter)
         monitoring_filter = VARIABLE_VAR_PATTERN.sub('', monitoring_filter)
         object.__setattr__(self, "monitoring_filter", monitoring_filter)
+        object.__setattr__(self, "is_enabled",  kwargs.get("is_enabled", True))
 
     def __hash__(self):
         return hash((self.name, self.technology_name, self.feature_set, self.monitoring_filter))

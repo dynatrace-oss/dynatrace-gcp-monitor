@@ -1,4 +1,4 @@
-#   Copyright 2021 Dynatrace LLC
+#   Copyright 2023 Dynatrace LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ class ExtensionsFetcher:
         not_configured_services = []
 
         for extension_name, extension_version in extension_name_to_version_dict.items():
-            configured_services_for_extension, not_configured_services_for_extension = await self._get_service_configs_for_extension(
+            services_for_extension, not_configured_services_for_extension = await self._get_service_configs_for_extension(
                 extension_name, extension_version, activation_config_per_service, feature_sets_from_activation_config)
-            configured_services.extend(configured_services_for_extension)
+            configured_services.extend(services_for_extension)
             not_configured_services.extend(not_configured_services_for_extension)
         if not_configured_services:
             self.logging_context.log(f"Following services (enabled in extensions) are filtered out,"
@@ -103,17 +103,19 @@ class ExtensionsFetcher:
             self.logging_context.log(f"Incorrect extension fetched from Dynatrace cluster. {extension_name}-{extension_version} has no 'gcp' section and will be skipped")
             return []
 
-        configured_services = []
+        all_services = []
         not_configured_services = []
         for service in extension_configuration.get("gcp"):
             service_name = service.get('service')
             feature_set = f"{service_name}/{service.get('featureSet')}"
-            if feature_set in feature_sets_from_activation_config:
-                activation = activation_config_per_service.get(service_name, {})
-                configured_services.append(GCPService(**service, activation=activation))
-            else:
+            activation = activation_config_per_service.get(service_name, {})
+            is_configured = feature_set in feature_sets_from_activation_config
+            all_services.append(
+                GCPService(**service, activation=activation, is_enabled=is_configured)
+            )
+            if not is_configured:
                 not_configured_services.append(feature_set)
-        return configured_services, not_configured_services
+        return all_services, not_configured_services
 
     async def get_extension_configuration_from_cache_or_download(self, extension_name, extension_version):
         if extension_name in EXTENSIONS_CACHE_BY_NAME and EXTENSIONS_CACHE_BY_NAME[extension_name].version == extension_version:
