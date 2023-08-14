@@ -162,7 +162,7 @@ async def run_autodiscovery(
     logging_context.log(
         f"Adding metrics: {[metric.google_metric for metric in missing_metrics_list]}"
     )
-    await send_metric_metadata(missing_metrics_list,metric_context)
+    await send_metric_metadata(missing_metrics_list, metric_context)
 
     for service in gcp_services_list:
         if service.name == discovered_resource_type and service.feature_set == "default_metrics":
