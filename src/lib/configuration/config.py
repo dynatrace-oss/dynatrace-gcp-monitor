@@ -72,11 +72,22 @@ def gcp_allowed_metric_dimension_key_length():
 def gcp_allowed_metric_key_length():
     return os.environ.get("ALLOWED_METRIC_KEY_LENGTH", 250)
 
+
 def gcp_allowed_metric_display_name():
-     return os.environ.get("ALLOWED_METRIC_DISPLAY_NAME_LENGTH", 300)
+    limit =  os.environ.get("ALLOWED_METRIC_DISPLAY_NAME_LENGTH", "300")
+    return int(limit) if limit.isdigit() and int(limit) > 1 else 300
+
 
 def gcp_allowed_metric_description():
-     return os.environ.get("ALLOWED_METRIC_DESCRIPTION_LENGTH", 65535)
+    limit = os.environ.get("ALLOWED_METRIC_DESCRIPTION_LENGTH", "65535")
+    return int(limit) if limit.isdigit() and int(limit) > 1 else 65535
+
 
 def gcp_allowed_metric_unit_name():
-     return os.environ.get("ALLOWED_METRIC_UNIT_NAME_LENGTH", 63)
+    limit = os.environ.get("ALLOWED_METRIC_UNIT_NAME_LENGTH", "63")
+    return int(limit) if limit.isdigit() and int(limit) > 1 else 63
+
+
+def get_autodiscovery_querry_interval():
+    interval = os.environ.get("AUTODISCOVERY_QUERY_INTERVAL", "60")
+    return int(interval) if interval.isdigit() and int(interval) > 1 else 60

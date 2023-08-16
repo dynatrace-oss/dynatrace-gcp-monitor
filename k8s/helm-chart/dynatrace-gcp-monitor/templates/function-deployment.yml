@@ -132,6 +132,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: QUERY_INTERVAL_MIN
+        - name: AUTODISCOVERY_QUERY_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: AUTODISCOVERY_QUERY_INTERVAL
         - name: HEALTH_CHECK_PORT
           value: "8080"
         - name: SCOPING_PROJECT_SUPPORT_ENABLED
