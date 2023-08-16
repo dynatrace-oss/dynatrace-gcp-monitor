@@ -112,7 +112,7 @@ async def get_metric_descriptors(
         *metric_fetch_coroutines, return_exceptions=True
     )
     flattened_results = list(chain.from_iterable(fetch_metrics_descriptor_results))
-
+    
     for fetch_reslut in flattened_results:
         metric_per_project.setdefault(fetch_reslut.metric_descriptor, []).append(
             fetch_reslut.project_id

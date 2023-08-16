@@ -110,9 +110,8 @@ async def get_metric_context(
         self_monitoring_enabled=config.self_monitoring_enabled(),
         scheduled_execution_id=logging_context.scheduled_execution_id,
     )
-    
-    return context
 
+    return context
 
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
     logging_context = LoggingContext(execution_id)
@@ -224,17 +223,6 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                     context=context, project_id=project_id, service=service, metric=metric
                 )
                 fetch_metric_coros.append(fetch_metric_coro)
-
-                if metric.autodiscovered_metric:
-                    metrics_metadata.append(
-                        MetadataIngestLine(
-                            metric_name=metric.dynatrace_name,
-                            metric_type=metric.dynatrace_metric_type,
-                            metric_display_name=metric.name,
-                            metric_description=metric.description,
-                            metric_unit=metric.unit,
-                        )
-                    )
 
     context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")
 
