@@ -134,6 +134,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: SCOPING_PROJECT_SUPPORT_ENABLED
+        - name: EXCLUDED_PROJECTS
+            valueFrom:
+              configMapKeyRef:
+                name: dynatrace-gcp-monitor-config
+                key: EXCLUDED_PROJECTS
         - name:   KEEP_REFRESHING_EXTENSIONS_CONFIG
           valueFrom:
             configMapKeyRef:

@@ -13,6 +13,10 @@ def scoping_project_support_enabled():
     return os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE").upper() in ["TRUE", "YES"]
 
 
+def excluded_projects():
+    return os.environ.get("EXCLUDED_PROJECTS", "")
+
+
 def project_id():
     return os.environ.get("GCP_PROJECT")
 
