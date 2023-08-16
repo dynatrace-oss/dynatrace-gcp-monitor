@@ -1,8 +1,8 @@
 import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Any
 
-from lib.autodiscovery.autodiscovery import enrich_services_with_autodiscovery_metrics
+from lib.autodiscovery.autodiscovery import AutodiscoveryResult, enrich_services_with_autodiscovery_metrics
 from lib.metrics import GCPService
 
 AUTODISCOVERY_QUERY_INTERVAL_SEC = 60
@@ -14,37 +14,41 @@ class AutodiscoveryManager:
     autodiscovered_extension_versions_hash: int
     time_since_last_autodiscovery: datetime
     query_interval = timedelta(seconds=AUTODISCOVERY_QUERY_INTERVAL_SEC)
+    last_autodiscovered_metric_list_names: Dict[str, Any]
 
     @staticmethod
     async def initialize(services: List[GCPService], current_extension_versions: Dict[str, str]):
         autodiscovery_manager = AutodiscoveryManager(services, current_extension_versions)
-        await autodiscovery_manager.autodiscovery_task
+        await autodiscovery_manager._refresh_autodiscovery_task(
+            services, current_extension_versions
+        )
         return autodiscovery_manager
 
     def __init__(self, services: List[GCPService], current_extension_versions: Dict[str, str]):
+        self.last_autodiscovered_metric_list_names = {}
         self.autodiscovered_metrics_cache = []
         self.autodiscovered_extension_versions_hash = hash(
             tuple(sorted(current_extension_versions.items()))
         )
         self.query_interval = timedelta(seconds=AUTODISCOVERY_QUERY_INTERVAL_SEC)
         self.autodiscovery_task = asyncio.create_task(
-            enrich_services_with_autodiscovery_metrics(services)
+            enrich_services_with_autodiscovery_metrics(
+                services, self.last_autodiscovered_metric_list_names
+            )
         )
         self.time_since_last_autodiscovery = datetime.now()
 
-    async def _try_refresh_autodiscovery_task(self, services, new_extension_versions_hash):
-        self.autodiscovered_metrics_cache = await self.autodiscovery_task
+    async def _refresh_autodiscovery_task(self, services, new_extension_versions_hash):
+        result = await self.autodiscovery_task
+        self.autodiscovered_metrics_cache = result.enriched_services
+        self.last_autodiscovered_metric_list_names = result.discovered_metric_list
         self.autodiscovery_task = asyncio.create_task(
-            enrich_services_with_autodiscovery_metrics(services)
+            enrich_services_with_autodiscovery_metrics(
+                services, self.last_autodiscovered_metric_list_names
+            )
         )
         self.autodiscovered_extension_versions_hash = new_extension_versions_hash
         self.time_since_last_autodiscovery = datetime.now()
-
-    async def force_autodiscovery_update(self, services, new_extension_versions_hash):
-        if self.autodiscovery_task.done():
-            await self._try_refresh_autodiscovery_task(services, new_extension_versions_hash)
-        else:
-            self.autodiscovered_metrics_cache = await self.autodiscovery_task
 
     async def get_cached_or_refreshed_metrics(
         self, services: List[GCPService], new_extension_versions: Dict[str, str]
@@ -58,6 +62,6 @@ class AutodiscoveryManager:
             or delta > self.query_interval
             or self.autodiscovery_task.done()
         ):
-            await self._try_refresh_autodiscovery_task(services, new_extension_versions_hash)
+            await self._refresh_autodiscovery_task(services, new_extension_versions_hash)
 
         return self.autodiscovered_metrics_cache
