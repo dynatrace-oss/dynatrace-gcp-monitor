@@ -126,7 +126,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
             disabled_projects, disabled_apis_by_project_id = \
                 await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
-        disabled_projects.extend(config.excluded_projects().split(','))
+        disabled_projects.extend(filter(None, config.excluded_projects().split(',')))
 
         if disabled_projects:
             for disabled_project in disabled_projects:
