@@ -118,7 +118,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
-        disabled_projects = []
+        disabled_projects = set()
         disabled_apis_by_project_id = {}
 
         # Using metrics scope feature, checking disabled apis in every project is not needed
@@ -126,7 +126,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
             disabled_projects, disabled_apis_by_project_id = \
                 await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
 
-        disabled_projects.extend(filter(None, config.excluded_projects().split(',')))
+        disabled_projects.update(filter(None, config.excluded_projects().split(',')))
 
         if disabled_projects:
             for disabled_project in disabled_projects:

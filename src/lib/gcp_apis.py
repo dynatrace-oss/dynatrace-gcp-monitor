@@ -60,8 +60,8 @@ async def _get_all_disabled_apis(context: MetricsContext, project_id: str):
 
 
 # This function return all the disabled projects that Service Account has access to and all disabled apis of the enabled projects
-async def get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids) -> Tuple[List[str], Dict[str, Set[str]]]:
-    disabled_projects = []
+async def get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids) -> Tuple[Set[str], Dict[str, Set[str]]]:
+    disabled_projects = set()
     disabled_apis = {}
     tasks_to_check_if_project_is_disabled = []
 
@@ -71,7 +71,7 @@ async def get_disabled_projects_and_disabled_apis_by_project_id(context, project
     results = await asyncio.gather(*tasks_to_check_if_project_is_disabled)
     for project_id, is_project_disabled, disabled_api_set in results:
         if is_project_disabled:
-            disabled_projects.append(project_id)
+            disabled_projects.add(project_id)
         else:
             disabled_apis[project_id] = disabled_api_set
 
