@@ -131,6 +131,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         if disabled_projects:
             for disabled_project in disabled_projects:
                 projects_ids.remove(disabled_project)
+            context.log("Disabled projects: " + ", ".join(disabled_projects))
 
         setup_time = (time.time() - setup_start_time)
         for project_id in projects_ids:
