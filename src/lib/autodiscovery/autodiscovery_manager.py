@@ -1,11 +1,12 @@
 import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
-from lib.autodiscovery.autodiscovery import AutodiscoveryResult, enrich_services_with_autodiscovery_metrics
+from lib.autodiscovery.autodiscovery import enrich_services_with_autodiscovery_metrics
+from lib.configuration import config
 from lib.metrics import GCPService
 
-AUTODISCOVERY_QUERY_INTERVAL_SEC = 60
+AUTODISCOVERY_QUERY_INTERVAL_SEC = config.get_autodiscovery_querry_interval() * 60
 
 
 class AutodiscoveryManager:
@@ -39,9 +40,10 @@ class AutodiscoveryManager:
         self.time_since_last_autodiscovery = datetime.now()
 
     async def _refresh_autodiscovery_task(self, services, new_extension_versions_hash):
-        result = await self.autodiscovery_task
-        self.autodiscovered_metrics_cache = result.enriched_services
-        self.last_autodiscovered_metric_list_names = result.discovered_metric_list
+        if self.autodiscovery_task is not None:
+            result = await self.autodiscovery_task
+            self.autodiscovered_metrics_cache = result.enriched_services
+            self.last_autodiscovered_metric_list_names = result.discovered_metric_list
         self.autodiscovery_task = asyncio.create_task(
             enrich_services_with_autodiscovery_metrics(
                 services, self.last_autodiscovered_metric_list_names
@@ -50,6 +52,12 @@ class AutodiscoveryManager:
         self.autodiscovered_extension_versions_hash = new_extension_versions_hash
         self.time_since_last_autodiscovery = datetime.now()
 
+    async def _handle_autodiscovery_task_result(self):
+        result = await self.autodiscovery_task
+        self.autodiscovered_metrics_cache = result.enriched_services
+        self.last_autodiscovered_metric_list_names = result.discovered_metric_list
+        self.autodiscovery_task = None
+
     async def get_cached_or_refreshed_metrics(
         self, services: List[GCPService], new_extension_versions: Dict[str, str]
     ):
@@ -57,10 +65,12 @@ class AutodiscoveryManager:
         time_now = datetime.now()
         delta = time_now - self.time_since_last_autodiscovery
 
+        if self.autodiscovery_task is not None and self.autodiscovery_task.done():
+            await self._handle_autodiscovery_task_result()
+
         if (
             new_extension_versions_hash != self.autodiscovered_extension_versions_hash
             or delta > self.query_interval
-            or self.autodiscovery_task.done()
         ):
             await self._refresh_autodiscovery_task(services, new_extension_versions_hash)
 
