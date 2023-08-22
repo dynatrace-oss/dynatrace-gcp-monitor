@@ -131,7 +131,9 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         logging_context.log("Successfully obtained access token")
 
-        context = await get_metric_context(gcp_session,dt_session,token,logging_context=logging_context)
+        context = await get_metric_context(
+            gcp_session, dt_session, token, logging_context=logging_context
+        )
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 

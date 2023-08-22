@@ -18,7 +18,7 @@ class AutodiscoveryManager:
     last_autodiscovered_metric_list_names: Dict[str, Any]
 
     @staticmethod
-    async def initialize(services: List[GCPService], current_extension_versions: Dict[str, str]):
+    async def init(services: List[GCPService], current_extension_versions: Dict[str, str]):
         autodiscovery_manager = AutodiscoveryManager(services, current_extension_versions)
         await autodiscovery_manager._refresh_autodiscovery_task(
             services, current_extension_versions
@@ -62,8 +62,7 @@ class AutodiscoveryManager:
         self, services: List[GCPService], new_extension_versions: Dict[str, str]
     ):
         new_extension_versions_hash = hash(tuple(sorted(new_extension_versions.items())))
-        time_now = datetime.now()
-        delta = time_now - self.time_since_last_autodiscovery
+        delta = datetime.now() - self.time_since_last_autodiscovery
 
         if self.autodiscovery_task is not None and self.autodiscovery_task.done():
             await self._handle_autodiscovery_task_result()

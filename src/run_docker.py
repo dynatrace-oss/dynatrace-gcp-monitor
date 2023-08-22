@@ -149,26 +149,26 @@ async def run_metrics_fetcher_forever():
         return
 
     services = pre_launch_check_result.services
-    extenion_versions = pre_launch_check_result.extension_versions
+    extension_versions = pre_launch_check_result.extension_versions
     new_services_from_extensions_task = None
 
     if config.metric_autodiscovery():
-        autodiscovery_manager = await AutodiscoveryManager.initialize(services,extenion_versions)
+        autodiscovery_manager = await AutodiscoveryManager.init(services, extension_versions)
     
     while True:
         start_time_s = time.time()
 
         if config.keep_refreshing_extensions_config():
-            new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services,extenion_versions))
+            new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services, extension_versions))
 
         if config.metric_autodiscovery():
-            services = await autodiscovery_manager.get_cached_or_refreshed_metrics(services,extenion_versions)
+            services = await autodiscovery_manager.get_cached_or_refreshed_metrics(services, extension_versions)
             
         await run_single_polling_with_timeout(services)
 
         if config.keep_refreshing_extensions_config():
             logging_context.log('MAIN_LOOP', 'Refreshing services config')
-            services, extenion_versions = await new_services_from_extensions_task
+            services, extension_versions = await new_services_from_extensions_task
 
         end_time_s = time.time()
 
