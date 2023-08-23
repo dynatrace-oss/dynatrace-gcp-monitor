@@ -38,8 +38,7 @@ _DYNATRACE_URL_SECRET_NAME = config.dynatrace_url_secret_name()
 _DYNATRACE_LOG_INGEST_URL_SECRET_NAME = config.dynatrace_log_ingest_url_secret_name()
 
 
-async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str, ):
-    #return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_ACCESS_KEY_SECRET_NAME)
+async def fetch_dynatrace_api_key():
     client = secretmanager.SecretManagerServiceClient()
     full_secret_version_name = 'projects/dynatrace-gcp-extension/secrets/joaquin-test-secret-gcp-monitor/versions/1'
     response = client.access_secret_version(request={"name": full_secret_version_name})
@@ -47,8 +46,7 @@ async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, t
     return secrets.get('access-key')
 
 
-async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token: str, ):
-    #return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
+async def fetch_dynatrace_url():
     client = secretmanager.SecretManagerServiceClient()
     full_secret_version_name = 'projects/dynatrace-gcp-extension/secrets/joaquin-test-secret-gcp-monitor/versions/1'
     response = client.access_secret_version(request={"name": full_secret_version_name})

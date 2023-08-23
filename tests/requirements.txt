@@ -7,3 +7,4 @@ assertpy==1.1
 cryptography==41.0.0
 pytz==2022.2.1
 urllib3==1.26.6
+google-cloud-secret-manager==2.16.3

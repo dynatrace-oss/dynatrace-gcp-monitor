@@ -91,8 +91,8 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         project_id_owner = get_project_id_from_environment()
 
-        dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-        dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+        dynatrace_api_key = await fetch_dynatrace_api_key()
+        dynatrace_url = await fetch_dynatrace_url()
         check_version(logging_context=context)
         await check_dynatrace(logging_context=context,
                               project_id=project_id_owner,
