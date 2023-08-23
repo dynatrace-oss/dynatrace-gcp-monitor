@@ -158,8 +158,8 @@ class MetricsFastCheck:
     async def is_project_ready_to_monitor(self, project_id: str) -> Tuple[str, bool]:
         try:
             if is_deployment_running_inside_cloud_function():
-                dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
-                dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
+                dynatrace_url = await fetch_dynatrace_url()
+                dynatrace_access_key = await fetch_dynatrace_api_key()
                 await check_dynatrace(logging_context=self.logging_context,
                                       project_id=get_project_id_from_environment(),
                                       dt_session=self.dt_session,

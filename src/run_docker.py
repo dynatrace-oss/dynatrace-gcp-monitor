@@ -116,8 +116,8 @@ async def sfm_send_loop_timeouts(finished_before_timeout: bool):
         token = await create_token(logging_context, gcp_session)
         context = SfmContext(
             project_id_owner=config.project_id(),
-            dynatrace_api_key=await credentials.fetch_dynatrace_api_key(gcp_session, config.project_id(), token),
-            dynatrace_url=await credentials.fetch_dynatrace_url(gcp_session, config.project_id(), token),
+            dynatrace_api_key=await credentials.fetch_dynatrace_api_key(),
+            dynatrace_url=await credentials.fetch_dynatrace_url(),
             token=token,
             scheduled_execution_id=None,
             self_monitoring_enabled=config.self_monitoring_enabled(),

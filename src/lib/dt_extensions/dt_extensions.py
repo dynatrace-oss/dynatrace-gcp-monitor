@@ -32,8 +32,8 @@ async def prepare_services_config_for_next_polling(current_services: List[GCPSer
 async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[ExtensionsFetchResult]:
     extension_fetcher_result = await ExtensionsFetcher(
         dt_session=dt_session,
-        dynatrace_url=await fetch_dynatrace_url(gcp_session, config.project_id(), token),
-        dynatrace_access_key=await fetch_dynatrace_api_key(gcp_session, config.project_id(), token),
+        dynatrace_url=await fetch_dynatrace_url(),
+        dynatrace_access_key=await fetch_dynatrace_api_key(),
         logging_context=logging_context
     ).execute()
 
