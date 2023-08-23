@@ -152,3 +152,5 @@ async def ingest_lines_output(expected_ingest_output_file):
         assert_that(actual_ingest_lines).is_length(len(expected_ingest_lines))
         assert_that(actual_ingest_lines).contains_only(*expected_ingest_lines)
 '''
+def test_placeholder():
+    pass
