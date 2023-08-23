@@ -19,6 +19,7 @@ import time
 
 import jwt
 from aiohttp import ClientSession
+from google.cloud import secretmanager
 
 from lib.configuration import config
 from lib.context import LoggingContext
@@ -38,11 +39,21 @@ _DYNATRACE_LOG_INGEST_URL_SECRET_NAME = config.dynatrace_log_ingest_url_secret_n
 
 
 async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str, ):
-    return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_ACCESS_KEY_SECRET_NAME)
+    #return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_ACCESS_KEY_SECRET_NAME)
+    client = secretmanager.SecretManagerServiceClient()
+    full_secret_version_name = 'projects/dynatrace-gcp-extension/secrets/joaquin-test-secret-gcp-monitor/versions/1'
+    response = client.access_secret_version(request={"name": full_secret_version_name})
+    secrets = json.loads(response.payload.data)
+    return secrets.get('access-key')
 
 
 async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token: str, ):
-    return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
+    #return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
+    client = secretmanager.SecretManagerServiceClient()
+    full_secret_version_name = 'projects/dynatrace-gcp-extension/secrets/joaquin-test-secret-gcp-monitor/versions/1'
+    response = client.access_secret_version(request={"name": full_secret_version_name})
+    secrets = json.loads(response.payload.data)
+    return secrets.get('url')
 
 
 def get_dynatrace_api_key_from_env():

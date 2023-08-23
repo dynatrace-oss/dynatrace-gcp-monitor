@@ -390,6 +390,11 @@ else
   CLUSTER_NAME=$(kubectl config current-context 2>${CMD_OUT_PIPE})
 fi
 
+info "Installing CSI drivers"
+helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
+helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace "$KUBERNETES_NAMESPACE"
+gcloud secrets add-iam-policy-binding joaquin-test-secret-gcp-monitor --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
+
 debug "Installing Dynatrace Integration Helm Chart on selected kubernetes cluster"
 info ""
 info "- 7. Install dynatrace-gcp-monitor with helm chart in $CLUSTER_NAME"
