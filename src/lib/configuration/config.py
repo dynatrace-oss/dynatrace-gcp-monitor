@@ -1,6 +1,17 @@
 import os
 
 
+def get_number_from_env(env_var, default_value):
+    number = os.environ.get(env_var, default_value)
+    try:
+        value_int = int(number)
+        if value_int < 0:
+            return 0
+        return value_int
+    except (ValueError, TypeError):
+        return default_value
+
+
 def self_monitoring_enabled():
     return os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
 
@@ -59,17 +70,6 @@ def gcp_service_usage_url():
 
 def gcp_monitoring_url():
     return os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
-
-def get_number_from_env(env_var, default_value):
-    number = os.environ.get(env_var, default_value)
-    try:
-        value_int = int(number)
-        if value_int < 0:
-            return 0
-        return value_int
-    except (ValueError, TypeError):
-        return default_value
-
 
 def gcp_allowed_metric_dimension_value_length():
     return get_number_from_env("ALLOWED_METRIC_DIMENSION_VALUE_LENGTH", 250)
