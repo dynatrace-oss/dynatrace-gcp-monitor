@@ -23,7 +23,7 @@ from lib.context import LoggingContext, get_should_require_valid_certificate
 from lib.metrics import GCPService
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
 
-ExtensionsFetchResult = NamedTuple('ExtensionsFetchResult', [('services', List[GCPService])])
+ExtensionsFetchResult = NamedTuple("ExtensionsFetchResult",[("services", List[GCPService]), ("extension_versions", Dict[str, str])],)
 
 
 ExtensionCacheEntry = NamedTuple('ExtensionCacheEntry', [('version', str), ('definition', Dict)])
@@ -55,7 +55,7 @@ class ExtensionsFetcher:
         if not_configured_services:
             self.logging_context.log(f"Following services (enabled in extensions) are filtered out,"
                                      f" because not enabled in deployment config: {not_configured_services}")
-        return ExtensionsFetchResult(services=configured_services)
+        return ExtensionsFetchResult(services=configured_services,extension_versions=extension_name_to_version_dict)
 
     async def _get_extensions_dict_from_dynatrace_cluster(self) -> Dict[str, str]:
         dynatrace_extensions = await self._get_extension_list_from_dynatrace_cluster()

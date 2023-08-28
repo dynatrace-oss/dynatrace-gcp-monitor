@@ -1,6 +1,17 @@
 import os
 
 
+def get_number_from_env(env_var, default_value):
+    number = os.environ.get(env_var, default_value)
+    try:
+        value_int = int(number)
+        if value_int < 0:
+            return 0
+        return value_int
+    except (ValueError, TypeError):
+        return default_value
+
+
 def self_monitoring_enabled():
     return os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
 
@@ -60,23 +71,29 @@ def gcp_service_usage_url():
 def gcp_monitoring_url():
     return os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
 
-
 def gcp_allowed_metric_dimension_value_length():
-    return os.environ.get("ALLOWED_METRIC_DIMENSION_VALUE_LENGTH", 250)
+    return get_number_from_env("ALLOWED_METRIC_DIMENSION_VALUE_LENGTH", 250)
 
 
 def gcp_allowed_metric_dimension_key_length():
-    return os.environ.get("ALLOWED_METRIC_DIMENSION_KEY_LENGTH", 100)
+    return get_number_from_env("ALLOWED_METRIC_DIMENSION_KEY_LENGTH", 100)
 
 
 def gcp_allowed_metric_key_length():
-    return os.environ.get("ALLOWED_METRIC_KEY_LENGTH", 250)
+    return get_number_from_env("ALLOWED_METRIC_KEY_LENGTH", 250)
+
 
 def gcp_allowed_metric_display_name():
-     return os.environ.get("ALLOWED_METRIC_DISPLAY_NAME_LENGTH", 300)
+    return get_number_from_env("ALLOWED_METRIC_DISPLAY_NAME_LENGTH", 300)
+
 
 def gcp_allowed_metric_description():
-     return os.environ.get("ALLOWED_METRIC_DESCRIPTION_LENGTH", 65535)
+    return get_number_from_env("ALLOWED_METRIC_DESCRIPTION_LENGTH", 65535)
+
 
 def gcp_allowed_metric_unit_name():
-     return os.environ.get("ALLOWED_METRIC_UNIT_NAME_LENGTH", 63)
+    return get_number_from_env("ALLOWED_METRIC_UNIT_NAME_LENGTH", 63)
+
+
+def get_autodiscovery_querry_interval():
+    return get_number_from_env("AUTODISCOVERY_QUERY_INTERVAL", 60)

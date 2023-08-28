@@ -21,6 +21,7 @@ from datetime import datetime
 from os import listdir
 from os.path import isfile
 from typing import Dict, List, Optional, Set, Iterable
+from aiohttp import ClientSession
 
 import yaml
 
@@ -71,49 +72,67 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
     logging_context.log(f"Execution took {elapsed_time}")
 
 
+async def get_metric_context(
+    gcp_session: ClientSession,
+    dt_session: ClientSession,
+    token: str,
+    logging_context: LoggingContext,
+) -> MetricsContext:
+    project_id_owner = get_project_id_from_environment()
+
+    dynatrace_api_key = await fetch_dynatrace_api_key(
+        gcp_session=gcp_session, project_id=project_id_owner, token=token
+    )
+    dynatrace_url = await fetch_dynatrace_url(
+        gcp_session=gcp_session, project_id=project_id_owner, token=token
+    )
+    check_version(logging_context=logging_context)
+    await check_dynatrace(
+        logging_context=logging_context,
+        project_id=project_id_owner,
+        dt_session=dt_session,
+        dynatrace_url=dynatrace_url,
+        dynatrace_access_key=dynatrace_api_key,
+    )
+
+    query_interval_min = get_query_interval_minutes()
+
+    context = MetricsContext(
+        gcp_session=gcp_session,
+        dt_session=dt_session,
+        project_id_owner=project_id_owner,
+        token=token,
+        execution_time=datetime.utcnow(),
+        execution_interval_seconds=60 * query_interval_min,
+        dynatrace_api_key=dynatrace_api_key,
+        dynatrace_url=dynatrace_url,
+        print_metric_ingest_input=config.print_metric_ingest_input(),
+        self_monitoring_enabled=config.self_monitoring_enabled(),
+        scheduled_execution_id=logging_context.scheduled_execution_id,
+    )
+
+    return context
+
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
-    context = LoggingContext(execution_id)
+    logging_context = LoggingContext(execution_id)
     if not services:
         # Load services for Cloud Function
-        services = load_supported_services(context)
+        services = load_supported_services(logging_context)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         setup_start_time = time.time()
-        token = await create_token(context, gcp_session)
+        token = await create_token(logging_context, gcp_session)
 
         if token is None:
-            context.log("Cannot proceed without authorization token, stopping the execution")
+            logging_context.log("Cannot proceed without authorization token, stopping the execution")
             return
         if not isinstance(token, str):
             raise Exception(f"Failed to fetch access token, got non string value: {token}")
 
-        context.log("Successfully obtained access token")
+        logging_context.log("Successfully obtained access token")
 
-        project_id_owner = get_project_id_from_environment()
-
-        dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-        dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-        check_version(logging_context=context)
-        await check_dynatrace(logging_context=context,
-                              project_id=project_id_owner,
-                              dt_session=dt_session,
-                              dynatrace_url=dynatrace_url,
-                              dynatrace_access_key=dynatrace_api_key)
-
-        query_interval_min = get_query_interval_minutes()
-
-        context = MetricsContext(
-            gcp_session=gcp_session,
-            dt_session=dt_session,
-            project_id_owner=project_id_owner,
-            token=token,
-            execution_time=datetime.utcnow(),
-            execution_interval_seconds=60 * query_interval_min,
-            dynatrace_api_key=dynatrace_api_key,
-            dynatrace_url=dynatrace_url,
-            print_metric_ingest_input=config.print_metric_ingest_input(),
-            self_monitoring_enabled=config.self_monitoring_enabled(),
-            scheduled_execution_id=context.scheduled_execution_id
+        context = await get_metric_context(
+            gcp_session, dt_session, token, logging_context=logging_context
         )
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
@@ -206,17 +225,6 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                     context=context, project_id=project_id, service=service, metric=metric
                 )
                 fetch_metric_coros.append(fetch_metric_coro)
-
-                if metric.autodiscovered_metric:
-                    metrics_metadata.append(
-                        MetadataIngestLine(
-                            metric_name=metric.dynatrace_name,
-                            metric_type=metric.dynatrace_metric_type,
-                            metric_display_name=metric.name,
-                            metric_description=metric.description,
-                            metric_unit=metric.unit,
-                        )
-                    )
 
     context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")
 

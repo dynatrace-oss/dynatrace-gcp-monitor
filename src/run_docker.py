@@ -17,12 +17,13 @@ import platform
 import threading
 import time
 from datetime import datetime
-from typing import Optional, List, NamedTuple
+from typing import Optional, List, NamedTuple, Dict
 
 from aiohttp import ClientSession
 
 from lib import credentials
 from lib.autodiscovery.autodiscovery import enrich_services_with_autodiscovery_metrics
+from lib.autodiscovery.autodiscovery_manager import AutodiscoveryManager
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes, SfmContext
@@ -50,7 +51,7 @@ if platform.system() == 'Windows':
 
 loop = asyncio.get_event_loop()
 
-PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('projects', List[str]), ('services', List[GCPService])])
+PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('projects', List[str]), ('services', List[GCPService]), ('extension_versions', Dict[str,str])])
 
 logging_context = LoggingContext(None)
 
@@ -70,7 +71,7 @@ async def metrics_pre_launch_check() -> Optional[PreLaunchCheckResult]:
         if not extensions_fetch_result:
             return None
 
-    return PreLaunchCheckResult(projects=fast_check_result.projects, services=extensions_fetch_result.services)
+    return PreLaunchCheckResult(projects=fast_check_result.projects, services=extensions_fetch_result.services, extension_versions=extensions_fetch_result.extension_versions)
 
 
 async def metrics_initial_check(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[FastCheckResult]:
@@ -148,27 +149,32 @@ async def run_metrics_fetcher_forever():
         return
 
     services = pre_launch_check_result.services
+    extension_versions = pre_launch_check_result.extension_versions
     new_services_from_extensions_task = None
 
+    if config.metric_autodiscovery():
+        autodiscovery_manager = await AutodiscoveryManager.init(services, extension_versions)
+    
     while True:
         start_time_s = time.time()
 
         if config.keep_refreshing_extensions_config():
-            new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services))
+            new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services, extension_versions))
 
         if config.metric_autodiscovery():
-            services = await enrich_services_with_autodiscovery_metrics(services)
+            services = await autodiscovery_manager.get_cached_or_refreshed_metrics(services, extension_versions)
             
         await run_single_polling_with_timeout(services)
 
         if config.keep_refreshing_extensions_config():
             logging_context.log('MAIN_LOOP', 'Refreshing services config')
-            services = await new_services_from_extensions_task
+            services, extension_versions = await new_services_from_extensions_task
 
         end_time_s = time.time()
 
         polling_duration = end_time_s - start_time_s
         logging_context.log('MAIN_LOOP', f"Polling finished after {round(polling_duration, 2)}s")
+
 
         await sleep_until_next_polling(polling_duration)
 
