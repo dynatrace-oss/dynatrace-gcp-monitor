@@ -14,15 +14,10 @@
 
 import asyncio
 import hashlib
-import os
 import time
-import traceback
 from datetime import datetime
-from os import listdir
-from os.path import isfile
 from typing import Dict, List, Optional, Set, Iterable
 
-import yaml
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
@@ -37,26 +32,12 @@ from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.topology.topology import fetch_topology, build_entity_id_map
-from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets, \
-    is_yaml_file, extract_technology_name
 from lib.sfm.api_call_latency import ApiCallLatency
-
-
-def dynatrace_gcp_extension(event, context):
-    """
-    Starting point for installation as a function.
-    See https://cloud.google.com/functions/docs/calling/pubsub#event_structure
-    """
-    try:
-        asyncio.run(query_metrics(None, None))
-    except Exception as e:
-        traceback.print_exc()
-        raise e
 
 
 async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = None):
     """
-    Starting point for installation as a cluster.
+    Starting point for metrics monitoring main loop.
     """
     timestamp_utc = datetime.utcnow()
     timestamp_utc_iso = timestamp_utc.isoformat()
@@ -73,9 +54,6 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
 
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
     context = LoggingContext(execution_id)
-    if not services:
-        # Load services for Cloud Function
-        services = load_supported_services(context)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         setup_start_time = time.time()
@@ -91,8 +69,8 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         project_id_owner = get_project_id_from_environment()
 
-        dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
+        dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
         check_version(logging_context=context)
         await check_dynatrace(logging_context=context,
                               project_id=project_id_owner,
@@ -220,48 +198,6 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     entity_id_map = build_entity_id_map(list(topology.values()))
     flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
     return flat_metric_results
-
-
-def load_supported_services(context: LoggingContext) -> List[GCPService]:
-    activation_yaml = read_activation_yaml()
-    activation_config_per_service = get_activation_config_per_service(activation_yaml)
-    feature_sets_from_activation_config = load_activated_feature_sets(context, activation_yaml)
-
-    working_directory = os.path.dirname(os.path.realpath(__file__))
-    config_directory = os.path.join(working_directory, "config")
-    config_files = [
-        file for file
-        in listdir(config_directory)
-        if isfile(os.path.join(config_directory, file)) and is_yaml_file(file)
-    ]
-
-    services = []
-    for file in config_files:
-        config_file_path = os.path.join(config_directory, file)
-        try:
-            with open(config_file_path, encoding="utf-8") as config_file:
-                config_yaml = yaml.safe_load(config_file)
-                technology_name = extract_technology_name(config_yaml)
-
-                for service_yaml in config_yaml.get("gcp", {}):
-                    service_name = service_yaml.get("service", "None")
-                    feature_set = service_yaml.get("featureSet", "default_metrics")
-                    # If whitelist of services exists and current service is not present in it, skip
-                    # If whitelist is empty - no services explicitly selected - load all available
-                    whitelist_exists = feature_sets_from_activation_config.__len__() > 0
-                    if f'{service_name}/{feature_set}' in feature_sets_from_activation_config or not whitelist_exists:
-                        activation = activation_config_per_service.get(service_name, {})
-                        services.append(GCPService(tech_name=technology_name, **service_yaml, activation=activation))
-
-        except Exception as error:
-            context.log(f"Failed to load configuration file: '{config_file_path}'. Error details: {error}")
-            continue
-    feature_sets = [f"{service.name}/{service.feature_set}" for service in services]
-    if feature_sets:
-        context.log("Selected feature sets: " + ", ".join(feature_sets))
-    else:
-        context.log("Empty feature sets. GCP services not monitored.")
-    return services
 
 
 async def run_fetch_metric(

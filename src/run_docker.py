@@ -19,13 +19,11 @@ import time
 from datetime import datetime
 from typing import Optional, List, NamedTuple
 
-from aiohttp import ClientSession
-
 from lib import credentials
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes, SfmContext
-from lib.credentials import create_token, get_project_id_from_environment
+from lib.credentials import create_token, get_project_id_from_environment, get_all_accessible_projects
 from lib.dt_extensions.dt_extensions import extensions_fetch, prepare_services_config_for_next_polling
 from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
@@ -49,7 +47,8 @@ if platform.system() == 'Windows':
 
 loop = asyncio.get_event_loop()
 
-PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('projects', List[str]), ('services', List[GCPService])])
+# TODO: Now it can be a simple list of services. Tests would need to be adjusted
+PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('services', List[GCPService])])
 
 logging_context = LoggingContext(None)
 
@@ -61,30 +60,18 @@ async def metrics_pre_launch_check() -> Optional[PreLaunchCheckResult]:
             logging_context.log(f'Monitoring disabled. Unable to acquire authorization token.')
             return None
 
-        fast_check_result = await metrics_initial_check(gcp_session, dt_session, token)
-        if not fast_check_result:
+        # TODO: Only checking available projects. Could be removed, maybe? It's being checked in every monitoring loop either way
+        available_projects = await get_all_accessible_projects(logging_context, gcp_session, token)
+        if not available_projects:
             return None
+
+        # TODO: Metrics fastcheck could be done here
 
         extensions_fetch_result = await extensions_fetch(gcp_session, dt_session, token)
         if not extensions_fetch_result:
             return None
 
-    return PreLaunchCheckResult(projects=fast_check_result.projects, services=extensions_fetch_result.services)
-
-
-async def metrics_initial_check(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[FastCheckResult]:
-    fast_check_result = await MetricsFastCheck(
-        gcp_session=gcp_session,
-        dt_session=dt_session,
-        token=token,
-        logging_context=logging_context
-    ).execute()
-    if fast_check_result.projects:
-        logging_context.log(f'Monitoring enabled for the following projects: {fast_check_result.projects}')
-        return fast_check_result
-    else:
-        logging_context.log("Monitoring disabled. Check your project(s) settings.")
-        return None
+    return PreLaunchCheckResult(services=extensions_fetch_result.services)
 
 
 async def run_instance_metadata_check() -> Optional[InstanceMetadata]:

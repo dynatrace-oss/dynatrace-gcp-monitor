@@ -66,7 +66,3 @@ def extract_technology_name(config_yaml):
     if isinstance(technology_name, Dict):
         technology_name = technology_name.get("name", "N/A")
     return technology_name
-
-
-def is_deployment_running_inside_cloud_function():
-    return K8S_CONTAINER_NAME_PREFIX not in HOSTNAME
