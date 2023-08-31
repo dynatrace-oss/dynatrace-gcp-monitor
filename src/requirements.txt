@@ -1,3 +1,4 @@
+setuptools==65.5.1
 # metrics
 aiohttp==3.8.5
 aiodns==2.0.0
