@@ -22,8 +22,10 @@ def test_token_masking_old_format():
 
 
 def test_token_masking_new_format():
+    token_public_part = "dt0c01.FAKE11."
+    token_private_part = "FAKEEU7QQ5KW7BZVN2XQFAKEFAKEJFHLZKTOUTFZKAAZTRSFR4HTJXZKXIZPPUVZ2D7YPRXY2IUFAKE7JY"
     assert_that(obfuscate_dynatrace_access_key(
-        "dt0c01.FAKE11.FAKEEU7QQ5KW7BZVN2XQFAKEFAKEJFHLZKTOUTFZKAAZTRSFR4HTJXZKXIZPPUVZ2D7YPRXY2IUFAKE7JY")).is_equal_to(
+        token_public_part + token_private_part)).is_equal_to(
         "dt0c01.FAKE11")
 
 
