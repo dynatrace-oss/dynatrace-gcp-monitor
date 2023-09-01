@@ -49,15 +49,15 @@ def get_activation_config_per_service(activation_yaml):
 
 
 def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml) -> List[str]:
-    services_whitelist = []
+    services_allow_list = []
     for service in activation_yaml.get("services", []):
         feature_sets = service.get("featureSets", [])
         for feature_set in feature_sets:
-            services_whitelist.append(f"{service.get('service')}/{feature_set}")
+            services_allow_list.append(f"{service.get('service')}/{feature_set}")
         if not feature_sets:
             logging_context.error(f"No feature set in given {service} service.")
 
-    return services_whitelist
+    return services_allow_list
 
 
 def is_yaml_file(f: str) -> bool:
@@ -96,10 +96,10 @@ def load_supported_services() -> List[GCPService]:
                 for service_yaml in config_yaml.get("gcp", {}):
                     service_name = service_yaml.get("service", "None")
                     feature_set = service_yaml.get("featureSet", "default_metrics")
-                    # If whitelist of services exists and current service is not present in it, skip
-                    # If whitelist is empty - no services explicitly selected - load all available
-                    whitelist_exists = feature_sets_from_activation_config.__len__() > 0
-                    if f'{service_name}/{feature_set}' in feature_sets_from_activation_config or not whitelist_exists:
+                    # If allow_list of services exists and current service is not present in it, skip
+                    # If allow_list is empty - no services explicitly selected - load all available
+                    allow_list_exists = feature_sets_from_activation_config.__len__() > 0
+                    if f'{service_name}/{feature_set}' in feature_sets_from_activation_config or not allow_list_exists:
                         activation = activation_config_per_service.get(service_name, {})
                         services.append(GCPService(tech_name=technology_name, **service_yaml, activation=activation))
 
