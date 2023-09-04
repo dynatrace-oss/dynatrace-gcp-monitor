@@ -111,7 +111,7 @@ class ExtensionsFetcher:
             activation = activation_config_per_service.get(service_name, {})
             is_configured = feature_set in feature_sets_from_activation_config
             all_services.append(
-                GCPService(**service, activation=activation, is_enabled=is_configured)
+                GCPService(**service, activation=activation, is_enabled=is_configured, extension_name=extension_name)
             )
             if not is_configured:
                 not_configured_services.append(feature_set)

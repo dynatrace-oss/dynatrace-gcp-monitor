@@ -18,6 +18,7 @@ import re
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import List, Text, Any, Dict
+from lib.autodiscovery.autodiscovery_manager import AutodiscoveryResourceLinking
 from lib.configuration import config
 
 VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
@@ -162,7 +163,6 @@ class Metric:
             object.__setattr__(self, "sample_period_seconds", timedelta(seconds=60))
 
 
-@dataclass(frozen=True)
 class GCPService:
     """Describes singular GCP service to ingest data from."""
     # IMPORTANT! this object is only for one combination of object/featureSet!
@@ -176,6 +176,7 @@ class GCPService:
     monitoring_filter: Text
     activation: Dict[Text, Any]
     is_enabled: bool
+    extension_name: str
 
     def __init__(self, **kwargs):
         object.__setattr__(self, "name", kwargs.get("service", ""))
@@ -200,9 +201,22 @@ class GCPService:
         monitoring_filter = VARIABLE_VAR_PATTERN.sub('', monitoring_filter)
         object.__setattr__(self, "monitoring_filter", monitoring_filter)
         object.__setattr__(self, "is_enabled",  kwargs.get("is_enabled", True))
+        object.__setattr__(self, "extension_name",  kwargs.get("extension_name", "Unknown Extension"))
 
     def __hash__(self):
         return hash((self.name, self.technology_name, self.feature_set, self.monitoring_filter))
+
+
+class AutodiscoveryGCPService(GCPService):
+    resources_to_metrics: Dict[str, List[Metric]]
+    resources_linking: List[AutodiscoveryResourceLinking]
+
+    def __init__(self) -> None:
+        super().__init__(service="Autodiscovery Service", extension_name = "GCP Autodiscovery")
+
+    def set_metrics(self, resources_to_metrics: Dict[str, List[Metric]], resource: List[AutodiscoveryResourceLinking]):
+        self.resources_to_metrics = resources_to_metrics
+        self.resources_linking = resource
 
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'
