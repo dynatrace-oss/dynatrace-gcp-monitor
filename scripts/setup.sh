@@ -13,7 +13,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-GCP_FUNCTION_RELEASE_VERSION=''
+GCP_FUNCTION_RELEASE_VERSION='release-1.1.8'
 
 WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./scripts/lib.sh
