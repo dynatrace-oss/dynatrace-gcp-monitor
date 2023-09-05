@@ -14,12 +14,16 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import List, Text, Any, Dict
-from lib.autodiscovery.autodiscovery_manager import AutodiscoveryResourceLinking
+from typing import TYPE_CHECKING, List, Optional, Text, Any, Dict
+
 from lib.configuration import config
+
+if TYPE_CHECKING:
+    from lib.autodiscovery.autodiscovery import AutodiscoveryResourceLinking
 
 VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
 VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
@@ -172,7 +176,7 @@ class GCPService:
     technology_name: Text
     feature_set: Text
     dimensions: List[Dimension]
-    metrics = List[Metric]
+    metrics:  List[Metric]
     monitoring_filter: Text
     activation: Dict[Text, Any]
     is_enabled: bool
@@ -209,14 +213,34 @@ class GCPService:
 
 class AutodiscoveryGCPService(GCPService):
     resources_to_metrics: Dict[str, List[Metric]]
-    resources_linking: List[AutodiscoveryResourceLinking]
+    resources_linking: Dict[str, AutodiscoveryResourceLinking]
+    metrics_to_resources: Dict[str, Optional[AutodiscoveryResourceLinking]]
 
     def __init__(self) -> None:
         super().__init__(service="Autodiscovery Service", extension_name = "GCP Autodiscovery")
 
-    def set_metrics(self, resources_to_metrics: Dict[str, List[Metric]], resource: List[AutodiscoveryResourceLinking]):
+    def set_metrics(self, resources_to_metrics: Dict[str, List[Metric]], resource_linking: Dict[str, AutodiscoveryResourceLinking]):
+        self.metrics_to_resources = {metric.google_metric: resource_linking[resource] for resource, metrics in resources_to_metrics.items() for metric in metrics}
+        self.metrics = [metric for metrics in resources_to_metrics.values() for metric in metrics]
         self.resources_to_metrics = resources_to_metrics
-        self.resources_linking = resource
+        self.resources_linking = resource_linking
+
+    
+    def get_dimensions(self, metric: Metric) -> List[Dimension]:
+        linking = self.metrics_to_resources[metric.google_metric]
+        if linking:
+            return linking.possible_service_linking[0].dimensions
+        else:
+            Exception("Not Implemented")
+    
+
+    
+    def get_name(self,metric) -> str:
+        linking = self.metrics_to_resources[metric.google_metric]
+        if linking:
+            return linking.possible_service_linking[0].name
+        else:
+            Exception("Not Implemented")
 
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'

@@ -1,12 +1,12 @@
 import asyncio
 import os
 import time
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from itertools import chain
 from typing import Dict, List, NamedTuple, Any, Set
+import json
 
 from aiohttp import ClientSession
-from lib.autodiscovery.autodiscovery_manager import AutodiscoveryResourceLinking
 from lib.autodiscovery.gcp_metrics_descriptor import GCPMetricDescriptor
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
@@ -70,6 +70,9 @@ async def run_fetch_metric_descriptors(
         response.raise_for_status()
         response_json = await response.json()
 
+        with open(f"descriptors-{project_id}.json" ,"a") as f:
+            json.dump(response_json, f, indent=4, sort_keys=False)
+
         for descriptor in response_json.get("metricDescriptors", []):
             try:
                 metric_descriptor = GCPMetricDescriptor.create(**descriptor, project_id=project_id)
@@ -79,6 +82,7 @@ async def run_fetch_metric_descriptors(
                     and metric_descriptor.monitored_resources_types[0] in resources_to_autodiscovery
                 ):
                     project_discovered_metrics.append(metric_descriptor)
+                    print(f"[{project_id}]: {descriptor}")
             except Exception as error:
                 logging_context.log(
                     f"Failed to load autodiscovered metric for project: {project_id}. Details: {error}"
@@ -88,6 +92,7 @@ async def run_fetch_metric_descriptors(
         params["pageToken"] = page_token
         if page_token == "":
             break
+        print("Next Token!")
     return [
         FetchMetricDescriptorsResult(project_id, metric_descriptor)
         for metric_descriptor in project_discovered_metrics
@@ -120,15 +125,23 @@ async def send_metric_metadata(
     return previously_discovered_metrics
 
 
+@dataclass(frozen=True)
+class AutodiscoveryResourceLinking:
+    possible_service_linking: List[GCPService]
+    disabled_services_for_resource: List[GCPService]
+
+
 async def get_metric_descriptors(
     metric_context: MetricsContext,
     gcp_session: ClientSession,
     token: str,
-    autodiscovery_resources: List[AutodiscoveryResourceLinking],
+    autodiscovery_resources_to_services: Dict[str, AutodiscoveryResourceLinking],
 ) -> Dict[GCPMetricDescriptor, List[str]]:
     project_ids = await get_project_ids(metric_context, gcp_session, token)
 
-    resources_to_autodiscovery = {resource.resource_name for resource in autodiscovery_resources}
+    resources_to_autodiscovery = {
+        resource for resource in autodiscovery_resources_to_services.keys()
+    }
     metric_fetch_coroutines = []
     metric_per_project = {}
     for project_id in project_ids:
@@ -150,16 +163,22 @@ async def get_metric_descriptors(
 
 
 async def get_existing_metrics(
-    autodiscovery_resources: List[AutodiscoveryResourceLinking],
+    autodiscovery_resources: Dict[str, AutodiscoveryResourceLinking],
 ) -> Dict[str, Set[str]]:
-    resources_to_metrics = {x.resource_name: set() for x in autodiscovery_resources}
+    resources_to_metrics = {
+        resource_name: set() for resource_name in autodiscovery_resources.keys()
+    }
 
-    for autodisovery_resource in autodiscovery_resources:
+    for resource_name, service_linking in autodiscovery_resources.items():
         metric_name_list = []
-        for service in autodisovery_resource.possible_service_linking:
-            for metric in service.metrics:
-                metric_name_list.append(metric.google_metric)
-        resources_to_metrics[autodisovery_resource.resource_name] = set(metric_name_list)
+        if service_linking:
+            for service in service_linking.possible_service_linking:
+                for metric in service.metrics:
+                    metric_name_list.append(metric.google_metric)
+            for service in service_linking.disabled_services_for_resource:
+                for metric in service.metrics:
+                    metric_name_list.append(metric.google_metric)
+        resources_to_metrics[resource_name] = set(metric_name_list)
 
     return resources_to_metrics
 
@@ -170,27 +189,15 @@ async def run_autodiscovery(
     dt_session: ClientSession,
     token: str,
     previously_discovered_metrics: Dict[str, Any],
-    autodiscovery_resources: List[AutodiscoveryResourceLinking],
+    autodiscovery_resources: Dict[str, AutodiscoveryResourceLinking],
 ) -> AutodiscoveryResult:
     start_time = time.time()
     logging_context.log("Adding metrics using autodiscovery")
     metric_context = await get_metric_context(gcp_session, dt_session, token, logging_context)
 
-    filtered_gcp_extension_services = list(
-        filter(lambda x: discovered_resource_type in x.name, gcp_services_list)
-    )
-
-    existing_metric_list = []
-    for service in filtered_gcp_extension_services:
-        existing_metric_list.extend(service.metrics)
-
     discovered_metric_descriptors = await get_metric_descriptors(
         metric_context, gcp_session, token, autodiscovery_resources
     )
-
-    existing_metric_names = {}
-    for existing_metric in existing_metric_list:
-        existing_metric_names[existing_metric.google_metric] = None
 
     existing_resources_to_metrics = await get_existing_metrics(autodiscovery_resources)
 
@@ -198,7 +205,7 @@ async def run_autodiscovery(
 
     for descriptor, project_ids in discovered_metric_descriptors.items():
         monitored_resource = descriptor.monitored_resources_types[0]
-        if descriptor.value in existing_resources_to_metrics[monitored_resource]:
+        if descriptor.value not in existing_resources_to_metrics[monitored_resource]:
             autodiscovery_resources_to_metrics.setdefault(monitored_resource, []).append(
                 Metric(**(asdict(descriptor)), autodiscovered_metric=True, project_ids=project_ids)
             )
@@ -228,7 +235,7 @@ async def run_autodiscovery(
 async def enrich_services_with_autodiscovery_metrics(
     current_services: List[GCPService],
     previously_discovered_metrics: Dict[str, Any],
-    autodiscovery_resources: List[AutodiscoveryResourceLinking],
+    autodiscovery_resources: Dict[str, AutodiscoveryResourceLinking],
 ) -> AutodiscoveryResult:
     try:
         async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:

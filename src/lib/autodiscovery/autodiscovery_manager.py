@@ -1,14 +1,10 @@
-import asyncio
-from dataclasses import dataclass
-import yaml
-from datetime import datetime, timedelta
 from typing import Any, Dict, List, NamedTuple, Optional
 
-from lib.autodiscovery.autodiscovery import enrich_services_with_autodiscovery_metrics
-from lib.configuration import config
+import yaml
+
+from lib.autodiscovery.autodiscovery import AutodiscoveryResourceLinking, enrich_services_with_autodiscovery_metrics
 from lib.context import LoggingContext
 from lib.metrics import AutodiscoveryGCPService, GCPService
-
 
 GcpServiceStub = NamedTuple(
     "GcpServiceStub", [("extension_name", str), ("service_name", str), ("feature_set", str)]
@@ -18,17 +14,10 @@ AutodiscoveryResource = NamedTuple(
     "GcpServiceStub", [("extension_name", str), ("service_name", str), ("feature_set", str)]
 )
 
-@dataclass(frozen=True)
-class AutodiscoveryResourceLinking:
-    resource_name: str
-    possible_service_linking: List[GCPService]
-    disabled_services_for_resource: List[GCPService]
-
 
 class AutodiscoveryManager:
     autodiscovery_config: Dict[str, Any]
     autodiscovery_resource_mapping: Dict[str, Any]
-    autodiscovery_service: AutodiscoveryGCPService
     last_autodiscovered_metric_list_names: Dict[str, Any]
     logging_context = LoggingContext("AUTODISCOVERY")
     autodiscovery_enabled: bool
@@ -50,9 +39,11 @@ class AutodiscoveryManager:
                         )
         return {key: list(set(value)) for key, value in resource_mapping.items()}
 
-    def check_resources_to_autodiscovery(
+    async def check_resources_to_autodiscovery(
         self, services: List[GCPService]
-    ) -> List[AutodiscoveryResourceLinking]:
+    ) -> Dict[str, AutodiscoveryResourceLinking]:
+        prepared_resources = {}
+
         searched_resources = self.autodiscovery_config["searched_resources"]
 
         enabled_services_identifiers = {}
@@ -64,11 +55,8 @@ class AutodiscoveryManager:
             identifier = (extension_name, service.name, service.feature_set)
             if service.is_enabled:
                 enabled_services_identifiers[identifier] = service
-            else: disabled_services_identifiers[identifier] = service
-
-
-
-        prepared_resources = []
+            else:
+                disabled_services_identifiers[identifier] = service
 
         for resource in searched_resources:
             if resource in self.autodiscovery_resource_mapping:
@@ -82,10 +70,9 @@ class AutodiscoveryManager:
                     if possible_identifier in disabled_services_identifiers:
                         disabled_linking.append(disabled_services_identifiers[possible_identifier])
                 if flag:
-                    prepared_resources.append(
-                        AutodiscoveryResourceLinking(
-                            resource_name=resource, possible_service_linking=possible_linking,disabled_services_for_resource=disabled_linking
-                        )
+                    prepared_resources[resource] = AutodiscoveryResourceLinking(
+                        possible_service_linking=possible_linking,
+                        disabled_services_for_resource=disabled_linking,
                     )
 
                 else:
@@ -94,9 +81,7 @@ class AutodiscoveryManager:
                     )
 
             else:
-                prepared_resources.append(
-                    AutodiscoveryResourceLinking(resource_name=resource, possible_service_linking=[],disabled_services_for_resource=[])
-                )
+                prepared_resources[resource] = None
 
         return prepared_resources
 
@@ -115,24 +100,25 @@ class AutodiscoveryManager:
             self.logging_context.log(f"Error during init autodiscovery config; {e}")
             self.autodiscovery_enabled = False
 
-        self.autodiscovery_service = AutodiscoveryGCPService()
-
     async def get_autodiscovery_service(
         self, services: List[GCPService]
     ) -> Optional[AutodiscoveryGCPService]:
-        resources_to_discovery = self.check_resources_to_autodiscovery(services)
+        resources_to_discovery = await self.check_resources_to_autodiscovery(services)
 
         if resources_to_discovery:
+            autodiscovery_service = AutodiscoveryGCPService()
             autodiscovery_result = await enrich_services_with_autodiscovery_metrics(
                 services,
                 self.last_autodiscovered_metric_list_names,
                 resources_to_discovery,
             )
             self.last_autodiscovered_metric_list_names = autodiscovery_result.discovered_metric_list
-            self.autodiscovery_service.set_metrics(
+            autodiscovery_service.set_metrics(
                 autodiscovery_result.autodiscovered_resources_to_metrics, resources_to_discovery
             )
-            return self.autodiscovery_service
+            return autodiscovery_service
 
-        self.logging_context.log("No resources to discover, add proper in autodisovery-config.yaml or make shure you enabled proper extensions")
+        self.logging_context.log(
+            "No resources to discover, add proper in autodisovery-config.yaml or make shure you enabled proper extensions"
+        )
         return None
