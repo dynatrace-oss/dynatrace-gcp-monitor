@@ -25,7 +25,7 @@ from lib.configuration import config
 from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes, SfmContext
 from lib.credentials import create_token, get_project_id_from_environment, get_all_accessible_projects
 from lib.dt_extensions.dt_extensions import extensions_fetch, prepare_services_config_for_next_polling
-from lib.fast_check import MetricsFastCheck, FastCheckResult, LogsFastCheck
+from lib.fast_check import LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
 from lib.logs.log_forwarder import run_logs
 from lib.metrics import GCPService
@@ -47,7 +47,6 @@ if platform.system() == 'Windows':
 
 loop = asyncio.get_event_loop()
 
-# TODO: Now it can be a simple list of services. Tests would need to be adjusted
 PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('services', List[GCPService])])
 
 logging_context = LoggingContext(None)
@@ -59,13 +58,6 @@ async def metrics_pre_launch_check() -> Optional[PreLaunchCheckResult]:
         if not token:
             logging_context.log(f'Monitoring disabled. Unable to acquire authorization token.')
             return None
-
-        # TODO: Only checking available projects. Could be removed, maybe? It's being checked in every monitoring loop either way
-        available_projects = await get_all_accessible_projects(logging_context, gcp_session, token)
-        if not available_projects:
-            return None
-
-        # TODO: Metrics fastcheck could be done here
 
         extensions_fetch_result = await extensions_fetch(gcp_session, dt_session, token)
         if not extensions_fetch_result:

@@ -146,19 +146,6 @@ def valid_dynatrace_scopes(token_metadata: dict):
     return all(scope in token_scopes for scope in DYNATRACE_REQUIRED_TOKEN_SCOPES) if token_scopes else False
 
 
-# TODO: This was no fastcheck for metrics. Add some metric ingestion for it to make sense.
-class MetricsFastCheck:
-
-    def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, token: str, logging_context: LoggingContext):
-        self.gcp_session = gcp_session
-        self.dt_session = dt_session
-        self.logging_context = logging_context
-        self.token = token
-
-    async def execute(self) -> FastCheckResult:
-        return FastCheckResult(projects=[])
-
-
 class LogsFastCheck:
     def __init__(self, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
         self.instance_metadata = instance_metadata
