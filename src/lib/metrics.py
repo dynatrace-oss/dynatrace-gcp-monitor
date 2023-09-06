@@ -232,7 +232,6 @@ class AutodiscoveryGCPService(GCPService):
             return linking.possible_service_linking[0].dimensions
         else:
             return []
-            Exception("Not Implemented")
     
 
     
@@ -242,7 +241,6 @@ class AutodiscoveryGCPService(GCPService):
             return linking.possible_service_linking[0].name
         else:
             return metric.google_metric.split(".")[0] 
-            Exception("Not Implemented")
 
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'

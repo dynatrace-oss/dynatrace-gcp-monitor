@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from lib.autodiscovery.autodiscovery import get_metric_descriptors
+from lib.autodiscovery.autodiscovery import AutodiscoveryResourceLinking, get_metric_descriptors
 
 response_json = {
     "metricDescriptors": [
@@ -53,7 +53,9 @@ async def test_get_metric_descriptors(get_project_ids_mock, config_mock):
 
     metric_context = AsyncMock()
 
-    result = await get_metric_descriptors(metric_context, gcp_session_mock, token_mock)
+    ad_resources_to_services_mock = {"cloud_function": AutodiscoveryResourceLinking(None,None)}
+
+    result = await get_metric_descriptors(metric_context, gcp_session_mock, token_mock,ad_resources_to_services_mock)
     result = list(result.items())
 
     assert len(result) == 1
