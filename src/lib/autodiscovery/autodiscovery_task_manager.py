@@ -5,9 +5,12 @@ from typing import Any, Dict, List, Optional
 from lib.autodiscovery.autodiscovery import enrich_services_with_autodiscovery_metrics
 from lib.autodiscovery.autodiscovery_manager import AutodiscoveryManager
 from lib.configuration import config
+from lib.context import LoggingContext
 from lib.metrics import AutodiscoveryGCPService, GCPService
 
 AUTODISCOVERY_QUERY_INTERVAL_SEC = config.get_autodiscovery_querry_interval() * 60
+
+logging_context = LoggingContext("AUTODISCOVERY_TASK")
 
 
 class AutodiscoveryTaskExecutor:
@@ -49,7 +52,9 @@ class AutodiscoveryTaskExecutor:
 
     async def _refresh_autodiscovery_task(self, services, new_extension_versions_hash):
         if self.autodiscovery_task is not None:
-            self.autodiscovered_cached_service = await self.autodiscovery_task
+            ad_service_result = await self.autodiscovery_task
+            if ad_service_result:
+                self.autodiscovered_cached_service = ad_service_result
         self.autodiscovery_task = asyncio.create_task(
             self.autodiscovery_manager.get_autodiscovery_service(services)
         )
@@ -58,7 +63,9 @@ class AutodiscoveryTaskExecutor:
 
     async def _handle_autodiscovery_task_result(self):
         if self.autodiscovery_task:
-            self.autodiscovered_cached_service = await self.autodiscovery_task
+            ad_service_result = await self.autodiscovery_task
+            if ad_service_result:
+                self.autodiscovered_cached_service = ad_service_result
             self.autodiscovery_task = None
 
     async def get_cached_or_refreshed_metrics(
@@ -77,7 +84,7 @@ class AutodiscoveryTaskExecutor:
             await self._refresh_autodiscovery_task(services, new_extension_versions_hash)
 
         if self.autodiscovered_cached_service:
-            services.append(self.autodiscovered_cached_service)    
-        else :
-            print("### AD - Service is None")
+            services.append(self.autodiscovered_cached_service)
+        else:
+            logging_context.log("No resources to autodiscovery will skip")
         return services

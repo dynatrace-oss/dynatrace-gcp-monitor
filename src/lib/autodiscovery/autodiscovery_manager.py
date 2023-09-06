@@ -15,11 +15,12 @@ AutodiscoveryResource = NamedTuple(
 )
 
 
+
 class AutodiscoveryManager:
     autodiscovery_config: Dict[str, Any]
     autodiscovery_resource_mapping: Dict[str, Any]
     last_autodiscovered_metric_list_names: Dict[str, Any]
-    logging_context = LoggingContext("AUTODISCOVERY")
+    logging_context = LoggingContext("AUTODISCOVERY_MANAGER")
     autodiscovery_enabled: bool
 
     @staticmethod
@@ -113,10 +114,11 @@ class AutodiscoveryManager:
                 resources_to_discovery,
             )
             self.last_autodiscovered_metric_list_names = autodiscovery_result.discovered_metric_list
-            autodiscovery_service.set_metrics(
-                autodiscovery_result.autodiscovered_resources_to_metrics, resources_to_discovery
-            )
-            return autodiscovery_service
+            if any(autodiscovery_result.autodiscovered_resources_to_metrics):
+                autodiscovery_service.set_metrics(
+                    autodiscovery_result.autodiscovered_resources_to_metrics, resources_to_discovery
+                )
+                return autodiscovery_service
 
         self.logging_context.log(
             "No resources to discover, add proper in autodisovery-config.yaml or make shure you enabled proper extensions"

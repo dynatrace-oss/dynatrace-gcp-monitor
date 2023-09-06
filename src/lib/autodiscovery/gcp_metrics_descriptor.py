@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Tuple
 
 GCP_UNIT_CONVERSION_MAP = {
@@ -47,8 +47,8 @@ GCP_UNIT_CONVERSION_MAP = {
 
 @dataclass(frozen=True)
 class GCPMetricDescriptorOptions:
-    ingestDelay: int
-    samplePeriod: int
+    ingestDelay: int = field(hash=False)
+    samplePeriod: int = field(hash=False)
     valueType: str
     metricKind: str
     unit: str

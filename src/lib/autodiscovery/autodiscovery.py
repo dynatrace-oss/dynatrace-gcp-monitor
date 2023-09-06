@@ -36,6 +36,12 @@ AutodiscoveryResult = NamedTuple(
     ],
 )
 
+@dataclass(frozen=True)
+class AutodiscoveryResourceLinking:
+    possible_service_linking: List[GCPService]
+    disabled_services_for_resource: List[GCPService]
+
+
 
 async def get_project_ids(
     metric_context: MetricsContext,
@@ -82,7 +88,6 @@ async def run_fetch_metric_descriptors(
                     and metric_descriptor.monitored_resources_types[0] in resources_to_autodiscovery
                 ):
                     project_discovered_metrics.append(metric_descriptor)
-                    print(f"[{project_id}]: {descriptor}")
             except Exception as error:
                 logging_context.log(
                     f"Failed to load autodiscovered metric for project: {project_id}. Details: {error}"
@@ -123,13 +128,6 @@ async def send_metric_metadata(
         logging_context.log(f"Adding {len(metrics_metadata)} new autodiscovered metrics metadata")
         await push_ingest_lines(context, "autodiscovery-metadata", metrics_metadata)
     return previously_discovered_metrics
-
-
-@dataclass(frozen=True)
-class AutodiscoveryResourceLinking:
-    possible_service_linking: List[GCPService]
-    disabled_services_for_resource: List[GCPService]
-
 
 async def get_metric_descriptors(
     metric_context: MetricsContext,
