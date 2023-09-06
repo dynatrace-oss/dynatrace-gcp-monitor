@@ -39,6 +39,17 @@ def read_activation_yaml():
         activation_yaml = {}
     return activation_yaml
 
+def read_autodiscovery_config_yaml():
+    autodiscovery_config_path = '/code/config/activation/gcp_services.yaml'
+    try:
+        with open(autodiscovery_config_path, encoding="utf-8") as config_file:
+            autodiscovery_config_yaml = yaml.safe_load(config_file)
+    except Exception:
+        autodiscovery_config_yaml = yaml.safe_load(os.environ.get("AUTODISCOVERY_RESOURCES_YAML", ""))
+    if not autodiscovery_config_yaml:
+        autodiscovery_config_yaml = {}
+    return autodiscovery_config_yaml
+
 
 def get_activation_config_per_service(activation_yaml):
     return {service_activation.get('service'): service_activation for service_activation in

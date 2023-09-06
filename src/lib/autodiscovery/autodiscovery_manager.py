@@ -2,9 +2,13 @@ from typing import Any, Dict, List, NamedTuple, Optional
 
 import yaml
 
-from lib.autodiscovery.autodiscovery import AutodiscoveryResourceLinking, enrich_services_with_autodiscovery_metrics
+from lib.autodiscovery.autodiscovery import (
+    AutodiscoveryResourceLinking,
+    enrich_services_with_autodiscovery_metrics,
+)
 from lib.context import LoggingContext
 from lib.metrics import AutodiscoveryGCPService, GCPService
+from lib.utilities import read_autodiscovery_config_yaml
 
 GcpServiceStub = NamedTuple(
     "GcpServiceStub", [("extension_name", str), ("service_name", str), ("feature_set", str)]
@@ -13,7 +17,6 @@ GcpServiceStub = NamedTuple(
 AutodiscoveryResource = NamedTuple(
     "GcpServiceStub", [("extension_name", str), ("service_name", str), ("feature_set", str)]
 )
-
 
 
 class AutodiscoveryManager:
@@ -45,8 +48,6 @@ class AutodiscoveryManager:
     ) -> Dict[str, AutodiscoveryResourceLinking]:
         prepared_resources = {}
 
-        searched_resources = self.autodiscovery_config["searched_resources"]
-
         enabled_services_identifiers = {}
         disabled_services_identifiers = {}
 
@@ -59,7 +60,7 @@ class AutodiscoveryManager:
             else:
                 disabled_services_identifiers[identifier] = service
 
-        for resource in searched_resources:
+        for resource in self.autodiscovery_config:
             if resource in self.autodiscovery_resource_mapping:
                 flag = False
                 possible_linking = []
@@ -91,9 +92,10 @@ class AutodiscoveryManager:
         self.autodiscovery_enabled = True
 
         try:
-            with open("autodiscovery-config.yaml", "r") as file_config:
-                self.autodiscovery_config = yaml.safe_load(file_config)["autodicovery_config"]
-            with open("autodiscovery-mapping.yaml", "r") as file_mapping:
+            self.autodiscovery_config = read_autodiscovery_config_yaml()["autodicovery_config"][
+                "searched_resources"
+            ]
+            with open("./lib/autodiscovery/config/autodiscovery-mapping.yaml", "r") as file_mapping:
                 self.autodiscovery_resource_mapping = self.generate_resource_mapping(
                     yaml.safe_load(file_mapping)
                 )
@@ -121,6 +123,6 @@ class AutodiscoveryManager:
                 return autodiscovery_service
 
         self.logging_context.log(
-            "No resources to discover, add proper in autodisovery-config.yaml or make shure you enabled proper extensions"
+            "There are no resources to find; please ensure that you have either added them in the autodiscoveryResourcesYaml file or verified that the necessary extensions are enabled."
         )
         return None

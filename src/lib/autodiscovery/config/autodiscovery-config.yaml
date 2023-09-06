@@ -1,5 +1,9 @@
 autodicovery_config:
   searched_resources:
+  - tpu_worker
+  
+  - memcache_node
+  - my_custm
   # Google AI Platform
   # - cloudml_model_version
   # - cloudml_job
@@ -47,12 +51,12 @@ autodicovery_config:
   # Google Cloud Composer
   # - cloud_composer_environment
   # Google Compute Engine
-  - instance_group
-  - gce_instance
-  - aws_ec2_instance
-  - tpu_worker
-  - autoscaler
-  - baremetalsolution.googleapis.com/Instance
+  #- instance_group
+  #- gce_instance
+  #- aws_ec2_instance
+  #- tpu_worker
+  #- autoscaler
+  #- baremetalsolution.googleapis.com/Instance
   # Google Cloud Storage Transfer
   # - transfer_service_agent
   # Google Dataflow

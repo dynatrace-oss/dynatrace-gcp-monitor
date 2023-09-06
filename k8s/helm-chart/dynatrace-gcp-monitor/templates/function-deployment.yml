@@ -53,6 +53,12 @@ spec:
           items:
           - key: GCP_SERVICES_YAML
             path: "gcp_services.yaml"
+      - name: gcp-autodiscovery
+        configMap:
+          name: gcp-autodiscovery-config
+          items:
+          - key: AUTODISCOVERY_RESOURCES_YAML
+            path: "autodiscovery-config.yaml"
       {{- end }}
       {{- if (.Values.imagePullSecrets) }}      
       imagePullSecrets:

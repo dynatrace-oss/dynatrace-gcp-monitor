@@ -35,6 +35,7 @@ data:
   AUTODISCOVERY_QUERY_INTERVAL: {{ .Values.autodiscoveryQueryInterval | quote }}
   METRIC_AUTODISCOVERY: {{ .Values.metricAutodiscovery | quote }}
   GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
+  AUTODISCOVERY_RESOURCES_YAML: {{ .Values.autodiscoveryResourcesYaml | quote }}
   {{- end }}
   {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
   LOGS_SUBSCRIPTION_ID: {{ .Values.logsSubscriptionId | quote }}
