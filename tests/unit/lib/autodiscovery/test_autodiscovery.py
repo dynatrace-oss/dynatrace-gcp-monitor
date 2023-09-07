@@ -2,7 +2,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from lib.autodiscovery.autodiscovery import AutodiscoveryResourceLinking, get_metric_descriptors
+from lib.autodiscovery.autodiscovery import (
+    AutodiscoveryResourceLinking,
+    get_metric_descriptors,
+)
 
 response_json = {
     "metricDescriptors": [

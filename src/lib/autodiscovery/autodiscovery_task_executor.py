@@ -1,8 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
-from lib.autodiscovery.autodiscovery import enrich_services_with_autodiscovery_metrics
 from lib.autodiscovery.autodiscovery_manager import AutodiscoveryManager
 from lib.configuration import config
 from lib.context import LoggingContext

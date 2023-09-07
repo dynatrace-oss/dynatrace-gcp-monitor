@@ -47,7 +47,7 @@ def read_autodiscovery_config_yaml():
     except Exception:
         autodiscovery_config_yaml = yaml.safe_load(os.environ.get("AUTODISCOVERY_RESOURCES_YAML", ""))
     if not autodiscovery_config_yaml:
-        autodiscovery_config_yaml = {}
+        raise Exception("Unable to load AutodiscoveryResourcesYaml")
     return autodiscovery_config_yaml
 
 

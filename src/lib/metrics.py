@@ -215,32 +215,44 @@ class AutodiscoveryGCPService(GCPService):
     resources_to_metrics: Dict[str, List[Metric]]
     resources_linking: Dict[str, AutodiscoveryResourceLinking]
     metrics_to_resources: Dict[str, Optional[AutodiscoveryResourceLinking]]
+    resource_dimensions: Dict[str, List[Dimension]]
 
     def __init__(self) -> None:
-        super().__init__(service="Autodiscovery Service", extension_name = "GCP Autodiscovery")
+        super().__init__(service="Autodiscovery Service", extension_name="GCP Autodiscovery")
 
-    def set_metrics(self, resources_to_metrics: Dict[str, List[Metric]], resource_linking: Dict[str, AutodiscoveryResourceLinking]):
-        self.metrics_to_resources = {metric.google_metric: resource_linking[resource] for resource, metrics in resources_to_metrics.items() for metric in metrics}
+    def set_metrics(
+        self,
+        resources_to_metrics: Dict[str, List[Metric]],
+        resource_linking: Dict[str, AutodiscoveryResourceLinking],
+        resource_dimensions: Dict[str, List[Dimension]],
+    ):
+        self.metrics_to_resources = {
+            metric.google_metric: resource_linking[resource]
+            for resource, metrics in resources_to_metrics.items()
+            for metric in metrics
+        }
         self.metrics = [metric for metrics in resources_to_metrics.values() for metric in metrics]
         self.resources_to_metrics = resources_to_metrics
         self.resources_linking = resource_linking
+        self.resource_dimensions = resource_dimensions
 
-    
     def get_dimensions(self, metric: Metric) -> List[Dimension]:
         linking = self.metrics_to_resources[metric.google_metric]
         if linking:
             return linking.possible_service_linking[0].dimensions
+
+        if self.resource_dimensions[metric.google_metric]:
+            return self.resource_dimensions[metric.google_metric]
         else:
             return []
-    
 
-    
-    def get_name(self,metric) -> str:
+
+    def get_name(self, metric) -> str:
         linking = self.metrics_to_resources[metric.google_metric]
         if linking:
             return linking.possible_service_linking[0].name
         else:
-            return metric.google_metric.split(".")[0] 
+            return metric.google_metric.split(".")[0]
 
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'

@@ -22,9 +22,8 @@ from typing import Optional, List, NamedTuple, Dict
 from aiohttp import ClientSession
 
 from lib import credentials
-from lib.autodiscovery.autodiscovery import enrich_services_with_autodiscovery_metrics
 from lib.autodiscovery.autodiscovery_manager import AutodiscoveryManager
-from lib.autodiscovery.autodiscovery_task_manager import AutodiscoveryTaskExecutor
+from lib.autodiscovery.autodiscovery_task_executor import AutodiscoveryTaskExecutor
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes, SfmContext
