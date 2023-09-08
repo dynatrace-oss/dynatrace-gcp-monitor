@@ -243,16 +243,16 @@ class AutodiscoveryGCPService(GCPService):
 
         if self.resource_dimensions[metric.google_metric]:
             return self.resource_dimensions[metric.google_metric]
-        else:
-            return []
+ 
+        return []
 
 
     def get_name(self, metric) -> str:
         linking = self.metrics_to_resources[metric.google_metric]
         if linking:
             return linking.possible_service_linking[0].name
-        else:
-            return metric.google_metric.split(".")[0]
+        
+        return metric.google_metric.split(".")[0]
 
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'

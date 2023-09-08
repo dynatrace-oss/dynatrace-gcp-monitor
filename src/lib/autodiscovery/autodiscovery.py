@@ -38,6 +38,14 @@ AutodiscoveryResult = NamedTuple(
 )
 
 
+label_mapping = {
+    "project_id": "gcp.project.id",
+    "region": "gcp.region",
+    "location": "gcp.region",
+    "zone": "gcp.region",
+}
+
+
 @dataclass(frozen=True)
 class AutodiscoveryResourceLinking:
     possible_service_linking: List[GCPService]
@@ -83,9 +91,12 @@ async def fetch_resource_descriptors(
 
             if "labels" in descriptor:
                 for label in descriptor["labels"]:
-                    label_key = (label.get("key"),)
-                    label_value = "label:resource.labels." + label.get("key")
+                    label_key = label.get("key","")
+                    label_value = "label:resource.labels." + label_key
                     dimensions.append(Dimension(key=label_key, value=label_value))
+
+                    if label_key in label_mapping:
+                         dimensions.append(Dimension(key=label_mapping[label_key], value=label_value))
 
                 resource_dimensions[type_key] = dimensions
 

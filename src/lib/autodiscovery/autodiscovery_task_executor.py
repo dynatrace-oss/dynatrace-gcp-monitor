@@ -44,11 +44,13 @@ class AutodiscoveryTaskExecutor:
             tuple(sorted(current_extension_versions.items()))
         )
 
-        autodiscovery_query_interval =  config.get_autodiscovery_querry_interval()
+        autodiscovery_query_interval = config.get_autodiscovery_querry_interval()
         if autodiscovery_query_interval >= 60:
             self.query_interval = timedelta(minutes=autodiscovery_query_interval)
         else:
-            logging_context.log("Query interval for autodiscovery cannot be smaller than 60 minutes. Set default 60 minutes interval")
+            logging_context.log(
+                "Query interval for autodiscovery cannot be smaller than 60 minutes. Run with default 60 minutes interval"
+            )
             self.query_interval = timedelta(minutes=60)
 
         self.autodiscovery_task = asyncio.create_task(

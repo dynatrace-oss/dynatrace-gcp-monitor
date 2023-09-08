@@ -58,7 +58,7 @@ async def test_get_metric_descriptors(get_project_ids_mock, config_mock):
 
     ad_resources_to_services_mock = {"cloud_function": AutodiscoveryResourceLinking(None,None)}
 
-    result = await get_metric_descriptors(metric_context, gcp_session_mock, token_mock,ad_resources_to_services_mock)
+    result, resource_labels = await get_metric_descriptors(metric_context, gcp_session_mock, token_mock,ad_resources_to_services_mock)
     result = list(result.items())
 
     assert len(result) == 1
