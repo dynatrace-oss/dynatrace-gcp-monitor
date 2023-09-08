@@ -40,7 +40,7 @@ def read_activation_yaml():
     return activation_yaml
 
 def read_autodiscovery_config_yaml():
-    autodiscovery_config_path = '/code/config/activation/gcp_services.yaml'
+    autodiscovery_config_path = '/code/config/activation/autodiscovery-config.yaml'
     try:
         with open(autodiscovery_config_path, encoding="utf-8") as config_file:
             autodiscovery_config_yaml = yaml.safe_load(config_file)

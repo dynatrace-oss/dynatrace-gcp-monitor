@@ -159,6 +159,9 @@ spec:
         - mountPath: /code/config/activation
           readOnly: true
           name: gcp-config
+        - mountPath: /code/config/activation
+          readOnly: true
+          name: gcp-autodiscovery
         resources: {{- toYaml .Values.metricResources | nindent 12 }}
         livenessProbe:
           httpGet:
