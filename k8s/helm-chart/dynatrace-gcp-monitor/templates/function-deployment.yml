@@ -53,10 +53,6 @@ spec:
           items:
           - key: GCP_SERVICES_YAML
             path: "gcp_services.yaml"
-      - name: gcp-autodiscovery
-        configMap:
-          name: gcp-autodiscovery-config
-          items:
           - key: AUTODISCOVERY_RESOURCES_YAML
             path: "autodiscovery-config.yaml"
       {{- end }}
@@ -159,9 +155,6 @@ spec:
         - mountPath: /code/config/activation
           readOnly: true
           name: gcp-config
-        - mountPath: /code/config/activation
-          readOnly: true
-          name: gcp-autodiscovery
         resources: {{- toYaml .Values.metricResources | nindent 12 }}
         livenessProbe:
           httpGet:
