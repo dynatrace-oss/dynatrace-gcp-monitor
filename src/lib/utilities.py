@@ -48,8 +48,20 @@ def read_autodiscovery_config_yaml():
         autodiscovery_config_yaml = yaml.safe_load(os.environ.get("AUTODISCOVERY_RESOURCES_YAML", ""))
     if not autodiscovery_config_yaml:
         raise Exception("Unable to load AutodiscoveryResourcesYaml")
+    if "searched_resources" not in autodiscovery_config_yaml["autodicovery_config"]:
+        raise Exception("No resources field in autodiscovery config")
     return autodiscovery_config_yaml
 
+def read_autodiscovery_block_list_yaml():
+    autodiscovery_config_path = '/code/config/activation/autodiscovery-block-list.yaml'
+    try:
+        with open(autodiscovery_config_path, encoding="utf-8") as config_file:
+            autodiscovery_block_list = yaml.safe_load(config_file)["block_list"]
+    except Exception:
+        autodiscovery_block_list = yaml.safe_load(os.environ.get("AUTODISCOVERY_BLOCK_LIST_YAML", ""))["block_list"]
+    if not autodiscovery_block_list:
+        autodiscovery_block_list = []
+    return autodiscovery_block_list
 
 def get_activation_config_per_service(activation_yaml):
     return {service_activation.get('service'): service_activation for service_activation in

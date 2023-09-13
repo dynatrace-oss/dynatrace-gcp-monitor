@@ -23,13 +23,26 @@ response_json = {
             "monitoredResourceTypes": ["cloud_function"],
         },
         {
-            "name": "projects/test_project/metricDescriptors/cloudiot.googleapis.com/device/sample_other_metric",
+            "name": "projects/test_project/metricDescriptors/custom_google.googleapis.com/function/next_metric",
             "labels": [{"key": "key2", "description": "description2"}],
             "metricKind": "GAUGE",
             "valueType": "INT64",
             "displayName": "Metric 2",
             "unit": "1",
             "description": "Description Metric 2",
+            "type": "custom_google.googleapis.com/function/next_metric",
+            "metadata": {"launchStage": "GA", "samplePeriod": "60s", "ingestDelay": "240s"},
+            "launchStage": "GA",
+            "monitoredResourceTypes": ["cloud_function"],
+        },
+        {
+            "name": "projects/test_project/metricDescriptors/cloudiot.googleapis.com/device/sample_other_metric",
+            "labels": [{"key": "key3", "description": "description2"}],
+            "metricKind": "GAUGE",
+            "valueType": "INT64",
+            "displayName": "Metric 3",
+            "unit": "1",
+            "description": "Description Metric 3",
             "type": "cloudiot.googleapis.com/device/active_devices",
             "metadata": {"launchStage": "GA", "samplePeriod": "60s", "ingestDelay": "240s"},
             "launchStage": "GA",
@@ -40,13 +53,15 @@ response_json = {
 
 
 @pytest.mark.asyncio
+@patch("lib.autodiscovery.autodiscovery.fetch_resource_descriptors")
 @patch("lib.autodiscovery.autodiscovery.config")
 @patch("lib.autodiscovery.autodiscovery.get_project_ids")
 @patch("lib.autodiscovery.autodiscovery.discovered_resource_type", "cloud_function")
-async def test_get_metric_descriptors(get_project_ids_mock, config_mock):
+async def test_get_metric_descriptors(get_project_ids_mock, config_mock, fetch_resource_mock):
     token_mock = "test_token"
     config_mock.project_id.return_value = "test_project_id"
     get_project_ids_mock.return_value = ["test_project_id", "other_project_id"]
+    fetch_resource_mock.return_value = {}
 
     response_mock = AsyncMock()
     response_mock.json.return_value = response_json
@@ -56,9 +71,10 @@ async def test_get_metric_descriptors(get_project_ids_mock, config_mock):
 
     metric_context = AsyncMock()
 
-    ad_resources_to_services_mock = {"cloud_function": AutodiscoveryResourceLinking(None,None)}
+    ad_resources_to_services_mock = {"cloud_function": AutodiscoveryResourceLinking([],[])}
 
-    result, resource_labels = await get_metric_descriptors(metric_context, gcp_session_mock, token_mock,ad_resources_to_services_mock)
+    autodiscovery_metric_block_list = ["custom_google.googleapis.com"]
+    result, resource_labels = await get_metric_descriptors(metric_context, gcp_session_mock, token_mock,ad_resources_to_services_mock, autodiscovery_metric_block_list)
     result = list(result.items())
 
     assert len(result) == 1

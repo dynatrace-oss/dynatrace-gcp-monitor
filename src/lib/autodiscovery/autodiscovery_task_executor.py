@@ -17,7 +17,7 @@ class AutodiscoveryTaskExecutor:
     autodiscovered_cached_service: Optional[AutodiscoveryGCPService]
     autodiscovered_extension_versions_hash: int
     time_since_last_autodiscovery: datetime
-    query_interval = timedelta(seconds=AUTODISCOVERY_QUERY_INTERVAL_SEC)
+    query_interval: timedelta
     autodiscovery_manager: AutodiscoveryManager
 
     @staticmethod
@@ -29,7 +29,7 @@ class AutodiscoveryTaskExecutor:
         autodiscovery_task = AutodiscoveryTaskExecutor(
             services, autodiscovery_manager, current_extension_versions
         )
-        await autodiscovery_task._refresh_autodiscovery_task(services, current_extension_versions)
+        await autodiscovery_task.get_task_result()
         return autodiscovery_task
 
     def __init__(
@@ -58,14 +58,24 @@ class AutodiscoveryTaskExecutor:
         )
         self.time_since_last_autodiscovery = datetime.now()
 
-    async def _refresh_autodiscovery_task(self, services, new_extension_versions_hash):
+    async def get_task_result(self):
         if self.autodiscovery_task is not None:
             ad_service_result = await self.autodiscovery_task
             if ad_service_result:
                 self.autodiscovered_cached_service = ad_service_result
+
+    async def _refresh_autodiscovery_task(
+        self, services, new_extension_versions_hash, force_refresh=False
+    ):
+        if not force_refresh and self.autodiscovery_task and not self.autodiscovery_task.done():
+            return
+
+        await self.get_task_result()
+
         self.autodiscovery_task = asyncio.create_task(
             self.autodiscovery_manager.get_autodiscovery_service(services)
         )
+
         self.autodiscovered_extension_versions_hash = new_extension_versions_hash
         self.time_since_last_autodiscovery = datetime.now()
 

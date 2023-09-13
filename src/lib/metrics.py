@@ -94,11 +94,16 @@ class MetadataIngestLine(IngestLine):
         object.__setattr__(self, "meta_metric_unit", kwargs.get("metric_unit", ""))
 
     def to_string(self) -> str:
-        return (f'#{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]} {self.metric_type} '
-        f'dt.meta.displayname="{self.meta_metric_display_name[:ALLOWED_METRIC_DISPLAY_NAME_LENGTH]}",'
-        f'dt.meta.description="{self.meta_metric_description[:ALLOWED_METRIC_DESCRIPTION_LENGTH]}",'
-        f'dt.meta.unit="{self.meta_metric_unit[:ALLOWED_METRIC_UNIT_NAME_LENGTH]}"')
-
+        name = self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]
+        display_name = self.meta_metric_display_name[:ALLOWED_METRIC_DISPLAY_NAME_LENGTH]
+        description = self.meta_metric_description[:ALLOWED_METRIC_DESCRIPTION_LENGTH].replace("\"","")
+        unit = self.meta_metric_unit[:ALLOWED_METRIC_UNIT_NAME_LENGTH]
+        return (
+            f"#{name} {self.metric_type} "
+            f'dt.meta.displayname="{display_name}",'
+            f'dt.meta.description="{description}",'
+            f'dt.meta.unit="{unit}"'
+        )
 
 
 @dataclass(frozen=True)
@@ -213,8 +218,9 @@ class GCPService:
 
 class AutodiscoveryGCPService(GCPService):
     resources_to_metrics: Dict[str, List[Metric]]
+    metrics_to_resources: Dict[str, str]
     resources_linking: Dict[str, AutodiscoveryResourceLinking]
-    metrics_to_resources: Dict[str, Optional[AutodiscoveryResourceLinking]]
+    metrics_to_linking: Dict[str, Optional[AutodiscoveryResourceLinking]]
     resource_dimensions: Dict[str, List[Dimension]]
 
     def __init__(self) -> None:
@@ -226,32 +232,41 @@ class AutodiscoveryGCPService(GCPService):
         resource_linking: Dict[str, AutodiscoveryResourceLinking],
         resource_dimensions: Dict[str, List[Dimension]],
     ):
-        self.metrics_to_resources = {
+        self.metrics_to_linking = {
             metric.google_metric: resource_linking[resource]
             for resource, metrics in resources_to_metrics.items()
             for metric in metrics
         }
         self.metrics = [metric for metrics in resources_to_metrics.values() for metric in metrics]
+        self.metrics_to_resources = {}
+
+        self.metrics_to_resources = {
+            metric.google_metric: resource
+            for resource, metrics in resources_to_metrics.items()
+            for metric in metrics
+        }
+
         self.resources_to_metrics = resources_to_metrics
         self.resources_linking = resource_linking
         self.resource_dimensions = resource_dimensions
 
     def get_dimensions(self, metric: Metric) -> List[Dimension]:
-        linking = self.metrics_to_resources[metric.google_metric]
+        linking = self.metrics_to_linking[metric.google_metric]
         if linking:
             return linking.possible_service_linking[0].dimensions
 
-        if self.resource_dimensions[metric.google_metric]:
-            return self.resource_dimensions[metric.google_metric]
- 
+        metric_resource = self.metrics_to_resources[metric.google_metric]
+        if metric_resource in self.resource_dimensions:
+            return self.resource_dimensions[metric_resource]
+
         return []
 
 
     def get_name(self, metric) -> str:
-        linking = self.metrics_to_resources[metric.google_metric]
+        linking = self.metrics_to_linking[metric.google_metric]
         if linking:
             return linking.possible_service_linking[0].name
-        
+
         return metric.google_metric.split(".")[0]
 
 

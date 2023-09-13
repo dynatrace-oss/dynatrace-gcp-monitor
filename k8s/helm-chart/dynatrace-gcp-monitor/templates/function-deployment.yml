@@ -55,6 +55,8 @@ spec:
             path: "gcp_services.yaml"
           - key: AUTODISCOVERY_RESOURCES_YAML
             path: "autodiscovery-config.yaml"
+          - key: AUTODISCOVERY_METRIC_BLOCK_LIST_YAML
+            path: "autodiscovery-block-list.yaml"
       {{- end }}
       {{- if (.Values.imagePullSecrets) }}      
       imagePullSecrets:

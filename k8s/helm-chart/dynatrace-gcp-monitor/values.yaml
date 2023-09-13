@@ -132,10 +132,10 @@ autodiscoveryResourcesYaml: |
   # resources from: https://cloud.google.com/monitoring/api/metrics_gcp
   autodicovery_config:
     searched_resources:
-    # Custom resources
+    # Any resources to monitor (you can list them here)
     # - memcache_node
     # Google AI Platform
-    - cloudml_model_version
+    # - cloudml_model_version
     # - cloudml_job
     # Google AlloyDB
     # - alloydb.googleapis.com/Instance
@@ -181,12 +181,12 @@ autodiscoveryResourcesYaml: |
     # Google Cloud Composer
     # - cloud_composer_environment
     # Google Compute Engine
-    #- instance_group
-    #- gce_instance
-    #- aws_ec2_instance
-    #- tpu_worker
-    #- autoscaler
-    #- baremetalsolution.googleapis.com/Instance
+    # - instance_group
+    # - gce_instance
+    # - aws_ec2_instance
+    # - tpu_worker
+    # - autoscaler
+    # - baremetalsolution.googleapis.com/Instance
     # Google Cloud Storage Transfer
     # - transfer_service_agent
     # Google Dataflow
@@ -262,6 +262,24 @@ autodiscoveryResourcesYaml: |
     # - vpc_access_connector
     # Google Network Topology
     # - gce_zone_network_health
+
+# configuration file for metrics that contains names bellow that shoud not be included
+# in autodiscovery process
+autodiscoveryBlockListYaml: |
+  block_list:
+  - alloydb.googleapis.com/database/postgresql/insights/perquery/
+  - alloydb.googleapis.com/database/postgresql/insights/pertag/
+  - alloydb.googleapis.com/database/postgresql/insights/aggregate/
+  - cloudsql.googleapis.com/database/postgresql/insights/perquery/
+  - cloudsql.googleapis.com/database/postgresql/insights/pertag/
+  - cloudsql.googleapis.com/database/postgresql/insights/aggregate/
+  - dbinsights.googleapis.com/perquery/
+  - dbinsights.googleapis.com/pertag/
+  - networking.googleapis.com/vm_flow/
+  - kubernetes.io/pod/volume/
+  - kubernetes.io/container/accelerator/
+  - kubernetes.io/container/node/accelerator/
+
 # configuration file for GCP services - uncommented services will be monitored
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax

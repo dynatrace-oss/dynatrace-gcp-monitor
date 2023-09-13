@@ -36,6 +36,7 @@ data:
   METRIC_AUTODISCOVERY: {{ .Values.metricAutodiscovery | quote }}
   GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
   AUTODISCOVERY_RESOURCES_YAML: {{ .Values.autodiscoveryResourcesYaml | quote }}
+  AUTODISCOVERY_METRIC_BLOCK_LIST_YAML: {{ .Values.autodiscoveryBlockListYaml | quote }}
   {{- end }}
   {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
   LOGS_SUBSCRIPTION_ID: {{ .Values.logsSubscriptionId | quote }}
