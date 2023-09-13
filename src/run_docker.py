@@ -23,7 +23,7 @@ from lib import credentials
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes, SfmContext
-from lib.credentials import create_token, get_project_id_from_environment, get_all_accessible_projects
+from lib.credentials import create_token, get_project_id_from_environment
 from lib.dt_extensions.dt_extensions import extensions_fetch, prepare_services_config_for_next_polling
 from lib.fast_check import LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
