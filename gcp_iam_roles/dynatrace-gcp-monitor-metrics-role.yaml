@@ -1,4 +1,3 @@
-# For Kubernetes. The Cloud Function counterpart is in setup.sh script
 # create with command:
 # gcloud iam roles create dynatrace_function.metrics --project={PROJECT_ID} --file=dynatrace-gcp-monitor-metrics-role.yaml
 title: Dynatrace GCP Metrics Monitor
