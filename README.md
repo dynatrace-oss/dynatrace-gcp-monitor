@@ -10,14 +10,11 @@ This integration consists of K8s container and few auxiliary components. This se
 The whole project was renamed, so all internal references and files are now named `dynatrace-gcp-monitor`. This includes created resources names and docker images.
 Previous versions will still be available (but not updated), under the name `dynatrace-gcp-function`.
 
-
 ## (legacy info) Cloud Function deployment is deprecated
-Up till now, there was an option to deploy GCP integration as Cloud Function (instead of K8s container). It is now deprecated and will only be supported till the end of March 2023. If you are using this kind of deployment, you should switch to K8s container as soon as possible.
-
-See [migration guide](https://www.dynatrace.com/support/help/shortlink/migrate-gcp-function-1-to-k8s-1).
+Up until version 1.1.8, there was an option to deploy GCP integration as a Cloud Function (instead of a K8s container). It is now deprecated and has no support. If you are using this kind of deployment, please refer to this [migration guide](https://www.dynatrace.com/support/help/shortlink/migrate-gcp-function-1-to-k8s-1).
 
 ## (legacy info) Migrating to 1.0.x from previous 0.1.x installations
-If you already have previous version of `dynatrace-gcp-monitor` deployed, please refer to [migration guide](./MIGRATION-V1.md) before installing latest version.
+If you already have a previous version of `dynatrace-gcp-monitor` deployed, please refer to this [migration guide](./MIGRATION-V1.md) before installing the latest version.
 
 ## Pricing
 - Ingested metrics will consume DDUs. For more details [GCP service monitoring consumption](https://www.dynatrace.com/support/help/shortlink/metric-cost-calculation#which-built-in-metrics-consume-ddus)

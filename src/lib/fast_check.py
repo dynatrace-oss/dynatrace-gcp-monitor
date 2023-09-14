@@ -23,12 +23,9 @@ from typing import NamedTuple, List, Optional, Tuple
 from aiohttp import ClientSession
 
 from lib.context import LoggingContext, get_should_require_valid_certificate
-from lib.credentials import get_all_accessible_projects, fetch_dynatrace_url, fetch_dynatrace_api_key, \
-    get_project_id_from_environment
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder import create_logs_context
-from lib.utilities import is_deployment_running_inside_cloud_function
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -75,53 +72,12 @@ DYNATRACE_REQUIRED_TOKEN_SCOPES = [
 FastCheckResult = NamedTuple('FastCheckResult', [('projects', List[str])])
 
 
-def valid_dynatrace_scopes(token_metadata: dict):
-    """Check whether Dynatrace token metadata has required scopes to start ingest metrics"""
-    token_scopes = token_metadata.get('scopes', [])
-    return all(scope in token_scopes for scope in DYNATRACE_REQUIRED_TOKEN_SCOPES) if token_scopes else False
-
-
 def check_version(logging_context: LoggingContext):
     script_directory = os.path.dirname(os.path.realpath(__file__))
     version_file_path = os.path.join(script_directory, "./../version.txt")
     with open(version_file_path) as version_file:
         _version = version_file.readline()
         logging_context.log(f"Found version: {_version}")
-
-
-async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str, dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
-    try:
-        response = await dt_session.post(
-            url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
-            headers={
-                "Authorization": f"Api-Token {dynatrace_api_key}",
-                "Content-Type": "application/json; charset=utf-8"
-            },
-            json={
-                "token": dynatrace_api_key
-            },
-            verify_ssl=get_should_require_valid_certificate(),
-            timeout=timeout)
-        if response.status != 200:
-            context.log(f'Unable to get Dynatrace token metadata: {response.status}, url: {response.url}, reason: {response.reason}')
-            return {}
-
-        return await response.json()
-    except Exception as e:
-        context.log(f'Unable to get Dynatrace token metadata. Error details: {e}')
-        return {}
-
-
-def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
-    if len(dynatrace_access_key) >= 7:
-        is_new_token = dynatrace_access_key.startswith("dt0c01.") and len(dynatrace_access_key) == 96
-        if is_new_token:
-            # characters between dots are the public part of the token
-            return 'dt0c01.' + dynatrace_access_key.split('.')[1]
-        else:
-            return dynatrace_access_key[:3] + '*' * (len(dynatrace_access_key) - 6) + dynatrace_access_key[-3:]
-    else:
-        return "Invalid Token"
 
 
 async def check_dynatrace(logging_context: LoggingContext, project_id: str, dt_session: ClientSession,
@@ -147,45 +103,47 @@ async def check_dynatrace(logging_context: LoggingContext, project_id: str, dt_s
         return False
 
 
-class MetricsFastCheck:
+def obfuscate_dynatrace_access_key(dynatrace_access_key: str):
+    if len(dynatrace_access_key) >= 7:
+        is_new_token = dynatrace_access_key.startswith("dt0c01.") and len(dynatrace_access_key) == 96
+        if is_new_token:
+            # characters between dots are the public part of the token
+            return 'dt0c01.' + dynatrace_access_key.split('.')[1]
+        else:
+            return dynatrace_access_key[:3] + '*' * (len(dynatrace_access_key) - 6) + dynatrace_access_key[-3:]
+    else:
+        return "Invalid Token"
 
-    def __init__(self, gcp_session: ClientSession, dt_session: ClientSession, token: str, logging_context: LoggingContext):
-        self.gcp_session = gcp_session
-        self.dt_session = dt_session
-        self.logging_context = logging_context
-        self.token = token
 
-    async def is_project_ready_to_monitor(self, project_id: str) -> Tuple[str, bool]:
-        try:
-            if is_deployment_running_inside_cloud_function():
-                dynatrace_url = await fetch_dynatrace_url(self.gcp_session, project_id, self.token)
-                dynatrace_access_key = await fetch_dynatrace_api_key(self.gcp_session, project_id, self.token)
-                await check_dynatrace(logging_context=self.logging_context,
-                                      project_id=get_project_id_from_environment(),
-                                      dt_session=self.dt_session,
-                                      dynatrace_url=dynatrace_url,
-                                      dynatrace_access_key=dynatrace_access_key)
-        except Exception as e:
-            self.logging_context.log(f'Unable to get Dynatrace Secrets for project: {project_id}. Error details: {e}')
-            return project_id, False
-        return project_id, True
+async def get_dynatrace_token_metadata(dt_session: ClientSession, context: LoggingContext, dynatrace_url: str,
+                                       dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
+    try:
+        response = await dt_session.post(
+            url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
+            headers={
+                "Authorization": f"Api-Token {dynatrace_api_key}",
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            json={
+                "token": dynatrace_api_key
+            },
+            verify_ssl=get_should_require_valid_certificate(),
+            timeout=timeout)
+        if response.status != 200:
+            context.log(
+                f'Unable to get Dynatrace token metadata: {response.status}, url: {response.url}, reason: {response.reason}')
+            return {}
 
-    async def execute(self) -> FastCheckResult:
-        _print_configuration_flags(self.logging_context, METRICS_CONFIGURATION_FLAGS)
+        return await response.json()
+    except Exception as e:
+        context.log(f'Unable to get Dynatrace token metadata. Error details: {e}')
+        return {}
 
-        project_list = await get_all_accessible_projects(self.logging_context, self.gcp_session, self.token)
 
-        projects_ready_to_monitor = []
-        tasks_to_find_ready_projects = []
-        for project_id in project_list:
-            tasks_to_find_ready_projects.append(self.is_project_ready_to_monitor(project_id))
-
-        ready_project_task_results = await asyncio.gather(*tasks_to_find_ready_projects)
-        for project_id, is_project_ready in ready_project_task_results:
-            if is_project_ready:
-                projects_ready_to_monitor.append(project_id)
-
-        return FastCheckResult(projects=projects_ready_to_monitor)
+def valid_dynatrace_scopes(token_metadata: dict):
+    """Check whether Dynatrace token metadata has required scopes to start ingest metrics"""
+    token_scopes = token_metadata.get('scopes', [])
+    return all(scope in token_scopes for scope in DYNATRACE_REQUIRED_TOKEN_SCOPES) if token_scopes else False
 
 
 class LogsFastCheck:
