@@ -97,18 +97,27 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
 
         disabled_projects = set()
+        disabled_projects_by_prefix = set()
         disabled_apis_by_project_id = {}
 
         # Using metrics scope feature, checking disabled apis in every project is not needed
         if not config.scoping_project_support_enabled():
             disabled_projects, disabled_apis_by_project_id = \
                 await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
-
+        
         disabled_projects.update(filter(None, config.excluded_projects().split(',')))
+        disabled_projects_by_prefix.update(filter(None, config.excluded_projects_by_prefix().split(',')))
+
+        if disabled_projects_by_prefix:
+            for p in disabled_projects_by_prefix:
+                not_matching = [s for s in projects_ids if p not in s]
+                projects_ids = not_matching
+            context.log("Disabled projects: " + ", ".join(disabled_projects_by_prefix))
 
         if disabled_projects:
             projects_ids = [x for x in projects_ids if x not in disabled_projects]
             context.log("Disabled projects: " + ", ".join(disabled_projects))
+            
 
         setup_time = (time.time() - setup_start_time)
         for project_id in projects_ids:
