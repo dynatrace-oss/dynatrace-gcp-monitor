@@ -20,8 +20,16 @@ from typing import Dict, List, Any
 from lib.context import MetricsContext, LoggingContext, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
 from lib.entities.model import Entity
-from lib.metrics import DISTRIBUTION_VALUE_KEY, AutodiscoveryGCPService, Dimension, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
-    DimensionValue, IngestLine
+from lib.metrics import (
+    DISTRIBUTION_VALUE_KEY,
+    TYPED_VALUE_KEY_MAPPING,
+    AutodiscoveryGCPService,
+    Dimension,
+    DimensionValue,
+    GCPService,
+    IngestLine,
+    Metric,
+)
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.configuration import config
 

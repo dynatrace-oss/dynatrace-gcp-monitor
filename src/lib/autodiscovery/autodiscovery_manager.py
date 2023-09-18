@@ -10,7 +10,6 @@ from lib.autodiscovery.autodiscovery import (
 from lib.context import LoggingContext
 from lib.metrics import AutodiscoveryGCPService, GCPService
 from lib.utilities import read_autodiscovery_block_list_yaml, read_autodiscovery_config_yaml
-from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -73,7 +72,7 @@ class AutodiscoveryManager:
             for resource_name, service_stub in resource_mapping.items()
         }
 
-    async def check_resources_to_autodiscovery(
+    async def check_resources_to_discover(
         self, services: List[GCPService]
     ) -> Dict[str, AutodiscoveryResourceLinking]:
         prepared_resources = {}
@@ -108,7 +107,7 @@ class AutodiscoveryManager:
                     )
 
                 else:
-                    self.logging_context.log(
+                    self.logging_context.error(
                         f"Can't add resource {resource}. Make sure if extension {self.autodiscovery_resource_mapping[resource][0].extension_name} with proper services is enabled."
                     )
 
@@ -121,7 +120,7 @@ class AutodiscoveryManager:
         self, services: List[GCPService]
     ) -> Optional[AutodiscoveryGCPService]:
         if self.autodiscovery_enabled:
-            resources_to_discovery = await self.check_resources_to_autodiscovery(services)
+            resources_to_discovery = await self.check_resources_to_discover(services)
 
             if resources_to_discovery:
                 autodiscovery_service = AutodiscoveryGCPService()
@@ -132,7 +131,7 @@ class AutodiscoveryManager:
                     self.autodiscovery_metric_block_list,
                 )
                 self.last_autodiscovered_metric_list_names = (
-                    autodiscovery_result.discovered_metric_list
+                    autodiscovery_result.discovered_metrics_list
                 )
                 if any(autodiscovery_result.autodiscovered_resources_to_metrics):
                     autodiscovery_service.set_metrics(
@@ -143,6 +142,6 @@ class AutodiscoveryManager:
                     return autodiscovery_service
 
             self.logging_context.log(
-                "No resources find to autodiscovery. Please ensure that you have either added them in the autodiscoveryResourcesYaml file or verified that the necessary extensions are enabled."
+                "Autodiscovery didn't find any resources to monitor. Ensure they're listed in autodiscoveryResourcesYaml."
             )
         return None

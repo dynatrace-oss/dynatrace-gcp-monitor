@@ -7,12 +7,18 @@ from lib.configuration import config
 from lib.context import LoggingContext
 from lib.metrics import AutodiscoveryGCPService, GCPService
 
-AUTODISCOVERY_QUERY_INTERVAL_SEC = config.get_autodiscovery_querry_interval() * 60
 
 logging_context = LoggingContext("AUTODISCOVERY_TASK")
 
 
 class AutodiscoveryTaskExecutor:
+    """
+    The AutodiscoveryTaskExecutor class manages autodiscovery-related tasks and caching of autodiscovered services.
+
+    This class coordinates the execution of autodiscovery tasks, caching of autodiscovered services, and
+    refreshing of autodiscovery tasks based on specified criteria.
+    """
+
     autodiscovery_task: Optional[asyncio.Task]
     autodiscovered_cached_service: Optional[AutodiscoveryGCPService]
     autodiscovered_extension_versions_hash: int
@@ -60,9 +66,9 @@ class AutodiscoveryTaskExecutor:
 
     async def get_task_result(self):
         if self.autodiscovery_task is not None:
-            ad_service_result = await self.autodiscovery_task
-            if ad_service_result:
-                self.autodiscovered_cached_service = ad_service_result
+            autodiscovery_service_result = await self.autodiscovery_task
+            if autodiscovery_service_result:
+                self.autodiscovered_cached_service = autodiscovery_service_result
 
     async def _refresh_autodiscovery_task(
         self, services, new_extension_versions_hash, force_refresh=False
@@ -81,9 +87,9 @@ class AutodiscoveryTaskExecutor:
 
     async def _handle_autodiscovery_task_result(self):
         if self.autodiscovery_task:
-            ad_service_result = await self.autodiscovery_task
-            if ad_service_result:
-                self.autodiscovered_cached_service = ad_service_result
+            autodiscovery_service_result = await self.autodiscovery_task
+            if autodiscovery_service_result:
+                self.autodiscovered_cached_service = autodiscovery_service_result
             self.autodiscovery_task = None
 
     async def get_cached_or_refreshed_metrics(
@@ -104,5 +110,5 @@ class AutodiscoveryTaskExecutor:
         if self.autodiscovered_cached_service:
             services.append(self.autodiscovered_cached_service)
         else:
-            logging_context.log("No resources to autodiscovery will skip")
+            logging_context.log("Autodiscovery couldn't find any metrics for the given resources.")
         return services

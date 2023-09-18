@@ -217,9 +217,14 @@ class GCPService:
 
 
 class AutodiscoveryGCPService(GCPService):
-    resources_to_metrics: Dict[str, List[Metric]]
+    """
+    AutodiscoveryGCPService is a specialized class for managing autodiscovery-related operations.
+
+    This class extends the base GCPService class and provides functionality for setting metrics,
+    retrieving dimensions, and getting metric names for autodiscovery purposes.
+
+    """
     metrics_to_resources: Dict[str, str]
-    resources_linking: Dict[str, AutodiscoveryResourceLinking]
     metrics_to_linking: Dict[str, Optional[AutodiscoveryResourceLinking]]
     resource_dimensions: Dict[str, List[Dimension]]
 
@@ -246,8 +251,6 @@ class AutodiscoveryGCPService(GCPService):
             for metric in metrics
         }
 
-        self.resources_to_metrics = resources_to_metrics
-        self.resources_linking = resource_linking
         self.resource_dimensions = resource_dimensions
 
     def get_dimensions(self, metric: Metric) -> List[Dimension]:
