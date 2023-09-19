@@ -120,6 +120,9 @@ clusterName: ""
 scopingProjectSupportEnabled: "false"
 # excludedProjects: comma separated list of projects that will be excluded from monitoring (e.g. "project-a,project-b,project-c").
 excludedProjects: ""
+# excludedProjectsByPrefix: comma separated list of projects substring that will be excluded from monitoring (e.g. "project-a,proj,pro").
+excludedProjectsByPrefix: ""
+
 metricResources:
   requests:
     memory: "1536Mi"
