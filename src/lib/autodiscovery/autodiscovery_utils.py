@@ -216,11 +216,12 @@ async def get_existing_metrics(
     for resource_name, service_linking in autodiscovery_resources.items():
         metric_name_list = []
 
-        for service in (
-            service_linking.possible_service_linking
-            + service_linking.disabled_services_for_resource
-        ):
-            metric_name_list.extend(metric.google_metric for metric in service.metrics)
+        if service_linking:
+            for service in (
+                service_linking.possible_service_linking
+                + service_linking.disabled_services_for_resource
+            ):
+                metric_name_list.extend(metric.google_metric for metric in service.metrics)
 
         resources_to_metrics[resource_name] = set(metric_name_list)
 

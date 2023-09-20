@@ -106,7 +106,7 @@ class AutodiscoveryContext:
 
             # Resource is unknown (custom)
             else:
-                prepared_resources[resource] = AutodiscoveryResourceLinking([], [])
+                prepared_resources[resource] = None
 
         return prepared_resources
 
