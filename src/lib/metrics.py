@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, List, Optional, Text, Any, Dict
 from lib.configuration import config
 
 if TYPE_CHECKING:
-    from lib.autodiscovery.autodiscovery import AutodiscoveryResourceLinking
+    from lib.autodiscovery.models import AutodiscoveryResourceLinking
 
 VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
 VARIABLE_VAR_PATTERN=re.compile("var:\\S+")

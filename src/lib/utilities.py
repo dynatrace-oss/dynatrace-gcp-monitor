@@ -27,41 +27,27 @@ def chunks(full_list: List, chunk_size: int) -> List[List]:
     chunk_size = max(1, chunk_size)
     return [full_list[i:i + chunk_size] for i in range(0, len(full_list), chunk_size)]
 
+def safe_read_yaml(filepath: str, alternative_environ_name: str):
+    try:
+        with open(filepath, encoding="utf-8") as activation_file:
+            yaml_dict = yaml.safe_load(activation_file)
+    except Exception:
+        yaml_dict = yaml.safe_load(os.environ.get(alternative_environ_name, ""))
+    if not yaml_dict:
+        yaml_dict = {}
+    return yaml_dict
 
 def read_activation_yaml():
-    activation_file_path = '/code/config/activation/gcp_services.yaml'
-    try:
-        with open(activation_file_path, encoding="utf-8") as activation_file:
-            activation_yaml = yaml.safe_load(activation_file)
-    except Exception:
-        activation_yaml = yaml.safe_load(os.environ.get("ACTIVATION_CONFIG", ""))
-    if not activation_yaml:
-        activation_yaml = {}
-    return activation_yaml
+    return safe_read_yaml('/code/config/activation/gcp_services.yaml', "ACTIVATION_CONFIG" )
 
 def read_autodiscovery_config_yaml():
-    autodiscovery_config_path = '/code/config/activation/autodiscovery-config.yaml'
-    try:
-        with open(autodiscovery_config_path, encoding="utf-8") as config_file:
-            autodiscovery_config_yaml = yaml.safe_load(config_file)
-    except Exception:
-        autodiscovery_config_yaml = yaml.safe_load(os.environ.get("AUTODISCOVERY_RESOURCES_YAML", ""))
-    if not autodiscovery_config_yaml:
-        raise Exception("Unable to load AutodiscoveryResourcesYaml")
-    if "searched_resources" not in autodiscovery_config_yaml["autodicovery_config"]:
-        raise Exception("No resources field in autodiscovery config")
-    return autodiscovery_config_yaml
+    return safe_read_yaml('/code/config/activation/autodiscovery-config.yaml', "AUTODISCOVERY_RESOURCES_YAML" )
 
 def read_autodiscovery_block_list_yaml():
-    autodiscovery_config_path = '/code/config/activation/autodiscovery-block-list.yaml'
-    try:
-        with open(autodiscovery_config_path, encoding="utf-8") as config_file:
-            autodiscovery_block_list = yaml.safe_load(config_file)["block_list"]
-    except Exception:
-        autodiscovery_block_list = yaml.safe_load(os.environ.get("AUTODISCOVERY_BLOCK_LIST_YAML", ""))["block_list"]
-    if not autodiscovery_block_list:
-        autodiscovery_block_list = []
-    return autodiscovery_block_list
+    return safe_read_yaml('/code/config/activation/autodiscovery-block-list.yaml', "AUTODISCOVERY_BLOCK_LIST_YAML" )
+
+def read_autodiscovery_resources_mapping():
+    return safe_read_yaml('./lib/autodiscovery/config/autodiscovery-mapping.yaml', "AUTODISCOVERY_RESOURCES_MAPPING")
 
 def get_activation_config_per_service(activation_yaml):
     return {service_activation.get('service'): service_activation for service_activation in

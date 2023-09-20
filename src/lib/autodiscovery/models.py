@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
-from typing import List, Tuple
+from typing import Dict, List, NamedTuple, Tuple
+
+from lib.metrics import Dimension, GCPService, Metric
 
 GCP_UNIT_CONVERSION_MAP = {
     "1": "Count",
@@ -43,6 +45,27 @@ GCP_UNIT_CONVERSION_MAP = {
     "s{uptime}": "Second",
     "{dBm}": "DecibelMilliWatt",
 }
+
+AutodiscoveryResult = NamedTuple(
+    "AutodiscoveryResult",
+    [
+        ("autodiscovered_resources_to_metrics", Dict[str, List[Metric]]),
+        ("resource_dimensions", Dict[str, List[Dimension]]),
+    ],
+)
+
+
+@dataclass(frozen=True)
+class ServiceStub:
+    extension_name: str
+    service_name: str
+    feature_set_name: str
+
+
+@dataclass(frozen=True)
+class AutodiscoveryResourceLinking:
+    possible_service_linking: List[GCPService]
+    disabled_services_for_resource: List[GCPService]
 
 
 @dataclass(frozen=True)

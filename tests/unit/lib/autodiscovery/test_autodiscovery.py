@@ -2,10 +2,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from lib.autodiscovery.autodiscovery import (
-    AutodiscoveryResourceLinking,
+from lib.autodiscovery.autodiscovery_utils import (
     get_metric_descriptors,
 )
+from lib.autodiscovery.models import AutodiscoveryResourceLinking
 
 response_json = {
     "metricDescriptors": [
@@ -53,10 +53,9 @@ response_json = {
 
 
 @pytest.mark.asyncio
-@patch("lib.autodiscovery.autodiscovery.fetch_resource_descriptors")
-@patch("lib.autodiscovery.autodiscovery.config")
-@patch("lib.autodiscovery.autodiscovery.get_project_ids")
-@patch("lib.autodiscovery.autodiscovery.discovered_resource_type", "cloud_function")
+@patch("lib.autodiscovery.autodiscovery_utils.fetch_resource_descriptors")
+@patch("lib.autodiscovery.autodiscovery_utils.config")
+@patch("lib.autodiscovery.autodiscovery_utils.get_project_ids")
 async def test_get_metric_descriptors(get_project_ids_mock, config_mock, fetch_resource_mock):
     token_mock = "test_token"
     config_mock.project_id.return_value = "test_project_id"
@@ -71,10 +70,16 @@ async def test_get_metric_descriptors(get_project_ids_mock, config_mock, fetch_r
 
     metric_context = AsyncMock()
 
-    ad_resources_to_services_mock = {"cloud_function": AutodiscoveryResourceLinking([],[])}
+    ad_resources_to_services_mock = {"cloud_function": AutodiscoveryResourceLinking([], [])}
 
     autodiscovery_metric_block_list = ["custom_google.googleapis.com"]
-    result, resource_labels = await get_metric_descriptors(metric_context, gcp_session_mock, token_mock,ad_resources_to_services_mock, autodiscovery_metric_block_list)
+    result, _ = await get_metric_descriptors(
+        metric_context,
+        gcp_session_mock,
+        token_mock,
+        ad_resources_to_services_mock,
+        autodiscovery_metric_block_list,
+    )
     result = list(result.items())
 
     assert len(result) == 1

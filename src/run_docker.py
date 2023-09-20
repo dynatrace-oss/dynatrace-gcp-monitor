@@ -22,7 +22,7 @@ from typing import Optional, List, NamedTuple, Dict
 from aiohttp import ClientSession
 
 from lib import credentials
-from lib.autodiscovery.autodiscovery_manager import AutodiscoveryManager
+from lib.autodiscovery.autodiscovery import AutodiscoveryContext
 from lib.autodiscovery.autodiscovery_task_executor import AutodiscoveryTaskExecutor
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
@@ -156,8 +156,8 @@ async def run_metrics_fetcher_forever():
 
 
     if config.metric_autodiscovery():
-        autodiscovery_manager = AutodiscoveryManager()
-        autodiscovery_task = await AutodiscoveryTaskExecutor.init(services, autodiscovery_manager, extension_versions)
+        autodiscovery_manager = AutodiscoveryContext()
+        autodiscovery_task = await AutodiscoveryTaskExecutor.create(services, autodiscovery_manager, extension_versions)
     
     while True:
         start_time_s = time.time()
@@ -166,7 +166,7 @@ async def run_metrics_fetcher_forever():
             new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services, extension_versions))
 
         if config.metric_autodiscovery():
-            services = await autodiscovery_task.get_cached_or_refreshed_metrics(services, extension_versions)
+            services = await autodiscovery_task.process_autodiscovery_result(services, extension_versions)
             
         await run_single_polling_with_timeout(services)
 

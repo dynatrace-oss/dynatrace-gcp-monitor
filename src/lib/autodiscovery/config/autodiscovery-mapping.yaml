@@ -289,11 +289,11 @@ gcp_extension_mapping:
     feature_set: apigee
     monitored_resources:
     - value: k8s_container
-#  - service_name: k8s_container
-#    feature_set: istio
-#    monitored_resources:
-#    - value: istio_control_plane
-#    - value: k8s_container
+  - service_name: k8s_container
+    feature_set: istio
+    monitored_resources:
+    - value: istio_control_plane
+    - value: k8s_container
   - service_name: k8s_container
     feature_set: nginx
     monitored_resources:
