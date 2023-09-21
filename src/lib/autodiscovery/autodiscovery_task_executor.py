@@ -97,7 +97,7 @@ class AutodiscoveryTaskExecutor:
                 async with self.lock:
                     if result:
                         self.autodiscovered_cached_service = result
-                        self._notify_observers()
+                    self._notify_observers()
                 await asyncio.wait_for(
                     self.notify_event.wait(), timeout=self.query_interval.total_seconds()
                 )
@@ -109,9 +109,9 @@ class AutodiscoveryTaskExecutor:
                 )
             except asyncio.TimeoutError:
                 logging_context.log("Query time elapsed. Preparing for the next autodiscovery.")
-            except Exception:
+            except Exception as e:
+                logging_context.error(f"Error ocured: {type(e).__name__} : {e} ")
                 self._notify_observers()
-                break
 
     async def process_autodiscovery_result(
         self, services: List[GCPService], new_extension_versions: Dict[str, str]

@@ -199,7 +199,7 @@ async def get_metric_descriptors(
         )
 
     resource_dimensions = await fetch_resource_descriptors(
-        gcp_session, token, project_ids[0], resources_to_autodiscover
+        gcp_session, token, project_ids, resources_to_autodiscover
     )
 
     fetch_metrics_descriptor_results = await asyncio.gather(

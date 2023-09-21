@@ -208,10 +208,6 @@ class AutodiscoveryContext:
             logging_context.log(
                 f"Discovered {len(metric_list)} metrics for [{resource_name}] resource."
             )
-            for metric in metric_list:
-                logging_context.log(
-                    f"In resource: [{resource_name}] found metric: [{metric.google_metric}]"
-                )
 
         self.last_autodiscovered_metric_list_names = await send_metric_metadata(
             autodiscovery_resources_to_metrics,
