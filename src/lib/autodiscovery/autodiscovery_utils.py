@@ -53,34 +53,41 @@ async def get_project_ids(
 
 
 async def fetch_resource_descriptors(
-    gcp_session: ClientSession, token: str, project_id: str, resources: Set[str]
+    gcp_session: ClientSession, token: str, projects_id: List[str], resources: Set[str]
 ) -> Dict[str, List[Dimension]]:
     headers = {"Accept": "application/json", "Authorization": f"Bearer {token}"}
 
-    params = {}
+    for project_id in projects_id:
+        params = {}
+        resource_dimensions = {}
+        for resource in resources:
+            url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/monitoredResourceDescriptors/{resource}"
+            response = await gcp_session.request("GET", url=url, headers=headers, params=params)
 
-    resource_dimensions = {}
-    for resource in resources:
-        url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/monitoredResourceDescriptors/{resource}"
-        response = await gcp_session.request("GET", url=url, headers=headers, params=params)
-        response.raise_for_status()
-        descriptor = await response.json()
+            if response.status != 200:
+                break
+            descriptor = await response.json()
 
-        type_key = descriptor["type"]
-        dimensions = []
+            type_key = descriptor["type"]
+            dimensions = []
 
-        if "labels" in descriptor:
-            for label in descriptor["labels"]:
-                label_key = label.get("key", "")
-                label_value = "label:resource.labels." + label_key
-                dimensions.append(Dimension(key=label_key, value=label_value))
+            if "labels" in descriptor:
+                for label in descriptor["labels"]:
+                    label_key = label.get("key", "")
+                    label_value = "label:resource.labels." + label_key
+                    dimensions.append(Dimension(key=label_key, value=label_value))
 
-                if label_key in label_mapping:
-                    dimensions.append(Dimension(key=label_mapping[label_key], value=label_value))
+                    if label_key in label_mapping:
+                        dimensions.append(
+                            Dimension(key=label_mapping[label_key], value=label_value)
+                        )
 
-        resource_dimensions[type_key] = dimensions
+            resource_dimensions[type_key] = dimensions
 
-    return resource_dimensions
+        return resource_dimensions
+    raise Exception(
+        "Unable to get any resource descriptors check if role have proper permission: monitoring.monitoredResourceDescriptors.list"
+    )
 
 
 def should_include_metric(
