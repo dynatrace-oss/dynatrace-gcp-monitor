@@ -397,7 +397,7 @@ info ""
 info "- 7. Install dynatrace-gcp-monitor with helm chart in $CLUSTER_NAME"
 
 if [ "$AUTODISCOVERY" = "T" ]; then
-  helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor -f autodiscovery-values.yaml -f values.yaml --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+  helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor -f ./dynatrace-gcp-monitor/autodiscovery-values.yaml -f ./dynatrace-gcp-monitor/values.yaml --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 else
   helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 fi
