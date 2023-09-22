@@ -67,6 +67,7 @@ class AutodiscoveryTaskExecutor:
         self.autodiscovery_task = asyncio.create_task(self._init_autodiscovery_task())
         self.time_since_last_autodiscovery = datetime.now()
         self.lock = asyncio.Lock()
+        self.notify_event = asyncio.Event()
         self.observers = init_observer_list
 
     def _notify_observers(self):
