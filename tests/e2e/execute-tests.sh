@@ -14,8 +14,13 @@
 #     limitations under the License.
 source ./tests/e2e/lib-tests.sh
 
+echo "TRAVIS_BUILD_ID: $TRAVIS_BUILD_ID"
 function run_deploy_and_tests() {
     TEST_TYPE=$1
+
+    echo "---------------------------------"
+    echo "TEST_TYPE: $TEST_TYPE, DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE, CLOUD_RUN_REVISION_NAME: $CLOUD_RUN_REVISION_NAME, GCP_PROJECT_2_ID: $GCP_PROJECT_2_ID"
+    echo "---------------------------------"
 
     START_LOAD_GENERATION=$(date -u +%s%3N)
     export START_LOAD_GENERATION
@@ -26,6 +31,11 @@ function run_deploy_and_tests() {
     echo waiting 300sec
     sleep 300
     END_LOAD_GENERATION=$(date -u +%s%3N)
+
+    echo "---------------------------------"
+    echo "START_LOAD_GENERATION: $START_LOAD_GENERATION, END_LOAD_GENERATION: $END_LOAD_GENERATION"
+    echo "---------------------------------"
+
     export END_LOAD_GENERATION
 
     if [[ $TEST_TYPE == 'all' ]]; then
@@ -37,6 +47,10 @@ function run_deploy_and_tests() {
     if [[ $TRAVIS_BRANCH == 'master' ]] && [[ $TEST_TYPE != 'logs' ]]; then
         performance_test
     fi
+
+    echo "---------------------------------"
+    echo "This was: $TEST_TYPE"
+    echo "---------------------------------"
 }
 
 if [[ $TRAVIS_EVENT_TYPE == 'cron' ]] || [[ $1 == 'separate' ]]; then
