@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
+import traceback
 from typing import Dict, List, Optional
 
 from lib.autodiscovery.autodiscovery import AutodiscoveryContext
@@ -27,6 +28,7 @@ class AutodiscoveryTaskExecutor:
     lock: asyncio.Lock
     notify_event: asyncio.Event
     observers: List
+    is_task_running: bool
 
     @staticmethod
     async def create(
@@ -43,7 +45,8 @@ class AutodiscoveryTaskExecutor:
             services, autodiscovery_manager, current_extension_versions, observer_list
         )
 
-        await init_task_finished.wait()
+        if autodiscovery_executor.is_task_running:
+            await init_task_finished.wait()
 
         return autodiscovery_executor
 
@@ -64,7 +67,12 @@ class AutodiscoveryTaskExecutor:
         self.query_interval = timedelta(minutes=max(autodiscovery_query_interval, 60))
 
         self.cached_services = services[:]
-        self.autodiscovery_task = asyncio.create_task(self._init_autodiscovery_task())
+        
+        if autodiscovery_manager.autodiscovery_enabled:
+            self.is_task_running = True
+            self.autodiscovery_task = asyncio.create_task(self._init_autodiscovery_task())
+        else:
+            self.is_task_running = False
         self.time_since_last_autodiscovery = datetime.now()
         self.lock = asyncio.Lock()
         self.notify_event = asyncio.Event()
@@ -111,19 +119,24 @@ class AutodiscoveryTaskExecutor:
             except asyncio.TimeoutError:
                 logging_context.log("Query time elapsed. Preparing for the next autodiscovery.")
             except Exception as e:
-                logging_context.error(f"Error ocured: {type(e).__name__} : {e} ")
+                logging_context.error(
+                    f"Autodiscovery Disabled, Error ocured: {type(e).__name__} : {e} \n  {traceback.format_exc()}"
+                )
+                self.is_task_running = False
                 self._notify_observers()
+                break
 
     async def process_autodiscovery_result(
         self, services: List[GCPService], new_extension_versions: Dict[str, str]
     ) -> List[GCPService]:
-        await self._update_extensions(new_extension_versions, services)
+        if self.is_task_running:
+            await self._update_extensions(new_extension_versions, services)
 
-        async with self.lock:
-            if self.autodiscovered_cached_service:
-                services.append(self.autodiscovered_cached_service)
-            else:
-                logging_context.error(
-                    "Autodiscovery couldn't find any metrics for the given resources."
-                )
-            return services
+            async with self.lock:
+                if self.autodiscovered_cached_service:
+                    services.append(self.autodiscovered_cached_service)
+                else:
+                    logging_context.error(
+                        "Autodiscovery couldn't find any metrics for the given resources."
+                    )
+        return services

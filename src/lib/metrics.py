@@ -186,6 +186,7 @@ class GCPService:
     activation: Dict[Text, Any]
     is_enabled: bool
     extension_name: str
+    autodiscovery_enabled: bool
 
     def __init__(self, **kwargs):
         object.__setattr__(self, "name", kwargs.get("service", ""))
@@ -211,6 +212,7 @@ class GCPService:
         object.__setattr__(self, "monitoring_filter", monitoring_filter)
         object.__setattr__(self, "is_enabled",  kwargs.get("is_enabled", True))
         object.__setattr__(self, "extension_name",  kwargs.get("extension_name", "Unknown Extension"))
+        object.__setattr__(self, "autodiscovery_enabled",  kwargs.get("autodiscovery_enabled", False))
 
     def __hash__(self):
         return hash((self.name, self.technology_name, self.feature_set, self.monitoring_filter))

@@ -97,6 +97,7 @@ def should_include_metric(
 ) -> bool:
     return (
         metric_descriptor.gcpOptions.valueType.upper() != "STRING"
+        and metric_descriptor.launch_stage != "DEPRECATED"
         and len(metric_descriptor.monitored_resources_types) == 1
         and metric_descriptor.monitored_resources_types[0] in resources_to_autodiscover
         and not any(

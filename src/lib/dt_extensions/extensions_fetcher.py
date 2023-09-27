@@ -21,7 +21,7 @@ from aiohttp import ClientSession
 
 from lib.context import LoggingContext, get_should_require_valid_certificate
 from lib.metrics import GCPService
-from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
+from lib.utilities import get_autodiscovery_flag_per_service, read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
 
 ExtensionsFetchResult = NamedTuple("ExtensionsFetchResult",[("services", List[GCPService]), ("extension_versions", Dict[str, str])],)
 
@@ -42,6 +42,7 @@ class ExtensionsFetcher:
         extension_name_to_version_dict = await self._get_extensions_dict_from_dynatrace_cluster()
         activation_yaml = read_activation_yaml()
         activation_config_per_service = get_activation_config_per_service(activation_yaml)
+        autodiscovery_per_service = get_autodiscovery_flag_per_service(activation_yaml)
         feature_sets_from_activation_config = load_activated_feature_sets(self.logging_context, activation_yaml)
 
         configured_services = []
@@ -49,7 +50,7 @@ class ExtensionsFetcher:
 
         for extension_name, extension_version in extension_name_to_version_dict.items():
             services_for_extension, not_configured_services_for_extension = await self._get_service_configs_for_extension(
-                extension_name, extension_version, activation_config_per_service, feature_sets_from_activation_config)
+                extension_name, extension_version, activation_config_per_service, feature_sets_from_activation_config, autodiscovery_per_service)
             configured_services.extend(services_for_extension)
             not_configured_services.extend(not_configured_services_for_extension)
         if not_configured_services:
@@ -95,23 +96,39 @@ class ExtensionsFetcher:
                 dynatrace_extensions_dict[extension.get("extensionName")] = extension.get("version")
         return dynatrace_extensions_dict
 
-    async def _get_service_configs_for_extension(self, extension_name: str, extension_version: str,
-                                                 activation_config_per_service, feature_sets_from_activation_config) -> (List[GCPService], List):
-        extension_configuration = await self.get_extension_configuration_from_cache_or_download(extension_name, extension_version)
+    async def _get_service_configs_for_extension(
+        self,
+        extension_name: str,
+        extension_version: str,
+        activation_config_per_service,
+        feature_sets_from_activation_config,
+        autodiscovery_per_service: Dict[str, bool],
+    ) -> (List[GCPService], List):
+        extension_configuration = await self.get_extension_configuration_from_cache_or_download(
+            extension_name, extension_version
+        )
 
         if "gcp" not in extension_configuration:
-            self.logging_context.log(f"Incorrect extension fetched from Dynatrace cluster. {extension_name}-{extension_version} has no 'gcp' section and will be skipped")
+            self.logging_context.log(
+                f"Incorrect extension fetched from Dynatrace cluster. {extension_name}-{extension_version} has no 'gcp' section and will be skipped"
+            )
             return []
 
         all_services = []
         not_configured_services = []
         for service in extension_configuration.get("gcp"):
-            service_name = service.get('service')
+            service_name = service.get("service")
             feature_set = f"{service_name}/{service.get('featureSet')}"
             activation = activation_config_per_service.get(service_name, {})
             is_configured = feature_set in feature_sets_from_activation_config
             all_services.append(
-                GCPService(**service, activation=activation, is_enabled=is_configured, extension_name=extension_name)
+                GCPService(
+                    **service,
+                    activation=activation,
+                    is_enabled=is_configured,
+                    extension_name=extension_name,
+                    autodiscovery_enabled=autodiscovery_per_service.get(service_name, False)
+                )
             )
             if not is_configured:
                 not_configured_services.append(feature_set)

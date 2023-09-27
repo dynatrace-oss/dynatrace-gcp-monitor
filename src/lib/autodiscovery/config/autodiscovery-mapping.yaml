@@ -95,7 +95,6 @@ gcp_extension_mapping:
   - service_name: bigquery_project
     feature_set: default_metrics
     monitored_resources:
-    - value: global
     - value: bigquery_project
 - extension_name: google-bigtable
   services:
@@ -165,7 +164,7 @@ gcp_extension_mapping:
   - service_name: gce_instance
     feature_set: agent
     monitored_resources:
-    - value: aws_ec2_instance
+#    - value: aws_ec2_instance
     - value: baremetalsolution.googleapis.com/Instance
     - value: gce_instance
   - service_name: gce_instance

@@ -96,6 +96,7 @@ class GCPMetricDescriptor:
     gcpOptions: GCPMetricDescriptorOptions
     dimensions: Tuple[GCPMetricDescriptorDimension, ...]
     monitored_resources_types: Tuple[str, ...]
+    launch_stage: str
 
     @staticmethod
     def _cast_metric_key_to_dt_format(metric_name: str) -> str:
@@ -155,6 +156,7 @@ class GCPMetricDescriptor:
             )
         )
         monitored_resources_types = tuple(sorted(kwargs.get("monitoredResourceTypes", [])))
+        launch_stage = kwargs.get("launchStage", "")
 
         return cls(
             value=value,
@@ -166,4 +168,5 @@ class GCPMetricDescriptor:
             gcpOptions=gcp_options,
             dimensions=dimensions,
             monitored_resources_types=monitored_resources_types,
+            launch_stage = launch_stage
         )

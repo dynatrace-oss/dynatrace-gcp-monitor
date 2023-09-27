@@ -1,10 +1,11 @@
 import time
 from dataclasses import asdict
+import traceback
 from typing import Any, Dict, List, Optional
 
 from aiohttp import ClientSession
 
-from lib.autodiscovery.autodiscovery_config import get_resources_mapping
+from lib.autodiscovery.autodiscovery_config import get_resources_mapping, get_services_to_resources
 from lib.autodiscovery.autodiscovery_utils import (
     get_existing_metrics,
     get_metric_descriptors,
@@ -42,73 +43,93 @@ class AutodiscoveryContext:
 
     def _load_yamls(self):
         try:
-            self.resource_to_disovery = read_autodiscovery_config_yaml()["autodicovery_config"][
-                "searched_resources"
-            ]
+            resource_to_disovery = (
+                read_autodiscovery_config_yaml()
+                .get("autodicovery_config", {})
+                .get("searched_resources", {})
+            )
+            self.resource_to_disovery = (
+                resource_to_disovery if resource_to_disovery is not None else {}
+            )
+
             self.resources_to_extensions_mapping = get_resources_mapping()
-            self.autodiscovery_metric_block_list = read_autodiscovery_block_list_yaml()[
-                "block_list"
-            ]
+            self.services_to_resources_mapping = get_services_to_resources()
+            autodiscovery_metric_block_list = read_autodiscovery_block_list_yaml().get(
+                "block_list", []
+            )
+            self.autodiscovery_metric_block_list = (
+                autodiscovery_metric_block_list
+                if autodiscovery_metric_block_list is not None
+                else []
+            )
 
         except Exception as e:
             self.logging_context.log(
-                f"Error during init autodiscovery config. Autodiscovery is disabled; {type(e).__name__} : {e}"
+                f"Error during init autodiscovery config. Autodiscovery is now disabled; {type(e).__name__} : {e}\n  {traceback.format_exc()}"
             )
             self.autodiscovery_enabled = False
 
-    async def _check_resources_to_discover(
-        self, services: List[GCPService]
-    ) -> Dict[str, AutodiscoveryResourceLinking]:
+    async def _get_resources_from_config(self) -> Dict[str, AutodiscoveryResourceLinking]:
         """
-        Check resources for autodiscovery compatibility.
+        Check resources for autodiscovery from autodiscovery-values.yaml
+        """
 
-        This function examines a list of GCP services and their configurations to
-        determine if any autodiscovery resources shoud be linked with existing services.
-        """
         prepared_resources = {}
 
-        enabled_services_identifiers = {}
-        disabled_services_identifiers = {}
-
-        # Iterate through all existing and enabled services in the extensions of the current configuration
-        for service in services:
-            extension_name = service.extension_name.split(".")[-1]
-            identifier = ServiceStub(extension_name, service.name, service.feature_set)
-            if service.is_enabled:
-                enabled_services_identifiers[identifier] = service
-            else:
-                disabled_services_identifiers[identifier] = service
-
-        # Try to match every resoruce to autodiscovery with enabled services in extensions
         for resource in self.resource_to_disovery:
-            # Check if the resource already exists in one of the extensions
             if resource in self.resources_to_extensions_mapping:
-                possible_linking = []
-                disabled_linking = []
+                log_message_list = ""
+                reqiured_services = self.resources_to_extensions_mapping[resource]
 
-                # Check which required services are enabled and which are disabled
-                for required_service in self.resources_to_extensions_mapping[resource]:
-                    if required_service in enabled_services_identifiers:
-                        possible_linking.append(enabled_services_identifiers[required_service])
-                    if required_service in disabled_services_identifiers:
-                        disabled_linking.append(disabled_services_identifiers[required_service])
+                for service in reqiured_services:
+                    log_message_list += f"\nIn extension: {service.extension_name} Service: {service.service_name} Feature Set: {service.feature_set_name}"
 
-                # Check if there is at least one enabled service in extension that match with the same resources,
-                if possible_linking:
-                    prepared_resources[resource] = AutodiscoveryResourceLinking(
-                        possible_service_linking=possible_linking,
-                        disabled_services_for_resource=disabled_linking,
-                    )
-                else:
-                    self.logging_context.error(
-                        f"Can't add resource {resource}. Make sure if extension {self.resources_to_extensions_mapping[resource][0].extension_name} with proper services is enabled."
-                    )
+                self.logging_context.error(
+                    f"Resource {resource} can't be added in searched_resources autodiscovery config. You can add this resource to autodiscovery by enabling one of the following: {log_message_list}"
+                )
 
-            # Resource is unknown (custom)
             else:
                 prepared_resources[resource] = None
 
         return prepared_resources
+
+    async def _check_resources_to_discover(
+        self, services: List[GCPService]
+    ) -> Dict[str, AutodiscoveryResourceLinking]:
+        resources = {}
+
+        # Get resource to discover from enabled extensions
+        for service in services:
+            extension_name = service.extension_name.split(".")[-1]
+            identifier = ServiceStub(extension_name, service.name, service.feature_set)
+            if service.autodiscovery_enabled and identifier in self.services_to_resources_mapping:
+                prepared_resources = self.services_to_resources_mapping[identifier]
+
+                for resource in prepared_resources:
+                    autodiscovery = resources.get(
+                        resource,
+                        AutodiscoveryResourceLinking(
+                            possible_service_linking=[], disabled_services_for_resource=[]
+                        ),
+                    )
+
+                    if service.is_enabled:
+                        autodiscovery.possible_service_linking.append(service)
+                    else:
+                        autodiscovery.disabled_services_for_resource.append(service)
+
+                    resources[resource] = autodiscovery
+
+        # Get resources to discover from config
+        config_resources = await self._get_resources_from_config()
+
+        for resource_name, value in config_resources.items():
+            if resource_name not in resources:
+                resources[resource_name] = value
+            else:
+                self.logging_context.error("Attempted to add a resource that is already registered")
+
+        return resources
 
     async def get_autodiscovery_service(
         self, services: List[GCPService]
@@ -159,7 +180,7 @@ class AutodiscoveryContext:
 
         except Exception as e:
             self.logging_context.error(
-                f"Unable to prepare new metrics for autodiscovery; {type(e).__name__} : {e} "
+                f"Unable to prepare new metrics for autodiscovery; {type(e).__name__} : {e} \n  {traceback.format_exc()}"
             )
 
         return None

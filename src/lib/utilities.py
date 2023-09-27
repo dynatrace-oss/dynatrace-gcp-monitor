@@ -66,6 +66,19 @@ def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml
     return services_whitelist
 
 
+def get_autodiscovery_flag_per_service(activation_yaml) -> Dict[str, bool]:
+    enabled_autodiscovery = {}
+    for service in activation_yaml.get("services", []):
+        service_name = service.get("service", "")
+        autodiscovery_enabled_flag = service.get("allowAutodiscovery", False)
+        if isinstance(autodiscovery_enabled_flag, bool) and autodiscovery_enabled_flag is True:
+            enabled_autodiscovery[service_name] = True
+        else:
+            enabled_autodiscovery[service_name] = False
+
+    return enabled_autodiscovery
+
+
 def is_yaml_file(f: str) -> bool:
     return f.endswith(".yml") or f.endswith(".yaml")
 
