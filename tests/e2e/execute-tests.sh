@@ -18,23 +18,24 @@ echo "TRAVIS_BUILD_ID: $TRAVIS_BUILD_ID"
 function run_deploy_and_tests() {
     TEST_TYPE=$1
 
-    echo "---------------------------------"
-    echo "TEST_TYPE: $TEST_TYPE, DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE, CLOUD_RUN_REVISION_NAME: $CLOUD_RUN_REVISION_NAME, GCP_PROJECT_2_ID: $GCP_PROJECT_2_ID"
-    echo "---------------------------------"
-
     START_LOAD_GENERATION=$(date -u +%s%3N)
     export START_LOAD_GENERATION
     export DEPLOYMENT_TYPE=$TEST_TYPE
 
-    ./tests/e2e/deployment-test.sh "--${TEST_TYPE}"
+    echo "============================================"
+    echo "TEST_TYPE: $TEST_TYPE, DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE, CLOUD_RUN_REVISION_NAME: $CLOUD_RUN_REVISION_NAME, GCP_PROJECT_2_ID: $GCP_PROJECT_2_ID"
+    echo "============================================"
+
+    ./tests/e2e/deployment-test.sh "--${TEST_TYPE}" # most important part -> here creations of the sample app, and load generation happnes
 
     echo waiting 300sec
     sleep 300
     END_LOAD_GENERATION=$(date -u +%s%3N)
 
-    echo "---------------------------------"
+    echo "============================================"
     echo "START_LOAD_GENERATION: $START_LOAD_GENERATION, END_LOAD_GENERATION: $END_LOAD_GENERATION"
-    echo "---------------------------------"
+    echo "============================================"
+
 
     export END_LOAD_GENERATION
 
@@ -48,9 +49,9 @@ function run_deploy_and_tests() {
         performance_test
     fi
 
-    echo "---------------------------------"
-    echo "This was: $TEST_TYPE"
-    echo "---------------------------------"
+    echo "============================================"
+    echo "This was: $TEST_TYPE"``
+    echo "============================================"
 }
 
 if [[ $TRAVIS_EVENT_TYPE == 'cron' ]] || [[ $1 == 'separate' ]]; then
