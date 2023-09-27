@@ -55,9 +55,7 @@ function run_deploy_and_tests() {
 
 if [[ $TRAVIS_EVENT_TYPE == 'cron' ]] || [[ $1 == 'separate' ]]; then
     run_deploy_and_tests 'logs'
-    sleep 300
     run_deploy_and_tests 'metrics'
-    sleep 300
     run_deploy_and_tests 'all'
 else
     run_deploy_and_tests 'all'
