@@ -93,4 +93,8 @@ check_deployment_status || exit 1
 echo
 kubectl -n dynatrace get pods
 
+echo "============================"
+echo "GENERATING LOAD"
+echo "============================"
+
 generate_load_on_sample_app

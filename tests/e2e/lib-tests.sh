@@ -68,9 +68,10 @@ check_deployment_status() {
   fi
 }
 
-generate_load_on_sample_app() {
-  for _ in {1..5}; do
-    curl -s "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
+generate_load_on_sample_app() { 
+  for i in {1..5}; do
+    echo "creating log no. $i"
+    curl -i "https://us-central1-${GCP_PROJECT_ID}.cloudfunctions.net/${CLOUD_FUNCTION_NAME}?deployment_type=${DEPLOYMENT_TYPE}&build_id=${TRAVIS_BUILD_ID}" \
     -H "Authorization: bearer $(gcloud auth print-identity-token)"
     echo
   done
