@@ -393,7 +393,7 @@ fi
 debug "Installing Dynatrace Integration Helm Chart on selected kubernetes cluster"
 info ""
 info "- 7. Install dynatrace-gcp-monitor with helm chart in $CLUSTER_NAME"
-helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 20m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+time (helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 20m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE})
 
 debug "Helm installation completed"
 info ""
