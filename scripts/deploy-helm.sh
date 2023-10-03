@@ -20,7 +20,7 @@ source "$WORKING_DIR/lib.sh"
 init_ext_tools
 
 trap ctrl_c INT
-trap onFailure ERR
+# trap onFailure ERR
 set -o pipefail
 
 info "\033[1;34mDynatrace GCP integration on GKE"

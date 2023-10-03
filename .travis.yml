@@ -183,6 +183,6 @@ jobs:
       - gcloud components install gke-gcloud-auth-plugin; export USE_GKE_GCLOUD_AUTH_PLUGIN=True; gcloud components update;
     script:
       - mkdir -p ./artefacts/ && gsutil cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
-      - travis_wait 60 ./tests/e2e/execute-tests.sh separate
+      - travis_wait 60 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
