@@ -395,6 +395,10 @@ info ""
 info "- 7. Install dynatrace-gcp-monitor with helm chart in $CLUSTER_NAME"
 time (helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor --install --debug --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 20m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE})
 
+
+echo "EVENTS: "
+kubectl -n "$KUBERNETES_NAMESPACE" get events --sort-by='{.lastTimestamp}'
+
 debug "Helm installation completed"
 info ""
 info "\e[92m- Deployment complete, check if containers are running:\e[37m"
