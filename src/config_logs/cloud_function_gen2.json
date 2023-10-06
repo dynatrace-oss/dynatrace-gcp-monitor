@@ -6,8 +6,8 @@
       "sources": [
         {
           "sourceType": "logs",
-          "source": "resourceType",
-          "condition": "$eq('cloud_run_revision')"
+          "source": "managedBy",
+          "condition": "$eq('cloudfunctions')"
         }
       ],
       "attributes": [
