@@ -2,6 +2,7 @@ title: E2E tests dynatrace-gcp-monitor
 description: Role for Dynatrace GCP Monitor E2E tests
 stage: GA
 includedPermissions:
+  - container.events.list
   - pubsub.subscriptions.delete
   - pubsub.topics.delete
   - pubsub.topics.getIamPolicy
