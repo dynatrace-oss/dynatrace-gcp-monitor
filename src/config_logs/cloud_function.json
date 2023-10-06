@@ -8,10 +8,6 @@
           "sourceType": "logs",
           "source": "resourceType",
           "condition": "$eq('cloud_function')"
-        },{
-          "sourceType": "logs",
-          "source": "resourceType",
-          "condition": "$eq('cloud_run_revision')"
         }
       ],
       "attributes": [
