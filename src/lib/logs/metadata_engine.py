@@ -186,7 +186,7 @@ class MetadataEngine:
 
 
 def _check_if_rule_applies(rule: ConfigRule, record: Dict, parsed_record: Dict):
-    return all(matcher.match(record, parsed_record) for matcher in rule.source_matchers)
+    return any(matcher.match(record, parsed_record) for matcher in rule.source_matchers)
 
 
 def _apply_rule(context: LoggingContext, rule: ConfigRule, record: Dict, parsed_record: Dict):
