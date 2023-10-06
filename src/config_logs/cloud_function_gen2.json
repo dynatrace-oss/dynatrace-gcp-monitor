@@ -7,21 +7,21 @@
         {
           "sourceType": "logs",
           "source": "resourceType",
-          "condition": "$eq('cloud_function')"
+          "condition": "$eq('cloud_run_revision')"
         }
       ],
       "attributes": [
         {
           "key": "faas.id",
-          "pattern": "join('', ['//cloudfunctions.googleapis.com/projects/', resource.labels.project_id, '/locations/', resource.labels.region, '/functions/', resource.labels.function_name])"
+          "pattern": "join('', ['//cloudfunctions.googleapis.com/projects/', resource.labels.project_id, '/locations/', resource.labels.location, '/functions/', resource.labels.configuration_name])"
         },
         {
           "key": "faas.name",
-          "pattern": "resource.labels.function_name"
+          "pattern": "resource.labels.configuration_name"
         },
         {
           "key": "gcp.instance.name",
-          "pattern": "resource.labels.function_name"
+          "pattern": "resource.labels.configuration_name"
         },
         {
           "key": "content",
