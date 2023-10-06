@@ -75,6 +75,9 @@ ctrl_c() {
 }
 
 onFailure() {
+  echo "EVENTS: "
+  kubectl -n "$KUBERNETES_NAMESPACE" get events --sort-by='{.lastTimestamp}'
+
   err " - deployment failed, please examine error messages and run again"
   exit 2
 }
