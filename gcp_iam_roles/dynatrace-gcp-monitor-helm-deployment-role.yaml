@@ -4,6 +4,7 @@ title: Dynatrace GCP Monitor helm deployment role
 description: Role for Dynatrace GCP Monitor helm and pubsub deployment
 stage: GA
 includedPermissions:
+  - container.events.list
   - container.clusters.get
   - container.configMaps.create
   - container.configMaps.delete
