@@ -34,7 +34,7 @@ _CONDITION_COMPARATOR_MAP = {
 _SOURCE_VALUE_EXTRACTOR_MAP = {
     "resourceType".casefold(): lambda record, parsed_record: parsed_record.get("gcp.resource.type", None),
     "logName".casefold(): lambda record, parsed_record: record.get("logName", None),
-    "managedBy".casefold(): lambda record, parsed_record: record.get("gcp.labels.goog-managed-by", None)
+    "managedBy".casefold(): lambda record, parsed_record: record.get("labels", None)
 }
 
 ATTRIBUTE_AUDIT_IDENTITY = "audit.identity"

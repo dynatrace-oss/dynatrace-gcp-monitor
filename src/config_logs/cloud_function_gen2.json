@@ -7,7 +7,7 @@
         {
           "sourceType": "logs",
           "source": "managedBy",
-          "condition": "$eq('cloudfunctions')"
+          "condition": "$contains('cloudfunctions')"
         }
       ],
       "attributes": [
