@@ -1,0 +1,29 @@
+{
+  "name": "cloud_run_revision",
+  "displayName": "Cloud Run",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('cloudsql_run_revision')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.instanceId"
+        },
+        {
+          "key": "gcp.instance.name",
+          "pattern": "resource.labels.revision_name"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
