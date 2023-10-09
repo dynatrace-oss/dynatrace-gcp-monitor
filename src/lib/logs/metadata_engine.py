@@ -34,7 +34,7 @@ _CONDITION_COMPARATOR_MAP = {
 _SOURCE_VALUE_EXTRACTOR_MAP = {
     "resourceType".casefold(): lambda record, parsed_record: parsed_record.get("gcp.resource.type", None),
     "logName".casefold(): lambda record, parsed_record: record.get("logName", None),
-    "managedBy".casefold(): lambda record, parsed_record: record.get("labels.goog-managed-by", None)
+    "managedBy".casefold(): lambda record, parsed_record: record.get("gcp.labels.goog-managed-by", None)
 }
 
 ATTRIBUTE_AUDIT_IDENTITY = "audit.identity"
@@ -167,6 +167,7 @@ class MetadataEngine:
     def _apply_rules(context, rules: List[ConfigRule], record: Dict, parsed_record: Dict) -> bool:
         any_rule_applied = False
         for rule in rules:
+            print("record:{}".format(record))
             if _check_if_rule_applies(rule, record, parsed_record):
                 _apply_rule(context, rule, record, parsed_record)
                 any_rule_applied = True
