@@ -167,8 +167,6 @@ class MetadataEngine:
     def _apply_rules(context, rules: List[ConfigRule], record: Dict, parsed_record: Dict) -> bool:
         any_rule_applied = False
         for rule in rules:
-            context.log("record:{}".format(record))
-            context.log("parsed_record:{}".format(parsed_record))
             if _check_if_rule_applies(rule, record, parsed_record):
                 _apply_rule(context, rule, record, parsed_record)
                 any_rule_applied = True

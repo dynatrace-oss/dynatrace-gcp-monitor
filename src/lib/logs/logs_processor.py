@@ -126,8 +126,6 @@ def _create_parsed_record(context: LogsProcessingContext, message_data: str):
         }
     parsed_record = {}
     _metadata_engine.apply(context, record, parsed_record)
-    context.log(f"_create_parsed_record, record: {record}")
-    context.log(f"_create_parsed_record, parsed_record: {parsed_record}")
 
     if ATTRIBUTE_TIMESTAMP not in parsed_record.keys() or _is_invalid_datetime(parsed_record[ATTRIBUTE_TIMESTAMP]):
         context.self_monitoring.publish_time_fallback_records += 1
