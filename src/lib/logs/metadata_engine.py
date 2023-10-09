@@ -168,6 +168,7 @@ class MetadataEngine:
         any_rule_applied = False
         for rule in rules:
             print("record:{}".format(record))
+            print("parsed_record:{}".format(parsed_record))
             if _check_if_rule_applies(rule, record, parsed_record):
                 _apply_rule(context, rule, record, parsed_record)
                 any_rule_applied = True
