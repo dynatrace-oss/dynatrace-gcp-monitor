@@ -7,7 +7,7 @@
         {
           "sourceType": "logs",
           "source": "managedBy",
-          "condition": "$contains('\'goog-managed-by\': \'cloudfunctions\'')"
+          "condition": "$contains('cloudfunctions')"
         }
       ],
       "attributes": [
