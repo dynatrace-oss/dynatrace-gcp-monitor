@@ -24,6 +24,7 @@ def run_webserver_on_asyncio_loop_forever():
 
         app_runner: AppRunner = web.AppRunner(application)
         webserver_loop.run_until_complete(app_runner.setup())
+        print(f'Health_check_port: {HEALTH_CHECK_PORT}')
         site = web.TCPSite(app_runner, '0.0.0.0', HEALTH_CHECK_PORT)
         webserver_loop.run_until_complete(site.start())
 
