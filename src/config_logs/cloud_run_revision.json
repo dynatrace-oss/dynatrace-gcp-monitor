@@ -12,10 +12,6 @@
       ],
       "attributes": [
         {
-          "key": "gcp.instance.id",
-          "pattern": "resource.labels.instanceId"
-        },
-        {
           "key": "gcp.instance.name",
           "pattern": "resource.labels.revision_name"
         },
