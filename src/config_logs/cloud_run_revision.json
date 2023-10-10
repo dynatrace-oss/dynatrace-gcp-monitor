@@ -7,7 +7,7 @@
         {
           "sourceType": "logs",
           "source": "resourceType",
-          "condition": "$eq('cloudsql_run_revision')"
+          "condition": "$eq('cloud_run_revision')"
         }
       ],
       "attributes": [
