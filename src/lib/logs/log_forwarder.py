@@ -58,14 +58,14 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
             "Cannot start pubsub streaming pull - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
 
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
-    #asyncio.run_coroutine_threadsafe(create_sfm_worker_loop(sfm_queue, logging_context, instance_metadata),
-    #                                 asyncio_loop)
 
+    # open worker threads to process logs from PubSub queue and ingest them into DT
     for i in range(0, PROCESSING_WORKERS):
         threading.Thread(target=run_ack_logs,
                          args=(f"Worker-{i}", sfm_queue,),
                          name=f"worker-{i}").start()
 
+    # coroutine in loop to create SFM logs and put them in the queue
     asyncio.run(create_sfm_worker_loop(sfm_queue, logging_context, instance_metadata))
 
 def run_ack_logs(worker_name: str, sfm_queue: Queue):
