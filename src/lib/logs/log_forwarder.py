@@ -63,7 +63,7 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
 
     for i in range(0, PROCESSING_WORKERS):
         threading.Thread(target=run_ack_logs,
-                         args=(f"Worker-{i}", sfm_queue),
+                         args=(f"Worker-{i}", sfm_queue,),
                          name=f"worker-{i}").start()
 
     asyncio.run(create_sfm_worker_loop(sfm_queue, logging_context, instance_metadata))
