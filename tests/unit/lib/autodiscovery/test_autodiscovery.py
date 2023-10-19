@@ -1,7 +1,7 @@
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
-
 import pytest
+
 from lib.autodiscovery.autodiscovery import AutodiscoveryContext
 from lib.autodiscovery.autodiscovery_task_executor import AutodiscoveryTaskExecutor
 
