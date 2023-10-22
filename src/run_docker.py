@@ -22,8 +22,8 @@ from typing import Optional, List, NamedTuple, Dict
 from aiohttp import ClientSession
 
 from lib import credentials
-from lib.autodiscovery.autodiscovery import enrich_services_with_autodiscovery_metrics
-from lib.autodiscovery.autodiscovery_manager import AutodiscoveryManager
+from lib.autodiscovery.autodiscovery import AutodiscoveryContext
+from lib.autodiscovery.autodiscovery_task_executor import AutodiscoveryTaskExecutor
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes, SfmContext
@@ -152,8 +152,12 @@ async def run_metrics_fetcher_forever():
     extension_versions = pre_launch_check_result.extension_versions
     new_services_from_extensions_task = None
 
+
+
+
     if config.metric_autodiscovery():
-        autodiscovery_manager = await AutodiscoveryManager.init(services, extension_versions)
+        autodiscovery_manager = AutodiscoveryContext()
+        autodiscovery_task = await AutodiscoveryTaskExecutor.create(services, autodiscovery_manager, extension_versions)
     
     while True:
         start_time_s = time.time()
@@ -162,7 +166,7 @@ async def run_metrics_fetcher_forever():
             new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services, extension_versions))
 
         if config.metric_autodiscovery():
-            services = await autodiscovery_manager.get_cached_or_refreshed_metrics(services, extension_versions)
+            services = await autodiscovery_task.process_autodiscovery_result(services, extension_versions)
             
         await run_single_polling_with_timeout(services)
 

@@ -32,9 +32,13 @@ data:
   PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
   SERVICE_USAGE_BOOKING: {{ .Values.serviceUsageBooking | quote }}
   QUERY_INTERVAL_MIN: {{ .Values.queryInterval | quote }}
-  AUTODISCOVERY_QUERY_INTERVAL: {{ .Values.autodiscoveryQueryInterval | quote }}
-  METRIC_AUTODISCOVERY: {{ .Values.metricAutodiscovery | quote }}
   GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
+  METRIC_AUTODISCOVERY: {{ .Values.metricAutodiscovery | quote }}
+  {{- if eq (lower .Values.metricAutodiscovery) "true" }}
+  AUTODISCOVERY_QUERY_INTERVAL: {{ .Values.autodiscoveryQueryInterval | quote }}
+  AUTODISCOVERY_RESOURCES_YAML: {{ .Values.autodiscoveryResourcesYaml | quote }}
+  AUTODISCOVERY_METRIC_BLOCK_LIST_YAML: {{ .Values.autodiscoveryBlockListYaml | quote }}
+  {{- end }}
   {{- end }}
   {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
   LOGS_SUBSCRIPTION_ID: {{ .Values.logsSubscriptionId | quote }}

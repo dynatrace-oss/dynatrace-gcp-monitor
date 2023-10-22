@@ -1,213 +1,246 @@
-import asyncio
-import os
 import time
 from dataclasses import asdict
-from itertools import chain
-from typing import Dict, List, NamedTuple, Any
+import traceback
+from typing import Any, Dict, List, Optional
 
 from aiohttp import ClientSession
-from lib.autodiscovery.gcp_metrics_descriptor import GCPMetricDescriptor
+
+from lib.autodiscovery.autodiscovery_config import get_resources_mapping, get_services_to_resources
+from lib.autodiscovery.autodiscovery_utils import (
+    get_existing_metrics,
+    get_metric_descriptors,
+    logging_context,
+    send_metric_metadata,
+)
+from lib.autodiscovery.models import AutodiscoveryResourceLinking, AutodiscoveryResult, ServiceStub
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
-from lib.configuration import config
-from lib.context import LoggingContext, MetricsContext
-from lib.credentials import create_token, get_all_accessible_projects
-from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
-from lib.metric_ingest import push_ingest_lines
-from lib.metrics import GCPService, MetadataIngestLine, Metric
+from lib.context import LoggingContext
+from lib.credentials import create_token
+from lib.metrics import AutodiscoveryGCPService, GCPService, Metric
+from lib.utilities import (
+    read_autodiscovery_block_list_yaml,
+    read_autodiscovery_config_yaml,
+)
 from main import get_metric_context
 
-logging_context = LoggingContext("AUTODISCOVERY")
 
+class AutodiscoveryContext:
+    resource_to_disovery: Dict[str, Any]
+    resources_to_extensions_mapping: Dict[str, List[ServiceStub]]
+    autodiscovery_metric_block_list: List[str]
+    last_autodiscovered_metric_list_names: Dict[str, Any]
+    logging_context = LoggingContext("AUTODISCOVERY")
+    autodiscovery_enabled: bool
 
-discovered_resource_type = os.environ.get("AUTODISCOVERY_RESOURCE_TYPE", "gce_instance")
+    def __init__(self):
+        self.resource_to_disovery = {}
+        self.resources_to_extensions_mapping = {}
+        self.autodiscovery_metric_block_list = []
+        self.last_autodiscovered_metric_list_names = {}
+        self.autodiscovery_enabled = True
 
-FetchMetricDescriptorsResult = NamedTuple(
-    "FetchMetricDescriptorsResult",
-    [("project_id", str), ("metric_descriptor", GCPMetricDescriptor)],
-)
+        self._load_yamls()
 
-
-AutodiscoveryResult = NamedTuple(
-    "AutodiscoveryResult",
-    [("enriched_services", List[GCPService]), ("discovered_metric_list", Dict[str, Any])],
-)
-
-
-async def get_project_ids(
-    metric_context: MetricsContext,
-    gcp_session: ClientSession,
-    token: str,
-) -> List[str]:
-    projects_ids = await get_all_accessible_projects(metric_context, gcp_session, token)
-    disabled_projects = []
-
-    if not config.scoping_project_support_enabled():
-        disabled_project, _ = await get_disabled_projects_and_disabled_apis_by_project_id(
-            metric_context, projects_ids
-        )
-
-    if disabled_projects:
-        for disabled_project in disabled_projects:
-            projects_ids.remove(disabled_project)
-
-    return projects_ids
-
-
-async def run_fetch_metric_descriptors(
-    gcp_session: ClientSession, token: str, project_id: str
-) -> List[FetchMetricDescriptorsResult]:
-    headers = {"Accept": "application/json", "Authorization": f"Bearer {token}"}
-    url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
-    params = {}
-
-    project_discovered_metrics = []
-    while True:
-        response = await gcp_session.request("GET", url=url, headers=headers, params=params)
-        response.raise_for_status()
-        response_json = await response.json()
-
-        for descriptor in response_json.get("metricDescriptors", []):
-            try:
-                metric_descriptor = GCPMetricDescriptor.create(**descriptor, project_id=project_id)
-                if (
-                    metric_descriptor.gcpOptions.valueType.upper() != "STRING"
-                    and discovered_resource_type in metric_descriptor.monitored_resources_types
-                ):
-                    project_discovered_metrics.append(metric_descriptor)
-            except Exception as error:
-                logging_context.log(
-                    f"Failed to load autodiscovered metric for project: {project_id}. Details: {error}"
-                )
-
-        page_token = response_json.get("nextPageToken", "")
-        params["pageToken"] = page_token
-        if page_token == "":
-            break
-    return [
-        FetchMetricDescriptorsResult(project_id, metric_descriptor)
-        for metric_descriptor in project_discovered_metrics
-    ]
-
-
-async def send_metric_metadata(
-    metrics: List[Metric], context: MetricsContext, previously_discovered_metrics: Dict[str, Any]
-) -> Dict[str, Any]:
-    metrics_metadata = []
-    for metric in metrics:
-        if metric.dynatrace_name not in previously_discovered_metrics:
-            metrics_metadata.append(
-                MetadataIngestLine(
-                    metric_name=metric.dynatrace_name,
-                    metric_type=metric.dynatrace_metric_type,
-                    metric_display_name=metric.name,
-                    metric_description=metric.description,
-                    metric_unit=metric.unit,
-                )
+    def _load_yamls(self):
+        try:
+            resource_to_disovery = (
+                read_autodiscovery_config_yaml()
+                .get("autodicovery_config", {})
+                .get("searched_resources", {})
             )
-            previously_discovered_metrics[metric.dynatrace_name] = None
-
-    logging_context.log(f"Adding {len(metrics_metadata)} new autodiscovered metrics metadata")
-    await push_ingest_lines(context, "autodiscovery-metadata", metrics_metadata)
-    return previously_discovered_metrics
-
-
-async def get_metric_descriptors(
-    metric_context: MetricsContext, gcp_session: ClientSession, token: str
-) -> Dict[GCPMetricDescriptor, List[str]]:
-    project_ids = await get_project_ids(metric_context, gcp_session, token)
-
-    metric_fetch_coroutines = []
-    metric_per_project = {}
-    for project_id in project_ids:
-        metric_fetch_coroutines.append(run_fetch_metric_descriptors(gcp_session, token, project_id))
-
-    fetch_metrics_descriptor_results = await asyncio.gather(
-        *metric_fetch_coroutines, return_exceptions=True
-    )
-    flattened_results = list(chain.from_iterable(fetch_metrics_descriptor_results))
-
-    for fetch_reslut in flattened_results:
-        metric_per_project.setdefault(fetch_reslut.metric_descriptor, []).append(
-            fetch_reslut.project_id
-        )
-
-    return metric_per_project
-
-
-async def run_autodiscovery(
-    gcp_services_list: List[GCPService],
-    gcp_session: ClientSession,
-    dt_session: ClientSession,
-    token: str,
-    previously_discovered_metrics: Dict[str, Any],
-) -> AutodiscoveryResult:
-    start_time = time.time()
-    logging_context.log("Adding metrics using autodiscovery")
-    metric_context = await get_metric_context(gcp_session, dt_session, token, logging_context)
-
-    filtered_gcp_extension_services = list(
-        filter(lambda x: discovered_resource_type in x.name, gcp_services_list)
-    )
-
-    existing_metric_list = []
-    for service in filtered_gcp_extension_services:
-        existing_metric_list.extend(service.metrics)
-
-    discovered_metric_descriptors = await get_metric_descriptors(metric_context, gcp_session, token)
-
-    existing_metric_names = {}
-    for existing_metric in existing_metric_list:
-        existing_metric_names[existing_metric.google_metric] = None
-
-    missing_metrics_list = []
-
-    for descriptor, project_ids in discovered_metric_descriptors.items():
-        if descriptor.value not in existing_metric_names:
-            metric_fields = asdict(descriptor)
-            metric_fields["autodiscovered_metric"] = True
-            autodiscovered_metric = Metric(**(metric_fields), project_ids=project_ids)
-            missing_metrics_list.append(autodiscovered_metric)
-
-    logging_context.log(f"In the extension there are {len(existing_metric_list)} metrics")
-    logging_context.log(
-        f"Discovered Resource type {discovered_resource_type} has {len(discovered_metric_descriptors)} metrics"
-    )
-    logging_context.log(f"Adding {len(missing_metrics_list)} metrics")
-    logging_context.log(
-        f"Adding metrics: {[metric.google_metric for metric in missing_metrics_list]}"
-    )
-    sended_metrics_metadata = await send_metric_metadata(
-        missing_metrics_list, metric_context, previously_discovered_metrics
-    )
-
-    for service in gcp_services_list:
-        if service.name == discovered_resource_type and service.feature_set == "default_metrics":
-            service.metrics.extend([metric for metric in missing_metrics_list])
-
-    end_time = time.time()
-
-    logging_context.log(f"Elapsed time in autodiscovery: {end_time-start_time} s")
-    return AutodiscoveryResult(
-        enriched_services=gcp_services_list, discovered_metric_list=sended_metrics_metadata
-    )
-
-
-async def enrich_services_with_autodiscovery_metrics(
-    current_services: List[GCPService], previously_discovered_metrics: Dict[str, Any]
-) -> AutodiscoveryResult:
-    try:
-        async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
-            token = await create_token(logging_context, gcp_session)
-            if not token:
-                raise Exception("Failed to fetch token")
-
-            autodiscovery_fetch_result = await run_autodiscovery(
-                current_services, gcp_session, dt_session, token, previously_discovered_metrics
+            self.resource_to_disovery = (
+                resource_to_disovery if resource_to_disovery is not None else {}
             )
 
-            return autodiscovery_fetch_result
-    except Exception as e:
-        logging_context.error(
-            f"Failed to prepare autodiscovery new services metrics, will reuse previous metrics list; {str(e)}"
+            self.resources_to_extensions_mapping = get_resources_mapping()
+            self.services_to_resources_mapping = get_services_to_resources()
+            autodiscovery_metric_block_list = read_autodiscovery_block_list_yaml().get(
+                "block_list", []
+            )
+            self.autodiscovery_metric_block_list = (
+                autodiscovery_metric_block_list
+                if autodiscovery_metric_block_list is not None
+                else []
+            )
+
+        except Exception as e:
+            self.logging_context.log(
+                f"Error during init autodiscovery config. Autodiscovery is now disabled; {type(e).__name__} : {e}\n  {traceback.format_exc()}"
+            )
+            self.autodiscovery_enabled = False
+
+    async def _get_resources_from_config(self) -> Dict[str, AutodiscoveryResourceLinking]:
+        """
+        Check resources for autodiscovery from autodiscovery-values.yaml
+        """
+
+        prepared_resources = {}
+
+        for resource in self.resource_to_disovery:
+            if resource in self.resources_to_extensions_mapping:
+                log_message_list = ""
+                reqiured_services = self.resources_to_extensions_mapping[resource]
+
+                for service in reqiured_services:
+                    log_message_list += f"\nIn extension: {service.extension_name} Service: {service.service_name} Feature Set: {service.feature_set_name}"
+
+                self.logging_context.error(
+                    f"Resource {resource} can't be added in searched_resources autodiscovery config. You can add this resource to autodiscovery by enabling one of the following: {log_message_list}"
+                )
+
+            else:
+                prepared_resources[resource] = None
+
+        return prepared_resources
+
+    async def _check_resources_to_discover(
+        self, services: List[GCPService]
+    ) -> Dict[str, AutodiscoveryResourceLinking]:
+        resources = {}
+
+        # Get resource to discover from enabled extensions
+        for service in services:
+            extension_name = service.extension_name.split(".")[-1]
+            identifier = ServiceStub(extension_name, service.name, service.feature_set)
+            if service.autodiscovery_enabled and identifier in self.services_to_resources_mapping:
+                prepared_resources = self.services_to_resources_mapping[identifier]
+
+                for resource in prepared_resources:
+                    autodiscovery = resources.get(
+                        resource,
+                        AutodiscoveryResourceLinking(
+                            possible_service_linking=[], disabled_services_for_resource=[]
+                        ),
+                    )
+
+                    if service.is_enabled:
+                        autodiscovery.possible_service_linking.append(service)
+                    else:
+                        autodiscovery.disabled_services_for_resource.append(service)
+
+                    resources[resource] = autodiscovery
+
+        # Get resources to discover from config
+        config_resources = await self._get_resources_from_config()
+
+        for resource_name, value in config_resources.items():
+            if resource_name not in resources:
+                resources[resource_name] = value
+            else:
+                self.logging_context.error("Attempted to add a resource that is already registered")
+
+        return resources
+
+    async def get_autodiscovery_service(
+        self, services: List[GCPService]
+    ) -> Optional[AutodiscoveryGCPService]:
+        """
+        Retrieve an AutodiscoveryGCPService if autodiscovery is enabled and resources are discovered.
+
+        This function checks if autodiscovery is enabled and, if so, attempts to discover
+        resources for monitoring. If resources are discovered, it returns AutodiscoveryGCPService
+        containing the discovered metrics and resource dimensions.
+        """
+        if not self.autodiscovery_enabled:
+            return None
+
+        resources_to_discovery = await self._check_resources_to_discover(services)
+
+        if not resources_to_discovery:
+            self.logging_context.log(
+                "Autodiscovery didn't find any resources to monitor. Ensure they're listed in autodiscoveryResourcesYaml."
+            )
+            return None
+
+        try:
+            async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
+                token = await create_token(self.logging_context, gcp_session)
+                if not token:
+                    logging_context.error(
+                        "Autodiscovery disabled. Unable to acquire authorization token."
+                    )
+                    return None
+
+                autodiscovery_fetch_result = await self._run_autodiscovery(
+                    gcp_session,
+                    dt_session,
+                    token,
+                    resources_to_discovery,
+                )
+
+                if any(autodiscovery_fetch_result.autodiscovered_resources_to_metrics):
+                    autodiscovery_service = AutodiscoveryGCPService()
+
+                    autodiscovery_service.set_metrics(
+                        autodiscovery_fetch_result.autodiscovered_resources_to_metrics,
+                        resources_to_discovery,
+                        autodiscovery_fetch_result.resource_dimensions,
+                    )
+                    return autodiscovery_service
+
+        except Exception as e:
+            self.logging_context.error(
+                f"Unable to prepare new metrics for autodiscovery; {type(e).__name__} : {e} \n  {traceback.format_exc()}"
+            )
+
+        return None
+
+    async def _run_autodiscovery(
+        self,
+        gcp_session: ClientSession,
+        dt_session: ClientSession,
+        token: str,
+        autodiscovery_resources: Dict[str, AutodiscoveryResourceLinking],
+    ) -> AutodiscoveryResult:
+        """
+        Discover and add metrics to a monitoring system using autodiscovery.
+
+        This function orchestrates the autodiscovery process for metrics associated with Google Cloud Platform (GCP)
+        services. It retrieves metric descriptors, filters and adds new metrics based on specified criteria, and
+        sends metric metadata to a monitoring system.
+
+        """
+        start_time = time.time()
+        logging_context.log("Adding metrics using autodiscovery")
+        metric_context = await get_metric_context(gcp_session, dt_session, token, logging_context)
+
+        discovered_metric_descriptors, resource_dimensions = await get_metric_descriptors(
+            metric_context,
+            gcp_session,
+            token,
+            autodiscovery_resources,
+            self.autodiscovery_metric_block_list,
         )
-        return AutodiscoveryResult(enriched_services=current_services,discovered_metric_list=previously_discovered_metrics)
+
+        existing_resources_to_metrics = await get_existing_metrics(autodiscovery_resources)
+
+        autodiscovery_resources_to_metrics = {}
+
+        for descriptor, project_ids in discovered_metric_descriptors.items():
+            monitored_resource = descriptor.monitored_resources_types[0]
+            if descriptor.value not in existing_resources_to_metrics[monitored_resource]:
+                autodiscovery_resources_to_metrics.setdefault(monitored_resource, []).append(
+                    Metric(
+                        **(asdict(descriptor)), autodiscovered_metric=True, project_ids=project_ids
+                    )
+                )
+
+        for resource_name, metric_list in autodiscovery_resources_to_metrics.items():
+            logging_context.log(
+                f"Discovered {len(metric_list)} metrics for [{resource_name}] resource."
+            )
+
+        self.last_autodiscovered_metric_list_names = await send_metric_metadata(
+            autodiscovery_resources_to_metrics,
+            metric_context,
+            self.last_autodiscovered_metric_list_names,
+        )
+
+        end_time = time.time()
+
+        logging_context.log(f"Elapsed time in autodiscovery: {end_time-start_time} s")
+
+        return AutodiscoveryResult(
+            autodiscovered_resources_to_metrics=autodiscovery_resources_to_metrics,
+            resource_dimensions=resource_dimensions,
+        )

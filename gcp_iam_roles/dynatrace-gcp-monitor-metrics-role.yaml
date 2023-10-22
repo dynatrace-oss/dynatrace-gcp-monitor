@@ -21,6 +21,8 @@ includedPermissions:
   - monitoring.metricDescriptors.create
   - monitoring.metricDescriptors.delete
   - monitoring.metricDescriptors.list
+  - monitoring.monitoredResourceDescriptors.get
+  - monitoring.monitoredResourceDescriptors.list
   - monitoring.timeSeries.create
   - monitoring.dashboards.list
   - monitoring.dashboards.create

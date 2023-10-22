@@ -53,6 +53,12 @@ spec:
           items:
           - key: GCP_SERVICES_YAML
             path: "gcp_services.yaml"
+          {{- if eq (lower .Values.metricAutodiscovery) "true" }}
+          - key: AUTODISCOVERY_RESOURCES_YAML
+            path: "autodiscovery-config.yaml"
+          - key: AUTODISCOVERY_METRIC_BLOCK_LIST_YAML
+            path: "autodiscovery-block-list.yaml"
+          {{- end }}
       {{- end }}
       {{- if (.Values.imagePullSecrets) }}      
       imagePullSecrets:
@@ -132,11 +138,13 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: QUERY_INTERVAL_MIN
+        {{- if eq (lower .Values.metricAutodiscovery) "true" }}
         - name: AUTODISCOVERY_QUERY_INTERVAL
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: AUTODISCOVERY_QUERY_INTERVAL
+        {{- end }}
         - name: HEALTH_CHECK_PORT
           value: "8080"
         - name: SCOPING_PROJECT_SUPPORT_ENABLED

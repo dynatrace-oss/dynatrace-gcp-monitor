@@ -1,0 +1,27 @@
+# Metrics autodiscovery polling interval in minutes.
+autodiscoveryQueryInterval: 60
+# This list comprises resources that will be scanned within GCP 
+# projects for the purpose of metrics autodiscovery.
+autodiscoveryResourcesYaml: |
+  # resources from: https://cloud.google.com/monitoring/api/metrics_gcp
+  autodicovery_config:
+    searched_resources:
+    # Any resources to monitor (you can list them here)
+    # - memcache_node
+
+# Metrics containing the following names will not be included
+# in autodiscovery process
+autodiscoveryBlockListYaml: |
+  block_list:
+  - alloydb.googleapis.com/database/postgresql/insights/perquery/
+  - alloydb.googleapis.com/database/postgresql/insights/pertag/
+  - alloydb.googleapis.com/database/postgresql/insights/aggregate/
+  - cloudsql.googleapis.com/database/postgresql/insights/perquery/
+  - cloudsql.googleapis.com/database/postgresql/insights/pertag/
+  - cloudsql.googleapis.com/database/postgresql/insights/aggregate/
+  - dbinsights.googleapis.com/perquery/
+  - dbinsights.googleapis.com/pertag/
+  - networking.googleapis.com/vm_flow/
+  - kubernetes.io/pod/volume/
+  - kubernetes.io/container/accelerator/
+  - kubernetes.io/container/node/accelerator/
