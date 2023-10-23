@@ -18,7 +18,7 @@ def test_query_loop_correct_interval(
         mock_async_dynatrace_gcp_extension: AsyncMock,
         mock_sfm_send_loop_timeouts: AsyncMock,
     ):
-    mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(projects=[], services=[], extension_versions={})
+    mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(services=[], extension_versions={})
 
     run_docker.QUERY_INTERVAL_SEC = 3
     run_loop_for = 7
@@ -39,7 +39,7 @@ def test_query_loop_timeout(
         mock_metrics_pre_launch_check,
         mock_sfm_send_loop_timeouts: AsyncMock,
     ):
-    mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(projects=[], services=[], extension_versions={})
+    mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(services=[], extension_versions={})
 
     run_docker.QUERY_INTERVAL_SEC = 1
     run_docker.QUERY_TIMEOUT_SEC = 3

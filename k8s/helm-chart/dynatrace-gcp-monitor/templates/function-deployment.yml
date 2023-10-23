@@ -152,6 +152,17 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: SCOPING_PROJECT_SUPPORT_ENABLED
+        - name: EXCLUDED_PROJECTS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: EXCLUDED_PROJECTS
+        - name: EXCLUDED_PROJECTS_BY_PREFIX
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: EXCLUDED_PROJECTS_BY_PREFIX
+
         - name:   KEEP_REFRESHING_EXTENSIONS_CONFIG
           valueFrom:
             configMapKeyRef:
@@ -172,7 +183,7 @@ spec:
           httpGet:
             path: /health
             port: 8080
-          initialDelaySeconds: 30
+          initialDelaySeconds: 10
           timeoutSeconds: 120
         securityContext:
             allowPrivilegeEscalation: false
@@ -297,8 +308,9 @@ spec:
           httpGet:
             path: /health
             port: 8081
-          initialDelaySeconds: 30
-          timeoutSeconds: 60
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 2
         securityContext:
             allowPrivilegeEscalation: false
             privileged: false

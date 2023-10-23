@@ -30,6 +30,7 @@ import lib.entities.extractors.gce_instance
 import lib.entities.google_api
 import lib.gcp_apis
 import lib.metric_ingest
+from lib.utilities import load_supported_services
 from main import async_dynatrace_gcp_extension
 from assertpy import assert_that
 
@@ -47,6 +48,9 @@ system_variables: Dict = {
     'GCP_PROJECT': 'dynatrace-gcp-extension'
     # 'DYNATRACE_ACCESS_KEY': ACCESS_KEY, this one is encoded in mocks files
 }
+
+ACTIVATION_CONFIG = "{services: [{service: pubsub_snapshot, featureSets: [default_metrics], vars: {filter_conditions: ''}},\
+ {service: pubsub_subscription, featureSets: [default_metrics, test], vars: {filter_conditions: 'resource.labels.subscription_id=starts_with(\"test\")'}}]}"
 
 
 @pytest.fixture(scope="package", autouse=True)
@@ -102,7 +106,7 @@ def setup_wiremock():
 # It should be '/tests/integration/metrics'
 @pytest.mark.asyncio
 async def test_metric_authorization_header():
-    await async_dynatrace_gcp_extension()
+    await async_dynatrace_gcp_extension(services=load_supported_services())
 
     request = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest",
                                           method="POST")
@@ -122,10 +126,10 @@ async def test_ingest_lines_output(resource_path_root):
 
 
 async def ingest_lines_output(expected_ingest_output_file):
-    await async_dynatrace_gcp_extension()
-    reqeusts_gcp_timeseries_pattern = NearMissMatchPatternRequest(url_path_pattern="/v3/projects/dynatrace-gcp-extension/timeSeries?([\d\w\W]*)",
+    await async_dynatrace_gcp_extension(services=load_supported_services())
+    requests_gcp_timeseries_pattern = NearMissMatchPatternRequest(url_path_pattern="/v3/projects/dynatrace-gcp-extension/timeSeries?([\d\w\W]*)",
                                           method="GET")
-    reqeusts_gcp_timeseries: RequestResponseFindResponse = Requests.get_matching_requests(reqeusts_gcp_timeseries_pattern)
+    reqeusts_gcp_timeseries: RequestResponseFindResponse = Requests.get_matching_requests(requests_gcp_timeseries_pattern)
     gce_instance_filter="resource.labels.instance_name%3Dstarts_with(%22test%22)"
     requests_with_filter = [reqeust_gcp_timeseries for reqeust_gcp_timeseries in reqeusts_gcp_timeseries.requests
                             if gce_instance_filter in reqeust_gcp_timeseries.url]

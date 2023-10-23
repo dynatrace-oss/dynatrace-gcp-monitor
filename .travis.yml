@@ -34,7 +34,6 @@ stages:
   - e2e-helm-deployment-test
   - github-deploy
   - docker-deploy
-  - gcp-install-release
 env:
   global:
   - TAG=$TRAVIS_TAG
@@ -112,7 +111,6 @@ jobs:
       - ./ext_tools/yq_linux_x64 e -i ".dockerImage |= \"${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}\"" k8s/helm-chart/dynatrace-gcp-monitor/values.yaml
       - ./build/helm-package.sh
       - ./build/docker-deploy.sh
-      - ./build/function-package.sh
       - gsutil -m cp ./artefacts/* gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/
   - stage: docker-deploy
     name: Docker Hub deploy
@@ -134,7 +132,6 @@ jobs:
       - ./build/version.sh
       - ./build/get_ext_tools.sh
       - ./build/helm-package.sh
-      - ./build/function-package.sh
     deploy:
       provider: releases
       file_glob: true
@@ -143,39 +140,6 @@ jobs:
       skip_cleanup: true
       on:
         tags: true
-  - stage: gcp-install-release
-    name: GCP install release
-    sudo: required
-    language: python
-    python:
-      - "3.8"
-    if: tag =~ /^release-.*
-    cache:
-      directories:
-        - "$HOME/.wgetcache"
-        - "$HOME/google-cloud-sdk/"
-    env:
-      - CLOUDSDK_CORE_DISABLE_PROMPTS=1
-      - IAM_SERVICE_ACCOUNT="dynatrace-gcp-sa-release"
-      - DYNATRACE_URL_SECRET_NAME="DYNATRACE_RELEASE_URL"
-      - DYNATRACE_ACCESS_KEY_SECRET_NAME="DYNATRACE_RELEASE_ACCESS_KEY"
-      - IAM_ROLE_METRCICS="ms_role3.metrics"
-      - PUBSUB_TOPIC="dynatrace_gcp_topic_release"
-      - CLOUD_SCHEDULER="dynatrace_gcp_scheduler_release"
-      - METRIC_FORWARDING_FUNCTION="dynatrace_gcp_release"
-      - DYNATRACE_URL=${DYNATRACE_URL_E2E}
-      - DYNATRACE_ACCESS_KEY=${DYNATRACE_ACCESS_KEY_E2E}
-    install:
-      # Install GCP SDK if not already cached
-      - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf "$HOME/google-cloud-sdk"; curl https://sdk.cloud.google.com | bash > /dev/null; fi
-      - source $HOME/google-cloud-sdk/path.bash.inc
-      - gcloud version
-    before_script:
-      - mkdir -p release
-      - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out release/e2e-gcp-sa-key.json -d
-      - gcloud auth activate-service-account --key-file release/e2e-gcp-sa-key.json
-    script:
-      - ./scripts/perform-deployment-function.sh
   - stage: e2e-helm-deployment-test
     name: E2E GCP helm deployment test
     sudo: required

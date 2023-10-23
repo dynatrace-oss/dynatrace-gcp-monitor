@@ -78,8 +78,6 @@ useProxy: ""
 httpProxy: ""
 # httpsProxy: set the https proxy address. To be used in conjunction with USE_PROXY.
 httpsProxy: ""
-# scopingProjectSupportEnabled: set to true when metrics scope is configured, so metrics will be collected from all monitored projects.
-scopingProjectSupportEnabled: "false"
 # keepRefreshingExtensionsConfig: if true, will fetch enabled extensions from DT on each polling, otherwise will only fetch once during startup
 keepRefreshingExtensionsConfig: "true"
 
@@ -118,6 +116,13 @@ serviceUsageBooking: "source"
 queryInterval: 3
 #clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh
 clusterName: ""
+# scopingProjectSupportEnabled: set to true when metrics scope is configured, so metrics will be collected from all monitored projects.
+scopingProjectSupportEnabled: "false"
+# excludedProjects: comma separated list of projects that will be excluded from monitoring (e.g. "project-a,project-b,project-c").
+excludedProjects: ""
+# excludedProjectsByPrefix: comma separated list of projects substring that will be excluded from monitoring (e.g. "project-a,proj,pro").
+excludedProjectsByPrefix: ""
+
 metricResources:
   requests:
     memory: "1536Mi"
