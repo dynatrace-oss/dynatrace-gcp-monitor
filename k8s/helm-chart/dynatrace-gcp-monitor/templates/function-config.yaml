@@ -44,5 +44,6 @@ data:
   DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE: {{ .Values.logIngestRequestMaxSize | quote }}
   DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD: {{ .Values.logIngestSendingWorkerExecutionPeriod | quote }}
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
+  PROCESSING_WORKERS: {{ .Values.processingWorkers | quote }}
   CLOUD_LOG_FORWARDER: projects/{{ .Values.gcpProjectId }}/clusters/{{ .Values.clusterName }}/namespaces/{{ .Release.Namespace }}
   {{- end }}

@@ -144,7 +144,7 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Number of sent logs entries: {self_monitoring.sent_logs_entries}")
 
 
-def create_time_serie(
+def create_time_series(
         context: LogsSfmContext,
         metric_type: str,
         metric_labels: Dict,
@@ -176,7 +176,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
     time_series = []
     if sfm.all_requests:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE,
                 {
@@ -191,7 +191,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
 
     if sfm.too_old_records:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE,
                 {
@@ -206,7 +206,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
 
     if sfm.parsing_errors:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE,
                 {
@@ -221,7 +221,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
 
     if sfm.records_with_too_long_content:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE,
                 {
@@ -236,7 +236,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
 
     if sfm.publish_time_fallback_records:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE,
                 {
@@ -249,7 +249,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                     "value": {"int64Value": sfm.publish_time_fallback_records}
                 }]))
 
-    time_series.append(create_time_serie(
+    time_series.append(create_time_series(
             context,
             LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE,
             {
@@ -263,7 +263,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             }],
             "DOUBLE"))
 
-    time_series.append(create_time_serie(
+    time_series.append(create_time_series(
             context,
             LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE,
             {
@@ -280,7 +280,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
     connectivity_counter = Counter(sfm.dynatrace_connectivity)
     for dynatrace_connectivity, counter in connectivity_counter.items():
         if dynatrace_connectivity.name != DynatraceConnectivity.Ok.name:
-            time_series.append(create_time_serie(
+            time_series.append(create_time_series(
                     context,
                     LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE,
                     {
@@ -295,7 +295,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                     }]))
 
     if sfm.log_ingest_payload_size:
-        time_series.append(create_time_serie(
+        time_series.append(create_time_series(
             context,
             LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE,
             {
@@ -311,7 +311,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
         ))
 
     if sfm.sent_logs_entries:
-        time_series.append(create_time_serie(
+        time_series.append(create_time_series(
             context,
             LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE,
             {

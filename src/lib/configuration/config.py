@@ -75,3 +75,11 @@ def gcp_allowed_metric_dimension_key_length():
 
 def gcp_allowed_metric_key_length():
     return os.environ.get("ALLOWED_METRIC_KEY_LENGTH", 250)
+
+
+def get_dynatrace_api_key_from_env():
+    return os.environ.get(dynatrace_access_key_secret_name(), None)
+
+
+def get_dynatrace_log_ingest_url_from_env():
+    return os.environ.get(dynatrace_log_ingest_url_secret_name(), None)

@@ -12,20 +12,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import asyncio
 import json
 import os
 import re
 from datetime import datetime
 from queue import Queue
-from typing import NamedTuple, List, Optional, Tuple
+from typing import NamedTuple, List, Optional
 
 from aiohttp import ClientSession
 
-from lib.context import LoggingContext, get_should_require_valid_certificate
+from lib.context import LoggingContext, get_should_require_valid_certificate, create_logs_context
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
-from lib.logs.log_forwarder import create_logs_context
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 

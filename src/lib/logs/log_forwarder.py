@@ -14,8 +14,6 @@
 import asyncio
 import threading
 import time
-from asyncio import AbstractEventLoop
-from functools import partial
 from queue import Queue
 from typing import List
 
@@ -24,35 +22,19 @@ from google.cloud import pubsub
 from google.cloud.pubsub_v1 import SubscriberClient
 from google.pubsub_v1 import PullRequest, PullResponse
 
-from lib.context import LoggingContext, LogsContext
-from lib.credentials import get_dynatrace_api_key_from_env, get_dynatrace_log_ingest_url_from_env, \
-    get_project_id_from_environment
+from lib.context import LoggingContext, create_logs_context
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder_variables import MAX_SFM_MESSAGES_PROCESSED, LOGS_SUBSCRIPTION_PROJECT, \
     LOGS_SUBSCRIPTION_ID, \
     PROCESSING_WORKERS, PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES, REQUEST_BODY_MAX_SIZE
 from lib.logs.log_self_monitoring import create_sfm_worker_loop
-from lib.logs.logs_processor import _process_message
+from lib.logs.logs_processor import _prepare_context_and_process_message
 from lib.logs.worker_state import WorkerState
 from lib.utilities import chunks
 
 
-def create_logs_context(sfm_queue: Queue):
-    dynatrace_api_key = get_dynatrace_api_key_from_env()
-    dynatrace_url = get_dynatrace_log_ingest_url_from_env()
-    project_id_owner = get_project_id_from_environment()
-
-    return LogsContext(
-        project_id_owner=project_id_owner,
-        dynatrace_api_key=dynatrace_api_key,
-        dynatrace_url=dynatrace_url,
-        scheduled_execution_id=str(int(time.time()))[-8:],
-        sfm_queue=sfm_queue
-    )
-
-
-def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadata, asyncio_loop: AbstractEventLoop):
+def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadata):
     if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception(
             "Cannot start pubsub streaming pull - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
@@ -61,20 +43,20 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
 
     # open worker threads to process logs from PubSub queue and ingest them into DT
     for i in range(0, PROCESSING_WORKERS):
-        threading.Thread(target=run_ack_logs,
+        threading.Thread(target=pull_and_flush_logs_forever,
                          args=(f"Worker-{i}", sfm_queue,),
                          name=f"worker-{i}").start()
 
-    # coroutine in loop to create SFM logs and put them in the queue
+    # coroutine in loop to create SFM metrics out of the logs
     asyncio.run(create_sfm_worker_loop(sfm_queue, logging_context, instance_metadata))
 
-def run_ack_logs(worker_name: str, sfm_queue: Queue):
+
+def pull_and_flush_logs_forever(worker_name: str, sfm_queue: Queue):
     logging_context = LoggingContext(worker_name)
     subscriber_client = pubsub.SubscriberClient()
     subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
-    logging_context.log(f"Starting processing")
-
     worker_state = WorkerState(worker_name)
+    logging_context.log(f"Starting processing")
     while True:
         try:
             perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path)
@@ -98,7 +80,7 @@ def perform_pull(worker_state: WorkerState,
 
     for received_message in response.received_messages:
         # print(f"Received: {received_message.message.data}.")
-        message_job = _process_message(sfm_queue, received_message)
+        message_job = _prepare_context_and_process_message(sfm_queue, received_message)
 
         if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
             worker_state.ack_ids.append(received_message.ack_id)
@@ -109,7 +91,7 @@ def perform_pull(worker_state: WorkerState,
 
         worker_state.add_job(message_job, received_message.ack_id)
 
-    # check if should flush because of time
+    # check if worker_state should flush because of time
     if worker_state.should_flush():
         perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
 
@@ -134,10 +116,10 @@ def perform_flush(worker_state: WorkerState,
             if sent:
                 context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
                 context.self_monitoring.log_ingest_payload_size += display_payload_size
-                send_batched_acks(subscriber_client, subscription_path, worker_state.ack_ids)
+                send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
         elif worker_state.ack_ids:
             # Send ACKs if processing all messages has failed
-            send_batched_acks(subscriber_client, subscription_path, worker_state.ack_ids)
+            send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
     except Exception:
         context.exception(worker_state.worker_name, "Failed to perform flush")
     finally:
@@ -146,19 +128,14 @@ def perform_flush(worker_state: WorkerState,
         worker_state.reset()
 
 
-def send_batched_acks(subscriber_client: SubscriberClient, subscription_path: str, acks_ids: List[str]):
+def send_batched_ack(subscriber_client: SubscriberClient, subscription_path: str, ack_ids: List[str]):
     # request size limit is 524288, but we are not able to easily control size of created protobuf
     # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer
     # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
     chunk_size = 2048
-    if len(acks_ids) < chunk_size:
-        send_acks(subscriber_client, subscription_path, acks_ids)
+    if len(ack_ids) < chunk_size:
+        subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": ack_ids})
     else:
-        for chunk in chunks(acks_ids, chunk_size):
-            send_acks(subscriber_client, subscription_path, chunk)
+        for chunk in chunks(ack_ids, chunk_size):
+            subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": chunk})
 
-
-def send_acks(subscriber_client: SubscriberClient, subscription_path: str, acks_ids: List[str]):
-    subscriber_client.acknowledge(
-        request={"subscription": subscription_path, "ack_ids": acks_ids}
-    )

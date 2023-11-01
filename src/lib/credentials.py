@@ -45,10 +45,6 @@ async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token
     return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
 
 
-def get_dynatrace_api_key_from_env():
-    return os.environ.get(_DYNATRACE_ACCESS_KEY_SECRET_NAME, None)
-
-
 def get_dynatrace_log_ingest_url_from_env():
     url = os.environ.get(_DYNATRACE_LOG_INGEST_URL_SECRET_NAME, None)
     if url is None:
@@ -93,10 +89,6 @@ async def create_default_service_account_token(context: LoggingContext, session:
     except Exception as e:
         context.log(f"Failed to authorize with Service Account from Metadata Service due to '{e}'")
         return None
-
-
-def get_project_id_from_environment():
-    return config.project_id()
 
 
 async def create_token(context: LoggingContext, session: ClientSession):

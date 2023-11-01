@@ -13,6 +13,7 @@
 #     limitations under the License.
 
 import os
+import time
 import traceback
 from datetime import datetime, timedelta
 from queue import Queue
@@ -20,6 +21,7 @@ from typing import Optional, Dict
 
 import aiohttp
 
+from lib.configuration import config
 from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_MAP
@@ -37,6 +39,20 @@ class DynatraceConnectivity(enum.Enum):
     InvalidInput = 4
     TooManyRequests = 5
     Other = 6
+
+
+def create_logs_context(sfm_queue: Queue):
+    dynatrace_api_key = config.get_dynatrace_api_key_from_env()
+    dynatrace_url = config.get_dynatrace_log_ingest_url_from_env()
+    project_id_owner = config.project_id()
+
+    return LogsContext(
+        project_id_owner=project_id_owner,
+        dynatrace_api_key=dynatrace_api_key,
+        dynatrace_url=dynatrace_url,
+        scheduled_execution_id=str(int(time.time()))[-8:],
+        sfm_queue=sfm_queue
+    )
 
 
 def get_int_environment_value(key: str, default_value: int) -> int:
@@ -317,7 +333,6 @@ class MetricsContext(SfmContext):
 
         self.update_dt_connectivity_status(DynatraceConnectivity.Ok)
         self.start_processing_timestamp = 0
-
 
     def update_dt_connectivity_status(self, status: DynatraceConnectivity):
         self.sfm[SfmKeys.dynatrace_connectivity].update(status)

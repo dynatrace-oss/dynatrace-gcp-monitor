@@ -220,6 +220,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: DYNATRACE_TIMEOUT_SECONDS
+        - name: PROCESSING_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: PROCESSING_WORKERS
         - name: CLOUD_LOG_FORWARDER
           valueFrom:
             configMapKeyRef:

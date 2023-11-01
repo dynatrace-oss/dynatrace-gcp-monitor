@@ -23,7 +23,7 @@ from lib import credentials
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, SfmDashboardsContext, get_query_interval_minutes, SfmContext
-from lib.credentials import create_token, get_project_id_from_environment
+from lib.credentials import create_token
 from lib.dt_extensions.dt_extensions import extensions_fetch, prepare_services_config_for_next_polling
 from lib.fast_check import LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
@@ -82,7 +82,7 @@ async def import_self_monitoring_dashboards(metadata: InstanceMetadata):
         async with init_gcp_client_session() as gcp_session:
             token = await create_token(logging_context, gcp_session)
             if token:
-                sfm_dashboards_context = SfmDashboardsContext(project_id_owner=get_project_id_from_environment(),
+                sfm_dashboards_context = SfmDashboardsContext(project_id_owner=config.project_id(),
                                                               token=token,
                                                               gcp_session=gcp_session,
                                                               operation_mode=OPERATION_MODE,
@@ -173,7 +173,7 @@ def main():
         asyncio.run(run_metrics_fetcher_forever())
     elif OPERATION_MODE == OperationMode.Logs:
         LogsFastCheck(logging_context, instance_metadata).execute()
-        run_logs(logging_context, instance_metadata, loop)
+        run_logs(logging_context, instance_metadata)
 
 
 if __name__ == '__main__':

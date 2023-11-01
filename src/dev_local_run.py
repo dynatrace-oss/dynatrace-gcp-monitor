@@ -13,8 +13,6 @@
 #     limitations under the License.
 import os
 
-import run_docker
-
 env_vars = {
     "ACTIVATION_CONFIG":
         '''
@@ -32,6 +30,11 @@ env_vars = {
     "PRINT_METRIC_INGEST_INPUT": "FALSE",
 }
 
+for key, value in env_vars.items():
+    os.environ[key] = value
+
+import run_docker
+
 
 # THINGS YOU NEED TO PROVIDE
 
@@ -41,12 +44,5 @@ env_vars = {
 # 2) DYNATRACE_ACCESS_KEY
 # Normal DT token for GCP Monitor metrics
 
-def local_run_metrics():
-    for key, value in env_vars.items():
-        os.environ[key] = value
-
-    run_docker.main()
-
-
 if __name__ == '__main__':
-    local_run_metrics()
+    run_docker.main()
