@@ -86,7 +86,10 @@ async def create_sfm_worker_loop(sfm_queue: Queue, logging_context: LoggingConte
             logging_context.exception("Logs Self Monitoring Worker Loop Exception:")
 
 
-async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Queue, context: LoggingContext, instance_metadata: InstanceMetadata):
+async def _loop_single_period(self_monitoring: LogSelfMonitoring,
+                              sfm_queue: Queue,
+                              context: LoggingContext,
+                              instance_metadata: InstanceMetadata):
     try:
         sfm_list = _pull_sfm(sfm_queue)
         if sfm_list:
