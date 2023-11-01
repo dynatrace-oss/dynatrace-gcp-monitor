@@ -22,13 +22,14 @@ from google.cloud import pubsub
 from google.cloud.pubsub_v1 import SubscriberClient
 from google.pubsub_v1 import PullRequest, PullResponse
 
+from lib.configuration import config
 from lib.context import LoggingContext, create_logs_context
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder_variables import MAX_SFM_MESSAGES_PROCESSED, LOGS_SUBSCRIPTION_PROJECT, \
     LOGS_SUBSCRIPTION_ID, \
     PROCESSING_WORKERS, PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES, REQUEST_BODY_MAX_SIZE
-from lib.logs.log_self_monitoring import create_sfm_worker_loop
+from lib.logs.log_self_monitoring import create_sfm_worker_loop, create_synchronous_sfm_loop
 from lib.logs.logs_processor import _prepare_context_and_process_message
 from lib.logs.worker_state import WorkerState
 from lib.utilities import chunks
@@ -40,26 +41,40 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
             "Cannot start pubsub streaming pull - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
 
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
+    subscriber_client = pubsub.SubscriberClient()
+    subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
 
     # open worker threads to process logs from PubSub queue and ingest them into DT
     for i in range(0, PROCESSING_WORKERS):
         threading.Thread(target=pull_and_flush_logs_forever,
-                         args=(f"Worker-{i}", sfm_queue,),
+                         args=(f"Worker-{i}", sfm_queue, subscriber_client, subscription_path,),
                          name=f"worker-{i}").start()
 
-    # coroutine in loop to create SFM metrics out of the logs
-    asyncio.run(create_sfm_worker_loop(sfm_queue, logging_context, instance_metadata))
+    # OPTION 1: coroutine in loop to create SFM metrics out of the logs
+    # asyncio.run(create_sfm_worker_loop(sfm_queue, logging_context, instance_metadata))
+
+    # OPTION 2: open another thread to create SFM metrics out of the logs
+    # threading.Thread(target=create_sfm_worker_loop,
+    #                  args=(sfm_queue, logging_context, instance_metadata,),
+    #                  name=f"SFM").start()
+
+    # OPTION 3: loop in normal method. Asyncio.run() inside that loop only to send SFM.
+    create_synchronous_sfm_loop(sfm_queue, logging_context, instance_metadata)
 
 
-def pull_and_flush_logs_forever(worker_name: str, sfm_queue: Queue):
+def pull_and_flush_logs_forever(worker_name: str,
+                                sfm_queue: Queue,
+                                subscriber_client: SubscriberClient,
+                                subscription_path: str):
     logging_context = LoggingContext(worker_name)
-    subscriber_client = pubsub.SubscriberClient()
-    subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
     worker_state = WorkerState(worker_name)
+    pull_request = PullRequest()
+    pull_request.max_messages = PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES
+    pull_request.subscription = subscription_path
     logging_context.log(f"Starting processing")
     while True:
         try:
-            perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path)
+            perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request)
         except Exception as e:
             if isinstance(e, Forbidden):
                 logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.")
@@ -72,10 +87,8 @@ def pull_and_flush_logs_forever(worker_name: str, sfm_queue: Queue):
 def perform_pull(worker_state: WorkerState,
                  sfm_queue: Queue,
                  subscriber_client: SubscriberClient,
-                 subscription_path: str):
-    pull_request = PullRequest()
-    pull_request.max_messages = PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES
-    pull_request.subscription = subscription_path
+                 subscription_path: str,
+                 pull_request: PullRequest):
     response: PullResponse = subscriber_client.pull(pull_request)
 
     for received_message in response.received_messages:
