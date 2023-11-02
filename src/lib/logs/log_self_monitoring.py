@@ -60,7 +60,7 @@ def put_sfm_into_queue(context: LogsContext):
             context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
 
-def create_synchronous_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
     while True:
         try:
             time.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
@@ -68,22 +68,6 @@ def create_synchronous_sfm_loop(sfm_queue: Queue, logging_context: LoggingContex
             asyncio.run(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
         except Exception:
             logging_context.exception("Logs Self Monitoring Loop Exception:")
-
-
-async def create_sfm_worker_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
-    loop = asyncio.get_event_loop()
-    sfm_tasks = set()
-    while True:
-        try:
-            await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
-            self_monitoring = LogSelfMonitoring()
-            # Keeping task reference to prevent it from being garbage collected before it's done
-            # See https://docs.python.org/3/library/asyncio-task.html#creating-tasks
-            sfm_task = loop.create_task(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
-            sfm_tasks.add(sfm_task)
-            sfm_task.add_done_callback(sfm_tasks.discard)
-        except Exception:
-            logging_context.exception("Logs Self Monitoring Worker Loop Exception:")
 
 
 async def _loop_single_period(self_monitoring: LogSelfMonitoring,

@@ -97,11 +97,11 @@ logIngestSendingWorkerExecutionPeriod: 60
 # Determines max age of forwarded log event. Should be the same or lower than on cluster
 logIngestEventMaxAgeSeconds: 86400
 # Number of workers pulling logs from pubsub concurrently
-processingWorkers: 10
+processingWorkers: 5
 logResources:
   requests:
     memory: "256Mi"
-    cpu: "1"
+    cpu: "1.25"
     ephemeral-storage: "1Gi"
 
 # METRICS VALUES - DEFAULTS
