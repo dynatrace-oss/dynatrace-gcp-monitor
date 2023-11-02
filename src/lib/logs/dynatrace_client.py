@@ -38,7 +38,7 @@ def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
     # pylint: disable=R0912
     context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
     context.self_monitoring.sending_time_start = time.perf_counter()
-    log_ingest_url = urlparse(context.dynatrace_url + "/api/v2/logs/ingest").geturl()
+    log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()
 
     try:
         encoded_body_bytes = batch.encode("UTF-8")
