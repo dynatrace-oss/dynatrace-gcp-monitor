@@ -63,10 +63,10 @@ def pull_and_flush_logs_forever(worker_name: str,
     pull_request.max_messages = PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES
     pull_request.subscription = subscription_path
     logging_context.log(f"Starting processing")
-    logging_context.log(f"Testing")
+    # logging_context.log(f"Testing")
     while True:
         try:
-            perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request)
+            perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request, logging_context)
         except Exception as e:
             if isinstance(e, Forbidden):
                 logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.")
@@ -80,24 +80,31 @@ def perform_pull(worker_state: WorkerState,
                  sfm_queue: Queue,
                  subscriber_client: SubscriberClient,
                  subscription_path: str,
-                 pull_request: PullRequest):
+                 pull_request: PullRequest,
+                 logging_context):
     response: PullResponse = subscriber_client.pull(pull_request)
 
+    logging_context.log(f"pull received. Messages len: {len(response.received_messages)}")
     for received_message in response.received_messages:
         # print(f"Received: {received_message.message.data}.")
         message_job = _prepare_context_and_process_message(sfm_queue, received_message)
 
+        logging_context.log(f"message processed")
         if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
+            logging_context.log(f"message job: {message_job}. Or too big otherwise")
             worker_state.ack_ids.append(received_message.ack_id)
             continue
 
         if worker_state.should_flush(message_job):
+            logging_context.log(f"flushing due to queue")
             perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
 
+        logging_context.log(f"adding job to worker state")
         worker_state.add_job(message_job, received_message.ack_id)
 
     # check if worker_state should flush because of time
     if worker_state.should_flush():
+        logging_context.log(f"flushing due to time")
         perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
 
 
