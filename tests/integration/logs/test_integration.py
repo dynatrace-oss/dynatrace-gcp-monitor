@@ -326,7 +326,8 @@ async def run_worker_with_messages(
     pull_request = PullRequest()
 
     test_worker_state = WorkerState("TEST")
-    perform_pull(test_worker_state, sfm_queue, mock_subscriber_client, "", pull_request)
+    logging_context = LoggingContext("Logging context - test")
+    perform_pull(test_worker_state, sfm_queue, mock_subscriber_client, "", pull_request, logging_context)
     # Flush down rest of messages
     perform_flush(test_worker_state, sfm_queue, mock_subscriber_client, "")
 
