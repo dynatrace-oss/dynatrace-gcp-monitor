@@ -63,6 +63,7 @@ def pull_and_flush_logs_forever(worker_name: str,
     pull_request.max_messages = PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES
     pull_request.subscription = subscription_path
     logging_context.log(f"Starting processing")
+    logging_context.log(f"Testing")
     while True:
         try:
             perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request)
