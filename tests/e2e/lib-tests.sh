@@ -409,4 +409,14 @@ performance_test() {
     fi
     echo "$PERF_LOGS" | "$TEST_JQ" '.[-2,-1].textPayload'
     echo "#####PERFORMANCE TEST ENDED#####"
+    echo
+
+    echo "Resetting variables in case another test is going to be run (empty ones have defaults)"
+    kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace GCP_PROJECT_ID="${GCP_PROJECT_ID}" \
+        GCP_METADATA_URL="" \
+        GCP_CLOUD_RESOURCE_MANAGER_URL="" \
+        GCP_SERVICE_USAGE_URL="" \
+        GCP_MONITORING_URL="" \
+        GCP_SECRET_ROOT=""
+
 }
