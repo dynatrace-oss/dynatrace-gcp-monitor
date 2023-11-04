@@ -146,4 +146,6 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
         context.log("Access to following projects: " + ", ".join(all_projects))
     else:
         context.log("There is no access to any projects. Check service account configuration.")
+        context.debug(f"URL called: {url}.")
+        context.debug(f"Response from server: {response_json}.")
     return all_projects
