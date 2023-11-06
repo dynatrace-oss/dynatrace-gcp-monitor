@@ -104,7 +104,7 @@ class InstanceMetadataCheck:
                     token_scopes=results[2],
                     service_account=results[3],
                     audience=audience,
-                    hostname=os.environ.get("HOSTNAME", ""),
+                    hostname=config.hostname(),
                     zone=zone
                 )
                 self.logging_context.log(f'GCP instance metadata: {metadata}')

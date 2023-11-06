@@ -22,8 +22,9 @@ from typing import Dict, List
 import aiohttp
 
 from lib.clientsession_provider import init_gcp_client_session
+from lib.configuration import config
 from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity, LogsContext
-from lib.credentials import create_token, get_dynatrace_log_ingest_url_from_env
+from lib.credentials import create_token, get_dynatrace_log_ingest_url
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.log_forwarder_variables import LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID, \
     SFM_WORKER_EXECUTION_PERIOD_SECONDS, MAX_SFM_MESSAGES_PROCESSED
@@ -97,8 +98,8 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring,
 
 
 async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_session: aiohttp.ClientSession(), instance_metadata: InstanceMetadata):
-    dynatrace_url = get_dynatrace_log_ingest_url_from_env()
-    self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
+    dynatrace_url = get_dynatrace_log_ingest_url()
+    self_monitoring_enabled = config.self_monitoring_enabled()
     token = await create_token(context, gcp_session)
     container_name = instance_metadata.hostname if instance_metadata else "local deployment"
     zone = instance_metadata.zone if instance_metadata else "us-east1"

@@ -19,7 +19,8 @@ from typing import NamedTuple, List, Dict, Optional
 import yaml
 from aiohttp import ClientSession
 
-from lib.context import LoggingContext, get_should_require_valid_certificate
+from lib.configuration import config
+from lib.context import LoggingContext
 from lib.metrics import GCPService
 from lib.utilities import read_activation_yaml, get_activation_config_per_service, load_activated_feature_sets
 
@@ -66,7 +67,7 @@ class ExtensionsFetcher:
         headers = {"Authorization": f"Api-Token {self.dynatrace_access_key}", "Accept": "application/json; charset=utf-8"}
         params = {"name": "com.dynatrace.extension.google"}
         response = await self.dt_session.get(url, headers=headers, params=params,
-                                             verify_ssl=get_should_require_valid_certificate())
+                                             verify_ssl=config.require_valid_certificate())
         if response.status != 200:
             self.logging_context.log(
                 f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')
@@ -77,7 +78,7 @@ class ExtensionsFetcher:
         while next_page_key:
             params = {"nextPageKey": next_page_key}
             response = await self.dt_session.get(url, headers=headers, params=params,
-                                                 verify_ssl=get_should_require_valid_certificate())
+                                                 verify_ssl=config.require_valid_certificate())
             next_page_key = None
             if response.status == 200:
                 response_json = await response.json()
@@ -135,7 +136,7 @@ class ExtensionsFetcher:
             "Authorization": f"Api-Token {self.dynatrace_access_key}",
             "Accept": "application/octet-stream"
         }
-        response = await self.dt_session.get(url, headers=headers, verify_ssl=get_should_require_valid_certificate())
+        response = await self.dt_session.get(url, headers=headers, verify_ssl=config.require_valid_certificate())
         if response.status != 200:
             self.logging_context.log(
                 f'Http error: {response.status}, url: {response.url}, reason: {response.reason}')

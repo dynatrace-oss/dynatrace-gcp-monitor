@@ -12,7 +12,6 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import asyncio
-import os
 import platform
 import threading
 import time
@@ -36,7 +35,7 @@ from lib.webserver.webserver import run_webserver_on_asyncio_loop_forever
 from main import async_dynatrace_gcp_extension
 from operation_mode import OperationMode
 
-OPERATION_MODE = OperationMode.from_environment_string(os.environ.get("OPERATION_MODE", None)) or OperationMode.Metrics
+OPERATION_MODE = OperationMode.from_environment_string(config.operation_mode()) or OperationMode.Metrics
 QUERY_INTERVAL_SEC = get_query_interval_minutes() * 60
 QUERY_TIMEOUT_SEC = (get_query_interval_minutes() + 2) * 60
 

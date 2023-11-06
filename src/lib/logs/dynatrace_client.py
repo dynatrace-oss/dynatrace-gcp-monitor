@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import json
 import ssl
 import time
 import urllib
@@ -21,13 +20,13 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request
 
-from lib.context import get_should_require_valid_certificate, get_int_environment_value, \
-    DynatraceConnectivity, LogsContext
+from lib.configuration import config
+from lib.context import get_int_environment_value, DynatraceConnectivity, LogsContext
 from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
 from lib.logs.logs_processor import LogProcessingJob
 
 ssl_context = ssl.create_default_context()
-if not get_should_require_valid_certificate():
+if not config.require_valid_certificate():
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
 

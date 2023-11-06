@@ -45,8 +45,8 @@ async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token
     return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
 
 
-def get_dynatrace_log_ingest_url_from_env():
-    url = os.environ.get(_DYNATRACE_LOG_INGEST_URL_SECRET_NAME, None)
+def get_dynatrace_log_ingest_url():
+    url = config.get_dynatrace_log_ingest_url_from_env()
     if url is None:
         raise Exception("{env_var} environment variable is not set".format(env_var=_DYNATRACE_LOG_INGEST_URL_SECRET_NAME))
     return url.rstrip('/')
@@ -82,7 +82,8 @@ async def create_default_service_account_token(context: LoggingContext, session:
         response = await session.get(url, headers=_METADATA_HEADERS)
         if response.status >= 300:
             body = await response.text()
-            context.log(f"Failed to authorize with Service Account from Metadata Service, response is {response.status} => {body}")
+            context.log(f"Failed to authorize with Service Account from Metadata Service, "
+                        f"response is {response.status} => {body}")
             return None
         response_json = await response.json()
         return response_json["access_token"]
@@ -145,7 +146,6 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
     if all_projects:
         context.log("Access to following projects: " + ", ".join(all_projects))
     else:
-        context.log("There is no access to any projects. Check service account configuration.")
-        context.debug(f"URL called: {url}.")
-        context.debug(f"Response from server: {response_json}.")
+        context.log(f"There is no access to any projects. Check service account configuration. "
+                    f"Response from server: {response_json}.")
     return all_projects

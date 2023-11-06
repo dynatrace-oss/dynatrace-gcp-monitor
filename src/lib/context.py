@@ -60,13 +60,9 @@ def get_int_environment_value(key: str, default_value: int) -> int:
     return int(environment_value) if environment_value and environment_value.isdigit() else default_value
 
 
-def get_should_require_valid_certificate() -> bool:
-    return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
-
-
 def get_query_interval_minutes() -> int:
     default_query_interval = 3
-    query_interval_env_var = os.environ.get('QUERY_INTERVAL_MIN', None)
+    query_interval_env_var = config.query_interval_min()
     if query_interval_env_var:
         query_interval_min = int(query_interval_env_var) if query_interval_env_var.isdigit() else default_query_interval
     else:
@@ -171,7 +167,7 @@ class ExecutionContext(LoggingContext):
         self.dynatrace_url = dynatrace_url
         self.function_name = os.environ.get("K_SERVICE", "Local")
         self.location = os.environ.get("FUNCTION_REGION", "us-east1")
-        self.require_valid_certificate = get_should_require_valid_certificate()
+        self.require_valid_certificate = config.require_valid_certificate()
 
 
 class LogsContext(ExecutionContext):

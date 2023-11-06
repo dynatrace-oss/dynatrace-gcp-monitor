@@ -21,7 +21,8 @@ from typing import NamedTuple, List, Optional
 
 from aiohttp import ClientSession
 
-from lib.context import LoggingContext, get_should_require_valid_certificate, create_logs_context
+from lib.configuration import config
+from lib.context import LoggingContext, create_logs_context
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 
@@ -125,7 +126,7 @@ async def get_dynatrace_token_metadata(dt_session: ClientSession, context: Loggi
             json={
                 "token": dynatrace_api_key
             },
-            verify_ssl=get_should_require_valid_certificate(),
+            verify_ssl=config.require_valid_certificate(),
             timeout=timeout)
         if response.status != 200:
             context.log(
