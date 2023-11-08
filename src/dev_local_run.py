@@ -13,6 +13,9 @@
 #     limitations under the License.
 import os
 
+# Moved environment variables setting before next import for them to be effective. As we have it now,
+# the code from run_docker and subsequent imported files in some cases create global variables from
+# environment variables, so for a local run they need to be set at the beginning. This could be improved if needed.
 env_vars = {
     "ACTIVATION_CONFIG":
         '''
