@@ -210,159 +210,16 @@ gcpServicesYaml: |
 EOF
 }
 
-
-create_activation_config_e2e_file() {
-  cat <<EOF > activation.config.e2e.yaml
-googleCloud:
-  required:
-    gcpProjectId: "${GCP_PROJECT_ID}"
-    dynatraceTenantUrl: "${DYNATRACE_URL}"
-    dynatraceApiToken: "${DYNATRACE_ACCESS_KEY}"
-    cloudFunctionSize: s
-    cloudFunctionRegion: us-central1
-    preferredAppEngineRegion: us-central
-  common:
-    dynatraceUrlSecretName: "${DYNATRACE_URL_SECRET_NAME}"
-    dynatraceAccessKeySecretName: "${DYNATRACE_ACCESS_KEY_SECRET_NAME}"
-    serviceAccount: "${IAM_SERVICE_ACCOUNT}"
-    iamRole: "${IAM_ROLE_METRCICS}"
-    requireValidCertificate: false
-    scopingProjectSupportEnabled: true
-  metrics:
-    pubSubTopic: "${PUBSUB_TOPIC}"
-    function: "${METRIC_FORWARDING_FUNCTION}"
-    scheduler: "${CLOUD_SCHEDULER}"
-activation: |
-  services:
-    - service: api
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: cloudsql_database
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: cloud_function
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: datastore_request
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: filestore_instance
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: gce_instance
-      featureSets:
-       - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: gcs_bucket
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: https_lb_rule
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: internal_http_lb_rule
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: internal_tcp_lb_rule
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: internal_udp_lb_rule
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: tcp_lb_rule
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: udp_lb_rule
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: k8s_cluster
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: k8s_container
-      featureSets:
-       - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: k8s_node
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: k8s_pod
-      featureSets:
-       - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: pubsublite_subscription_partition
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: pubsublite_topic_partition
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: pubsub_snapshot
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: pubsub_subscription
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: pubsub_topic
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-    - service: cloud_run_revision
-      featureSets:
-        - default_metrics
-      vars:
-        filter_conditions: ""
-EOF
-}
-
 performance_test() {
     echo
     echo "#####PERFORMANCE TEST#####"
 
     echo "Setting variables to use GCP simulator"
-    kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace GCP_PROJECT_ID="fake-project-0" \
+    kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace \
         GCP_METADATA_URL="http://${GCP_SIMULATOR_IP}/metadata.google.internal/computeMetadata/v1" \
         GCP_CLOUD_RESOURCE_MANAGER_URL="http://${GCP_SIMULATOR_IP}/cloudresourcemanager.googleapis.com/v1" \
         GCP_SERVICE_USAGE_URL="http://${GCP_SIMULATOR_IP}/serviceusage.googleapis.com/v1" \
-        GCP_MONITORING_URL="http://${GCP_SIMULATOR_IP}/monitoring.googleapis.com/v3" \
-        GCP_SECRET_ROOT="http://${GCP_SIMULATOR_IP}/secretmanager.googleapis.com/v1"
+        GCP_MONITORING_URL="http://${GCP_SIMULATOR_IP}/monitoring.googleapis.com/v3"
 
     echo "Wait until previous pod terminates"
     for _ in {1..60}
@@ -412,11 +269,10 @@ performance_test() {
     echo
 
     echo "Resetting variables in case another test is going to be run (empty ones have defaults)"
-    kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace GCP_PROJECT_ID="${GCP_PROJECT_ID}" \
-        GCP_METADATA_URL="" \
-        GCP_CLOUD_RESOURCE_MANAGER_URL="" \
-        GCP_SERVICE_USAGE_URL="" \
-        GCP_MONITORING_URL="" \
-        GCP_SECRET_ROOT=""
+    kubectl set env deployment dynatrace-gcp-monitor -c dynatrace-gcp-monitor-metrics -n dynatrace \
+        GCP_METADATA_URL="http://metadata.google.internal/computeMetadata/v1" \
+        GCP_CLOUD_RESOURCE_MANAGER_URL="https://cloudresourcemanager.googleapis.com/v1" \
+        GCP_SERVICE_USAGE_URL="https://serviceusage.googleapis.com/v1" \
+        GCP_MONITORING_URL="https://monitoring.googleapis.com/v3"
 
 }
