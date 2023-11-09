@@ -55,11 +55,6 @@ def create_logs_context(sfm_queue: Queue):
     )
 
 
-def get_int_environment_value(key: str, default_value: int) -> int:
-    environment_value = os.environ.get(key, None)
-    return int(environment_value) if environment_value and environment_value.isdigit() else default_value
-
-
 def get_query_interval_minutes() -> int:
     default_query_interval = 3
     query_interval_env_var = config.query_interval_min()
@@ -324,7 +319,7 @@ class MetricsContext(SfmContext):
         self.execution_interval = timedelta(seconds=execution_interval_seconds)
         self.print_metric_ingest_input = print_metric_ingest_input
         self.self_monitoring_enabled = self_monitoring_enabled
-        self.metric_ingest_batch_size = get_int_environment_value("METRIC_INGEST_BATCH_SIZE", 1000)
+        self.metric_ingest_batch_size = config.get_int_environment_value("METRIC_INGEST_BATCH_SIZE", 1000)
         self.use_x_goog_user_project_header = {project_id_owner: False}
 
         self.update_dt_connectivity_status(DynatraceConnectivity.Ok)

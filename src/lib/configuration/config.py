@@ -1,6 +1,11 @@
 import os
 
 
+def get_int_environment_value(key: str, default_value: int) -> int:
+    environment_value = os.environ.get(key, None)
+    return int(environment_value) if environment_value and environment_value.isdigit() else default_value
+
+
 def operation_mode():
     return os.environ.get("OPERATION_MODE", None)
 

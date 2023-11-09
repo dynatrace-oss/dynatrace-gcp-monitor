@@ -21,7 +21,7 @@ from urllib.parse import urlparse
 from urllib.request import Request
 
 from lib.configuration import config
-from lib.context import get_int_environment_value, DynatraceConnectivity, LogsContext
+from lib.context import DynatraceConnectivity, LogsContext
 from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
 from lib.logs.logs_processor import LogProcessingJob
 
@@ -29,8 +29,6 @@ ssl_context = ssl.create_default_context()
 if not config.require_valid_certificate():
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
-
-_TIMEOUT = get_int_environment_value("DYNATRACE_TIMEOUT_SECONDS", 30)
 
 
 def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
@@ -85,14 +83,16 @@ def _perform_http_request(
         encoded_body_bytes: bytes,
         headers: Dict
 ) -> Tuple[int, str, str]:
-    req = Request(
+    request = Request(
         url,
         encoded_body_bytes,
         headers,
         method=method
     )
     try:
-        response = urllib.request.urlopen(req, context=ssl_context, timeout=_TIMEOUT)
+        response = urllib.request.urlopen(url=request,
+                                          context=ssl_context,
+                                          timeout=config.get_int_environment_value("DYNATRACE_TIMEOUT_SECONDS", 30))
         return response.code, response.reason, response.read().decode("utf-8")
     except HTTPError as e:
         response_body = e.read().decode("utf-8")
