@@ -57,25 +57,27 @@ Worker function execution can be tweaked with environment variables. In Google F
 
 ### Log processing configuration variables
 
-| Variable name | description   | default value |
-| ----------------- | ------------- | ----------- |
-| DYNATRACE_ACCESS_KEY_SECRET_NAME | name of environment variable or Google Secret Manager Secret containing Dynatrace Access Key | DYNATRACE_ACCESS_KEY |
+| Variable name | description   | default value            |
+| ----------------- | ------------- |--------------------------|
+| DYNATRACE_ACCESS_KEY_SECRET_NAME | name of environment variable or Google Secret Manager Secret containing Dynatrace Access Key | DYNATRACE_ACCESS_KEY     |
 | DYNATRACE_LOG_INGEST_URL_SECRET_NAME | name of environment variable or Google Secret Manager Secret containing Dynatrace URL | DYNATRACE_LOG_INGEST_URL |
-| GOOGLE_APPLICATION_CREDENTIALS | path to GCP service account key file | |
-| REQUIRE_VALID_CERTIFICATE | determines whether worker will verify SSL certificate of Dynatrace endpoint. Allowed values: `true`/`yes`, `false`/`no` | `true` |
-| DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH | determines max content length of log event. Should be the same or lower than on cluster | 8192 characters |
-| DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH | Max length of log event attribute value. If it surpasses server limit, Content will be truncated | 250 |
-| DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS | Max number of log events in single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code  | 5000 |
-| DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE | Max size in bytes of single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code | 1048576 (1 mb) |
-| DYNATRACE_LOG_INGEST_EVENT_MAX_AGE_SECONDS | Determines max age of forwarded log event. Should be the same or lower than on cluster | 1 day |
-| GCP_PROJECT | GCP project of log sink pubsub subscription | |
+| GOOGLE_APPLICATION_CREDENTIALS | path to GCP service account key file |                          |
+| REQUIRE_VALID_CERTIFICATE | determines whether worker will verify SSL certificate of Dynatrace endpoint. Allowed values: `true`/`yes`, `false`/`no` | `true`                   |
+| DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH | determines max content length of log event. Should be the same or lower than on cluster | 8192 characters          |
+| DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH | Max length of log event attribute value. If it surpasses server limit, Content will be truncated | 250                      |
+| DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS | Max number of log events in single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code  | 5000                     |
+| DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE | Max size in bytes of single payload to logs ingest endpoint. If it surpasses server limit, payload will be rejected with 413 code | 1048576 (1 mb)           |
+| DYNATRACE_LOG_INGEST_EVENT_MAX_AGE_SECONDS | Determines max age of forwarded log event. Should be the same or lower than on cluster | 1 day                    |
+| GCP_PROJECT | GCP project of log sink pubsub subscription |                          |
 | USE_PROXY | Depending on value of this flag, function will use proxy settings for either Dynatrace, GCP API or both.
-| HTTP_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |  |
-| HTTPS_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |  |
-| LOGS_SUBSCRIPTION_ID | subscription id of log sink pubsub subscription | |
-| DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD | Period of sending batched logs to Dynatrace | 60 seconds |
-| DYNATRACE_TIMEOUT_SECONDS | Timeout of request to Dynatrace Log Ingest | 30 seconds |
-| SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your gcp-log-forwarder processes and sends logs to Dynatrace properly. Allowed values: `true`/`yes`, `false`/`no` | `false` |
+| HTTP_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |                          |
+| HTTPS_PROXY | Set the proxy address. To be used in conjunction with USE_PROXY |                          |
+| LOGS_SUBSCRIPTION_ID | subscription id of log sink pubsub subscription |                          |
+| DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD | Period of sending batched logs to Dynatrace | 60 seconds               |
+| DYNATRACE_TIMEOUT_SECONDS | Timeout of request to Dynatrace Log Ingest | 30 seconds               |
+| SELF_MONITORING_ENABLED | Send custom metrics to GCP to diagnose quickly if your gcp-log-forwarder processes and sends logs to Dynatrace properly. Allowed values: `true`/`yes`, `false`/`no` | `false`                  |
+| PROCESSING_WORKERS | Number of workers pulling logs from pubsub concurrently | 5                        |
+| PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES | Maximum number of messages to be retrieved per pull request. 1000 is the maximum allowed by GCP                  | 1000                     |
 
 
 ## Building custom extension for Google Cloud service

@@ -238,6 +238,16 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: DYNATRACE_TIMEOUT_SECONDS
+        - name: PROCESSING_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: PROCESSING_WORKERS
+        - name: PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES
         - name: CLOUD_LOG_FORWARDER
           valueFrom:
             configMapKeyRef:

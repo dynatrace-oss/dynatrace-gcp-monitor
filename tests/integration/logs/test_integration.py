@@ -323,9 +323,10 @@ async def run_worker_with_messages(
     ack_queue = Queue()
     sfm_queue = Queue()
     mock_subscriber_client = MockSubscriberClient(ack_queue, messages)
-
+    pull_request = PullRequest()
     test_worker_state = WorkerState("TEST")
-    perform_pull(test_worker_state, sfm_queue, mock_subscriber_client, "")
+
+    perform_pull(test_worker_state, sfm_queue, mock_subscriber_client, "", pull_request)
     # Flush down rest of messages
     perform_flush(test_worker_state, sfm_queue, mock_subscriber_client, "")
 

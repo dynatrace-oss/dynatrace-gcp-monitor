@@ -13,8 +13,9 @@
 #     limitations under the License.
 import os
 
-import run_docker
-
+# Moved environment variables setting before next import for them to be effective. As we have it now,
+# the code from run_docker and subsequent imported files in some cases create global variables from
+# environment variables, so for a local run they need to be set at the beginning. This could be improved if needed.
 env_vars = {
     "ACTIVATION_CONFIG":
         '''
@@ -32,6 +33,11 @@ env_vars = {
     "PRINT_METRIC_INGEST_INPUT": "FALSE",
 }
 
+for key, value in env_vars.items():
+    os.environ[key] = value
+
+import run_docker
+
 
 # THINGS YOU NEED TO PROVIDE
 
@@ -41,12 +47,5 @@ env_vars = {
 # 2) DYNATRACE_ACCESS_KEY
 # Normal DT token for GCP Monitor metrics
 
-def local_run_metrics():
-    for key, value in env_vars.items():
-        os.environ[key] = value
-
-    run_docker.main()
-
-
 if __name__ == '__main__':
-    local_run_metrics()
+    run_docker.main()

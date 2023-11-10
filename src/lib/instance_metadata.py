@@ -17,7 +17,7 @@ import os
 import socket
 from collections import namedtuple
 from typing import Optional
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 import jwt
 from aiohttp import ClientSession
@@ -47,8 +47,9 @@ class InstanceMetadataCheck:
 
     async def _get_metadata(self, url_path: str, timeout: Optional[int] = 2):
         try:
+            endpoint_url = METADATA_URL + url_path
             response = await self.gcp_session.get(
-                urljoin(METADATA_URL, url_path),
+                endpoint_url,
                 headers={
                     "Authorization": f'Bearer {self.token}',
                     'Metadata-Flavor': 'Google'
@@ -59,7 +60,7 @@ class InstanceMetadataCheck:
                 return None
             return await response.text()
         except Exception as e:
-            self.logging_context.log(f'Cannot get instance metadata: {urljoin(METADATA_URL, url_path)}. {e}')
+            self.logging_context.log(f'Cannot get instance metadata: {endpoint_url}. {e}')
             return None
 
     async def project_id(self):
@@ -103,7 +104,7 @@ class InstanceMetadataCheck:
                     token_scopes=results[2],
                     service_account=results[3],
                     audience=audience,
-                    hostname=os.environ.get("HOSTNAME", ""),
+                    hostname=config.hostname(),
                     zone=zone
                 )
                 self.logging_context.log(f'GCP instance metadata: {metadata}')

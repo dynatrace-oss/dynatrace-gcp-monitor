@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import json
 import ssl
 import time
 import urllib
@@ -21,24 +20,22 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request
 
-from lib.context import get_should_require_valid_certificate, get_int_environment_value, \
-    DynatraceConnectivity, LogsContext
+from lib.configuration import config
+from lib.context import DynatraceConnectivity, LogsContext
 from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
 from lib.logs.logs_processor import LogProcessingJob
 
 ssl_context = ssl.create_default_context()
-if not get_should_require_valid_certificate():
+if not config.require_valid_certificate():
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
-
-_TIMEOUT = get_int_environment_value("DYNATRACE_TIMEOUT_SECONDS", 30)
 
 
 def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
     # pylint: disable=R0912
     context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
     context.self_monitoring.sending_time_start = time.perf_counter()
-    log_ingest_url = urlparse(context.dynatrace_url + "/api/v2/logs/ingest").geturl()
+    log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()
 
     try:
         encoded_body_bytes = batch.encode("UTF-8")
@@ -86,14 +83,16 @@ def _perform_http_request(
         encoded_body_bytes: bytes,
         headers: Dict
 ) -> Tuple[int, str, str]:
-    req = Request(
+    request = Request(
         url,
         encoded_body_bytes,
         headers,
         method=method
     )
     try:
-        response = urllib.request.urlopen(req, context=ssl_context, timeout=_TIMEOUT)
+        response = urllib.request.urlopen(url=request,
+                                          context=ssl_context,
+                                          timeout=config.get_int_environment_value("DYNATRACE_TIMEOUT_SECONDS", 30))
         return response.code, response.reason, response.read().decode("utf-8")
     except HTTPError as e:
         response_body = e.read().decode("utf-8")

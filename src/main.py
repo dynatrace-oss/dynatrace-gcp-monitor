@@ -23,7 +23,7 @@ from aiohttp import ClientSession
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.configuration import config
 from lib.context import MetricsContext, LoggingContext, get_query_interval_minutes
-from lib.credentials import create_token, get_project_id_from_environment, fetch_dynatrace_api_key, fetch_dynatrace_url, \
+from lib.credentials import create_token, fetch_dynatrace_api_key, fetch_dynatrace_url, \
     get_all_accessible_projects
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
@@ -59,7 +59,7 @@ async def get_metric_context(
     token: str,
     logging_context: LoggingContext,
 ) -> MetricsContext:
-    project_id_owner = get_project_id_from_environment()
+    project_id_owner = config.project_id()
 
     dynatrace_api_key = await fetch_dynatrace_api_key(
         gcp_session=gcp_session, project_id=project_id_owner, token=token
