@@ -11,23 +11,23 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-import os
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
 from typing import Dict, List, Any
 
+from lib.configuration import config
 from lib.context import MetricsContext, LoggingContext, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
 from lib.entities.model import Entity
 from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
     DimensionValue, IngestLine
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
-from lib.configuration import config
+
 
 UNIT_10TO2PERCENT = "10^2.%"
-MAX_DIMENSION_NAME_LENGTH = os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
-MAX_DIMENSION_VALUE_LENGTH = os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
+MAX_DIMENSION_NAME_LENGTH = config.max_dimension_name_length()
+MAX_DIMENSION_VALUE_LENGTH = config.max_dimension_value_length()
 
 GCP_MONITORING_URL = config.gcp_monitoring_url()
 

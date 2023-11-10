@@ -18,12 +18,9 @@ from typing import List, Dict
 
 import yaml
 
+from lib.configuration import config
 from lib.context import LoggingContext
 from lib.metrics import GCPService
-
-HOSTNAME = os.environ.get("HOSTNAME", "")
-
-K8S_CONTAINER_NAME_PREFIX = "dynatrace-gcp-monitor"
 
 
 def chunks(full_list: List, chunk_size: int) -> List[List]:
@@ -37,7 +34,7 @@ def read_activation_yaml():
         with open(activation_file_path, encoding="utf-8") as activation_file:
             activation_yaml = yaml.safe_load(activation_file)
     except Exception:
-        activation_yaml = yaml.safe_load(os.environ.get("ACTIVATION_CONFIG", ""))
+        activation_yaml = yaml.safe_load(config.activation_config())
     if not activation_yaml:
         activation_yaml = {}
     return activation_yaml

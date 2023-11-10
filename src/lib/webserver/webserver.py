@@ -5,7 +5,8 @@ from aiohttp import web
 from aiohttp.web_app import Application
 from aiohttp.web_runner import AppRunner
 
-from lib.context import LoggingContext, get_int_environment_value
+from lib.configuration.config import get_int_environment_value
+from lib.context import LoggingContext
 
 logging_context = LoggingContext("webserver")
 

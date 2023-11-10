@@ -42,7 +42,7 @@ class LogProcessingJob:
         self.bytes_size = len(payload.encode("UTF-8"))
 
 
-def _process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[LogProcessingJob]:
+def _prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[LogProcessingJob]:
     context = None
     try:
         context = LogsProcessingContext(
@@ -50,7 +50,7 @@ def _process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[Log
             message_publish_time=message.message.publish_time,
             sfm_queue=sfm_queue
         )
-        return _do_process_message(context, message.message)
+        return _process_message(context, message.message)
     except Exception as exception:
         if not context:
             context = LogsProcessingContext(None, None, sfm_queue)
@@ -67,7 +67,7 @@ def _process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[Log
         return None
 
 
-def _do_process_message(context: LogsProcessingContext, message: PubsubMessage) -> Optional[LogProcessingJob]:
+def _process_message(context: LogsProcessingContext, message: PubsubMessage) -> Optional[LogProcessingJob]:
     context.self_monitoring.processing_time_start = time.perf_counter()
     data = message.data.decode("UTF-8")
     # context.log(f"Data: {data}")

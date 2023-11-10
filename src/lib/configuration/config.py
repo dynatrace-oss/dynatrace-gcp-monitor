@@ -1,6 +1,19 @@
 import os
 
 
+def get_int_environment_value(key: str, default_value: int) -> int:
+    environment_value = os.environ.get(key, None)
+    return int(environment_value) if environment_value and environment_value.isdigit() else default_value
+
+
+def operation_mode():
+    return os.environ.get("OPERATION_MODE", None)
+
+
+def activation_config():
+    return os.environ.get("ACTIVATION_CONFIG", "")
+
+
 def self_monitoring_enabled():
     return os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
 
@@ -11,6 +24,10 @@ def print_metric_ingest_input():
 
 def scoping_project_support_enabled():
     return os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE").upper() in ["TRUE", "YES"]
+
+
+def query_interval_min():
+    return os.environ.get('QUERY_INTERVAL_MIN', None)
 
 
 def excluded_projects():
@@ -75,3 +92,31 @@ def gcp_allowed_metric_dimension_key_length():
 
 def gcp_allowed_metric_key_length():
     return os.environ.get("ALLOWED_METRIC_KEY_LENGTH", 250)
+
+
+def max_dimension_name_length():
+    return os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
+
+
+def max_dimension_value_length():
+    return os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
+
+
+def get_dynatrace_api_key_from_env():
+    return os.environ.get(dynatrace_access_key_secret_name(), None)
+
+
+def get_dynatrace_log_ingest_url_from_env():
+    return os.environ.get(dynatrace_log_ingest_url_secret_name(), None)
+
+
+def use_proxy():
+    return os.environ.get("USE_PROXY", "").upper()
+
+
+def require_valid_certificate():
+    return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
+
+
+def hostname():
+    return os.environ.get("HOSTNAME", "")

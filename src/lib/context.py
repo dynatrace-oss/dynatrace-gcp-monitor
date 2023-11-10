@@ -13,6 +13,7 @@
 #     limitations under the License.
 
 import os
+import time
 import traceback
 from datetime import datetime, timedelta
 from queue import Queue
@@ -20,6 +21,7 @@ from typing import Optional, Dict
 
 import aiohttp
 
+from lib.configuration import config
 from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_METRIC_MAP
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_MAP
@@ -39,18 +41,23 @@ class DynatraceConnectivity(enum.Enum):
     Other = 6
 
 
-def get_int_environment_value(key: str, default_value: int) -> int:
-    environment_value = os.environ.get(key, None)
-    return int(environment_value) if environment_value and environment_value.isdigit() else default_value
+def create_logs_context(sfm_queue: Queue):
+    dynatrace_api_key = config.get_dynatrace_api_key_from_env()
+    dynatrace_url = config.get_dynatrace_log_ingest_url_from_env()
+    project_id_owner = config.project_id()
 
-
-def get_should_require_valid_certificate() -> bool:
-    return os.environ.get("REQUIRE_VALID_CERTIFICATE", "TRUE").upper() in ["TRUE", "YES"]
+    return LogsContext(
+        project_id_owner=project_id_owner,
+        dynatrace_api_key=dynatrace_api_key,
+        dynatrace_url=dynatrace_url,
+        scheduled_execution_id=str(int(time.time()))[-8:],
+        sfm_queue=sfm_queue
+    )
 
 
 def get_query_interval_minutes() -> int:
     default_query_interval = 3
-    query_interval_env_var = os.environ.get('QUERY_INTERVAL_MIN', None)
+    query_interval_env_var = config.query_interval_min()
     if query_interval_env_var:
         query_interval_min = int(query_interval_env_var) if query_interval_env_var.isdigit() else default_query_interval
     else:
@@ -155,7 +162,7 @@ class ExecutionContext(LoggingContext):
         self.dynatrace_url = dynatrace_url
         self.function_name = os.environ.get("K_SERVICE", "Local")
         self.location = os.environ.get("FUNCTION_REGION", "us-east1")
-        self.require_valid_certificate = get_should_require_valid_certificate()
+        self.require_valid_certificate = config.require_valid_certificate()
 
 
 class LogsContext(ExecutionContext):
@@ -312,12 +319,11 @@ class MetricsContext(SfmContext):
         self.execution_interval = timedelta(seconds=execution_interval_seconds)
         self.print_metric_ingest_input = print_metric_ingest_input
         self.self_monitoring_enabled = self_monitoring_enabled
-        self.metric_ingest_batch_size = get_int_environment_value("METRIC_INGEST_BATCH_SIZE", 1000)
+        self.metric_ingest_batch_size = config.get_int_environment_value("METRIC_INGEST_BATCH_SIZE", 1000)
         self.use_x_goog_user_project_header = {project_id_owner: False}
 
         self.update_dt_connectivity_status(DynatraceConnectivity.Ok)
         self.start_processing_timestamp = 0
-
 
     def update_dt_connectivity_status(self, status: DynatraceConnectivity):
         self.sfm[SfmKeys.dynatrace_connectivity].update(status)

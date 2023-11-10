@@ -22,8 +22,9 @@ from typing import Dict, List
 import aiohttp
 
 from lib.clientsession_provider import init_gcp_client_session
+from lib.configuration import config
 from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity, LogsContext
-from lib.credentials import create_token, get_dynatrace_log_ingest_url_from_env
+from lib.credentials import create_token, get_dynatrace_log_ingest_url
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.log_forwarder_variables import LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID, \
     SFM_WORKER_EXECUTION_PERIOD_SECONDS, MAX_SFM_MESSAGES_PROCESSED
@@ -60,23 +61,20 @@ def put_sfm_into_queue(context: LogsContext):
             context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
 
-async def create_sfm_worker_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
-    loop = asyncio.get_event_loop()
-    sfm_tasks = set()
+def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
     while True:
         try:
-            await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
+            time.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
             self_monitoring = LogSelfMonitoring()
-            # Keeping task reference to prevent it from being garbage collected before it's done
-            # See https://docs.python.org/3/library/asyncio-task.html#creating-tasks
-            sfm_task = loop.create_task(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
-            sfm_tasks.add(sfm_task)
-            sfm_task.add_done_callback(sfm_tasks.discard)
+            asyncio.run(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
         except Exception:
-            logging_context.exception("Logs Self Monitoring Worker Loop Exception:")
+            logging_context.exception("Logs Self Monitoring Loop Exception:")
 
 
-async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Queue, context: LoggingContext, instance_metadata: InstanceMetadata):
+async def _loop_single_period(self_monitoring: LogSelfMonitoring,
+                              sfm_queue: Queue,
+                              context: LoggingContext,
+                              instance_metadata: InstanceMetadata):
     try:
         sfm_list = _pull_sfm(sfm_queue)
         if sfm_list:
@@ -100,8 +98,8 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring, sfm_queue: Que
 
 
 async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_session: aiohttp.ClientSession(), instance_metadata: InstanceMetadata):
-    dynatrace_url = get_dynatrace_log_ingest_url_from_env()
-    self_monitoring_enabled = os.environ.get('SELF_MONITORING_ENABLED', "FALSE").upper() in ["TRUE", "YES"]
+    dynatrace_url = get_dynatrace_log_ingest_url()
+    self_monitoring_enabled = config.self_monitoring_enabled()
     token = await create_token(context, gcp_session)
     container_name = instance_metadata.hostname if instance_metadata else "local deployment"
     zone = instance_metadata.zone if instance_metadata else "us-east1"
@@ -144,7 +142,7 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Number of sent logs entries: {self_monitoring.sent_logs_entries}")
 
 
-def create_time_serie(
+def create_time_series(
         context: LogsSfmContext,
         metric_type: str,
         metric_labels: Dict,
@@ -176,7 +174,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
     time_series = []
     if sfm.all_requests:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE,
                 {
@@ -191,7 +189,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
 
     if sfm.too_old_records:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE,
                 {
@@ -206,7 +204,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
 
     if sfm.parsing_errors:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE,
                 {
@@ -221,7 +219,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
 
     if sfm.records_with_too_long_content:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE,
                 {
@@ -236,7 +234,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
 
     if sfm.publish_time_fallback_records:
         time_series.append(
-            create_time_serie(
+            create_time_series(
                 context,
                 LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE,
                 {
@@ -249,7 +247,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                     "value": {"int64Value": sfm.publish_time_fallback_records}
                 }]))
 
-    time_series.append(create_time_serie(
+    time_series.append(create_time_series(
             context,
             LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE,
             {
@@ -263,7 +261,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             }],
             "DOUBLE"))
 
-    time_series.append(create_time_serie(
+    time_series.append(create_time_series(
             context,
             LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE,
             {
@@ -280,7 +278,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
     connectivity_counter = Counter(sfm.dynatrace_connectivity)
     for dynatrace_connectivity, counter in connectivity_counter.items():
         if dynatrace_connectivity.name != DynatraceConnectivity.Ok.name:
-            time_series.append(create_time_serie(
+            time_series.append(create_time_series(
                     context,
                     LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE,
                     {
@@ -295,7 +293,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                     }]))
 
     if sfm.log_ingest_payload_size:
-        time_series.append(create_time_serie(
+        time_series.append(create_time_series(
             context,
             LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE,
             {
@@ -311,7 +309,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
         ))
 
     if sfm.sent_logs_entries:
-        time_series.append(create_time_serie(
+        time_series.append(create_time_series(
             context,
             LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE,
             {
