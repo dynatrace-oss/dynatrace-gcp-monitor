@@ -160,7 +160,7 @@ jobs:
       - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
       - K8S_CLUSTER="e2e-test-master"
       - E2E=true
-      - CLOUD_FUNCTION_NAME="e2e_test_sample_app_${TRAVIS_BUILD_ID}"
+      - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
       - GCP_PROJECT_2_ID="dynatrace-gcp-extension-2"
       - CLOUD_RUN_REVISION_NAME="e2e-test-sample-service-00002-bif"
       - DYNATRACE_URL=${DYNATRACE_URL_E2E}
