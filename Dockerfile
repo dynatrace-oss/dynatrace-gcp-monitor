@@ -1,11 +1,12 @@
-FROM python:3.8-slim AS build
+FROM pypy:3.9-bookworm AS build
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential libffi-dev
 RUN pip install --upgrade pip
+RUN pip install --upgrade setuptools
 COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
 
 
-FROM python:3.8-slim
+FROM pypy:3.9-bookworm
 
 ARG RELEASE_TAG_ARG
 ENV RELEASE_TAG=$RELEASE_TAG_ARG
@@ -20,11 +21,13 @@ LABEL name="dynatrace-gcp-monitor" \
       description="Dynatrace function for Google Cloud Platform provides the mechanism to pull Google Cloud metrics and logs into Dynatrace."
 
 WORKDIR /code
-COPY --from=build /usr/local/lib/python3.8/site-packages /usr/local/lib/python3.8/site-packages
+
+COPY --from=build /opt/pypy/lib/pypy3.9/site-packages /opt/pypy/lib/pypy3.9/site-packages
+
 COPY src/ .
 COPY LICENSE.md /licenses/
 
 RUN adduser --disabled-password gcp-monitor && chown -R gcp-monitor /code
 USER gcp-monitor
 
-CMD [ "python", "-u", "./run_docker.py" ]
+CMD [ "pypy", "-u", "./run_docker.py" ]
