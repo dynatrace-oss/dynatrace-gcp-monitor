@@ -96,7 +96,7 @@ class AutodiscoveryContext:
     async def _check_resources_to_discover(
         self, services: List[GCPService]
     ) -> Dict[str, AutodiscoveryResourceLinking]:
-        resources = {}
+        resources: Dict[str, AutodiscoveryResourceLinking] = {}
 
         # Get resource to discover from enabled extensions
         for service in services:
@@ -119,6 +119,9 @@ class AutodiscoveryContext:
                         autodiscovery.disabled_services_for_resource.append(service)
 
                     resources[resource] = autodiscovery
+        
+        # Filter if there are any resouce linking for all resources
+        resources = {resource: linking for resource, linking in resources.items() if len(linking.possible_service_linking) > 0}
 
         # Get resources to discover from config
         config_resources = await self._get_resources_from_config()
