@@ -6,8 +6,7 @@ autodiscoveryResourcesYaml: |
   # resources from: https://cloud.google.com/monitoring/api/metrics_gcp
   autodicovery_config:
     searched_resources:
-    # Any resources to monitor (you can list them here)
-    # - memcache_node
+    # - resource_name
 
 # Metrics containing the following names will not be included
 # in autodiscovery process
