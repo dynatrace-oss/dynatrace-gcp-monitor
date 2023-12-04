@@ -175,7 +175,7 @@ def main():
         LogsFastCheck(logging_context, instance_metadata).execute()
         processes = []
 
-        for _ in range(10):  # Adjust the number of processes as needed
+        for _ in range(16):  # Adjust the number of processes as needed
             process = multiprocessing.Process(target=run_logs, args=(logging_context, instance_metadata,))
             processes.append(process)
             process.start()
