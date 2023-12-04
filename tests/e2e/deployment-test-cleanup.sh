@@ -17,9 +17,9 @@ source ./tests/e2e/lib-tests.sh
 
 helm -n dynatrace ls --all --short | grep dynatrace-gcp-monitor | xargs -L1 helm -n dynatrace uninstall --timeout 10m
 
-gcloud logging sinks delete "${LOG_ROUTER}"
-gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}"
-gcloud pubsub topics delete "${PUBSUB_TOPIC}"
+#gcloud logging sinks delete "${LOG_ROUTER}"
+#gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}"
+#gcloud pubsub topics delete "${PUBSUB_TOPIC}"
 gcloud iam service-accounts delete "${IAM_SERVICE_ACCOUNT}@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.logs" --project="${GCP_PROJECT_ID}" > /dev/null
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.metrics" --project="${GCP_PROJECT_ID}" > /dev/null
