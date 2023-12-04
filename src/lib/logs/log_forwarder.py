@@ -44,10 +44,12 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
     subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
 
     # Open worker threads to process logs from PubSub queue and ingest them into DT
-    for i in range(0, PROCESSING_WORKERS):
+    for i in range(0, 5):
         threading.Thread(target=pull_and_flush_logs_forever,
                          args=(f"Worker-{i}", sfm_queue, subscriber_client, subscription_path,),
                          name=f"worker-{i}").start()
+    # pull_and_flush_logs_forever(f'Worker-only', sfm_queue,subscriber_client,subscription_path )
+
 
     # Create loop with a timer to gather self monitoring metrics and send them to GCP (if enabled)
     create_sfm_loop(sfm_queue, logging_context, instance_metadata)
@@ -65,7 +67,9 @@ def pull_and_flush_logs_forever(worker_name: str,
     logging_context.log(f"Starting processing")
     while True:
         try:
+            start_time = time.perf_counter()
             perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request)
+            print(f"end_time: {time.perf_counter() - start_time}")
         except Exception as e:
             if isinstance(e, Forbidden):
                 logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.")
@@ -80,12 +84,15 @@ def perform_pull(worker_state: WorkerState,
                  subscriber_client: SubscriberClient,
                  subscription_path: str,
                  pull_request: PullRequest):
+    start_time=time.perf_counter()
     response: PullResponse = subscriber_client.pull(pull_request)
+    print(f'pulling time: {time.perf_counter()-start_time}')
 
     for received_message in response.received_messages:
-        # print(f"Received: {received_message.message.data}.")
+        worker_state.ack_ids.append(received_message.ack_id)
+        ## print(f"Received: {received_message.message.data}.")
         message_job = _prepare_context_and_process_message(sfm_queue, received_message)
-
+        #
         if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
             worker_state.ack_ids.append(received_message.ack_id)
             continue
@@ -94,11 +101,14 @@ def perform_pull(worker_state: WorkerState,
             perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
 
         worker_state.add_job(message_job, received_message.ack_id)
+    # uncomment when clearing up pub/sub is needed
 
+    # send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
+    # print(f"ack_time: {time.perf_counter()-start_time_ack_send}")
     # check if worker_state should flush because of time
     if worker_state.should_flush():
         perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
-
+#
 
 def perform_flush(worker_state: WorkerState,
                   sfm_queue: Queue,
@@ -136,10 +146,13 @@ def send_batched_ack(subscriber_client: SubscriberClient, subscription_path: str
     # request size limit is 524288, but we are not able to easily control size of created protobuf
     # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer
     # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
+    start_time_ack_send = time.perf_counter()
     chunk_size = 2048
     if len(ack_ids) < chunk_size:
         subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": ack_ids})
     else:
         for chunk in chunks(ack_ids, chunk_size):
             subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": chunk})
+
+    print(f"ack_time: {time.perf_counter()-start_time_ack_send}")
 

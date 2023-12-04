@@ -14,6 +14,7 @@
 import asyncio
 import platform
 import threading
+import multiprocessing
 import time
 from datetime import datetime
 from typing import Optional, List, NamedTuple
@@ -172,8 +173,15 @@ def main():
         asyncio.run(run_metrics_fetcher_forever())
     elif OPERATION_MODE == OperationMode.Logs:
         LogsFastCheck(logging_context, instance_metadata).execute()
-        run_logs(logging_context, instance_metadata)
+        processes = []
 
+        for _ in range(10):  # Adjust the number of processes as needed
+            process = multiprocessing.Process(target=run_logs, args=(logging_context, instance_metadata,))
+            processes.append(process)
+            process.start()
+
+        for process in processes:
+            process.join()
 
 if __name__ == '__main__':
     main()

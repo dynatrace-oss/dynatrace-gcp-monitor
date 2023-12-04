@@ -33,6 +33,8 @@ if not config.require_valid_certificate():
 
 def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
     # pylint: disable=R0912
+
+
     context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
     context.self_monitoring.sending_time_start = time.perf_counter()
     log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()
@@ -40,6 +42,7 @@ def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
     try:
         encoded_body_bytes = batch.encode("UTF-8")
         context.self_monitoring.all_requests += 1
+        start_time = time.perf_counter()
         status, reason, response = _perform_http_request(
             method="POST",
             url=log_ingest_url,
@@ -49,6 +52,7 @@ def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
                 "Content-Type": "application/json; charset=utf-8"
             }
         )
+        print(f"sending time (overall): {time.perf_counter() - start_time}")
         if status > 299:
             context.t_error(f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"')
             if status == 400:
@@ -75,6 +79,8 @@ def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
     finally:
         context.self_monitoring.calculate_sending_time()
         put_sfm_into_queue(context)
+
+
 
 
 def _perform_http_request(
