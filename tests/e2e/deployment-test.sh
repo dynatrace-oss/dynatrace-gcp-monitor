@@ -93,4 +93,7 @@ check_deployment_status || exit 1
 echo
 kubectl -n dynatrace get pods
 
+echo "waiting 300sec for policies to take effect before generating load on sample app"
+sleep 300
+
 generate_load_on_sample_app
