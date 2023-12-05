@@ -15,20 +15,93 @@
 import ssl
 import time
 import urllib
-from typing import List, Dict, Tuple
+from typing import List, Dict, NamedTuple, Tuple
 from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request
 
+from multiprocessing import Lock, Process, Queue,JoinableQueue, current_process
+
+
+
+from lib.logs.worker_state import WorkerState
 from lib.configuration import config
-from lib.context import DynatraceConnectivity, LogsContext
+from lib.context import DynatraceConnectivity, LogsContext, create_logs_context
 from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
 from lib.logs.logs_processor import LogProcessingJob
+from google.cloud.pubsub_v1 import SubscriberClient
+from google.cloud import pubsub
+
+from google.cloud.pubsub_v1 import SubscriberClient
+from google.pubsub_v1 import PullRequest, PullResponse
+
 
 ssl_context = ssl.create_default_context()
 if not config.require_valid_certificate():
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
+
+
+def send_batched_ack(subscriber_client: SubscriberClient, subscription_path: str, ack_ids: List[str]):
+    # request size limit is 524288, but we are not able to easily control size of created protobuf
+    # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer
+    # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
+    chunk_size = 2048
+    if len(ack_ids) < chunk_size:
+        subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": ack_ids})
+    else:
+        for chunk in chunks(ack_ids, chunk_size):
+            subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": chunk})
+
+
+
+
+FlushTask = NamedTuple('FlushTask', [('worker_state', WorkerState)])
+
+
+
+def perform_flush(worker_state: WorkerState,
+                  sfm_queue: Queue,
+                  subscriber_client: SubscriberClient,
+                  subscription_path: str):
+    context = create_logs_context(sfm_queue)
+
+    try:
+        if worker_state.jobs:
+            sent = False
+            display_payload_size = round((worker_state.finished_batch_bytes_size / 1024), 3)
+            try:
+                context.log(worker_state.worker_name, f'Log ingest payload size: {display_payload_size} kB')
+                send_logs(context, worker_state.jobs, worker_state.finished_batch)
+                context.log(worker_state.worker_name, "Log ingest payload pushed successfully")
+                sent = True
+            except Exception:
+                context.error()
+                context.exception(worker_state.worker_name, "Failed to ingest logs")
+            if sent:
+                context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
+                context.self_monitoring.log_ingest_payload_size += display_payload_size
+                send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
+        elif worker_state.ack_ids:
+            # Send ACKs if processing all messages has failed
+            send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
+    except Exception:
+        context.exception(worker_state.worker_name, "Failed to perform flush")
+
+
+def flush_worker(queue,sfm_queue,LOGS_SUBSCRIPTION_PROJECT,LOGS_SUBSCRIPTION_ID):
+
+    subscriber_client = pubsub.SubscriberClient()
+    subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
+
+
+
+    while True:
+        task = queue.get()
+
+        worker_state = task[0]
+
+        perform_flush(worker_state,sfm_queue,subscriber_client,subscription_path)
 
 
 def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
