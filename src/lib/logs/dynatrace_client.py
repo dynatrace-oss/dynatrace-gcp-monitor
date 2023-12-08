@@ -20,6 +20,8 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request
 
+import aiohttp
+
 from lib.configuration import config
 from lib.context import DynatraceConnectivity, LogsContext
 from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
@@ -31,8 +33,9 @@ if not config.require_valid_certificate():
     ssl_context.verify_mode = ssl.CERT_NONE
 
 
-def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
+async def send_logs(session: aiohttp.ClientSession(), context: LogsContext, logs: List[LogProcessingJob], batch: str):
     # pylint: disable=R0912
+    print(f"Sending logs. len(logs): {len(logs)}")
     context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
     context.self_monitoring.sending_time_start = time.perf_counter()
     log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()
@@ -40,7 +43,8 @@ def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
     try:
         encoded_body_bytes = batch.encode("UTF-8")
         context.self_monitoring.all_requests += 1
-        status, reason, response = _perform_http_request(
+        status, reason, response = await _perform_http_request(
+            session=session,
             method="POST",
             url=log_ingest_url,
             encoded_body_bytes=encoded_body_bytes,
@@ -77,23 +81,8 @@ def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
         put_sfm_into_queue(context)
 
 
-def _perform_http_request(
-        method: str,
-        url: str,
-        encoded_body_bytes: bytes,
-        headers: Dict
-) -> Tuple[int, str, str]:
-    request = Request(
-        url,
-        encoded_body_bytes,
-        headers,
-        method=method
-    )
-    try:
-        response = urllib.request.urlopen(url=request,
-                                          context=ssl_context,
-                                          timeout=config.get_int_environment_value("DYNATRACE_TIMEOUT_SECONDS", 30))
-        return response.code, response.reason, response.read().decode("utf-8")
-    except HTTPError as e:
-        response_body = e.read().decode("utf-8")
-        return e.code, e.reason, response_body
+async def _perform_http_request(session, method, url, encoded_body_bytes, headers) -> Tuple[int, str, str]:
+    timeout = aiohttp.ClientTimeout(total=60)
+    async with session.request(method, url, headers=headers, data=encoded_body_bytes, ssl=ssl_context, timeout=timeout) as response:
+        response_text = await response.text()
+        return response.status, response.reason, response_text

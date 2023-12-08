@@ -171,7 +171,7 @@ def main():
     if OPERATION_MODE == OperationMode.Metrics:
         asyncio.run(run_metrics_fetcher_forever())
     elif OPERATION_MODE == OperationMode.Logs:
-        LogsFastCheck(logging_context, instance_metadata).execute()
+        asyncio.run(LogsFastCheck(logging_context, instance_metadata).execute())
         run_logs(logging_context, instance_metadata)
 
 

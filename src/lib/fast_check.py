@@ -19,6 +19,7 @@ from datetime import datetime
 from queue import Queue
 from typing import NamedTuple, List, Optional
 
+import aiohttp
 from aiohttp import ClientSession
 
 from lib.configuration import config
@@ -150,7 +151,7 @@ class LogsFastCheck:
         self.instance_metadata = instance_metadata
         self.logging_context = logging_context
 
-    def execute(self):
+    async def execute(self):
         _print_configuration_flags(self.logging_context, LOGS_CONFIGURATION_FLAGS)
         check_version(self.logging_context)
         self.logging_context.log("Sending the startup message")
@@ -161,7 +162,8 @@ class LogsFastCheck:
             'content': f'GCP Log Forwarder has started at {container_name}',
             'severity': 'INFO'
         }
-        send_logs(create_logs_context(Queue()), [], json.dumps([fast_check_event]))
+        async with aiohttp.ClientSession() as session:
+            await send_logs(session, create_logs_context(Queue()), [], json.dumps([fast_check_event]))
 
 
 def _print_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):
