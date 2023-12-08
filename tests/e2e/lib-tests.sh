@@ -20,7 +20,7 @@ TEST_JQ=ext_tools/jq_linux_x64
 create_sample_app() {
   echo "Deploying sample app"
   gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
-  --runtime python37 \
+  --runtime python38 \
   --trigger-http \
   --source ./tests/e2e/sample_app/ > /dev/null 2>&1
 }
