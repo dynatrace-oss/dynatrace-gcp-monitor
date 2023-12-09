@@ -35,7 +35,7 @@ if not config.require_valid_certificate():
 
 async def send_logs(session: aiohttp.ClientSession(), context: LogsContext, logs: List[LogProcessingJob], batch: str):
     # pylint: disable=R0912
-    print(f"Sending logs. len(logs): {len(logs)}")
+    #print(f"Sending logs. len(logs): {len(logs)}")
     context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
     context.self_monitoring.sending_time_start = time.perf_counter()
     log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()

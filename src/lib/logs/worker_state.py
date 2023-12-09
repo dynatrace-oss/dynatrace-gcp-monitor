@@ -94,10 +94,10 @@ class BatchManager:
 
     def get_ready_batches(self):
         ready_batches = []
-        while self.batch_queue.qsize() > 1:
+        while self.batch_queue.qsize() > 0:
             ready_batches.append(self.batch_queue.get())
-        if self.batch_queue.qsize() == 1 and self.batch_queue.queue[0].should_flush():
-            ready_batches.append(self.batch_queue.get())
+        #if self.batch_queue.qsize() == 1 and self.batch_queue.queue[0].should_flush():
+        #    ready_batches.append(self.batch_queue.get())
         return ready_batches
 
     def should_send(self):
