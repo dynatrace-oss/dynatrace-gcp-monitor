@@ -101,6 +101,8 @@ class BatchManager:
         return ready_batches
 
     def should_send(self):
-        if self.batch_queue.qsize() > 4:
+        if self.batch_queue.qsize() > 1:
+            return True
+        if self.batch_queue.qsize() == 1 and self.batch_queue.queue[0].should_flush():
             return True
         return False

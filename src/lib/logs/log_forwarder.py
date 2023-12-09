@@ -53,10 +53,10 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
     #                     name=f"worker-{i}").start()
 
     # Open pulling thread
-    threading.Thread(target=pull_forever, name="Puller").start()
+    threading.Thread(target=pull_forever, name=f"Puller").start()
 
     # Open pushing thread
-    #threading.Thread(target=push_forever, name="Pusher").start()
+    threading.Thread(target=push_forever, name="Pusher").start()
 
     # Create loop with a timer to gather self monitoring metrics and send them to GCP (if enabled)
     create_sfm_loop(sfm_queue, logging_context, instance_metadata)
@@ -72,7 +72,7 @@ def pull_forever():
     while True:
         try:
             response: PullResponse = subscriber_client.pull(pull_request)
-            print(f"Received messages: {len(response.received_messages)}")
+            #print(f"Received messages: {len(response.received_messages)}")
 
             for received_message in response.received_messages:
                 message_job = _prepare_context_and_process_message(sfm_queue, received_message)
@@ -81,8 +81,7 @@ def pull_forever():
                 else:
                     batch_manager.add_job(message_job, received_message.ack_id)
 
-            if batch_manager.should_send():
-                asyncio.run(push_asynchronously())
+            logging_context.log(f"batch_queue.qsize(): {batch_manager.batch_queue.qsize()}")
 
         except Exception as e:
             if isinstance(e, Forbidden):
@@ -99,16 +98,18 @@ def push_forever():
     logging_context.log(f"Starting pushing")
     while True:
         try:
-            #logging_context.log(f"Pusher sleep 1s")
-            #time.sleep(1)
-            asyncio.run(push_asynchronously())
+            if not batch_manager.should_send():
+                logging_context.log(f"Pusher sleep 3s")
+                time.sleep(3)
+            else:
+                asyncio.run(push_asynchronously())
         except Exception:
             logging_context.exception("Failed to push messages")
 
 
 async def push_asynchronously():
     context = create_logs_context(sfm_queue)
-    semaphore = asyncio.Semaphore(5)
+    semaphore = asyncio.Semaphore(3)
     async with aiohttp.ClientSession() as session:  # Create the session once
         async def process_batch(batch: LogsBatch):
             async with semaphore:
@@ -133,7 +134,7 @@ async def push_asynchronously():
                 except Exception:
                     context.exception("Batch", "Failed to process batch")
 
-        print(f"batch_queue.qsize(): {batch_manager.batch_queue.qsize()}")
+        #print(f"batch_queue.qsize(): {batch_manager.batch_queue.qsize()}")
         await asyncio.gather(*[process_batch(batch) for batch in batch_manager.get_ready_batches()])
 
 
