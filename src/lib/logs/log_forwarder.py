@@ -46,8 +46,9 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
         raise Exception(
             "Cannot start pubsub streaming pull - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
 
-    # Open pulling thread
-    threading.Thread(target=pull_forever, name=f"Puller").start()
+    # Open pulling threads
+    for i in range(0, PROCESSING_WORKERS):
+        threading.Thread(target=pull_forever, name=f"Puller").start()
 
     # Open pushing thread
     threading.Thread(target=push_forever, name="Pusher").start()
@@ -71,7 +72,7 @@ def pull_forever():
             for received_message in response.received_messages:
                 message_job = _prepare_context_and_process_message(sfm_queue, received_message)
                 if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
-                    batch_manager.add_ids(received_message.ack_id)
+                    batch_manager.add_id(received_message.ack_id)
                 else:
                     batch_manager.add_job(message_job, received_message.ack_id)
 
@@ -92,10 +93,6 @@ def push_forever():
     logging_context.log(f"Starting pushing")
     while True:
         try:
-            #if not batch_manager.should_send():
-            #    logging_context.log(f"Pusher sleep 3s")
-            #    time.sleep(3)
-            #else:
             asyncio.run(push_asynchronously())
         except Exception:
             logging_context.exception("Failed to push messages")
@@ -103,6 +100,7 @@ def push_forever():
 
 async def push_asynchronously():
     context = create_logs_context(sfm_queue)
+    #context.exception("Pusher", "Pushing asynchronously")
     semaphore = asyncio.Semaphore(CONCURRENT_REQUESTS)
     async with aiohttp.ClientSession() as session:  # Create the session once
         async def process_batch(batch: LogsBatch):

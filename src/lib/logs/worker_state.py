@@ -13,6 +13,7 @@
 #     limitations under the License.
 import queue
 import time
+from threading import Lock
 from typing import List, Optional
 
 from lib.logs.log_forwarder_variables import REQUEST_MAX_EVENTS, REQUEST_BODY_MAX_SIZE, \
@@ -71,38 +72,37 @@ class LogsBatch:
 
 class BatchManager:
     batch_queue: queue.Queue
+    lock: Lock
 
     def __init__(self, ):
         self.batch_queue = queue.Queue()
+        self.lock = Lock()
 
     def add_id(self, ack_id):
-        if self.batch_queue.qsize() == 0:
-            self.batch_queue.put(LogsBatch())
-        current_batch = self.batch_queue.queue[self.batch_queue.qsize() - 1]
-        current_batch.ack_ids.append(ack_id)
+        with self.lock:
+            if self.batch_queue.qsize() == 0:
+                self.batch_queue.put(LogsBatch())
+            current_batch = self.batch_queue.queue[self.batch_queue.qsize() - 1]
+            current_batch.ack_ids.append(ack_id)
         return
 
     def add_job(self, message_job, ack_id):
-        if self.batch_queue.qsize() == 0:
-            self.batch_queue.put(LogsBatch())
-        current_batch = self.batch_queue.queue[self.batch_queue.qsize() - 1]
-        if current_batch.should_flush(message_job):
-            current_batch = LogsBatch()
-            self.batch_queue.put(current_batch)
-        current_batch.add_job(message_job, ack_id)
+        with self.lock:
+            if self.batch_queue.qsize() == 0:
+                self.batch_queue.put(LogsBatch())
+            current_batch = self.batch_queue.queue[self.batch_queue.qsize() - 1]
+            if current_batch.should_flush(message_job):
+                current_batch = LogsBatch()
+                self.batch_queue.put(current_batch)
+            current_batch.add_job(message_job, ack_id)
         return
 
     def get_ready_batches(self):
-        ready_batches = []
-        while self.batch_queue.qsize() > 0:
-            ready_batches.append(self.batch_queue.get())
-        #if self.batch_queue.qsize() == 1 and self.batch_queue.queue[0].should_flush():
-        #    ready_batches.append(self.batch_queue.get())
+        with self.lock:
+            ready_batches = []
+            while self.batch_queue.qsize() > 0:
+                ready_batches.append(self.batch_queue.get())
+            #if self.batch_queue.qsize() == 1 and self.batch_queue.queue[0].should_flush():
+            #    ready_batches.append(self.batch_queue.get())
         return ready_batches
 
-    def should_send(self):
-        if self.batch_queue.qsize() > 1:
-            return True
-        if self.batch_queue.qsize() == 1 and self.batch_queue.queue[0].should_flush():
-            return True
-        return False
