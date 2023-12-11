@@ -48,7 +48,7 @@ class LogsBatch:
 
     def should_flush(self, next_log_processing_job: Optional[LogProcessingJob] = None) -> bool:
         """
-        Check if worker state should be flushed before calling #add_job on this WorkerState instance
+        Check if worker state should be flushed before calling #add_job on this LogsBatch instance
         :param next_log_processing_job: next log message to process
         :return: bool value indicating if state should be flushed
         """

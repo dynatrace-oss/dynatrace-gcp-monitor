@@ -21,7 +21,7 @@ from lib.logs.log_forwarder_variables import SENDING_WORKER_EXECUTION_PERIOD_SEC
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 from lib.logs.logs_processor import LogProcessingJob
 from lib.logs.metadata_engine import ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CONTENT, ATTRIBUTE_SEVERITY
-from lib.logs.worker_state import WorkerState
+from lib.logs.worker_state import LogsBatch
 
 log_message = "WALTHAM, Mass.--(BUSINESS WIRE)-- Software intelligence company Dynatrace (NYSE: DT) announced today its entry into the cloud application security market with the addition of a new module to its industry-leading Software Intelligence Platform. The Dynatrace® Application Security Module provides continuous runtime application self-protection (RASP) capabilities for applications in production as well as preproduction and is optimized for Kubernetes architectures and DevSecOps approaches. This module inherits the automation, AI, scalability, and enterprise-grade robustness of the Dynatrace® Software Intelligence Platform and extends it to modern cloud RASP use cases. Dynatrace customers can launch this module with the flip of a switch, empowering the world’s leading organizations currently using the Dynatrace platform to immediately increase security coverage and precision.;"
 
@@ -48,7 +48,7 @@ def test_should_flush_on_batch_exceeding_request_size(monkeypatch: MonkeyPatchFi
 
     monkeypatch.setattr(worker_state, 'REQUEST_BODY_MAX_SIZE', limit)
 
-    test_state = WorkerState("TEST")
+    test_state = LogsBatch("TEST")
     for log in logs:
         assert not test_state.should_flush(log)
         test_state.add_job(log, "")
@@ -62,7 +62,7 @@ def test_should_flush_on_too_many_events(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setattr(worker_state, 'REQUEST_MAX_EVENTS', max_events)
 
     logs = [create_log_entry_with_random_len_msg() for x in range(max_events)]
-    test_state = WorkerState("TEST")
+    test_state = LogsBatch("TEST")
 
     for log in logs:
         assert not test_state.should_flush(log)
@@ -73,7 +73,7 @@ def test_should_flush_on_too_many_events(monkeypatch: MonkeyPatchFixture):
 
 
 def test_should_flush_on_time_passed(monkeypatch: MonkeyPatchFixture):
-    test_state = WorkerState("TEST")
+    test_state = LogsBatch("TEST")
     test_state.last_flush_time -= (2 * SENDING_WORKER_EXECUTION_PERIOD_SECONDS)
 
     assert test_state.should_flush(create_log_entry_with_random_len_msg())
