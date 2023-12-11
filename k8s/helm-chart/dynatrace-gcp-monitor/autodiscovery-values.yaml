@@ -1,5 +1,9 @@
 # Metrics autodiscovery polling interval in minutes.
 autodiscoveryQueryInterval: 60
+# Enable automatic discovery of experimental alpha GCP metrics if set to true.
+autodiscoveryIncludeAlphaMetrics: true
+# When true, appends the label "[Autodiscovered]" to metric names during automatic discovery.
+autodiscoveryAddLabels: true
 # This list comprises resources that will be scanned within GCP 
 # projects for the purpose of metrics autodiscovery.
 autodiscoveryResourcesYaml: |

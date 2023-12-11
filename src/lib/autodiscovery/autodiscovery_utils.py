@@ -94,8 +94,9 @@ def should_include_metric(
     metric_descriptor: GCPMetricDescriptor,
     resources_to_autodiscover: Set[str],
     autodiscovery_metric_block_list: List[str],
+    include_alpha_metrics: bool
 ) -> bool:
-    return (
+    should_include = (
         metric_descriptor.gcpOptions.valueType.upper() != "STRING"
         and metric_descriptor.launch_stage != "DEPRECATED"
         and len(metric_descriptor.monitored_resources_types) == 1
@@ -107,6 +108,12 @@ def should_include_metric(
             }
         )
     )
+
+
+    if not include_alpha_metrics:
+        should_include = should_include and metric_descriptor.launch_stage != "ALPHA"
+
+    return should_include 
 
 
 async def run_fetch_metric_descriptors(
@@ -121,6 +128,8 @@ async def run_fetch_metric_descriptors(
     params = {}
 
     project_discovered_metrics = []
+    include_alpha_metrics = config.gcp_autodiscovery_include_alpha_metrics()
+
     while True:
         response = await gcp_session.request("GET", url=url, headers=headers, params=params)
         response.raise_for_status()
@@ -130,7 +139,7 @@ async def run_fetch_metric_descriptors(
             try:
                 metric_descriptor = GCPMetricDescriptor.create(**descriptor, project_id=project_id)
                 if should_include_metric(
-                    metric_descriptor, resources_to_autodiscover, autodiscovery_metric_block_list
+                    metric_descriptor, resources_to_autodiscover, autodiscovery_metric_block_list, include_alpha_metrics
                 ):
                     project_discovered_metrics.append(metric_descriptor)
             except Exception as error:
@@ -154,6 +163,7 @@ async def send_metric_metadata(
     previously_discovered_metrics: Dict[str, Any],
 ) -> Dict[str, Any]:
     metrics_metadata = []
+    add_autodiscovery_label = config.gcp_autodiscovery_add_label()
     for _, metrics_list in metrics.items():
         for metric in metrics_list:
             if metric.dynatrace_name not in previously_discovered_metrics:
@@ -164,6 +174,7 @@ async def send_metric_metadata(
                         metric_display_name=metric.name,
                         metric_description=metric.description,
                         metric_unit=metric.unit,
+                        add_autodiscovery_label=add_autodiscovery_label
                     )
                 )
                 previously_discovered_metrics[metric.dynatrace_name] = None

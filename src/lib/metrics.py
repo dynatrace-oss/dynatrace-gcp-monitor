@@ -77,6 +77,7 @@ class MetadataIngestLine(IngestLine):
     meta_metric_unit: str
 
     def __init__(self, **kwargs):
+        name_to_display = kwargs.get('metric_display_name', '') if len(kwargs.get("metric_display_name", "")) > 0 else kwargs.get('metric_name', '')
         object.__setattr__(self, "metric_name", kwargs.get("metric_name", ""))
         object.__setattr__(
             self,
@@ -86,9 +87,9 @@ class MetadataIngestLine(IngestLine):
         object.__setattr__(
             self,
             "meta_metric_display_name",
-            f"[Autodiscovered] {kwargs.get('metric_display_name', '')}"
-            if len(kwargs.get("metric_display_name", "")) > 0
-            else f"[Autodiscovered] {kwargs.get('metric_name', '')}",
+            f"[Autodiscovered] {name_to_display}"
+            if kwargs.get('add_autodiscovery_label', True)
+            else name_to_display,
         )
         object.__setattr__(self, "meta_metric_description", kwargs.get("metric_description", ""))
         object.__setattr__(self, "meta_metric_unit", kwargs.get("metric_unit", ""))

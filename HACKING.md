@@ -53,6 +53,8 @@ Worker function execution can be tweaked with environment variables. In Google F
 | QUERY_INTERVAL_MIN | Metrics polling interval in minutes. Allowed values: 1 - 6 | 3 |
 | METRIC_AUTODISCOVERY | boolean value, if true will enable metrics autodiscovery. Allowed values: `true`/`yes`, `false`/`no` | `false` |
 | AUTODISCOVERY_QUERY_INTERVAL | Autodiscovery pooling interval in minutes | 60 |
+| AUTODISCOVERY_INCLUDE_ALPHA_METRICS | boolean value, if true autodiscovery will include metrics with ALPHA status from GoogleAPI  | `true` |
+| AUTODISCOVERY_ADD_LABEL | boolean value, if true label `[Autodiscovered]` will be added to metrics | `true` |
 | ACTIVATION_CONFIG | Dimension filtering config (see `gcpServicesYaml` property in [values.yaml](https://github.com/dynatrace-oss/dynatrace-gcp-monitor/blob/master/k8s/helm-chart/dynatrace-gcp-monitor/values.yaml) file) minified to single line json |  |
 
 ### Log processing configuration variables

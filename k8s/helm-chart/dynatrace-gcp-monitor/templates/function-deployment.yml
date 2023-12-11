@@ -144,6 +144,16 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: AUTODISCOVERY_QUERY_INTERVAL
+        - name: AUTODISCOVERY_INCLUDE_ALPHA_METRICS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: AUTODISCOVERY_INCLUDE_ALPHA_METRICS
+        - name: AUTODISCOVERY_ADD_LABEL
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: AUTODISCOVERY_ADD_LABEL
         {{- end }}
         - name: HEALTH_CHECK_PORT
           value: "8080"

@@ -38,6 +38,8 @@ data:
   METRIC_AUTODISCOVERY: {{ .Values.metricAutodiscovery | quote }}
   {{- if eq (lower .Values.metricAutodiscovery) "true" }}
   AUTODISCOVERY_QUERY_INTERVAL: {{ .Values.autodiscoveryQueryInterval | quote }}
+  AUTODISCOVERY_INCLUDE_ALPHA_METRICS: {{ .Values.autodiscoveryIncludeAlphaMetrics | quote }}
+  AUTODISCOVERY_ADD_LABEL: {{ .Values.autodiscoveryAddLabels | quote }}
   AUTODISCOVERY_RESOURCES_YAML: {{ .Values.autodiscoveryResourcesYaml | quote }}
   AUTODISCOVERY_METRIC_BLOCK_LIST_YAML: {{ .Values.autodiscoveryBlockListYaml | quote }}
   {{- end }}

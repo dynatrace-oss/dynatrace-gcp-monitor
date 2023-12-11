@@ -112,6 +112,11 @@ def gcp_allowed_metric_unit_name():
 def get_autodiscovery_querry_interval():
     return get_int_environment_value("AUTODISCOVERY_QUERY_INTERVAL", 60)
 
+def gcp_autodiscovery_include_alpha_metrics():
+    return os.environ.get("AUTODISCOVERY_INCLUDE_ALPHA_METRICS", "TRUE").upper() in ["TRUE", "YES","Y"]
+
+def gcp_autodiscovery_add_label():
+    return os.environ.get("AUTODISCOVERY_ADD_LABEL", "TRUE").upper() in ["TRUE", "YES","Y"]
 
 def max_dimension_name_length():
     return get_int_environment_value("MAX_DIMENSION_NAME_LENGTH", 100)
