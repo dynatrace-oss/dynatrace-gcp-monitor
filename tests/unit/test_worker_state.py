@@ -48,7 +48,7 @@ def test_should_flush_on_batch_exceeding_request_size(monkeypatch: MonkeyPatchFi
 
     monkeypatch.setattr(worker_state, 'REQUEST_BODY_MAX_SIZE', limit)
 
-    test_state = LogsBatch("TEST")
+    test_state = LogsBatch()
     for log in logs:
         assert not test_state.should_flush(log)
         test_state.add_job(log, "")
@@ -62,7 +62,7 @@ def test_should_flush_on_too_many_events(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setattr(worker_state, 'REQUEST_MAX_EVENTS', max_events)
 
     logs = [create_log_entry_with_random_len_msg() for x in range(max_events)]
-    test_state = LogsBatch("TEST")
+    test_state = LogsBatch()
 
     for log in logs:
         assert not test_state.should_flush(log)
@@ -73,7 +73,7 @@ def test_should_flush_on_too_many_events(monkeypatch: MonkeyPatchFixture):
 
 
 def test_should_flush_on_time_passed(monkeypatch: MonkeyPatchFixture):
-    test_state = LogsBatch("TEST")
+    test_state = LogsBatch()
     test_state.last_flush_time -= (2 * SENDING_WORKER_EXECUTION_PERIOD_SECONDS)
 
     assert test_state.should_flush(create_log_entry_with_random_len_msg())
