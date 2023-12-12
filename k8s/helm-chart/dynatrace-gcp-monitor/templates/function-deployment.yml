@@ -230,6 +230,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: CONCURRENT_REQUESTS
+        - name: SENDER_THREAD_SLEEP_SECONDS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: SENDER_THREAD_SLEEP_SECONDS
         - name: PARALLEL_PROCESSES
           valueFrom:
             configMapKeyRef:

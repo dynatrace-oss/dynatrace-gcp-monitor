@@ -50,8 +50,8 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
     for i in range(0, PROCESSING_WORKERS):
         threading.Thread(target=pull_forever, name=f"Puller").start()
 
-    # Open pushing thread
-    threading.Thread(target=push_forever, name="Pusher").start()
+    # Open sender thread
+    threading.Thread(target=push_forever, name="Sender").start()
 
     # Create loop with a timer to gather self monitoring metrics and send them to GCP (if enabled)
     create_sfm_loop(sfm_queue, logging_context, instance_metadata)
@@ -67,7 +67,7 @@ def pull_forever():
     while True:
         try:
             response: PullResponse = subscriber_client.pull(pull_request)
-            print(f"Received messages: {len(response.received_messages)}")
+            logging_context.log(f"Received messages: {len(response.received_messages)}")
 
             for received_message in response.received_messages:
                 message_job = _prepare_context_and_process_message(sfm_queue, received_message)
@@ -89,10 +89,11 @@ def pull_forever():
 
 
 def push_forever():
-    logging_context = LoggingContext("Pusher")
+    logging_context = LoggingContext("Sender")
     logging_context.log(f"Starting pushing")
     while True:
         try:
+            time.sleep(1)
             asyncio.run(push_asynchronously())
         except Exception:
             logging_context.exception("Failed to push messages")
@@ -110,12 +111,12 @@ async def push_asynchronously():
                         sent = False
                         display_payload_size = round((batch.finished_batch_bytes_size / 1024), 3)
                         try:
-                            context.log("Batch", f'Log ingest payload size: {display_payload_size} kB')
+                            context.log("Sender", f'Log ingest payload size: {display_payload_size} kB')
                             await send_logs(session, context, batch.jobs, batch.finished_batch)
-                            context.log("Batch", "Log ingest payload pushed successfully")
+                            context.log("Sender", "Log ingest payload pushed successfully")
                             sent = True
                         except Exception:
-                            context.exception("Batch", "Failed to ingest logs")
+                            context.exception("Sender", "Failed to ingest logs")
                         if sent:
                             context.self_monitoring.sent_logs_entries += len(batch.jobs)
                             context.self_monitoring.log_ingest_payload_size += display_payload_size
@@ -124,7 +125,7 @@ async def push_asynchronously():
                         # Send ACKs from too big messages, if any
                         send_ack_ids(batch.ack_ids)
                 except Exception:
-                    context.exception("Batch", "Failed to process batch")
+                    context.exception("Sender", "Failed to process batch")
 
         #print(f"batch_queue.qsize(): {batch_manager.batch_queue.qsize()}")
         start_time = time.perf_counter()

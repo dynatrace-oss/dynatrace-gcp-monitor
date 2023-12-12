@@ -46,6 +46,7 @@ data:
   DYNATRACE_TIMEOUT_SECONDS: {{ .Values.logIngestEventMaxAgeSeconds | quote }}
   PROCESSING_WORKERS: {{ .Values.processingWorkers | quote }}
   CONCURRENT_REQUESTS: {{ .Values.concurrentRequests | quote }}
+  SENDER_THREAD_SLEEP_SECONDS: {{ .Values.senderThreadSleepSeconds | quote }}
   PARALLEL_PROCESSES: {{ .Values.parallelProcesses | quote }}
   PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES: {{ .Values.processingWorkerPullRequestMaxMessages | quote }}
   CLOUD_LOG_FORWARDER: projects/{{ .Values.gcpProjectId }}/clusters/{{ .Values.clusterName }}/namespaces/{{ .Release.Namespace }}
