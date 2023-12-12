@@ -323,10 +323,10 @@ fi
 debug "Creating dynatrace namespace into kubernetes cluster"
 info ""
 info "- 1. Create $KUBERNETES_NAMESPACE namespace in k8s cluster."
-if [[ $(kubectl get namespace $KUBERNETES_NAMESPACE --ignore-not-found) ]]; then
+if [[ $(kubectl get namespace "${KUBERNETES_NAMESPACE}" --ignore-not-found) ]]; then
   info "namespace $KUBERNETES_NAMESPACE already exists"
 else
-  kubectl create namespace $KUBERNETES_NAMESPACE | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+  kubectl create namespace "${KUBERNETES_NAMESPACE}" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 fi
 
 debug "Creating GCP Service Account for kubernetes"

@@ -100,7 +100,7 @@ def push_forever():
 
 async def push_asynchronously():
     context = create_logs_context(sfm_queue)
-    #context.exception("Pusher", "Pushing asynchronously")
+    #context.log("Pusher", "Pushing asynchronously")
     semaphore = asyncio.Semaphore(CONCURRENT_REQUESTS)
     async with aiohttp.ClientSession() as session:  # Create the session once
         async def process_batch(batch: LogsBatch):
