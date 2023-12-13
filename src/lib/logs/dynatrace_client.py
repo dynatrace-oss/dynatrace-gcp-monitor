@@ -31,7 +31,7 @@ from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monit
 from lib.logs.logs_processor import LogProcessingJob
 from google.cloud.pubsub_v1 import SubscriberClient
 from google.cloud import pubsub
-
+from lib.utilities import chunks
 from google.cloud.pubsub_v1 import SubscriberClient
 from google.pubsub_v1 import PullRequest, PullResponse
 
@@ -96,12 +96,24 @@ def flush_worker(queue,sfm_queue,LOGS_SUBSCRIPTION_PROJECT,LOGS_SUBSCRIPTION_ID)
 
 
 
+    task_counter = 0
+
+    batcher=[]
+
     while True:
         task = queue.get()
 
+        task_counter+=1
         worker_state = task[0]
+        batcher.append(worker_state)
 
-        perform_flush(worker_state,sfm_queue,subscriber_client,subscription_path)
+        if task_counter >=3:
+            main_worker = batcher[0]
+            for i in range(1,3):
+                main_worker.merge_worker(batcher[i])
+            perform_flush(main_worker,sfm_queue,subscriber_client,subscription_path)
+            task_counter = 0
+            batcher = []
 
 
 def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):

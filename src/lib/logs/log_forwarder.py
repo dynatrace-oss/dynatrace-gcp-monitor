@@ -12,18 +12,19 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+import copy
 import threading
 import time
 #from queue import Queue
 from typing import List
 import sys
-import copy
 
 from google.api_core.exceptions import Forbidden
 from google.cloud import pubsub
 from google.cloud.pubsub_v1 import SubscriberClient
 from google.pubsub_v1 import PullRequest, PullResponse
-from multiprocessing import Lock, Process, Queue,JoinableQueue, current_process
+#from multiprocessing import Lock, Process, Queue,JoinableQueue, current_process
+from queue import Queue
 import time
 #import queue # imported for using queue.Empty exception
 
@@ -44,24 +45,23 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
         raise Exception(
             "Cannot start pubsub streaming pull - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
 
-    sfm_queue = JoinableQueue(MAX_SFM_MESSAGES_PROCESSED)
+    sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
     send_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
 
 
-    subscriber_client = pubsub.SubscriberClient()
 
 
     subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
 
     for i in range(0, PROCESSING_WORKERS):
-        p = Process(target=flush_worker, args=(send_queue,sfm_queue,LOGS_SUBSCRIPTION_PROJECT,LOGS_SUBSCRIPTION_ID))
+        p = threading.Thread(target=flush_worker, args=(send_queue,sfm_queue,LOGS_SUBSCRIPTION_PROJECT,LOGS_SUBSCRIPTION_ID))
         p.start()
 
 
     processes = []
     # Open worker threads to process logs from PubSub queue and ingest them into DT
     for i in range(0, PROCESSING_WORKERS):
-        p = Process(target=pull_and_flush_logs_forever, args=(f"Worker-{i}",sfm_queue, send_queue, subscriber_client,subscription_path,))
+        p = threading.Thread(target=pull_and_flush_logs_forever, args=(f"Worker-{i}",sfm_queue, send_queue, subscriber_client,subscription_path,))
         processes.append(p)
         p.start()
         
@@ -131,6 +131,7 @@ def prepare_flush(worker_state: WorkerState,
     context = create_logs_context(sfm_queue)
 
     if send_queue.qsize() >= 50:
+        print("Queue is Full!")
         # Too many tasks in queue
         # Perform it using main process to slow down. 
         

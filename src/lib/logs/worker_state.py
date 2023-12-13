@@ -47,6 +47,13 @@ class WorkerState:
         self.batch_bytes_size += log_processing_job.bytes_size
         self.jobs.append(log_processing_job)
 
+    def merge_worker(self,worker):
+        self.ack_ids.extend(worker.ack_ids)
+        self.jobs.extend(worker.jobs)
+        self.batch += ", " + worker.batch[1:]
+        self.batch_bytes_size += worker.batch_bytes_size
+
+
     def should_flush(self, next_log_processing_job: Optional[LogProcessingJob] = None) -> bool:
         """
         Check if worker state should be flushed before calling #add_job on this WorkerState instance
