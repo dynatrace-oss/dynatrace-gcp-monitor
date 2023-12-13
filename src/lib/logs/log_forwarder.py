@@ -19,7 +19,6 @@ from typing import List
 
 import aiohttp
 from google.api_core.exceptions import Forbidden
-from google.cloud import pubsub
 from google.cloud.pubsub_v1 import SubscriberClient
 from google.pubsub_v1 import PullRequest, PullResponse
 
@@ -28,15 +27,16 @@ from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder_variables import MAX_SFM_MESSAGES_PROCESSED, LOGS_SUBSCRIPTION_PROJECT, \
     LOGS_SUBSCRIPTION_ID, \
-    PROCESSING_WORKERS, PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES, REQUEST_BODY_MAX_SIZE, CONCURRENT_REQUESTS
+    PROCESSING_WORKERS, PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES, REQUEST_BODY_MAX_SIZE, CONCURRENT_REQUESTS, \
+    SENDER_THREAD_SLEEP_SECONDS
 from lib.logs.log_self_monitoring import create_sfm_loop
 from lib.logs.logs_processor import _prepare_context_and_process_message
-from lib.logs.worker_state import LogsBatch, BatchManager
+from lib.logs.batch_manager import LogsBatch, BatchManager
 from lib.utilities import chunks
 
 
 sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
-subscriber_client = pubsub.SubscriberClient()
+subscriber_client = SubscriberClient()
 subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
 batch_manager = BatchManager()
 
@@ -67,7 +67,7 @@ def pull_forever():
     while True:
         try:
             response: PullResponse = subscriber_client.pull(pull_request)
-            logging_context.log(f"Received messages: {len(response.received_messages)}")
+            #logging_context.log(f"Received messages: {len(response.received_messages)}")
 
             for received_message in response.received_messages:
                 message_job = _prepare_context_and_process_message(sfm_queue, received_message)
@@ -75,8 +75,7 @@ def pull_forever():
                     batch_manager.add_id(received_message.ack_id)
                 else:
                     batch_manager.add_job(message_job, received_message.ack_id)
-
-            logging_context.log(f"batch_queue.qsize(): {batch_manager.batch_queue.qsize()}")
+            #logging_context.log(f"batch_queue.qsize(): {batch_manager.batch_queue.qsize()}")
 
         except Exception as e:
             if isinstance(e, Forbidden):
@@ -93,7 +92,8 @@ def push_forever():
     logging_context.log(f"Starting pushing")
     while True:
         try:
-            time.sleep(1)
+            #Gives more time to pulling threads to collect from PubSub
+            time.sleep(SENDER_THREAD_SLEEP_SECONDS)
             asyncio.run(push_asynchronously())
         except Exception:
             logging_context.exception("Failed to push messages")
@@ -101,7 +101,6 @@ def push_forever():
 
 async def push_asynchronously():
     context = create_logs_context(sfm_queue)
-    #context.log("Pusher", "Pushing asynchronously")
     semaphore = asyncio.Semaphore(CONCURRENT_REQUESTS)
     async with aiohttp.ClientSession() as session:  # Create the session once
         async def process_batch(batch: LogsBatch):
@@ -127,8 +126,7 @@ async def push_asynchronously():
                 except Exception:
                     context.exception("Sender", "Failed to process batch")
 
-        #print(f"batch_queue.qsize(): {batch_manager.batch_queue.qsize()}")
-        start_time = time.perf_counter()
+        #start_time = time.perf_counter()
         await asyncio.gather(*[process_batch(batch) for batch in batch_manager.get_ready_batches()])
         #print(f'ingesting and sending ack time: {time.perf_counter() - start_time}')
 

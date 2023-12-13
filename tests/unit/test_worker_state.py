@@ -16,12 +16,12 @@ import json
 import random
 from typing import NewType, Any
 
-from lib.logs import worker_state
+from lib.logs import batch_manager
 from lib.logs.log_forwarder_variables import SENDING_WORKER_EXECUTION_PERIOD_SECONDS
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 from lib.logs.logs_processor import LogProcessingJob
 from lib.logs.metadata_engine import ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CONTENT, ATTRIBUTE_SEVERITY
-from lib.logs.worker_state import LogsBatch
+from lib.logs.batch_manager import LogsBatch
 
 log_message = "WALTHAM, Mass.--(BUSINESS WIRE)-- Software intelligence company Dynatrace (NYSE: DT) announced today its entry into the cloud application security market with the addition of a new module to its industry-leading Software Intelligence Platform. The Dynatrace® Application Security Module provides continuous runtime application self-protection (RASP) capabilities for applications in production as well as preproduction and is optimized for Kubernetes architectures and DevSecOps approaches. This module inherits the automation, AI, scalability, and enterprise-grade robustness of the Dynatrace® Software Intelligence Platform and extends it to modern cloud RASP use cases. Dynatrace customers can launch this module with the flip of a switch, empowering the world’s leading organizations currently using the Dynatrace platform to immediately increase security coverage and precision.;"
 
@@ -46,7 +46,7 @@ def test_should_flush_on_batch_exceeding_request_size(monkeypatch: MonkeyPatchFi
     logs = [create_log_entry_with_random_len_msg() for x in range(how_many_logs)]
     limit = sum(len(log_message.payload.encode("UTF-8")) for log_message in logs) + how_many_logs + 2 + 1
 
-    monkeypatch.setattr(worker_state, 'REQUEST_BODY_MAX_SIZE', limit)
+    monkeypatch.setattr(batch_manager, 'REQUEST_BODY_MAX_SIZE', limit)
 
     test_state = LogsBatch()
     for log in logs:
@@ -59,7 +59,7 @@ def test_should_flush_on_batch_exceeding_request_size(monkeypatch: MonkeyPatchFi
 
 def test_should_flush_on_too_many_events(monkeypatch: MonkeyPatchFixture):
     max_events = 5
-    monkeypatch.setattr(worker_state, 'REQUEST_MAX_EVENTS', max_events)
+    monkeypatch.setattr(batch_manager, 'REQUEST_MAX_EVENTS', max_events)
 
     logs = [create_log_entry_with_random_len_msg() for x in range(max_events)]
     test_state = LogsBatch()

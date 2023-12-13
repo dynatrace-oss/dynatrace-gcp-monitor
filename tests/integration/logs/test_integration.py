@@ -30,7 +30,7 @@ from wiremock.server import WireMockServer
 
 from lib.context import LoggingContext, DynatraceConnectivity
 from lib.instance_metadata import InstanceMetadata
-from lib.logs import log_self_monitoring, log_forwarder_variables, logs_processor, dynatrace_client, worker_state
+from lib.logs import log_self_monitoring, log_forwarder_variables, logs_processor, dynatrace_client, batch_manager
 from lib.logs.log_forwarder import LogsBatch
 from lib.logs.log_self_monitoring import LogSelfMonitoring
 from lib.logs.metadata_engine import ATTRIBUTE_TIMESTAMP, ATTRIBUTE_CONTENT, ATTRIBUTE_CLOUD_PROVIDER

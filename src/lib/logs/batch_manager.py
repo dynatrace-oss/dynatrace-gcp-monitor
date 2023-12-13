@@ -100,6 +100,7 @@ class BatchManager:
     def get_ready_batches(self):
         with self.lock:
             ready_batches = []
+            # Send every available batch even if the last one is not full, not to waste time
             while self.batch_queue.qsize() > 0:
                 ready_batches.append(self.batch_queue.get())
             #if self.batch_queue.qsize() == 1 and self.batch_queue.queue[0].should_flush():
