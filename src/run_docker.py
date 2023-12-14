@@ -114,10 +114,12 @@ async def run_metrics_fetcher_forever():
 
         try:
             await asyncio.wait_for(polling_task, QUERY_TIMEOUT_SEC)
-            await sfm_send_loop_timeouts(True)
+            if config.self_monitoring_enabled():
+                await sfm_send_loop_timeouts(True)
         except asyncio.exceptions.TimeoutError:
             logging_context.error('MAIN_LOOP', f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
-            await sfm_send_loop_timeouts(False)
+            if config.self_monitoring_enabled():
+                await sfm_send_loop_timeouts(False)
 
     pre_launch_check_result = await metrics_pre_launch_check()
     if not pre_launch_check_result:
