@@ -38,6 +38,7 @@ from operation_mode import OperationMode
 OPERATION_MODE = OperationMode.from_environment_string(config.operation_mode()) or OperationMode.Metrics
 QUERY_INTERVAL_SEC = get_query_interval_minutes() * 60
 QUERY_TIMEOUT_SEC = (get_query_interval_minutes() + 2) * 60
+SFM_ENABLED = config.self_monitoring_enabled()
 
 # USED TO TEST ON WINDOWS MACHINE
 if platform.system() == 'Windows':
@@ -114,11 +115,11 @@ async def run_metrics_fetcher_forever():
 
         try:
             await asyncio.wait_for(polling_task, QUERY_TIMEOUT_SEC)
-            if config.self_monitoring_enabled():
+            if SFM_ENABLED:
                 await sfm_send_loop_timeouts(True)
         except asyncio.exceptions.TimeoutError:
             logging_context.error('MAIN_LOOP', f'Single polling timed out and was stopped, timeout: {QUERY_TIMEOUT_SEC}s')
-            if config.self_monitoring_enabled():
+            if SFM_ENABLED:
                 await sfm_send_loop_timeouts(False)
 
     pre_launch_check_result = await metrics_pre_launch_check()

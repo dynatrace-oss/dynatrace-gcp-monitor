@@ -20,6 +20,7 @@ def test_query_loop_correct_interval(
     ):
     mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(services=[])
 
+    run_docker.SFM_ENABLED = True
     run_docker.QUERY_INTERVAL_SEC = 3
     run_loop_for = 7
     # run 7 seconds, should start query 3 times (0s, 3s, 6s)
@@ -41,6 +42,7 @@ def test_query_loop_timeout(
     ):
     mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(services=[])
 
+    run_docker.SFM_ENABLED = True
     run_docker.QUERY_INTERVAL_SEC = 1
     run_docker.QUERY_TIMEOUT_SEC = 3
     query_length_sec = 4
