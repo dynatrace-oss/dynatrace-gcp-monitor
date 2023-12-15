@@ -96,7 +96,7 @@ async def create_token(context: LoggingContext, session: ClientSession):
     credentials_path = config.credentials_path()
 
     if credentials_path:
-        context.log(f"Using credentials from {credentials_path}")
+        #context.log(f"Using credentials from {credentials_path}")
         with open(credentials_path) as key_file:
             credentials_data = json.load(key_file)
 

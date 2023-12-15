@@ -18,7 +18,7 @@ from datetime import timedelta
 from lib.configuration.config import get_int_environment_value
 
 PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES = get_int_environment_value("PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES", 1_000)
-PROCESSING_WORKERS = get_int_environment_value("PROCESSING_WORKERS", 8)
+PROCESSING_WORKERS = get_int_environment_value("PROCESSING_WORKERS", 5)
 PARALLEL_PROCESSES = get_int_environment_value("PARALLEL_PROCESSES", 1)
 MAX_SFM_MESSAGES_PROCESSED = 10_000
 LOGS_SUBSCRIPTION_PROJECT = os.environ.get("GCP_PROJECT", os.environ.get("LOGS_SUBSCRIPTION_PROJECT", None))

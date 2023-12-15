@@ -13,12 +13,16 @@
 #     limitations under the License.
 import asyncio
 import os
+import ssl
 
+import aiohttp
 from aiohttp import ClientResponseError
 from typing import Set, List, Dict, Tuple
 
+from lib.clientsession_provider import init_gcp_client_session
 from lib.context import MetricsContext
 from lib.configuration import config
+from lib.credentials import create_token
 
 _GCP_SERVICE_USAGE_URL = config.gcp_service_usage_url()
 
@@ -120,3 +124,59 @@ async def _check_x_goog_user_project_header_permissions(context: MetricsContext,
         context.log(project_id, "Ignoring destination SERVICE_USAGE_BOOKING. Missing permission: 'serviceusage.services.use'")
     else:
         context.log(project_id, f"Unexpected response when checking 'x-goog-user-project' header: {str(page)}")
+
+
+async def pull_messages_from_pubsub(token, gcp_session, subscription_path, logging_context):
+    url = f"https://pubsub.googleapis.com/v1/{subscription_path}:pull"
+    try:
+        status, reason, response = await _perform_http_request(
+            session=gcp_session,
+            method="POST",
+            url=url,
+            json_body={
+                "maxMessages": 1000
+            },
+            headers={
+                "Authorization": f"Bearer {token}",
+                "x-goog-user-project": f"{config.project_id()}"
+            }
+        )
+        if status > 299:
+            logging_context.log(f'pull_messages_from_pubsub error: {status}, reason: {reason}, url: {url}, body: "{str(response)}"')
+    except Exception as e:
+        logging_context.log(
+                    f'Failed to pull_messages_from_pubsub: {url}. {e}')
+        raise e
+    return response
+
+
+async def send_ack_ids_to_pubsub(token, gcp_session, subscription_path, ack_ids: List[str]):
+    url = f"https://pubsub.googleapis.com/v1/{subscription_path}:acknowledge"
+    try:
+        status, reason, response = await _perform_http_request(
+            session=gcp_session,
+            method="POST",
+            url=url,
+            json_body={
+                "ackIds": ack_ids
+            },
+            headers={
+                "Authorization": f"Bearer {token}",
+                "x-goog-user-project": f"{config.project_id()}"
+            }
+        )
+        if status > 299:
+            #logging_context.log(f'send_ack_ids_to_pubsub error: {status}, reason: {reason}, url: {url}, body: "{str(response)}"')
+            print(f'send_ack_ids_to_pubsub error: {status}, reason: {reason}, url: {url}, body: "{str(response)}"')
+    except Exception as e:
+        #logging_context.log(f'Failed to send_ack_ids_to_pubsub: {url}. {e}')
+        print(f'Failed to send_ack_ids_to_pubsub: {url}. {e}')
+        raise e
+    return
+
+
+async def _perform_http_request(session, method, url, json_body, headers) -> Tuple[int, str, str]:
+    timeout = aiohttp.ClientTimeout(total=60)
+    async with session.request(method, url, headers=headers, json=json_body, ssl=ssl.create_default_context(), timeout=timeout) as response:
+        response_json = await response.json()
+        return response.status, response.reason, response_json

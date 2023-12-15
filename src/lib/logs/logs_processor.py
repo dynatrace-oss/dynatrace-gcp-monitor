@@ -11,7 +11,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-
+import base64
 import json
 import queue
 import time
@@ -46,11 +46,11 @@ def _prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMess
     context = None
     try:
         context = LogsProcessingContext(
-            scheduled_execution_id=str(message.ack_id.__hash__())[-8:],
-            message_publish_time=message.message.publish_time,
+            scheduled_execution_id=str(message.get('ackId').__hash__())[-8:],
+            message_publish_time=message.get('message').get('publishTime'),
             sfm_queue=sfm_queue
         )
-        return _process_message(context, message.message)
+        return _process_message(context, message.get('message'))
     except Exception as exception:
         if not context:
             context = LogsProcessingContext(None, None, sfm_queue)
@@ -69,11 +69,11 @@ def _prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMess
 
 def _process_message(context: LogsProcessingContext, message: PubsubMessage) -> Optional[LogProcessingJob]:
     context.self_monitoring.processing_time_start = time.perf_counter()
-    data = message.data.decode("UTF-8")
-    # context.log(f"Data: {data}")
+    data = base64.b64decode(message.get('data'))
+    #context.log(f"Data: {data}")
 
     payload = _create_dt_log_payload(context, data)
-    # context.log(f"Payload: {payload}")
+    #context.log(f"Payload: {payload}")
     context.self_monitoring.calculate_processing_time()
 
     if not payload:

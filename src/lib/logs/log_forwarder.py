@@ -21,7 +21,10 @@ from google.cloud import pubsub
 from google.cloud.pubsub_v1 import SubscriberClient
 from google.pubsub_v1 import PullRequest, PullResponse
 
+from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext, create_logs_context
+from lib.credentials import create_token
+from lib.gcp_apis import pull_messages_from_pubsub, send_ack_ids_to_pubsub
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
 from lib.logs.log_forwarder_variables import MAX_SFM_MESSAGES_PROCESSED, LOGS_SUBSCRIPTION_PROJECT, \
@@ -43,17 +46,17 @@ async def run_logs(logging_context: LoggingContext, instance_metadata: InstanceM
     subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
 
     # Create worker tasks to process logs from PubSub queue and ingest them into DT
-    worker_tasks = []
+    tasks = []
     for i in range(PROCESSING_WORKERS):
         worker_task = asyncio.create_task(
             pull_and_flush_logs_forever(f'worker-{i}', sfm_queue, subscriber_client, subscription_path))
-        worker_tasks.append(worker_task)
+        tasks.append(worker_task)
 
     # Create loop with a timer to gather self monitoring metrics and send them to GCP (if enabled)
     sfm_task = asyncio.create_task(create_sfm_loop(sfm_queue, logging_context, instance_metadata))
-    worker_tasks.append(sfm_task)
+    tasks.append(sfm_task)
 
-    await asyncio.gather(*worker_tasks, return_exceptions=True)
+    await asyncio.gather(*tasks, return_exceptions=True)
 
 
 async def pull_and_flush_logs_forever(worker_name: str,
@@ -68,7 +71,7 @@ async def pull_and_flush_logs_forever(worker_name: str,
     logging_context.log(f"Starting processing")
     while True:
         try:
-            await perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request)
+            await perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request, logging_context)
         except Exception as e:
             if isinstance(e, Forbidden):
                 logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.")
@@ -82,31 +85,39 @@ async def perform_pull(worker_state: WorkerState,
                  sfm_queue: Queue,
                  subscriber_client: SubscriberClient,
                  subscription_path: str,
-                 pull_request: PullRequest):
-    response: PullResponse = subscriber_client.pull(pull_request)
+                 pull_request: PullRequest,
+                logging_context):
 
-    for received_message in response.received_messages:
-        # print(f"Received: {received_message.message.data}.")
-        message_job = _prepare_context_and_process_message(sfm_queue, received_message)
+    #response: PullResponse = subscriber_client.pull(pull_request)
+    async with init_gcp_client_session() as gcp_session:
+        token = await create_token(logging_context, gcp_session)
+        response = await pull_messages_from_pubsub(token, gcp_session, subscription_path, logging_context)
 
-        if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
-            worker_state.ack_ids.append(received_message.ack_id)
-            continue
+        if 'receivedMessages' in response:
+            for received_message in response.get('receivedMessages'):
+                #print(f"Received: {received_message.get('message').get('data')}.")
+                message_job = _prepare_context_and_process_message(sfm_queue, received_message)
 
-        if worker_state.should_flush(message_job):
-            await perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
+                if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
+                    worker_state.ack_ids.append(received_message.get('ackId'))
+                    continue
 
-        worker_state.add_job(message_job, received_message.ack_id)
+                if worker_state.should_flush(message_job):
+                    await perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path, token, gcp_session)
 
-    # check if worker_state should flush because of time
-    if worker_state.should_flush():
-        await perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
+                worker_state.add_job(message_job, received_message.get('ackId'))
+
+            # check if worker_state should flush because of time
+            if worker_state.should_flush():
+                await perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path, token, gcp_session)
 
 
 async def perform_flush(worker_state: WorkerState,
-                  sfm_queue: Queue,
-                  subscriber_client: SubscriberClient,
-                  subscription_path: str):
+                        sfm_queue: Queue,
+                        subscriber_client: SubscriberClient,
+                        subscription_path: str,
+                        token,
+                        gcp_session):
 
     context = create_logs_context(sfm_queue)
     try:
@@ -124,10 +135,10 @@ async def perform_flush(worker_state: WorkerState,
                 if sent:
                     context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
                     context.self_monitoring.log_ingest_payload_size += display_payload_size
-                    send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
+                    await send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids, token, gcp_session)
         elif worker_state.ack_ids:
             # Send ACKs if processing all messages has failed
-            send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
+            await send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids, token, gcp_session)
     except Exception:
         context.exception(worker_state.worker_name, "Failed to perform flush")
     finally:
@@ -136,14 +147,17 @@ async def perform_flush(worker_state: WorkerState,
         worker_state.reset()
 
 
-def send_batched_ack(subscriber_client: SubscriberClient, subscription_path: str, ack_ids: List[str]):
+async def send_batched_ack(subscriber_client: SubscriberClient, subscription_path: str, ack_ids: List[str], token, gcp_session):
     # request size limit is 524288, but we are not able to easily control size of created protobuf
     # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer
     # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
     chunk_size = 2048
     if len(ack_ids) < chunk_size:
-        subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": ack_ids})
+        #subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": ack_ids})
+        await send_ack_ids_to_pubsub(token, gcp_session, subscription_path, ack_ids)
     else:
         for chunk in chunks(ack_ids, chunk_size):
-            subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": chunk})
+            #subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": chunk})
+            await send_ack_ids_to_pubsub(token, gcp_session, subscription_path, chunk)
+
 
