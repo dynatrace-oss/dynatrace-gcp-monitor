@@ -61,12 +61,12 @@ def put_sfm_into_queue(context: LogsContext):
             context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
 
-def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+async def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
     while True:
         try:
-            time.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
+            await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
             self_monitoring = LogSelfMonitoring()
-            asyncio.run(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
+            await _loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata)
         except Exception:
             logging_context.exception("Logs Self Monitoring Loop Exception:")
 

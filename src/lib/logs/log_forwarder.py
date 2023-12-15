@@ -11,12 +11,11 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-
-import threading
-import time
+import asyncio
 from queue import Queue
 from typing import List
 
+import aiohttp
 from google.api_core.exceptions import Forbidden
 from google.cloud import pubsub
 from google.cloud.pubsub_v1 import SubscriberClient
@@ -34,7 +33,7 @@ from lib.logs.worker_state import WorkerState
 from lib.utilities import chunks
 
 
-def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+async def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadata):
     if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception(
             "Cannot start pubsub streaming pull - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
@@ -43,17 +42,21 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
     subscriber_client = pubsub.SubscriberClient()
     subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
 
-    # Open worker threads to process logs from PubSub queue and ingest them into DT
-    for i in range(0, PROCESSING_WORKERS):
-        threading.Thread(target=pull_and_flush_logs_forever,
-                         args=(f"Worker-{i}", sfm_queue, subscriber_client, subscription_path,),
-                         name=f"worker-{i}").start()
+    # Create worker tasks to process logs from PubSub queue and ingest them into DT
+    worker_tasks = []
+    for i in range(PROCESSING_WORKERS):
+        worker_task = asyncio.create_task(
+            pull_and_flush_logs_forever(f'worker-{i}', sfm_queue, subscriber_client, subscription_path))
+        worker_tasks.append(worker_task)
 
     # Create loop with a timer to gather self monitoring metrics and send them to GCP (if enabled)
-    create_sfm_loop(sfm_queue, logging_context, instance_metadata)
+    sfm_task = asyncio.create_task(create_sfm_loop(sfm_queue, logging_context, instance_metadata))
+    worker_tasks.append(sfm_task)
+
+    await asyncio.gather(*worker_tasks, return_exceptions=True)
 
 
-def pull_and_flush_logs_forever(worker_name: str,
+async def pull_and_flush_logs_forever(worker_name: str,
                                 sfm_queue: Queue,
                                 subscriber_client: SubscriberClient,
                                 subscription_path: str):
@@ -65,17 +68,17 @@ def pull_and_flush_logs_forever(worker_name: str,
     logging_context.log(f"Starting processing")
     while True:
         try:
-            perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request)
+            await perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request)
         except Exception as e:
             if isinstance(e, Forbidden):
                 logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.")
             else:
                 logging_context.exception("Failed to pull messages")
             # Backoff for 1 minute to avoid spamming requests and logs
-            time.sleep(60)
+            await asyncio.sleep(60)
 
 
-def perform_pull(worker_state: WorkerState,
+async def perform_pull(worker_state: WorkerState,
                  sfm_queue: Queue,
                  subscriber_client: SubscriberClient,
                  subscription_path: str,
@@ -91,16 +94,16 @@ def perform_pull(worker_state: WorkerState,
             continue
 
         if worker_state.should_flush(message_job):
-            perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
+            await perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
 
         worker_state.add_job(message_job, received_message.ack_id)
 
     # check if worker_state should flush because of time
     if worker_state.should_flush():
-        perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
+        await perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
 
 
-def perform_flush(worker_state: WorkerState,
+async def perform_flush(worker_state: WorkerState,
                   sfm_queue: Queue,
                   subscriber_client: SubscriberClient,
                   subscription_path: str):
@@ -110,17 +113,18 @@ def perform_flush(worker_state: WorkerState,
         if worker_state.jobs:
             sent = False
             display_payload_size = round((worker_state.finished_batch_bytes_size / 1024), 3)
-            try:
-                context.log(worker_state.worker_name, f'Log ingest payload size: {display_payload_size} kB')
-                send_logs(context, worker_state.jobs, worker_state.finished_batch)
-                context.log(worker_state.worker_name, "Log ingest payload pushed successfully")
-                sent = True
-            except Exception:
-                context.exception(worker_state.worker_name, "Failed to ingest logs")
-            if sent:
-                context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
-                context.self_monitoring.log_ingest_payload_size += display_payload_size
-                send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
+            async with aiohttp.ClientSession() as session:
+                try:
+                    context.log(worker_state.worker_name, f'Log ingest payload size: {display_payload_size} kB')
+                    await send_logs(session, context, worker_state.jobs, worker_state.finished_batch)
+                    context.log(worker_state.worker_name, "Log ingest payload pushed successfully")
+                    sent = True
+                except Exception:
+                    context.exception(worker_state.worker_name, "Failed to ingest logs")
+                if sent:
+                    context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
+                    context.self_monitoring.log_ingest_payload_size += display_payload_size
+                    send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
         elif worker_state.ack_ids:
             # Send ACKs if processing all messages has failed
             send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids)
