@@ -17,85 +17,71 @@ from typing import List
 
 import aiohttp
 from google.api_core.exceptions import Forbidden
-from google.cloud import pubsub
-from google.cloud.pubsub_v1 import SubscriberClient
-from google.pubsub_v1 import PullRequest, PullResponse
 
 from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext, create_logs_context
 from lib.credentials import create_token
-from lib.gcp_apis import pull_messages_from_pubsub, send_ack_ids_to_pubsub
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import send_logs
+from lib.logs.gcp_client import send_ack_ids_to_pubsub, pull_messages_from_pubsub
 from lib.logs.log_forwarder_variables import MAX_SFM_MESSAGES_PROCESSED, LOGS_SUBSCRIPTION_PROJECT, \
-    LOGS_SUBSCRIPTION_ID, \
-    PROCESSING_WORKERS, PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES, REQUEST_BODY_MAX_SIZE
+    LOGS_SUBSCRIPTION_ID, PROCESSING_WORKERS, REQUEST_BODY_MAX_SIZE
 from lib.logs.log_self_monitoring import create_sfm_loop
 from lib.logs.logs_processor import _prepare_context_and_process_message
 from lib.logs.worker_state import WorkerState
 from lib.utilities import chunks
 
 
-async def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+def run_logs_wrapper(instance_metadata):
+    # Starting point for each process to handle asyncio loops independently in parallel
+    asyncio.run(run_logs(instance_metadata))
+
+
+async def run_logs(instance_metadata: InstanceMetadata):
     if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception(
             "Cannot start pubsub streaming pull - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
 
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
-    subscriber_client = pubsub.SubscriberClient()
-    subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
+    tasks = []
 
     # Create worker tasks to process logs from PubSub queue and ingest them into DT
-    tasks = []
     for i in range(PROCESSING_WORKERS):
-        worker_task = asyncio.create_task(
-            pull_and_flush_logs_forever(f'worker-{i}', sfm_queue, subscriber_client, subscription_path))
+        worker_task = asyncio.create_task(pull_and_flush_logs_forever(f'worker-{i}', sfm_queue))
         tasks.append(worker_task)
 
-    # Create loop with a timer to gather self monitoring metrics and send them to GCP (if enabled)
-    sfm_task = asyncio.create_task(create_sfm_loop(sfm_queue, logging_context, instance_metadata))
+    # Create timed task to log and send self monitoring metrics to GCP (if enabled)
+    sfm_task = asyncio.create_task(create_sfm_loop(sfm_queue, instance_metadata))
     tasks.append(sfm_task)
 
     await asyncio.gather(*tasks, return_exceptions=True)
 
 
-async def pull_and_flush_logs_forever(worker_name: str,
-                                sfm_queue: Queue,
-                                subscriber_client: SubscriberClient,
-                                subscription_path: str):
+async def pull_and_flush_logs_forever(worker_name: str, sfm_queue: Queue):
     logging_context = LoggingContext(worker_name)
     worker_state = WorkerState(worker_name)
-    pull_request = PullRequest()
-    pull_request.max_messages = PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES
-    pull_request.subscription = subscription_path
     logging_context.log(f"Starting processing")
+
     while True:
         try:
-            await perform_pull(worker_state, sfm_queue, subscriber_client, subscription_path, pull_request, logging_context)
+            await perform_pull(worker_state, sfm_queue, logging_context)
         except Exception as e:
             if isinstance(e, Forbidden):
-                logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.")
+                logging_context.error(f"{e}. Please check whether assigned service account "
+                                      f"has permission to fetch Pub/Sub messages.")
             else:
                 logging_context.exception("Failed to pull messages")
             # Backoff for 1 minute to avoid spamming requests and logs
             await asyncio.sleep(60)
 
 
-async def perform_pull(worker_state: WorkerState,
-                 sfm_queue: Queue,
-                 subscriber_client: SubscriberClient,
-                 subscription_path: str,
-                 pull_request: PullRequest,
-                logging_context):
-
-    #response: PullResponse = subscriber_client.pull(pull_request)
+async def perform_pull(worker_state: WorkerState, sfm_queue: Queue, logging_context: LoggingContext):
     async with init_gcp_client_session() as gcp_session:
         token = await create_token(logging_context, gcp_session)
-        response = await pull_messages_from_pubsub(token, gcp_session, subscription_path, logging_context)
+        response = await pull_messages_from_pubsub(gcp_session, token, logging_context)
 
         if 'receivedMessages' in response:
             for received_message in response.get('receivedMessages'):
-                #print(f"Received: {received_message.get('message').get('data')}.")
                 message_job = _prepare_context_and_process_message(sfm_queue, received_message)
 
                 if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
@@ -103,61 +89,55 @@ async def perform_pull(worker_state: WorkerState,
                     continue
 
                 if worker_state.should_flush(message_job):
-                    await perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path, token, gcp_session)
+                    await perform_flush(worker_state, sfm_queue, gcp_session, token, logging_context)
 
                 worker_state.add_job(message_job, received_message.get('ackId'))
 
             # check if worker_state should flush because of time
             if worker_state.should_flush():
-                await perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path, token, gcp_session)
+                await perform_flush(worker_state, sfm_queue, gcp_session, token, logging_context)
 
 
 async def perform_flush(worker_state: WorkerState,
                         sfm_queue: Queue,
-                        subscriber_client: SubscriberClient,
-                        subscription_path: str,
-                        token,
-                        gcp_session):
-
-    context = create_logs_context(sfm_queue)
+                        gcp_session: aiohttp.ClientSession,
+                        token: str,
+                        logging_context: LoggingContext):
+    sfm_context = create_logs_context(sfm_queue)
     try:
         if worker_state.jobs:
             sent = False
             display_payload_size = round((worker_state.finished_batch_bytes_size / 1024), 3)
             async with aiohttp.ClientSession() as session:
                 try:
-                    context.log(worker_state.worker_name, f'Log ingest payload size: {display_payload_size} kB')
-                    await send_logs(session, context, worker_state.jobs, worker_state.finished_batch)
-                    context.log(worker_state.worker_name, "Log ingest payload pushed successfully")
+                    logging_context.log(f'Log ingest payload size: {display_payload_size} kB')
+                    await send_logs(session, sfm_context, worker_state.jobs, worker_state.finished_batch)
+                    logging_context.log("Log ingest payload pushed successfully")
                     sent = True
                 except Exception:
-                    context.exception(worker_state.worker_name, "Failed to ingest logs")
+                    logging_context.exception("Failed to ingest logs")
                 if sent:
-                    context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
-                    context.self_monitoring.log_ingest_payload_size += display_payload_size
-                    await send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids, token, gcp_session)
+                    sfm_context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
+                    sfm_context.self_monitoring.log_ingest_payload_size += display_payload_size
+                    await send_batched_ack_ids(gcp_session, token, worker_state.ack_ids, logging_context)
         elif worker_state.ack_ids:
-            # Send ACKs if processing all messages has failed
-            await send_batched_ack(subscriber_client, subscription_path, worker_state.ack_ids, token, gcp_session)
+            # Send ACK IDs of messages that failed to be processed (e.g., exceeding the size limit)
+            await send_batched_ack_ids(gcp_session, token, worker_state.ack_ids, logging_context)
     except Exception:
-        context.exception(worker_state.worker_name, "Failed to perform flush")
+        logging_context.exception("Failed to perform flush")
     finally:
         # reset state event if we failed to flush, to AVOID getting stuck in processing the same messages
         # over and over again and letting their acknowledgement deadline expire
         worker_state.reset()
 
 
-async def send_batched_ack(subscriber_client: SubscriberClient, subscription_path: str, ack_ids: List[str], token, gcp_session):
+async def send_batched_ack_ids(gcp_session, token: str, ack_ids: List[str], logging_context: LoggingContext):
     # request size limit is 524288, but we are not able to easily control size of created protobuf
     # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer
     # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
     chunk_size = 2048
     if len(ack_ids) < chunk_size:
-        #subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": ack_ids})
-        await send_ack_ids_to_pubsub(token, gcp_session, subscription_path, ack_ids)
+        await send_ack_ids_to_pubsub(gcp_session, token, ack_ids, logging_context)
     else:
         for chunk in chunks(ack_ids, chunk_size):
-            #subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": chunk})
-            await send_ack_ids_to_pubsub(token, gcp_session, subscription_path, chunk)
-
-
+            await send_ack_ids_to_pubsub(gcp_session, token, chunk, logging_context)

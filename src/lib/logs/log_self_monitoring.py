@@ -12,7 +12,6 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import asyncio
-import os
 import queue
 import time
 from collections import Counter
@@ -61,7 +60,8 @@ def put_sfm_into_queue(context: LogsContext):
             context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
 
-async def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+async def create_sfm_loop(sfm_queue: Queue, instance_metadata: InstanceMetadata):
+    logging_context = LoggingContext("sfm-worker")
     while True:
         try:
             await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)

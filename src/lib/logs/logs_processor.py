@@ -70,10 +70,7 @@ def _prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMess
 def _process_message(context: LogsProcessingContext, message: PubsubMessage) -> Optional[LogProcessingJob]:
     context.self_monitoring.processing_time_start = time.perf_counter()
     data = base64.b64decode(message.get('data'))
-    #context.log(f"Data: {data}")
-
     payload = _create_dt_log_payload(context, data)
-    #context.log(f"Payload: {payload}")
     context.self_monitoring.calculate_processing_time()
 
     if not payload:

@@ -14,11 +14,9 @@
 
 import ssl
 import time
-import urllib
-from typing import List, Dict, Tuple
+from typing import List, Tuple
 from urllib.error import HTTPError
 from urllib.parse import urlparse
-from urllib.request import Request
 
 import aiohttp
 
@@ -33,7 +31,7 @@ if not config.require_valid_certificate():
     ssl_context.verify_mode = ssl.CERT_NONE
 
 
-async def send_logs(session, context: LogsContext, logs: List[LogProcessingJob], batch: str):
+async def send_logs(session: aiohttp.ClientSession, context: LogsContext, logs: List[LogProcessingJob], batch: str):
     # pylint: disable=R0912
     context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
     context.self_monitoring.sending_time_start = time.perf_counter()

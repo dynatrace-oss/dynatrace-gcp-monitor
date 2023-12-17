@@ -27,7 +27,7 @@ from lib.credentials import create_token
 from lib.dt_extensions.dt_extensions import extensions_fetch, prepare_services_config_for_next_polling
 from lib.fast_check import LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
-from lib.logs.log_forwarder import run_logs
+from lib.logs.log_forwarder import run_logs, run_logs_wrapper
 from lib.logs.log_forwarder_variables import PARALLEL_PROCESSES
 from lib.metrics import GCPService
 from lib.self_monitoring import sfm_push_metrics
@@ -174,21 +174,13 @@ def main():
         asyncio.run(run_metrics_fetcher_forever())
     elif OPERATION_MODE == OperationMode.Logs:
         asyncio.run(LogsFastCheck(logging_context, instance_metadata).execute())
-        #asyncio.run(run_logs(logging_context, instance_metadata))
-
         processes = []
-
         for _ in range(PARALLEL_PROCESSES):  # Adjust the number of processes as needed
             process = multiprocessing.Process(target=run_logs_wrapper, args=(instance_metadata,))
             processes.append(process)
             process.start()
-
         for process in processes:
             process.join()
-
-
-def run_logs_wrapper(instance_metadata):
-    asyncio.run(run_logs(logging_context, instance_metadata))
 
 
 if __name__ == '__main__':
