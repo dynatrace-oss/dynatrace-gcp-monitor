@@ -14,6 +14,8 @@
 import json
 from datetime import datetime
 from typing import NewType, Any
+import msgspec
+
 
 from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_CLOUD_PROVIDER, \
@@ -46,7 +48,7 @@ record = {
     "timestamp": timestamp
 }
 
-record_string = json.dumps(record)
+record_string = msgspec.json.encode(record)
 
 expected_output = {
     ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -56,7 +58,7 @@ expected_output = {
     ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_run_revision',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: record_string,
+    ATTRIBUTE_CONTENT: msgspec.json.encode(record).decode("UTF-8"),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/run.googleapis.com%2Fstdout',
     ATTRIBUTE_SEVERITY: "INFO"
 }
@@ -69,7 +71,7 @@ expected_output_attribute_values_trimmed = {
     ATTRIBUTE_GCP_PROJECT_ID: 'dyna',
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'clou',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: record_string,
+    ATTRIBUTE_CONTENT: msgspec.json.encode(record).decode("UTF-8"),
     ATTRIBUTE_DT_LOGPATH: 'proj',
     ATTRIBUTE_SEVERITY: "INFO"
 }

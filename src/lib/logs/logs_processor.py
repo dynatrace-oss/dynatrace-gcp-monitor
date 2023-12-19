@@ -12,7 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-import json
+import msgspec
 import queue
 import time
 from datetime import datetime, timezone
@@ -34,13 +34,13 @@ _metadata_engine = MetadataEngine()
 
 
 class LogProcessingJob:
-    payload: str
+    payload: bytes
     self_monitoring: LogSelfMonitoring
 
-    def __init__(self, payload: str, self_monitoring: LogSelfMonitoring):
+    def __init__(self, payload: bytes, self_monitoring: LogSelfMonitoring):
         self.payload = payload
         self.self_monitoring: LogSelfMonitoring = self_monitoring
-        self.bytes_size = len(payload.encode("UTF-8"))
+        self.bytes_size = len(payload)
 
 
 def _prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[LogProcessingJob]:
@@ -81,7 +81,7 @@ def _process_message(context: LogsProcessingContext, message: PubsubMessage) -> 
         put_sfm_into_queue(context)
         return None
     else:
-        job = LogProcessingJob(json.dumps(payload), context.self_monitoring)
+        job = LogProcessingJob(msgspec.json.encode(payload), context.self_monitoring)
         return job
 
 
@@ -108,7 +108,7 @@ def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) ->
     content = parsed_record.get(ATTRIBUTE_CONTENT, None)
     if content:
         if not isinstance(content, str):
-            parsed_record[ATTRIBUTE_CONTENT] = json.dumps(parsed_record[ATTRIBUTE_CONTENT])
+            parsed_record[ATTRIBUTE_CONTENT] = msgspec.json.encode(parsed_record[ATTRIBUTE_CONTENT]).decode("UTF-8")
         if len(parsed_record[ATTRIBUTE_CONTENT]) > CONTENT_LENGTH_LIMIT:
             trimmed_len = CONTENT_LENGTH_LIMIT - len(DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED)
             parsed_record[ATTRIBUTE_CONTENT] = parsed_record[ATTRIBUTE_CONTENT][
@@ -120,8 +120,8 @@ def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) ->
 
 def _create_parsed_record(context: LogsProcessingContext, message_data: str):
     try:
-        record = json.loads(message_data)
-    except ValueError:
+        record = msgspec.json.decode(message_data)
+    except msgspec.DecodeError:
         record = {
             ATTRIBUTE_CONTENT: message_data
         }

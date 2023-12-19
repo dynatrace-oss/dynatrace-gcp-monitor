@@ -14,6 +14,7 @@
 import json
 from datetime import datetime
 
+import msgspec
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
@@ -58,7 +59,7 @@ expected_output = {
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'k8s_container',
     ATTRIBUTE_GCP_INSTANCE_NAME: 'test-app-api',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: json.dumps(log_record),
+    ATTRIBUTE_CONTENT: msgspec.json.encode(log_record).decode("UTF-8"),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/stdout',
     'container.name': 'test-app-api',
     'k8s.cluster.name': 'test-cluster',

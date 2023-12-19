@@ -14,6 +14,7 @@
 import json
 from datetime import datetime
 from typing import NewType, Any
+import msgspec
 
 from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
@@ -235,7 +236,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'gce_instance_group_manager',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fdata_access',
         ATTRIBUTE_AUDIT_IDENTITY: 'service-125992521190@container-engine-robot.iam.gserviceaccount.com',
         ATTRIBUTE_AUDIT_ACTION: 'v1.compute.instanceGroupManagers.list',
@@ -247,7 +248,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloudsql_database',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record2),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record2).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fdata_access',
         ATTRIBUTE_AUDIT_IDENTITY: 'dynatrace-gcp-service@dynatrace-gcp-extension.iam.gserviceaccount.com',
         ATTRIBUTE_AUDIT_ACTION: 'cloudsql.instances.list',
@@ -261,7 +262,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'gcs_bucket',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record3),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record3).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fdata_access',
         ATTRIBUTE_AUDIT_IDENTITY: 'maria.swiatkowska@dynatrace.com',
         ATTRIBUTE_AUDIT_ACTION: 'storage.buckets.list',
@@ -275,7 +276,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'gcs_bucket',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record4),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record4).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fdata_access',
         ATTRIBUTE_AUDIT_ACTION: 'storage.objects.list',
         ATTRIBUTE_AUDIT_RESULT: 'Failed.PermissionDenied',

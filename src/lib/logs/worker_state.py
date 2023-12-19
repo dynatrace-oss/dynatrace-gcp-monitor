@@ -18,7 +18,6 @@ from lib.logs.log_forwarder_variables import REQUEST_MAX_EVENTS, REQUEST_BODY_MA
     SENDING_WORKER_EXECUTION_PERIOD_SECONDS
 from lib.logs.logs_processor import LogProcessingJob
 
-
 class WorkerState:
     worker_name: str
     ack_ids: List[str]  # May be greater than jobs, worker is ACKing failed (too old or too big) messages too
@@ -26,6 +25,8 @@ class WorkerState:
     jobs: List[LogProcessingJob]
     batch_bytes_size: int
     batch: str
+    bin_batch: List[bytes]
+    tmp_list = List[LogProcessingJob]
 
     def __init__(self, worker_name: str):
         self.reset()
@@ -35,22 +36,22 @@ class WorkerState:
         self.last_flush_time = time.time()
         self.ack_ids = []
         self.jobs = []
-        self.batch = "["
-        self.batch_bytes_size = 1
+        self.batch = ""
+        self.bin_batch = []
+        self.batch_bytes_size = 0
+        self.job_counter = 0
 
     def add_job(self, log_processing_job: LogProcessingJob, ack_id: str):
         self.ack_ids.append(ack_id)
-        if self.jobs:
-            self.batch += ","
-            self.batch_bytes_size += 1
-        self.batch += log_processing_job.payload
+        self.bin_batch.append(log_processing_job.payload)
         self.batch_bytes_size += log_processing_job.bytes_size
         self.jobs.append(log_processing_job)
+        self.job_counter+=1
 
     def merge_worker(self,worker):
         self.ack_ids.extend(worker.ack_ids)
         self.jobs.extend(worker.jobs)
-        self.batch += ", " + worker.batch[1:]
+        self.bin_batch.extend(worker.bin_batch)
         self.batch_bytes_size += worker.batch_bytes_size
 
 
@@ -64,14 +65,15 @@ class WorkerState:
         if not next_log_processing_job:
             return time_has_passed
 
-        too_many_messages = len(self.jobs) + 1 > REQUEST_MAX_EVENTS
+        too_many_messages = self.job_counter + 1 > REQUEST_MAX_EVENTS
         batch_is_big = self.batch_bytes_size + next_log_processing_job.bytes_size + 2 >= REQUEST_BODY_MAX_SIZE
         return too_many_messages or batch_is_big or time_has_passed
 
     @property
     def finished_batch(self):
-        return self.batch + "]"
+        result_str = "[".encode("UTF-8") + ", ".encode("UTF-8").join(self.bin_batch) + "]".encode("UTF-8")
+        return result_str
 
     @property
     def finished_batch_bytes_size(self):
-        return self.batch_bytes_size + 1
+        return self.batch_bytes_size + 2 + (len(self.bin_batch) - 1 )*2

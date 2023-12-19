@@ -14,6 +14,7 @@
 import json
 from datetime import datetime
 
+import msgspec
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
@@ -53,7 +54,7 @@ debug_text_record_expected_output = {
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
     ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-monitor',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: json.dumps(debug_text_record),
+    ATTRIBUTE_CONTENT: msgspec.json.encode(debug_text_record).decode("UTF-8"),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions',
     ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-monitor',
     ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor'
@@ -97,7 +98,7 @@ notice_json_record_expected_output = {
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
     ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-monitor',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: json.dumps(notice_json_record),
+    ATTRIBUTE_CONTENT: msgspec.json.encode(notice_json_record).decode("UTF-8"),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/clouderrorreporting.googleapis.com%2Finsights',
     ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-monitor',
     ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor'
@@ -149,7 +150,7 @@ error_proto_record_expected_output = {
     ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_function',
     ATTRIBUTE_GCP_INSTANCE_NAME: 'dynatrace-gcp-monitor',
     ATTRIBUTE_TIMESTAMP: timestamp,
-    ATTRIBUTE_CONTENT: json.dumps(error_proto_record),
+    ATTRIBUTE_CONTENT: msgspec.json.encode(error_proto_record).decode("UTF-8"),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
     ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/europe-central2/functions/dynatrace-gcp-monitor',
     ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor'
@@ -157,15 +158,15 @@ error_proto_record_expected_output = {
 
 
 def test_extraction_debug_text():
-    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, json.dumps(debug_text_record))
+    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, msgspec.json.encode(debug_text_record))
     assert actual_output == debug_text_record_expected_output
 
 
 def test_extraction_notice_json():
-    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, json.dumps(notice_json_record))
+    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT,msgspec.json.encode(notice_json_record))
     assert actual_output == notice_json_record_expected_output
 
 
 def test_extraction_error_proto():
-    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT, json.dumps(error_proto_record))
+    actual_output = _create_dt_log_payload(TEST_LOGS_PROCESSING_CONTEXT,msgspec.json.encode(error_proto_record))
     assert actual_output == error_proto_record_expected_output

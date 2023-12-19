@@ -38,13 +38,13 @@ def create_log_entry_with_random_len_msg():
         ATTRIBUTE_SEVERITY: 'INFO'
     }
 
-    return LogProcessingJob(json.dumps(as_dict), LogSelfMonitoring())
+    return LogProcessingJob(json.dumps(as_dict).encode("UTF-8"), LogSelfMonitoring())
 
 
 def test_should_flush_on_batch_exceeding_request_size(monkeypatch: MonkeyPatchFixture):
     how_many_logs = 100
     logs = [create_log_entry_with_random_len_msg() for x in range(how_many_logs)]
-    limit = sum(len(log_message.payload.encode("UTF-8")) for log_message in logs) + how_many_logs + 2 + 1
+    limit = sum(len(log_message.payload) for log_message in logs) + how_many_logs + 2 + 1
 
     monkeypatch.setattr(worker_state, 'REQUEST_BODY_MAX_SIZE', limit)
 
@@ -54,7 +54,7 @@ def test_should_flush_on_batch_exceeding_request_size(monkeypatch: MonkeyPatchFi
         test_state.add_job(log, "")
 
     assert test_state.should_flush(create_log_entry_with_random_len_msg())
-    assert len(test_state.finished_batch.encode("UTF-8")) == test_state.finished_batch_bytes_size
+    assert len(test_state.finished_batch) == test_state.finished_batch_bytes_size
 
 
 def test_should_flush_on_too_many_events(monkeypatch: MonkeyPatchFixture):

@@ -49,10 +49,15 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
     send_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
 
 
+    subscriber_client = pubsub.SubscriberClient()
 
 
     subscription_path = subscriber_client.subscription_path(LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID)
 
+    #for i in range(0, PROCESSING_WORKERS):
+    #    p = Process(target=custom_pull, args=(None,None,pull_queue))
+    #    p.start()
+    
     for i in range(0, PROCESSING_WORKERS):
         p = threading.Thread(target=flush_worker, args=(send_queue,sfm_queue,LOGS_SUBSCRIPTION_PROJECT,LOGS_SUBSCRIPTION_ID))
         p.start()
@@ -86,7 +91,7 @@ def pull_and_flush_logs_forever(worker_name: str,
     logging_context.log(f"Starting processing")
     while True:
         try:
-            perform_pull(worker_state, sfm_queue, send_queue, subscriber_client, subscription_path, pull_request)
+            worker_state = perform_pull(worker_state, sfm_queue, send_queue, subscriber_client, subscription_path, pull_request)
         except Exception as e:
             if isinstance(e, Forbidden):
                 logging_context.error(f"{e} Please check whether assigned service account has permission to fetch Pub/Sub messages.")
@@ -113,13 +118,16 @@ def perform_pull(worker_state: WorkerState,
             continue
 
         if worker_state.should_flush(message_job):
-            prepare_flush(worker_state, sfm_queue, send_queue,subscriber_client, subscription_path)
+            worker_state = prepare_flush(worker_state, sfm_queue, send_queue,subscriber_client, subscription_path)
 
         worker_state.add_job(message_job, received_message.ack_id)
 
     # check if worker_state should flush because of time
     if worker_state.should_flush():
-        prepare_flush(worker_state, sfm_queue,send_queue, subscriber_client, subscription_path)
+        worker_state = prepare_flush(worker_state, sfm_queue,send_queue, subscriber_client, subscription_path)
+    
+    return worker_state
+
 
 
 def prepare_flush(worker_state: WorkerState,
@@ -136,13 +144,14 @@ def prepare_flush(worker_state: WorkerState,
         # Perform it using main process to slow down. 
         
         perform_flush(worker_state,sfm_queue,subscriber_client,subscription_path)
-        worker_state.reset()
     else:
         try:
-            send_queue.put((copy.copy(worker_state),None))
+            send_queue.put((worker_state,None))
         except Exception:
             context.exception(worker_state.worker_name, "Failed to create flush task")
         finally:
-            worker_state.reset()
+            worker_state = WorkerState(worker_name=worker_state.worker_name)
+    
+    return worker_state
 
 

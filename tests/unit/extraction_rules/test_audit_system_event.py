@@ -15,6 +15,7 @@ import json
 from datetime import datetime
 from typing import NewType, Any
 
+import msgspec
 from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
@@ -193,7 +194,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'gce_instance',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fsystem_event',
         ATTRIBUTE_AUDIT_IDENTITY: 'system@google.com',
         ATTRIBUTE_AUDIT_ACTION: 'compute.instances.migrateOnHostMaintenance',
@@ -208,7 +209,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloud_run_revision',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record2),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record2).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fsystem_event',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
         ATTRIBUTE_SEVERITY: "INFO"

@@ -20,8 +20,8 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import Request
 
-from multiprocessing import Lock, Process, Queue,JoinableQueue, current_process
-
+#from multiprocessing import Lock, Process, Queue,JoinableQueue, current_process
+from queue import Queue
 
 
 from lib.logs.worker_state import WorkerState
@@ -52,7 +52,6 @@ def send_batched_ack(subscriber_client: SubscriberClient, subscription_path: str
     else:
         for chunk in chunks(ack_ids, chunk_size):
             subscriber_client.acknowledge(request={"subscription": subscription_path, "ack_ids": chunk})
-
 
 
 
@@ -107,23 +106,23 @@ def flush_worker(queue,sfm_queue,LOGS_SUBSCRIPTION_PROJECT,LOGS_SUBSCRIPTION_ID)
         worker_state = task[0]
         batcher.append(worker_state)
 
-        if task_counter >=3:
+        if task_counter >=2:
             main_worker = batcher[0]
-            for i in range(1,3):
+            for i in range(1,2):
                 main_worker.merge_worker(batcher[i])
             perform_flush(main_worker,sfm_queue,subscriber_client,subscription_path)
             task_counter = 0
             batcher = []
 
 
-def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
+def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: bytes):
     # pylint: disable=R0912
     context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
     context.self_monitoring.sending_time_start = time.perf_counter()
     log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()
 
     try:
-        encoded_body_bytes = batch.encode("UTF-8")
+        encoded_body_bytes = batch
         context.self_monitoring.all_requests += 1
         status, reason, response = _perform_http_request(
             method="POST",

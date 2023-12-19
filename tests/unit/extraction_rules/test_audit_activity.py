@@ -22,6 +22,8 @@ from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RES
     ATTRIBUTE_GCP_INSTANCE_ID
 from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
+import msgspec
+
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
 
 timestamp = datetime.utcnow().isoformat() + "Z"
@@ -309,7 +311,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'k8s_cluster',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
         ATTRIBUTE_AUDIT_IDENTITY: 'system:vpa-recommender',
         ATTRIBUTE_AUDIT_ACTION: 'io.k8s.core.v1.endpoints.update',
@@ -321,7 +323,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'audited_resource',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record2),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record2).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
         ATTRIBUTE_AUDIT_IDENTITY: 'svc-gke-dynatrace-npd@mgmt-ple-prd-83f7.iam.gserviceaccount.com',
         ATTRIBUTE_AUDIT_ACTION: 'google.monitoring.v3.MetricService.CreateMetricDescriptor',
@@ -336,7 +338,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'cloudsql_database',
         ATTRIBUTE_GCP_INSTANCE_ID: 'dynatrace-gcp-extension:pawel-001-mysql',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record3),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record3).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
         ATTRIBUTE_AUDIT_IDENTITY: 'dynatrace-gcp-extension@appspot.gserviceaccount.com',
         ATTRIBUTE_AUDIT_ACTION: 'cloudsql.instances.connect',
@@ -348,7 +350,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'audited_resource',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record4),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record4).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
         ATTRIBUTE_AUDIT_IDENTITY: 'user@dynatrace.com',
         ATTRIBUTE_AUDIT_ACTION: 'google.longrunning.Operations.GetOperation',

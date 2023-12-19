@@ -15,6 +15,7 @@ import json
 from datetime import datetime
 from typing import NewType, Any
 
+import msgspec
 from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
@@ -84,7 +85,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'audited_resource',
         ATTRIBUTE_TIMESTAMP: timestamp,
-        ATTRIBUTE_CONTENT: json.dumps(record),
+        ATTRIBUTE_CONTENT: msgspec.json.encode(record).decode("UTF-8"),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fpolicy',
         ATTRIBUTE_AUDIT_IDENTITY: 'someone@google.com',
         ATTRIBUTE_AUDIT_ACTION: 'google.storage.NoBillingOk',
