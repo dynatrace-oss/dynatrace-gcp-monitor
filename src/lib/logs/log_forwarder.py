@@ -56,6 +56,32 @@ def run_logs(logging_context: LoggingContext, instance_metadata: InstanceMetadat
     # Create loop with a timer to gather self monitoring metrics and send them to GCP (if enabled)
     create_sfm_loop(sfm_queue, logging_context, instance_metadata)
 
+from lib.logs.log_forwarder_variables import REQUEST_MAX_EVENTS, REQUEST_BODY_MAX_SIZE, \
+    SENDING_WORKER_EXECUTION_PERIOD_SECONDS
+
+def create_queue(job_array,acks_id):
+
+    batch_list = []
+    size = 0
+    count = 0 
+    batch = LogsBatch()
+    for tup in job_array:
+        job, id = tup
+        if count + 1 > REQUEST_MAX_EVENTS or size + job.bytes_size + 2 >= REQUEST_BODY_MAX_SIZE:
+            batch_list.append(batch)
+            batch = LogsBatch()
+            size =0
+            count = 0
+        batch.add_job(job,id)
+        count+=1
+        size +=job.bytes_size
+    
+    if batch.job_counter > 0:
+        batch_list.append(batch)
+    
+    
+    batch_manager.add_batch(batch_list,acks_id)
+
 
 def pull_forever():
     logging_context = LoggingContext("Puller")
@@ -64,17 +90,23 @@ def pull_forever():
     pull_request.subscription = subscription_path
     logging_context.log(f"Starting pulling")
 
+    job_array = []
+    acks_id = []
+    p = None
     while True:
         try:
             response: PullResponse = subscriber_client.pull(pull_request)
             #logging_context.log(f"Received messages: {len(response.received_messages)}")
-
+            if p != None:
+                p.join()
             for received_message in response.received_messages:
                 message_job = _prepare_context_and_process_message(sfm_queue, received_message)
                 if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
-                    batch_manager.add_id(received_message.ack_id)
+                    acks_id.append(received_message.ack_id)
                 else:
-                    batch_manager.add_job(message_job, received_message.ack_id)
+                    job_array.append((message_job, received_message.ack_id))
+            p = threading.Thread(target=create_queue, args=(job_array,acks_id))
+            p.start()
             #logging_context.log(f"batch_queue.qsize(): {batch_manager.batch_queue.qsize()}")
 
         except Exception as e:

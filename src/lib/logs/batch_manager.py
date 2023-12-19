@@ -22,11 +22,14 @@ from lib.logs.logs_processor import LogProcessingJob
 
 
 class LogsBatch:
+    worker_name: str
     ack_ids: List[str]  # May be greater than jobs, worker is ACKing failed (too old or too big) messages too
     last_flush_time: float
     jobs: List[LogProcessingJob]
     batch_bytes_size: int
     batch: str
+    bin_batch: List[bytes]
+    tmp_list = List[LogProcessingJob]
 
     def __init__(self):
         self.reset()
@@ -36,20 +39,28 @@ class LogsBatch:
         self.ack_ids = []
         self.jobs = []
         self.batch = "["
+        self.bin_batch = []
         self.batch_bytes_size = 1
+        self.job_counter = 0
 
     def add_job(self, log_processing_job: LogProcessingJob, ack_id: str):
         self.ack_ids.append(ack_id)
-        if self.jobs:
-            self.batch += ","
-            self.batch_bytes_size += 1
-        self.batch += log_processing_job.payload
+        self.bin_batch.append(log_processing_job.payload)
         self.batch_bytes_size += log_processing_job.bytes_size
         self.jobs.append(log_processing_job)
+        self.job_counter+=1
+
+    def merge_worker(self,worker):
+        self.ack_ids.extend(worker.ack_ids)
+        self.jobs.extend(worker.jobs)
+        #self.batch += ", " + worker.batch[1:]
+        self.bin_batch.extend(worker.bin_batch)
+        self.batch_bytes_size += worker.batch_bytes_size
+
 
     def should_flush(self, next_log_processing_job: Optional[LogProcessingJob] = None) -> bool:
         """
-        Check if worker state should be flushed before calling #add_job on this LogsBatch instance
+        Check if worker state should be flushed before calling #add_job on this WorkerState instance
         :param next_log_processing_job: next log message to process
         :return: bool value indicating if state should be flushed
         """
@@ -57,17 +68,19 @@ class LogsBatch:
         if not next_log_processing_job:
             return time_has_passed
 
-        too_many_messages = len(self.jobs) + 1 > REQUEST_MAX_EVENTS
+        too_many_messages = self.job_counter + 1 > REQUEST_MAX_EVENTS
         batch_is_big = self.batch_bytes_size + next_log_processing_job.bytes_size + 2 >= REQUEST_BODY_MAX_SIZE
         return too_many_messages or batch_is_big or time_has_passed
 
     @property
     def finished_batch(self):
-        return self.batch + "]"
+        result_str = "[".encode("UTF-8") + ", ".join(self.bin_batch).encode("UTF-8") + "]".encode("UTF-8")
+        return result_str
 
     @property
     def finished_batch_bytes_size(self):
-        return self.batch_bytes_size + 1
+        return self.batch_bytes_size + 2 + len(self.bin_batch) -1
+
 
 
 class BatchManager:
@@ -96,7 +109,16 @@ class BatchManager:
                 self.batch_queue.put(current_batch)
             current_batch.add_job(message_job, ack_id)
         return
-
+    def add_batch(self,batch: List[LogsBatch],ids: List[str]):
+        with self.lock:
+            for i in batch:
+                self.batch_queue.put(i)
+            if len(ids) > 0:
+                if self.batch_queue.qsize() == 0:
+                    self.batch_queue.put(LogsBatch())
+                current_batch = self.batch_queue.queue[self.batch_queue.qsize() - 1]
+                current_batch.ack_ids.extend(ids)
+                
     def get_ready_batches(self):
         with self.lock:
             ready_batches = []

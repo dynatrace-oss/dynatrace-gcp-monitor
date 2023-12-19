@@ -33,7 +33,7 @@ if not config.require_valid_certificate():
     ssl_context.verify_mode = ssl.CERT_NONE
 
 
-async def send_logs(session: aiohttp.ClientSession(), context: LogsContext, logs: List[LogProcessingJob], batch: str):
+async def send_logs(session: aiohttp.ClientSession(), context: LogsContext, logs: List[LogProcessingJob], batch: bytes):
     # pylint: disable=R0912
     #print(f"Sending logs. len(logs): {len(logs)}")
     context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
@@ -41,7 +41,7 @@ async def send_logs(session: aiohttp.ClientSession(), context: LogsContext, logs
     log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()
 
     try:
-        encoded_body_bytes = batch.encode("UTF-8")
+        encoded_body_bytes = batch
         context.self_monitoring.all_requests += 1
         status, reason, response = await _perform_http_request(
             session=session,

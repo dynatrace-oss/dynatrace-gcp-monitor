@@ -18,6 +18,7 @@ import time
 from datetime import datetime, timezone
 from queue import Queue
 from typing import Optional, Dict
+import ciso8601
 
 from dateutil.parser import *
 from google.pubsub_v1 import ReceivedMessage, PubsubMessage
@@ -145,13 +146,13 @@ def _set_cloud_log_forwarder(parsed_record):
 
 def _is_invalid_datetime(datetime_str: str) -> bool:
     try:
-        parse(datetime_str)
+        ciso8601.parse_datetime(datetime_str)
         return False
-    except ParserError:
+    except ValueError:
         return True
 
 
 def _is_log_too_old(timestamp: Optional[str]):
-    timestamp_datetime = parse(timestamp)
+    timestamp_datetime = ciso8601.parse_datetime(timestamp)
     event_age_in_seconds = (datetime.now(timezone.utc) - timestamp_datetime).total_seconds()
     return event_age_in_seconds > EVENT_AGE_LIMIT_SECONDS
