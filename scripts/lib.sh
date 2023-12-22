@@ -185,7 +185,7 @@ dt_api() {
   else
     METHOD="GET"
   fi
-  if RESPONSE=$(curl -k -s -X $METHOD "${DYNATRACE_URL}${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}" | tee -a "$FULL_LOG_FILE"); then
+  if RESPONSE=$(curl -k -s -X "${METHOD}" "${DYNATRACE_URL}${URL}" -w "<<HTTP_CODE>>%{http_code}" -H "Accept: application/json; charset=utf-8" -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Api-Token $DYNATRACE_ACCESS_KEY" "${DATA[@]}" | tee -a "$FULL_LOG_FILE"); then
     CODE=$(sed -rn 's/.*<<HTTP_CODE>>(.*)$/\1/p' <<<"$RESPONSE")
     sed -r 's/(.*)<<HTTP_CODE>>.*$/\1/' <<<"$RESPONSE"
     if [ "$CODE" -ge 400 ]; then

@@ -143,6 +143,7 @@ jobs:
   - stage: e2e-helm-deployment-test
     name: E2E GCP helm deployment test
     sudo: required
+    if: (tag =~ /^release-.*/) OR (branch = master) OR (type = pull_request)
     language: python
     python:
       - "3.8"

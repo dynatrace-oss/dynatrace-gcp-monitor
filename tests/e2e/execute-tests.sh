@@ -23,7 +23,7 @@ function run_deploy_and_tests() {
 
     ./tests/e2e/deployment-test.sh "--${TEST_TYPE}"
 
-    echo waiting 300sec
+    echo "waiting 300sec to give logs time to appear in DT"
     sleep 300
     END_LOAD_GENERATION=$(date -u +%s%3N)
     export END_LOAD_GENERATION
