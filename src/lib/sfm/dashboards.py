@@ -16,7 +16,7 @@ async def import_self_monitoring_dashboard(context: SfmDashboardsContext):
         return
 
     working_directory = os.path.dirname(os.path.realpath(__file__))
-    dashboards_directory = os.path.join(working_directory, "../dashboards")
+    dashboards_directory = os.path.join(working_directory, "../../dashboards")
     dashboard_file_path = os.path.join(dashboards_directory, dashboard_filename)
 
     try:
