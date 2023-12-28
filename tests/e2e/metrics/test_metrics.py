@@ -27,6 +27,8 @@ def test_environment_vars():
 
 
 def test_metrics_on_dynatrace():
+    # Cloud Function might record audit operations, so execution count could be more than 5 (depending on timeframe).
+    # Also, it happened that those extra operations differed in labels (different data, different total count).
     print(f"Try to receive execution_count metric from Dynatrace in 5 min (start_time={os.environ['START_LOAD_GENERATION']} ,end_time={os.environ['END_LOAD_GENERATION']})")
     time.sleep(5*60)
 
@@ -43,12 +45,11 @@ def test_metrics_on_dynatrace():
     assert response.status_code == 200
     response_json = response.json()
     assert 'totalCount' in response_json
-    assert response_json['totalCount'] == 1
+    assert response_json['totalCount'] >= 1
     # show full response on test fail
     print(response_json)
     execution_count_values = response_json['result'][0]['data'][0]['values']
     execution_count_value = max(execution_count_values)
-    # from 18.02.2022 GCP metrics give bad values for function execution count; after 5 executions we get value 6 or 7 in metric value :(
     assert execution_count_value >= 5
 
 
