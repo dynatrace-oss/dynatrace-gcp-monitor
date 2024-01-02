@@ -84,15 +84,19 @@ async def perform_pull(worker_state: WorkerState, sfm_queue: Queue, logging_cont
         token = await create_token(logging_context, gcp_session)
         tasks_to_pull = []
         messages_to_process = []
-        for _ in range(0, 16):
+        start_time = time.time()
+        coroutine_size_for_pulling = 16
+        for _ in range(0, coroutine_size_for_pulling):
             tasks_to_pull.append(pull_messages_from_pubsub(gcp_session, token, logging_context, messages_to_process))
         start_time = time.time()
         await asyncio.gather(*tasks_to_pull, return_exceptions=True)
 
+        print(f"message pulling time {time.time()-start_time} for {coroutine_size_for_pulling} coroutines")
 
+    async with init_gcp_client_session() as gcp_session:
         processed_messages_to_send = []
         ack_ids_to_send = []
-
+        start_time = time.time()
         for response in messages_to_process:
             if 'receivedMessages' in response:
                 for received_message in response.get('receivedMessages'):
@@ -104,7 +108,8 @@ async def perform_pull(worker_state: WorkerState, sfm_queue: Queue, logging_cont
 
                     processed_messages_to_send.append(message_job)
                     ack_ids_to_send.append(received_message.get('ackId'))
-
+        print(f"pure processing time: {time.time() - start_time}")
+        start_time = time.time()
         if len(processed_messages_to_send) > 0:
             batches = prepare_serialized_batches(processed_messages_to_send, logging_context)
             sfm_context = create_logs_context(sfm_queue)
@@ -115,6 +120,8 @@ async def perform_pull(worker_state: WorkerState, sfm_queue: Queue, logging_cont
                 send_tasks.append(send_logs2(gcp_session, sfm_context, processed_messages_to_send, batch))
 
             await asyncio.gather(*send_tasks, return_exceptions=True)
+
+            print(f"pure sending to DT time: {time.time() - start_time}")
 
 
 
@@ -165,6 +172,7 @@ async def send_batched_ack_ids(gcp_session, token: str, ack_ids: List[str], logg
     # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
     chunk_size = 2048
     print(f"Ack_Ids length: {len(ack_ids)}")
+    start_time = time.time()
     if len(ack_ids) < chunk_size:
         await send_ack_ids_to_pubsub(gcp_session, token, ack_ids, logging_context)
     else:
@@ -172,7 +180,7 @@ async def send_batched_ack_ids(gcp_session, token: str, ack_ids: List[str], logg
         for chunk in chunks(ack_ids, chunk_size):
             tasks_to_send_ack_ids.append(send_ack_ids_to_pubsub(gcp_session, token, chunk, logging_context))
         await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
-
+    print(f"ack_id sending time: {time.time() - start_time}")
 class LogBatch(NamedTuple):
     serialized_batch: str
     number_of_logs_in_batch: int
