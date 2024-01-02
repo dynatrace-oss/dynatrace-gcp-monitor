@@ -26,7 +26,7 @@ SUBSCRIPTION_PATH = f"projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_S
 
 async def pull_messages_from_pubsub(gcp_session: aiohttp.ClientSession,
                                     token: str,
-                                    logging_context: LoggingContext):
+                                    logging_context: LoggingContext, messages_to_process: list):
     pull_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:pull"
     try:
         status, reason, response = await _perform_http_request(
@@ -47,8 +47,9 @@ async def pull_messages_from_pubsub(gcp_session: aiohttp.ClientSession,
     except Exception as e:
         logging_context.log(f'Failed to pull messages from pubsub: {pull_url}. {e}')
         raise e
-    return response
 
+    if 'receivedMessages' in response:
+        messages_to_process.append(response)
 
 async def send_ack_ids_to_pubsub(gcp_session: aiohttp.ClientSession,
                                  token: str,

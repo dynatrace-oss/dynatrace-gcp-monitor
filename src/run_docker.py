@@ -175,7 +175,7 @@ def main():
     elif OPERATION_MODE == OperationMode.Logs:
         asyncio.run(LogsFastCheck(logging_context, instance_metadata).execute())
         processes = []
-        for _ in range(PARALLEL_PROCESSES):  # Adjust the number of processes as needed
+        for _ in range(3):  # Adjust the number of processes as needed
             process = multiprocessing.Process(target=run_logs_wrapper, args=(instance_metadata,))
             processes.append(process)
             process.start()

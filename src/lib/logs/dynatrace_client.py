@@ -33,7 +33,7 @@ if not config.require_valid_certificate():
 
 async def send_logs(session: aiohttp.ClientSession, context: LogsContext, logs: List[LogProcessingJob], batch: str):
     # pylint: disable=R0912
-    context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
+    # context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
     context.self_monitoring.sending_time_start = time.perf_counter()
     log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()
 
@@ -52,6 +52,55 @@ async def send_logs(session: aiohttp.ClientSession, context: LogsContext, logs: 
         )
         if status > 299:
             context.t_error(f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"')
+            if status == 400:
+                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.InvalidInput)
+            elif status == 401:
+                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.ExpiredToken)
+            elif status == 403:
+                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.WrongToken)
+            elif status == 404 or status == 405:
+                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.WrongURL)
+            elif status == 413 or status == 429:
+                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.TooManyRequests)
+            elif status == 500:
+                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
+
+            raise HTTPError(log_ingest_url, status, reason, "", "")
+        else:
+            context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Ok)
+    except Exception as e:
+        # Handle non-HTTP Errors
+        if not isinstance(e, HTTPError):
+            context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
+        raise e
+    finally:
+        context.self_monitoring.calculate_sending_time()
+        put_sfm_into_queue(context)
+
+async def send_logs2(session: aiohttp.ClientSession, context: LogsContext, logs: List[LogProcessingJob],
+                    batch):
+    # pylint: disable=R0912
+    # context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
+    context.self_monitoring.sending_time_start = time.perf_counter()
+    log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()
+
+    try:
+        encoded_body_bytes = batch.serialized_batch.encode("UTF-8")
+        context.self_monitoring.all_requests += 1
+        print(f"message size being sent to DT: {len(encoded_body_bytes)}")
+        status, reason, response = await _perform_http_request(
+            session=session,
+            method="POST",
+            url=log_ingest_url,
+            encoded_body_bytes=encoded_body_bytes,
+            headers={
+                "Authorization": f"Api-Token {context.dynatrace_api_key}",
+                "Content-Type": "application/json; charset=utf-8"
+            }
+        )
+        if status > 299:
+            context.t_error(
+                f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"')
             if status == 400:
                 context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.InvalidInput)
             elif status == 401:
