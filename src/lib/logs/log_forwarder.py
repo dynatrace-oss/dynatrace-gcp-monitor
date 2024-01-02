@@ -32,8 +32,8 @@ from lib.logs.logs_processor import _prepare_context_and_process_message
 from lib.logs.worker_state import WorkerState
 from lib.utilities import chunks
 
-from src.lib.logs.dynatrace_client import send_logs2
-from src.lib.logs.logs_processor import LogProcessingJob
+from lib.logs.dynatrace_client import send_logs2
+from lib.logs.logs_processor import LogProcessingJob
 
 
 def run_logs_wrapper(instance_metadata):
