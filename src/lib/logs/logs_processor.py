@@ -1,4 +1,4 @@
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2024 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@ import json
 import queue
 import time
 from datetime import datetime, timezone
-from queue import Queue
+from asyncio import Queue
 from typing import Optional, Dict
 
+import base64
 from dateutil.parser import *
 from google.pubsub_v1 import ReceivedMessage, PubsubMessage
 
@@ -42,15 +43,15 @@ class LogProcessingJob:
         self.bytes_size = len(payload.encode("UTF-8"))
 
 
-def _prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[LogProcessingJob]:
+def prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[LogProcessingJob]:
     context = None
     try:
         context = LogsProcessingContext(
-            scheduled_execution_id=str(message.ack_id.__hash__())[-8:],
-            message_publish_time=message.message.publish_time,
+            scheduled_execution_id=str(message.get('ackId').__hash__())[-8:],
+            message_publish_time=message.get('message').get('publishTime'),
             sfm_queue=sfm_queue
         )
-        return _process_message(context, message.message)
+        return _process_message(context, message.get('message'))
     except Exception as exception:
         if not context:
             context = LogsProcessingContext(None, None, sfm_queue)
@@ -69,7 +70,8 @@ def _prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMess
 
 def _process_message(context: LogsProcessingContext, message: PubsubMessage) -> Optional[LogProcessingJob]:
     context.self_monitoring.processing_time_start = time.perf_counter()
-    data = message.data.decode("UTF-8")
+    data = base64.b64decode(message.get('data'))
+    data = data.decode("UTF-8")
     # context.log(f"Data: {data}")
 
     payload = _create_dt_log_payload(context, data)

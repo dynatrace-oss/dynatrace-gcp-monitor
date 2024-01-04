@@ -1,4 +1,4 @@
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2024 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import os
 import queue
 import time
 from collections import Counter
-from queue import Queue
+from asyncio import Queue
 from typing import Dict, List
 
 import aiohttp
@@ -61,12 +61,12 @@ def put_sfm_into_queue(context: LogsContext):
             context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
 
-def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+async def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
     while True:
         try:
-            time.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
+            await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
             self_monitoring = LogSelfMonitoring()
-            asyncio.run(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
+            await _loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata)
         except Exception:
             logging_context.exception("Logs Self Monitoring Loop Exception:")
 
@@ -76,7 +76,7 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring,
                               context: LoggingContext,
                               instance_metadata: InstanceMetadata):
     try:
-        sfm_list = _pull_sfm(sfm_queue)
+        sfm_list = await _pull_sfm(sfm_queue)
         if sfm_list:
             async with init_gcp_client_session() as gcp_session:
                 context = await _create_sfm_logs_context(sfm_queue, context, gcp_session, instance_metadata)
@@ -117,11 +117,11 @@ async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_sessi
     )
 
 
-def _pull_sfm(sfm_queue: Queue):
+async def _pull_sfm(sfm_queue: Queue):
     sfm_list: List[LogSelfMonitoring] = []
     # Limit used to avoid pulling forever (the same as for job_queue)
     while len(sfm_list) < MAX_SFM_MESSAGES_PROCESSED and sfm_queue.qsize() > 0:
-        single_sfm: LogSelfMonitoring = sfm_queue.get()
+        single_sfm: LogSelfMonitoring = await sfm_queue.get()
         sfm_list.append(single_sfm)
     return sfm_list
 
