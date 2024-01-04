@@ -81,7 +81,6 @@ def perform_pull(worker_state: WorkerState,
                  subscription_path: str,
                  pull_request: PullRequest):
     response: PullResponse = subscriber_client.pull(pull_request)
-    message_jobs = []
     for received_message in response.received_messages:
         # print(f"Received: {received_message.message.data}.")
         message_job = prepare_context_and_process_message(sfm_queue, received_message)
@@ -89,7 +88,6 @@ def perform_pull(worker_state: WorkerState,
         if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
             worker_state.ack_ids.append(received_message.ack_id)
             continue
-        message_jobs.append(message_job)
         if worker_state.should_flush(message_job):
             perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
 
