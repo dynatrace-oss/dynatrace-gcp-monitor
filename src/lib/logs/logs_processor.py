@@ -17,7 +17,7 @@ import queue
 import time
 from datetime import datetime, timezone
 from asyncio import Queue
-from typing import Optional, Dict
+from typing import Optional, Dict, NamedTuple, List
 
 import base64
 from dateutil.parser import *
@@ -26,7 +26,7 @@ from google.pubsub_v1 import ReceivedMessage, PubsubMessage
 from lib.context import LogsProcessingContext
 from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, CONTENT_LENGTH_LIMIT, \
     ATTRIBUTE_VALUE_LENGTH_LIMIT, DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED, CLOUD_LOG_FORWARDER, \
-    CLOUD_LOG_FORWARDER_POD
+    CLOUD_LOG_FORWARDER_POD, REQUEST_BODY_MAX_SIZE, REQUEST_MAX_EVENTS
 from lib.logs.log_self_monitoring import LogSelfMonitoring, put_sfm_into_queue
 from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
 
@@ -41,6 +41,52 @@ class LogProcessingJob:
         self.payload = payload
         self.self_monitoring: LogSelfMonitoring = self_monitoring
         self.bytes_size = len(payload.encode("UTF-8"))
+
+
+class LogBatch(NamedTuple):
+    serialized_batch: str
+    number_of_logs_in_batch: int
+
+
+def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
+
+    batches: List[LogBatch] = []
+
+    logs_for_next_batch: List[str] = []
+    logs_for_next_batch_total_len = 0
+    logs_for_next_batch_events_count = 0
+
+    log_entries = 0
+    for log_entry in logs:
+        new_batch_len = logs_for_next_batch_total_len + 2 + len(logs_for_next_batch) - 1  # add bracket length (2) and commas for each entry but last one.
+
+        next_serialized_entry = log_entry.payload
+
+        next_entry_size = len(next_serialized_entry.encode("UTF-8"))
+
+        batch_length_if_added_entry = new_batch_len + 1 + len(next_serialized_entry)  # +1 is for comma
+
+        if batch_length_if_added_entry > REQUEST_BODY_MAX_SIZE or logs_for_next_batch_events_count >= REQUEST_MAX_EVENTS:
+            # would overflow limit, close batch and prepare new
+            batch = LogBatch("[" + ",".join(logs_for_next_batch) + "]", log_entries)
+            batches.append(batch)
+            log_entries = 0
+
+            logs_for_next_batch = []
+            logs_for_next_batch_total_len = 0
+            logs_for_next_batch_events_count = 0
+
+        logs_for_next_batch.append(next_serialized_entry)
+        log_entries += 1
+        logs_for_next_batch_total_len += next_entry_size
+        logs_for_next_batch_events_count += 1
+
+    if len(logs_for_next_batch) >= 1:
+        # finalize the last batch
+        batch = LogBatch("[" + ",".join(logs_for_next_batch) + "]", log_entries)
+        batches.append(batch)
+
+    return batches
 
 
 def prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[LogProcessingJob]:
