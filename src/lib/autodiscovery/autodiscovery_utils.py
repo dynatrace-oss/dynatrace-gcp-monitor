@@ -18,6 +18,8 @@ logging_context = LoggingContext("AUTODISCOVERY")
 
 discovered_resource_type = os.environ.get("AUTODISCOVERY_RESOURCE_TYPE", "gce_instance")
 
+
+
 FetchMetricDescriptorsResult = NamedTuple(
     "FetchMetricDescriptorsResult",
     [("project_id", str), ("metric_descriptor", GCPMetricDescriptor)],
