@@ -21,8 +21,8 @@ from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext, create_logs_context
 from lib.credentials import create_token
 from lib.instance_metadata import InstanceMetadata
-from lib.logs.dynatrace_aio_client import DynatraceClient, DynatraceClientFactory
-from lib.logs.gcp_client import GCPAioClient, GCPAioClientFactory
+from lib.logs.dynatrace_client import DynatraceClient, DynatraceClientFactory
+from lib.logs.gcp_client import GCPClient, GCPClientFactory
 from lib.logs.log_forwarder_variables import (
     LOGS_SUBSCRIPTION_ID,
     LOGS_SUBSCRIPTION_PROJECT,
@@ -48,7 +48,7 @@ async def run_logs(logging_context: LoggingContext, instance_metadata: InstanceM
 
     async with init_gcp_client_session() as gcp_session:
         token = await create_token(logging_context, gcp_session)
-        gcp_client_factory = GCPAioClientFactory(token)
+        gcp_client_factory = GCPClientFactory(token)
         dynatrace_client_factory = DynatraceClientFactory()
 
         sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
@@ -73,7 +73,7 @@ async def run_logs(logging_context: LoggingContext, instance_metadata: InstanceM
 async def pull_and_flush_logs_forever(
     worker_name: str,
     sfm_queue: Queue,
-    gcp_client_factory: GCPAioClientFactory,
+    gcp_client_factory: GCPClientFactory,
     dynatrace_client_factory: DynatraceClientFactory,
 ):
     logging_context = LoggingContext(worker_name)
@@ -97,7 +97,7 @@ async def pull_and_flush_logs_forever(
 async def perform_pull(
     worker_state: WorkerState,
     sfm_queue: Queue,
-    gcp_aio_client: GCPAioClient,
+    gcp_aio_client: GCPClient,
     dynatrace_aio_client: DynatraceClient,
     logging_context: LoggingContext,
 ):
@@ -124,7 +124,7 @@ async def perform_pull(
 async def perform_flush(
     worker_state: WorkerState,
     sfm_queue: Queue,
-    gcp_client: GCPAioClient,
+    gcp_client: GCPClient,
     dynatrace_client: DynatraceClient,
 ):
     context = create_logs_context(sfm_queue)
@@ -159,7 +159,7 @@ async def perform_flush(
 
 
 async def send_batched_ack(
-    gcp_client: GCPAioClient, ack_ids: List[str], logging_context: LoggingContext
+    gcp_client: GCPClient, ack_ids: List[str], logging_context: LoggingContext
 ):
     # request size limit is 524288, but we are not able to easily control size of created protobuf
     # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer

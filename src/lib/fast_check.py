@@ -24,7 +24,7 @@ from aiohttp import ClientSession
 from lib.configuration import config
 from lib.context import LoggingContext, create_logs_context
 from lib.instance_metadata import InstanceMetadata
-from lib.logs.dynatrace_aio_client import DynatraceClientFactory
+from lib.logs.dynatrace_client import DynatraceClientFactory
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 

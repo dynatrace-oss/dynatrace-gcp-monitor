@@ -16,6 +16,7 @@ import json
 from typing import Any, Dict, List
 
 import aiohttp
+from aiohttp import ClientSession
 from lib.context import LoggingContext
 from lib.logs.client_base import DynatraceClientBase
 from lib.logs.log_forwarder_variables import (
@@ -27,40 +28,21 @@ from lib.logs.log_forwarder_variables import (
 SUBSCRIPTION_PATH = f"projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_SUBSCRIPTION_ID}"
 
 
-class GCPAioClientFactory:
-    subscription_path: str
-    pull_url: str
-    acknowledge_url: str
-    api_token: str
-
-    def __init__(self, api_token):
-        self.subscription_path = (
-            f"projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_SUBSCRIPTION_ID}"
-        )
-        self.pull_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:pull"
-        self.acknowledge_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:acknowledge"
-        self.api_token = api_token
-
-    def get_gcp_pub_client(self, concurrent_con_limit: int = 900):
-        my_conn = aiohttp.TCPConnector(limit=concurrent_con_limit)
-        aio_http_session = aiohttp.ClientSession(connector=my_conn)
-        return GCPAioClient(
-            self.subscription_path,
-            self.pull_url,
-            self.acknowledge_url,
-            aio_http_session,
-            self.api_token,
-        )
-
-
-class GCPAioClient(DynatraceClientBase):
+class GCPClient(DynatraceClientBase):
     subscription_path: str
     pull_url: str
     acknowledge_url: str
     body_payload: bytes
     headers: Dict[str, Any]
 
-    def __init__(self, subscription_path, pull_url, acknowledge_url, aio_http_session, api_token):
+    def __init__(
+        self,
+        subscription_path: str,
+        pull_url: str,
+        acknowledge_url: str,
+        aio_http_session: ClientSession,
+        api_token: str,
+    ):
         self.subscription_path = subscription_path
         self.pull_url = pull_url
         self.acknowledge_url = acknowledge_url
@@ -104,3 +86,29 @@ class GCPAioClient(DynatraceClientBase):
                     f'reason: {response.reason}, url: {self.acknowledge_url}, body: "{await response.json()}"'
                 )
                 response.raise_for_status()
+
+
+class GCPClientFactory:
+    subscription_path: str
+    pull_url: str
+    acknowledge_url: str
+    api_token: str
+
+    def __init__(self, api_token):
+        self.subscription_path = (
+            f"projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_SUBSCRIPTION_ID}"
+        )
+        self.pull_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:pull"
+        self.acknowledge_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:acknowledge"
+        self.api_token = api_token
+
+    def get_gcp_pub_client(self, concurrent_con_limit: int = 900) -> GCPClient:
+        my_conn = aiohttp.TCPConnector(limit=concurrent_con_limit)
+        aio_http_session = aiohttp.ClientSession(connector=my_conn)
+        return GCPClient(
+            self.subscription_path,
+            self.pull_url,
+            self.acknowledge_url,
+            aio_http_session,
+            self.api_token,
+        )

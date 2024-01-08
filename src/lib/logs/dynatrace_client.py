@@ -15,7 +15,7 @@
 import ssl
 import time
 import aiohttp
-from typing import List
+from typing import List, Union
 from urllib.parse import urlparse
 
 from aiohttp import ClientResponseError
@@ -30,35 +30,22 @@ from lib.logs.log_self_monitoring import (
 from lib.logs.logs_processor import LogProcessingJob
 from lib.logs.client_base import DynatraceClientBase
 
-ssl_context = ssl.create_default_context()
-if not config.require_valid_certificate():
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-
-
-class DynatraceClientFactory:
-    dynatrace_api_key: str
-    log_ingest_url: str
-
-    def __init__(self):
-        dynatrace_url = config.get_dynatrace_log_ingest_url_from_env()  # type: ignore
-
-        self.dynatrace_api_key = config.get_dynatrace_api_key_from_env()  # type: ignore
-        self.log_ingest_url = urlparse(dynatrace_url.rstrip("/") + "/api/v2/logs/ingest").geturl()
-
-    def get_dynatrace_client(self, concurrent_con_limit: int = 900):
-        my_conn = aiohttp.TCPConnector(limit=concurrent_con_limit)
-        aio_http_session = aiohttp.ClientSession(connector=my_conn)
-        return DynatraceClient(self.dynatrace_api_key, self.log_ingest_url, aio_http_session)
-
 
 class DynatraceClient(DynatraceClientBase):
     dynatrace_api_key: str
     log_ingest_url: str
+    verify_ssl: Union[bool, None]
 
-    def __init__(self, dynatrace_api_key, log_ingest_url, aio_http_session):
+    def __init__(
+        self,
+        dynatrace_api_key: str,
+        log_ingest_url: str,
+        aio_http_session: aiohttp.ClientSession,
+        verify_ssl: Union[bool, None],
+    ):
         self.dynatrace_api_key = dynatrace_api_key
         self.log_ingest_url = log_ingest_url
+        self.verify_ssl = verify_ssl
         super().__init__(aio_http_session)
 
     async def send_logs(self, context: LogsContext, logs: List[LogProcessingJob], batch: str):
@@ -72,15 +59,16 @@ class DynatraceClient(DynatraceClientBase):
             "Content-Type": "application/json; charset=utf-8",
         }
 
-
-
-
         encoded_body_bytes = batch.encode("UTF-8")
 
         try:
             context.self_monitoring.all_requests += 1
             async with self.aio_http_session.request(
-                method="POST", url=self.log_ingest_url, data=encoded_body_bytes, headers=headers
+                method="POST",
+                url=self.log_ingest_url,
+                data=encoded_body_bytes,
+                headers=headers,
+                ssl=self.verify_ssl,
             ) as response:
                 response_text = await response.text()
                 resp_status = response.status
@@ -124,3 +112,23 @@ class DynatraceClient(DynatraceClientBase):
         finally:
             context.self_monitoring.calculate_sending_time()
             put_sfm_into_queue(context)
+
+
+class DynatraceClientFactory:
+    dynatrace_api_key: str
+    log_ingest_url: str
+    verify_ssl: Union[bool, None]
+
+    def __init__(self):
+        dynatrace_url: str = config.get_dynatrace_log_ingest_url_from_env()  # type: ignore
+
+        self.dynatrace_api_key = config.get_dynatrace_api_key_from_env()  # type: ignore
+        self.log_ingest_url = urlparse(dynatrace_url.rstrip("/") + "/api/v2/logs/ingest").geturl()
+        self.verify_ssl = None if config.require_valid_certificate() else False
+
+    def get_dynatrace_client(self, concurrent_con_limit: int = 900) -> DynatraceClient:
+        my_conn = aiohttp.TCPConnector(limit=concurrent_con_limit)
+        aio_http_session = aiohttp.ClientSession(connector=my_conn)
+        return DynatraceClient(
+            self.dynatrace_api_key, self.log_ingest_url, aio_http_session, self.verify_ssl
+        )
