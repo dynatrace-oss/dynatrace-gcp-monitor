@@ -1,4 +1,4 @@
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2023 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ import hashlib
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Set, Iterable
+from aiohttp import ClientSession
 
 
 from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
@@ -28,7 +29,7 @@ from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
-from lib.metrics import GCPService, Metric, IngestLine
+from lib.metrics import GCPService, MetadataIngestLine, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.topology.topology import fetch_topology, build_entity_id_map
@@ -52,46 +53,64 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
     logging_context.log(f"Execution took {elapsed_time}")
 
 
+async def get_metric_context(
+    gcp_session: ClientSession,
+    dt_session: ClientSession,
+    token: str,
+    logging_context: LoggingContext,
+) -> MetricsContext:
+    project_id_owner = config.project_id()
+
+    dynatrace_api_key = await fetch_dynatrace_api_key(
+        gcp_session=gcp_session, project_id=project_id_owner, token=token
+    )
+    dynatrace_url = await fetch_dynatrace_url(
+        gcp_session=gcp_session, project_id=project_id_owner, token=token
+    )
+    check_version(logging_context=logging_context)
+    await check_dynatrace(
+        logging_context=logging_context,
+        project_id=project_id_owner,
+        dt_session=dt_session,
+        dynatrace_url=dynatrace_url,
+        dynatrace_access_key=dynatrace_api_key,
+    )
+
+    query_interval_min = get_query_interval_minutes()
+
+    context = MetricsContext(
+        gcp_session=gcp_session,
+        dt_session=dt_session,
+        project_id_owner=project_id_owner,
+        token=token,
+        execution_time=datetime.utcnow(),
+        execution_interval_seconds=60 * query_interval_min,
+        dynatrace_api_key=dynatrace_api_key,
+        dynatrace_url=dynatrace_url,
+        print_metric_ingest_input=config.print_metric_ingest_input(),
+        self_monitoring_enabled=config.self_monitoring_enabled(),
+        scheduled_execution_id=logging_context.scheduled_execution_id,
+    )
+
+    return context
+
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
-    context = LoggingContext(execution_id)
+    logging_context = LoggingContext(execution_id)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
         setup_start_time = time.time()
-        token = await create_token(context, gcp_session)
+        token = await create_token(logging_context, gcp_session)
 
         if token is None:
-            context.log("Cannot proceed without authorization token, stopping the execution")
+            logging_context.log("Cannot proceed without authorization token, stopping the execution")
             return
         if not isinstance(token, str):
             raise Exception(f"Failed to fetch access token, got non string value: {token}")
 
-        context.log("Successfully obtained access token")
+        logging_context.log("Successfully obtained access token")
 
-        project_id_owner = config.project_id()
-
-        dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-        dynatrace_api_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, project_id=project_id_owner, token=token)
-        check_version(logging_context=context)
-        await check_dynatrace(logging_context=context,
-                              project_id=project_id_owner,
-                              dt_session=dt_session,
-                              dynatrace_url=dynatrace_url,
-                              dynatrace_access_key=dynatrace_api_key)
-
-        query_interval_min = get_query_interval_minutes()
-
-        context = MetricsContext(
-            gcp_session=gcp_session,
-            dt_session=dt_session,
-            project_id_owner=project_id_owner,
-            token=token,
-            execution_time=datetime.utcnow(),
-            execution_interval_seconds=60 * query_interval_min,
-            dynatrace_api_key=dynatrace_api_key,
-            dynatrace_url=dynatrace_url,
-            print_metric_ingest_input=config.print_metric_ingest_input(),
-            self_monitoring_enabled=config.self_monitoring_enabled(),
-            scheduled_execution_id=context.scheduled_execution_id
+        context = await get_metric_context(
+            gcp_session, dt_session, token, logging_context=logging_context
         )
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
@@ -163,6 +182,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str]) -> List[IngestLine]:
     fetch_metric_coros = []
+    metrics_metadata = []
     topology: Dict[GCPService, Iterable[Entity]] = {}
 
     # Topology fetching: retrieving additional instances info about enabled services
@@ -177,22 +197,23 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     skipped_disabled_apis = set()
 
     for service in services:
+        if not service.is_enabled:
+            continue  # skip disabled services
         if service in topology and not topology[service]:
             skipped_services_with_no_instances.append(f"{service.name}/{service.feature_set}")
             continue  # skip fetching the metrics because there are no instances
         for metric in service.metrics:
-            gcp_api_last_index = metric.google_metric.find("/")
-            api = metric.google_metric[:gcp_api_last_index]
-            if api in disabled_apis:
-                skipped_disabled_apis.add(api)
-                continue  # skip fetching the metrics because service API is disabled
-            fetch_metric_coro = run_fetch_metric(
-                context=context,
-                project_id=project_id,
-                service=service,
-                metric=metric
-            )
-            fetch_metric_coros.append(fetch_metric_coro)
+            # Fetch metric only if it's metric from extensions or is autodiscovered in project_id
+            if not metric.autodiscovered_metric or project_id in metric.project_ids:
+                gcp_api_last_index = metric.google_metric.find("/")
+                api = metric.google_metric[:gcp_api_last_index]
+                if api in disabled_apis:
+                    skipped_disabled_apis.add(api)
+                    continue  # skip fetching the metrics because service API is disabled
+                fetch_metric_coro = run_fetch_metric(
+                    context=context, project_id=project_id, service=service, metric=metric
+                )
+                fetch_metric_coros.append(fetch_metric_coro)
 
     context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")
 
@@ -206,6 +227,8 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     fetch_metric_results = await asyncio.gather(*fetch_metric_coros, return_exceptions=True)
     entity_id_map = build_entity_id_map(list(topology.values()))
     flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
+
+    flat_metric_results.extend(metrics_metadata)
     return flat_metric_results
 
 

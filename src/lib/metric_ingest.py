@@ -20,8 +20,16 @@ from lib.configuration import config
 from lib.context import MetricsContext, LoggingContext, DynatraceConnectivity
 from lib.entities.ids import _create_mmh3_hash
 from lib.entities.model import Entity
-from lib.metrics import DISTRIBUTION_VALUE_KEY, Metric, TYPED_VALUE_KEY_MAPPING, GCPService, \
-    DimensionValue, IngestLine
+from lib.metrics import (
+    DISTRIBUTION_VALUE_KEY,
+    TYPED_VALUE_KEY_MAPPING,
+    AutodiscoveryGCPService,
+    Dimension,
+    DimensionValue,
+    GCPService,
+    IngestLine,
+    Metric,
+)
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 
 
@@ -97,6 +105,21 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
     context.sfm[SfmKeys.dynatrace_ingest_lines_ok_count].update(project_id, lines_ok)
     context.sfm[SfmKeys.dynatrace_ingest_lines_invalid_count].update(project_id, lines_invalid)
 
+    # Discarding warnings about monotonic counters
+    if ingest_response_json.get("warnings") and isinstance(
+        ingest_response_json.get("warnings"), dict
+    ):
+        warnings = ingest_response_json.get("warnings", {}).get("warningLines", [])
+
+        filtered_warnings = [
+            warning
+            for warning in warnings
+            if not warning.get("warning", "").endswith(
+                "Note that monotonic counters are deprecated."
+            )
+        ]
+        ingest_response_json["warnings"]["warningLines"] = filtered_warnings
+
     context.log(project_id, f"Ingest response: {ingest_response_json}")
     await log_invalid_lines(context, ingest_response_json, lines_batch)
 
@@ -159,7 +182,14 @@ async def fetch_metric(
         ('aggregation.crossSeriesReducer', reducer)
     ]
 
-    all_dimensions = (service.dimensions + metric.dimensions)
+    if metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
+        service_dimensions = service.get_dimensions(metric)
+        service_name = service.get_name(metric)
+    else:
+        service_dimensions = service.dimensions
+        service_name = service.name
+
+    all_dimensions = (service_dimensions + metric.dimensions)
     dt_dimensions_mapping = DtDimensionsMap()
     for dimension in all_dimensions:
         if dimension.key_for_send_to_dynatrace:
@@ -186,8 +216,8 @@ async def fetch_metric(
 
         for single_time_series in page['timeSeries']:
             typed_value_key = extract_typed_value_key(single_time_series)
-            dimensions = create_dimensions(context, service.name, single_time_series, dt_dimensions_mapping)
-            entity_id = create_entity_id(service, single_time_series)
+            dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping)
+            entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
 
             for point in single_time_series['points']:
                 line = convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
@@ -304,11 +334,11 @@ def flatten_and_enrich_metric_results(
     return results
 
 
-def create_entity_id(service: GCPService, time_series):
+def create_entity_id(service_name: str, service_dimensions: List[Dimension], time_series):
     resource = time_series['resource']
     resource_labels = resource.get('labels', {})
-    parts = [service.name]
-    for dimension in service.dimensions:
+    parts = [service_name]
+    for dimension in service_dimensions:
         key = dimension.key_for_create_entity_id
 
         dimension_value = resource_labels.get(key)

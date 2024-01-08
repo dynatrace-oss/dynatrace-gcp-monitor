@@ -1,0 +1,464 @@
+gcp_extension_mapping:
+- extension_name: google-ai-platform
+  services:
+  - service_name: cloudml_job
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloudml_job
+  - service_name: cloudml_model_version
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloudml_model_version
+- extension_name: google-alloydb
+  services:
+  - service_name: alloydb_database
+    feature_set: insights_metrics
+    monitored_resources:
+    - value: alloydb.googleapis.com/Database
+  - service_name: alloydb_instance
+    feature_set: default_metrics
+    monitored_resources:
+    - value: alloydb.googleapis.com/Instance
+- extension_name: google-api
+  services:
+  - service_name: api
+    feature_set: default_metrics
+    monitored_resources:
+    - value: api
+    - value: consumed_api
+    - value: produced_api
+  - service_name: consumer_quota
+    feature_set: default_metrics
+    monitored_resources:
+    - value: producer_quota
+    - value: consumer_quota
+  - service_name: consumed_api
+    feature_set: default_metrics
+    monitored_resources:
+    - value: api
+    - value: consumed_api
+    - value: produced_api
+  - service_name: producer_quota
+    feature_set: default_metrics
+    monitored_resources:
+    - value: producer_quota
+    - value: consumer_quota
+  - service_name: api
+    feature_set: limited_response_codes
+    monitored_resources:
+    - value: api
+    - value: consumed_api
+    - value: produced_api
+  - service_name: consumed_api
+    feature_set: limited_response_codes
+    monitored_resources:
+    - value: api
+    - value: consumed_api
+    - value: produced_api
+- extension_name: google-apigee
+  services:
+  - service_name: apigee_googleapis_com_Environment
+    feature_set: default_metrics
+    monitored_resources:
+    - value: apigee.googleapis.com/Environment
+  - service_name: apigee_googleapis_com_Proxy
+    feature_set: default_metrics
+    monitored_resources:
+    - value: apigee.googleapis.com/Proxy
+  - service_name: apigee_googleapis_com_ProxyV2
+    feature_set: default_metrics
+    monitored_resources:
+    - value: apigee.googleapis.com/TargetV2
+    - value: apigee.googleapis.com/ProxyV2
+- extension_name: google-app-engine
+  services:
+  - service_name: gae_app
+    feature_set: default_metrics
+    monitored_resources:
+    - value: gae_app
+  - service_name: gae_instance
+    feature_set: default_metrics
+    monitored_resources:
+    - value: gae_instance
+- extension_name: google-assistant-api
+  services:
+  - service_name: assistant_action_project
+    feature_set: default_metrics
+    monitored_resources:
+    - value: assistant_action_project
+- extension_name: google-bigquery
+  services:
+  - service_name: bigquery_biengine_model
+    feature_set: default_metrics
+    monitored_resources:
+    - value: bigquery_biengine_model
+  - service_name: bigquery_project
+    feature_set: default_metrics
+    monitored_resources:
+    - value: bigquery_project
+- extension_name: google-bigtable
+  services:
+  - service_name: bigtable_cluster
+    feature_set: default_metrics
+    monitored_resources:
+    - value: bigtable_cluster
+  - service_name: bigtable_table
+    feature_set: default_metrics
+    monitored_resources:
+    - value: bigtable_table
+- extension_name: google-cloud-dns
+  services:
+  - service_name: dns_query
+    feature_set: default_metrics
+    monitored_resources:
+    - value: dns_query
+- extension_name: google-cloud-functions
+  services:
+  - service_name: cloud_function
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloud_function
+- extension_name: google-cloud-iot
+  services:
+  - service_name: cloudiot_device_registry
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloudiot_device_registry
+- extension_name: google-cloud-nat-gateway
+  services:
+  - service_name: nat_gateway
+    feature_set: default_metrics
+    monitored_resources:
+    - value: nat_gateway
+- extension_name: google-cloud-run
+  services:
+  - service_name: cloud_run_revision
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloud_run_revision
+    - value: cloud_run_job
+- extension_name: google-cloud-storage
+  services:
+  - service_name: gcs_bucket
+    feature_set: default_metrics
+    monitored_resources:
+    - value: gcs_bucket
+- extension_name: google-cloud-tasks
+  services:
+  - service_name: cloud_tasks_queue
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloud_tasks_queue
+- extension_name: google-composer
+  services:
+  - service_name: cloud_composer_environment
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloud_composer_environment
+- extension_name: google-compute-engine
+  services:
+  - service_name: gce_instance
+    feature_set: default_metrics
+    monitored_resources:
+    - value: gce_instance
+  - service_name: gce_instance
+    feature_set: agent
+    monitored_resources:
+#    - value: aws_ec2_instance
+    - value: baremetalsolution.googleapis.com/Instance
+    - value: gce_instance
+  - service_name: gce_instance
+    feature_set: firewallinsights
+    monitored_resources:
+    - value: gce_instance
+#  - service_name: gce_instance
+#    feature_set: istio
+#    monitored_resources: []
+  - service_name: gce_instance_vm_flow
+    feature_set: default_metrics
+    monitored_resources:
+    - value: gce_instance
+  - service_name: instance_group
+    feature_set: default_metrics
+    monitored_resources:
+    - value: instance_group
+  - service_name: autoscaler
+    feature_set: default_metrics
+    monitored_resources:
+    - value: autoscaler
+  - service_name: tpu_worker
+    feature_set: default_metrics
+    monitored_resources:
+    - value: tpu_worker
+- extension_name: google-data-transfer
+  services:
+  - service_name: transfer_service_agent
+    feature_set: default_metrics
+    monitored_resources:
+    - value: transfer_service_agent
+- extension_name: google-dataflow
+  services:
+  - service_name: dataflow_job
+    feature_set: default_metrics
+    monitored_resources:
+    - value: dataflow_job
+- extension_name: google-dataproc
+  services:
+  - service_name: cloud_dataproc_cluster
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloud_dataproc_cluster
+- extension_name: google-datastore
+  services:
+  - service_name: datastore_request
+    feature_set: default_metrics
+    monitored_resources:
+    - value: datastore_request
+- extension_name: google-dlp
+  services:
+  - service_name: cloud_dlp_project
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloud_dlp_project
+- extension_name: google-filestore
+  services:
+  - service_name: filestore_instance
+    feature_set: default_metrics
+    monitored_resources:
+    - value: filestore_instance
+- extension_name: google-firebase
+  services:
+  - service_name: firebase_domain
+    feature_set: default_metrics
+    monitored_resources:
+    - value: firebase_domain
+  - service_name: firebase_namespace
+    feature_set: default_metrics
+    monitored_resources:
+    - value: firebase_namespace
+- extension_name: google-firestore
+  services:
+  - service_name: firestore_instance
+    feature_set: default_metrics
+    monitored_resources:
+    - value: firestore_instance
+    - value: firestore.googleapis.com/Database
+- extension_name: google-hybrid-connectivity
+  services:
+  - service_name: gce_router
+    feature_set: default_metrics
+    monitored_resources:
+    - value: gce_router
+  - service_name: interconnect
+    feature_set: default_metrics
+    monitored_resources:
+    - value: interconnect
+  - service_name: vpn_gateway
+    feature_set: default_metrics
+    monitored_resources:
+    - value: vpn_gateway
+  - service_name: interconnect_attachment
+    feature_set: default_metrics
+    monitored_resources:
+    - value: interconnect_attachment
+- extension_name: google-kubernetes-engine
+  services:
+#  - service_name: k8s_cluster
+#    feature_set: default_metrics
+#    monitored_resources: []
+  - service_name: k8s_node
+    feature_set: default_metrics
+    monitored_resources:
+    - value: k8s_node
+  - service_name: k8s_pod
+    feature_set: default_metrics
+    monitored_resources:
+    - value: k8s_pod
+#  - service_name: k8s_pod
+#    feature_set: istio
+#    monitored_resources: []
+  - service_name: k8s_container
+    feature_set: default_metrics
+    monitored_resources:
+    - value: k8s_container
+#  - service_name: k8s_container
+#    feature_set: agent
+#    monitored_resources: []
+  - service_name: k8s_container
+    feature_set: apigee
+    monitored_resources:
+    - value: k8s_container
+  - service_name: k8s_container
+    feature_set: istio
+    monitored_resources:
+    - value: istio_control_plane
+    - value: k8s_container
+  - service_name: k8s_container
+    feature_set: nginx
+    monitored_resources:
+    - value: k8s_container
+- extension_name: google-load-balancing
+  services:
+  - service_name: https_lb_rule
+    feature_set: default_metrics
+    monitored_resources:
+    - value: https_lb_rule
+  - service_name: internal_http_lb_rule
+    feature_set: default_metrics
+    monitored_resources:
+    - value: internal_http_lb_rule
+  - service_name: internal_tcp_lb_rule
+    feature_set: default_metrics
+    monitored_resources:
+    - value: internal_udp_lb_rule
+    - value: internal_tcp_lb_rule
+  - service_name: internal_udp_lb_rule
+    feature_set: default_metrics
+    monitored_resources:
+    - value: internal_udp_lb_rule
+    - value: internal_tcp_lb_rule
+  - service_name: tcp_lb_rule
+    feature_set: default_metrics
+    monitored_resources:
+    - value: loadbalancing.googleapis.com/ExternalNetworkLoadBalancerRule
+    - value: udp_lb_rule
+    - value: tcp_lb_rule
+  - service_name: udp_lb_rule
+    feature_set: default_metrics
+    monitored_resources:
+    - value: loadbalancing.googleapis.com/ExternalNetworkLoadBalancerRule
+    - value: udp_lb_rule
+    - value: tcp_lb_rule
+  - service_name: tcp_ssl_proxy_rule
+    feature_set: default_metrics
+    monitored_resources:
+    - value: tcp_ssl_proxy_rule
+- extension_name: google-managed-service-ad
+  services:
+  - service_name: microsoft_ad_domain
+    feature_set: default_metrics
+    monitored_resources:
+    - value: microsoft_ad_domain
+- extension_name: google-memorystore
+  services:
+  - service_name: redis_instance
+    feature_set: default_metrics
+    monitored_resources:
+    - value: redis_instance
+- extension_name: google-netapp-cvs
+  services:
+  - service_name: netapp_cloud_volume
+    feature_set: default_metrics
+    monitored_resources:
+    - value: netapp_cloud_volume
+  - service_name: cloudvolumesgcp_api_netapp_com_NetAppCloudVolumeSO
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloudvolumesgcp-api.netapp.com/CloudVolume
+- extension_name: google-network-security
+  services:
+  - service_name: network_security_policy
+    feature_set: default_metrics
+    monitored_resources:
+    - value: network_security_policy
+#- extension_name: google-operations
+#  services:
+#  - service_name: uptime_url
+#    feature_set: default_metrics
+#    monitored_resources:
+#    - value: aws_ec2_instance
+#    - value: servicedirectory_service
+#    - value: gae_app
+#    - value: gce_instance
+#    - value: uptime_url
+#    - value: cloud_run_revision
+#    - value: k8s_service
+#    - value: aws_elb_load_balancer
+#  - service_name: gce_instance
+#    feature_set: uptime_check
+#    monitored_resources:
+#    - value: aws_ec2_instance
+#    - value: servicedirectory_service
+#    - value: gae_app
+#    - value: gce_instance
+#    - value: uptime_url
+#    - value: cloud_run_revision
+#    - value: k8s_service
+#    - value: aws_elb_load_balancer
+#  - service_name: gae_app_uptime_check
+#    feature_set: default_metrics
+#    monitored_resources:
+#    - value: aws_ec2_instance
+#    - value: servicedirectory_service
+#    - value: gae_app
+#    - value: gce_instance
+#    - value: uptime_url
+#    - value: cloud_run_revision
+#    - value: k8s_service
+#    - value: aws_elb_load_balancer
+#  - service_name: logging_sink
+#    feature_set: default_metrics
+#    monitored_resources:
+#    - value: logging_sink
+#  - service_name: cloudtrace_googleapis_com_CloudtraceProject
+#    feature_set: default_metrics
+#    monitored_resources:
+#    - value: cloudtrace.googleapis.com/CloudtraceProject
+- extension_name: google-pubsub
+  services:
+  - service_name: pubsub_snapshot
+    feature_set: default_metrics
+    monitored_resources:
+    - value: pubsub_snapshot
+  - service_name: pubsub_subscription
+    feature_set: default_metrics
+    monitored_resources:
+    - value: pubsub_subscription
+  - service_name: pubsub_topic
+    feature_set: default_metrics
+    monitored_resources:
+    - value: pubsub_topic
+- extension_name: google-pubsub-lite
+  services:
+  - service_name: pubsublite_topic_partition
+    feature_set: default_metrics
+    monitored_resources:
+    - value: pubsublite_topic_partition
+  - service_name: pubsublite_subscription_partition
+    feature_set: default_metrics
+    monitored_resources:
+    - value: pubsublite_subscription_partition
+- extension_name: google-recaptcha-ent
+  services:
+  - service_name: recaptchaenterprise_googleapis_com_Key
+    feature_set: default_metrics
+    monitored_resources:
+    - value: recaptchaenterprise.googleapis.com/Key
+- extension_name: google-spanner
+  services:
+  - service_name: spanner_instance
+    feature_set: default_metrics
+    monitored_resources:
+    - value: spanner_instance
+- extension_name: google-sql
+  services:
+  - service_name: cloudsql_database
+    feature_set: default_metrics
+    monitored_resources:
+    - value: cloudsql_database
+  - service_name: cloudsql_database
+    feature_set: postgresqlinsights
+    monitored_resources:
+    - value: cloudsql_instance_database
+- extension_name: google-vpc-network
+  services:
+  - service_name: vpc_access_connector
+    feature_set: default_metrics
+    monitored_resources:
+    - value: vpc_access_connector
+- extension_name: google-zone-network-health
+  services:
+  - service_name: gce_zone_network_health
+    feature_set: default_metrics
+    monitored_resources:
+    - value: gce_zone_network_health
