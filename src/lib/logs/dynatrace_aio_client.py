@@ -28,7 +28,7 @@ from lib.logs.log_self_monitoring import (
     put_sfm_into_queue,
 )
 from lib.logs.logs_processor import LogProcessingJob
-from lib.logs.aio_client_base import DynatraceAioClientBase
+from lib.logs.client_base import DynatraceClientBase
 
 ssl_context = ssl.create_default_context()
 if not config.require_valid_certificate():
@@ -36,7 +36,7 @@ if not config.require_valid_certificate():
     ssl_context.verify_mode = ssl.CERT_NONE
 
 
-class DynatraceAioClientFactory:
+class DynatraceClientFactory:
     dynatrace_api_key: str
     log_ingest_url: str
 
@@ -49,10 +49,10 @@ class DynatraceAioClientFactory:
     def get_dynatrace_client(self, concurrent_con_limit: int = 900):
         my_conn = aiohttp.TCPConnector(limit=concurrent_con_limit)
         aio_http_session = aiohttp.ClientSession(connector=my_conn)
-        return DynatraceAioClient(self.dynatrace_api_key, self.log_ingest_url, aio_http_session)
+        return DynatraceClient(self.dynatrace_api_key, self.log_ingest_url, aio_http_session)
 
 
-class DynatraceAioClient(DynatraceAioClientBase):
+class DynatraceClient(DynatraceClientBase):
     dynatrace_api_key: str
     log_ingest_url: str
 

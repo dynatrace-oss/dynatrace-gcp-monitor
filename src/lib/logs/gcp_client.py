@@ -17,7 +17,7 @@ from typing import Any, Dict, List
 
 import aiohttp
 from lib.context import LoggingContext
-from lib.logs.aio_client_base import DynatraceAioClientBase
+from lib.logs.client_base import DynatraceClientBase
 from lib.logs.log_forwarder_variables import (
     LOGS_SUBSCRIPTION_ID,
     LOGS_SUBSCRIPTION_PROJECT,
@@ -53,7 +53,7 @@ class GCPAioClientFactory:
         )
 
 
-class GCPAioClient(DynatraceAioClientBase):
+class GCPAioClient(DynatraceClientBase):
     subscription_path: str
     pull_url: str
     acknowledge_url: str

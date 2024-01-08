@@ -14,7 +14,7 @@
 
 import aiohttp
 
-class DynatraceAioClientBase:
+class DynatraceClientBase:
     aio_http_session: aiohttp.ClientSession
 
     def __init__(self, aio_http_session):

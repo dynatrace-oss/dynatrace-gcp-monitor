@@ -24,7 +24,7 @@ from aiohttp import ClientSession
 from lib.configuration import config
 from lib.context import LoggingContext, create_logs_context
 from lib.instance_metadata import InstanceMetadata
-from lib.logs.dynatrace_aio_client import DynatraceAioClientFactory
+from lib.logs.dynatrace_aio_client import DynatraceClientFactory
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -162,7 +162,7 @@ class LogsFastCheck:
             'severity': 'INFO'
         }
 
-        dynatrace_client_factory = DynatraceAioClientFactory()
+        dynatrace_client_factory = DynatraceClientFactory()
         async with dynatrace_client_factory.get_dynatrace_client() as dynatrace_client:
             await dynatrace_client.send_logs(create_logs_context(Queue()), [], json.dumps([fast_check_event]))
 

@@ -21,8 +21,8 @@ from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext, create_logs_context
 from lib.credentials import create_token
 from lib.instance_metadata import InstanceMetadata
-from lib.logs.dynatrace_aio_client import DynatraceAioClient, DynatraceAioClientFactory
-from lib.logs.gcp_aio_client import GCPAioClient, GCPAioClientFactory
+from lib.logs.dynatrace_aio_client import DynatraceClient, DynatraceClientFactory
+from lib.logs.gcp_client import GCPAioClient, GCPAioClientFactory
 from lib.logs.log_forwarder_variables import (
     LOGS_SUBSCRIPTION_ID,
     LOGS_SUBSCRIPTION_PROJECT,
@@ -49,17 +49,18 @@ async def run_logs(logging_context: LoggingContext, instance_metadata: InstanceM
     async with init_gcp_client_session() as gcp_session:
         token = await create_token(logging_context, gcp_session)
         gcp_client_factory = GCPAioClientFactory(token)
-        dynatrace_client_factory = DynatraceAioClientFactory()
+        dynatrace_client_factory = DynatraceClientFactory()
 
         sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
         tasks = []
 
         for i in range(0, PROCESSING_WORKERS):
             worker_task = asyncio.create_task(
-                pull_and_flush_logs_forever(f"Worker-{i}", sfm_queue, gcp_client_factory,dynatrace_client_factory)
+                pull_and_flush_logs_forever(
+                    f"Worker-{i}", sfm_queue, gcp_client_factory, dynatrace_client_factory
+                )
             )
             tasks.append(worker_task)
-
 
         sfm_task = asyncio.create_task(
             create_sfm_loop(sfm_queue, logging_context, instance_metadata)
@@ -69,55 +70,11 @@ async def run_logs(logging_context: LoggingContext, instance_metadata: InstanceM
         await asyncio.gather(*tasks, return_exceptions=True)
 
 
-import datetime
-import time
-
-
-async def worker(client, result_array, sem):
-    async with sem:
-        result = await client.pull_messages()
-
-    messages = len(result.get("receivedMessages"))
-    size_bytes = 0
-    for r_m in result.get("receivedMessages"):
-        sb = len(r_m.get("message").get("data"))
-        size_bytes += sb
-
-    result_array.append((messages, size_bytes))
-
-
-async def perf_aio(factory: GCPAioClientFactory):
-    semaphore = asyncio.Semaphore(10000)
-
-    while True:
-        client = factory.get_gcp_pub_client()
-
-        array = []
-        tasks = []
-        start = time.time()
-
-        for i in range(100):
-            task = asyncio.ensure_future(worker(client, array, semaphore))
-            tasks.append(task)
-        await asyncio.gather(*tasks, return_exceptions=True)
-
-        elapsed = time.time() - start
-        await client.aio_http_session.close()
-
-        final_count = 0
-        final_size = 0
-
-        for res in array:
-            final_count += res[0]
-            final_size += res[1]
-
-        print(
-            f"[{datetime.datetime.now()}] Got: {final_count} messages. Size: {round(final_size/(1024*1024),3) } MB Elapsed: {elapsed} s"
-        )
-
-
 async def pull_and_flush_logs_forever(
-    worker_name: str, sfm_queue: Queue, gcp_client_factory: GCPAioClientFactory, dynatrace_client_factory: DynatraceAioClientFactory
+    worker_name: str,
+    sfm_queue: Queue,
+    gcp_client_factory: GCPAioClientFactory,
+    dynatrace_client_factory: DynatraceClientFactory,
 ):
     logging_context = LoggingContext(worker_name)
     worker_state = WorkerState(worker_name)
@@ -125,7 +82,11 @@ async def pull_and_flush_logs_forever(
     while True:
         try:
             await perform_pull(
-                worker_state, sfm_queue, gcp_client_factory.get_gcp_pub_client(), dynatrace_client_factory.get_dynatrace_client(), logging_context
+                worker_state,
+                sfm_queue,
+                gcp_client_factory.get_gcp_pub_client(),
+                dynatrace_client_factory.get_dynatrace_client(),
+                logging_context,
             )
         except Exception as e:
             logging_context.exception("Failed to pull messages")
@@ -137,7 +98,7 @@ async def perform_pull(
     worker_state: WorkerState,
     sfm_queue: Queue,
     gcp_aio_client: GCPAioClient,
-    dynatrace_aio_client: DynatraceAioClient,
+    dynatrace_aio_client: DynatraceClient,
     logging_context: LoggingContext,
 ):
     async with gcp_aio_client as gcp_client, dynatrace_aio_client as dynatrace_client:
@@ -164,7 +125,7 @@ async def perform_flush(
     worker_state: WorkerState,
     sfm_queue: Queue,
     gcp_client: GCPAioClient,
-    dynatrace_client: DynatraceAioClient,
+    dynatrace_client: DynatraceClient,
 ):
     context = create_logs_context(sfm_queue)
     try:
@@ -175,7 +136,9 @@ async def perform_flush(
                 context.log(
                     worker_state.worker_name, f"Log ingest payload size: {display_payload_size} kB"
                 )
-                await dynatrace_client.send_logs(context, worker_state.jobs, worker_state.finished_batch)
+                await dynatrace_client.send_logs(
+                    context, worker_state.jobs, worker_state.finished_batch
+                )
                 context.log(worker_state.worker_name, "Log ingest payload pushed successfully")
                 sent = True
             except Exception:
@@ -183,7 +146,7 @@ async def perform_flush(
             if sent:
                 context.self_monitoring.sent_logs_entries += len(worker_state.jobs)
                 context.self_monitoring.log_ingest_payload_size += display_payload_size
-                await send_batched_ack(gcp_client, worker_state.ack_ids,context )
+                await send_batched_ack(gcp_client, worker_state.ack_ids, context)
         elif worker_state.ack_ids:
             # Send ACKs if processing all messages has failed
             await send_batched_ack(gcp_client, worker_state.ack_ids, context)
@@ -195,7 +158,9 @@ async def perform_flush(
         worker_state.reset()
 
 
-async def send_batched_ack(gcp_client: GCPAioClient, ack_ids: List[str], logging_context: LoggingContext):
+async def send_batched_ack(
+    gcp_client: GCPAioClient, ack_ids: List[str], logging_context: LoggingContext
+):
     # request size limit is 524288, but we are not able to easily control size of created protobuf
     # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer
     # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
