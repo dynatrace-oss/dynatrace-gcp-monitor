@@ -1,4 +1,4 @@
-#   Copyright 2021 Dynatrace LLC
+#   Copyright 2024 Dynatrace LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,86 +14,121 @@
 
 import ssl
 import time
-import urllib
-from typing import List, Dict, Tuple
-from urllib.error import HTTPError
+import aiohttp
+from typing import List, Union
 from urllib.parse import urlparse
-from urllib.request import Request
+
+from aiohttp import ClientResponseError
 
 from lib.configuration import config
 from lib.context import DynatraceConnectivity, LogsContext
-from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
+from lib.logs.log_self_monitoring import (
+    LogSelfMonitoring,
+    aggregate_self_monitoring_metrics,
+    put_sfm_into_queue,
+)
 from lib.logs.logs_processor import LogProcessingJob
-
-ssl_context = ssl.create_default_context()
-if not config.require_valid_certificate():
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
+from lib.logs.client_base import DynatraceClientBase
 
 
-def send_logs(context: LogsContext, logs: List[LogProcessingJob], batch: str):
-    # pylint: disable=R0912
-    context.self_monitoring = aggregate_self_monitoring_metrics(LogSelfMonitoring(), [log.self_monitoring for log in logs])
-    context.self_monitoring.sending_time_start = time.perf_counter()
-    log_ingest_url = urlparse(context.dynatrace_url.rstrip('/') + "/api/v2/logs/ingest").geturl()
+class DynatraceClient(DynatraceClientBase):
+    dynatrace_api_key: str
+    log_ingest_url: str
+    verify_ssl: Union[bool, None]
 
-    try:
-        encoded_body_bytes = batch.encode("UTF-8")
-        context.self_monitoring.all_requests += 1
-        status, reason, response = _perform_http_request(
-            method="POST",
-            url=log_ingest_url,
-            encoded_body_bytes=encoded_body_bytes,
-            headers={
-                "Authorization": f"Api-Token {context.dynatrace_api_key}",
-                "Content-Type": "application/json; charset=utf-8"
-            }
+    def __init__(
+        self,
+        dynatrace_api_key: str,
+        log_ingest_url: str,
+        aio_http_session: aiohttp.ClientSession,
+        verify_ssl: Union[bool, None],
+    ):
+        self.dynatrace_api_key = dynatrace_api_key
+        self.log_ingest_url = log_ingest_url
+        self.verify_ssl = verify_ssl
+        super().__init__(aio_http_session)
+
+    async def send_logs(self, context: LogsContext, logs: List[LogProcessingJob], batch: str):
+        context.self_monitoring = aggregate_self_monitoring_metrics(
+            LogSelfMonitoring(), [log.self_monitoring for log in logs]
         )
-        if status > 299:
-            context.t_error(f'Log ingest error: {status}, reason: {reason}, url: {log_ingest_url}, body: "{response}"')
-            if status == 400:
-                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.InvalidInput)
-            elif status == 401:
-                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.ExpiredToken)
-            elif status == 403:
-                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.WrongToken)
-            elif status == 404 or status == 405:
-                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.WrongURL)
-            elif status == 413 or status == 429:
-                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.TooManyRequests)
-            elif status == 500:
+        context.self_monitoring.sending_time_start = time.perf_counter()
+
+        headers = {
+            "Authorization": f"Api-Token {context.dynatrace_api_key}",
+            "Content-Type": "application/json; charset=utf-8",
+        }
+
+        encoded_body_bytes = batch.encode("UTF-8")
+
+        try:
+            context.self_monitoring.all_requests += 1
+            async with self.aio_http_session.request(
+                method="POST",
+                url=self.log_ingest_url,
+                data=encoded_body_bytes,
+                headers=headers,
+                ssl=self.verify_ssl,
+            ) as response:
+                response_text = await response.text()
+                resp_status = response.status
+
+            if resp_status > 299:
+                context.t_error(
+                    f'Log ingest error: {resp_status}, reason: {response.reason}, url: {self.log_ingest_url}, body: "{response_text}"'
+                )
+                if resp_status == 400:
+                    context.self_monitoring.dynatrace_connectivity.append(
+                        DynatraceConnectivity.InvalidInput
+                    )
+                elif resp_status == 401:
+                    context.self_monitoring.dynatrace_connectivity.append(
+                        DynatraceConnectivity.ExpiredToken
+                    )
+                elif resp_status == 403:
+                    context.self_monitoring.dynatrace_connectivity.append(
+                        DynatraceConnectivity.WrongToken
+                    )
+                elif resp_status == 404 or resp_status == 405:
+                    context.self_monitoring.dynatrace_connectivity.append(
+                        DynatraceConnectivity.WrongURL
+                    )
+                elif resp_status == 413 or resp_status == 429:
+                    context.self_monitoring.dynatrace_connectivity.append(
+                        DynatraceConnectivity.TooManyRequests
+                    )
+                elif resp_status == 500:
+                    context.self_monitoring.dynatrace_connectivity.append(
+                        DynatraceConnectivity.Other
+                    )
+
+                response.raise_for_status()
+            else:
+                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Ok)
+        except Exception as e:
+            if not isinstance(e, ClientResponseError):
                 context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
-
-            raise HTTPError(log_ingest_url, status, reason, "", "")
-        else:
-            context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Ok)
-    except Exception as e:
-        # Handle non-HTTP Errors
-        if not isinstance(e, HTTPError):
-            context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
-        raise e
-    finally:
-        context.self_monitoring.calculate_sending_time()
-        put_sfm_into_queue(context)
+            raise e
+        finally:
+            context.self_monitoring.calculate_sending_time()
+            put_sfm_into_queue(context)
 
 
-def _perform_http_request(
-        method: str,
-        url: str,
-        encoded_body_bytes: bytes,
-        headers: Dict
-) -> Tuple[int, str, str]:
-    request = Request(
-        url,
-        encoded_body_bytes,
-        headers,
-        method=method
-    )
-    try:
-        response = urllib.request.urlopen(url=request,
-                                          context=ssl_context,
-                                          timeout=config.get_int_environment_value("DYNATRACE_TIMEOUT_SECONDS", 30))
-        return response.code, response.reason, response.read().decode("utf-8")
-    except HTTPError as e:
-        response_body = e.read().decode("utf-8")
-        return e.code, e.reason, response_body
+class DynatraceClientFactory:
+    dynatrace_api_key: str
+    log_ingest_url: str
+    verify_ssl: Union[bool, None]
+
+    def __init__(self):
+        dynatrace_url: str = config.get_dynatrace_log_ingest_url_from_env()  # type: ignore
+
+        self.dynatrace_api_key = config.get_dynatrace_api_key_from_env()  # type: ignore
+        self.log_ingest_url = urlparse(dynatrace_url.rstrip("/") + "/api/v2/logs/ingest").geturl()
+        self.verify_ssl = None if config.require_valid_certificate() else False
+
+    def get_dynatrace_client(self, concurrent_con_limit: int = 900) -> DynatraceClient:
+        my_conn = aiohttp.TCPConnector(limit=concurrent_con_limit)
+        aio_http_session = aiohttp.ClientSession(connector=my_conn)
+        return DynatraceClient(
+            self.dynatrace_api_key, self.log_ingest_url, aio_http_session, self.verify_ssl
+        )

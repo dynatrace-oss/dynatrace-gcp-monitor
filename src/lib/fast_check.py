@@ -1,4 +1,4 @@
-#   Copyright 2021 Dynatrace LLC
+#   Copyright 2024 Dynatrace LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ from aiohttp import ClientSession
 from lib.configuration import config
 from lib.context import LoggingContext, create_logs_context
 from lib.instance_metadata import InstanceMetadata
-from lib.logs.dynatrace_client import send_logs
+from lib.logs.dynatrace_client import DynatraceClientFactory
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -150,7 +150,7 @@ class LogsFastCheck:
         self.instance_metadata = instance_metadata
         self.logging_context = logging_context
 
-    def execute(self):
+    async def execute(self):
         _print_configuration_flags(self.logging_context, LOGS_CONFIGURATION_FLAGS)
         check_version(self.logging_context)
         self.logging_context.log("Sending the startup message")
@@ -161,7 +161,10 @@ class LogsFastCheck:
             'content': f'GCP Log Forwarder has started at {container_name}',
             'severity': 'INFO'
         }
-        send_logs(create_logs_context(Queue()), [], json.dumps([fast_check_event]))
+
+        dynatrace_client_factory = DynatraceClientFactory()
+        async with dynatrace_client_factory.get_dynatrace_client() as dynatrace_client:
+            await dynatrace_client.send_logs(create_logs_context(Queue()), [], json.dumps([fast_check_event]))
 
 
 def _print_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):
