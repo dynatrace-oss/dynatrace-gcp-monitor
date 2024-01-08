@@ -225,6 +225,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: PROCESSING_WORKERS
+        - name: PARALLEL_PROCESSES
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: PARALLEL_PROCESSES
         - name: PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES
           valueFrom:
             configMapKeyRef:

@@ -98,6 +98,8 @@ logIngestSendingWorkerExecutionPeriod: 60
 logIngestEventMaxAgeSeconds: 86400
 # Number of workers pulling logs from pubsub concurrently
 processingWorkers: 5
+# Number of parallel processes to run the whole log monitoring loop
+parallelProcesses: 1
 # Maximum number of messages to be retrieved per pull request. 1000 is the maximum allowed by GCP
 processingWorkerPullRequestMaxMessages: 1000
 logResources:
