@@ -29,7 +29,7 @@ from lib.logs.log_forwarder_variables import MAX_SFM_MESSAGES_PROCESSED, LOGS_SU
     LOGS_SUBSCRIPTION_ID, \
     PROCESSING_WORKERS, PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES, REQUEST_BODY_MAX_SIZE
 from lib.logs.log_self_monitoring import create_sfm_loop
-from lib.logs.logs_processor import _prepare_context_and_process_message
+from lib.logs.logs_processor import prepare_context_and_process_message
 from lib.logs.worker_state import WorkerState
 from lib.utilities import chunks
 
@@ -81,15 +81,13 @@ def perform_pull(worker_state: WorkerState,
                  subscription_path: str,
                  pull_request: PullRequest):
     response: PullResponse = subscriber_client.pull(pull_request)
-
     for received_message in response.received_messages:
         # print(f"Received: {received_message.message.data}.")
-        message_job = _prepare_context_and_process_message(sfm_queue, received_message)
+        message_job = prepare_context_and_process_message(sfm_queue, received_message)
 
         if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
             worker_state.ack_ids.append(received_message.ack_id)
             continue
-
         if worker_state.should_flush(message_job):
             perform_flush(worker_state, sfm_queue, subscriber_client, subscription_path)
 
