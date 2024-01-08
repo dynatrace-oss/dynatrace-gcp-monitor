@@ -23,7 +23,6 @@ FetchMetricDescriptorsResult = NamedTuple(
     [("project_id", str), ("metric_descriptor", GCPMetricDescriptor)],
 )
 
-
 label_mapping = {
     "project_id": "gcp.project.id",
     "region": "gcp.region",
