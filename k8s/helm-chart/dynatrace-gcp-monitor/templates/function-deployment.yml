@@ -220,16 +220,26 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: DYNATRACE_TIMEOUT_SECONDS
-        - name: PROCESSING_WORKERS
-          valueFrom:
-            configMapKeyRef:
-              name: dynatrace-gcp-monitor-config
-              key: PROCESSING_WORKERS
         - name: PARALLEL_PROCESSES
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: PARALLEL_PROCESSES
+        - name: PROCESSING_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: PROCESSING_WORKERS
+        - name: NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES
+        - name: NUMBER_OF_CONCURRENT_PUSH_COROUTINES
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: NUMBER_OF_CONCURRENT_PUSH_COROUTINES
         - name: PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES
           valueFrom:
             configMapKeyRef:

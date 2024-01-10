@@ -177,7 +177,7 @@ def main():
         asyncio.run(run_metrics_fetcher_forever())
     elif OPERATION_MODE == OperationMode.Logs:
         asyncio.run(LogsFastCheck(logging_context, instance_metadata).execute())
-        processes = [multiprocessing.Process(target=run_logs, args=run_logs_wrapper(logging_context, instance_metadata,))
+        processes = [multiprocessing.Process(target=run_logs_wrapper, args=(logging_context, instance_metadata,))
                      for _ in range(PARALLEL_PROCESSES)]
         [process.start() for process in processes]
         [process.join() for process in processes]
