@@ -25,9 +25,9 @@ from lib.configuration import config
 from lib.context import LoggingContext, create_logs_context
 from lib.instance_metadata import InstanceMetadata
 
-from src.lib.clientsession_provider import init_dt_client_session
-from src.lib.logs.dynatrace_client import DynatraceClient
-from src.lib.logs.logs_processor import LogBatch
+from lib.clientsession_provider import init_dt_client_session
+from lib.logs.dynatrace_client import DynatraceClient
+from lib.logs.logs_processor import LogBatch
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -167,7 +167,8 @@ class LogsFastCheck:
 
         dynatrace_client = DynatraceClient()
         async with init_dt_client_session() as dt_session:
-            await dynatrace_client.send_logs(create_logs_context(Queue()), dt_session, LogBatch(json.dumps([fast_check_event]), 1))
+            fake_ack_ids = []
+            await dynatrace_client.send_logs(create_logs_context(Queue()), dt_session, LogBatch(json.dumps([fast_check_event]), 1, ack_ids=[]), fake_ack_ids)
 
 
 def _print_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):

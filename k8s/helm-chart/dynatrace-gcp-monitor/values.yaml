@@ -96,10 +96,14 @@ logIngestRequestMaxSize: 1048576
 logIngestSendingWorkerExecutionPeriod: 60
 # Determines max age of forwarded log event. Should be the same or lower than on cluster
 logIngestEventMaxAgeSeconds: 86400
-# Number of workers pulling logs from pubsub concurrently
-processingWorkers: 5
 # Number of parallel processes to run the whole log monitoring loop
 parallelProcesses: 1
+# Number of workers pulling logs from pubsub concurrently
+processingWorkers: 5
+# Number of concurrent coroutines to pull messages from pub/sub
+numberOfConcurrentMessagePullCoroutines: 10
+# Number of concurrent coroutines to push messaged to Dynatrace
+numberOfConcurrentPushCoroutines: 5
 # Maximum number of messages to be retrieved per pull request. 1000 is the maximum allowed by GCP
 processingWorkerPullRequestMaxMessages: 1000
 logResources:

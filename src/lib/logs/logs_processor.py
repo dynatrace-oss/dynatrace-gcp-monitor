@@ -34,18 +34,19 @@ _metadata_engine = MetadataEngine()
 
 
 class LogProcessingJob:
-    payload: str
     self_monitoring: LogSelfMonitoring
 
-    def __init__(self, payload: str, self_monitoring: LogSelfMonitoring):
+    def __init__(self, payload: str, self_monitoring: LogSelfMonitoring, ack_id):
         self.payload = payload
         self.self_monitoring: LogSelfMonitoring = self_monitoring
         self.bytes_size = len(payload.encode("UTF-8"))
+        self.ack_id = ack_id
 
 
 class LogBatch(NamedTuple):
     serialized_batch: str
     number_of_logs_in_batch: int
+    ack_ids: List[str]
 
 
 def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
@@ -53,6 +54,7 @@ def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
     batches: List[LogBatch] = []
 
     logs_for_next_batch: List[str] = []
+    ack_ids_for_next_batch: List[str] = []
     logs_for_next_batch_total_len = 0
     logs_for_next_batch_events_count = 0
 
@@ -68,22 +70,24 @@ def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
 
         if batch_length_if_added_entry > REQUEST_BODY_MAX_SIZE or logs_for_next_batch_events_count >= REQUEST_MAX_EVENTS:
             # would overflow limit, close batch and prepare new
-            batch = LogBatch("[" + ",".join(logs_for_next_batch) + "]", log_entries)
+            batch = LogBatch("[" + ",".join(logs_for_next_batch) + "]", log_entries, ack_ids_for_next_batch)
             batches.append(batch)
             log_entries = 0
 
             logs_for_next_batch = []
+            ack_ids_for_next_batch = []
             logs_for_next_batch_total_len = 0
             logs_for_next_batch_events_count = 0
 
         logs_for_next_batch.append(next_serialized_entry)
+        ack_ids_for_next_batch.append(log_entry.ack_id)
         log_entries += 1
         logs_for_next_batch_total_len += next_entry_size
         logs_for_next_batch_events_count += 1
 
     if len(logs_for_next_batch) >= 1:
         # finalize the last batch
-        batch = LogBatch("[" + ",".join(logs_for_next_batch) + "]", log_entries)
+        batch = LogBatch("[" + ",".join(logs_for_next_batch) + "]", log_entries, ack_ids_for_next_batch)
         batches.append(batch)
 
     return batches
@@ -97,7 +101,7 @@ def prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessa
             message_publish_time=message.get('message').get('publishTime'),
             sfm_queue=sfm_queue
         )
-        return _process_message(context, message.get('message'))
+        return _process_message(context, message.get('message'), message.get('ackId'))
     except Exception as exception:
         if not context:
             context = LogsProcessingContext(None, None, sfm_queue)
@@ -114,7 +118,7 @@ def prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessa
         return None
 
 
-def _process_message(context: LogsProcessingContext, message: PubsubMessage) -> Optional[LogProcessingJob]:
+def _process_message(context: LogsProcessingContext, message: PubsubMessage, ack_id) -> Optional[LogProcessingJob]:
     context.self_monitoring.processing_time_start = time.perf_counter()
     data = base64.b64decode(message.get('data'))
     data = data.decode("UTF-8")
@@ -128,7 +132,7 @@ def _process_message(context: LogsProcessingContext, message: PubsubMessage) -> 
         put_sfm_into_queue(context)
         return None
     else:
-        job = LogProcessingJob(json.dumps(payload), context.self_monitoring)
+        job = LogProcessingJob(json.dumps(payload), context.self_monitoring, ack_id)
         return job
 
 

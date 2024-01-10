@@ -16,7 +16,7 @@ import asyncio
 from asyncio import Queue
 from typing import List
 
-from lib.clientsession_provider import init_gcp_client_session
+from lib.clientsession_provider import init_gcp_client_session, init_dt_client_session
 from lib.context import LoggingContext, create_logs_context
 from lib.credentials import create_token
 from lib.instance_metadata import InstanceMetadata
@@ -28,14 +28,12 @@ from lib.logs.log_forwarder_variables import (
     MAX_SFM_MESSAGES_PROCESSED,
     PROCESSING_WORKERS,
     REQUEST_BODY_MAX_SIZE,
+    NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES,
+    NUMBER_OF_CONCURRENT_PUSH_COROUTINES
 )
 from lib.logs.log_self_monitoring import create_sfm_loop
-from lib.logs.logs_processor import prepare_context_and_process_message, prepare_batches
+from lib.logs.logs_processor import prepare_context_and_process_message, prepare_batches, LogBatch
 from lib.utilities import chunks
-
-from lib.logs.logs_processor import LogBatch
-
-from src.lib.clientsession_provider import init_dt_client_session
 
 
 def run_logs_wrapper(logging_context, instance_metadata):
@@ -51,8 +49,13 @@ async def run_logs(logging_context: LoggingContext, instance_metadata: InstanceM
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
     tasks = []
 
+    # initiate http client for both GCP and DT
+    async with init_gcp_client_session() as gcp_session:
+        gcp_client = GCPClient(await create_token(logging_context, gcp_session))
+    dynatrace_client = DynatraceClient()
+
     for i in range(0, PROCESSING_WORKERS):
-        worker_task = asyncio.create_task(pull_and_push_logs_forever(f"Worker-{i}", sfm_queue))
+        worker_task = asyncio.create_task(pull_and_push_logs_forever(f"Worker-{i}", sfm_queue, gcp_client, dynatrace_client))
         tasks.append(worker_task)
 
     sfm_task = asyncio.create_task(create_sfm_loop(sfm_queue, logging_context, instance_metadata))
@@ -64,18 +67,22 @@ async def run_logs(logging_context: LoggingContext, instance_metadata: InstanceM
 async def pull_and_push_logs_forever(
     worker_name: str,
     sfm_queue: Queue,
+    gcp_client: GCPClient,
+    dynatrace_client: DynatraceClient
 ):
     logging_context = LoggingContext(worker_name)
-    async with init_gcp_client_session() as gcp_session:
-        gcp_client = GCPClient(await create_token(logging_context, gcp_session))
-
-    dynatrace_client = DynatraceClient()
+    ack_ids_to_send = []
     logging_context.log(f"Starting processing")
     while True:
         try:
             log_batches, ack_ids = await perform_pull(sfm_queue, gcp_client, logging_context)
-            await push_logs(log_batches, sfm_queue, dynatrace_client)
-            await push_ack_ids(ack_ids, gcp_client, logging_context)
+
+            await push_logs(log_batches, sfm_queue, dynatrace_client, ack_ids_to_send)
+
+            if ack_ids:
+                ack_ids_to_send.extend(ack_ids)
+            await push_ack_ids(ack_ids_to_send, gcp_client, logging_context)
+            ack_ids_to_send = []
         except Exception as e:
             logging_context.exception("Failed to pull messages")
             # Backoff for 1 minute to avoid spamming requests and logs
@@ -86,9 +93,9 @@ async def perform_pull(
     sfm_queue: Queue,
     gcp_client: GCPClient,
     logging_context: LoggingContext,
-):
+) -> [List[LogBatch], List[str]]:
     async with init_gcp_client_session() as gcp_session:
-        tasks_to_pull_messages = [gcp_client.pull_messages(logging_context, gcp_session) for _ in range(16)]
+        tasks_to_pull_messages = [gcp_client.pull_messages(logging_context, gcp_session) for _ in range(NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES)]
         responses = await asyncio.gather(*tasks_to_pull_messages, return_exceptions=True)
 
         processed_messages = []
@@ -97,9 +104,8 @@ async def perform_pull(
         for response in responses:
             for received_message in response.get("receivedMessages", []):
                 message_job = prepare_context_and_process_message(sfm_queue, received_message)
-
-                ack_ids_to_send.append(received_message.get("ackId"))
                 if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
+                    ack_ids_to_send.append(received_message.get("ackId"))
                     continue
                 processed_messages.append(message_job)
 
@@ -111,17 +117,17 @@ async def push_logs(
     log_batches,
     sfm_queue: Queue,
     dynatrace_client: DynatraceClient,
+    ack_ids_to_send
 ):
-    semaphore = asyncio.Semaphore(5)
+    semaphore = asyncio.Semaphore(NUMBER_OF_CONCURRENT_PUSH_COROUTINES)
     context = create_logs_context(sfm_queue)
-
+    context.log(f"Number of log batches to push to Dynatrace: {len(log_batches)}")
     async with init_dt_client_session() as dt_session:
         async def process_batch(batch: LogBatch):
             async with semaphore:
-                await dynatrace_client.send_logs(context, batch, dt_session)
+                await dynatrace_client.send_logs(context, dt_session, batch, ack_ids_to_send)
 
         await asyncio.gather(*[process_batch(batch) for batch in log_batches])
-
     # try:
     #     if len(log_batches):
     #         sent = False
@@ -161,3 +167,5 @@ async def push_ack_ids(
         chunk_size = 2048
         tasks_to_send_ack_ids = [gcp_client.push_ack_ids(chunk, gcp_session, logging_context) for chunk in chunks(ack_ids, chunk_size)]
         await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
+
+    logging_context.log("Log ingest payload pushed successfully")

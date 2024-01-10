@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 import time
-from typing import List, Union
+from typing import Union
 from urllib.parse import urlparse
 
 from aiohttp import ClientResponseError
@@ -26,7 +26,7 @@ from lib.logs.log_self_monitoring import (
     put_sfm_into_queue,
 )
 
-from src.lib.logs.logs_processor import LogBatch
+from lib.logs.logs_processor import LogBatch
 
 
 class DynatraceClient():
@@ -43,7 +43,7 @@ class DynatraceClient():
         self.log_ingest_url = urlparse(dynatrace_url.rstrip("/") + "/api/v2/logs/ingest").geturl()
         self.verify_ssl = None if config.require_valid_certificate() else False
 
-    async def send_logs(self, context: LogsContext, dt_session, batch: LogBatch):
+    async def send_logs(self, context: LogsContext, dt_session, batch: LogBatch, ack_ids_to_send):
         # context.self_monitoring = aggregate_self_monitoring_metrics(
         #     LogSelfMonitoring(), [log.self_monitoring for log in logs]
         # )
@@ -99,6 +99,7 @@ class DynatraceClient():
 
                 response.raise_for_status()
             else:
+                ack_ids_to_send.extend(batch.ack_ids)
                 context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Ok)
         except Exception as e:
             if not isinstance(e, ClientResponseError):
