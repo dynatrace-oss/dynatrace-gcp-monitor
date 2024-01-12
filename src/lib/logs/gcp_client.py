@@ -25,7 +25,7 @@ from lib.logs.log_forwarder_variables import (
 SUBSCRIPTION_PATH = f"projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_SUBSCRIPTION_ID}"
 
 
-class GCPClient():
+class GCPClient:
     subscription_path: str
     pull_url: str
     acknowledge_url: str
@@ -46,8 +46,9 @@ class GCPClient():
         json_data = json.dumps(json_body)
         self.body_payload = json_data.encode("utf-8")
 
-
-    async def pull_messages(self, logging_context: LoggingContext, gcp_session) -> Dict[str, List[Any]]:
+    async def pull_messages(
+        self, logging_context: LoggingContext, gcp_session
+    ) -> Dict[str, List[Any]]:  # type: ignore
         async with gcp_session.request(
             method="POST", url=self.pull_url, data=self.body_payload, headers=self.headers
         ) as response:
@@ -77,4 +78,3 @@ class GCPClient():
                     f'reason: {response.reason}, url: {self.acknowledge_url}, body: "{await response.json()}"'
                 )
                 response.raise_for_status()
-

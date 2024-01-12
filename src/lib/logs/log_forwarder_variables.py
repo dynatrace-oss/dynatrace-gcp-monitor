@@ -1,4 +1,4 @@
-#     Copyright 2021 Dynatrace LLC
+#     Copyright 2024 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ EVENT_AGE_LIMIT_SECONDS = get_int_environment_value("DYNATRACE_LOG_INGEST_EVENT_
 SENDING_WORKER_EXECUTION_PERIOD_SECONDS = get_int_environment_value("DYNATRACE_LOG_INGEST_SENDING_WORKER_EXECUTION_PERIOD", 60)
 SFM_WORKER_EXECUTION_PERIOD_SECONDS = get_int_environment_value("DYNATRACE_LOG_INGEST_SFM_WORKER_EXECUTION_PERIOD", 60)
 REQUEST_BODY_MAX_SIZE = get_int_environment_value("DYNATRACE_LOG_INGEST_REQUEST_MAX_SIZE", 5242000)
-REQUEST_MAX_EVENTS = get_int_environment_value("DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS", 5000)
+REQUEST_MAX_EVENTS = get_int_environment_value("DYNATRACE_LOG_INGEST_REQUEST_MAX_EVENTS", 50_000)
 BATCH_MAX_MESSAGES = get_int_environment_value("DYNATRACE_LOG_INGEST_BATCH_MAX_MESSAGES", 10_000)
 DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED = "[TRUNCATED]"
 CLOUD_LOG_FORWARDER = os.environ.get("CLOUD_LOG_FORWARDER", "")

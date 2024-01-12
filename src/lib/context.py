@@ -1,4 +1,4 @@
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2024 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -12,12 +12,13 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+import asyncio
 import os
 import time
 import traceback
 from datetime import datetime, timedelta
 from queue import Queue
-from typing import Optional, Dict
+from typing import Optional, Dict, Union
 
 import aiohttp
 
@@ -41,7 +42,7 @@ class DynatraceConnectivity(enum.Enum):
     Other = 6
 
 
-def create_logs_context(sfm_queue: Queue):
+def create_logs_context(sfm_queue: Union[Queue,asyncio.Queue]):
     dynatrace_api_key = config.get_dynatrace_api_key_from_env()
     dynatrace_url = config.get_dynatrace_log_ingest_url_from_env()
     project_id_owner = config.project_id()

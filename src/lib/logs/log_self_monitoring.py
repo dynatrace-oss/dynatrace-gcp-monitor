@@ -28,7 +28,7 @@ from lib.instance_metadata import InstanceMetadata
 from lib.logs.log_forwarder_variables import LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID, \
     SFM_WORKER_EXECUTION_PERIOD_SECONDS, MAX_SFM_MESSAGES_PROCESSED
 from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, \
-    LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE, \
+    LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE, LOG_SELF_MONITORING_POOLING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE, LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE, \
     LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE, LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE, LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, \
@@ -46,6 +46,7 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
         aggregated_sfm.records_with_too_long_content += sfm.records_with_too_long_content
         aggregated_sfm.dynatrace_connectivity.extend(sfm.dynatrace_connectivity)
         aggregated_sfm.processing_time += sfm.processing_time
+        aggregated_sfm.pooling_time += sfm.pooling_time
         aggregated_sfm.sending_time += sfm.sending_time
         aggregated_sfm.log_ingest_payload_size += sfm.log_ingest_payload_size
         aggregated_sfm.sent_logs_entries += sfm.sent_logs_entries
@@ -135,6 +136,7 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Number of invalid log records due to too old timestamp: {self_monitoring.too_old_records}")
     logging_context.log("SFM", f"Number of errors occurred during parsing logs: {self_monitoring.parsing_errors}")
     logging_context.log("SFM", f"Number of records with too long content: {self_monitoring.records_with_too_long_content}")
+    logging_context.log("SFM", f"Total logs pooling time [s]: {self_monitoring.pooling_time}")
     logging_context.log("SFM", f"Total logs processing time [s]: {self_monitoring.processing_time}")
     logging_context.log("SFM", f"Total logs sending time [s]: {self_monitoring.sending_time}")
     logging_context.log("SFM", f"Log ingest payload size [kB]: {self_monitoring.log_ingest_payload_size}")
@@ -271,6 +273,19 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             [{
                 "interval": interval,
                 "value": {"doubleValue": sfm.sending_time}
+            }],
+            "DOUBLE"))
+    time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_POOLING_TIME_SIZE_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name
+            },
+            [{
+                "interval": interval,
+                "value": {"doubleValue": sfm.pooling_time}
             }],
             "DOUBLE"))
 

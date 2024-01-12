@@ -168,7 +168,7 @@ class LogsFastCheck:
         dynatrace_client = DynatraceClient()
         async with init_dt_client_session() as dt_session:
             fake_ack_ids = []
-            await dynatrace_client.send_logs(create_logs_context(Queue()), dt_session, LogBatch(json.dumps([fast_check_event]), 1, ack_ids=[]), fake_ack_ids)
+            await dynatrace_client.send_logs(create_logs_context(Queue()), dt_session, LogBatch(json.dumps([fast_check_event]), 1, [], len(json.dumps([fast_check_event]))), fake_ack_ids)
 
 
 def _print_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):
