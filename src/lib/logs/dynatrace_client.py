@@ -19,6 +19,7 @@ from aiohttp import ClientResponseError
 
 from lib.configuration import config
 from lib.context import DynatraceConnectivity, LogsContext
+from lib.logs.log_self_monitoring import put_sfm_into_queue
 
 from lib.logs.logs_processor import LogBatch
 
@@ -98,3 +99,7 @@ class DynatraceClient:
             if not isinstance(e, ClientResponseError):
                 context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
             raise e
+        finally:
+            await context.sfm_queue.put(batch.self_monitoring)
+
+         

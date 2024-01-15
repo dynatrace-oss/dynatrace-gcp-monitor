@@ -38,7 +38,7 @@ def create_log_entry_with_random_len_msg():
         ATTRIBUTE_SEVERITY: 'INFO'
     }
 
-    return LogProcessingJob(json.dumps(as_dict), LogSelfMonitoring())
+    return LogProcessingJob(json.dumps(as_dict), LogSelfMonitoring(), '')
 
 
 def test_should_flush_on_batch_exceeding_request_size(monkeypatch: MonkeyPatchFixture):

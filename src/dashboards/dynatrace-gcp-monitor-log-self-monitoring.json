@@ -259,13 +259,13 @@
         }
       },
       {
-        "title": "Pooling time",
+        "title": "Pulling time",
         "xyChart": {
           "dataSets": [
             {
               "timeSeriesQuery": {
                 "timeSeriesFilter": {
-                  "filter": "metric.type=\"custom.googleapis.com/dynatrace/logs/pooling_time\" resource.type=\"generic_task\"",
+                  "filter": "metric.type=\"custom.googleapis.com/dynatrace/logs/pulling_time\" resource.type=\"generic_task\"",
                   "aggregation": {
                     "alignmentPeriod": "60s",
                     "perSeriesAligner": "ALIGN_MEAN"

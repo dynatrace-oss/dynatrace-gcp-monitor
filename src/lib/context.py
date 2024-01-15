@@ -17,7 +17,7 @@ import os
 import time
 import traceback
 from datetime import datetime, timedelta
-from queue import Queue
+from asyncio import Queue
 from typing import Optional, Dict, Union
 
 import aiohttp
@@ -42,7 +42,7 @@ class DynatraceConnectivity(enum.Enum):
     Other = 6
 
 
-def create_logs_context(sfm_queue: Union[Queue,asyncio.Queue]):
+def create_logs_context(sfm_queue: Queue):
     dynatrace_api_key = config.get_dynatrace_api_key_from_env()
     dynatrace_url = config.get_dynatrace_log_ingest_url_from_env()
     project_id_owner = config.project_id()

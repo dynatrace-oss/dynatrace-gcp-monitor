@@ -33,7 +33,7 @@ from lib.logs.log_forwarder_variables import (
     REQUEST_BODY_MAX_SIZE,
     REQUEST_MAX_EVENTS,
 )
-from lib.logs.log_self_monitoring import LogSelfMonitoring, put_sfm_into_queue
+from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
 from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
 
 _metadata_engine = MetadataEngine()
@@ -54,6 +54,7 @@ class LogBatch(NamedTuple):
     number_of_logs_in_batch: int
     ack_ids: List[str]
     size_batch_bytes: int
+    self_monitoring: LogSelfMonitoring
 
 
 
@@ -66,6 +67,7 @@ def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
     logs_for_next_batch_events_count = 0
 
     log_entries = 0
+    batch_sfm_monitoring_list = []
     for log_entry in logs:
         new_batch_len = (
             logs_for_next_batch_total_len + 2 + len(logs_for_next_batch) - 1
@@ -82,15 +84,20 @@ def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
             or logs_for_next_batch_events_count >= REQUEST_MAX_EVENTS
         ):
             # would overflow limit, close batch and prepare new
+            batch_self_monitoring = LogSelfMonitoring()
+            aggregate_self_monitoring_metrics(batch_self_monitoring,batch_sfm_monitoring_list)
+
             batch = LogBatch(
                 "[" + ",".join(logs_for_next_batch) + "]",
                 log_entries,
                 ack_ids_for_next_batch,
                 new_batch_len,
+                batch_self_monitoring
             )
             batches.append(batch)
             log_entries = 0
 
+            batch_sfm_monitoring_list = []
             logs_for_next_batch = []
             ack_ids_for_next_batch = []
             logs_for_next_batch_total_len = 0
@@ -101,15 +108,20 @@ def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
         log_entries += 1
         logs_for_next_batch_total_len += next_entry_size
         logs_for_next_batch_events_count += 1
+        batch_sfm_monitoring_list.append(log_entry.self_monitoring)
+
 
     if len(logs_for_next_batch) >= 1:
         # finalize the last batch
-        fin_batch_len = logs_for_next_batch_total_len + 2 + len(logs_for_next_batch) - 1
+        total_batch_len = logs_for_next_batch_total_len + 2 + len(logs_for_next_batch) - 1
+        batch_self_monitoring = LogSelfMonitoring()
+        aggregate_self_monitoring_metrics(batch_self_monitoring,batch_sfm_monitoring_list)
         batch = LogBatch(
             "[" + ",".join(logs_for_next_batch) + "]",
             log_entries,
             ack_ids_for_next_batch,
-            fin_batch_len,
+            total_batch_len,
+            batch_self_monitoring
         )
         batches.append(batch)
 

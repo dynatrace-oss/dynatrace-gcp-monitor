@@ -16,7 +16,7 @@ import time
 from collections import Counter
 from datetime import datetime
 from importlib import reload
-from queue import Queue
+from asyncio import Queue
 from typing import NewType, Any, List, Dict
 
 import pytest
