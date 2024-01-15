@@ -12,6 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import asyncio
 import json
 import os
 import re
@@ -28,6 +29,7 @@ from lib.instance_metadata import InstanceMetadata
 from lib.clientsession_provider import init_dt_client_session
 from lib.logs.dynatrace_client import DynatraceClient
 from lib.logs.logs_processor import LogBatch
+from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 
 service_name_pattern = re.compile(r"^projects\/([\w,-]*)\/services\/([\w,-.]*)$")
 
@@ -168,7 +170,7 @@ class LogsFastCheck:
         dynatrace_client = DynatraceClient()
         async with init_dt_client_session() as dt_session:
             fake_ack_ids = []
-            await dynatrace_client.send_logs(create_logs_context(Queue()), dt_session, LogBatch(json.dumps([fast_check_event]), 1, [], len(json.dumps([fast_check_event]))), fake_ack_ids)
+            await dynatrace_client.send_logs(create_logs_context(asyncio.Queue()), dt_session, LogBatch(json.dumps([fast_check_event]), 1, [], len(json.dumps([fast_check_event])), LogSelfMonitoring()), fake_ack_ids)
 
 
 def _print_configuration_flags(logging_context: LoggingContext, flags_to_check: List[str]):
