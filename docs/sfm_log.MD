@@ -11,6 +11,7 @@ By default (if this option is not enabled) custom metrics won't be sent to GCP.
 | custom.googleapis.com/dynatrace/logs/parsing_errors | Reported when any parsing errors occurred during log processing | - |
 | custom.googleapis.com/dynatrace/logs/processing_time | Time needed to process all logs [s] | - |
 | custom.googleapis.com/dynatrace/logs/sending_time | Time needed to send all requests [s] | - |
+| custom.googleapis.com/dynatrace/logs/pulling_time | Time needed to pull data from pubsub [s] | - |
 | custom.googleapis.com/dynatrace/logs/all_requests | All requests sent to Dynatrace | - |
 | custom.googleapis.com/dynatrace/logs/connectivity_failures | Reported when any Dynatrace connectivity issues occurred | connectivity_status |
 | custom.googleapis.com/dynatrace/logs/log_ingest_payload_size | Size of log payload sent to Dynatrace [kB] | - |

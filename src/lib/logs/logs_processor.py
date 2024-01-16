@@ -14,7 +14,6 @@
 
 import json
 import queue
-import time
 from datetime import datetime, timezone
 from asyncio import Queue
 from typing import Optional, Dict, NamedTuple, List
@@ -24,10 +23,17 @@ from dateutil.parser import *
 from google.pubsub_v1 import ReceivedMessage, PubsubMessage
 
 from lib.context import LogsProcessingContext
-from lib.logs.log_forwarder_variables import EVENT_AGE_LIMIT_SECONDS, CONTENT_LENGTH_LIMIT, \
-    ATTRIBUTE_VALUE_LENGTH_LIMIT, DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED, CLOUD_LOG_FORWARDER, \
-    CLOUD_LOG_FORWARDER_POD, REQUEST_BODY_MAX_SIZE, REQUEST_MAX_EVENTS
-from lib.logs.log_self_monitoring import LogSelfMonitoring, put_sfm_into_queue
+from lib.logs.log_forwarder_variables import (
+    EVENT_AGE_LIMIT_SECONDS,
+    CONTENT_LENGTH_LIMIT,
+    ATTRIBUTE_VALUE_LENGTH_LIMIT,
+    DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED,
+    CLOUD_LOG_FORWARDER,
+    CLOUD_LOG_FORWARDER_POD,
+    REQUEST_BODY_MAX_SIZE,
+    REQUEST_MAX_EVENTS,
+)
+from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
 from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
 
 _metadata_engine = MetadataEngine()
@@ -47,10 +53,12 @@ class LogBatch(NamedTuple):
     serialized_batch: str
     number_of_logs_in_batch: int
     ack_ids: List[str]
+    size_batch_bytes: int
+    self_monitoring: LogSelfMonitoring
+
 
 
 def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
-
     batches: List[LogBatch] = []
 
     logs_for_next_batch: List[str] = []
@@ -59,21 +67,37 @@ def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
     logs_for_next_batch_events_count = 0
 
     log_entries = 0
+    batch_sfm_monitoring_list = []
     for log_entry in logs:
-        new_batch_len = logs_for_next_batch_total_len + 2 + len(logs_for_next_batch) - 1  # add bracket length (2) and commas for each entry but last one.
+        new_batch_len = (
+            logs_for_next_batch_total_len + 2 + len(logs_for_next_batch) - 1
+        )  # add bracket length (2) and commas for each entry but last one.
 
         next_serialized_entry = log_entry.payload
 
         next_entry_size = len(next_serialized_entry.encode("UTF-8"))
 
-        batch_length_if_added_entry = new_batch_len + 1 + len(next_serialized_entry)  # +1 is for comma
+        batch_length_if_added_entry = new_batch_len + 1 + next_entry_size  # +1 is for comma
 
-        if batch_length_if_added_entry > REQUEST_BODY_MAX_SIZE or logs_for_next_batch_events_count >= REQUEST_MAX_EVENTS:
+        if (
+            batch_length_if_added_entry > REQUEST_BODY_MAX_SIZE
+            or logs_for_next_batch_events_count >= REQUEST_MAX_EVENTS
+        ):
             # would overflow limit, close batch and prepare new
-            batch = LogBatch("[" + ",".join(logs_for_next_batch) + "]", log_entries, ack_ids_for_next_batch)
+            batch_self_monitoring = LogSelfMonitoring()
+            aggregate_self_monitoring_metrics(batch_self_monitoring,batch_sfm_monitoring_list)
+
+            batch = LogBatch(
+                "[" + ",".join(logs_for_next_batch) + "]",
+                log_entries,
+                ack_ids_for_next_batch,
+                new_batch_len,
+                batch_self_monitoring
+            )
             batches.append(batch)
             log_entries = 0
 
+            batch_sfm_monitoring_list = []
             logs_for_next_batch = []
             ack_ids_for_next_batch = []
             logs_for_next_batch_total_len = 0
@@ -84,24 +108,37 @@ def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
         log_entries += 1
         logs_for_next_batch_total_len += next_entry_size
         logs_for_next_batch_events_count += 1
+        batch_sfm_monitoring_list.append(log_entry.self_monitoring)
+
 
     if len(logs_for_next_batch) >= 1:
         # finalize the last batch
-        batch = LogBatch("[" + ",".join(logs_for_next_batch) + "]", log_entries, ack_ids_for_next_batch)
+        total_batch_len = logs_for_next_batch_total_len + 2 + len(logs_for_next_batch) - 1
+        batch_self_monitoring = LogSelfMonitoring()
+        aggregate_self_monitoring_metrics(batch_self_monitoring,batch_sfm_monitoring_list)
+        batch = LogBatch(
+            "[" + ",".join(logs_for_next_batch) + "]",
+            log_entries,
+            ack_ids_for_next_batch,
+            total_batch_len,
+            batch_self_monitoring
+        )
         batches.append(batch)
 
     return batches
 
 
-def prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessage) -> Optional[LogProcessingJob]:
+def prepare_context_and_process_message(
+    sfm_queue: Queue, message: ReceivedMessage
+) -> Optional[LogProcessingJob]:
     context = None
     try:
         context = LogsProcessingContext(
-            scheduled_execution_id=str(message.get('ackId').__hash__())[-8:],
-            message_publish_time=message.get('message').get('publishTime'),
-            sfm_queue=sfm_queue
+            scheduled_execution_id=str(message.get("ackId").__hash__())[-8:],
+            message_publish_time=message.get("message").get("publishTime"),
+            sfm_queue=sfm_queue,
         )
-        return _process_message(context, message.get('message'), message.get('ackId'))
+        return _process_message(context, message.get("message"), message.get("ackId"))
     except Exception as exception:
         if not context:
             context = LogsProcessingContext(None, None, sfm_queue)
@@ -109,7 +146,9 @@ def prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessa
             context.error(f"Failed to process message due full job queue, rejecting the message")
         else:
             if isinstance(exception, UnicodeDecodeError):
-                context.error(f"Failed to process message due to message data not being valid UTF-8. Binary data is not supported")
+                context.error(
+                    f"Failed to process message due to message data not being valid UTF-8. Binary data is not supported"
+                )
             else:
                 context.t_exception(f"Failed to process message due to {type(exception).__name__}")
             context.self_monitoring.parsing_errors += 1
@@ -118,15 +157,13 @@ def prepare_context_and_process_message(sfm_queue: Queue, message: ReceivedMessa
         return None
 
 
-def _process_message(context: LogsProcessingContext, message: PubsubMessage, ack_id) -> Optional[LogProcessingJob]:
-    context.self_monitoring.processing_time_start = time.perf_counter()
-    data = base64.b64decode(message.get('data'))
+def _process_message(
+    context: LogsProcessingContext, message: PubsubMessage, ack_id
+) -> Optional[LogProcessingJob]:
+    data = base64.b64decode(message.get("data"))
     data = data.decode("UTF-8")
-    # context.log(f"Data: {data}")
 
     payload = _create_dt_log_payload(context, data)
-    # context.log(f"Payload: {payload}")
-    context.self_monitoring.calculate_processing_time()
 
     if not payload:
         put_sfm_into_queue(context)
@@ -154,7 +191,7 @@ def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) ->
             string_attribute_value = attribute_value
             if not isinstance(attribute_value, str):
                 string_attribute_value = str(attribute_value)
-            parsed_record[attribute_key] = string_attribute_value[: ATTRIBUTE_VALUE_LENGTH_LIMIT]
+            parsed_record[attribute_key] = string_attribute_value[:ATTRIBUTE_VALUE_LENGTH_LIMIT]
 
     content = parsed_record.get(ATTRIBUTE_CONTENT, None)
     if content:
@@ -162,8 +199,10 @@ def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) ->
             parsed_record[ATTRIBUTE_CONTENT] = json.dumps(parsed_record[ATTRIBUTE_CONTENT])
         if len(parsed_record[ATTRIBUTE_CONTENT]) > CONTENT_LENGTH_LIMIT:
             trimmed_len = CONTENT_LENGTH_LIMIT - len(DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED)
-            parsed_record[ATTRIBUTE_CONTENT] = parsed_record[ATTRIBUTE_CONTENT][
-                                               :trimmed_len] + DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED
+            parsed_record[ATTRIBUTE_CONTENT] = (
+                parsed_record[ATTRIBUTE_CONTENT][:trimmed_len]
+                + DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED
+            )
             context.self_monitoring.records_with_too_long_content += 1
 
     return parsed_record
@@ -173,13 +212,13 @@ def _create_parsed_record(context: LogsProcessingContext, message_data: str):
     try:
         record = json.loads(message_data)
     except ValueError:
-        record = {
-            ATTRIBUTE_CONTENT: message_data
-        }
+        record = {ATTRIBUTE_CONTENT: message_data}
     parsed_record = {}
     _metadata_engine.apply(context, record, parsed_record)
 
-    if ATTRIBUTE_TIMESTAMP not in parsed_record.keys() or _is_invalid_datetime(parsed_record[ATTRIBUTE_TIMESTAMP]):
+    if ATTRIBUTE_TIMESTAMP not in parsed_record.keys() or _is_invalid_datetime(
+        parsed_record[ATTRIBUTE_TIMESTAMP]
+    ):
         context.self_monitoring.publish_time_fallback_records += 1
         parsed_record[ATTRIBUTE_TIMESTAMP] = context.message_publish_time.isoformat()
 
@@ -190,7 +229,10 @@ def _create_parsed_record(context: LogsProcessingContext, message_data: str):
 
 def _set_cloud_log_forwarder(parsed_record):
     cloud_log_forwarder = (
-                CLOUD_LOG_FORWARDER + "/pods/" + CLOUD_LOG_FORWARDER_POD) if CLOUD_LOG_FORWARDER and CLOUD_LOG_FORWARDER_POD else CLOUD_LOG_FORWARDER
+        (CLOUD_LOG_FORWARDER + "/pods/" + CLOUD_LOG_FORWARDER_POD)
+        if CLOUD_LOG_FORWARDER and CLOUD_LOG_FORWARDER_POD
+        else CLOUD_LOG_FORWARDER
+    )
     if cloud_log_forwarder:
         parsed_record["cloud.log_forwarder"] = cloud_log_forwarder
 
