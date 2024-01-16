@@ -23,7 +23,7 @@ import aiohttp
 from lib.clientsession_provider import init_gcp_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity, LogsContext
-from lib.credentials import create_token, get_dynatrace_log_ingest_url
+from lib.credentials import create_token, fetch_dynatrace_url
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.log_forwarder_variables import LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID, \
     SFM_WORKER_EXECUTION_PERIOD_SECONDS, MAX_SFM_MESSAGES_PROCESSED
@@ -62,11 +62,21 @@ def put_sfm_into_queue(context: LogsContext):
 
 
 async def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+    async with init_gcp_client_session() as gcp_session:
+        gcp_token = await create_token(
+            context=logging_context, session=gcp_session, validate=True
+        )
+        dynatrace_url = await fetch_dynatrace_url(
+            gcp_session=gcp_session, token=gcp_token, validate=True
+        )
+    
+        sfm_context = await _create_sfm_logs_context(sfm_queue, gcp_session, instance_metadata, dynatrace_url, gcp_token)
+
     while True:
         try:
             await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
             self_monitoring = LogSelfMonitoring()
-            await _loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata)
+            await _loop_single_period(self_monitoring, sfm_queue, logging_context, sfm_context)
         except Exception:
             logging_context.exception("Logs Self Monitoring Loop Exception:")
 
@@ -74,40 +84,36 @@ async def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, ins
 async def _loop_single_period(self_monitoring: LogSelfMonitoring,
                               sfm_queue: Queue,
                               context: LoggingContext,
-                              instance_metadata: InstanceMetadata):
+                              sfm_context: LogsSfmContext):
     try:
         sfm_list = await _pull_sfm(sfm_queue)
         if sfm_list:
-            async with init_gcp_client_session() as gcp_session:
-                context = await _create_sfm_logs_context(sfm_queue, context, gcp_session, instance_metadata)
-                self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
-                _log_self_monitoring_data(self_monitoring, context)
-                if context.self_monitoring_enabled:
-                    if context.token is None:
-                        context.log("Cannot proceed without authorization token, failed to send log self monitoring")
-                        return
-                    if not isinstance(context.token, str):
-                        context.log(f"Failed to fetch access token, got non string value: {context.token}")
-                        return
-                    time_series = create_self_monitoring_time_series(self_monitoring, context)
-                    await push_self_monitoring_time_series(context, time_series)
-                for _ in sfm_list:
-                    sfm_queue.task_done()
+            self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
+            _log_self_monitoring_data(self_monitoring, sfm_context)
+            if sfm_context.self_monitoring_enabled:
+                if sfm_context.token is None:
+                    sfm_context.log("Cannot proceed without authorization token, failed to send log self monitoring")
+                    return
+                if not isinstance(sfm_context.token, str):
+                    sfm_context.log(f"Failed to fetch access token, got non string value: {sfm_context.token}")
+                    return
+                time_series = create_self_monitoring_time_series(self_monitoring, sfm_context)
+                await push_self_monitoring_time_series(sfm_context, time_series)
+            for _ in sfm_list:
+                sfm_queue.task_done()
     except Exception:
         context.exception("Log SFM Loop Exception:")
 
 
-async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_session: aiohttp.ClientSession(), instance_metadata: InstanceMetadata):
-    dynatrace_url = get_dynatrace_log_ingest_url()
+async def _create_sfm_logs_context(sfm_queue, gcp_session: aiohttp.ClientSession(), instance_metadata: InstanceMetadata, dynatrace_url: str, gcp_token: str):
     self_monitoring_enabled = config.self_monitoring_enabled()
-    token = await create_token(context, gcp_session)
     container_name = instance_metadata.hostname if instance_metadata else "local deployment"
     zone = instance_metadata.zone if instance_metadata else "us-east1"
     return LogsSfmContext(
         project_id_owner=LOGS_SUBSCRIPTION_PROJECT,
         dynatrace_url=dynatrace_url,
         logs_subscription_id=LOGS_SUBSCRIPTION_ID,
-        token=token,
+        token=gcp_token,
         scheduled_execution_id=str(int(time.time()))[-8:],
         sfm_queue=sfm_queue,
         self_monitoring_enabled=self_monitoring_enabled,

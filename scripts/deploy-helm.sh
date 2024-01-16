@@ -377,7 +377,7 @@ if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   gcloud projects add-iam-policy-binding "$GCP_PROJECT" --member="serviceAccount:$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com" --role="projects/$GCP_PROJECT/roles/$ROLE_NAME.metrics" >/dev/null
 fi
 
-debug "Enablig required Google APIs"
+debug "Enabling required Google APIs"
 info ""
 info "- 6. Enable the APIs required for monitoring."
 gcloud services enable cloudapis.googleapis.com monitoring.googleapis.com cloudresourcemanager.googleapis.com | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}

@@ -24,9 +24,10 @@ from aiohttp import ClientSession
 
 from lib.configuration import config
 from lib.context import LoggingContext, create_logs_context
+from lib.credentials import create_token, fetch_dynatrace_api_key, fetch_dynatrace_url
 from lib.instance_metadata import InstanceMetadata
 
-from lib.clientsession_provider import init_dt_client_session
+from lib.clientsession_provider import init_dt_client_session, init_gcp_client_session
 from lib.logs.dynatrace_client import DynatraceClient
 from lib.logs.logs_processor import LogBatch
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
@@ -167,7 +168,12 @@ class LogsFastCheck:
             'severity': 'INFO'
         }
 
-        dynatrace_client = DynatraceClient()
+        async with init_gcp_client_session() as gcp_session:
+            gcp_token = await create_token(self.logging_context, gcp_session, validate=True)
+            dynatrace_url = await fetch_dynatrace_url(gcp_session=gcp_session, token=gcp_token, validate=True)
+            dynatrace_access_key = await fetch_dynatrace_api_key(gcp_session=gcp_session, token=gcp_token, validate=True)
+
+        dynatrace_client = DynatraceClient(dynatrace_url, dynatrace_access_key)
         async with init_dt_client_session() as dt_session:
             fake_ack_ids = []
             await dynatrace_client.send_logs(create_logs_context(asyncio.Queue()), dt_session, LogBatch(json.dumps([fast_check_event]), 1, [], len(json.dumps([fast_check_event])), LogSelfMonitoring()), fake_ack_ids)

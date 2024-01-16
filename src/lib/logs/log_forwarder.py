@@ -19,7 +19,11 @@ from typing import List, Tuple
 
 from lib.clientsession_provider import init_gcp_client_session, init_dt_client_session
 from lib.context import LoggingContext, LogsProcessingContext, create_logs_context
-from lib.credentials import create_token
+from lib.credentials import (
+    create_token,
+    fetch_dynatrace_api_key,
+    fetch_dynatrace_url,
+)
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.dynatrace_client import DynatraceClient
 from lib.logs.gcp_client import GCPClient
@@ -58,13 +62,19 @@ async def run_logs(
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
     tasks = []
 
-    # initiate http client for both GCP and DT
     async with init_gcp_client_session() as gcp_session:
-        token = await create_token(logging_context, gcp_session)
-        if token is None:
-            raise Exception("Cannot start pubsub pulling - 'Failed to fetch token")
-        gcp_client = GCPClient(token)
-    dynatrace_client = DynatraceClient()
+        gcp_token = await create_token(
+            context=logging_context, session=gcp_session, validate=True
+        )
+        dynatrace_url = await fetch_dynatrace_url(
+            gcp_session=gcp_session, token=gcp_token, validate=True
+        )
+        dynatrace_api_key = await fetch_dynatrace_api_key(
+            gcp_session=gcp_session, token=gcp_token, validate=True
+        )
+
+        gcp_client = GCPClient(gcp_token)
+    dynatrace_client = DynatraceClient(dynatrace_url=dynatrace_url, dynatrace_api_key=dynatrace_api_key)
 
     dt_semaphore = asyncio.Semaphore(NUMBER_OF_CONCURRENT_PUSH_COROUTINES)
 
@@ -135,7 +145,7 @@ async def perform_pull(
         context.self_monitoring.processing_time_start = time.perf_counter()
         for response in responses:
             if not isinstance(response, Exception):
-                for received_message in response.get("receivedMessages", []): # type: ignore
+                for received_message in response.get("receivedMessages", []):  # type: ignore
                     message_job = prepare_context_and_process_message(
                         sfm_queue, received_message
                     )

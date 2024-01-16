@@ -31,16 +31,17 @@ class DynatraceClient:
 
     def __init__(
         self,
+        dynatrace_url: str,
+        dynatrace_api_key: str
     ):
-        dynatrace_url: str = config.get_dynatrace_log_ingest_url_from_env()  # type: ignore
+        self.dynatrace_api_key = dynatrace_api_key  # type: ignore
 
-        self.dynatrace_api_key = config.get_dynatrace_api_key_from_env()  # type: ignore
         self.log_ingest_url = urlparse(dynatrace_url.rstrip("/") + "/api/v2/logs/ingest").geturl()
         self.verify_ssl = None if config.require_valid_certificate() else False
 
     async def send_logs(self, context: LogsContext, dt_session, batch: LogBatch, ack_ids_to_send):
         headers = {
-            "Authorization": f"Api-Token {context.dynatrace_api_key}",
+            "Authorization": f"Api-Token {self.dynatrace_api_key}",
             "Content-Type": "application/json; charset=utf-8",
         }
 
