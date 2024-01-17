@@ -12,29 +12,24 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+import base64
 import json
 import queue
-from datetime import datetime, timezone
 from asyncio import Queue
-from typing import Optional, Dict, NamedTuple, List
+from datetime import datetime, timezone
+from typing import Any, Dict, List, NamedTuple, Optional
 
-import base64
-from dateutil.parser import *
-from google.pubsub_v1 import ReceivedMessage, PubsubMessage
-
+import ciso8601
 from lib.context import LogsProcessingContext
 from lib.logs.log_forwarder_variables import (
-    EVENT_AGE_LIMIT_SECONDS,
-    CONTENT_LENGTH_LIMIT,
-    ATTRIBUTE_VALUE_LENGTH_LIMIT,
-    DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED,
-    CLOUD_LOG_FORWARDER,
-    CLOUD_LOG_FORWARDER_POD,
-    REQUEST_BODY_MAX_SIZE,
-    REQUEST_MAX_EVENTS,
-)
-from lib.logs.log_self_monitoring import LogSelfMonitoring, aggregate_self_monitoring_metrics, put_sfm_into_queue
-from lib.logs.metadata_engine import MetadataEngine, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP
+    ATTRIBUTE_VALUE_LENGTH_LIMIT, CLOUD_LOG_FORWARDER, CLOUD_LOG_FORWARDER_POD,
+    CONTENT_LENGTH_LIMIT, DYNATRACE_LOG_INGEST_CONTENT_MARK_TRIMMED,
+    EVENT_AGE_LIMIT_SECONDS, REQUEST_BODY_MAX_SIZE, REQUEST_MAX_EVENTS)
+from lib.logs.log_self_monitoring import (LogSelfMonitoring,
+                                          aggregate_self_monitoring_metrics,
+                                          put_sfm_into_queue)
+from lib.logs.metadata_engine import (ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP,
+                                      MetadataEngine)
 
 _metadata_engine = MetadataEngine()
 
@@ -129,7 +124,7 @@ def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
 
 
 def prepare_context_and_process_message(
-    sfm_queue: Queue, message: ReceivedMessage
+    sfm_queue: Queue, message: Dict[str, Any]
 ) -> Optional[LogProcessingJob]:
     context = None
     try:
@@ -158,7 +153,7 @@ def prepare_context_and_process_message(
 
 
 def _process_message(
-    context: LogsProcessingContext, message: PubsubMessage, ack_id
+    context: LogsProcessingContext, message: Dict[str, Any], ack_id
 ) -> Optional[LogProcessingJob]:
     data = base64.b64decode(message.get("data"))
     data = data.decode("UTF-8")
@@ -220,7 +215,7 @@ def _create_parsed_record(context: LogsProcessingContext, message_data: str):
         parsed_record[ATTRIBUTE_TIMESTAMP]
     ):
         context.self_monitoring.publish_time_fallback_records += 1
-        parsed_record[ATTRIBUTE_TIMESTAMP] = context.message_publish_time.isoformat()
+        parsed_record[ATTRIBUTE_TIMESTAMP] = context.message_publish_time
 
     _set_cloud_log_forwarder(parsed_record)
 
@@ -239,13 +234,15 @@ def _set_cloud_log_forwarder(parsed_record):
 
 def _is_invalid_datetime(datetime_str: str) -> bool:
     try:
-        parse(datetime_str)
+        ciso8601.parse_datetime(datetime_str)
         return False
-    except ParserError:
+    except ValueError as e:
+        print(e)
         return True
 
 
 def _is_log_too_old(timestamp: Optional[str]):
-    timestamp_datetime = parse(timestamp)
-    event_age_in_seconds = (datetime.now(timezone.utc) - timestamp_datetime).total_seconds()
+    timestamp_datetime =  ciso8601.parse_datetime(timestamp)
+    timestamp_now = datetime.now(timezone.utc)
+    event_age_in_seconds = (timestamp_now - timestamp_datetime).total_seconds()
     return event_age_in_seconds > EVENT_AGE_LIMIT_SECONDS
