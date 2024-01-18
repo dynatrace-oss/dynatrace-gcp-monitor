@@ -16,11 +16,10 @@ import json
 import queue
 from datetime import datetime, timezone
 from asyncio import Queue
-from typing import Optional, Dict, NamedTuple, List
+from typing import Any, Optional, Dict, NamedTuple, List
 
 import base64
 from dateutil.parser import *
-from google.pubsub_v1 import ReceivedMessage, PubsubMessage
 
 from lib.context import LogsProcessingContext
 from lib.logs.log_forwarder_variables import (
@@ -129,7 +128,7 @@ def prepare_batches(logs: List[LogProcessingJob]) -> List[LogBatch]:
 
 
 def prepare_context_and_process_message(
-    sfm_queue: Queue, message: ReceivedMessage
+    sfm_queue: Queue, message: Any
 ) -> Optional[LogProcessingJob]:
     context = None
     try:
@@ -158,7 +157,7 @@ def prepare_context_and_process_message(
 
 
 def _process_message(
-    context: LogsProcessingContext, message: PubsubMessage, ack_id
+    context: LogsProcessingContext, message: Any, ack_id
 ) -> Optional[LogProcessingJob]:
     data = base64.b64decode(message.get("data"))
     data = data.decode("UTF-8")
