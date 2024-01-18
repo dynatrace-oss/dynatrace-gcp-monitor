@@ -1,11 +1,11 @@
-FROM python:3.8-slim AS build
+FROM 3.9.18-slim-bookworm AS build
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential libffi-dev
 RUN pip install --upgrade pip
 COPY src/requirements.txt .
 RUN pip install -r ./requirements.txt
 
 
-FROM python:3.8-slim
+FROM 3.9.18-slim-bookworm
 
 ARG RELEASE_TAG_ARG
 ENV RELEASE_TAG=$RELEASE_TAG_ARG

@@ -1,13 +1,12 @@
-setuptools==65.5.1
+setuptools==69.0.3
 # metrics
-aiohttp==3.9.0
-aiodns==2.0.0
-mmh3==2.5.1
-PyJWT==2.4.0
-cryptography==41.0.6
-PyYAML==5.4
+aiohttp==3.9.1
+aiodns==3.1.1
+mmh3==4.1.0
+PyJWT==2.8.0
+cryptography==41.0.7
+PyYAML==6.0.1
 # logs
-google-cloud-pubsub==2.17.1
-python-dateutil==2.8.1
-jmespath~=0.10.0
-pytz==2022.2.1
+python-dateutil==2.8.2
+jmespath==1.0.1
+pytz==2023.3
