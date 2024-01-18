@@ -36,8 +36,7 @@ from lib.logs import (
     log_self_monitoring,
     log_forwarder_variables,
     logs_processor,
-    dynatrace_client,
-    worker_state,
+    dynatrace_client
 )
 from lib.logs.log_forwarder import perform_pull, push_logs
 from lib.logs.log_self_monitoring import LogSelfMonitoring
@@ -96,7 +95,6 @@ def setup_env(monkeypatch):
         monkeypatch.setenv(variable_name, system_variables[variable_name])
     reload(log_forwarder_variables)
     reload(logs_processor)
-    reload(worker_state)
     reload(log_self_monitoring)
     reload(dynatrace_client)
 
