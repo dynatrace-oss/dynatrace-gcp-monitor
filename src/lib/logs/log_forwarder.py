@@ -86,6 +86,10 @@ async def pull_and_push_logs_forever(
             ack_ids_to_send = await log_integration_service.push_logs(log_batches, logging_context)
             ack_ids_to_send.extend(ack_ids)
             await log_integration_service.push_ack_ids(ack_ids_to_send, logging_context)
+            start_time = time.time()
+            del log_batches
+            print(f"Time spent for del: {time.time() - start_time}")
+            del ack_ids_to_send
         except Exception as e:
             logging_context.exception("Failed to pull messages")
             # Backoff for 1 minute to avoid spamming requests and logs
