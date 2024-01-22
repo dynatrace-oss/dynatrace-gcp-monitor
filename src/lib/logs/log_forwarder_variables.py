@@ -18,7 +18,7 @@ from datetime import timedelta
 from lib.configuration.config import get_int_environment_value
 
 PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES = get_int_environment_value("PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES", 1000)
-PARALLEL_PROCESSES = get_int_environment_value("PARALLEL_PROCESSES", 1)
+PARALLEL_PROCESSES = get_int_environment_value("PARALLEL_PROCESSES", 4)
 PROCESSING_WORKERS = get_int_environment_value("PROCESSING_WORKERS", 5)
 NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES = get_int_environment_value("NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES", 10)
 NUMBER_OF_CONCURRENT_PUSH_COROUTINES = get_int_environment_value("NUMBER_OF_CONCURRENT_PUSH_COROUTINES", 5)

@@ -43,18 +43,18 @@ from lib.logs.logs_processor import (
 from lib.utilities import chunks
 
 
-def run_logs_wrapper(logging_context, instance_metadata):
-    asyncio.run(run_logs(logging_context, instance_metadata))
+def run_logs_wrapper(logging_context, instance_metadata, process_number):
+    asyncio.run(run_logs(logging_context, instance_metadata, process_number))
 
 
 async def run_logs(
-    logging_context: LoggingContext, instance_metadata: InstanceMetadata
+    logging_context: LoggingContext, instance_metadata: InstanceMetadata, process_number
 ):
     if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception(
             "Cannot start pubsub pulling - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined"
         )
-
+    await asyncio.sleep(process_number * 15)
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
     log_integration_service = LogIntegrationService(sfm_queue)
     await log_integration_service.update_gcp_client(logging_context)
