@@ -37,7 +37,7 @@ async def run_logs(
     if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception("Cannot start pubsub pulling - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
 
-    # Each process starts 15 second later than the previous one
+    # Each process starts 15 seconds later than the previous one
     await asyncio.sleep(process_number * 15)
 
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
