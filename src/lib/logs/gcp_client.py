@@ -12,10 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import asyncio
 import json
 from typing import Any, Dict, List
 
+from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext
+from lib.credentials import create_token
 from lib.logs.log_forwarder_variables import (
     LOGS_SUBSCRIPTION_ID,
     LOGS_SUBSCRIPTION_PROJECT,
@@ -46,6 +49,25 @@ class GCPClient:
         json_data = json.dumps(json_body)
         self.body_payload = json_data.encode("utf-8")
 
+
+    async def _get_new_token(self, logging_context):
+        while True:
+            async with init_gcp_client_session() as gcp_session:
+                token = await create_token(logging_context, gcp_session)
+                if token is None:
+                    await asyncio.sleep(1*60)
+                else:
+                    return token
+                
+    async def keep_token_updated(self, logging_context: LoggingContext):
+         while True:
+            await asyncio.sleep(1*60)
+            task = self._get_new_token(logging_context)
+            try:
+                api_token = await asyncio.wait_for(task, 1*60)
+                self.headers = {"Authorization": f"Bearer {api_token}"}
+            except asyncio.exceptions.TimeoutError as e:
+                raise Exception("Failed to fetch Google API token")
     async def pull_messages(
         self, logging_context: LoggingContext, gcp_session
     ) -> Dict[str, List[Any]]:  # type: ignore

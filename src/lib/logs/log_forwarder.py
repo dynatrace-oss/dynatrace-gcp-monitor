@@ -31,6 +31,7 @@ from lib.logs.log_forwarder_variables import (
     REQUEST_BODY_MAX_SIZE,
     NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES,
     NUMBER_OF_CONCURRENT_PUSH_COROUTINES,
+    PROCESS_STARTUP_DELAY_SECONDS
 )
 
 
@@ -41,20 +42,21 @@ from lib.logs.logs_processor import (
     LogBatch,
 )
 from lib.utilities import chunks
+from lib.logs.gcp_token_observer import GCPTokenObserver
 
-
-def run_logs_wrapper(logging_context, instance_metadata):
-    asyncio.run(run_logs(logging_context, instance_metadata))
+def run_logs_wrapper(logging_context, instance_metadata, process_number):
+    asyncio.run(run_logs(logging_context, instance_metadata, process_number))
 
 
 async def run_logs(
-    logging_context: LoggingContext, instance_metadata: InstanceMetadata
+    logging_context: LoggingContext, instance_metadata: InstanceMetadata, process_number: int
 ):
     if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception(
             "Cannot start pubsub pulling - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined"
         )
 
+    await asyncio.sleep(process_number*PROCESS_STARTUP_DELAY_SECONDS)
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
     tasks = []
 
@@ -64,14 +66,19 @@ async def run_logs(
         if token is None:
             raise Exception("Cannot start pubsub pulling - 'Failed to fetch token")
         gcp_client = GCPClient(token)
+        update_token_task = asyncio.create_task(gcp_client.keep_token_updated(logging_context))
+        tasks.append(update_token_task)
+    
+
+   
     dynatrace_client = DynatraceClient()
 
     dt_semaphore = asyncio.Semaphore(NUMBER_OF_CONCURRENT_PUSH_COROUTINES)
 
-    for i in range(0, PROCESSING_WORKERS):
+    for worker_number in range(0, PROCESSING_WORKERS):
         worker_task = asyncio.create_task(
             pull_and_push_logs_forever(
-                f"Worker-{i}", sfm_queue, gcp_client, dynatrace_client, dt_semaphore
+                process_number, worker_number, sfm_queue, gcp_client, dynatrace_client, dt_semaphore
             )
         )
         tasks.append(worker_task)
@@ -81,17 +88,18 @@ async def run_logs(
     )
     tasks.append(sfm_task)
 
-    await asyncio.gather(*tasks, return_exceptions=True)
+    await asyncio.gather(*tasks)
 
 
 async def pull_and_push_logs_forever(
-    worker_name: str,
+    process_number: int,
+    worker_number: int,
     sfm_queue: Queue,
     gcp_client: GCPClient,
     dynatrace_client: DynatraceClient,
     dt_semaphore: asyncio.Semaphore,
 ):
-    logging_context = LoggingContext(worker_name)
+    logging_context = LoggingContext(f"Process-{process_number}",f"Worker-{worker_number}")
     logging_context.log(f"Starting processing")
     while True:
         try:
