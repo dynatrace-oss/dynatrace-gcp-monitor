@@ -22,6 +22,7 @@ from lib.logs.log_forwarder_variables import (
     LOGS_SUBSCRIPTION_PROJECT,
     MAX_SFM_MESSAGES_PROCESSED,
     PROCESSING_WORKERS,
+    LOG_PROCESS_STARTUP_DELAY_SECONDS,
 )
 from lib.logs.log_self_monitoring import create_sfm_loop
 from lib.logs.log_integration_service import LogIntegrationService
@@ -35,33 +36,38 @@ async def run_logs(
     logging_context: LoggingContext, instance_metadata: InstanceMetadata, process_number
 ):
     if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
-        raise Exception("Cannot start pubsub pulling - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined")
+        raise Exception(
+            "Cannot start pubsub pulling - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined"
+        )
 
-    # Each process starts 15 seconds later than the previous one
-    await asyncio.sleep(process_number * 15)
+    # Each process starts later than the previous one
+    await asyncio.sleep(process_number * LOG_PROCESS_STARTUP_DELAY_SECONDS)
 
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
     log_integration_service = LogIntegrationService(sfm_queue)
     await log_integration_service.update_gcp_client(logging_context)
+
     tasks = []
 
-    for i in range(0, PROCESSING_WORKERS):
+    update_token = asyncio.create_task(log_integration_service.keep_gcp_token_updated(logging_context))
+
+    tasks.append(update_token)
+    for worker_number in range(0, PROCESSING_WORKERS):
         worker_task = asyncio.create_task(
-            pull_and_push_logs_forever(f"Worker-{i}", log_integration_service)
+            pull_and_push_logs_forever(process_number, worker_number, log_integration_service)
         )
         tasks.append(worker_task)
 
     sfm_task = asyncio.create_task(create_sfm_loop(sfm_queue, logging_context, instance_metadata))
     tasks.append(sfm_task)
 
-    await asyncio.gather(*tasks, return_exceptions=True)
+    await asyncio.gather(*tasks)
 
 
 async def pull_and_push_logs_forever(
-    worker_name: str,
-    log_integration_service
+    process_number: int, worker_number: int, log_integration_service: LogIntegrationService
 ):
-    logging_context = LoggingContext(worker_name)
+    logging_context = LoggingContext(f"Process-{process_number}", f"Worker-{worker_number}")
     logging_context.log(f"Starting processing")
     while True:
         try:

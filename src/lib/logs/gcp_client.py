@@ -12,10 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import asyncio
 import json
 from typing import Any, Dict, List
 
+from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext
+from lib.credentials import create_token
 from lib.logs.log_forwarder_variables import (
     LOGS_SUBSCRIPTION_ID,
     LOGS_SUBSCRIPTION_PROJECT,
@@ -45,6 +48,16 @@ class GCPClient:
         json_body = {"maxMessages": PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES}
         json_data = json.dumps(json_body)
         self.body_payload = json_data.encode("utf-8")
+
+    async def update_token(self, logging_context: LoggingContext) -> bool:
+        while True:
+            async with init_gcp_client_session() as gcp_session:
+                api_token = await create_token(logging_context, gcp_session)
+                if api_token is None:
+                    await asyncio.sleep(1 * 60)
+                else:
+                    self.headers = {"Authorization": f"Bearer {api_token}"}
+                    return True
 
     async def pull_messages(
         self, logging_context: LoggingContext, gcp_session
