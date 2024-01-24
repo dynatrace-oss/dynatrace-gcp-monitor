@@ -21,7 +21,7 @@ from lib.logs.log_forwarder_variables import (
 
 
 class LogIntegrationService:
-    def __init__(self, sfm_queue):
+    def __init__(self, sfm_queue: asyncio.Queue):
         self.gcp_client = None
         self.dynatrace_client = DynatraceClient()
         self.sfm_queue = sfm_queue
@@ -31,10 +31,21 @@ class LogIntegrationService:
         async with init_gcp_client_session() as gcp_session:
             token = await create_token(logging_context, gcp_session)
             if token is None:
-                raise Exception("Cannot start pubsub pulling - 'Failed to fetch token")
+                raise Exception("Cannot start pub/sub pulling - Failed to fetch token")
             self.gcp_client = GCPClient(token)
 
-    async def perform_pull(self, logging_context: LoggingContext) -> Tuple[List[LogBatch], List[str]]:
+    async def keep_gcp_token_updated(self, logging_context: LoggingContext):
+        while True:
+            await asyncio.sleep(50 * 60)
+            task = self.update_gcp_client(logging_context)
+            try:
+                await asyncio.wait_for(task, 5 * 60)
+            except asyncio.exceptions.TimeoutError as e:
+                raise Exception("Failed to fetch Google API token")
+
+    async def perform_pull(
+        self, logging_context: LoggingContext
+    ) -> Tuple[List[LogBatch], List[str]]:
         async with init_gcp_client_session() as gcp_session:
             context = LogsProcessingContext(None, None, self.sfm_queue)
             context.self_monitoring.pulling_time_start = time.perf_counter()
@@ -43,9 +54,7 @@ class LogIntegrationService:
                 self.gcp_client.pull_messages(logging_context, gcp_session)
                 for _ in range(NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES)
             ]
-            responses = await asyncio.gather(
-                *tasks_to_pull_messages, return_exceptions=True
-            )
+            responses = await asyncio.gather(*tasks_to_pull_messages, return_exceptions=True)
 
             context.self_monitoring.calculate_pulling_time()
             processed_messages = []
@@ -58,10 +67,7 @@ class LogIntegrationService:
                         message_job = prepare_context_and_process_message(
                             self.sfm_queue, received_message
                         )
-                        if (
-                                not message_job
-                                or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2
-                        ):
+                        if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
                             ack_ids_to_send.append(received_message.get("ackId"))
                             continue
                         processed_messages.append(message_job)
@@ -80,15 +86,11 @@ class LogIntegrationService:
             logging_context.log(f"Skipping pushing logs - no logs to push")
             return []
 
-        logging_context.log(
-            f"Number of log batches to push to Dynatrace: {batch_length}"
-        )
+        logging_context.log(f"Number of log batches to push to Dynatrace: {batch_length}")
 
         async def process_batch(batch: LogBatch):
             async with self.log_push_semaphore:
-                await self.dynatrace_client.send_logs(
-                    context, dt_session, batch, ack_ids_to_send
-                )
+                await self.dynatrace_client.send_logs(context, dt_session, batch, ack_ids_to_send)
 
         context.self_monitoring.sending_time_start = time.perf_counter()
         async with init_dt_client_session() as dt_session:
@@ -110,8 +112,6 @@ class LogIntegrationService:
                 self.gcp_client.push_ack_ids(chunk, gcp_session, logging_context)
                 for chunk in chunks(ack_ids, chunk_size)
             ]
-            exceptions = await asyncio.gather(
-                *tasks_to_send_ack_ids, return_exceptions=True
-            )
+            exceptions = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
         if ack_ids:
             logging_context.log("Log ingest payload has been pushed successfully")

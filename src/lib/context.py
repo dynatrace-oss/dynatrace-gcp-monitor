@@ -12,13 +12,12 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
-import asyncio
 import os
 import time
 import traceback
 from datetime import datetime, timedelta
 from asyncio import Queue
-from typing import Optional, Dict, Union
+from typing import Optional, Dict
 
 import aiohttp
 
@@ -70,9 +69,8 @@ def get_query_interval_minutes() -> int:
 
 
 class LoggingContext:
-    def __init__(self, scheduled_execution_id: Optional[str]):
-        self.scheduled_execution_id: str = scheduled_execution_id[0:12] if scheduled_execution_id else None
-        self.throttled_log_call_count = dict()
+    def __init__(self, *scheduled_execution_id ):
+        self.scheduled_execution_id: str = '[' + ']['.join(scheduled_execution_id) + ']' if scheduled_execution_id and any(scheduled_execution_id) else ""
 
     def error(self, *args):
         self.log("ERROR", *args)
@@ -122,7 +120,7 @@ class LoggingContext:
 
         context_strings = []
         if self.scheduled_execution_id:
-            context_strings.append(f"[{self.scheduled_execution_id}]")
+            context_strings.append(self.scheduled_execution_id)
         for arg in args[:-1]:
             context_strings.append(f"[{arg}]")
         context_section = "".join(context_strings)
