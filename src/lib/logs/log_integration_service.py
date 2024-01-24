@@ -21,10 +21,6 @@ from lib.logs.log_forwarder_variables import (
 
 
 class LogIntegrationService:
-    gcp_client: GCPClient
-    dynatrace_client: DynatraceClient
-    sfm_queue: asyncio.Queue
-    log_push_semaphore: asyncio.Semaphore
 
     def __init__(self, sfm_queue: asyncio.Queue):
         self.gcp_client = None
@@ -42,7 +38,7 @@ class LogIntegrationService:
     async def keep_gcp_token_updated(self, logging_context: LoggingContext):
         while True:
             await asyncio.sleep(50 * 60)
-            task = self.gcp_client.update_token(logging_context)
+            task = self.update_gcp_client(logging_context)
             try:
                 await asyncio.wait_for(task, 5 * 60)
             except asyncio.exceptions.TimeoutError as e:

@@ -49,16 +49,6 @@ class GCPClient:
         json_data = json.dumps(json_body)
         self.body_payload = json_data.encode("utf-8")
 
-    async def update_token(self, logging_context: LoggingContext) -> bool:
-        while True:
-            async with init_gcp_client_session() as gcp_session:
-                api_token = await create_token(logging_context, gcp_session)
-                if api_token is None:
-                    await asyncio.sleep(1 * 60)
-                else:
-                    self.headers = {"Authorization": f"Bearer {api_token}"}
-                    return True
-
     async def pull_messages(
         self, logging_context: LoggingContext, gcp_session
     ) -> Dict[str, List[Any]]:  # type: ignore
