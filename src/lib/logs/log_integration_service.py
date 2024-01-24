@@ -21,7 +21,6 @@ from lib.logs.log_forwarder_variables import (
 
 
 class LogIntegrationService:
-
     def __init__(self, sfm_queue: asyncio.Queue):
         self.gcp_client = None
         self.dynatrace_client = DynatraceClient()
@@ -32,7 +31,7 @@ class LogIntegrationService:
         async with init_gcp_client_session() as gcp_session:
             token = await create_token(logging_context, gcp_session)
             if token is None:
-                raise Exception("Cannot start pubsub pulling - 'Failed to fetch token")
+                raise Exception("Cannot start pub/sub pulling - Failed to fetch token")
             self.gcp_client = GCPClient(token)
 
     async def keep_gcp_token_updated(self, logging_context: LoggingContext):
