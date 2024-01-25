@@ -38,7 +38,7 @@ from lib.logs import (
     logs_processor,
     dynatrace_client
 )
-from lib.logs.log_forwarder import perform_pull, push_logs
+from lib.logs.log_integration_service import LogIntegrationService
 from lib.logs.log_self_monitoring import LogSelfMonitoring
 from lib.logs.metadata_engine import (
     ATTRIBUTE_TIMESTAMP,
@@ -326,8 +326,8 @@ async def test_execution_expired_token():
 
 
 async def run_worker_with_messages(
-    messages: List[Dict[str, Any]],
-    expected_ack_ids: List[str],
+        messages: List[Dict[str, Any]],
+        expected_ack_ids: List[str],
 ) -> LogSelfMonitoring:
     async def pull_messages_side_effect(*args):
         if pull_messages_side_effect.call_count == 0:
@@ -349,12 +349,12 @@ async def run_worker_with_messages(
     pull_messages_side_effect.call_count = 0
     mock_gcp_client.pull_messages.side_effect = pull_messages_side_effect
 
-    dynatrace_client = DynatraceClient()
+    log_integration_service = LogIntegrationService(sfm_queue)
+    log_integration_service.gcp_client = mock_gcp_client
+    log_integration_service.log_push_semaphore = asyncio.Semaphore(1)
 
-    log_batches, ack_ids = await perform_pull(sfm_queue, mock_gcp_client, logging_context)
-    ack_ids_to_send = await push_logs(
-        log_batches, sfm_queue, dynatrace_client, logging_context, asyncio.Semaphore(1)
-    )
+    log_batches, ack_ids = await log_integration_service.perform_pull(logging_context)
+    ack_ids_to_send = await log_integration_service.push_logs(log_batches, logging_context)
 
     await push_ack_ids(ack_ids_to_send + ack_ids, mock_gcp_client, logging_context)
 
@@ -411,7 +411,7 @@ def assert_correct_body_structure(request):
 
 
 def create_fake_message(
-    message_data, ack_id="ACK_ID", message_id="MESSAGE_ID", timestamp_epoch_seconds=int(time.time())
+        message_data, ack_id="ACK_ID", message_id="MESSAGE_ID", timestamp_epoch_seconds=int(time.time())
 ) -> Dict[str, Any]:
     iso_formatted_time = datetime.fromtimestamp(
         timestamp_epoch_seconds, tz=timezone.utc
