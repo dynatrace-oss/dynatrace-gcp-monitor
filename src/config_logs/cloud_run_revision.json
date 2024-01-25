@@ -16,6 +16,14 @@
           "pattern": "resource.labels.revision_name"
         },
         {
+          "key": "gcp.instance.cloud_function_name",
+          "pattern": "resource.labels.configuration_name"
+        },
+        {
+          "key": "gcp.instance.goog_managed_by",
+          "pattern": "labels.\"goog-managed-by\""
+        },
+        {
           "key": "content",
           "pattern": "@"
         }

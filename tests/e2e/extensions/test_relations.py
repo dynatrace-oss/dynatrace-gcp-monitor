@@ -50,6 +50,10 @@ def test_generic_relation_on_dynatrace(generic_relation, api_response):
     assert 'totalCount' in api_response
     assert api_response['totalCount'] >= 1
     assert 'items' in api_response
+
+    print(api_response)
     createdByList = [item['value']['toType'] for item in api_response['items']
                      if 'com.dynatrace.extension.' in item['value']['createdBy']]
+    print("*****************")
+    print(createdByList)
     assert generic_relation in createdByList
