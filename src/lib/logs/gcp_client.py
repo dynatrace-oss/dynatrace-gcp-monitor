@@ -12,10 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import asyncio
 import json
 from typing import Any, Dict, List
 
+from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext
+from lib.credentials import create_token
 from lib.logs.log_forwarder_variables import (
     LOGS_SUBSCRIPTION_ID,
     LOGS_SUBSCRIPTION_PROJECT,
