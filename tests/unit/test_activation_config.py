@@ -13,7 +13,6 @@
 #   limitations under the License.
 from typing import NewType, Any
 
-from assertpy import assert_that
 
 from lib.context import LoggingContext
 from lib.utilities import read_activation_yaml, load_activated_feature_sets
@@ -34,8 +33,9 @@ def test_filtering_config_loaded(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG)
     activation_yaml = read_activation_yaml()
     activated_service_names = load_activated_feature_sets(context, activation_yaml)
-    assert_that(activated_service_names).contains_only("pubsub_subscription/default_metrics", "pubsub_subscription/test",
-                                                       "pubsub_snapshot/default_metrics")
+
+    assert sorted(activated_service_names) == sorted(["pubsub_subscription/default_metrics", "pubsub_subscription/test",
+                                                      "pubsub_snapshot/default_metrics"])
 
 
 def test_filtering_missing_configs(monkeypatch: MonkeyPatchFixture):
@@ -49,11 +49,14 @@ def test_filtering_services_without_feature_sets(monkeypatch: MonkeyPatchFixture
     monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG_WITHOUT_FEATURE_SET)
     activation_yaml = read_activation_yaml()
     activated_service_names = load_activated_feature_sets(context, activation_yaml)
-    assert_that(activated_service_names).contains_only("services_to_be_activated/default_metrics")
+
+    assert activated_service_names == ["services_to_be_activated/default_metrics"]
 
 
 def test_services_with_an_empty_feature_sets(monkeypatch: MonkeyPatchFixture):
     monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG_WITH_EMPTY_FEATURE_SET)
     activation_yaml = read_activation_yaml()
     activated_service_names = load_activated_feature_sets(context, activation_yaml)
-    assert_that(activated_service_names).contains_only("services_to_be_activated/default_metrics", "services_to_be_activated/test")
+
+    assert activated_service_names == ["services_to_be_activated/default_metrics",
+                                       "services_to_be_activated/test"]
