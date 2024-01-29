@@ -216,6 +216,38 @@ expected_metric_data = {
                 }
             },
             "metric": {
+                "type": "custom.googleapis.com/dynatrace/logs/pulling_time",
+                "labels": {
+                    "dynatrace_tenant_url": "http://localhost:9011",
+                    "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
+                    "container_name": "container_name"
+                }
+            },
+            "valueType": "DOUBLE",
+            "metricKind": "GAUGE",
+            "points": [
+                {
+                    "interval": {
+                        "endTime": end_time
+                    },
+                    "value": {
+                        "doubleValue": 0.0945120120242137
+                    }
+                }
+            ]
+        },
+        {
+            "resource": {
+                "type": "generic_task",
+                "labels": {
+                    "project_id": "project_id",
+                    "location": "us-east1",
+                    "namespace": "Local",
+                    "job": "Local",
+                    "task_id": "Local"
+                }
+            },
+            "metric": {
                 "type": "custom.googleapis.com/dynatrace/logs/connectivity_failures",
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
@@ -345,6 +377,7 @@ def test_self_monitoring_metrics():
     self_monitoring.parsing_errors = 3
     self_monitoring.all_requests = 3
     self_monitoring.processing_time = 0.0878758430480957
+    self_monitoring.pulling_time = 0.0945120120242137
     self_monitoring.sending_time = 0.3609178066253662
     self_monitoring.records_with_too_long_content = 4
     self_monitoring.log_ingest_payload_size = 10.123

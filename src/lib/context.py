@@ -71,6 +71,7 @@ def get_query_interval_minutes() -> int:
 class LoggingContext:
     def __init__(self, *scheduled_execution_id ):
         self.scheduled_execution_id: str = '[' + ']['.join(scheduled_execution_id) + ']' if scheduled_execution_id and any(scheduled_execution_id) else ""
+        self.throttled_log_call_count = dict()
 
     def error(self, *args):
         self.log("ERROR", *args)

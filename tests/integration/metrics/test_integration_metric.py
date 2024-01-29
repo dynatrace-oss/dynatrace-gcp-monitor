@@ -32,7 +32,6 @@ import lib.gcp_apis
 import lib.metric_ingest
 from lib.utilities import load_supported_services
 from main import async_dynatrace_gcp_extension
-from assertpy import assert_that
 
 AUTHORIZATION_KEY = "Fake secret - Open sesame"
 METRIC_MESSAGE_DATA = '{}'
@@ -113,11 +112,11 @@ async def test_metric_authorization_header():
 
     matched_request: RequestResponseFindResponse = Requests.get_matching_requests(request)
 
-    assert_that(matched_request.requests).is_not_empty()
+    assert bool(matched_request.requests) #is not empty
 
     result: RequestResponseRequest = matched_request.requests[0]
 
-    assert_that(result.headers['Authorization']).is_equal_to(f"Api-Token {AUTHORIZATION_KEY}")
+    assert result.headers['Authorization'] == f"Api-Token {AUTHORIZATION_KEY}"
 
 
 @pytest.mark.asyncio
@@ -133,7 +132,8 @@ async def ingest_lines_output(expected_ingest_output_file):
     gce_instance_filter="resource.labels.instance_name%3Dstarts_with(%22test%22)"
     requests_with_filter = [reqeust_gcp_timeseries for reqeust_gcp_timeseries in reqeusts_gcp_timeseries.requests
                             if gce_instance_filter in reqeust_gcp_timeseries.url]
-    assert_that(requests_with_filter).is_length(3)
+    
+    assert len(requests_with_filter) == 3
 
     sent_requests = Requests.get_all_received_requests().get_json_data().get('requests')
     urls = {sent_request["request"]["url"] for sent_request in sent_requests}
@@ -143,7 +143,8 @@ async def ingest_lines_output(expected_ingest_output_file):
 
     request_metrics_ingest_pattern = NearMissMatchPatternRequest(url_path_pattern="/api/v2/metrics/ingest", method="POST")
     request_metrics_ingest: RequestResponseFindResponse = Requests.get_matching_requests(request_metrics_ingest_pattern)
-    assert_that(request_metrics_ingest.requests).is_not_empty()
+
+    assert bool(request_metrics_ingest.requests) #assert not empty
     result: RequestResponseRequest = request_metrics_ingest.requests[0]
 
     body = result.body
@@ -152,5 +153,5 @@ async def ingest_lines_output(expected_ingest_output_file):
         expected_ingest_lines = ingest.read().split("\n")
         actual_ingest_lines = body.split("\n")
 
-        assert_that(actual_ingest_lines).is_length(len(expected_ingest_lines))
-        assert_that(actual_ingest_lines).contains_only(*expected_ingest_lines)
+        assert len(actual_ingest_lines) == len(expected_ingest_lines)
+        assert sorted(actual_ingest_lines) == sorted(expected_ingest_lines)
