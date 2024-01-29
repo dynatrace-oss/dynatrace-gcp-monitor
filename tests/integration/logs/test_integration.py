@@ -31,12 +31,7 @@ from wiremock.server import WireMockServer
 
 from lib.context import LoggingContext, DynatraceConnectivity
 from lib.instance_metadata import InstanceMetadata
-from lib.logs import (
-    log_self_monitoring,
-    log_forwarder_variables,
-    logs_processor,
-    dynatrace_client
-)
+from lib.logs import log_self_monitoring, log_forwarder_variables, logs_processor, dynatrace_client
 from lib.logs.log_integration_service import LogIntegrationService
 from lib.logs.log_self_monitoring import LogSelfMonitoring
 from lib.logs.metadata_engine import (
@@ -111,30 +106,6 @@ def response(status: int, status_message: str):
             persistent=False,
         )
     )
-
-
-class MockSubscriberClient:
-    received_messages: List[ReceivedMessage]
-    ack_queue: Queue
-
-    def __init__(self, ack_queue: Queue, messages: List[ReceivedMessage] = None):
-        self.received_messages = messages if messages else []
-        self.ack_queue = ack_queue
-
-    def add_message(self, message: ReceivedMessage):
-        self.received_messages.append(message)
-
-    def add_all_messages(self, messages: List[ReceivedMessage]):
-        self.received_messages += messages
-
-    def pull(self, pull_request: PullRequest) -> PullResponse:
-        pull_response = PullResponse()
-        pull_response.received_messages = self.received_messages.copy()
-        return pull_response
-
-    def acknowledge(self, request: Dict):
-        for ack_id in request.get("ack_ids", []):
-            self.ack_queue.put_nowait(ack_id)
 
 
 @pytest.mark.asyncio
@@ -325,8 +296,8 @@ async def test_execution_expired_token():
 
 
 async def run_worker_with_messages(
-        messages: List[Dict[str, Any]],
-        expected_ack_ids: List[str],
+    messages: List[Dict[str, Any]],
+    expected_ack_ids: List[str],
 ) -> LogSelfMonitoring:
     async def pull_messages_side_effect(*args):
         if pull_messages_side_effect.call_count == 0:
@@ -410,7 +381,7 @@ def assert_correct_body_structure(request):
 
 
 def create_fake_message(
-        message_data, ack_id="ACK_ID", message_id="MESSAGE_ID", timestamp_epoch_seconds=int(time.time())
+    message_data, ack_id="ACK_ID", message_id="MESSAGE_ID", timestamp_epoch_seconds=int(time.time())
 ) -> Dict[str, Any]:
     iso_formatted_time = datetime.fromtimestamp(
         timestamp_epoch_seconds, tz=timezone.utc
