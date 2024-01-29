@@ -23,7 +23,6 @@ from typing import NewType, Any, List, Dict
 
 import pytest
 from unittest.mock import AsyncMock
-from google.pubsub_v1 import PullResponse, ReceivedMessage, PullRequest
 from wiremock.constants import Config
 from wiremock.resources.mappings import MappingRequest, HttpMethods, MappingResponse, Mapping
 from wiremock.resources.mappings.resource import Mappings
