@@ -21,7 +21,7 @@ from lib.logs.log_forwarder_variables import (
     LOGS_SUBSCRIPTION_ID,
     LOGS_SUBSCRIPTION_PROJECT,
     MAX_SFM_MESSAGES_PROCESSED,
-    PROCESSING_WORKERS,
+    NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS,
     LOG_PROCESS_STARTUP_DELAY_SECONDS,
 )
 from lib.logs.log_self_monitoring import create_sfm_loop
@@ -52,7 +52,7 @@ async def run_logs(
     update_token = asyncio.create_task(log_integration_service.keep_gcp_token_updated(logging_context))
 
     tasks.append(update_token)
-    for worker_number in range(0, PROCESSING_WORKERS):
+    for worker_number in range(0, NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS):
         worker_task = asyncio.create_task(
             pull_and_push_logs_forever(process_number, worker_number, log_integration_service)
         )
