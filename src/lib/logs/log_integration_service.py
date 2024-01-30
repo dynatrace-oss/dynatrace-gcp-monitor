@@ -58,7 +58,7 @@ class LogIntegrationService:
 
             context.self_monitoring.calculate_pulling_time()
             processed_messages = []
-            ack_ids_to_send = []
+            ack_ids_of_erroneous_messages = []
 
             context.self_monitoring.processing_time_start = time.perf_counter()
             for response in responses:
@@ -68,14 +68,14 @@ class LogIntegrationService:
                             self.sfm_queue, received_message
                         )
                         if not message_job or message_job.bytes_size > REQUEST_BODY_MAX_SIZE - 2:
-                            ack_ids_to_send.append(received_message.get("ackId"))
+                            ack_ids_of_erroneous_messages.append(received_message.get("ackId"))
                             continue
                         processed_messages.append(message_job)
             context.self_monitoring.calculate_processing_time()
             put_sfm_into_queue(context)
             return (
                 prepare_batches(processed_messages) if processed_messages else [],
-                ack_ids_to_send,
+                ack_ids_of_erroneous_messages,
             )
 
     async def push_logs(self, log_batches, logging_context: LoggingContext) -> List[str]:

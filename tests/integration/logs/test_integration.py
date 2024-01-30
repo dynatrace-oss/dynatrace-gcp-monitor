@@ -323,10 +323,10 @@ async def run_worker_with_messages(
     log_integration_service.gcp_client = mock_gcp_client
     log_integration_service.log_push_semaphore = asyncio.Semaphore(1)
 
-    log_batches, ack_ids = await log_integration_service.perform_pull(logging_context)
+    log_batches, ack_ids_of_erroneous_messages = await log_integration_service.perform_pull(logging_context)
     ack_ids_to_send = await log_integration_service.push_logs(log_batches, logging_context)
 
-    await push_ack_ids(ack_ids_to_send + ack_ids, mock_gcp_client, logging_context)
+    await push_ack_ids(ack_ids_to_send + ack_ids_of_erroneous_messages, mock_gcp_client, logging_context)
 
     metadata = InstanceMetadata(
         project_id="",

@@ -225,11 +225,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: PARALLEL_PROCESSES
-        - name: PROCESSING_WORKERS
+        - name: NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
-              key: PROCESSING_WORKERS
+              key: NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS
         - name: NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES
           valueFrom:
             configMapKeyRef:
