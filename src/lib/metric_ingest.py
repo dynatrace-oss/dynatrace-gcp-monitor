@@ -216,7 +216,7 @@ async def fetch_metric(
 
         for single_time_series in page['timeSeries']:
             typed_value_key = extract_typed_value_key(single_time_series)
-            dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping)
+            dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric)
             entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
 
             for point in single_time_series['points']:
@@ -267,10 +267,12 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
     return DimensionValue(name, string_value)
 
 
-def create_dimensions(context: MetricsContext, service_name: str, time_series: Dict, dt_dimensions_mapping: DtDimensionsMap) -> List[DimensionValue]:
     # "gcp.resource.type" is required to easily differentiate services with the same metric set
+def create_dimensions(context: MetricsContext, service_name: str, time_series: Dict, dt_dimensions_mapping: DtDimensionsMap, metric: Metric) -> List[DimensionValue]:
     # e.g. internal_tcp_lb_rule and internal_udp_lb_rule
     dt_dimensions = [create_dimension("gcp.resource.type", service_name, context)]
+
+    dt_dimensions.append(create_dimension("metadata.origin", "autodiscovery" if metric.autodiscovered_metric else "extension"))
 
     metric_labels = time_series.get('metric', {}).get('labels', {})
     for short_source_label, dim_value in metric_labels.items():

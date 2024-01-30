@@ -163,7 +163,6 @@ async def send_metric_metadata(
     previously_discovered_metrics: Dict[str, Any],
 ) -> Dict[str, Any]:
     metrics_metadata = []
-    add_autodiscovery_label = config.gcp_autodiscovery_add_label()
     for _, metrics_list in metrics.items():
         for metric in metrics_list:
             if metric.dynatrace_name not in previously_discovered_metrics:
@@ -173,8 +172,7 @@ async def send_metric_metadata(
                         metric_type=metric.dynatrace_metric_type,
                         metric_display_name=metric.name,
                         metric_description=metric.description,
-                        metric_unit=metric.unit,
-                        add_autodiscovery_label=add_autodiscovery_label
+                        metric_unit=metric.unit
                     )
                 )
                 previously_discovered_metrics[metric.dynatrace_name] = None
