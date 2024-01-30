@@ -72,13 +72,13 @@ async def pull_and_push_logs_forever(
     while True:
         try:
             # Pull logs from pub/sub, process them and create batches out of them to send to Dynatrace
-            log_batches, ack_ids = await log_integration_service.perform_pull(logging_context)
+            log_batches, ack_ids_of_erroneous_messages = await log_integration_service.perform_pull(logging_context)
 
             # Push logs batches to Dynatrace
             ack_ids_to_send = await log_integration_service.push_logs(log_batches, logging_context)
 
             # Push ACK_IDs to pub/sub
-            ack_ids_to_send.extend(ack_ids)
+            ack_ids_to_send.extend(ack_ids_of_erroneous_messages)
             await log_integration_service.push_ack_ids(ack_ids_to_send, logging_context)
         except Exception as e:
             logging_context.exception(f"Failed to pull or push messages: {e}")
