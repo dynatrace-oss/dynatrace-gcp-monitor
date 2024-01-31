@@ -36,7 +36,7 @@ class LogIntegrationService:
 
     async def keep_gcp_token_updated(self, logging_context: LoggingContext):
         while True:
-            await asyncio.sleep(50 * 60)
+            await asyncio.sleep(57)
             task = self.update_gcp_client(logging_context)
             try:
                 await asyncio.wait_for(task, 5 * 60)
@@ -51,7 +51,7 @@ class LogIntegrationService:
             context.self_monitoring.pulling_time_start = time.perf_counter()
 
             tasks_to_pull_messages = [
-                self.gcp_client.pull_messages(logging_context, gcp_session)
+                self.gcp_client.pull_messages(logging_context, gcp_session, self.update_gcp_client)
                 for _ in range(NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES)
             ]
             responses = await asyncio.gather(*tasks_to_pull_messages, return_exceptions=True)

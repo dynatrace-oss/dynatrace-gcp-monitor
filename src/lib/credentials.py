@@ -118,13 +118,14 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
         "iss": service,
         "scope": "https://www.googleapis.com/auth/cloud-platform",
         "aud": uri,
-        "exp": str(now + 60 * 60),
+        "exp": str(now + 1 * 60),
         "iat": str(now)
     }
     assertion_signed = jwt.encode(assertion, key, 'RS256')
     request = {'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer', 'assertion': assertion_signed}
     async with session.post(uri, data=request) as resp:
         response = await resp.json()
+        print(response)
         return response["access_token"]
 
 
