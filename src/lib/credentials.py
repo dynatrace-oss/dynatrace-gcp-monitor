@@ -118,7 +118,7 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
         "iss": service,
         "scope": "https://www.googleapis.com/auth/cloud-platform",
         "aud": uri,
-        "exp": str(now + 60 * 60),
+        "exp": str(now + 1 * 60),
         "iat": str(now)
     }
     assertion_signed = jwt.encode(assertion, key, 'RS256')

@@ -36,9 +36,10 @@ class LogIntegrationService:
 
     async def keep_gcp_token_updated(self, logging_context: LoggingContext):
         while True:
-            await asyncio.sleep(50 * 60)
+            await asyncio.sleep(50)
             task = self.update_gcp_client(logging_context)
             try:
+                logging_context.log("Updating GCP token")
                 await asyncio.wait_for(task, 5 * 60)
             except asyncio.exceptions.TimeoutError as e:
                 raise Exception("Failed to fetch Google API token")
