@@ -36,7 +36,7 @@ class LogIntegrationService:
 
     async def keep_gcp_token_updated(self, logging_context: LoggingContext):
         while True:
-            await asyncio.sleep(50 * 60)
+            await asyncio.sleep(20 * 60)
             task = self.update_gcp_client(logging_context)
             try:
                 await asyncio.wait_for(task, 5 * 60)
