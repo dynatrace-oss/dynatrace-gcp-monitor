@@ -100,7 +100,7 @@ class LogIntegrationService:
         async with init_gcp_client_session() as gcp_session:
             chunk_size = 2048
             tasks_to_send_ack_ids = [
-                self.gcp_client.push_ack_ids(chunk, gcp_session, logging_context)
+                self.gcp_client.push_ack_ids(chunk, gcp_session, logging_context, self.update_gcp_client)
                 for chunk in chunks(ack_ids, chunk_size)
             ]
             exceptions = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)

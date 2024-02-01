@@ -70,13 +70,16 @@ class GCPClient:
             else:
                 return response_json
 
-    async def push_ack_ids(self, ack_ids: List[str], gcp_session, logging_context: LoggingContext):
+    async def push_ack_ids(self, ack_ids: List[str], gcp_session, logging_context: LoggingContext, update_gcp_client: Callable[[LoggingContext], None]):
         payload = {"ackIds": ack_ids}
 
         async with gcp_session.request(
             method="POST", url=self.acknowledge_url, json=payload, headers=self.headers
         ) as response:
             resp_status = response.status
+
+            if resp_status == 401:
+                await update_gcp_client(logging_context)
 
             if resp_status > 299:
                 logging_context.log(
