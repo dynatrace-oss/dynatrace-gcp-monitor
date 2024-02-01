@@ -34,15 +34,6 @@ class LogIntegrationService:
                 raise Exception("Cannot start pub/sub pulling - Failed to fetch token")
             self.gcp_client = GCPClient(token)
 
-    async def keep_gcp_token_updated(self, logging_context: LoggingContext):
-        while True:
-            await asyncio.sleep(20 * 60)
-            task = self.update_gcp_client(logging_context)
-            try:
-                await asyncio.wait_for(task, 5 * 60)
-            except asyncio.exceptions.TimeoutError as e:
-                raise Exception("Failed to fetch Google API token")
-
     async def perform_pull(
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
