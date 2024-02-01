@@ -14,7 +14,7 @@
 
 import asyncio
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Callable
 
 from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext
@@ -50,13 +50,16 @@ class GCPClient:
         self.body_payload = json_data.encode("utf-8")
 
     async def pull_messages(
-        self, logging_context: LoggingContext, gcp_session
+        self, logging_context: LoggingContext, gcp_session, update_gcp_client: Callable[[LoggingContext], None]
     ) -> Dict[str, List[Any]]:  # type: ignore
         async with gcp_session.request(
             method="POST", url=self.pull_url, data=self.body_payload, headers=self.headers
         ) as response:
             response_json = await response.json()
             resp_status = response.status
+
+            if resp_status == 401:
+                await update_gcp_client(logging_context)
 
             if resp_status > 299:
                 logging_context.log(
