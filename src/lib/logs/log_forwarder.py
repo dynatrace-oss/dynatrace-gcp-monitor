@@ -49,9 +49,6 @@ async def run_logs(
 
     tasks = []
 
-    update_token = asyncio.create_task(log_integration_service.keep_gcp_token_updated(logging_context))
-
-    tasks.append(update_token)
     for worker_number in range(0, NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS):
         worker_task = asyncio.create_task(
             pull_and_push_logs_forever(process_number, worker_number, log_integration_service)
