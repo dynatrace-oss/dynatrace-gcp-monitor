@@ -22,6 +22,10 @@ def print_metric_ingest_input():
     return os.environ.get("PRINT_METRIC_INGEST_INPUT", "FALSE").upper() in ["TRUE", "YES"]
 
 
+def metric_autodiscovery():
+    return os.environ.get("METRIC_AUTODISCOVERY","FALSE").upper() in ["TRUE", "YES"]
+
+
 def scoping_project_support_enabled():
     return os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE").upper() in ["TRUE", "YES"]
 
@@ -39,7 +43,7 @@ def excluded_projects_by_prefix():
 
 
 def project_id():
-    return os.environ.get("GCP_PROJECT")
+    return os.environ.get("GCP_PROJECT","")
 
 
 def credentials_path():
@@ -81,25 +85,42 @@ def gcp_service_usage_url():
 def gcp_monitoring_url():
     return os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
 
-
 def gcp_allowed_metric_dimension_value_length():
-    return os.environ.get("ALLOWED_METRIC_DIMENSION_VALUE_LENGTH", 250)
+    return get_int_environment_value("ALLOWED_METRIC_DIMENSION_VALUE_LENGTH", 250)
 
 
 def gcp_allowed_metric_dimension_key_length():
-    return os.environ.get("ALLOWED_METRIC_DIMENSION_KEY_LENGTH", 100)
+    return get_int_environment_value("ALLOWED_METRIC_DIMENSION_KEY_LENGTH", 100)
 
 
 def gcp_allowed_metric_key_length():
-    return os.environ.get("ALLOWED_METRIC_KEY_LENGTH", 250)
+    return get_int_environment_value("ALLOWED_METRIC_KEY_LENGTH", 250)
 
+
+def gcp_allowed_metric_display_name():
+    return get_int_environment_value("ALLOWED_METRIC_DISPLAY_NAME_LENGTH", 300)
+
+
+def gcp_allowed_metric_description():
+    return get_int_environment_value("ALLOWED_METRIC_DESCRIPTION_LENGTH", 65535)
+
+
+def gcp_allowed_metric_unit_name():
+    return get_int_environment_value("ALLOWED_METRIC_UNIT_NAME_LENGTH", 63)
+
+
+def get_autodiscovery_querry_interval():
+    return get_int_environment_value("AUTODISCOVERY_QUERY_INTERVAL", 60)
+
+def gcp_autodiscovery_include_alpha_metrics():
+    return os.environ.get("AUTODISCOVERY_INCLUDE_ALPHA_METRICS", "TRUE").upper() in ["TRUE", "YES","Y"]
 
 def max_dimension_name_length():
-    return os.environ.get("MAX_DIMENSION_NAME_LENGTH", 100)
+    return get_int_environment_value("MAX_DIMENSION_NAME_LENGTH", 100)
 
 
 def max_dimension_value_length():
-    return os.environ.get("MAX_DIMENSION_VALUE_LENGTH", 250)
+    return get_int_environment_value("MAX_DIMENSION_VALUE_LENGTH", 250)
 
 
 def get_dynatrace_api_key_from_env():

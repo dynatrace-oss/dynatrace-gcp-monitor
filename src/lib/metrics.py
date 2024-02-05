@@ -1,6 +1,6 @@
 """This module contains data class definitions describing metrics."""
 
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2023 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -14,11 +14,16 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import List, Text, Any, Dict
+from typing import TYPE_CHECKING, List, Optional, Text, Any, Dict
+
 from lib.configuration import config
+
+if TYPE_CHECKING:
+    from lib.autodiscovery.models import AutodiscoveryResourceLinking
 
 VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
 VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
@@ -26,6 +31,10 @@ VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 ALLOWED_METRIC_DIMENSION_VALUE_LENGTH = config.gcp_allowed_metric_dimension_value_length()
 ALLOWED_METRIC_KEY_LENGTH = config.gcp_allowed_metric_key_length()
 ALLOWED_METRIC_DIMENSION_KEY_LENGTH = config.gcp_allowed_metric_dimension_key_length()
+ALLOWED_METRIC_DISPLAY_NAME_LENGTH = config.gcp_allowed_metric_display_name()
+ALLOWED_METRIC_DESCRIPTION_LENGTH = config.gcp_allowed_metric_description()
+ALLOWED_METRIC_UNIT_NAME_LENGTH = config.gcp_allowed_metric_unit_name()
+
 
 @dataclass(frozen=True)
 class DimensionValue:
@@ -43,19 +52,58 @@ class IngestLine:
     dimension_values: List[DimensionValue]
 
     def dimensions_string(self) -> str:
-        dimension_values = [f'{dimension_value.name[0:ALLOWED_METRIC_DIMENSION_KEY_LENGTH]}="{dimension_value.value[0:ALLOWED_METRIC_DIMENSION_VALUE_LENGTH]}"'
-                            for dimension_value
-                            in self.dimension_values
-                            if dimension_value.value != ""]  # MINT rejects line with empty dimension value
+        dimension_values = [
+            f'{dimension_value.name[0:ALLOWED_METRIC_DIMENSION_KEY_LENGTH]}="{dimension_value.value[0:ALLOWED_METRIC_DIMENSION_VALUE_LENGTH]}"'
+            for dimension_value in self.dimension_values
+            if dimension_value.value != ""
+        ]  # MINT rejects line with empty dimension value
         dimensions = ",".join(dimension_values)
         if dimensions:
             dimensions = "," + dimensions
         return dimensions
 
     def to_string(self) -> str:
-        separator = ',' if self.metric_type == 'gauge' else '='
-        metric_type = self.metric_type if self.metric_type != 'count' else 'count,delta'
+        separator = "," if self.metric_type == "gauge" else "="
+        metric_type = self.metric_type if self.metric_type != "count" else "count,delta"
         return f"{self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]}{self.dimensions_string()} {metric_type}{separator}{self.value} {self.timestamp}"
+
+
+@dataclass(frozen=True)
+class MetadataIngestLine(IngestLine):
+    metric_name: str
+    metric_type: str
+    meta_metric_display_name: str
+    meta_metric_description: str
+    meta_metric_unit: str
+
+    def __init__(self, **kwargs):
+        object.__setattr__(self, "metric_name", kwargs.get("metric_name", ""))
+        object.__setattr__(
+            self,
+            "metric_type",
+            "count" if "count" in kwargs.get("metric_type", "") else kwargs.get("metric_type", ""),
+        )
+        object.__setattr__(
+            self,
+            "meta_metric_display_name",
+            kwargs.get("metric_display_name", "")
+            if len(kwargs.get("metric_display_name", "")) > 0
+            else kwargs.get("metric_name", ""),
+        )
+        object.__setattr__(self, "meta_metric_description", kwargs.get("metric_description", ""))
+        object.__setattr__(self, "meta_metric_unit", kwargs.get("metric_unit", ""))
+
+    def to_string(self) -> str:
+        name = self.metric_name[0:ALLOWED_METRIC_KEY_LENGTH]
+        display_name = self.meta_metric_display_name[:ALLOWED_METRIC_DISPLAY_NAME_LENGTH]
+        description = self.meta_metric_description[:ALLOWED_METRIC_DESCRIPTION_LENGTH].replace("\"","")
+        unit = self.meta_metric_unit[:ALLOWED_METRIC_UNIT_NAME_LENGTH]
+        return (
+            f"#{name} {self.metric_type} "
+            f'dt.meta.displayname="{display_name}",'
+            f'dt.meta.description="{description}",'
+            f'dt.meta.unit="{unit}"'
+        )
 
 
 @dataclass(frozen=True)
@@ -91,6 +139,9 @@ class Metric:
     sample_period_seconds: timedelta
     value_type: str
     metric_type: str
+    autodiscovered_metric: bool
+    description: str
+    project_ids: List[str]
 
     def __init__(self, **kwargs):
         gcp_options = kwargs.get("gcpOptions", {})
@@ -102,6 +153,9 @@ class Metric:
         object.__setattr__(self, "dynatrace_metric_type", kwargs.get("type", ""))
         object.__setattr__(self, "unit", kwargs.get("gcpOptions", {}).get("unit", None))
         object.__setattr__(self, "value_type", gcp_options.get("valueType", ""))
+        object.__setattr__(self, "autodiscovered_metric", kwargs.get("autodiscovered_metric", False))
+        object.__setattr__(self, "description", kwargs.get("description", ""))
+        object.__setattr__(self, "project_ids", kwargs.get("project_ids", []))
 
         object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 
@@ -118,7 +172,6 @@ class Metric:
             object.__setattr__(self, "sample_period_seconds", timedelta(seconds=60))
 
 
-@dataclass(frozen=True)
 class GCPService:
     """Describes singular GCP service to ingest data from."""
     # IMPORTANT! this object is only for one combination of object/featureSet!
@@ -128,9 +181,12 @@ class GCPService:
     technology_name: Text
     feature_set: Text
     dimensions: List[Dimension]
-    metrics = List[Metric]
+    metrics:  List[Metric]
     monitoring_filter: Text
     activation: Dict[Text, Any]
+    is_enabled: bool
+    extension_name: str
+    autodiscovery_enabled: bool
 
     def __init__(self, **kwargs):
         object.__setattr__(self, "name", kwargs.get("service", ""))
@@ -154,9 +210,69 @@ class GCPService:
         monitoring_filter = VARIABLE_BRACKETS_PATTERN.sub('', monitoring_filter)
         monitoring_filter = VARIABLE_VAR_PATTERN.sub('', monitoring_filter)
         object.__setattr__(self, "monitoring_filter", monitoring_filter)
+        object.__setattr__(self, "is_enabled",  kwargs.get("is_enabled", True))
+        object.__setattr__(self, "extension_name",  kwargs.get("extension_name", "Unknown Extension"))
+        object.__setattr__(self, "autodiscovery_enabled",  kwargs.get("autodiscovery_enabled", False))
 
     def __hash__(self):
         return hash((self.name, self.technology_name, self.feature_set, self.monitoring_filter))
+
+
+class AutodiscoveryGCPService(GCPService):
+    """
+    AutodiscoveryGCPService is a specialized class for managing autodiscovery-related operations.
+
+    This class extends the base GCPService class and provides functionality for setting metrics,
+    retrieving dimensions, and getting metric names for autodiscovery purposes.
+
+    """
+    metrics_to_resources: Dict[str, str]
+    metrics_to_linking: Dict[str, Optional[AutodiscoveryResourceLinking]]
+    resource_dimensions: Dict[str, List[Dimension]]
+
+    def __init__(self) -> None:
+        super().__init__(service="Autodiscovery Service", extension_name="GCP Autodiscovery")
+
+    def set_metrics(
+        self,
+        resources_to_metrics: Dict[str, List[Metric]],
+        resource_linking: Dict[str, AutodiscoveryResourceLinking],
+        resource_dimensions: Dict[str, List[Dimension]],
+    ):
+        self.metrics_to_linking = {
+            metric.google_metric: resource_linking[resource]
+            for resource, metrics in resources_to_metrics.items()
+            for metric in metrics
+        }
+        self.metrics = [metric for metrics in resources_to_metrics.values() for metric in metrics]
+        self.metrics_to_resources = {}
+
+        self.metrics_to_resources = {
+            metric.google_metric: resource
+            for resource, metrics in resources_to_metrics.items()
+            for metric in metrics
+        }
+
+        self.resource_dimensions = resource_dimensions
+
+    def get_dimensions(self, metric: Metric) -> List[Dimension]:
+        linking = self.metrics_to_linking[metric.google_metric]
+        if linking:
+            return linking.possible_service_linking[0].dimensions
+
+        metric_resource = self.metrics_to_resources[metric.google_metric]
+        if metric_resource in self.resource_dimensions:
+            return self.resource_dimensions[metric_resource]
+
+        return []
+
+
+    def get_name(self, metric) -> str:
+        linking = self.metrics_to_linking[metric.google_metric]
+        if linking:
+            return linking.possible_service_linking[0].name
+
+        return metric.google_metric.split(".")[0]
 
 
 DISTRIBUTION_VALUE_KEY = 'distributionValue'

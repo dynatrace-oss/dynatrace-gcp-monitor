@@ -165,6 +165,8 @@ if [ -z "$VPC_NETWORK" ]; then
   VPC_NETWORK="default"
 fi
 readonly VPC_NETWORK
+AUTODISCOVERY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.metricAutodiscovery}" | tr '[:lower:]' '[:upper:]' | cut -c 1) 
+readonly AUTODISCOVERY
 
 API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"' '"hub.read"' '"hub.write"' '"hub.install"')
 
@@ -393,7 +395,12 @@ fi
 debug "Installing Dynatrace Integration Helm Chart on selected kubernetes cluster"
 info ""
 info "- 7. Install dynatrace-gcp-monitor with helm chart in $CLUSTER_NAME"
-helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+
+if [ "$AUTODISCOVERY" = "T" ]; then
+  helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor -f ./dynatrace-gcp-monitor/autodiscovery-values.yaml -f ./dynatrace-gcp-monitor/values.yaml --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+else
+  helm upgrade dynatrace-gcp-monitor ./dynatrace-gcp-monitor --install --namespace "$KUBERNETES_NAMESPACE" --wait --timeout 10m --set clusterName="$CLUSTER_NAME" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+fi
 
 debug "Helm installation completed"
 info ""

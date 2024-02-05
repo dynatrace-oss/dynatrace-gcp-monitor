@@ -138,12 +138,15 @@ metricResources:
     memory: "1536Mi"
     cpu: "1.25"
     ephemeral-storage: "2Gi"
+# metricAutodiscovery: If true additional metrics not listed in extensions will be automatically detected and monitored
+metricAutodiscovery: "false"
 # configuration file for GCP services - uncommented services will be monitored
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax
   services:
     # Google Cloud APIs
     - service: api
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
     #     - limited_response_codes
@@ -151,84 +154,98 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google Apigee Environment
     - service: apigee_googleapis_com_Environment
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Apigee Proxy
     - service: apigee_googleapis_com_Proxy
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Apigee Proxy (v2)
     - service: apigee_googleapis_com_ProxyV2
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Assistant Action Project
     - service: assistant_action_project
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Autoscaler
     - service: autoscaler
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud BigQuery BI Engine Model
     - service: bigquery_biengine_model
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud BigQuery Project
     - service: bigquery_project
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Bigtable Cluster
     - service: bigtable_cluster
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Bigtable Table
     - service: bigtable_table
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud IoT Registry
     - service: cloudiot_device_registry
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud ML Job
     - service: cloudml_job
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud ML Model Version
     - service: cloudml_model_version
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Cloud SQL Database
     - service: cloudsql_database
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       #   - postgresqlinsights
       vars:
         filter_conditions: ""
     # Google Cloud Trace
+    # Autodiscovery not supported
     - service: cloudtrace_googleapis_com_CloudtraceProject
       featureSets:
         - default_metrics
@@ -236,48 +253,56 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google NetApp CVS-SO
     - service: cloudvolumesgcp_api_netapp_com_NetAppCloudVolumeSO
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Composer Environment
     - service: cloud_composer_environment
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Dataproc Cluster
     - service: cloud_dataproc_cluster
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Data Loss Prevention Project
     - service: cloud_dlp_project
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Function
     - service: cloud_function
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Run Revision
     - service: cloud_run_revision
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Tasks queues
     - service: cloud_tasks_queue
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Consumed API
     - service: consumed_api
+      allowAutodiscovery: false
       featureSets:
         - default_metrics    
         - limited_response_codes
@@ -285,59 +310,69 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google Consumer Quota
     - service: consumer_quota
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Dataflow Job
     - service: dataflow_job
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Datastore
     - service: datastore_request
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud DNS Query
     - service: dns_query
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Filestore Instance
     - service: filestore_instance
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Firebase Hosting Site Domain
     - service: firebase_domain
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Firebase Realtime Database
     - service: firebase_namespace
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Firestore Instance
     - service: firestore_instance
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google App Engine Application
     - service: gae_app
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google App Engine Application - Uptime Checks
+    # Autodiscovery not supported
     - service: gae_app_uptime_check
       featureSets:
         - default_metrics
@@ -345,12 +380,14 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google App Engine Instance
     - service: gae_instance
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google VM Instance
     - service: gce_instance
+      allowAutodiscovery: false
       featureSets:
        - default_metrics
       #  - agent
@@ -361,90 +398,105 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google VM Instance VM Flow
     - service: gce_instance_vm_flow
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Router
     - service: gce_router
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Zone Network Health
     - service: gce_zone_network_health
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Storage bucket
     - service: gcs_bucket
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud HTTP/S Load Balancing Rule
     - service: https_lb_rule
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Instance Group
     - service: instance_group
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Interconnect
     - service: interconnect
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Interconnect Attachment
     - service: interconnect_attachment
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Internal HTTP/S Load Balancing Rule
     - service: internal_http_lb_rule
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Internal TCP Load Balancer Rule
     - service: internal_tcp_lb_rule
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Internal UDP Load Balancer Rule
     - service: internal_udp_lb_rule
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Network TCP Load Balancer Rule
     - service: tcp_lb_rule
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Network UDP Load Balancer Rule
     - service: udp_lb_rule
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Kubernetes Cluster
     - service: k8s_cluster
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Kubernetes Container
     - service: k8s_container
+      allowAutodiscovery: false
       featureSets:
        # We recommend to monitor k8s_container/default_metrics together with k8s_node/default_metrics, k8s_pod/default_metrics
        - default_metrics
@@ -457,6 +509,7 @@ gcpServicesYaml: |
       #  filter_conditions: resource.labels.location = "us-central1-c" AND resource.labels.namespace_name != "jenkins"
     # Google Kubernetes Node
     - service: k8s_node
+      allowAutodiscovery: false
       featureSets:
         # We recommend to monitor k8s_node/default_metrics together with k8s_pod/default_metrics, k8s_container/default_metrics
         - default_metrics
@@ -464,6 +517,7 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google Kubernetes Pod
     - service: k8s_pod
+      allowAutodiscovery: false
       featureSets:
        # We recommend to monitor k8s_pod/default_metrics together with k8s_node/default_metrics, k8s_container/default_metrics
        - default_metrics
@@ -471,6 +525,7 @@ gcpServicesYaml: |
       vars:
         filter_conditions: ""
     # Google Cloud Logging export sink
+    # Autodiscovery not supported
     - service: logging_sink
       featureSets:
         - default_metrics
@@ -478,54 +533,63 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google Cloud Microsoft Active Directory Domain
     - service: microsoft_ad_domain
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud NAT Gateway
     - service: nat_gateway
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google NetApp Cloud Volume
     - service: netapp_cloud_volume
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Network Security Policy
     - service: network_security_policy
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Producer Quota
     - service: producer_quota
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Pub/Sub Lite Subscription Partition
     - service: pubsublite_subscription_partition
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Pub/Sub Lite Topic Partition
     - service: pubsublite_topic_partition
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Snapshot
     - service: pubsub_snapshot
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Subscription
     - service: pubsub_subscription
+      allowAutodiscovery: false
       featureSets:
         # We recommend to monitor pubsub_subscription/default_metrics together with pubsub_topic/default_metrics
         - default_metrics
@@ -533,6 +597,7 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google Cloud Pub/Sub Topic
     - service: pubsub_topic
+      allowAutodiscovery: false
       featureSets:
         # We recommend to monitor pubsub_topic/default_metrics together with pubsub_subscription/default_metrics
         - default_metrics
@@ -540,41 +605,48 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google reCAPTCHA Key
     - service: recaptchaenterprise_googleapis_com_Key
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Memorystore
     - service: redis_instance
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud Spanner Instance
     - service: spanner_instance
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud TCP/SSL Proxy Rule
     - service: tcp_ssl_proxy_rule
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud TPU Worker
     - service: tpu_worker
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Transfer Service Agent
     - service: transfer_service_agent
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Uptime Check URL
+    # Autodiscovery not supported
     - service: uptime_url
       featureSets:
         - default_metrics
@@ -582,23 +654,27 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google VPC Access Connector
     - service: vpc_access_connector
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google Cloud VPN Tunnel
     - service: vpn_gateway
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:
         filter_conditions: ""
     # Google AlloyDB for PostgreSQL
     - service: alloydb_database
+      allowAutodiscovery: false
       featureSets:
         - insights_metrics
       vars:
         filter_conditions: ""
     - service: alloydb_instance
+      allowAutodiscovery: false
       featureSets:
         - default_metrics
       vars:

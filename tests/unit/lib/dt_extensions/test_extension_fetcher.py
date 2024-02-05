@@ -1,4 +1,4 @@
-#   Copyright 2021 Dynatrace LLC
+#   Copyright 2023 Dynatrace LLC
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -82,8 +82,8 @@ async def test_execute(mocker: MockerFixture, monkeypatch: MonkeyPatchFixture):
     feature_sets_to_filter_conditions = {f"{gcp_service_config.name}/{gcp_service_config.feature_set}": gcp_service_config.monitoring_filter
                                          for gcp_service_config in result.services}
     assert feature_sets_to_filter_conditions == {"cloudsql_database/default_metrics": "",
-                                                                  "gce_instance/default_metrics": "resource.labels.instance_name=starts_with(\"test\")",
-                                                                  "gce_instance/agent": "resource.labels.instance_name=starts_with(\"test\")"}
+                                                 "gce_instance/default_metrics": "resource.labels.instance_name=starts_with(\"test\")",
+                                                 "gce_instance/agent": "resource.labels.instance_name=starts_with(\"test\")"}
 
 
 @pytest.mark.asyncio

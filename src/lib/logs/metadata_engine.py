@@ -60,6 +60,8 @@ ATTRIBUTE_GCP_PROJECT_ID = "gcp.project.id"
 
 ATTRIBUTE_GCP_INSTANCE_ID = "gcp.instance.id"
 
+ATTRIBUTE_GCP_CLOUD_FUNCTION_NAME = 'gcp.instance.cloud_function_name'
+
 ATTRIBUTE_GCP_INSTANCE_NAME = "gcp.instance.name"
 
 ATTRIBUTE_GCP_RESOURCE_TYPE = "gcp.resource.type"
