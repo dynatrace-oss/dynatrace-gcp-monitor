@@ -48,10 +48,10 @@ class GCPClient:
         json_body = {"maxMessages": PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES}
         json_data = json.dumps(json_body)
         self.body_payload = json_data.encode("utf-8")
+        self.update_gcp_client_in_the_next_loop = False
 
     async def pull_messages(
-        self, logging_context: LoggingContext, gcp_session, update_gcp_client: Callable[[LoggingContext], None]
-    ) -> Dict[str, List[Any]]:  # type: ignore
+        self, logging_context: LoggingContext, gcp_session) -> Dict[str, List[Any]]:  # type: ignore
         async with gcp_session.request(
             method="POST", url=self.pull_url, data=self.body_payload, headers=self.headers
         ) as response:
@@ -59,7 +59,7 @@ class GCPClient:
             resp_status = response.status
 
             if resp_status == 401:
-                await update_gcp_client(logging_context)
+                self.update_gcp_client_in_the_next_loop = True
 
             if resp_status > 299:
                 logging_context.log(

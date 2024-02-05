@@ -38,11 +38,13 @@ class LogIntegrationService:
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
         async with init_gcp_client_session() as gcp_session:
+            if self.gcp_client.update_gcp_client_in_the_next_loop:
+                await self.update_gcp_client(logging_context)
             context = LogsProcessingContext(None, None, self.sfm_queue)
             context.self_monitoring.pulling_time_start = time.perf_counter()
 
             tasks_to_pull_messages = [
-                self.gcp_client.pull_messages(logging_context, gcp_session, self.update_gcp_client)
+                self.gcp_client.pull_messages(logging_context, gcp_session)
                 for _ in range(NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES)
             ]
             responses = await asyncio.gather(*tasks_to_pull_messages, return_exceptions=True)

@@ -19,9 +19,19 @@ from aiohttp import ClientResponseError
 
 from lib.configuration import config
 from lib.context import DynatraceConnectivity, LogsContext
-from lib.logs.log_self_monitoring import put_sfm_into_queue
 
 from lib.logs.logs_processor import LogBatch
+
+DYNATRACE_ERROR_CODE_DESC_DICT = {
+    400: DynatraceConnectivity.InvalidInput,
+    401: DynatraceConnectivity.ExpiredToken,
+    403: DynatraceConnectivity.WrongToken,
+    404: DynatraceConnectivity.WrongURL,
+    405: DynatraceConnectivity.WrongURL,
+    413: DynatraceConnectivity.TooManyRequests,
+    429: DynatraceConnectivity.TooManyRequests,
+    500: DynatraceConnectivity.Other
+}
 
 
 class DynatraceClient:
@@ -62,29 +72,10 @@ class DynatraceClient:
                 context.t_error(
                     f'Log ingest error: {resp_status}, reason: {response.reason}, url: {self.log_ingest_url}, body: "{response_text}"'
                 )
-                if resp_status == 400:
+                error_code_description = DYNATRACE_ERROR_CODE_DESC_DICT.get(resp_status, 0)
+                if error_code_description:
                     context.self_monitoring.dynatrace_connectivity.append(
-                        DynatraceConnectivity.InvalidInput
-                    )
-                elif resp_status == 401:
-                    context.self_monitoring.dynatrace_connectivity.append(
-                        DynatraceConnectivity.ExpiredToken
-                    )
-                elif resp_status == 403:
-                    context.self_monitoring.dynatrace_connectivity.append(
-                        DynatraceConnectivity.WrongToken
-                    )
-                elif resp_status == 404 or resp_status == 405:
-                    context.self_monitoring.dynatrace_connectivity.append(
-                        DynatraceConnectivity.WrongURL
-                    )
-                elif resp_status == 413 or resp_status == 429:
-                    context.self_monitoring.dynatrace_connectivity.append(
-                        DynatraceConnectivity.TooManyRequests
-                    )
-                elif resp_status == 500:
-                    context.self_monitoring.dynatrace_connectivity.append(
-                        DynatraceConnectivity.Other
+                        error_code_description
                     )
 
                 response.raise_for_status()
