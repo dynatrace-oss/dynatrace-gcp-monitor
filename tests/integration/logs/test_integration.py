@@ -316,6 +316,7 @@ async def run_worker_with_messages(
 
     mock_gcp_client = AsyncMock(spec=GCPClient)
     mock_gcp_client.push_ack_ids = push_ack_ids
+    mock_gcp_client.update_gcp_client_in_the_next_loop = False
     pull_messages_side_effect.call_count = 0
     mock_gcp_client.pull_messages.side_effect = pull_messages_side_effect
 
