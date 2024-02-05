@@ -40,6 +40,7 @@ class LogIntegrationService:
         async with init_gcp_client_session() as gcp_session:
             if self.gcp_client.update_gcp_client_in_the_next_loop:
                 await self.update_gcp_client(logging_context)
+                self.gcp_client.update_gcp_client_in_the_next_loop = False
             context = LogsProcessingContext(None, None, self.sfm_queue)
             context.self_monitoring.pulling_time_start = time.perf_counter()
 
