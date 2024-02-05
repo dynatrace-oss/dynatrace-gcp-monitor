@@ -80,10 +80,10 @@ async def test_execute(mocker: MockerFixture, monkeypatch: MonkeyPatchFixture):
     result = await extensions_fetcher.execute()
     assert result is not None
     feature_sets_to_filter_conditions = {f"{gcp_service_config.name}/{gcp_service_config.feature_set}": gcp_service_config.monitoring_filter
-                                         for gcp_service_config in result.services}
+                                         for gcp_service_config in result.services if gcp_service_config.is_enabled}
     assert feature_sets_to_filter_conditions == {"cloudsql_database/default_metrics": "",
-                                                 "gce_instance/default_metrics": "resource.labels.instance_name=starts_with(\"test\")",
-                                                 "gce_instance/agent": "resource.labels.instance_name=starts_with(\"test\")"}
+                                                                  "gce_instance/default_metrics": "resource.labels.instance_name=starts_with(\"test\")",
+                                                                  "gce_instance/agent": "resource.labels.instance_name=starts_with(\"test\")"}
 
 
 @pytest.mark.asyncio
@@ -96,11 +96,11 @@ async def test_empty_activation_config(mocker: MockerFixture, monkeypatch: Monke
 
     extensions_fetcher = ExtensionsFetcher(dt_session, "", "", LoggingContext("TEST"))
     result = await extensions_fetcher.execute()
-
     assert result is not None
     feature_sets_to_filter_conditions = {f"{gcp_service_config.name}/{gcp_service_config.feature_set}": gcp_service_config.monitoring_filter
-                                         for gcp_service_config in result.services}
+                                         for gcp_service_config in result.services if gcp_service_config.is_enabled}
     assert feature_sets_to_filter_conditions == {}
+
 
 
 @pytest.mark.asyncio
