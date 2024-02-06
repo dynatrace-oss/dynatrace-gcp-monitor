@@ -1,4 +1,4 @@
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2024 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import asyncio
-import os
 import queue
 import time
 from collections import Counter
-from queue import Queue
+from asyncio import Queue
 from typing import Dict, List
 
 import aiohttp
@@ -29,7 +28,7 @@ from lib.instance_metadata import InstanceMetadata
 from lib.logs.log_forwarder_variables import LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID, \
     SFM_WORKER_EXECUTION_PERIOD_SECONDS, MAX_SFM_MESSAGES_PROCESSED
 from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE, \
-    LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE, \
+    LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE, LOG_SELF_MONITORING_PULLING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE, LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE, \
     LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE, LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE, LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, \
@@ -47,6 +46,7 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
         aggregated_sfm.records_with_too_long_content += sfm.records_with_too_long_content
         aggregated_sfm.dynatrace_connectivity.extend(sfm.dynatrace_connectivity)
         aggregated_sfm.processing_time += sfm.processing_time
+        aggregated_sfm.pulling_time += sfm.pulling_time
         aggregated_sfm.sending_time += sfm.sending_time
         aggregated_sfm.log_ingest_payload_size += sfm.log_ingest_payload_size
         aggregated_sfm.sent_logs_entries += sfm.sent_logs_entries
@@ -61,12 +61,12 @@ def put_sfm_into_queue(context: LogsContext):
             context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
 
-def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
+async def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
     while True:
         try:
-            time.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
+            await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
             self_monitoring = LogSelfMonitoring()
-            asyncio.run(_loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata))
+            await _loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata)
         except Exception:
             logging_context.exception("Logs Self Monitoring Loop Exception:")
 
@@ -76,7 +76,7 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring,
                               context: LoggingContext,
                               instance_metadata: InstanceMetadata):
     try:
-        sfm_list = _pull_sfm(sfm_queue)
+        sfm_list = await _pull_sfm(sfm_queue)
         if sfm_list:
             async with init_gcp_client_session() as gcp_session:
                 context = await _create_sfm_logs_context(sfm_queue, context, gcp_session, instance_metadata)
@@ -117,11 +117,11 @@ async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_sessi
     )
 
 
-def _pull_sfm(sfm_queue: Queue):
+async def _pull_sfm(sfm_queue: Queue):
     sfm_list: List[LogSelfMonitoring] = []
     # Limit used to avoid pulling forever (the same as for job_queue)
     while len(sfm_list) < MAX_SFM_MESSAGES_PROCESSED and sfm_queue.qsize() > 0:
-        single_sfm: LogSelfMonitoring = sfm_queue.get()
+        single_sfm: LogSelfMonitoring = await sfm_queue.get()
         sfm_list.append(single_sfm)
     return sfm_list
 
@@ -136,6 +136,7 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Number of invalid log records due to too old timestamp: {self_monitoring.too_old_records}")
     logging_context.log("SFM", f"Number of errors occurred during parsing logs: {self_monitoring.parsing_errors}")
     logging_context.log("SFM", f"Number of records with too long content: {self_monitoring.records_with_too_long_content}")
+    logging_context.log("SFM", f"Total logs pulling time [s]: {self_monitoring.pulling_time}")
     logging_context.log("SFM", f"Total logs processing time [s]: {self_monitoring.processing_time}")
     logging_context.log("SFM", f"Total logs sending time [s]: {self_monitoring.sending_time}")
     logging_context.log("SFM", f"Log ingest payload size [kB]: {self_monitoring.log_ingest_payload_size}")
@@ -272,6 +273,19 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             [{
                 "interval": interval,
                 "value": {"doubleValue": sfm.sending_time}
+            }],
+            "DOUBLE"))
+    time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_PULLING_TIME_SIZE_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name
+            },
+            [{
+                "interval": interval,
+                "value": {"doubleValue": sfm.pulling_time}
             }],
             "DOUBLE"))
 

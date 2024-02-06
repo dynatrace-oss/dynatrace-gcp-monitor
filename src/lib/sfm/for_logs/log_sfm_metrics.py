@@ -1,4 +1,4 @@
-#     Copyright 2021 Dynatrace LLC
+#     Copyright 2024 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ class LogSelfMonitoring:
         self.dynatrace_connectivity = []
         self.processing_time_start: float = 0
         self.processing_time: float = 0
+        self.pulling_time_start: float = 0
+        self.pulling_time: float = 0
         self.sending_time_start: float = 0
         self.sending_time: float = 0
         self.log_ingest_payload_size: float = 0
@@ -35,3 +37,6 @@ class LogSelfMonitoring:
 
     def calculate_sending_time(self):
         self.sending_time = (time.perf_counter() - self.sending_time_start)
+    
+    def calculate_pulling_time(self):
+        self.pulling_time = (time.perf_counter() - self.pulling_time_start)

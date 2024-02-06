@@ -23,7 +23,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
-import queue
+import asyncio
 
 from lib.context import LogsProcessingContext
 
@@ -31,5 +31,5 @@ from lib.context import LogsProcessingContext
 TEST_LOGS_PROCESSING_CONTEXT = LogsProcessingContext(
     scheduled_execution_id="",
     message_publish_time=None,
-    sfm_queue=queue.Queue()
+    sfm_queue=asyncio.Queue()
 )

@@ -1,4 +1,4 @@
-#     Copyright 2020 Dynatrace LLC
+#     Copyright 2024 Dynatrace LLC
 #
 #     Licensed under the Apache License, Version 2.0 (the "License");
 #     you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import asyncio
+import multiprocessing
 import platform
 import threading
 import time
@@ -28,7 +29,8 @@ from lib.credentials import create_token
 from lib.dt_extensions.dt_extensions import extensions_fetch, prepare_services_config_for_next_polling
 from lib.fast_check import LogsFastCheck
 from lib.instance_metadata import InstanceMetadataCheck, InstanceMetadata
-from lib.logs.log_forwarder import run_logs
+from lib.logs.log_forwarder import run_logs, run_logs_wrapper
+from lib.logs.log_forwarder_variables import PARALLEL_PROCESSES
 from lib.metrics import GCPService
 from lib.self_monitoring import sfm_push_metrics
 from lib.sfm.dashboards import import_self_monitoring_dashboard
@@ -188,8 +190,11 @@ def main():
     if OPERATION_MODE == OperationMode.Metrics:
         asyncio.run(run_metrics_fetcher_forever())
     elif OPERATION_MODE == OperationMode.Logs:
-        LogsFastCheck(logging_context, instance_metadata).execute()
-        run_logs(logging_context, instance_metadata)
+        asyncio.run(LogsFastCheck(logging_context, instance_metadata).execute())
+        processes = [multiprocessing.Process(target=run_logs_wrapper, args=(logging_context, instance_metadata, i))
+                     for i in range(PARALLEL_PROCESSES)]
+        [process.start() for process in processes]
+        [process.join() for process in processes]
 
 
 if __name__ == '__main__':
