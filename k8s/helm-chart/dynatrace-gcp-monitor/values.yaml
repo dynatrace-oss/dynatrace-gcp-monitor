@@ -108,7 +108,7 @@ numberOfConcurrentPushCoroutines: 5
 processingWorkerPullRequestMaxMessages: 1000
 logResources:
   requests:
-    memory: "256Mi"
+    memory: "1Gi"
     cpu: "1.25"
     ephemeral-storage: "1Gi"
 
