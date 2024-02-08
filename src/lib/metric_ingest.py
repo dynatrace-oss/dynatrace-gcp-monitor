@@ -137,6 +137,7 @@ async def log_invalid_lines(context: MetricsContext, ingest_response_json: Dict,
                 invalid_line_error_message = invalid_line_error_message.get("error", "")
                 context.log(f"INVALID LINE: '{lines_batch[line_index].to_string()}', reason: '{invalid_line_error_message}'")
 
+
 class DtDimensionsMap:
     def __init__(self) -> None:
             self.dt_dimensions_set_by_source_dimension = {}
@@ -165,13 +166,10 @@ async def fetch_metric(
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
 
-    reducer = 'REDUCE_SUM'
-    aligner = 'ALIGN_SUM'
-
-    if metric.value_type.lower() == 'bool':
-        aligner = 'ALIGN_COUNT_TRUE'
-    elif metric.google_metric_kind.lower().startswith('cumulative'):
-        aligner = 'ALIGN_DELTA'
+    # Ref: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors
+    # Combinations: https://cloud.google.com/monitoring/api/v3/kinds-and-types#kind-type-combos
+    aligner = _set_aligner(metric.google_metric_kind, metric.value_type)
+    reducer = _set_reducer(metric.google_metric_kind, metric.value_type)
 
     params = [
         ('filter', f'metric.type = "{metric.google_metric}" {service.monitoring_filter}'.strip()),
@@ -215,25 +213,50 @@ async def fetch_metric(
             break
 
         for single_time_series in page['timeSeries']:
-            typed_value_key = extract_typed_value_key(single_time_series)
+            typed_value_key = _extract_typed_value_key(single_time_series)
             dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric)
             entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
 
             for point in single_time_series['points']:
-                line = convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
+                line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
                 if line:
                     lines.append(line)
 
         next_page_token = page.get('nextPageToken', None)
         if next_page_token:
-            update_params(next_page_token, params)
+            _update_params(next_page_token, params)
         else:
             should_fetch = False
 
     return lines
 
 
-def update_params(next_page_token, params):
+def _set_aligner(metric_kind, value_type):
+    # Default, mainly for kind == DELTA (what we consider count)
+    aligner = 'ALIGN_SUM'
+
+    if metric_kind.lower().startswith('cumulative'):
+        aligner = 'ALIGN_DELTA'
+    elif metric_kind.lower().startswith('gauge'):
+        aligner = 'ALIGN_COUNT_TRUE' if value_type.lower() == 'bool' else 'ALIGN_MEAN'
+
+    return aligner
+
+
+def _set_reducer(metric_kind, value_type):
+    # Default, mainly for kind == DELTA (what we consider count)
+    reducer = 'REDUCE_SUM'
+
+    # Cannot be reduced
+    if metric_kind.lower().startswith('cumulative'):
+        reducer = 'REDUCE_NONE'
+    elif metric_kind.lower().startswith('gauge'):
+        reducer = 'REDUCE_COUNT_TRUE' if value_type.lower() == 'bool' else 'REDUCE_MEAN'
+
+    return reducer
+
+
+def _update_params(next_page_token, params):
     replace_index = -1
     for index, param in enumerate(params):
         if param[0] == 'pageToken':
@@ -246,7 +269,7 @@ def update_params(next_page_token, params):
         params.append(next_page_token_tuple)
 
 
-def extract_typed_value_key(time_series):
+def _extract_typed_value_key(time_series):
     value_type = time_series['valueType'].upper()
     typed_value_key = TYPED_VALUE_KEY_MAPPING.get(value_type, None)
     if typed_value_key is None:
@@ -350,7 +373,7 @@ def create_entity_id(service_name: str, service_dimensions: List[Dimension], tim
     return entity_id
 
 
-def convert_point_to_ingest_line(
+def _convert_point_to_ingest_line(
         context: MetricsContext,
         dimensions: List[DimensionValue],
         metric: Metric,
@@ -388,7 +411,7 @@ def convert_point_to_ingest_line(
     return line
 
 
-def gauge_line(min, max, count, sum) -> str:
+def _gauge_line(min, max, count, sum) -> str:
     return f"min={min},max={max},count={count},sum={sum}"
 
 
@@ -411,7 +434,7 @@ def extract_value(point, typed_value_key: str, metric: Metric):
 
         # No point in calculating min and max from distribution here
         if count == 1 or count == 2:
-            return gauge_line(min, max, count, sum)
+            return _gauge_line(min, max, count, sum)
 
         bucket_options = value['bucketOptions']
         bucket_counts = [int(bucket_count) for bucket_count in value['bucketCounts']]
@@ -456,7 +479,7 @@ def extract_value(point, typed_value_key: str, metric: Metric):
             max = 100 * max
             sum = 100 * sum
 
-        return gauge_line(min, max, count, sum)
+        return _gauge_line(min, max, count, sum)
     else:
         if metric.unit == UNIT_10TO2PERCENT:
             value = 100 * value
