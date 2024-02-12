@@ -30,6 +30,7 @@ class LogSelfMonitoring:
         self.sending_time_start: float = 0
         self.sending_time: float = 0
         self.log_ingest_payload_size: float = 0
+        self.log_ingest_raw_size: float = 0
         self.sent_logs_entries: int = 0
 
     def calculate_processing_time(self):

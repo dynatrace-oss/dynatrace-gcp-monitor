@@ -12,6 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import asyncio
+import os
 import queue
 import time
 from collections import Counter
@@ -32,9 +33,10 @@ from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNE
     LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE, LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE, \
     LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE, LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE, LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, \
-    LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE, LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE
+    LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE, LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE, \
+    LOG_SELF_MONITORING_RAW_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
-from lib.self_monitoring import push_self_monitoring_time_series
+from lib.self_monitoring import push_self_monitoring_time_series, sfm_create_descriptors_if_missing
 
 
 def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_list: List[LogSelfMonitoring]):
@@ -49,6 +51,7 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
         aggregated_sfm.pulling_time += sfm.pulling_time
         aggregated_sfm.sending_time += sfm.sending_time
         aggregated_sfm.log_ingest_payload_size += sfm.log_ingest_payload_size
+        aggregated_sfm.log_ingest_raw_size += sfm.log_ingest_raw_size
         aggregated_sfm.sent_logs_entries += sfm.sent_logs_entries
     return aggregated_sfm
 
@@ -89,6 +92,8 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring,
                     if not isinstance(context.token, str):
                         context.log(f"Failed to fetch access token, got non string value: {context.token}")
                         return
+
+                    await sfm_create_descriptors_if_missing(context)
                     time_series = create_self_monitoring_time_series(self_monitoring, context)
                     await push_self_monitoring_time_series(context, time_series)
                 for _ in sfm_list:
@@ -113,7 +118,8 @@ async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_sessi
         self_monitoring_enabled=self_monitoring_enabled,
         gcp_session=gcp_session,
         container_name=container_name,
-        zone=zone
+        zone=zone,
+        worker_pid = str(os.getpid())
     )
 
 
@@ -139,7 +145,8 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Total logs pulling time [s]: {self_monitoring.pulling_time}")
     logging_context.log("SFM", f"Total logs processing time [s]: {self_monitoring.processing_time}")
     logging_context.log("SFM", f"Total logs sending time [s]: {self_monitoring.sending_time}")
-    logging_context.log("SFM", f"Log ingest payload size [kB]: {self_monitoring.log_ingest_payload_size}")
+    logging_context.log("SFM", f"Log ingest payload size [kB]: {self_monitoring.log_ingest_payload_size}") 
+    logging_context.log("SFM", f"Raw log ingest payload size [kB]: {self_monitoring.log_ingest_raw_size}")
     logging_context.log("SFM", f"Number of sent logs entries: {self_monitoring.sent_logs_entries}")
 
 
@@ -181,7 +188,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 {
                     "dynatrace_tenant_url": context.dynatrace_url,
                     "logs_subscription_id": context.logs_subscription_id,
-                    "container_name": context.container_name
+                    "container_name": context.container_name,
+                    "worker_pid": context.worker_pid
                 },
                 [{
                     "interval": interval,
@@ -196,7 +204,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 {
                     "dynatrace_tenant_url": context.dynatrace_url,
                     "logs_subscription_id": context.logs_subscription_id,
-                    "container_name": context.container_name
+                    "container_name": context.container_name,
+                    "worker_pid": context.worker_pid
                 },
                 [{
                     "interval": interval,
@@ -211,7 +220,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 {
                     "dynatrace_tenant_url": context.dynatrace_url,
                     "logs_subscription_id": context.logs_subscription_id,
-                    "container_name": context.container_name
+                    "container_name": context.container_name,
+                    "worker_pid": context.worker_pid
                 },
                 [{
                     "interval": interval,
@@ -226,7 +236,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 {
                     "dynatrace_tenant_url": context.dynatrace_url,
                     "logs_subscription_id": context.logs_subscription_id,
-                    "container_name": context.container_name
+                    "container_name": context.container_name,
+                    "worker_pid": context.worker_pid
                 },
                 [{
                     "interval": interval,
@@ -241,7 +252,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 {
                     "dynatrace_tenant_url": context.dynatrace_url,
                     "logs_subscription_id": context.logs_subscription_id,
-                    "container_name": context.container_name
+                    "container_name": context.container_name,
+                    "worker_pid": context.worker_pid
                 },
                 [{
                     "interval": interval,
@@ -254,7 +266,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             {
                 "dynatrace_tenant_url": context.dynatrace_url,
                 "logs_subscription_id": context.logs_subscription_id,
-                "container_name": context.container_name
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
             },
             [{
                 "interval": interval,
@@ -268,7 +281,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             {
                 "dynatrace_tenant_url": context.dynatrace_url,
                 "logs_subscription_id": context.logs_subscription_id,
-                "container_name": context.container_name
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
             },
             [{
                 "interval": interval,
@@ -281,7 +295,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             {
                 "dynatrace_tenant_url": context.dynatrace_url,
                 "logs_subscription_id": context.logs_subscription_id,
-                "container_name": context.container_name
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
             },
             [{
                 "interval": interval,
@@ -299,6 +314,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                         "dynatrace_tenant_url": context.dynatrace_url,
                         "logs_subscription_id": context.logs_subscription_id,
                         "container_name": context.container_name,
+                        "worker_pid": context.worker_pid,
                         "connectivity_status": dynatrace_connectivity.name
                     },
                     [{
@@ -313,11 +329,28 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             {
                 "dynatrace_tenant_url": context.dynatrace_url,
                 "logs_subscription_id": context.logs_subscription_id,
-                "container_name": context.container_name
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
             },
             [{
                 "interval": interval,
                 "value": {"doubleValue": sfm.log_ingest_payload_size}
+            }],
+            "DOUBLE"
+        ))
+    if sfm.log_ingest_raw_size:
+        time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_RAW_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
+            },
+            [{
+                "interval": interval,
+                "value": {"doubleValue": sfm.log_ingest_raw_size}
             }],
             "DOUBLE"
         ))
@@ -329,7 +362,8 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             {
                 "dynatrace_tenant_url": context.dynatrace_url,
                 "logs_subscription_id": context.logs_subscription_id,
-                "container_name": context.container_name
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
             },
             [{
                 "interval": interval,

@@ -316,6 +316,37 @@
             "mode": "COLOR"
           }
         }
+      },
+      {
+        "title": "Raw log ingest payload size",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"custom.googleapis.com/dynatrace/logs/raw_log_ingest_payload_size\" resource.type=\"generic_task\"",
+                  "aggregation": {
+                    "alignmentPeriod": "60s",
+                    "perSeriesAligner": "ALIGN_MEAN"
+                  },
+                  "secondaryAggregation": {
+                    "alignmentPeriod": "60s"
+                  }
+                }
+              },
+              "plotType": "LINE",
+              "minAlignmentPeriod": "60s"
+            }
+          ],
+          "timeshiftDuration": "0s",
+          "yAxis": {
+            "label": "y1Axis",
+            "scale": "LINEAR"
+          },
+          "chartOptions": {
+            "mode": "COLOR"
+          }
+        }
       }
     ]
   }

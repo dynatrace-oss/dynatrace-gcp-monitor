@@ -12,6 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import gzip
 from typing import Union
 from urllib.parse import urlparse
 
@@ -52,16 +53,19 @@ class DynatraceClient:
         headers = {
             "Authorization": f"Api-Token {context.dynatrace_api_key}",
             "Content-Type": "application/json; charset=utf-8",
+            "Content-Encoding": "gzip"
         }
-
         encoded_body_bytes = batch.serialized_batch.encode("UTF-8")
+        encoded_body_size_kb = round((batch.size_batch_bytes / 1024), 3)
 
+        compressed_body_bytes = gzip.compress(encoded_body_bytes, compresslevel=6)
+        compressed_size_kb = round(len(compressed_body_bytes) / 1024.0, 3)
         try:
             context.self_monitoring.all_requests += 1
             async with dt_session.request(
                 method="POST",
                 url=self.log_ingest_url,
-                data=encoded_body_bytes,
+                data=compressed_body_bytes,
                 headers=headers,
                 ssl=self.verify_ssl,
             ) as response:
@@ -83,9 +87,8 @@ class DynatraceClient:
                 ack_ids_to_send.extend(batch.ack_ids)
                 context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Ok)
                 context.self_monitoring.sent_logs_entries += batch.number_of_logs_in_batch
-                context.self_monitoring.log_ingest_payload_size += round(
-                    (batch.size_batch_bytes / 1024), 3
-                )
+                context.self_monitoring.log_ingest_payload_size += compressed_size_kb
+                context.self_monitoring.log_ingest_raw_size += encoded_body_size_kb
         except Exception as e:
             if not isinstance(e, ClientResponseError):
                 context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)

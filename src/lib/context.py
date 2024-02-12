@@ -254,7 +254,8 @@ class LogsSfmContext(SfmContext):
             self_monitoring_enabled: bool,
             gcp_session: aiohttp.ClientSession,
             container_name: str,
-            zone: str
+            zone: str,
+            worker_pid: str
     ):
         super().__init__(
             project_id_owner=project_id_owner,
@@ -271,6 +272,7 @@ class LogsSfmContext(SfmContext):
         self.timestamp = datetime.utcnow()
         self.container_name = container_name
         self.zone = zone
+        self.worker_pid = worker_pid
 
 
 class MetricsContext(SfmContext):
