@@ -124,11 +124,13 @@ def max_dimension_value_length():
 
 
 def get_dynatrace_api_key_from_env():
-    return os.environ.get(dynatrace_access_key_secret_name(), None)
+    return os.environ.get("DYNATRACE_ACCESS_KEY", None)
 
+def get_dynatrace_url_from_env():
+    return os.environ.get("DYNATRACE_URL", None)
 
 def get_dynatrace_log_ingest_url_from_env():
-    return os.environ.get(dynatrace_log_ingest_url_secret_name(), None)
+    return os.environ.get("DYNATRACE_LOG_INGEST_URL", None)
 
 
 def use_proxy():
