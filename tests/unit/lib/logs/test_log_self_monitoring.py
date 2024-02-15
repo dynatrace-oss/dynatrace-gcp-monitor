@@ -6,7 +6,7 @@ from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 
 
 context = LogsSfmContext("project_id", "http://localhost:9011", "dynatrace-gcp-log-forwarder-sub", "token", "", Queue(),
-                         True, None, "container_name", "us-east1")
+                         True, None, "container_name", "us-east1", "12345")
 
 end_time = context.timestamp.isoformat() + "Z"
 
@@ -28,7 +28,8 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "INT64",
@@ -60,7 +61,8 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "INT64",
@@ -92,7 +94,8 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "INT64",
@@ -124,7 +127,8 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "INT64",
@@ -156,7 +160,8 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "DOUBLE",
@@ -188,7 +193,8 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "DOUBLE",
@@ -220,7 +226,8 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "DOUBLE",
@@ -253,7 +260,8 @@ expected_metric_data = {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
                     "connectivity_status": "Other",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "INT64",
@@ -286,7 +294,8 @@ expected_metric_data = {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
                     "connectivity_status": "TooManyRequests",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "INT64",
@@ -318,7 +327,8 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "DOUBLE",
@@ -346,11 +356,45 @@ expected_metric_data = {
                 }
             },
             "metric": {
+                "type": "custom.googleapis.com/dynatrace/logs/raw_log_ingest_payload_size",
+                "labels": {
+                    "dynatrace_tenant_url": "http://localhost:9011",
+                    "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
+                }
+            },
+            "valueType": "DOUBLE",
+            "metricKind": "GAUGE",
+            "points": [
+                {
+                    "interval": {
+                        "endTime": end_time
+                    },
+                    "value": {
+                        "doubleValue": 21.37
+                    }
+                }
+            ]
+        },
+        {
+            "resource": {
+                "type": "generic_task",
+                "labels": {
+                    "project_id": "project_id",
+                    "location": "us-east1",
+                    "namespace": "Local",
+                    "job": "Local",
+                    "task_id": "Local"
+                }
+            },
+            "metric": {
                 "type": "custom.googleapis.com/dynatrace/logs/sent_logs_entries",
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "container_name": "container_name"
+                    "container_name": "container_name",
+                    "worker_pid": "12345"
                 }
             },
             "valueType": "INT64",
@@ -381,6 +425,7 @@ def test_self_monitoring_metrics():
     self_monitoring.sending_time = 0.3609178066253662
     self_monitoring.records_with_too_long_content = 4
     self_monitoring.log_ingest_payload_size = 10.123
+    self_monitoring.log_ingest_raw_size = 21.37
     self_monitoring.sent_logs_entries = 5
 
     metric_data = create_self_monitoring_time_series(self_monitoring, context)

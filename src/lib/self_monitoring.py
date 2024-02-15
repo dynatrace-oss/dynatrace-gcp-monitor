@@ -97,13 +97,13 @@ async def sfm_create_descriptors_if_missing(context: SfmContext):
         context.log(f"Failed to create self monitoring metrics descriptors, reason is {type(e).__name__} {e}")
 
 
-async def replace_metric_descriptor_if_required(context: SfmContext,
-                                                existing_metric_descriptor: Dict,
-                                                metric_descriptor: Dict,
-                                                metric_type: str):
+async def replace_metric_descriptor_if_required(
+    context: SfmContext, existing_metric_descriptor: Dict, metric_descriptor: Dict, metric_type: str
+):
     existing_label_keys = extract_label_keys(existing_metric_descriptor)
     descriptor_label_keys = extract_label_keys(metric_descriptor)
-    if existing_label_keys != descriptor_label_keys:
+    if existing_label_keys != descriptor_label_keys or existing_metric_descriptor.get(
+        "displayName", "" ) != metric_descriptor.get("metric_descriptor", ""):
         await delete_metric_descriptor(context, metric_type)
         await create_metric_descriptor(context, metric_descriptor, metric_type)
 
