@@ -42,6 +42,10 @@ def excluded_projects_by_prefix():
     return os.environ.get("EXCLUDED_PROJECTS_BY_PREFIX", "")
 
 
+def excluded_metrics():
+    return os.environ.get("EXCLUDED_METRICS", "")
+
+
 def project_id():
     return os.environ.get("GCP_PROJECT","")
 

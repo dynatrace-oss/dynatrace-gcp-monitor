@@ -144,8 +144,9 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         context.start_processing_timestamp = time.time()
 
+        excluded_metrics = config.excluded_metrics().split(',')
         process_project_metrics_tasks = [
-            process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()))
+            process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()), excluded_metrics)
             for project_id
             in projects_ids
         ]
@@ -167,10 +168,10 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str]):
+                                  disabled_apis: Set[str], excluded_metrics: List[str]):
     try:
         context.log(project_id, f"Starting processing...")
-        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis)
+        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis, excluded_metrics)
         fetch_data_time = time.time() - context.start_processing_timestamp
         context.sfm[SfmKeys.fetch_gcp_data_execution_time].update(project_id, fetch_data_time)
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
@@ -180,7 +181,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 
 
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str]) -> List[IngestLine]:
+                                  disabled_apis: Set[str], excluded_metrics: List[str]) -> List[IngestLine]:
     fetch_metric_coros = []
     metrics_metadata = []
     topology: Dict[GCPService, Iterable[Entity]] = {}
@@ -195,6 +196,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     # and metrics from all projects are being collected
     skipped_services_with_no_instances = []
     skipped_disabled_apis = set()
+    skipped_excluded_metrics = []
 
     for service in services:
         if not service.is_enabled:
@@ -202,7 +204,12 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         if service in topology and not topology[service]:
             skipped_services_with_no_instances.append(f"{service.name}/{service.feature_set}")
             continue  # skip fetching the metrics because there are no instances
+
         for metric in service.metrics:
+            if metric.name in excluded_metrics:
+                skipped_excluded_metrics.append(metric.name)
+                continue
+
             # Fetch metric only if it's metric from extensions or is autodiscovered in project_id
             if not metric.autodiscovered_metric or project_id in metric.project_ids:
                 gcp_api_last_index = metric.google_metric.find("/")
@@ -223,6 +230,9 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     if skipped_disabled_apis:
         skipped_disabled_apis_string = ", ".join(skipped_disabled_apis)
         context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
+
+    if skipped_excluded_metrics:
+        context.log(project_id, f"Skipped fetching for excluded metrics: {", ".join(skipped_excluded_metrics)}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_coros, return_exceptions=True)
     entity_id_map = build_entity_id_map(list(topology.values()))
