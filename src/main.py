@@ -232,7 +232,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         context.log(project_id, f"Skipped fetching metrics for disabled APIs: {skipped_disabled_apis_string}")
 
     if skipped_excluded_metrics:
-        context.log(project_id, f"Skipped fetching for excluded metrics: {", ".join(skipped_excluded_metrics)}")
+        context.log(project_id, f"Skipped fetching for excluded metrics: {', '.join(skipped_excluded_metrics)}")
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_coros, return_exceptions=True)
     entity_id_map = build_entity_id_map(list(topology.values()))
