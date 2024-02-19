@@ -132,6 +132,8 @@ scopingProjectSupportEnabled: "false"
 excludedProjects: ""
 # excludedProjectsByPrefix: comma separated list of projects substring that will be excluded from monitoring (e.g. "project-a,proj,pro").
 excludedProjectsByPrefix: ""
+# excludedMetrics: comma separated list of metrics that will be excluded from monitoring (e.g. "function/execution_count,proxy/request_count").
+excludedMetrics: ""
 
 metricResources:
   requests:
