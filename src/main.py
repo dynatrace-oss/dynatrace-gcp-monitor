@@ -144,7 +144,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         context.start_processing_timestamp = time.time()
 
-        excluded_metrics = config.excluded_metrics().split(',')
+        excluded_metrics = config.excluded_metrics().split(',') if len(config.excluded_metrics()) > 2 else []
         process_project_metrics_tasks = [
             process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()), excluded_metrics)
             for project_id
