@@ -134,6 +134,8 @@ excludedProjects: ""
 excludedProjectsByPrefix: ""
 # excludedMetrics: comma separated list of metrics that will be excluded from monitoring (e.g. "function/execution_count,proxy/request_count").
 excludedMetrics: ""
+# excludedDimensions: comma separated list of dimentions that will be excluded from monitoring. (e.g. "database_id,volume_id")
+excludedDimensions: ""
 
 metricResources:
   requests:

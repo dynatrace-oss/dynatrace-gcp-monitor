@@ -46,7 +46,7 @@ def excluded_metrics():
     return os.environ.get("EXCLUDED_METRICS", None)
 
 def excluded_dimentions():
-    return os.environ.get("EXCLUDED_METRICS", None)
+    return os.environ.get("EXCLUDED_DIMENSIONS", None)
 
 
 def project_id():
