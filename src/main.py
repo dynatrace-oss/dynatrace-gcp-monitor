@@ -144,7 +144,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         context.start_processing_timestamp = time.time()
 
-        excluded_metrics = config.excluded_metrics().split(',') if len(config.excluded_metrics()) > 2 else []
+        excluded_metrics = config.excluded_metrics().split(',') if config.excluded_metrics() else []
         process_project_metrics_tasks = [
             process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()), excluded_metrics)
             for project_id
@@ -210,6 +210,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                 skipped_excluded_metrics.append(metric.name)
                 continue
 
+            excluded_dimensions = config.excluded_dimentions().split(',') if config.excluded_metrics() else []
             # Fetch metric only if it's metric from extensions or is autodiscovered in project_id
             if not metric.autodiscovered_metric or project_id in metric.project_ids:
                 gcp_api_last_index = metric.google_metric.find("/")
@@ -218,7 +219,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                     skipped_disabled_apis.add(api)
                     continue  # skip fetching the metrics because service API is disabled
                 fetch_metric_coro = run_fetch_metric(
-                    context=context, project_id=project_id, service=service, metric=metric
+                    context=context, project_id=project_id, service=service, metric=metric, excluded_dimensions=excluded_dimensions
                 )
                 fetch_metric_coros.append(fetch_metric_coro)
 
@@ -246,10 +247,11 @@ async def run_fetch_metric(
         context: MetricsContext,
         project_id: str,
         service: GCPService,
-        metric: Metric
+        metric: Metric,
+        excluded_dimensions=List[str]
 ):
     try:
-        return await fetch_metric(context, project_id, service, metric)
+        return await fetch_metric(context, project_id, service, metric, excluded_dimensions)
     except Exception as e:
         context.log(project_id, f"Failed to finish task for [{metric.google_metric}], reason is {type(e).__name__} {e}")
         return []

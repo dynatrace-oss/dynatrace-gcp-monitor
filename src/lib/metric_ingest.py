@@ -161,7 +161,8 @@ async def fetch_metric(
         context: MetricsContext,
         project_id: str,
         service: GCPService,
-        metric: Metric
+        metric: Metric,
+        excluded_dimensions: List[str]
 ) -> List[IngestLine]:
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
@@ -198,7 +199,7 @@ async def fetch_metric(
     headers = context.create_gcp_request_headers(project_id)
 
     should_fetch = True
-
+    context.log(f'Dimension \"{excluded_dimensions}\" will be excluded from fetch')
     lines = []
     while should_fetch:
         context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
@@ -215,7 +216,7 @@ async def fetch_metric(
         for single_time_series in page['timeSeries']:
             typed_value_key = _extract_typed_value_key(single_time_series)
             dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric)
-            entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
+            entity_id = create_entity_id(service_name, service_dimensions, single_time_series, excluded_dimensions)
 
             for point in single_time_series['points']:
                 line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
@@ -359,11 +360,14 @@ def flatten_and_enrich_metric_results(
     return results
 
 
-def create_entity_id(service_name: str, service_dimensions: List[Dimension], time_series):
+def create_entity_id(service_name: str, service_dimensions: List[Dimension], time_series, excluded_dimensions: List[str]):
     resource = time_series['resource']
     resource_labels = resource.get('labels', {})
     parts = [service_name]
     for dimension in service_dimensions:
+        if dimension.key_for_fetch_metric in excluded_dimensions:
+            continue
+
         key = dimension.key_for_create_entity_id
 
         dimension_value = resource_labels.get(key)
