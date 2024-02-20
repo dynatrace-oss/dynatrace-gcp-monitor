@@ -38,6 +38,16 @@ dynatraceAccessKey: ""
 dynatraceUrl: ""
 
 
+# GCP SECRET MANAGER KEYS
+
+# GCP Secret Manager key for getting the dynatraceAccessKey
+dynatraceAccessKeySecretName: ""
+# GCP Secret Manager key for getting the dynatraceUrl
+dynatraceUrlSecretName: ""
+# GCP Secret Manager key for getting the dynatraceLogIngestUrl
+dynatraceLogIngestUrlSecretName: ""
+
+
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
 
 # subscription id of log sink pubsub subscription

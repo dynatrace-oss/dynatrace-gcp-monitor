@@ -117,9 +117,15 @@ spec:
               key: HTTPS_PROXY
         {{- end }}
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
-          value: DYNATRACE_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-gcp-monitor-secret
+              key: access-key-secret-name
         - name: DYNATRACE_URL_SECRET_NAME
-          value: DYNATRACE_URL
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-gcp-monitor-secret
+              key: url-secret-name
         - name: DYNATRACE_URL
           valueFrom:
             secretKeyRef:
@@ -280,9 +286,15 @@ spec:
               name: dynatrace-gcp-monitor-config
               key: REQUIRE_VALID_CERTIFICATE
         - name: DYNATRACE_ACCESS_KEY_SECRET_NAME
-          value: DYNATRACE_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-gcp-monitor-secret
+              key: access-key-secret-name
         - name: DYNATRACE_LOG_INGEST_URL_SECRET_NAME
-          value: DYNATRACE_LOG_INGEST_URL
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-gcp-monitor-secret
+              key: log-ingest-url-secret-name
         - name: DYNATRACE_LOG_INGEST_URL
           valueFrom:
             secretKeyRef:
