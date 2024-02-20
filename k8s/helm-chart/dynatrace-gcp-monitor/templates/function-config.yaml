@@ -30,6 +30,7 @@ data:
   EXCLUDED_PROJECTS: {{ .Values.excludedProjects | quote }}
   EXCLUDED_PROJECTS_BY_PREFIX: {{ .Values.excludedProjectsByPrefix | quote }}
   EXCLUDED_METRICS: {{ .Values.excludedMetrics | quote }}
+  EXCLUDED_DIMENSIONS: {{ .Values.excludedDimensions | quote }}
   KEEP_REFRESHING_EXTENSIONS_CONFIG: {{ .Values.keepRefreshingExtensionsConfig | quote }}
   {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
   PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
