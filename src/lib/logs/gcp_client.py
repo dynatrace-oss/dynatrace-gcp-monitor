@@ -34,6 +34,7 @@ class GCPClient:
     acknowledge_url: str
     body_payload: bytes
     headers: Dict[str, Any]
+    api_token: str
 
     def __init__(
         self,
@@ -45,6 +46,7 @@ class GCPClient:
         self.pull_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:pull"
         self.acknowledge_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:acknowledge"
         self.headers = {"Authorization": f"Bearer {api_token}"}
+        self.api_token = api_token
         json_body = {"maxMessages": PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES}
         json_data = json.dumps(json_body)
         self.body_payload = json_data.encode("utf-8")

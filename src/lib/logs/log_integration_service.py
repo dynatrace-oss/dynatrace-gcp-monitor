@@ -2,8 +2,9 @@ import time
 import asyncio
 from typing import List, Tuple
 from lib.clientsession_provider import init_gcp_client_session, init_dt_client_session
-from lib.context import LoggingContext, LogsProcessingContext, create_logs_context
-from lib.credentials import create_token
+from lib.configuration import config
+from lib.context import LoggingContext, LogsContext, LogsProcessingContext, create_logs_context
+from lib.credentials import create_token, fetch_dynatrace_api_key, fetch_dynatrace_log_ingest_url, fetch_dynatrace_url
 from lib.logs.dynatrace_client import DynatraceClient
 from lib.logs.gcp_client import GCPClient
 from lib.logs.log_self_monitoring import put_sfm_into_queue
@@ -21,25 +22,50 @@ from lib.logs.log_forwarder_variables import (
 
 
 class LogIntegrationService:
-    def __init__(self, sfm_queue: asyncio.Queue):
-        self.gcp_client = None
-        self.dynatrace_client = DynatraceClient()
+    sfm_queue: asyncio.Queue
+    log_push_semaphore: asyncio.Semaphore
+    gcp_client: GCPClient
+    logs_context: LogsContext
+    dynatrace_client: DynatraceClient
+
+    @classmethod
+    async def create(cls, sfm_queue: asyncio.Queue, gcp_client: GCPClient = None, logging_context: LoggingContext = None):
+        self = cls()
         self.sfm_queue = sfm_queue
         self.log_push_semaphore = asyncio.Semaphore(NUMBER_OF_CONCURRENT_PUSH_COROUTINES)
 
-    async def update_gcp_client(self, logging_context: LoggingContext):
         async with init_gcp_client_session() as gcp_session:
-            token = await create_token(logging_context, gcp_session)
-            if token is None:
-                raise Exception("Cannot start pub/sub pulling - Failed to fetch token")
-            self.gcp_client = GCPClient(token)
+            gcp_token = (
+                gcp_client.api_token
+                if gcp_client
+                else await create_token(
+                    session=gcp_session, context=logging_context, validate=True
+                )
+            )
+            dynatrace_log_ingest_url = await fetch_dynatrace_log_ingest_url(
+                gcp_session=gcp_session,
+                project_id=config.project_id(),
+                token=gcp_token,
+            )
+            dynatrace_api_key = await fetch_dynatrace_api_key(
+                gcp_session=gcp_session,
+                project_id=config.project_id(),
+                token=gcp_token,
+            )
+
+        self.gcp_client = gcp_client or GCPClient(gcp_token)
+        self.dynatrace_client = DynatraceClient(url=dynatrace_log_ingest_url, api_key=dynatrace_api_key)
+
+        return self
+
 
     async def perform_pull(
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
         async with init_gcp_client_session() as gcp_session:
             if self.gcp_client.update_gcp_client_in_the_next_loop:
-                await self.update_gcp_client(logging_context)
+                gcp_token = await create_token(session=gcp_session, context=logging_context, validate=True)
+                self.gcp_client = GCPClient(gcp_token)
             context = LogsProcessingContext(None, None, self.sfm_queue)
             context.self_monitoring.pulling_time_start = time.perf_counter()
 

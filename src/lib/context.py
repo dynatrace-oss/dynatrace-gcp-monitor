@@ -42,14 +42,12 @@ class DynatraceConnectivity(enum.Enum):
 
 
 def create_logs_context(sfm_queue: Queue):
-    dynatrace_api_key = config.get_dynatrace_api_key_from_env()
-    dynatrace_url = config.get_dynatrace_log_ingest_url_from_env()
     project_id_owner = config.project_id()
 
     return LogsContext(
         project_id_owner=project_id_owner,
-        dynatrace_api_key=dynatrace_api_key,
-        dynatrace_url=dynatrace_url,
+        dynatrace_api_key="",
+        dynatrace_url="",
         scheduled_execution_id=str(int(time.time()))[-8:],
         sfm_queue=sfm_queue
     )

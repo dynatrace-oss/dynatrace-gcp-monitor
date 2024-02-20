@@ -16,6 +16,7 @@ import base64
 import json
 import os
 import time
+from urllib.parse import urlparse
 
 import jwt
 from aiohttp import ClientSession
@@ -32,31 +33,55 @@ _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 _SECRET_ROOT = 'https://secretmanager.googleapis.com/v1'
 _CLOUD_RESOURCE_MANAGER_ROOT = config.gcp_cloud_resource_manager_url()
 
-_DYNATRACE_ACCESS_KEY_SECRET_NAME = config.dynatrace_access_key_secret_name()
-_DYNATRACE_URL_SECRET_NAME = config.dynatrace_url_secret_name()
-_DYNATRACE_LOG_INGEST_URL_SECRET_NAME = config.dynatrace_log_ingest_url_secret_name()
+_DYNATRACE_ACCESS_KEY_SECRET_NAME = config.dynatrace_access_key_secret_name() or "DYNATRACE_ACCESS_KEY"
+_DYNATRACE_URL_SECRET_NAME = config.dynatrace_url_secret_name() or "DYNATRACE_URL"
+_DYNATRACE_LOG_INGEST_URL_SECRET_NAME = config.dynatrace_log_ingest_url_secret_name() or  "DYNATRACE_LOG_INGEST_URL"
 
 
-async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str, ):
-    return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_ACCESS_KEY_SECRET_NAME)
+async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str) -> str:
+    return (
+        config.get_dynatrace_api_key_from_env()
+        or await fetch_secret(
+            _DYNATRACE_ACCESS_KEY_SECRET_NAME,
+            gcp_session,
+            project_id,
+            token,
+        )
+    )
 
 
-async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token: str, ):
-    return await fetch_secret(gcp_session, project_id, token, _DYNATRACE_URL_SECRET_NAME)
+async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token: str) -> str:
+    return (
+        config.get_dynatrace_url_from_env()
+        or await fetch_secret(
+            _DYNATRACE_URL_SECRET_NAME,
+            gcp_session,
+            project_id,
+            token,
+        )
+    )
 
+async def fetch_dynatrace_log_ingest_url(gcp_session: ClientSession, project_id: str, token: str) -> str:
+    dynatrace_log_ingest_url = config.get_dynatrace_log_ingest_url_from_env()
 
-def get_dynatrace_log_ingest_url():
-    url = config.get_dynatrace_log_ingest_url_from_env()
-    if url is None:
-        raise Exception("{env_var} environment variable is not set".format(env_var=_DYNATRACE_LOG_INGEST_URL_SECRET_NAME))
-    return url.rstrip('/')
+    if not dynatrace_log_ingest_url:
+        dynatrace_log_ingest_url = await fetch_secret(
+            _DYNATRACE_LOG_INGEST_URL_SECRET_NAME,
+            gcp_session,
+            project_id,
+            token
+        )
 
+    if not dynatrace_log_ingest_url:
+        dynatrace_log_ingest_url = await fetch_dynatrace_url(
+            gcp_session=gcp_session,
+            project_id=project_id,
+            token=token,
+        )
 
-async def fetch_secret(session: ClientSession, project_id: str, token: str, secret_name: str):
-    env_secret_value = os.environ.get(secret_name, None)
-    if env_secret_value:
-        return env_secret_value
+    return urlparse(dynatrace_log_ingest_url.rstrip("/") + "/api/v2/logs/ingest").geturl()
 
+async def fetch_secret(secret_name: str, session: ClientSession, project_id: str, token: str) -> str:
     url = _SECRET_ROOT + "/projects/{project_id}/secrets/{secret_name}/versions/latest:access" \
         .format(project_id=project_id, secret_name=secret_name)
 
@@ -92,7 +117,7 @@ async def create_default_service_account_token(context: LoggingContext, session:
         return None
 
 
-async def create_token(context: LoggingContext, session: ClientSession):
+async def create_token(context: LoggingContext, session: ClientSession, validate: bool = False):
     credentials_path = config.credentials_path()
 
     if credentials_path:
@@ -100,7 +125,7 @@ async def create_token(context: LoggingContext, session: ClientSession):
         with open(credentials_path) as key_file:
             credentials_data = json.load(key_file)
 
-        return await get_token(
+        gcp_token = await get_token(
             key=credentials_data['private_key'],
             service=credentials_data['client_email'],
             uri=credentials_data['token_uri'],
@@ -108,7 +133,15 @@ async def create_token(context: LoggingContext, session: ClientSession):
         )
     else:
         context.log("Trying to use default service account")
-        return await create_default_service_account_token(context, session)
+        gcp_token = await create_default_service_account_token(context, session)
+
+    if validate:
+        if gcp_token is None:
+            raise Exception("Failed to fetch access token. No value")
+        if not isinstance(gcp_token, str):
+            raise Exception(f"Failed to fetch access token. Got non string value: {gcp_token}")
+
+    return gcp_token
 
 
 async def get_token(key: str, service: str, uri: str, session: ClientSession):
