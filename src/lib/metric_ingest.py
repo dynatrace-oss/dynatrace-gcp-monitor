@@ -192,7 +192,10 @@ async def fetch_metric(
     dt_dimensions_mapping = DtDimensionsMap()
 
     for dimension in all_dimensions:
-        if dimension.key_for_send_to_dynatrace and dimension.key_for_fetch_metric not in excluded_dimensions:
+        if dimension.key_for_fetch_metric in excluded_dimensions:
+            continue
+
+        if dimension.key_for_send_to_dynatrace:
             dt_dimensions_mapping.add_label_mapping(dimension.key_for_fetch_metric, dimension.key_for_send_to_dynatrace)
 
         params.append(('aggregation.groupByFields', dimension.key_for_fetch_metric))

@@ -206,7 +206,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             continue  # skip fetching the metrics because there are no instances
 
         for metric in service.metrics:
-            if any(metric.name in excluded_metric for excluded_metric in excluded_metrics_by_prefix):
+            if any(metric.name.startswith(excluded_metric) for excluded_metric in excluded_metrics_by_prefix):
                 skipped_excluded_metrics.append(metric.name)
                 continue
 
