@@ -162,7 +162,7 @@ async def fetch_metric(
         project_id: str,
         service: GCPService,
         metric: Metric,
-        excluded_dimensions: List[str]
+        excluded_dimensions: set
 ) -> List[IngestLine]:
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
@@ -192,7 +192,8 @@ async def fetch_metric(
     dt_dimensions_mapping = DtDimensionsMap()
 
     for dimension in all_dimensions:
-        if dimension.key_for_fetch_metric in excluded_dimensions:
+        dimension_per_metric_name = metric.google_metric + "|" + dimension.key_for_fetch_metric
+        if dimension_per_metric_name in excluded_dimensions:
             continue
 
         if dimension.key_for_send_to_dynatrace:
@@ -203,7 +204,9 @@ async def fetch_metric(
     headers = context.create_gcp_request_headers(project_id)
 
     should_fetch = True
-    context.log(f'Dimension \"{excluded_dimensions}\" will be excluded from fetch')
+    if len(excluded_dimensions) > 0:
+        context.log(f'Dimensions list \"{excluded_dimensions}\" has been excluded from fetch.')
+
     lines = []
     while should_fetch:
         context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
