@@ -167,11 +167,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: EXCLUDED_PROJECTS_BY_PREFIX
-        - name: EXCLUDED_METRICS
+        - name: EXCLUDED_METRICS_BY_PREFIX
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
-              key: EXCLUDED_METRICS
+              key: EXCLUDED_METRICS_BY_PREFIX
         - name: EXCLUDED_DIMENSIONS
           valueFrom:
             configMapKeyRef:
