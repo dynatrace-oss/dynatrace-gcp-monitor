@@ -134,7 +134,7 @@ excludedProjects: ""
 excludedProjectsByPrefix: ""
 # excludedMetricsByPrefix: comma separated list of metrics that will be excluded from monitoring (e.g. "function/execution_count,proxy/request_count,proxy/req").
 excludedMetricsByPrefix: ""
-# excludedDimensions: comma separated list of dimentions that will be excluded from monitoring. (e.g. "database_id,volume_id")
+# excludedDimensions: comma separated list of dimentions that will be excluded from monitoring in a format of "{gcp_metric}|{dimension}" (e.g. "loadbalancing.googleapis.com/l3/external/egress_bytes_count|resource.labels.client_country")
 excludedDimensions: ""
 
 metricResources:

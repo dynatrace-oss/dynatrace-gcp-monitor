@@ -210,7 +210,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                 skipped_excluded_metrics.append(metric.name)
                 continue
 
-            excluded_dimensions = set(config.excluded_dimentions().split(',') if config.excluded_dimentions() else [])
+            excluded_dimensions = set(config.excluded_dimensions().split(',') if config.excluded_dimensions() else [])
             # Fetch metric only if it's metric from extensions or is autodiscovered in project_id
             if not metric.autodiscovered_metric or project_id in metric.project_ids:
                 gcp_api_last_index = metric.google_metric.find("/")
