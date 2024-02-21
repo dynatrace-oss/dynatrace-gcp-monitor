@@ -248,7 +248,7 @@ async def run_fetch_metric(
         project_id: str,
         service: GCPService,
         metric: Metric,
-        excluded_dimensions=set
+        excluded_dimensions: set
 ):
     try:
         return await fetch_metric(context, project_id, service, metric, excluded_dimensions)
