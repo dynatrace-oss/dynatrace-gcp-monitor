@@ -172,6 +172,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: EXCLUDED_METRICS
+        - name: EXCLUDED_DIMENSIONS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: EXCLUDED_DIMENSIONS
         - name:   KEEP_REFRESHING_EXTENSIONS_CONFIG
           valueFrom:
             configMapKeyRef:
