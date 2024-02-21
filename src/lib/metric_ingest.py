@@ -190,8 +190,9 @@ async def fetch_metric(
 
     all_dimensions = (service_dimensions + metric.dimensions)
     dt_dimensions_mapping = DtDimensionsMap()
+
     for dimension in all_dimensions:
-        if dimension.key_for_send_to_dynatrace:
+        if dimension.key_for_send_to_dynatrace and dimension.key_for_fetch_metric not in excluded_dimensions:
             dt_dimensions_mapping.add_label_mapping(dimension.key_for_fetch_metric, dimension.key_for_send_to_dynatrace)
 
         params.append(('aggregation.groupByFields', dimension.key_for_fetch_metric))
@@ -216,7 +217,7 @@ async def fetch_metric(
         for single_time_series in page['timeSeries']:
             typed_value_key = _extract_typed_value_key(single_time_series)
             dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric)
-            entity_id = create_entity_id(service_name, service_dimensions, single_time_series, excluded_dimensions)
+            entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
 
             for point in single_time_series['points']:
                 line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
@@ -360,14 +361,11 @@ def flatten_and_enrich_metric_results(
     return results
 
 
-def create_entity_id(service_name: str, service_dimensions: List[Dimension], time_series, excluded_dimensions: List[str]):
+def create_entity_id(service_name: str, service_dimensions: List[Dimension], time_series):
     resource = time_series['resource']
     resource_labels = resource.get('labels', {})
     parts = [service_name]
     for dimension in service_dimensions:
-        if dimension.key_for_fetch_metric in excluded_dimensions:
-            continue
-
         key = dimension.key_for_create_entity_id
 
         dimension_value = resource_labels.get(key)
