@@ -134,8 +134,18 @@ excludedProjects: ""
 excludedProjectsByPrefix: ""
 # excludedMetricsByPrefix: comma separated list of metrics that will be excluded from monitoring (e.g. "function/execution_count,proxy/request_count,proxy/req").
 excludedMetricsByPrefix: ""
-# excludedDimensions: comma separated list of dimentions that will be excluded from monitoring in a format of "{gcp_metric}|{dimension}" (e.g. "loadbalancing.googleapis.com/l3/external/egress_bytes_count|resource.labels.client_country")
-excludedDimensions: ""
+# excludedMetricsWithDimensions: comma separated list of dimentions that will be excluded from monitoring in a format of "{gcp_metric}|{dimension}" (e.g. "loadbalancing.googleapis.com/l3/external/egress_bytes_count|client_country")
+excludedMetricsWithDimensions: |
+  filter_out:
+  - metric: google_metric_1
+    dimensions:
+      - dimension1_1
+      - dimension1_2
+  - metric: google_metric_2
+    dimensions:
+      - dimension2_1
+      - dimension2_2
+      - dimension2_3
 
 metricResources:
   requests:

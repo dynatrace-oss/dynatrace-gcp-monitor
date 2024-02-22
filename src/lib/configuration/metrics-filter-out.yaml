@@ -1,0 +1,30 @@
+# Metrics containing the following names will be excluded from the fetch
+
+#If you are willing fully exclude metric no matter what dimention it is, or are there any dimensions: place only `all` keyword under dimentions list.
+
+#Example Start:
+# - metric: serviceruntime.googleapis.com/api/request_count
+#   dimensions:
+#     - protocol
+#     - response_code
+#     - response_code_class
+#     - grpc_status_code
+# - metric: serviceruntime.googleapis.com/quota/exceeded
+#   dimensions:
+#     - limit_name
+#     - quota_metric
+#Example end.
+
+filter_out:
+- metric: google_metric_1
+  dimensions:
+    - dimension1_1
+    - dimension1_2
+- metric: google_metric_2
+  dimensions:
+    - dimension2_1
+    - dimension2_2
+    - dimension2_3
+- metric: google_metric_3
+  dimensions:
+    - all
