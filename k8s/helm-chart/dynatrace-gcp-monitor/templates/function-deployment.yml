@@ -58,7 +58,7 @@ spec:
             path: "autodiscovery-config.yaml"
           - key: AUTODISCOVERY_METRIC_BLOCK_LIST_YAML
             path: "autodiscovery-block-list.yaml"
-          - key: EXCLUDED_METRICS_WITH_DIMENSIONS
+          - key: EXCLUDED_METRICS_BY_PREFIX_WITH_DIMENSIONS
             path: "metrics-filter-out.yaml"
           {{- end }}
       {{- end }}
@@ -169,11 +169,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: EXCLUDED_PROJECTS_BY_PREFIX
-        - name: EXCLUDED_METRICS_WITH_DIMENSIONS
+        - name: EXCLUDED_METRICS_BY_PREFIX_WITH_DIMENSIONS
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
-              key: EXCLUDED_METRICS_WITH_DIMENSIONS
+              key: EXCLUDED_METRICS_BY_PREFIX_WITH_DIMENSIONS
         - name:   KEEP_REFRESHING_EXTENSIONS_CONFIG
           valueFrom:
             configMapKeyRef:
