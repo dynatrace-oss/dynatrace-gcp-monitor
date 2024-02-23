@@ -132,17 +132,28 @@ scopingProjectSupportEnabled: "false"
 excludedProjects: ""
 # excludedProjectsByPrefix: comma separated list of projects substring that will be excluded from monitoring (e.g. "project-a,proj,pro").
 excludedProjectsByPrefix: ""
-# excludedMetricsByPrefixWithDimensions: comma separated list of dimensions that will be excluded from monitoring in a format of "{gcp_metric}|{dimension}" (e.g. "loadbalancing.googleapis.com/l3/external/egress_bytes_count|client_country")
-excludedMetricsByPrefixWithDimensions: |
+# excludedMetricsAndDimensions: map structure of metrics and dimensions that will be excluded from monitoring.
+# If you want to exclude a metric, add a "metric" entry. Any global metric matching its prefix will not be ingested.
+# If you want to exclude dimensions from a specific metric, add the "metric" entry and specify the dimensions. Selected dimensions will be cut off and the metric will be ingested without them. 
+# Example:
+# this WILL NOT ingest any metric starting with "bigquery.googleapis.com/query/"
+# and WILL ingest "compute.googleapis.com/instance/disk/max_read_bytes_count" but WITHOUT the "storage_type" and "device_type" dimensions
+#
+# excludedMetricsAndDimensions: |
+#   filter_out:
+#   - metric: bigquery.googleapis.com/query/
+#   - metric: compute.googleapis.com/instance/disk/max_read_bytes_count
+#     dimensions:
+#       - storage_type
+#       - device_type
+#
+excludedMetricsAndDimensions: |
   filter_out:
-  - metric: google_metric_2
-    dimensions:
-      - dimension2_1
-      - dimension2_2
-      - dimension2_3
-  - metric: google_metric_3
-    dimensions:
-      - dimension3_1
+#   - metric: metric_1
+#   - metric: metric_2
+#     dimensions:
+#       - dimension_A
+
 
 metricResources:
   requests:

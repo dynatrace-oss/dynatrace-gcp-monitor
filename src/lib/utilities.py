@@ -49,8 +49,14 @@ def read_autodiscovery_block_list_yaml():
 def read_autodiscovery_resources_mapping():
     return safe_read_yaml('./lib/autodiscovery/config/autodiscovery-mapping.yaml', "AUTODISCOVERY_RESOURCES_MAPPING")
 
-def read_filter_out_list_yaml():
-    return safe_read_yaml('./lib/configuration/metrics-filter-out.yaml', "EXCLUDED_METRICS_BY_PREFIX_WITH_DIMENSIONS")
+def read_filter_out_list_yaml() -> list:
+    loaded_yaml = yaml.safe_load(os.environ.get("EXCLUDED_METRICS_AND_DIMENSIONS", ""))
+    excluded_metrics = loaded_yaml.get("filter_out", [])
+
+    for metric in excluded_metrics:
+        metric["dimensions"] = set(metric.get("dimensions"))
+
+    return excluded_metrics
 
 def get_activation_config_per_service(activation_yaml):
     return {service_activation.get('service'): service_activation for service_activation in

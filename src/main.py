@@ -145,10 +145,10 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
         context.start_processing_timestamp = time.time()
 
-        excluded_metrics_by_prefix_with_dimensions = read_filter_out_list_yaml()
+        excluded_metrics_and_dimensions = read_filter_out_list_yaml()
 
         process_project_metrics_tasks = [
-            process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()), excluded_metrics_by_prefix_with_dimensions)
+            process_project_metrics(context, project_id, services, disabled_apis_by_project_id.get(project_id, set()), excluded_metrics_and_dimensions)
             for project_id
             in projects_ids
         ]
@@ -170,10 +170,10 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str], excluded_metrics_by_prefix_with_dimensions: dict):
+                                  disabled_apis: Set[str], excluded_metrics_and_dimensions: list):
     try:
         context.log(project_id, f"Starting processing...")
-        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis, excluded_metrics_by_prefix_with_dimensions)
+        ingest_lines = await fetch_ingest_lines_task(context, project_id, services, disabled_apis, excluded_metrics_and_dimensions)
         fetch_data_time = time.time() - context.start_processing_timestamp
         context.sfm[SfmKeys.fetch_gcp_data_execution_time].update(project_id, fetch_data_time)
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
@@ -183,7 +183,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 
 
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
-                                  disabled_apis: Set[str], excluded_metrics_by_prefix_with_dimensions: dict) -> List[IngestLine]:
+                                  disabled_apis: Set[str], excluded_metrics_and_dimensions: list) -> List[IngestLine]:
     fetch_metric_coros = []
     metrics_metadata = []
     topology: Dict[GCPService, Iterable[Entity]] = {}
@@ -200,6 +200,14 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     skipped_disabled_apis = set()
     skipped_excluded_metrics = []
 
+    def should_exclude_metric(metric: Metric):
+        for excluded_metric in excluded_metrics_and_dimensions:
+            if metric.google_metric.startswith(excluded_metric.get("metric")):
+                found_excluded_metric = excluded_metric
+                break
+        
+        return found_excluded_metric and not found_excluded_metric.get("dimensions")
+
     for service in services:
         if not service.is_enabled:
             continue  # skip disabled services
@@ -208,17 +216,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             continue  # skip fetching the metrics because there are no instances
 
         for metric in service.metrics:
-            should_skip_metric = False
-            if(excluded_metrics_by_prefix_with_dimensions.get('filter_out', None)):
-                for excl_met_dim_data in excluded_metrics_by_prefix_with_dimensions.get('filter_out'):
-                    excluded_metric = excl_met_dim_data.get('metric')
-                    exluded_dimensions = excl_met_dim_data.get('dimensions', [])
-                    if metric.google_metric.startswith(str(excluded_metric)) and len(exluded_dimensions) == 0: #filter out entire metric of dimensions not provided
-                        skipped_excluded_metrics.append(metric.google_metric)
-                        should_skip_metric = True
-                        continue
-
-            if should_skip_metric:
+            if should_exclude_metric(metric):
                 context.log(f"Skiping fetching all the data for the metric {metric.google_metric}")
                 continue
 
@@ -230,7 +228,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
                     skipped_disabled_apis.add(api)
                     continue  # skip fetching the metrics because service API is disabled
                 fetch_metric_coro = run_fetch_metric(
-                    context=context, project_id=project_id, service=service, metric=metric, excluded_metrics_by_prefix_with_dimensions=excluded_metrics_by_prefix_with_dimensions
+                    context=context, project_id=project_id, service=service, metric=metric, excluded_metrics_and_dimensions=excluded_metrics_and_dimensions
                 )
                 fetch_metric_coros.append(fetch_metric_coro)
 
@@ -259,10 +257,10 @@ async def run_fetch_metric(
         project_id: str,
         service: GCPService,
         metric: Metric,
-        excluded_metrics_by_prefix_with_dimensions: dict
+        excluded_metrics_and_dimensions: list
 ):
     try:
-        return await fetch_metric(context, project_id, service, metric, excluded_metrics_by_prefix_with_dimensions)
+        return await fetch_metric(context, project_id, service, metric, excluded_metrics_and_dimensions)
     except Exception as e:
         context.log(project_id, f"Failed to finish task for [{metric.google_metric}], reason is {type(e).__name__} {e}")
         return []

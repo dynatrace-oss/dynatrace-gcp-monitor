@@ -162,7 +162,7 @@ async def fetch_metric(
         project_id: str,
         service: GCPService,
         metric: Metric,
-        excluded_metrics_by_prefix_with_dimensions: dict
+        excluded_metrics_and_dimensions: list
 ) -> List[IngestLine]:
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
@@ -191,17 +191,22 @@ async def fetch_metric(
     all_dimensions = (service_dimensions + metric.dimensions)
     dt_dimensions_mapping = DtDimensionsMap()
 
-    for dimension in all_dimensions:
-        should_skip_dimension = False
-        if(excluded_metrics_by_prefix_with_dimensions.get('filter_out', None)):
-            for excl_met_dim_data in excluded_metrics_by_prefix_with_dimensions.get('filter_out'):
-                excluded_metric = excl_met_dim_data.get('metric')
-                exluded_dimensions = excl_met_dim_data.get('dimensions', [])
-                for exluded_dimension in exluded_dimensions:
-                    if metric.google_metric.startswith(str(excluded_metric)) and exluded_dimension == dimension.key_for_create_entity_id:
-                        should_skip_dimension = True
+    def should_exclude_dimension(dimension: Dimension):
+        for excluded_metric in excluded_metrics_and_dimensions:
+            if metric.google_metric.startswith(excluded_metric.get("metric")):
+                found_excluded_metric = excluded_metric
+                break
 
-        if should_skip_dimension:
+        if not found_excluded_metric:
+            return False
+
+        dimension_key = dimension.key_for_fetch_metric
+        has_dimension_key = dimension_key[dimension_key.rfind(".") + 1:] in found_excluded_metric.get("dimensions", [])
+
+        return has_dimension_key
+
+    for dimension in all_dimensions:
+        if should_exclude_dimension(dimension):
             context.log(f"Skiping fetching dimension {dimension.key_for_create_entity_id} for metric {metric.google_metric}")
             continue
 
