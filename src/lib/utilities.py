@@ -54,7 +54,7 @@ def read_filter_out_list_yaml() -> list:
     excluded_metrics = loaded_yaml.get("filter_out", [])
 
     for metric in excluded_metrics:
-        metric["dimensions"] = set(metric.get("dimensions"))
+        metric["dimensions"] = set(metric.get("dimensions", []))
 
     return excluded_metrics
 
