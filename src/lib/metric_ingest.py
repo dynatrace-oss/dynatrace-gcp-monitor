@@ -192,6 +192,8 @@ async def fetch_metric(
     dt_dimensions_mapping = DtDimensionsMap()
 
     def should_exclude_dimension(dimension: Dimension):
+        found_excluded_metric = None
+
         for excluded_metric in excluded_metrics_and_dimensions:
             if metric.google_metric.startswith(excluded_metric.get("metric")):
                 found_excluded_metric = excluded_metric

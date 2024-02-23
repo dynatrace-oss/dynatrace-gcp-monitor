@@ -50,7 +50,7 @@ def read_autodiscovery_resources_mapping():
     return safe_read_yaml('./lib/autodiscovery/config/autodiscovery-mapping.yaml', "AUTODISCOVERY_RESOURCES_MAPPING")
 
 def read_filter_out_list_yaml() -> list:
-    loaded_yaml = yaml.safe_load(os.environ.get("EXCLUDED_METRICS_AND_DIMENSIONS", ""))
+    loaded_yaml = safe_read_yaml("/code/config/activation/metrics-filter-out.yaml", "EXCLUDED_METRICS_AND_DIMENSIONS") or {}
     excluded_metrics = loaded_yaml.get("filter_out", [])
 
     for metric in excluded_metrics:

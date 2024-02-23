@@ -201,6 +201,8 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     skipped_excluded_metrics = []
 
     def should_exclude_metric(metric: Metric):
+        found_excluded_metric = None
+        
         for excluded_metric in excluded_metrics_and_dimensions:
             if metric.google_metric.startswith(excluded_metric.get("metric")):
                 found_excluded_metric = excluded_metric
