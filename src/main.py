@@ -212,12 +212,10 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             if(excluded_metrics_by_prefix_with_dimensions.get('filter_out', None)):
                 for excl_met_dim_data in excluded_metrics_by_prefix_with_dimensions.get('filter_out'):
                     excluded_metric = excl_met_dim_data.get('metric')
-                    for dimension in excl_met_dim_data.get('dimensions'):
-                        if str(dimension) == 'all':
-                            if metric.google_metric.startswith(str(excluded_metric)):
-                                skipped_excluded_metrics.append(metric.google_metric)
-                                should_skip_metric = True
-                                continue
+                    if metric.google_metric.startswith(str(excluded_metric)):
+                        skipped_excluded_metrics.append(metric.google_metric)
+                        should_skip_metric = True
+                        continue
 
             if should_skip_metric:
                 context.log(f"Skiping fetching all the data for the metric {metric.google_metric}")

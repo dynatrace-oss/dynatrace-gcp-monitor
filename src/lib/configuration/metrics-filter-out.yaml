@@ -1,5 +1,7 @@
 # Metrics containing the following names will be excluded from the fetch
 
+# If you are willing to filter out specific dimension place it under `dimensions` keyword.
+# If you are willing to filter out entire metrics no matter what dimnesion it contains just don't place `dimensions` keyword.
 
 #Example Start:
 # - metric: serviceruntime.googleapis.com/api/request_count
@@ -15,7 +17,7 @@
 #Example end.
 
 filter_out:
-# - metric: google_metric_1
+- metric: google_metric_1
 - metric: google_metric_2
   dimensions:
     - dimension2_1

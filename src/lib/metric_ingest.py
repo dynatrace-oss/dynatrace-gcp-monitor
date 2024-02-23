@@ -198,9 +198,8 @@ async def fetch_metric(
                 excluded_metric = excl_met_dim_data.get('metric')
                 exluded_dimensions = excl_met_dim_data.get('dimensions', [])
                 for exluded_dimension in exluded_dimensions:
-                    if str(exluded_dimension) != 'all':
-                        if metric.google_metric == str(excluded_metric) and exluded_dimension == dimension.key_for_create_entity_id:
-                            should_skip_dimension = True
+                    if metric.google_metric.startswith(str(excluded_metric)) and exluded_dimension == dimension.key_for_create_entity_id:
+                        should_skip_dimension = True
 
         if should_skip_dimension:
             context.log(f"Skiping fetching dimension {dimension.key_for_create_entity_id} for metric {metric.google_metric}")
