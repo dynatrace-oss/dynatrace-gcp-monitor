@@ -90,6 +90,8 @@ activeGate:
   dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
 serviceAccount: "${IAM_SERVICE_ACCOUNT}"
 scopingProjectSupportEnabled: "true"
+excludedMetricsAndDimensions: |
+  filter_out:
 gcpServicesYaml: |
   services:
     - service: api
