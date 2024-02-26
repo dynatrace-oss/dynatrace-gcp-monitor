@@ -27,6 +27,7 @@ def chunks(full_list: List, chunk_size: int) -> List[List]:
     chunk_size = max(1, chunk_size)
     return [full_list[i:i + chunk_size] for i in range(0, len(full_list), chunk_size)]
 
+
 def safe_read_yaml(filepath: str, alternative_environ_name: str):
     try:
         with open(filepath, encoding="utf-8") as activation_file:
@@ -37,17 +38,32 @@ def safe_read_yaml(filepath: str, alternative_environ_name: str):
         yaml_dict = {}
     return yaml_dict
 
+
 def read_activation_yaml():
     return safe_read_yaml('/code/config/activation/gcp_services.yaml', "ACTIVATION_CONFIG" )
+
 
 def read_autodiscovery_config_yaml():
     return safe_read_yaml('/code/config/activation/autodiscovery-config.yaml', "AUTODISCOVERY_RESOURCES_YAML" )
 
+
+def read_filter_out_list_yaml() -> list:
+    loaded_yaml = safe_read_yaml("/code/config/activation/metrics-filter-out.yaml", "EXCLUDED_METRICS_AND_DIMENSIONS") or {}
+    excluded_metrics = loaded_yaml.get("filter_out", [])
+
+    for metric in excluded_metrics:
+        metric["dimensions"] = set(metric.get("dimensions", []))
+
+    return excluded_metrics
+
+
 def read_autodiscovery_block_list_yaml():
     return safe_read_yaml('/code/config/activation/autodiscovery-block-list.yaml', "AUTODISCOVERY_BLOCK_LIST_YAML" )
 
+
 def read_autodiscovery_resources_mapping():
     return safe_read_yaml('./lib/autodiscovery/config/autodiscovery-mapping.yaml', "AUTODISCOVERY_RESOURCES_MAPPING")
+
 
 def get_activation_config_per_service(activation_yaml):
     return {service_activation.get('service'): service_activation for service_activation in
