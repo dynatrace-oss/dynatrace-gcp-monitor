@@ -161,8 +161,25 @@ async def fetch_metric(
         context: MetricsContext,
         project_id: str,
         service: GCPService,
-        metric: Metric
+        metric: Metric,
+        excluded_metrics_and_dimensions: list
 ) -> List[IngestLine]:
+    def should_exclude_dimension(dimension: Dimension):
+        found_excluded_metric = None
+
+        for excluded_metric in excluded_metrics_and_dimensions:
+            if metric.google_metric.startswith(excluded_metric.get("metric")):
+                found_excluded_metric = excluded_metric
+                break
+
+        if not found_excluded_metric:
+            return False
+
+        dimension_key = dimension.key_for_fetch_metric
+        has_dimension_key = dimension_key[dimension_key.rfind(".") + 1:] in found_excluded_metric.get("dimensions", [])
+
+        return has_dimension_key
+
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
 
@@ -190,6 +207,11 @@ async def fetch_metric(
     all_dimensions = (service_dimensions + metric.dimensions)
     dt_dimensions_mapping = DtDimensionsMap()
     for dimension in all_dimensions:
+        if should_exclude_dimension(dimension):
+            context.log(
+                f"Skiping fetching dimension {dimension.key_for_create_entity_id} for metric {metric.google_metric}")
+            continue
+
         if dimension.key_for_send_to_dynatrace:
             dt_dimensions_mapping.add_label_mapping(dimension.key_for_fetch_metric, dimension.key_for_send_to_dynatrace)
 
