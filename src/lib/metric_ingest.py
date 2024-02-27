@@ -254,26 +254,27 @@ async def fetch_metric(
 
 
 def _set_aligner(metric_kind, value_type):
-    # Default, mainly for kind == DELTA (what we consider count)
     aligner = 'ALIGN_SUM'
 
-    if metric_kind.lower().startswith('cumulative'):
+    if value_type.lower() == 'bool':
+        aligner = 'ALIGN_COUNT_TRUE'
+    elif metric_kind.lower().startswith('cumulative'):
         aligner = 'ALIGN_DELTA'
-    elif metric_kind.lower().startswith('gauge'):
-        aligner = 'ALIGN_COUNT_TRUE' if value_type.lower() == 'bool' else 'ALIGN_MEAN'
+    elif metric_kind.lower().startswith('gauge') and (value_type.lower() == 'int64' or value_type.lower() == 'double'):
+        aligner = 'ALIGN_MEAN'
 
     return aligner
 
 
 def _set_reducer(metric_kind, value_type):
-    # Default, mainly for kind == DELTA (what we consider count)
     reducer = 'REDUCE_SUM'
 
-    # Cannot be reduced
-    if metric_kind.lower().startswith('cumulative'):
+    if value_type.lower() == 'bool':
+        reducer = 'REDUCE_COUNT_TRUE'
+    elif metric_kind.lower().startswith('cumulative'):
         reducer = 'REDUCE_NONE'
-    elif metric_kind.lower().startswith('gauge'):
-        reducer = 'REDUCE_COUNT_TRUE' if value_type.lower() == 'bool' else 'REDUCE_MEAN'
+    elif metric_kind.lower().startswith('gauge') and (value_type.lower() == 'int64' or value_type.lower() == 'double'):
+        reducer = 'REDUCE_MEAN'
 
     return reducer
 
