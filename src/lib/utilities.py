@@ -49,10 +49,10 @@ def read_autodiscovery_config_yaml():
 
 def read_filter_out_list_yaml() -> list:
     loaded_yaml = safe_read_yaml("/code/config/activation/metrics-filter-out.yaml", "EXCLUDED_METRICS_AND_DIMENSIONS") or {}
-    excluded_metrics = loaded_yaml.get("filter_out", [])
+    excluded_metrics = loaded_yaml.get("filter_out") or []
 
     for metric in excluded_metrics:
-        metric["dimensions"] = set(metric.get("dimensions", []))
+        metric["dimensions"] = set(metric.get("dimensions") or [])
 
     return excluded_metrics
 
