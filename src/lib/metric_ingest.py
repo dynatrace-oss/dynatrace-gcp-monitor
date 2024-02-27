@@ -269,9 +269,7 @@ def _set_aligner(metric_kind, value_type):
 def _set_reducer(metric_kind, value_type):
     reducer = 'REDUCE_SUM'
 
-    if value_type.lower() == 'bool':
-        reducer = 'REDUCE_COUNT_TRUE'
-    elif metric_kind.lower().startswith('cumulative'):
+    if metric_kind.lower().startswith('cumulative'):
         reducer = 'REDUCE_NONE'
     elif metric_kind.lower().startswith('gauge') and (value_type.lower() == 'int64' or value_type.lower() == 'double'):
         reducer = 'REDUCE_MEAN'
