@@ -36,27 +36,26 @@ dynatraceAccessKey: ""
 # - Managed: https://<cluster_id>.managed.internal.dynatrace.com/e/<environment_id>
 # - Through an environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
 dynatraceUrl: ""
-
-
-# GCP SECRET MANAGER KEYS
-
-# GCP Secret Manager key for getting the dynatraceAccessKey
+# Passing this variable will set the dynatraceAccessKey
+# by retrieving it from GCP Secret Manager using the specified secret name
 dynatraceAccessKeySecretName: ""
-# GCP Secret Manager key for getting the dynatraceUrl
+# Passing this variable will set the dynatraceUrl
+# by retrieving it from GCP Secret Manager using the specified secret name
 dynatraceUrlSecretName: ""
-# GCP Secret Manager key for getting the dynatraceLogIngestUrl
-dynatraceLogIngestUrlSecretName: ""
 
 
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
 
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
-#dynatraceLogIngestUrl OPTIONAL endpoint used to ingest logs to Dynatrace, if it's not wanted to ingest them through dynatraceUrl:
+# dynatraceLogIngestUrl OPTIONAL endpoint used to ingest logs to Dynatrace, if it's not wanted to ingest them through dynatraceUrl:
 # - for direct ingest through the Cluster API: https://<environment_id>.live.dynatrace.com
 # - for Environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
 # If not set, dynatraceUrl will be used
 dynatraceLogIngestUrl: ""
+# Passing this variable will set the dynatraceLogIngestUrl
+# by retrieving it from GCP Secret Manager using the specified secret name
+dynatraceLogIngestUrlSecretName: ""
 
 
 # COMMON VALUES - DEFAULTS
