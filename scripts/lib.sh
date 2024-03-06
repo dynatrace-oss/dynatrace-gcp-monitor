@@ -375,3 +375,20 @@ get_and_install_extensions() {
 
   fi
 }
+
+get_helm_value() {
+  local HELM_PATH=$1
+  echo $(helm show values ./dynatrace-gcp-monitor --jsonpath "{$HELM_PATH}")
+}
+
+get_helm_value_or_gcp_secret() {
+  local HELM_PATH=$1
+  local SECRET_NAME=$2
+
+  local VALUE=$(get_helm_value $HELM_PATH)
+  if [ -z "$VALUE" ]; then
+    VALUE=$(gcloud secrets versions access latest --secret="$SECRET_NAME")
+  fi
+
+  echo $VALUE
+}
