@@ -30,17 +30,21 @@ deploymentType: "all"
 # API v1: 'ReadConfig', 'WriteConfig'
 # - for deployment type 'all':
 # All the above permissions
+#
+# Specify either an API token directly in `dynatraceAccessKey`
+# or a secret name in `dynatraceAccessKeySecretName` to fetch the token from GCP Secret Manager.
+# Precedence is given to `dynatraceAccessKey` if both are provided.
 dynatraceAccessKey: ""
+dynatraceAccessKeySecretName: ""
 # Dynatrace endpoint to ingest metrics and logs, for example:
 # - SaaS: https://<environment_id>.live.dynatrace.com
 # - Managed: https://<cluster_id>.managed.internal.dynatrace.com/e/<environment_id>
 # - Through an environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
+#
+# Specify either an endpoint directly in `dynatraceUrl`
+# or a secret name in `dynatraceUrlSecretName` to fetch the endpoint from GCP Secret Manager.
+# Precedence is given to `dynatraceUrl` if both are provided.
 dynatraceUrl: ""
-# Passing this variable will set the dynatraceAccessKey
-# by retrieving it from GCP Secret Manager using the specified secret name
-dynatraceAccessKeySecretName: ""
-# Passing this variable will set the dynatraceUrl
-# by retrieving it from GCP Secret Manager using the specified secret name
 dynatraceUrlSecretName: ""
 
 
@@ -52,9 +56,11 @@ logsSubscriptionId: ""
 # - for direct ingest through the Cluster API: https://<environment_id>.live.dynatrace.com
 # - for Environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)
 # If not set, dynatraceUrl will be used
+#
+# Specify either an endpoint directly in `dynatraceLogIngestUrl`
+# or a secret name in `dynatraceLogIngestUrlSecretName` to fetch the endpoint from GCP Secret Manager.
+# Precedence is given to `dynatraceLogIngestUrl` if both are provided.
 dynatraceLogIngestUrl: ""
-# Passing this variable will set the dynatraceLogIngestUrl
-# by retrieving it from GCP Secret Manager using the specified secret name
 dynatraceLogIngestUrlSecretName: ""
 
 
