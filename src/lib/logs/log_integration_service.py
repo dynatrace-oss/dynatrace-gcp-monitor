@@ -1,6 +1,8 @@
 import time
 import asyncio
 from typing import List, Tuple
+
+from aiohttp import ClientSession
 from lib.clientsession_provider import init_gcp_client_session, init_dt_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, LogsContext, LogsProcessingContext, create_logs_context
@@ -58,14 +60,17 @@ class LogIntegrationService:
 
         return self
 
+    async def update_gcp_client(self, gcp_session: ClientSession, logging_context: LoggingContext):
+        gcp_token = await create_token(session=gcp_session, context=logging_context, validate=True)
+        self.gcp_client = GCPClient(gcp_token)
 
     async def perform_pull(
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
         async with init_gcp_client_session() as gcp_session:
             if self.gcp_client.update_gcp_client_in_the_next_loop:
-                gcp_token = await create_token(session=gcp_session, context=logging_context, validate=True)
-                self.gcp_client = GCPClient(gcp_token)
+                await self.update_gcp_client(gcp_session=gcp_session, logging_context=logging_context)
+
             context = LogsProcessingContext(None, None, self.sfm_queue)
             context.self_monitoring.pulling_time_start = time.perf_counter()
 

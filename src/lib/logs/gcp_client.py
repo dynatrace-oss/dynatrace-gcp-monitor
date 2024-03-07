@@ -16,6 +16,8 @@ import asyncio
 import json
 from typing import Any, Dict, List, Callable
 
+from aiohttp import ClientSession
+
 from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext
 from lib.credentials import create_token
@@ -72,7 +74,13 @@ class GCPClient:
             else:
                 return response_json
 
-    async def push_ack_ids(self, ack_ids: List[str], gcp_session, logging_context: LoggingContext, update_gcp_client: Callable[[LoggingContext], None]):
+    async def push_ack_ids(
+        self,
+        ack_ids: List[str],
+        gcp_session: ClientSession,
+        logging_context: LoggingContext,
+        update_gcp_client: Callable[[ClientSession, LoggingContext], None],
+    ):
         payload = {"ackIds": ack_ids}
 
         async with gcp_session.request(
@@ -81,7 +89,7 @@ class GCPClient:
             resp_status = response.status
 
             if resp_status == 401:
-                await update_gcp_client(logging_context)
+                await update_gcp_client(gcp_session, logging_context)
 
             if resp_status > 299:
                 logging_context.log(
