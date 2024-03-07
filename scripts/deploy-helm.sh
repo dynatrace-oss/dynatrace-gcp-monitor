@@ -142,19 +142,19 @@ GCP_PROJECT=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.gcpProjectI
 DEPLOYMENT_TYPE=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.deploymentType}")
 
 DYNATRACE_ACCESS_KEY_SECRET_NAME=$(get_helm_value .dynatraceAccessKeySecretName)
-DYNATRACE_ACCESS_KEY=$(get_helm_value_or_gcp_secret .dynatraceAccessKey $DYNATRACE_ACCESS_KEY_SECRET_NAME | sed 's/[\r\n\t ]//g')
+DYNATRACE_ACCESS_KEY=$(get_helm_value_or_gcp_secret .dynatraceAccessKey "$DYNATRACE_ACCESS_KEY_SECRET_NAME" | sed 's/[\r\n\t ]//g')
 readonly DYNATRACE_ACCESS_KEY
 
 DYNATRACE_URL_SECRET_NAME=$(get_helm_value .dynatraceUrlSecretName)
-DYNATRACE_URL=$(get_helm_value_or_gcp_secret .dynatraceUrl $DYNATRACE_URL_SECRET_NAME | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
+DYNATRACE_URL=$(get_helm_value_or_gcp_secret .dynatraceUrl "$DYNATRACE_URL_SECRET_NAME" | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
 readonly DYNATRACE_URL
 
 DYNATRACE_LOG_INGEST_URL_SECRET_NAME=$(get_helm_value .dynatraceLogIngestUrlSecretName)
-DYNATRACE_LOG_INGEST_URL=$(get_helm_value_or_gcp_secret .dynatraceLogIngestUrl $DYNATRACE_LOG_INGEST_URL_SECRET_NAME)
+DYNATRACE_LOG_INGEST_URL=$(get_helm_value_or_gcp_secret .dynatraceLogIngestUrl "$DYNATRACE_LOG_INGEST_URL_SECRET_NAME")
 if [ -z "$DYNATRACE_LOG_INGEST_URL" ]; then
   DYNATRACE_LOG_INGEST_URL=$DYNATRACE_URL
 fi
-DYNATRACE_LOG_INGEST_URL=$(echo $DYNATRACE_LOG_INGEST_URL | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
+DYNATRACE_LOG_INGEST_URL=$(echo "$DYNATRACE_LOG_INGEST_URL" | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
 readonly DYNATRACE_LOG_INGEST_URL
 
 LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.logsSubscriptionId}")
