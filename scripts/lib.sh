@@ -388,7 +388,7 @@ get_helm_value_or_gcp_secret() {
   local VALUE
   VALUE=$(get_helm_value "$HELM_PATH")
 
-  if [ -z "$VALUE" ]; then
+  if [[ -z "$VALUE" && -n "$SECRET_NAME" ]]; then
     VALUE=$(gcloud secrets versions access latest --secret="$SECRET_NAME")
   fi
 
