@@ -35,7 +35,7 @@ _CLOUD_RESOURCE_MANAGER_ROOT = config.gcp_cloud_resource_manager_url()
 
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = config.dynatrace_access_key_secret_name() or "DYNATRACE_ACCESS_KEY"
 _DYNATRACE_URL_SECRET_NAME = config.dynatrace_url_secret_name() or "DYNATRACE_URL"
-_DYNATRACE_LOG_INGEST_URL_SECRET_NAME = config.dynatrace_log_ingest_url_secret_name() or  "DYNATRACE_LOG_INGEST_URL"
+_DYNATRACE_LOG_INGEST_URL_SECRET_NAME = config.dynatrace_log_ingest_url_secret_name()
 
 
 async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str) -> str:
@@ -64,7 +64,7 @@ async def fetch_dynatrace_url(gcp_session: ClientSession, project_id: str, token
 async def fetch_dynatrace_log_ingest_url(gcp_session: ClientSession, project_id: str, token: str) -> str:
     dynatrace_log_ingest_url = config.get_dynatrace_log_ingest_url_from_env()
 
-    if not dynatrace_log_ingest_url:
+    if not dynatrace_log_ingest_url and _DYNATRACE_LOG_INGEST_URL_SECRET_NAME:
         dynatrace_log_ingest_url = await fetch_secret(
             _DYNATRACE_LOG_INGEST_URL_SECRET_NAME,
             gcp_session,
