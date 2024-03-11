@@ -16,6 +16,8 @@ import asyncio
 import json
 from typing import Any, Dict, List, Callable
 
+from aiohttp import ClientSession
+
 from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext
 from lib.credentials import create_token
@@ -34,6 +36,7 @@ class GCPClient:
     acknowledge_url: str
     body_payload: bytes
     headers: Dict[str, Any]
+    api_token: str
 
     def __init__(
         self,
@@ -45,6 +48,7 @@ class GCPClient:
         self.pull_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:pull"
         self.acknowledge_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:acknowledge"
         self.headers = {"Authorization": f"Bearer {api_token}"}
+        self.api_token = api_token
         json_body = {"maxMessages": PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES}
         json_data = json.dumps(json_body)
         self.body_payload = json_data.encode("utf-8")
@@ -70,7 +74,13 @@ class GCPClient:
             else:
                 return response_json
 
-    async def push_ack_ids(self, ack_ids: List[str], gcp_session, logging_context: LoggingContext, update_gcp_client: Callable[[LoggingContext], None]):
+    async def push_ack_ids(
+        self,
+        ack_ids: List[str],
+        gcp_session: ClientSession,
+        logging_context: LoggingContext,
+        update_gcp_client: Callable[[ClientSession, LoggingContext], None],
+    ):
         payload = {"ackIds": ack_ids}
 
         async with gcp_session.request(
@@ -79,7 +89,7 @@ class GCPClient:
             resp_status = response.status
 
             if resp_status == 401:
-                await update_gcp_client(logging_context)
+                await update_gcp_client(gcp_session, logging_context)
 
             if resp_status > 299:
                 logging_context.log(

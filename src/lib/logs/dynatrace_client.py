@@ -36,22 +36,21 @@ DYNATRACE_ERROR_CODE_DESC_DICT = {
 
 
 class DynatraceClient:
-    dynatrace_api_key: str
     log_ingest_url: str
     verify_ssl: Union[bool, None]
 
     def __init__(
         self,
+        url: str,
+        api_key: str
     ):
-        dynatrace_url: str = config.get_dynatrace_log_ingest_url_from_env()  # type: ignore
-
-        self.dynatrace_api_key = config.get_dynatrace_api_key_from_env()  # type: ignore
-        self.log_ingest_url = urlparse(dynatrace_url.rstrip("/") + "/api/v2/logs/ingest").geturl()
+        self.log_ingest_url = url
+        self.dynatrace_api_key = api_key
         self.verify_ssl = None if config.require_valid_certificate() else False
 
     async def send_logs(self, context: LogsContext, dt_session, batch: LogBatch, ack_ids_to_send):
         headers = {
-            "Authorization": f"Api-Token {context.dynatrace_api_key}",
+            "Authorization": f"Api-Token {self.dynatrace_api_key}",
             "Content-Type": "application/json; charset=utf-8",
             "Content-Encoding": "gzip"
         }

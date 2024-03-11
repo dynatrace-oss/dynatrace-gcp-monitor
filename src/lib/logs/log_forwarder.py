@@ -44,8 +44,7 @@ async def run_logs(
     await asyncio.sleep(process_number * LOG_PROCESS_STARTUP_DELAY_SECONDS)
 
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
-    log_integration_service = LogIntegrationService(sfm_queue)
-    await log_integration_service.update_gcp_client(logging_context)
+    log_integration_service = await LogIntegrationService.create(sfm_queue=sfm_queue, logging_context=logging_context)
 
     tasks = []
 

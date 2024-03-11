@@ -51,15 +51,15 @@ def credentials_path():
 
 
 def dynatrace_access_key_secret_name():
-    return os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_NAME", "DYNATRACE_ACCESS_KEY")
+    return os.environ.get("DYNATRACE_ACCESS_KEY_SECRET_NAME", None)
 
 
 def dynatrace_url_secret_name():
-    return os.environ.get("DYNATRACE_URL_SECRET_NAME", "DYNATRACE_URL")
+    return os.environ.get("DYNATRACE_URL_SECRET_NAME", None)
 
 
 def dynatrace_log_ingest_url_secret_name():
-    return os.environ.get("DYNATRACE_LOG_INGEST_URL_SECRET_NAME", "DYNATRACE_LOG_INGEST_URL")
+    return os.environ.get("DYNATRACE_LOG_INGEST_URL_SECRET_NAME", None)
 
 
 def keep_refreshing_extensions_config():
@@ -124,11 +124,13 @@ def max_dimension_value_length():
 
 
 def get_dynatrace_api_key_from_env():
-    return os.environ.get(dynatrace_access_key_secret_name(), None)
+    return os.environ.get("DYNATRACE_ACCESS_KEY", None)
 
+def get_dynatrace_url_from_env():
+    return os.environ.get("DYNATRACE_URL", None)
 
 def get_dynatrace_log_ingest_url_from_env():
-    return os.environ.get(dynatrace_log_ingest_url_secret_name(), None)
+    return os.environ.get("DYNATRACE_LOG_INGEST_URL", None)
 
 
 def use_proxy():
