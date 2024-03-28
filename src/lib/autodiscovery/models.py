@@ -97,6 +97,8 @@ class GCPMetricDescriptor:
     dimensions: Tuple[GCPMetricDescriptorDimension, ...]
     monitored_resources_types: Tuple[str, ...]
     launch_stage: str
+    autodiscovery_resource_of_intrest: Tuple[str] 
+    many_resources: bool
 
     @staticmethod
     def _cast_metric_key_to_dt_format(metric_name: str) -> str:
@@ -168,5 +170,7 @@ class GCPMetricDescriptor:
             gcpOptions=gcp_options,
             dimensions=dimensions,
             monitored_resources_types=monitored_resources_types,
-            launch_stage = launch_stage
+            launch_stage = launch_stage,
+            autodiscovery_resource_of_intrest = (),
+            many_resources = False
         )

@@ -94,13 +94,18 @@ def should_include_metric(
     metric_descriptor: GCPMetricDescriptor,
     resources_to_autodiscover: Set[str],
     autodiscovery_metric_block_list: List[str],
-    include_alpha_metrics: bool
+    include_alpha_metrics: bool,
 ) -> bool:
     should_include = (
         metric_descriptor.gcpOptions.valueType.upper() != "STRING"
         and metric_descriptor.launch_stage != "DEPRECATED"
-        and len(metric_descriptor.monitored_resources_types) == 1
-        and metric_descriptor.monitored_resources_types[0] in resources_to_autodiscover
+        and len(metric_descriptor.monitored_resources_types) > 0
+        and any(
+            (
+                monitored_resources_types in resources_to_autodiscover
+                for monitored_resources_types in metric_descriptor.monitored_resources_types
+            )
+        )
         and not any(
             {
                 metric_descriptor.value.startswith(prefix)
@@ -109,11 +114,20 @@ def should_include_metric(
         )
     )
 
-
     if not include_alpha_metrics:
         should_include = should_include and metric_descriptor.launch_stage != "ALPHA"
 
-    return should_include 
+    return should_include
+
+
+def get_resources_of_intrest(
+    metric_descriptor: GCPMetricDescriptor, resources_to_autodiscover: Set[str]
+):
+    return [
+        monitored_resources_types
+        for monitored_resources_types in metric_descriptor.monitored_resources_types
+        if monitored_resources_types in resources_to_autodiscover
+    ]
 
 
 async def run_fetch_metric_descriptors(
@@ -138,9 +152,32 @@ async def run_fetch_metric_descriptors(
         for descriptor in response_json.get("metricDescriptors", []):
             try:
                 metric_descriptor = GCPMetricDescriptor.create(**descriptor, project_id=project_id)
+
+                if "uptime_url" in metric_descriptor.monitored_resources_types:
+                    print("UPTIME_URL")
                 if should_include_metric(
-                    metric_descriptor, resources_to_autodiscover, autodiscovery_metric_block_list, include_alpha_metrics
+                    metric_descriptor,
+                    resources_to_autodiscover,
+                    autodiscovery_metric_block_list,
+                    include_alpha_metrics,
                 ):
+                    resources_of_intrests = get_resources_of_intrest(
+                        metric_descriptor,
+                        resources_to_autodiscover,
+                    )
+                    object.__setattr__(
+                        metric_descriptor,
+                        "autodiscovery_resource_of_intrest",
+                        tuple(resources_of_intrests),
+                    )
+
+                    if len(resources_to_autodiscover) > 1:
+                        object.__setattr__(
+                        metric_descriptor,
+                        "many_resources",
+                        True,
+                    )
+
                     project_discovered_metrics.append(metric_descriptor)
             except Exception as error:
                 logging_context.log(
@@ -172,7 +209,7 @@ async def send_metric_metadata(
                         metric_type=metric.dynatrace_metric_type,
                         metric_display_name=metric.name,
                         metric_description=metric.description,
-                        metric_unit=metric.unit
+                        metric_unit=metric.unit,
                     )
                 )
                 previously_discovered_metrics[metric.dynatrace_name] = None

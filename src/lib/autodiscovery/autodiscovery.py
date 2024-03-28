@@ -220,13 +220,13 @@ class AutodiscoveryContext:
         autodiscovery_resources_to_metrics = {}
 
         for descriptor, project_ids in discovered_metric_descriptors.items():
-            monitored_resource = descriptor.monitored_resources_types[0]
-            if descriptor.value not in existing_resources_to_metrics[monitored_resource]:
-                autodiscovery_resources_to_metrics.setdefault(monitored_resource, []).append(
-                    Metric(
-                        **(asdict(descriptor)), autodiscovered_metric=True, project_ids=project_ids
+            for monitored_resource in descriptor.autodiscovery_resource_of_intrest:
+                if descriptor.value not in existing_resources_to_metrics[monitored_resource]:
+                    autodiscovery_resources_to_metrics.setdefault(monitored_resource, []).append(
+                        Metric(
+                            **(asdict(descriptor)), autodiscovered_metric=True, project_ids=project_ids, autodiscovery_resource = monitored_resource
+                        )
                     )
-                )
 
         for resource_name, metric_list in autodiscovery_resources_to_metrics.items():
             logging_context.log(

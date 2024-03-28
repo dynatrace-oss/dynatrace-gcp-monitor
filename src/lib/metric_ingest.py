@@ -188,8 +188,9 @@ async def fetch_metric(
     aligner = _set_aligner(metric.google_metric_kind, metric.value_type)
     reducer = _set_reducer(metric.google_metric_kind, metric.value_type)
 
+
+    filter_query = f'metric.type = "{metric.google_metric}" {service.monitoring_filter}'.strip()
     params = [
-        ('filter', f'metric.type = "{metric.google_metric}" {service.monitoring_filter}'.strip()),
         ('interval.startTime', start_time.isoformat() + "Z"),
         ('interval.endTime', end_time.isoformat() + "Z"),
         ('aggregation.alignmentPeriod', f"{metric.sample_period_seconds.total_seconds()}s"),
@@ -198,11 +199,21 @@ async def fetch_metric(
     ]
 
     if metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
+        params.append(('filter',f'AND resource.type = "{metric.autodiscovery_resource}"'))
         service_dimensions = service.get_dimensions(metric)
         service_name = service.get_name(metric)
+        
     else:
+        return []
         service_dimensions = service.dimensions
         service_name = service.name
+
+    params.append(('filter',filter_query))
+
+
+    if not "NAGEL" in metric.google_metric:
+        return []
+
 
     all_dimensions = (service_dimensions + metric.dimensions)
     dt_dimensions_mapping = DtDimensionsMap()
@@ -225,6 +236,9 @@ async def fetch_metric(
     while should_fetch:
         context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
+        if "NAGEL_CUSTOM_1" in metric.google_metric:
+            print("NaGEL")
+
         url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
         resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
         page = await resp.json()
@@ -235,6 +249,8 @@ async def fetch_metric(
             break
 
         for single_time_series in page['timeSeries']:
+            if metric.many_resources:
+                print(f"####### Got Autodiscovered Metric with many resorces #### SZYMON: {metric.google_metric}")
             typed_value_key = _extract_typed_value_key(single_time_series)
             dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric)
             entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
