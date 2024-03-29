@@ -1,0 +1,25 @@
+{
+  "name": "pubsub_subscription",
+  "displayName": "Google Pub/Sub Subscription",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('pubsub_subscription')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.subscription_id | split('/', @)[-1]"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
