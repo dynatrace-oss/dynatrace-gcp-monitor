@@ -68,5 +68,9 @@ class MappingCustomFunctions(functions.Functions):
         else:
             return "Failed." + self.proto_error_code_to_string_dict.get(proto_code, "")
 
+    @functions.signature({'types': ['string']}, {'types': ['string']})
+    def _func_split(self, sep, string):
+        return string.split(sep)
+
 
 JMESPATH_OPTIONS = jmespath.Options(custom_functions=MappingCustomFunctions())

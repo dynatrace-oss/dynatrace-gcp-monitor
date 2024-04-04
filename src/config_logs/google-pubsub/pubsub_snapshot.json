@@ -1,0 +1,25 @@
+{
+  "name": "pubsub_snapshot",
+  "displayName": "Google Pub/Sub Snapshot",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('pubsub_snapshot')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.snapshot_id | split('/', @)[-1]"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}

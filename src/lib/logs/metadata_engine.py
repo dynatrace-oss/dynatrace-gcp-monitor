@@ -143,11 +143,13 @@ class MetadataEngine:
         context = LoggingContext("ME startup")
         working_directory = os.path.dirname(os.path.realpath(__file__))
         config_directory = os.path.join(working_directory, "../../config_logs")
-        config_files = [
-            file for file
-            in listdir(config_directory)
-            if isfile(os.path.join(config_directory, file)) and _is_json_file(file)
-        ]
+        config_files = []
+
+        for root, _, files in os.walk(config_directory):
+            for file in files:
+                if _is_json_file(file):
+                    config_files.append(os.path.join(root, file))
+
         for file in config_files:
             config_file_path = os.path.join(config_directory, file)
             try:

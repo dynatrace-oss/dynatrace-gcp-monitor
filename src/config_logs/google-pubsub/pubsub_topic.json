@@ -1,0 +1,25 @@
+{
+  "name": "pubsub_topic",
+  "displayName": "Google Pub/Sub Topic",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('pubsub_topic')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "topic_id",
+          "pattern": "resource.labels.topic_id | split('/', @)[-1]"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
