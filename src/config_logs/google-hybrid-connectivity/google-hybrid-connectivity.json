@@ -1,0 +1,49 @@
+{
+    "name": "k8s_container",
+    "displayName": "Hybrid Connectivity",
+    "rules": [
+        {
+            "sources": [
+                {
+                    "sourceType": "logs",
+                    "source": "resourceType",
+                    "condition": "$prefix(cloud.gcp.router_googleapis_com)"
+                }
+            ],
+            "attributes": [
+                {
+                    "key": "content",
+                    "pattern": "@"
+                },
+                {
+                    "key": "project_id",
+                    "pattern": "gcp.project.id"
+                },
+                {
+                    "key": "router_id",
+                    "pattern": "gcp.instance.id"
+                },
+                {
+                    "key": "region",
+                    "pattern": "gcp.region"
+                },
+                {
+                    "key": "vpn_gateway_id",
+                    "pattern": "gcp.instance.id"
+                },
+                {
+                    "key": "attachment_id",
+                    "pattern": "gcp.instance.id"
+                },
+                {
+                    "key": "interconnect_id",
+                    "pattern": "interconnect"
+                },
+                {
+                    "key": "interconnect_project",
+                    "pattern": "interconnect_project"
+                }
+            ]
+        }
+    ]
+}
