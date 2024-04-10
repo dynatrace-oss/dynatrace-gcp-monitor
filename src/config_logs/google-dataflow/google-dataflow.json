@@ -1,0 +1,12 @@
+{
+    "name": "google_dataflow",
+    "displayName": "Dataflow",
+    "rules": [
+        {
+            "sources": [
+                {}
+            ],
+            "attributes": []
+        }
+    ]
+}

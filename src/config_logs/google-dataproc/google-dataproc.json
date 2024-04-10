@@ -1,0 +1,42 @@
+{
+  "name": "cloud_dataproc_cluster",
+  "displayName": "Dataproc",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$prefix(cloud.gcp.dataproc_googleapis_com.cluster)"
+        },
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$prefix(cloud.gcp.logging_googleapis_com)"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "content",
+          "pattern": "@"
+        },
+        {
+          "key": "cluster_name",
+          "pattern": "gcp.instance.name"
+        },
+        {
+          "key": "project_id",
+          "pattern": "gcp.project.id"
+        },
+        {
+          "key": "region",
+          "pattern": "gcp.region"
+        },
+        {
+          "key": "cluster_uuid",
+          "pattern": "cluster_uuid"
+        }
+      ]
+    }
+  ]
+}

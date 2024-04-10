@@ -1,0 +1,33 @@
+{
+  "name": "cloud_composer_environment",
+  "displayName": "Google Cloud Composer Environment",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$prefix(cloud.gcp.logging_googleapis_com)"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "content",
+          "pattern": "@"
+        },
+        {
+          "key": "environment_name",
+          "pattern": "gcp.instance.name"
+        },
+        {
+          "key": "project_id",
+          "pattern": "gcp.project.id"
+        },
+        {
+          "key": "region",
+          "pattern": "gcp.region"
+        }
+      ]
+    }
+  ]
+}
