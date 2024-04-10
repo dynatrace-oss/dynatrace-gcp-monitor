@@ -1,0 +1,29 @@
+{
+  "name": "tpu_worker",
+  "displayName": "Google Cloud TPU worker",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('tpu_worker')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "content",
+          "pattern": "@"
+        },
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.worker_id"
+        },
+        {
+          "key": "gcp.instance.node_id",
+          "pattern": "resource.labels.node_id"
+        }
+      ]
+    }
+  ]
+}

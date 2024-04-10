@@ -1,0 +1,37 @@
+{
+  "name": "autoscaler",
+  "displayName": "Google Autoscaler",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('autoscaler')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "content",
+          "pattern": "@"
+        },
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.autoscaler_id"
+        },
+        {
+          "key": "gcp.instance.name",
+          "pattern": "resource.labels.autoscaler_name"
+        },
+        {
+          "key": "gcp.instance.group.manager.id",
+          "pattern": "resource.labels.instance_group_manager_id"
+        },
+        {
+          "key": "gcp.instance.group.manager.name",
+          "pattern": "resource.labels.instance_group_manager_name"
+        }
+      ]
+    }
+  ]
+}
