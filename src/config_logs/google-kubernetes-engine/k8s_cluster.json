@@ -1,0 +1,25 @@
+{
+  "name": "k8s_cluster",
+  "displayName": "Google Kubernetes cluster",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('k8s_cluster')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "k8s.cluster.name",
+          "pattern": "resource.labels.cluster_name"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
