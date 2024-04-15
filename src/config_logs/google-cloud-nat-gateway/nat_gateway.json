@@ -1,0 +1,29 @@
+{
+    "name": "nat_gateway",
+    "displayName": "Google Cloud NAT gateway",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('nat_gateway')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "router_id",
+            "pattern": "resource.labels.router_id"
+          },
+          {
+            "key": "gcp.instance.name",
+            "pattern": "resource.labels.gateway_name"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }
