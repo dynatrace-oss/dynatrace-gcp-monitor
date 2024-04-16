@@ -68,6 +68,14 @@ dynatraceLogIngestUrlSecretName: ""
 
 # vcpNetwork: name of an existing VPC Network in which the autopilot cluster will be deployed. By default or when empty, the network named 'default' is used
 vpcNetwork: "default"
+# useCustomSubnet: By default it is false.
+# Change it only when you want to use custom (non-default) vpcNetwork with already created custom subnet.
+# When true, customSubnetName is required
+# Allowed values: true/yes, false/no (notice the lack of quotes)
+useCustomSubnet: false
+# customSubnetName: name of custom subnet. Required when useCustomSubnet is true
+customSubnetName: ""
+
 # requireValidCertificate: if true function requires valid SSL certificates when communicating with Dynatrace cluster
 # may be used to bypass SSL certificates errors when traffic is proxied through Active Gate with self-signed certificate.
 # Allowed values: "true"/"yes", "false"/"no"
