@@ -1,0 +1,25 @@
+{
+  "name": "gcs_bucket",
+  "displayName": "Google Cloud Storage bucket",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('gcs_bucket')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "gcp.instance.name",
+          "pattern": "resource.labels.bucket_name"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
