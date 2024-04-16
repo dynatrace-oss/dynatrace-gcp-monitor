@@ -1,0 +1,29 @@
+{
+    "name": "gae_app",
+    "displayName": "Google App Engine application",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('gae_app')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "module_id",
+            "pattern": "resource.labels.module_id"
+          },
+          {
+            "key": "version_id",
+            "pattern": "resource.labels.version_id"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }
