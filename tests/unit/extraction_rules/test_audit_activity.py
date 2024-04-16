@@ -308,6 +308,7 @@ expected_output_list = [
         ATTRIBUTE_GCP_REGION: 'us-central1-c',
         ATTRIBUTE_GCP_PROJECT_ID: 'dynatrace-gcp-extension',
         ATTRIBUTE_GCP_RESOURCE_TYPE: 'k8s_cluster',
+        'k8s.cluster.name': 'mg-logs-docs-test',
         ATTRIBUTE_TIMESTAMP: timestamp,
         ATTRIBUTE_CONTENT: json.dumps(record),
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
