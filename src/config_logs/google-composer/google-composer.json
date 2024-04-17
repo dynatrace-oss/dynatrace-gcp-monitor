@@ -7,7 +7,7 @@
         {
           "sourceType": "logs",
           "source": "resourceType",
-          "condition": "$prefix(cloud.gcp.logging_googleapis_com)"
+          "condition": "$eq('cloud_composer_environment')"
         }
       ],
       "attributes": [
@@ -16,16 +16,28 @@
           "pattern": "@"
         },
         {
+          "pattern": "resource.labels.project_id",
+          "key": "gcp.project.id"
+        },
+        {
+          "pattern": "resource.labels.location",
+          "key": "gcp.region"
+        },
+        {
+          "pattern": "resource.labels.environment_name",
+          "key": "gcp.instance.name"
+        },
+        {
+          "pattern": "resource.labels.project_id",
+          "key": "project_id"
+        },
+        {
+          "pattern": "resource.labels.location",
+          "key": "location"
+        },
+        {
           "key": "environment_name",
-          "pattern": "gcp.instance.name"
-        },
-        {
-          "key": "project_id",
-          "pattern": "gcp.project.id"
-        },
-        {
-          "key": "region",
-          "pattern": "gcp.region"
+          "pattern": "resource.labels.environment_name"
         }
       ]
     }
