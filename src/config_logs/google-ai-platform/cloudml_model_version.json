@@ -1,0 +1,29 @@
+{
+  "name": "cloudml_model_version",
+  "displayName": "Cloud ML Model Version",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('cloudml_model_version')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.version_id"
+        },
+        {
+          "key": "model_id",
+          "pattern": "resource.labels.model_id"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}

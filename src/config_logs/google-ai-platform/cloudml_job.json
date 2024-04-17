@@ -1,0 +1,25 @@
+{
+  "name": "cloudml_job",
+  "displayName": "Cloud ML Job",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('cloudml_job')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.job_id"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
