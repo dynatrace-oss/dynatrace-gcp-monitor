@@ -1,0 +1,21 @@
+{
+  "name": "gce_instance",
+  "displayName": "Google VM instance",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('gce_instance')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}

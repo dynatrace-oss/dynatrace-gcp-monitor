@@ -1,13 +1,13 @@
 {
-  "name": "k8s_container",
-  "displayName": "Kubernetes Container",
+  "name": "k8s_pod",
+  "displayName": "Google Kubernetes pod",
   "rules": [
     {
       "sources": [
         {
           "sourceType": "logs",
           "source": "resourceType",
-          "condition": "$eq('k8s_container')"
+          "condition": "$eq('k8s_pod')"
         }
       ],
       "attributes": [
@@ -16,20 +16,12 @@
           "pattern": "resource.labels.cluster_name"
         },
         {
-          "key": "k8s.container.name",
-          "pattern": "resource.labels.container_name"
-        },
-        {
           "key": "k8s.namespace.name",
           "pattern": "resource.labels.namespace_name"
         },
         {
           "key": "k8s.pod.name",
           "pattern": "resource.labels.pod_name"
-        },
-        {
-          "key": "gcp.instance.name",
-          "pattern": "resource.labels.container_name"
         },
         {
           "key": "content",

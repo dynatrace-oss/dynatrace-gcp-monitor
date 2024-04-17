@@ -1,0 +1,29 @@
+{
+  "name": "gce_instance_group",
+  "displayName": "Google instance group",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('gce_instance_group')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "content",
+          "pattern": "@"
+        },
+        {
+          "key": "gcp.instance.name",
+          "pattern": "resource.labels.instance_group_name"
+        },
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.instance_group_id"
+        }
+      ]
+    }
+  ]
+}
