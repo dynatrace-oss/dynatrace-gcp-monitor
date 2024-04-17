@@ -1,0 +1,25 @@
+{
+    "name": "vpc_access_connector",
+    "displayName": "Google VPC Access Connector",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('vpc_access_connector')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.instance.name",
+            "pattern": "resource.labels.connector_name"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }
