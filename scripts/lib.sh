@@ -84,7 +84,7 @@ versionNumber() {
 }
 
 test_req_yq() {
-  if command -v "$YQ" &>/dev/null ; then
+  if command -v "$YQ" &>/dev/null; then
     VERSION_YQ=$("$YQ" --version | cut -d' ' -f3 | tr -d '"')
     if [ "$VERSION_YQ" == "version" ]; then
       VERSION_YQ=$("$YQ" --version | cut -d' ' -f4 | tr -d '"')
@@ -114,14 +114,14 @@ test_req_gcloud() {
   if ! command -v gcloud &>/dev/null; then
     err 'Google Cloud CLI is required to install Dynatrace function. Go to following link in your browser and download latest version of Cloud SDK:
       https://cloud.google.com/sdk/docs#install_the_latest_cloud_tools_version_cloudsdk_current_version'
-    exit
+    exit 1
   fi
 }
 
 test_req_unzip() {
   if ! command -v unzip &>/dev/null; then
     err 'unzip is required to install Dynatrace function'
-    exit
+    exit 1
   fi
 }
 
@@ -129,7 +129,7 @@ test_req_kubectl() {
   if ! command -v kubectl &>/dev/null; then
     err 'Kubernetes CLI is required to deploy the Dynatrace GCP Monitor. Go to following link in your browser and install kubectl in the most convenient way to you:
     https://kubernetes.io/docs/tasks/tools/'
-    exit
+    exit 1
   fi
 }
 
@@ -137,17 +137,16 @@ test_req_helm() {
   if ! command -v helm &>/dev/null; then
     err 'Helm is required to deploy the Dynatrace GCP Monitor. Go to following link in your browser and install Helm in the most convenient way to you:
     https://helm.sh/docs/intro/install/'
-    exit
+    exit 1
   fi
 }
 
 init_ext_tools() {
   local OS
   local HW
-  
+
   OS=$(uname -s)
   HW=$(uname -m)
-
 
   case "$OS $HW" in
     "Linux x86_64")
@@ -204,7 +203,7 @@ check_if_parameter_is_empty() {
   ADDITIONAL_MESSAGE=$3
   if [ -z "${PARAMETER}" ] || [ "$PARAMETER" = "<PLACEHOLDER>" ]; then
     info "Missing required parameter: ${PARAMETER_NAME}. ${ADDITIONAL_MESSAGE}"
-    exit
+    exit 1
   fi
 }
 
@@ -252,7 +251,7 @@ get_activated_extensions_on_cluster() {
     info "${EXTENSIONS[@]}"
   else
     err "- Dynatrace Cluster failed on ${DYNATRACE_URL}/api/v2/extensions endpoint."
-    exit
+    exit 1
   fi
 }
 
@@ -338,7 +337,7 @@ get_and_install_extensions() {
   LIST_OF_GOOGLE_EXTENSIONS=$(dt_api "/api/v2/extensions?name=google")
 
   GOOGLE_EXTENSIONS_ON_TENANT=$(echo "$LIST_OF_GOOGLE_EXTENSIONS" | jq -r '.totalCount')
-  
+
   if [ "$GOOGLE_EXTENSIONS_ON_TENANT" -gt 0 ]; then
       info ""
       info "- There are some google extensions already enabled on the tenant."
