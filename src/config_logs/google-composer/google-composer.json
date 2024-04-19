@@ -26,18 +26,6 @@
         {
           "pattern": "resource.labels.environment_name",
           "key": "gcp.instance.name"
-        },
-        {
-          "pattern": "resource.labels.project_id",
-          "key": "project_id"
-        },
-        {
-          "pattern": "resource.labels.location",
-          "key": "location"
-        },
-        {
-          "key": "environment_name",
-          "pattern": "resource.labels.environment_name"
         }
       ]
     }
