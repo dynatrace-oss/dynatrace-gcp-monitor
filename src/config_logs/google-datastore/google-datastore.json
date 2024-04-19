@@ -1,12 +1,1 @@
-{
-    "name": "google_datastore",
-    "displayName": "Datastore",
-    "rules": [
-        {
-            "sources": [
-                {}
-            ],
-            "attributes": []
-        }
-    ]
-}
+{}
