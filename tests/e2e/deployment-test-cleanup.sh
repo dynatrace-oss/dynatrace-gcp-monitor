@@ -21,8 +21,6 @@ gcloud logging sinks delete "${LOG_ROUTER}"
 
 helm -n dynatrace ls --all --short | grep dynatrace-gcp-monitor | xargs -L1 helm -n dynatrace uninstall --timeout 10m
 
-gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}"
-gcloud pubsub topics delete "${PUBSUB_TOPIC}"
 gcloud iam service-accounts delete "${IAM_SERVICE_ACCOUNT}@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.logs" --project="${GCP_PROJECT_ID}" > /dev/null
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.metrics" --project="${GCP_PROJECT_ID}" > /dev/null
@@ -43,3 +41,6 @@ for extension in ${INSTALLED_EXTENSIONS}; do
     curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/${VERSION}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '"\(.extensionName):\(.version)"'
     echo
 done
+
+gcloud pubsub subscriptions delete "${PUBSUB_SUBSCRIPTION}"
+gcloud pubsub topics delete "${PUBSUB_TOPIC}"
