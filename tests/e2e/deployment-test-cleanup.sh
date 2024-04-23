@@ -15,6 +15,8 @@
 
 source ./tests/e2e/lib-tests.sh
 
+gcloud config set project "${GCP_PROJECT_ID}"
+
 # First thing to delete (stopping logs from being routed) because it takes time to be applied,
 # to prevent topic_not_found error notifications.
 gcloud logging sinks delete "${LOG_ROUTER}"
