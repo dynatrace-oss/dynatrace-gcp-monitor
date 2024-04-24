@@ -1,0 +1,29 @@
+{
+    "name": "tcp_ssl_proxy_rule",
+    "displayName": "Google External Proxy Load Balancer",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('l4_proxy_rule')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('tcp_ssl_proxy_rule')"
+          },
+          {
+            "key": "gcp.instance.name",
+            "pattern": "resource.labels.backend_target_name"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }

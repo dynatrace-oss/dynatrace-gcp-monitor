@@ -1,0 +1,29 @@
+{
+    "name": "internal_network_lb_rule",
+    "displayName": "Google Internal Network Load Balancer",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('loadbalancing.googleapis.com/InternalNetworkLoadBalancerRule')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('internal_network_lb_rule')"
+          },
+          {
+            "key": "gcp.instance.name",
+            "pattern": "resource.labels.backend_service_name"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }

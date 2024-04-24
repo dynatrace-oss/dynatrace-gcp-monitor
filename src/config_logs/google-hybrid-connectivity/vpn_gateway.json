@@ -1,0 +1,25 @@
+{
+    "name": "vpn_gateway",
+    "displayName": "Google Cloud VPN Gateway",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('vpn_gateway')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.instance.id",
+            "pattern": "resource.labels.gateway_id"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }
