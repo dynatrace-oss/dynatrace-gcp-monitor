@@ -1,0 +1,37 @@
+{
+    "name": "internal_http_lb_rule",
+    "displayName": "Internal Application Load Balancer",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('internal_http_lb_rule')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('internal_http_lb_rule')"
+          },
+          {
+            "key": "gcp.instance.id",
+            "pattern": "resource.labels.url_map_name"
+          },
+          {
+            "key": "forwarding_rule_name",
+            "pattern": "resource.labels.forwarding_rule_name"
+          },
+          {
+            "key": "target_proxy_name",
+            "pattern": "resource.labels.target_proxy_name"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }

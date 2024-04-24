@@ -1,0 +1,29 @@
+{
+    "name": "network_lb_rule",
+    "displayName": "Google External Network Load Balancer",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('loadbalancing.googleapis.com/ExternalNetworkLoadBalancerRule')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('network_lb_rule')"
+          },
+          {
+            "key": "gcp.instance.name",
+            "pattern": "resource.labels.backend_service_name"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }
