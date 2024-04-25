@@ -1,13 +1,13 @@
 {
-  "name": "storage_transfer_job",
-  "displayName": "Storage Transfer Job",
+  "name": "cloud_composer_environment",
+  "displayName": "Google Cloud Composer Environment",
   "rules": [
     {
       "sources": [
         {
           "sourceType": "logs",
           "source": "resourceType",
-          "condition": "$eq('storage_transfer_job')"
+          "condition": "$eq('cloud_composer_environment')"
         }
       ],
       "attributes": [
@@ -16,8 +16,28 @@
           "pattern": "@"
         },
         {
-          "key": "gcp.instance.id",
-          "pattern": "resource.labels.job_id"
+          "pattern": "resource.labels.project_id",
+          "key": "gcp.project.id"
+        },
+        {
+          "pattern": "resource.labels.location",
+          "key": "gcp.region"
+        },
+        {
+          "pattern": "resource.labels.environment_name",
+          "key": "gcp.instance.name"
+        },
+        {
+          "pattern": "resource.labels.project_id",
+          "key": "project_id"
+        },
+        {
+          "pattern": "resource.labels.location",
+          "key": "location"
+        },
+        {
+          "key": "environment_name",
+          "pattern": "resource.labels.environment_name"
         }
       ]
     }

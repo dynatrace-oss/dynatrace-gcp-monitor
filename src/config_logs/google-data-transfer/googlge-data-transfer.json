@@ -1,1 +1,25 @@
-{}
+{
+    "name": "storage_transfer_job",
+    "displayName": "Storage Transfer Job",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('storage_transfer_job')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "content",
+            "pattern": "@"
+          },
+          {
+            "key": "gcp.instance.id",
+            "pattern": "resource.labels.job_id"
+          }
+        ]
+      }
+    ]
+  }
