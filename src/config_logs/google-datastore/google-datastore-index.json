@@ -1,13 +1,13 @@
 {
-    "name": "cloud_dataproc_cluster",
-    "displayName": "Dataproc",
+    "name": "datastore_index",
+    "displayName": "Datastore Index",
     "rules": [
         {
             "sources": [
                 {
                     "sourceType": "logs",
                     "source": "resourceType",
-                    "condition": "$eq('cloud_dataproc_cluster')"
+                    "condition": "$eq('datastore_index')"
                 }
             ],
             "attributes": [
@@ -16,20 +16,16 @@
                     "pattern": "@"
                 },
                 {
-                    "key": "cluster_name",
-                    "pattern": "resource.labels.cluster_name"
+                    "key": "database_id",
+                    "pattern": "resource.labels.database_id"
                 },
                 {
-                    "key": "cluster_uuid",
-                    "pattern": "resource.labels.cluster_uuid"
+                    "key": "index_id",
+                    "pattern": "resource.labels.index_id"
                 },
                 {
                     "key": "project_id",
                     "pattern": "resource.labels.project_id"
-                },
-                {
-                    "key": "region",
-                    "pattern": "resource.labels.region"
                 }
             ]
         }

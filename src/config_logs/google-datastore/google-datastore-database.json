@@ -1,5 +1,5 @@
 {
-    "name": "cloud_dataproc_cluster",
+    "name": "datastore_database",
     "displayName": "Dataproc",
     "rules": [
         {
@@ -7,7 +7,7 @@
                 {
                     "sourceType": "logs",
                     "source": "resourceType",
-                    "condition": "$eq('cloud_dataproc_cluster')"
+                    "condition": "$eq('datastore_database')"
                 }
             ],
             "attributes": [
@@ -16,20 +16,12 @@
                     "pattern": "@"
                 },
                 {
-                    "key": "cluster_name",
-                    "pattern": "resource.labels.cluster_name"
-                },
-                {
-                    "key": "cluster_uuid",
-                    "pattern": "resource.labels.cluster_uuid"
+                    "key": "database_id",
+                    "pattern": "resource.labels.database_id"
                 },
                 {
                     "key": "project_id",
                     "pattern": "resource.labels.project_id"
-                },
-                {
-                    "key": "region",
-                    "pattern": "resource.labels.region"
                 }
             ]
         }

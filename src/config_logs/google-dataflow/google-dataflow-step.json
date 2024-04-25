@@ -1,14 +1,14 @@
 {
-    "name": "cloud_dataproc_cluster",
-    "displayName": "Dataproc",
+    "name": "dataflow_step",
+    "displayName": "Dataflow Step",
     "rules": [
         {
             "sources": [
                 {
                     "sourceType": "logs",
                     "source": "resourceType",
-                    "condition": "$eq('cloud_dataproc_cluster')"
-                }
+                    "condition": "$eq('dataflow_step')"
+                  }
             ],
             "attributes": [
                 {
@@ -16,12 +16,12 @@
                     "pattern": "@"
                 },
                 {
-                    "key": "cluster_name",
-                    "pattern": "resource.labels.cluster_name"
+                    "key": "job_id",
+                    "pattern": "resource.labels.job_id"
                 },
                 {
-                    "key": "cluster_uuid",
-                    "pattern": "resource.labels.cluster_uuid"
+                    "key": "job_name",
+                    "pattern": "resource.labels.job_name"
                 },
                 {
                     "key": "project_id",
@@ -30,6 +30,10 @@
                 {
                     "key": "region",
                     "pattern": "resource.labels.region"
+                },
+                {
+                    "key": "step_id",
+                    "pattern": "resource.labels.step_id"
                 }
             ]
         }
