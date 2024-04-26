@@ -24,10 +24,6 @@
           "key": "gcp.region"
         },
         {
-          "pattern": "resource.labels.location",
-          "key": "location"
-        },
-        {
           "pattern": "resource.labels.environment_name",
           "key": "gcp.instance.name"
         }
