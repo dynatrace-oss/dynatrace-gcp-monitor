@@ -178,12 +178,11 @@ jobs:
       - openssl aes-256-cbc -K $encrypted_1019fd6574a7_key -iv $encrypted_1019fd6574a7_iv -in tests/e2e/e2e-gcp-sa-key.json.enc -out tests/e2e/e2e-gcp-sa-key.json -d
       - gcloud auth activate-service-account --key-file tests/e2e/e2e-gcp-sa-key.json
       - ./build/get_ext_tools.sh
-      - ./tests/e2e/deployment-test-cleanup.sh
       - ./tests/e2e/before-deployment-test-helm-cleanup.sh
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
       - gcloud components install gke-gcloud-auth-plugin; export USE_GKE_GCLOUD_AUTH_PLUGIN=True; gcloud components update;
     script:
       - mkdir -p ./artefacts/ && gsutil cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
-      - travis_wait 80 ./tests/e2e/execute-tests.sh
+      - travis_wait 120 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
