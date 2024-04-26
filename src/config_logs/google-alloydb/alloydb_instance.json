@@ -1,0 +1,37 @@
+{
+  "name": "alloydb_instance",
+  "displayName": "Google AlloyDB instance",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('alloydb.googleapis.com/Instance')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "instance_id",
+          "pattern": "resource.labels.instance_id"
+        },
+        {
+          "key": "cluster_id",
+          "pattern": "resource.labels.cluster_id"
+        },
+        {
+          "key": "gcp.project.id",
+          "pattern": "logName |  split('/', @)[1]"
+        },
+        {
+          "key": "gcp.resource.type",
+          "pattern": "to_string('alloydb_instance')"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
