@@ -16,7 +16,7 @@
                     "pattern": "@"
                 },
                 {
-                    "key": "cluster_name",
+                    "key": "gcp.instance.name",
                     "pattern": "resource.labels.cluster_name"
                 },
                 {
@@ -24,7 +24,7 @@
                     "pattern": "resource.labels.cluster_uuid"
                 },
                 {
-                    "key": "project_id",
+                    "key": "gcp.project.id",
                     "pattern": "resource.labels.project_id"
                 },
                 {
