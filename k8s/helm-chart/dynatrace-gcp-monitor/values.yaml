@@ -407,6 +407,13 @@ gcpServicesYaml: |
         - default_metrics
       vars:
         filter_conditions: ""
+    # Google Firestore Database
+    - service: firestore_database
+      allowAutodiscovery: false
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
     # Google App Engine Application
     - service: gae_app
       allowAutodiscovery: false
