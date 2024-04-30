@@ -16,14 +16,6 @@
           "pattern": "@"
         },
         {
-          "pattern": "resource.labels.project_id",
-          "key": "gcp.project.id"
-        },
-        {
-          "pattern": "resource.labels.location",
-          "key": "gcp.region"
-        },
-        {
           "pattern": "resource.labels.environment_name",
           "key": "gcp.instance.name"
         }
