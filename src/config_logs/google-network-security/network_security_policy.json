@@ -1,0 +1,25 @@
+{
+    "name": "network_security_policy",
+    "displayName": " Google Network Security Policy",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('network_security_policy')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.instance.name",
+            "pattern": "resource.labels.policy_name"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }
