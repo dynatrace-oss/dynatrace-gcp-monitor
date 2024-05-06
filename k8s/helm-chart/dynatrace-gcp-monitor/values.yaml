@@ -294,8 +294,8 @@ gcpServicesYaml: |
         - default_metrics
       vars:
         filter_conditions: ""
-    # Google NetApp CVS-SO
-    - service: cloudvolumesgcp_api_netapp_com_NetAppCloudVolumeSO
+    # Google NetApp Volumes
+    - service: netapp_volumes_volume
       allowAutodiscovery: false
       featureSets:
         - default_metrics
@@ -595,8 +595,15 @@ gcpServicesYaml: |
         - default_metrics
       vars:
         filter_conditions: ""
-    # Google NetApp Cloud Volume
-    - service: netapp_cloud_volume
+    # Google NetApp Cloud Volume Replication
+    - service: netapp_volumes_replication
+      allowAutodiscovery: false
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    # Google NetApp Cloud Volume Storage Pool
+    - service: netapp_volumes_storage_pool
       allowAutodiscovery: false
       featureSets:
         - default_metrics
@@ -690,6 +697,13 @@ gcpServicesYaml: |
         filter_conditions: ""
     # Google Transfer Service Agent
     - service: transfer_service_agent
+      allowAutodiscovery: false
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    # Google Storage Transfer Job
+    - service: storage_transfer_job
       allowAutodiscovery: false
       featureSets:
         - default_metrics
