@@ -22,14 +22,6 @@
                 {
                     "key": "cluster_uuid",
                     "pattern": "resource.labels.cluster_uuid"
-                },
-                {
-                    "key": "gcp.project.id",
-                    "pattern": "resource.labels.project_id"
-                },
-                {
-                    "key": "region",
-                    "pattern": "resource.labels.region"
                 }
             ]
         }

@@ -24,14 +24,6 @@
                     "pattern": "resource.labels.job_name"
                 },
                 {
-                    "key": "project_id",
-                    "pattern": "resource.labels.project_id"
-                },
-                {
-                    "key": "region",
-                    "pattern": "resource.labels.region"
-                },
-                {
                     "key": "step_id",
                     "pattern": "resource.labels.step_id"
                 }

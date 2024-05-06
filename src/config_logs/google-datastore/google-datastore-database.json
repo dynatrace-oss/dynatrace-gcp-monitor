@@ -18,10 +18,6 @@
                 {
                     "key": "database_id",
                     "pattern": "resource.labels.database_id"
-                },
-                {
-                    "key": "project_id",
-                    "pattern": "resource.labels.project_id"
                 }
             ]
         }
