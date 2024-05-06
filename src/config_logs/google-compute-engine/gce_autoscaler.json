@@ -1,0 +1,25 @@
+{
+  "name": "gce_autoscaler",
+  "displayName": "Google Autoscaler",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('gce_autoscaler')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "content",
+          "pattern": "@"
+        },
+        {
+          "key": "gcp.instance.id",
+          "pattern": "resource.labels.autoscaler_id"
+        }
+      ]
+    }
+  ]
+}

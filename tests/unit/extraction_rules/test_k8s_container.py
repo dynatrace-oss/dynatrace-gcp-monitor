@@ -60,8 +60,8 @@ expected_output = {
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: json.dumps(log_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/stdout',
-    'container.name': 'test-app-api',
     'k8s.cluster.name': 'test-cluster',
+    'k8s.container.name': 'test-app-api',
     'k8s.namespace.name': 'dynatrace',
     'k8s.pod.name': 'testpod'
 }

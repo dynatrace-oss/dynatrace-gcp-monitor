@@ -173,10 +173,46 @@ if [ -z "$VPC_NETWORK" ]; then
   VPC_NETWORK="default"
 fi
 readonly VPC_NETWORK
-AUTODISCOVERY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.metricAutodiscovery}" | tr '[:lower:]' '[:upper:]' | cut -c 1) 
+
+# the below code is handling a situation when the user wants to use a custom VPC network with custom subnet
+# the below if statements ensure that subnet variable will be empty if the default VPC network is to be used and non empty if custom subnet
+# should be used
+USE_CUSTOM_SUBNET=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.useCustomSubnet}")
+readonly USE_CUSTOM_SUBNET
+SUBNET=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.customSubnetName}")
+readonly SUBNET
+
+if [ "$USE_CUSTOM_SUBNET" != true ] && [ -n "$SUBNET" ]; then
+  # throw error as it isn't certain what the user wanted to achieve
+  ambiguity_err_message="Value 'useCustomSubnet' was not set to true but 'customSubnetName' was also provided, "
+  ambiguity_err_message+="please remove this ambiguity from your values.yaml file. "
+  err "$ambiguity_err_message"
+  exit 1
+fi
+
+if [ "$USE_CUSTOM_SUBNET" = true ]; then
+
+  if [ "$VPC_NETWORK" == "default" ]; then
+    err "You cannot have 'vpcNetwork' set to default VPC and 'useCustomSubnet' set to true at the same time."
+    exit 1
+  fi
+
+  if [ -z "$SUBNET" ]; then
+    empty_subnet_err="The 'useCustomSubnet' value was set to true, but 'customSubnetName' is empty, "
+    empty_subnet_err+="please provide a 'customSubnetName' value in your values.yaml file."
+    err "$empty_subnet_err"
+    exit 1
+  fi
+
+fi
+
+AUTODISCOVERY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.metricAutodiscovery}" | tr '[:lower:]' '[:upper:]' | cut -c 1)
 readonly AUTODISCOVERY
 
-API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"' '"hub.read"' '"hub.write"' '"hub.install"')
+API_TOKEN_SCOPES=('"logs.ingest"' '"metrics.ingest"' '"ReadConfig"' '"WriteConfig"'
+  '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"'
+  '"extensionConfigurations.write"' '"extensionEnvironment.read"'
+  '"extensionEnvironment.write"' '"hub.read"' '"hub.write"' '"hub.install"')
 
 debug "Setting GCP project"
 check_if_parameter_is_empty "$GCP_PROJECT" "Set correct gcpProjectId in values.yaml"
@@ -208,7 +244,9 @@ elif [[ $DEPLOYMENT_TYPE == logs ]]; then
 elif [[ $DEPLOYMENT_TYPE == metrics ]]; then
   info "Deploying $DEPLOYMENT_TYPE ingest"
   # shellcheck disable=SC2034  # Unused variables left for readability
-  API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"' '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"' '"extensionEnvironment.read"' '"extensionEnvironment.write"')
+  API_TOKEN_SCOPES=('"metrics.ingest"' '"ReadConfig"' '"WriteConfig"' '"extensions.read"'
+    '"extensions.write"' '"extensionConfigurations.read"' '"extensionConfigurations.write"'
+    '"extensionEnvironment.read"' '"extensionEnvironment.write"')
 else
   err "Invalid DEPLOYMENT_TYPE: $DEPLOYMENT_TYPE. use one of: 'all', 'metrics', 'logs'"
   exit 1
@@ -224,14 +262,18 @@ fi
 debug "Check if any required parameter is empty"
 check_if_parameter_is_empty "$DYNATRACE_URL" "DYNATRACE_URL"
 check_if_parameter_is_empty "$DYNATRACE_ACCESS_KEY" "DYNATRACE_ACCESS_KEY"
-check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "Not correct dynatraceUrl. Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
+incorrect_dynatrace_URL_err_message="Not correct dynatraceUrl. "
+incorrect_dynatrace_URL_err_message+="Example of proper Dynatrace environment endpoint: https://<your_environment_ID>.live.dynatrace.com"
+check_url "$DYNATRACE_URL" "$DYNATRACE_URL_REGEX" "$incorrect_dynatrace_URL_err_message"
 check_api_token "$DYNATRACE_URL"
 
 if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   if EXTENSIONS_SCHEMA_RESPONSE=$(dt_api "/api/v2/extensions/schemas"); then
     GCP_EXTENSIONS_SCHEMA_PRESENT=$("$JQ" -r '.versions[] | select(.=="1.230.0")' <<<"${EXTENSIONS_SCHEMA_RESPONSE}")
     if [ -z "${GCP_EXTENSIONS_SCHEMA_PRESENT}" ]; then
-      err "Dynatrace environment does not supports GCP extensions schema. Dynatrace needs to be running versions 1.230 or higher to complete installation."
+      unsuporrted_extensions_err_message="Dynatrace environment does not supports GCP extensions schema. "
+      unsuporrted_extensions_err_message+="Dynatrace needs to be running versions 1.230 or higher to complete installation."
+      err "$unsuporrted_extensions_err_message"
       exit 1
     fi
   fi
@@ -288,7 +330,8 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == metrics ]]; then
   info "- checking activated extensions in Dynatrace"
   EXTENSIONS_FROM_CLUSTER=$(get_activated_extensions_on_cluster)
 
-  # If --without-extensions-upgrade is set, all gcp extensions are downloaded from the cluster to get configuration of gcp services for versions that are currently active on the cluster.
+  # If --without-extensions-upgrade is set, all gcp extensions are downloaded from the cluster
+  # to get configuration of gcp services for versions that are currently active on the cluster.
   if [[ "$UPGRADE_EXTENSIONS" == "N" && -n "$EXTENSIONS_FROM_CLUSTER" ]]; then
     info ""
     info "- Some google extensions have already been activated in Dynatrace."
@@ -326,7 +369,8 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   fi
   info ""
   info "- Create and connect GKE Autopilot k8s cluster ${AUTOPILOT_CLUSTER_NAME}."
-  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" --network "${VPC_NETWORK}" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+  # if the VPC network is default then it's already ensured that $SUBNET is an empty string so we can always use the --subnetwork flag
+  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" --network "${VPC_NETWORK}" --subnetwork "$SUBNET" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   gcloud container clusters get-credentials "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 fi
 
@@ -428,7 +472,7 @@ fi
 info ""
 if [[ $DEPLOYMENT_TYPE == logs ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   info "\e[92m- Check logs in Dynatrace in 5 min. ${LOG_VIEWER}\e[37m"
-  fi
+fi
 if [[ $DEPLOYMENT_TYPE == metrics ]] || [[ $DEPLOYMENT_TYPE == all ]]; then
   GCP_DASHBOARDS="GCP dashboards: ${DYNATRACE_URL}"
   info -e "\e[92m- Check metrics in Dynatrace in 5 min. ${GCP_DASHBOARDS}/ui/dashboards?filters=tag%3DGoogle%20Cloud\e[37m"

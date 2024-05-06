@@ -1,0 +1,25 @@
+{
+  "name": "redis_instance",
+  "displayName": "Google Memorystore Redis",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('redis_instance')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "node_id",
+          "pattern": "resource.labels.node_id "
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
