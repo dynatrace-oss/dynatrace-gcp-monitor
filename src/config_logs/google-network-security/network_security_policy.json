@@ -1,6 +1,6 @@
 {
     "name": "network_security_policy",
-    "displayName": " Google Network Security Policy",
+    "displayName": "Google Network Security Policy",
     "rules": [
       {
         "sources": [
