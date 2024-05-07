@@ -1,0 +1,33 @@
+{
+    "name": "dataflow_step",
+    "displayName": "Dataflow Step",
+    "rules": [
+        {
+            "sources": [
+                {
+                    "sourceType": "logs",
+                    "source": "resourceType",
+                    "condition": "$eq('dataflow_step')"
+                  }
+            ],
+            "attributes": [
+                {
+                    "key": "content",
+                    "pattern": "@"
+                },
+                {
+                    "key": "job_id",
+                    "pattern": "resource.labels.job_id"
+                },
+                {
+                    "key": "job_name",
+                    "pattern": "resource.labels.job_name"
+                },
+                {
+                    "key": "step_id",
+                    "pattern": "resource.labels.step_id"
+                }
+            ]
+        }
+    ]
+}

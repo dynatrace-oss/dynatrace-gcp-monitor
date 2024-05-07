@@ -1,0 +1,29 @@
+{
+    "name": "cloud_dataproc_cluster",
+    "displayName": "Dataproc",
+    "rules": [
+        {
+            "sources": [
+                {
+                    "sourceType": "logs",
+                    "source": "resourceType",
+                    "condition": "$eq('cloud_dataproc_cluster')"
+                }
+            ],
+            "attributes": [
+                {
+                    "key": "content",
+                    "pattern": "@"
+                },
+                {
+                    "key": "gcp.instance.name",
+                    "pattern": "resource.labels.cluster_name"
+                },
+                {
+                    "key": "cluster_uuid",
+                    "pattern": "resource.labels.cluster_uuid"
+                }
+            ]
+        }
+    ]
+}
