@@ -1,0 +1,25 @@
+{
+    "name": "gce_router",
+    "displayName": "Google Cloud Router",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('gce_router')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.instance.id",
+            "pattern": "resource.labels.router_id"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }

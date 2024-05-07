@@ -1,0 +1,41 @@
+{
+    "name": "https_lb",
+    "displayName": "External Application Load Balancer",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('http_load_balancer')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('https_lb_rule')"
+          },
+          {
+            "key": "gcp.instance.name",
+            "pattern": "resource.labels.url_map_name"
+          },
+          {
+            "key": "backend_name",
+            "pattern": "resource.labels.backend_service_name"
+          },
+          {
+            "key": "forwarding_rule_name",
+            "pattern": "resource.labels.forwarding_rule_name"
+          },
+          {
+            "key": "target_proxy_name",
+            "pattern": "resource.labels.target_proxy_name"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }

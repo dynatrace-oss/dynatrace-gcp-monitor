@@ -196,6 +196,10 @@ gcp_extension_mapping:
     feature_set: default_metrics
     monitored_resources:
     - value: transfer_service_agent
+  - service_name: storage_transfer_job
+    feature_set: default_metrics
+    monitored_resources:
+    - value: storage_transfer_job
 - extension_name: google-dataflow
   services:
   - service_name: dataflow_job
@@ -242,6 +246,10 @@ gcp_extension_mapping:
     feature_set: default_metrics
     monitored_resources:
     - value: firestore_instance
+    - value: firestore.googleapis.com/Database
+  - service_name: firestore_database
+    feature_set: default_metrics
+    monitored_resources:
     - value: firestore.googleapis.com/Database
 - extension_name: google-hybrid-connectivity
   services:
@@ -347,14 +355,18 @@ gcp_extension_mapping:
     - value: redis_instance
 - extension_name: google-netapp-cvs
   services:
-  - service_name: netapp_cloud_volume
+  - service_name: netapp_volumes_replication
     feature_set: default_metrics
     monitored_resources:
-    - value: netapp_cloud_volume
-  - service_name: cloudvolumesgcp_api_netapp_com_NetAppCloudVolumeSO
+    - value: netapp.googleapis.com/Replication
+  - service_name: netapp_volumes_volume
     feature_set: default_metrics
     monitored_resources:
-    - value: cloudvolumesgcp-api.netapp.com/CloudVolume
+    - value: netapp.googleapis.com/Volume
+  - service_name: netapp_volumes_volume
+    feature_set: default_metrics
+    monitored_resources:
+    - value: netapp.googleapis.com/StoragePool
 - extension_name: google-network-security
   services:
   - service_name: network_security_policy

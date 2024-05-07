@@ -1,0 +1,25 @@
+{
+    "name": "uptime_url",
+    "displayName": "Uptime Check URL",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('uptime_url')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "host",
+            "pattern": "resource.labels.host"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+        ]
+      }
+    ]
+  }

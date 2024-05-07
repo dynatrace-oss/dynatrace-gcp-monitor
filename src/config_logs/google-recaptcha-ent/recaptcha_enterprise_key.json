@@ -1,0 +1,34 @@
+{
+    "name": "recaptcha_enterprise_key",
+    "displayName": "Google reCAPTCHA Enterprise Key",
+    "rules": [
+      {
+        "sources": [
+          {
+            "sourceType": "logs",
+            "source": "resourceType",
+            "condition": "$eq('recaptchaenterprise.googleapis.com/Key')"
+          }
+        ],
+        "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('recaptchaenterprise_googleapis_com_Key')"
+          },
+          {
+            "key": "gcp.instance.id",
+            "pattern": "resource.labels.key_id"
+          },
+          {
+            "key": "gcp.project.id",
+            "pattern": "logName | split('/', @)[1]"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+         
+        ]
+      }
+    ]
+  }
