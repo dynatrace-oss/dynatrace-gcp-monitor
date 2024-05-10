@@ -1,0 +1,25 @@
+{
+    "name": "datastore_database",
+    "displayName": "Dataproc",
+    "rules": [
+        {
+            "sources": [
+                {
+                    "sourceType": "logs",
+                    "source": "resourceType",
+                    "condition": "$eq('datastore_database')"
+                }
+            ],
+            "attributes": [
+                {
+                    "key": "content",
+                    "pattern": "@"
+                },
+                {
+                    "key": "database_id",
+                    "pattern": "resource.labels.database_id"
+                }
+            ]
+        }
+    ]
+}

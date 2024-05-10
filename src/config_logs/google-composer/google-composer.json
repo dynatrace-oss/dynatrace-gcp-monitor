@@ -1,0 +1,25 @@
+{
+  "name": "cloud_composer_environment",
+  "displayName": "Google Cloud Composer Environment",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('cloud_composer_environment')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "content",
+          "pattern": "@"
+        },
+        {
+          "pattern": "resource.labels.environment_name",
+          "key": "gcp.instance.name"
+        }
+      ]
+    }
+  ]
+}
