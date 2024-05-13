@@ -239,7 +239,7 @@ class MetadataEngine:
             #if self.common_rule:
             #    _apply_rule(context, self.common_rule, record, parsed_record)
             #Apply common rules
-            #apply_common_rules(record,parsed_record)
+            apply_common_rules(record, parsed_record)
             
             any_rule_applied = self._apply_rules(context, self.rules, record, parsed_record)
             any_audit_rule_applied = self._apply_rules(context, self.audit_logs_rules, record, parsed_record)
