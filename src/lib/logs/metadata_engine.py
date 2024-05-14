@@ -120,8 +120,6 @@ class SourceMatcher:
         return self._source_value_extractor(record, parsed_record)
 
 
-
-
 def apply_common_rules(record, parsed_record):
     def get_severity():
         parsed_record["severity"] = record.get("severity", "INFO")
@@ -145,26 +143,25 @@ def apply_common_rules(record, parsed_record):
         project_id = resource.get("labels", {}).get("project_id", None)
         if project_id:
             parsed_record["gcp.project.id"] = project_id
-    
+
     def get_gcp_instance_id(resource):
 
         instance_id = resource.get("labels", {}).get("instance_id", None)
         if instance_id and len(instance_id) >= 3:
             parsed_record["gcp.instance.id"] = instance_id
-    
-    def get_resource_type(resource):
 
-        resource_type =  resource.get("type", None)
+    def get_resource_type(resource):
+        resource_type = resource.get("type", None)
         if resource_type:
             parsed_record["gcp.resource.type"] = resource_type
 
     def get_timestamp():
-        parsed_record["timestamp"] = record.get("timestamp", 0)
+        if "timestamp" in record:
+            parsed_record["timestamp"] = record["timestamp"]
 
     def get_logsource():
-        parsed_record["log.source"] = record.get("logName", "")
-
-
+        if "logName" in record:
+            parsed_record["log.source"] = record["logName"]
 
     get_severity()
     get_cloud_provider()
@@ -178,7 +175,7 @@ def apply_common_rules(record, parsed_record):
         get_gcp_project_id(resource)
         get_gcp_instance_id(resource)
 
-    
+
 @dataclass(frozen=True)
 class ConfigRule:
     entity_type_name: str
@@ -240,7 +237,7 @@ class MetadataEngine:
             #    _apply_rule(context, self.common_rule, record, parsed_record)
             #Apply common rules
             apply_common_rules(record, parsed_record)
-            
+
             any_rule_applied = self._apply_rules(context, self.rules, record, parsed_record)
             any_audit_rule_applied = self._apply_rules(context, self.audit_logs_rules, record, parsed_record)
             # No matching rule has been found, applying the default rule
