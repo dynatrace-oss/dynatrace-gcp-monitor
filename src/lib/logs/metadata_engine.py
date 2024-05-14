@@ -159,14 +159,14 @@ def apply_common_rules(record, parsed_record):
         if "timestamp" in record:
             parsed_record["timestamp"] = record["timestamp"]
 
-    def get_logsource():
+    def get_log_source():
         if "logName" in record:
             parsed_record["log.source"] = record["logName"]
 
     get_severity()
     get_cloud_provider()
     get_timestamp()
-    get_logsource()
+    get_log_source()
 
     resource = record.get("resource", None)
     if resource:
@@ -233,6 +233,7 @@ class MetadataEngine:
 
     def apply(self, context: LoggingContext, record: Dict, parsed_record: Dict):
         try:
+            # Old rules from _config_logs/_common/common.json
             #if self.common_rule:
             #    _apply_rule(context, self.common_rule, record, parsed_record)
             #Apply common rules
