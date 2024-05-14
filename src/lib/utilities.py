@@ -29,10 +29,13 @@ def chunks(full_list: List, chunk_size: int) -> List[List]:
 
 
 def safe_read_yaml(filepath: str, alternative_environ_name: str):
+    logging_context = LoggingContext(None)
     try:
         with open(filepath, encoding="utf-8") as activation_file:
             yaml_dict = yaml.safe_load(activation_file)
-    except Exception:
+    except Exception as e:
+        if isinstance(e, yaml.YAMLError):
+            logging_context.t_error(str(e))
         yaml_dict = yaml.safe_load(os.environ.get(alternative_environ_name, ""))
     if not yaml_dict:
         yaml_dict = {}
