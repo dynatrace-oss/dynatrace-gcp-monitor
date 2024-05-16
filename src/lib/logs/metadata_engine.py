@@ -120,6 +120,62 @@ class SourceMatcher:
         return self._source_value_extractor(record, parsed_record)
 
 
+def apply_common_rules(record, parsed_record):
+    def get_severity():
+        parsed_record["severity"] = record.get("severity", "INFO")
+
+    def get_cloud_provider():
+        parsed_record["cloud.provider"] = "gcp"
+
+    def get_cloud_region(resource):
+        gcp_region = (
+            resource.get("labels", {}).get("region")
+            or resource.get("labels", {}).get("location")
+            or resource.get("labels", {}).get("zone")
+        )
+
+        if gcp_region:
+            parsed_record["gcp.region"] = gcp_region
+            parsed_record["cloud.region"] = gcp_region
+
+    def get_gcp_project_id(resource):
+
+        project_id = resource.get("labels", {}).get("project_id", None)
+        if project_id:
+            parsed_record["gcp.project.id"] = project_id
+
+    def get_gcp_instance_id(resource):
+
+        instance_id = resource.get("labels", {}).get("instance_id", None)
+        if instance_id and len(instance_id) >= 3:
+            parsed_record["gcp.instance.id"] = instance_id
+
+    def get_resource_type(resource):
+        resource_type = resource.get("type", None)
+        if resource_type:
+            parsed_record["gcp.resource.type"] = resource_type
+
+    def get_timestamp():
+        if "timestamp" in record:
+            parsed_record["timestamp"] = record["timestamp"]
+
+    def get_log_source():
+        if "logName" in record:
+            parsed_record["log.source"] = record["logName"]
+
+    get_severity()
+    get_cloud_provider()
+    get_timestamp()
+    get_log_source()
+
+    resource = record.get("resource", None)
+    if resource:
+        get_resource_type(resource)
+        get_cloud_region(resource)
+        get_gcp_project_id(resource)
+        get_gcp_instance_id(resource)
+
+
 @dataclass(frozen=True)
 class ConfigRule:
     entity_type_name: str
@@ -177,8 +233,12 @@ class MetadataEngine:
 
     def apply(self, context: LoggingContext, record: Dict, parsed_record: Dict):
         try:
-            if self.common_rule:
-                _apply_rule(context, self.common_rule, record, parsed_record)
+            # Old rules from _config_logs/_common/common.json
+            #if self.common_rule:
+            #    _apply_rule(context, self.common_rule, record, parsed_record)
+            #Apply common rules
+            apply_common_rules(record, parsed_record)
+
             any_rule_applied = self._apply_rules(context, self.rules, record, parsed_record)
             any_audit_rule_applied = self._apply_rules(context, self.audit_logs_rules, record, parsed_record)
             # No matching rule has been found, applying the default rule
@@ -190,7 +250,10 @@ class MetadataEngine:
 
 
 def _check_if_rule_applies(rule: ConfigRule, record: Dict, parsed_record: Dict):
-    return all(matcher.match(record, parsed_record) for matcher in rule.source_matchers)
+    for matcher in rule.source_matchers:
+        if not matcher.match(record, parsed_record):
+            return False
+    return True
 
 
 def _apply_rule(context: LoggingContext, rule: ConfigRule, record: Dict, parsed_record: Dict):
