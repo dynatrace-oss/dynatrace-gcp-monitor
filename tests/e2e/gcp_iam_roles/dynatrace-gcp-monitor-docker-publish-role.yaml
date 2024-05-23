@@ -2,7 +2,9 @@ title: E2E docker publish dynatrace-gcp-monitor
 description: Role for Dynatrace GCP Monitor Docker Publish
 stage: GA
 includedPermissions:
+  - storage.buckets.create
   - storage.buckets.get
+  - storage.buckets.list
   - storage.objects.create
   - storage.objects.delete
   - storage.objects.get

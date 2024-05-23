@@ -111,7 +111,7 @@ jobs:
       - ./ext_tools/yq_linux_x64 e -i ".dockerImage |= \"${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}\"" k8s/helm-chart/dynatrace-gcp-monitor/values.yaml
       - ./build/helm-package.sh
       - ./build/docker-deploy.sh
-      - gsutil -m cp ./artefacts/* gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/
+      - gsutil -m cp ./artefacts/* gs://travis-e2e-dt-gcp-extension-k8s-test/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/
   - stage: docker-deploy
     name: Docker Hub deploy
     if: tag =~ /^release-.*
@@ -182,7 +182,7 @@ jobs:
       - ./tests/e2e/before-deployment-test-extensions-cleanup.sh
       - gcloud components install gke-gcloud-auth-plugin; export USE_GKE_GCLOUD_AUTH_PLUGIN=True; gcloud components update;
     script:
-      - mkdir -p ./artefacts/ && gsutil cp gs://travis-e2e/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
+      - mkdir -p ./artefacts/ && gsutil cp gs://travis-e2e-dt-gcp-extension-k8s-test/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
       - travis_wait 120 ./tests/e2e/execute-tests.sh
     after_script:
       - ./tests/e2e/deployment-test-cleanup.sh
