@@ -40,7 +40,7 @@ env:
   - VERSION_TAG=/^release-.*
   - DOCKER_CLI_EXPERIMENTAL=enabled
   - GCP_PROJECT_ID="dt-gcp-extension-k8s-test"
-  - GCR_NAME="gcr.io/${GCP_PROJECT_ID}/dynatrace-gcp-monitor"
+  - GCR_NAME="europe-central2-docker.pkg.dev/${GCP_PROJECT_ID}/dynatrace-gcp-monitor"
 jobs:
   include:
   - stage: shellcheck
