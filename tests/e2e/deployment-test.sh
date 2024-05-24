@@ -81,7 +81,7 @@ create_values_e2e_file
 
 "$TEST_YQ" eval-all --inplace 'select(fileIndex == 0) * select(fileIndex == 1)' ${VALUES_FILE} values.e2e.yaml
 
-gcloud container clusters get-credentials "${K8S_CLUSTER}" --region europe-central2 --project "${GCP_PROJECT_ID}"
+gcloud container clusters get-credentials "${K8S_CLUSTER}" --region "${K8S_CLUSTER_REGION}" --project "${GCP_PROJECT_ID}"
 
 ./deploy-helm.sh --role-name "${IAM_ROLE_PREFIX}" --quiet || exit 1
 

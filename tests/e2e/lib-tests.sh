@@ -84,7 +84,7 @@ dynatraceAccessKey: "${DYNATRACE_ACCESS_KEY}"
 dynatraceUrl: "${DYNATRACE_URL}"
 logsSubscriptionId: "${PUBSUB_SUBSCRIPTION}"
 requireValidCertificate: "false"
-dockerImage: "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
+dockerImage: "${ARTIFACT_REGISTRY_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 activeGate:
   useExisting: "true"
   dynatracePaasToken: "${DYNATRACE_PAAS_TOKEN}"
@@ -254,7 +254,7 @@ performance_test() {
       timestamp<=\"$end_timestamp\" AND
       resource.type=k8s_container AND
       resource.labels.project_id=$GCP_PROJECT_ID AND
-      resource.labels.location=us-central1 AND
+      resource.labels.location=$K8S_CLUSTER_REGION AND
       resource.labels.cluster_name=$K8S_CLUSTER AND
       resource.labels.namespace_name=dynatrace AND
       labels.k8s-pod/app=dynatrace-gcp-monitor AND

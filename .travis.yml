@@ -40,7 +40,7 @@ env:
   - VERSION_TAG=/^release-.*
   - DOCKER_CLI_EXPERIMENTAL=enabled
   - GCP_PROJECT_ID="dt-gcp-extension-k8s-test"
-  - GCR_NAME="europe-central2-docker.pkg.dev/${GCP_PROJECT_ID}/dt-artifacts/dynatrace-gcp-monitor"
+  - ARTIFACT_REGISTRY_NAME="europe-central2-docker.pkg.dev/${GCP_PROJECT_ID}/dt-artifacts/dynatrace-gcp-monitor"
 jobs:
   include:
   - stage: shellcheck
@@ -108,7 +108,7 @@ jobs:
       # Put correct Version into files
       - ./build/version.sh
       - ./build/get_ext_tools.sh
-      - ./ext_tools/yq_linux_x64 e -i ".dockerImage |= \"${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}\"" k8s/helm-chart/dynatrace-gcp-monitor/values.yaml
+      - ./ext_tools/yq_linux_x64 e -i ".dockerImage |= \"${ARTIFACT_REGISTRY_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}\"" k8s/helm-chart/dynatrace-gcp-monitor/values.yaml
       - ./build/helm-package.sh
       - ./build/docker-deploy.sh
       - gsutil -m cp ./artefacts/* gs://travis-e2e-dt-gcp-extension-k8s-test/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/
@@ -160,6 +160,7 @@ jobs:
       - LOG_ROUTER="e2e_test_log_router_${TRAVIS_BUILD_ID}"
       - IAM_ROLE_PREFIX="e2e_test_${TRAVIS_BUILD_ID}"
       - K8S_CLUSTER="e2e-test-master"
+      - K8S_CLUSTER_REGION="europe-central2"
       - E2E=true
       - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
       - GCP_PROJECT_2_ID="dynatrace-gcp-extension-2"
