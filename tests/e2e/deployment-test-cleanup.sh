@@ -26,7 +26,7 @@ gcloud iam roles delete "${IAM_ROLE_PREFIX}.logs" --project="${GCP_PROJECT_ID}" 
 gcloud iam roles delete "${IAM_ROLE_PREFIX}.metrics" --project="${GCP_PROJECT_ID}" > /dev/null
 
 # disable Docker container deletion
-# gcloud container images delete "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
+# gcloud container images delete "${ARTIFACT_REGISTRY_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 gcloud functions delete "${CLOUD_FUNCTION_NAME}"
 
 # testing message
