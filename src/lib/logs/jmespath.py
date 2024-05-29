@@ -72,5 +72,11 @@ class MappingCustomFunctions(functions.Functions):
     def _func_split(self, sep, string):
         return string.split(sep)
 
+    @functions.signature({'types': ['string']},
+                         {'types': ['string']},
+                         {'types': ['string']})
+    def _func_form_id_path(self, project, region, instance_id):
+        return "projects/" + project + "/locations/" + region + "/instances/" + instance_id
+
 
 JMESPATH_OPTIONS = jmespath.Options(custom_functions=MappingCustomFunctions())
