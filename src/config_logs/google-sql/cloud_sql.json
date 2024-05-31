@@ -16,6 +16,14 @@
           "pattern": "resource.labels.database_id"
         },
         {
+          "key": "cloud.region", 
+          "pattern": "resource.labels.region | lower_region(@)"
+        },
+        {
+          "key": "gcp.region", 
+          "pattern": "resource.labels.region | lower_region(@)"
+        },
+        {
           "key": "content",
           "pattern": "@"
         }
