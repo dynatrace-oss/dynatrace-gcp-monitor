@@ -75,7 +75,7 @@ class MappingCustomFunctions(functions.Functions):
     @functions.signature({'types': ['string']})
     def _func_lower_region(self, string):
         return string.lower().replace('_','-')
-
+    
     @functions.signature({'types': ['string']},
                          {'types': ['string']},
                          {'types': ['string']})
