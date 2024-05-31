@@ -16,6 +16,10 @@
           "pattern": "resource.labels.node_id "
         },
         {
+          "key": "instance_id_path",
+          "pattern": "form_id_path(resource.labels.project_id, resource.labels.region, resource.labels.instance_id)"
+        },
+        {
           "key": "content",
           "pattern": "@"
         }
