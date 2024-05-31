@@ -28,6 +28,6 @@ if [[ "${PUSH:-}" == "true" ]]; then
     docker push dynatrace/dynatrace-gcp-monitor:v1-latest
     docker push "dynatrace/dynatrace-gcp-monitor:${TAG}"
 elif [[ "${PUSH:-}" != "true" && "${E2E:-}" == "true" ]]; then
-    docker tag dynatrace/dynatrace-gcp-monitor:v1-latest "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
-    docker push "${GCR_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
+    docker tag dynatrace/dynatrace-gcp-monitor:v1-latest "${ARTIFACT_REGISTRY_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
+    docker push "${ARTIFACT_REGISTRY_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"
 fi
