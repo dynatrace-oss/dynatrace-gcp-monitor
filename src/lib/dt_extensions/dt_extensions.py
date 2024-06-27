@@ -42,5 +42,5 @@ async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession
         logging_context.log(f'Services config prepared from extensions & deployment configuration: {feature_sets_names}')
         return extension_fetcher_result
     else:
-        logging_context.log("Extensions fetch resulted in empty list of services")
+        logging_context.log("Extensions fetch resulted in empty list of services. Check on the Dynatrace Hub and enable Google extensions to start monitoring the desired services.")
         return None
