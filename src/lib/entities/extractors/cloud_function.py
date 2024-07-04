@@ -57,11 +57,11 @@ create_entity_id = get_func_create_entity_id(LabelToApiResponseMapping)
 def _get_properties(rsp: Dict[Text, Any]) -> Iterable[CdProperty]:
     """ Retrieve key properties to be passed onto dynatrace server. """
     return [
-        CdProperty("Status", rsp.get("status", "N/A")),
-        CdProperty("Entry point", rsp.get("entryPoint", "N/A")),
-        CdProperty("Available memory Mb", rsp.get("availableMemoryMb", "N/A")),
-        CdProperty("Runtime", rsp.get("runtime", "")),
-        CdProperty("Ingress settings", rsp.get("ingressSettings", "")),
+        CdProperty("Status", rsp.get("state", "N/A")),
+        CdProperty("Entry point", rsp.get("buildConfig", {}).get("entryPoint", "N/A")),
+        CdProperty("Available memory", rsp.get("serviceConfig", {}).get("availableMemory", "N/A")),
+        CdProperty("Runtime", rsp.get("buildConfig", {}).get("runtime", "")),
+        CdProperty("Ingress settings", rsp.get("serviceConfig",{}).get("ingressSettings", "")),
     ]
 
 
