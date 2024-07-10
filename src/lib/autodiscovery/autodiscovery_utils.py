@@ -213,7 +213,7 @@ async def get_metric_descriptors(
     )
 
     fetch_metrics_descriptor_results = await asyncio.gather(
-        *metric_fetch_coroutines, return_exceptions=True
+        *metric_fetch_coroutines
     )
     flattened_results = list(chain.from_iterable(fetch_metrics_descriptor_results))
 
