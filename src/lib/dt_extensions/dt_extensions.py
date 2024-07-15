@@ -30,7 +30,7 @@ async def prepare_services_config_for_next_polling(current_services: List[GCPSer
 
 
 async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[ExtensionsFetchResult]:
-    extension_fetcher_result = await ExtensionsFetcher(
+    extension_fetcher_result, not_configured_services = await ExtensionsFetcher(
         dt_session=dt_session,
         dynatrace_url=await fetch_dynatrace_url(gcp_session, config.project_id(), token),
         dynatrace_access_key=await fetch_dynatrace_api_key(gcp_session, config.project_id(), token),
@@ -39,7 +39,7 @@ async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession
 
     if extension_fetcher_result.services:
         feature_sets_names = [f"{service.name}/{service.feature_set}" for service in extension_fetcher_result.services]
-        logging_context.log(f'Services config prepared from extensions & deployment configuration: {feature_sets_names}')
+        logging_context.log(f'Services config prepared from extensions & deployment configuration: {list(set(feature_sets_names) - set(not_configured_services))}')
         return extension_fetcher_result
     else:
         logging_context.log("Extensions fetch resulted in empty list of services. Check on the Dynatrace Hub and enable Google extensions to start monitoring the desired services.")

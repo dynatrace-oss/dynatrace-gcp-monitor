@@ -17,6 +17,8 @@ from os.path import isfile
 from typing import List, Dict
 
 import yaml
+import json
+import re
 
 from lib.configuration import config
 from lib.context import LoggingContext
@@ -42,16 +44,61 @@ def safe_read_yaml(filepath: str, alternative_environ_name: str):
     return yaml_dict
 
 
+def safe_read_json(filepath: str, alternative_environ_name: str):
+    def camel_to_snake(name):
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        s2 = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1)
+        return s2.lower()
+
+    def convert_data(item, data):
+        value = data[item]
+        gcp = value.pop('gcp', {})
+        value.update(gcp)
+        value['featureSets'] = [
+            camel_to_snake(feature) for feature in value.get('featureSets', [])
+        ]
+        return value
+
+    activation_dict = {'services': []}
+    try:
+        for extension in os.listdir(filepath):
+            file_path = os.path.join(filepath, extension)
+            for file in os.listdir(file_path):
+                if file.endswith(".json"):
+                    json_path = os.path.join(file_path, file)
+                    f = open(json_path)
+                    data = json.load(f)[0]
+                    for item in data:
+                        value = convert_data(item, data)
+                        value.update({"service": extension})
+                        activation_dict['services'].append(value)
+
+
+    except:
+        data = json.loads(os.environ.get(alternative_environ_name, ""))[0]
+        for item in data:
+            value = convert_data(item, data)
+            activation_dict['services'].append(value)
+
+    return activation_dict
+
+
+def read_activation_json():
+    return safe_read_json("../extensions", "ACTIVATION_JSON_CONFIG")
+    # return json.loads(os.environ.get("ACTIVATION_JSON_CONFIG", ""))[0]
+
+
 def read_activation_yaml():
-    return safe_read_yaml('/code/config/activation/gcp_services.yaml', "ACTIVATION_CONFIG" )
+    return safe_read_yaml('/code/config/activation/gcp_services.yaml', "ACTIVATION_CONFIG")
 
 
 def read_autodiscovery_config_yaml():
-    return safe_read_yaml('/code/config/activation/autodiscovery-config.yaml', "AUTODISCOVERY_RESOURCES_YAML" )
+    return safe_read_yaml('/code/config/activation/autodiscovery-config.yaml', "AUTODISCOVERY_RESOURCES_YAML")
 
 
 def read_filter_out_list_yaml() -> list:
-    loaded_yaml = safe_read_yaml("/code/config/activation/metrics-filter-out.yaml", "EXCLUDED_METRICS_AND_DIMENSIONS") or {}
+    loaded_yaml = safe_read_yaml("/code/config/activation/metrics-filter-out.yaml",
+                                 "EXCLUDED_METRICS_AND_DIMENSIONS") or {}
     excluded_metrics = loaded_yaml.get("filter_out") or []
 
     for metric in excluded_metrics:
@@ -61,7 +108,7 @@ def read_filter_out_list_yaml() -> list:
 
 
 def read_autodiscovery_block_list_yaml():
-    return safe_read_yaml('/code/config/activation/autodiscovery-block-list.yaml', "AUTODISCOVERY_BLOCK_LIST_YAML" )
+    return safe_read_yaml('/code/config/activation/autodiscovery-block-list.yaml', "AUTODISCOVERY_BLOCK_LIST_YAML")
 
 
 def read_autodiscovery_resources_mapping():
@@ -107,6 +154,7 @@ def extract_technology_name(config_yaml):
     if isinstance(technology_name, Dict):
         technology_name = technology_name.get("name", "N/A")
     return technology_name
+
 
 # For test_integration_metric.py
 def load_supported_services() -> List[GCPService]:

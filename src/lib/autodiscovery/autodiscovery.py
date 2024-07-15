@@ -20,6 +20,7 @@ from lib.metrics import AutodiscoveryGCPService, GCPService, Metric
 from lib.utilities import (
     read_autodiscovery_block_list_yaml,
     read_autodiscovery_config_yaml,
+    read_activation_json
 )
 from main import get_metric_context
 
@@ -54,9 +55,12 @@ class AutodiscoveryContext:
 
             self.resources_to_extensions_mapping = get_resources_mapping()
             self.services_to_resources_mapping = get_services_to_resources()
-            autodiscovery_metric_block_list = read_autodiscovery_block_list_yaml().get(
-                "block_list", []
-            )
+            activation_json = read_activation_json().get("services", [])
+            autodiscovery_metric_block_list = []
+            for item in activation_json:
+                block_list = item.get('blockList', [])
+                autodiscovery_metric_block_list.extend(block_list)
+
             self.autodiscovery_metric_block_list = (
                 autodiscovery_metric_block_list
                 if autodiscovery_metric_block_list is not None
