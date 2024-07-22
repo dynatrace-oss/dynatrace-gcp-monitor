@@ -57,11 +57,11 @@ create_entity_id = get_func_create_entity_id(LabelToApiResponseMapping)
 def _get_properties(rsp: Dict[Text, Any]) -> Iterable[CdProperty]:
     """ Retrieve key properties to be passed onto dynatrace server. """
     return [
-        CdProperty("Status", rsp.get("state", "N/A")),
-        CdProperty("Entry point", rsp.get("buildConfig", {}).get("entryPoint", "N/A")),
-        CdProperty("Available memory", rsp.get("serviceConfig", {}).get("availableMemory", "N/A")),
-        CdProperty("Runtime", rsp.get("buildConfig", {}).get("runtime", "")),
-        CdProperty("Ingress settings", rsp.get("serviceConfig",{}).get("ingressSettings", "")),
+        CdProperty("Status", rsp.get("status", "N/A")),
+        CdProperty("Entry point", rsp.get("entryPoint", "N/A")),
+        CdProperty("Available memory Mb", rsp.get("availableMemoryMb", "N/A")),
+        CdProperty("Runtime", rsp.get("runtime", "")),
+        CdProperty("Ingress settings", rsp.get("ingressSettings", "")),
     ]
 
 
@@ -86,6 +86,6 @@ def _cloud_function_resp_to_monitored_entities(page: Dict[Text, Any], svc_def: G
 @entity_extractor("cloud_function", "cloudfunctions.googleapis.com")
 async def get_cloud_function_entity(ctx: MetricsContext, project_id: str, svc_def: GCPService) -> Iterable[Entity]:
     """ Retrieve entity info on GCP cloud functions from google api. """
-    url = f"https://cloudfunctions.googleapis.com/v2/projects/{project_id}/locations/-/functions"
+    url = f"https://cloudfunctions.googleapis.com/v1/projects/{project_id}/locations/-/functions"
     mapper_func = partial(_cloud_function_resp_to_monitored_entities, svc_def=svc_def)
     return await generic_paging(project_id, url, ctx, mapper_func)

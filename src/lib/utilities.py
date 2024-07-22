@@ -44,7 +44,7 @@ def safe_read_yaml(filepath: str, alternative_environ_name: str):
     return yaml_dict
 
 
-def safe_read_json(filepath: str, alternative_environ_name: str):
+def safe_read_json(filepath: str, alternative_environ_name: str):   # TODO flatten json package
     def camel_to_snake(name):
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
         s2 = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1)
@@ -60,27 +60,40 @@ def safe_read_json(filepath: str, alternative_environ_name: str):
         return value
 
     activation_dict = {'services': []}
+    gcp_monitor_uuid = read_gcp_monitor_uuid()
     try:
         for extension in os.listdir(filepath):
             file_path = os.path.join(filepath, extension)
             for file in os.listdir(file_path):
                 if file.endswith(".json"):
                     json_path = os.path.join(file_path, file)
-                    f = open(json_path)
-                    data = json.load(f)[0]
-                    for item in data:
-                        value = convert_data(item, data)
-                        value.update({"service": extension})
-                        activation_dict['services'].append(value)
+                    with open(json_path, 'r') as f:
+                        data = json.load(f)[0]
+
+                    uuids = data.get("value").get("gcp").get("gcpMonitorId")
+                    enabled = data.get("value").get("enabled")
+                    if enabled and (gcp_monitor_uuid in uuids or uuids == ""):
+                        for item in data:
+                            value = convert_data(item, data)
+                            value.update({"service": extension})
+                            activation_dict['services'].append(value)
 
 
     except:
-        data = json.loads(os.environ.get(alternative_environ_name, ""))[0]
-        for item in data:
-            value = convert_data(item, data)
-            activation_dict['services'].append(value)
+        data = json.loads(os.environ.get(alternative_environ_name, ""))
+        for extension in data:
+            uuids = extension.get("value").get("gcp").get("gcpMonitorId")
+            enabled = extension.get("value").get("enabled")
+            if enabled and (gcp_monitor_uuid in uuids or uuids == ""):
+                for item in extension:
+                    value = convert_data(item, extension)
+                    activation_dict['services'].append(value)
 
     return activation_dict
+
+
+def read_gcp_monitor_uuid():
+    return os.environ.get("GCP_MONITOR_UUID", "")
 
 
 def read_activation_json():
@@ -113,6 +126,15 @@ def read_autodiscovery_block_list_yaml():
 
 def read_autodiscovery_resources_mapping():
     return safe_read_yaml('./lib/autodiscovery/config/autodiscovery-mapping.yaml', "AUTODISCOVERY_RESOURCES_MAPPING")
+
+
+def get_list_of_users(activation_json):
+    list_of_users = []
+    for service in activation_json.get("services", []):
+        user_uuid = service.get("gcpMonitorId", "")
+        list_of_users.append(user_uuid)
+
+    return list_of_users
 
 
 def get_activation_config_per_service(activation_yaml):

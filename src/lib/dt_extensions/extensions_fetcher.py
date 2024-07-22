@@ -24,7 +24,7 @@ from lib.configuration import config
 from lib.context import LoggingContext
 from lib.metrics import GCPService
 from lib.utilities import get_autodiscovery_flag_per_service, read_activation_yaml, get_activation_config_per_service, \
-    load_activated_feature_sets, read_activation_json
+    load_activated_feature_sets, read_activation_json, get_list_of_users
 
 ExtensionsFetchResult = NamedTuple("ExtensionsFetchResult",
                                    [("services", List[GCPService]), ("extension_versions", Dict[str, str])], )
@@ -46,7 +46,6 @@ class ExtensionsFetcher:
         extension_name_to_version_dict = await self._get_extensions_dict_from_dynatrace_cluster()
         # activation_yaml = read_activation_yaml()
         activation_json = read_activation_json()
-
         activation_config_per_service = get_activation_config_per_service(activation_json)
         autodiscovery_per_service = get_autodiscovery_flag_per_service(activation_json)
         feature_sets_from_activation_config = load_activated_feature_sets(self.logging_context, activation_json)
