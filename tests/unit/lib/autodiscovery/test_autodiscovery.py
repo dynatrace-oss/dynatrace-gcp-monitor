@@ -231,7 +231,7 @@ async def test_autodiscovery_check_resources_to_discover(
 
     mock_read_autodiscovery_block_list_yaml.return_value = {"block_list": []}
 
-    autodiscovery_context = AutodiscoveryContext()
+    autodiscovery_context = AutodiscoveryContext(mock_read_autodiscovery_block_list_yaml.return_value)
 
     service_1 = GCPService(
         extension_name="dynatrace.extension1",
