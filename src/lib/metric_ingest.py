@@ -189,7 +189,7 @@ async def fetch_metric(
     reducer = _set_reducer(metric.google_metric_kind, metric.value_type)
 
     params = [
-        ('filter', f'metric.type = "{metric.google_metric}" {service.monitoring_filter}'.strip()),
+        ('filter', f'metric.type = "{metric.google_metric}"'.strip()),
         ('interval.startTime', start_time.isoformat() + "Z"),
         ('interval.endTime', end_time.isoformat() + "Z"),
         ('aggregation.alignmentPeriod', f"{metric.sample_period_seconds.total_seconds()}s"),

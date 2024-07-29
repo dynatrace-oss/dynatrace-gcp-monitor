@@ -51,7 +51,10 @@ if platform.system() == 'Windows':
 
 loop = asyncio.get_event_loop()
 
-PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('services', List[GCPService]), ('extension_versions', Dict[str,str])])
+PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('services', List[GCPService]),
+                                                           ('extension_versions', Dict[str, str]),
+                                                           ('not_configured_services', List[str]),
+                                                           ('block_list', List[str])])
 
 logging_context = LoggingContext(None)
 
@@ -67,7 +70,10 @@ async def metrics_pre_launch_check() -> Optional[PreLaunchCheckResult]:
         if not extensions_fetch_result:
             return None
 
-    return PreLaunchCheckResult(services=extensions_fetch_result.services, extension_versions=extensions_fetch_result.extension_versions)
+    return PreLaunchCheckResult(services=extensions_fetch_result.services,
+                                extension_versions=extensions_fetch_result.extension_versions,
+                                not_configured_services=extensions_fetch_result.not_configured_services,
+                                block_list=extensions_fetch_result.block_list)
 
 
 async def run_instance_metadata_check() -> Optional[InstanceMetadata]:
@@ -133,17 +139,19 @@ async def run_metrics_fetcher_forever():
 
     services = pre_launch_check_result.services
     extension_versions = pre_launch_check_result.extension_versions
+    not_configured_services = pre_launch_check_result.not_configured_services
+    block_list = pre_launch_check_result.block_list
     new_services_from_extensions_task = None
 
     if config.metric_autodiscovery():
-        autodiscovery_manager = AutodiscoveryContext()
+        autodiscovery_manager = AutodiscoveryContext(block_list)
         autodiscovery_task = await AutodiscoveryTaskExecutor.create(services, autodiscovery_manager, extension_versions)
     
     while True:
         start_time_s = time.time()
 
         if config.keep_refreshing_extensions_config():
-            new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services, extension_versions))
+            new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services, extension_versions, not_configured_services, block_list))
 
         if config.metric_autodiscovery():
             services = await autodiscovery_task.process_autodiscovery_result(services, extension_versions)
@@ -152,7 +160,7 @@ async def run_metrics_fetcher_forever():
 
         if config.keep_refreshing_extensions_config():
             logging_context.log('MAIN_LOOP', 'Refreshing services config')
-            services, extension_versions = await new_services_from_extensions_task
+            services, extension_versions, not_configured_services, block_list = await new_services_from_extensions_task
 
         end_time_s = time.time()
 

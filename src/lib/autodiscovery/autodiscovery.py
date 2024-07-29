@@ -19,8 +19,7 @@ from lib.credentials import create_token
 from lib.metrics import AutodiscoveryGCPService, GCPService, Metric
 from lib.utilities import (
     read_autodiscovery_block_list_yaml,
-    read_autodiscovery_config_yaml,
-    read_activation_json
+    read_autodiscovery_config_yaml
 )
 from main import get_metric_context
 
@@ -33,16 +32,16 @@ class AutodiscoveryContext:
     logging_context = LoggingContext("AUTODISCOVERY")
     autodiscovery_enabled: bool
 
-    def __init__(self):
+    def __init__(self, block_list):
         self.resource_to_disovery = {}
         self.resources_to_extensions_mapping = {}
         self.autodiscovery_metric_block_list = []
         self.last_autodiscovered_metric_list_names = {}
         self.autodiscovery_enabled = True
 
-        self._load_yamls()
+        self._load_yamls(block_list)
 
-    def _load_yamls(self):
+    def _load_yamls(self, block_list):
         try:
             resource_to_disovery = (
                 read_autodiscovery_config_yaml()
@@ -52,18 +51,11 @@ class AutodiscoveryContext:
             self.resource_to_disovery = (
                 resource_to_disovery if resource_to_disovery is not None else {}
             )
-
             self.resources_to_extensions_mapping = get_resources_mapping()
             self.services_to_resources_mapping = get_services_to_resources()
-            activation_json = read_activation_json().get("services", [])
-            autodiscovery_metric_block_list = []
-            for item in activation_json:
-                block_list = item.get('blockList', [])
-                autodiscovery_metric_block_list.extend(block_list)
-
             self.autodiscovery_metric_block_list = (
-                autodiscovery_metric_block_list
-                if autodiscovery_metric_block_list is not None
+                block_list
+                if block_list is not None
                 else []
             )
 

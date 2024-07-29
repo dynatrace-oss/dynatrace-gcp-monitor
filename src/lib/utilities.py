@@ -19,6 +19,11 @@ from typing import List, Dict
 import yaml
 import json
 import re
+from itertools import chain
+import uuid
+
+# myuuid = uuid.uuid4()
+
 
 from lib.configuration import config
 from lib.context import LoggingContext
@@ -42,63 +47,6 @@ def safe_read_yaml(filepath: str, alternative_environ_name: str):
     if not yaml_dict:
         yaml_dict = {}
     return yaml_dict
-
-
-def safe_read_json(filepath: str, alternative_environ_name: str):   # TODO flatten json package
-    def camel_to_snake(name):
-        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-        s2 = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1)
-        return s2.lower()
-
-    def convert_data(item, data):
-        value = data[item]
-        gcp = value.pop('gcp', {})
-        value.update(gcp)
-        value['featureSets'] = [
-            camel_to_snake(feature) for feature in value.get('featureSets', [])
-        ]
-        return value
-
-    activation_dict = {'services': []}
-    gcp_monitor_uuid = read_gcp_monitor_uuid()
-    try:
-        for extension in os.listdir(filepath):
-            file_path = os.path.join(filepath, extension)
-            for file in os.listdir(file_path):
-                if file.endswith(".json"):
-                    json_path = os.path.join(file_path, file)
-                    with open(json_path, 'r') as f:
-                        data = json.load(f)[0]
-
-                    uuids = data.get("value").get("gcp").get("gcpMonitorId")
-                    enabled = data.get("value").get("enabled")
-                    if enabled and (gcp_monitor_uuid in uuids or uuids == ""):
-                        for item in data:
-                            value = convert_data(item, data)
-                            value.update({"service": extension})
-                            activation_dict['services'].append(value)
-
-
-    except:
-        data = json.loads(os.environ.get(alternative_environ_name, ""))
-        for extension in data:
-            uuids = extension.get("value").get("gcp").get("gcpMonitorId")
-            enabled = extension.get("value").get("enabled")
-            if enabled and (gcp_monitor_uuid in uuids or uuids == ""):
-                for item in extension:
-                    value = convert_data(item, extension)
-                    activation_dict['services'].append(value)
-
-    return activation_dict
-
-
-def read_gcp_monitor_uuid():
-    return os.environ.get("GCP_MONITOR_UUID", "")
-
-
-def read_activation_json():
-    return safe_read_json("../extensions", "ACTIVATION_JSON_CONFIG")
-    # return json.loads(os.environ.get("ACTIVATION_JSON_CONFIG", ""))[0]
 
 
 def read_activation_yaml():
@@ -128,13 +76,49 @@ def read_autodiscovery_resources_mapping():
     return safe_read_yaml('./lib/autodiscovery/config/autodiscovery-mapping.yaml', "AUTODISCOVERY_RESOURCES_MAPPING")
 
 
-def get_list_of_users(activation_json):
-    list_of_users = []
-    for service in activation_json.get("services", []):
-        user_uuid = service.get("gcpMonitorId", "")
-        list_of_users.append(user_uuid)
+def get_service_activation_dict(services, monitoring_configurations, extension_active_version):
+    gcp_monitor_uuid = config.read_gcp_monitor_uuid()
 
-    return list_of_users
+    def process_item(item):
+        item_value = item.get("value")
+        if not item_value:
+            return []
+
+        uuids = item_value.get("gcp").get("gcpMonitorID")
+        enabled = item_value.get("enabled")
+        version = item_value.get('version')
+
+        if enabled and (gcp_monitor_uuid in uuids or uuids == "") and version == extension_active_version:
+            value = item_value.copy()
+            gcp = value.pop('gcp', {})
+            value.update(gcp)
+            return [dict(value, service=service) for service in services]
+        return []
+
+    processed_items = chain.from_iterable(map(process_item, monitoring_configurations))
+
+    return processed_items
+
+
+def create_default_monitoring_config(extension_name, version) -> List[Dict]:
+    monitoring_configuration = {
+        "scope": "ag_group-default",
+        "value": {
+            "enabled": True,
+            "description": f"default_{extension_name}",
+            "version": f"{version}",
+            "featureSets": [
+                "default_metrics"
+            ],
+            "vars": {},
+            "gcp": {
+                "autodiscovery": False,
+                "blockList": [],
+                "gcpMonitorID": f"{config.read_gcp_monitor_uuid()}"
+            }
+        }
+    }
+    return [monitoring_configuration]
 
 
 def get_activation_config_per_service(activation_yaml):
@@ -158,9 +142,10 @@ def get_autodiscovery_flag_per_service(activation_yaml) -> Dict[str, bool]:
     enabled_autodiscovery = {}
     for service in activation_yaml.get("services", []):
         service_name = service.get("service", "")
-        autodiscovery_enabled_flag = service.get("allowAutodiscovery", False)
+        autodiscovery_enabled_flag = service.get("autodiscovery", False)
         if isinstance(autodiscovery_enabled_flag, bool) and autodiscovery_enabled_flag is True:
             enabled_autodiscovery[service_name] = True
+            return enabled_autodiscovery
         else:
             enabled_autodiscovery[service_name] = False
 

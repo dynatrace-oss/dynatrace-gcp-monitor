@@ -182,7 +182,6 @@ class GCPService:
     feature_set: Text
     dimensions: List[Dimension]
     metrics:  List[Metric]
-    monitoring_filter: Text
     activation: Dict[Text, Any]
     is_enabled: bool
     extension_name: str
@@ -200,22 +199,12 @@ class GCPService:
             in kwargs.get("metrics", {})
             if x.get("gcpOptions", {}).get("valueType", "").upper() != "STRING"
         ])
-        object.__setattr__(self, "activation", kwargs.get("activation", {}))
-        monitoring_filter = kwargs.get("gcpMonitoringFilter", "")
-        if self.activation:
-            for var_key, var_value in (self.activation.get("vars", {}) or {}).items():
-                monitoring_filter = monitoring_filter.replace(f'{{{var_key}}}', var_value)\
-                    .replace(f'var:{var_key}', var_value)
-        # remove not matched variables
-        monitoring_filter = VARIABLE_BRACKETS_PATTERN.sub('', monitoring_filter)
-        monitoring_filter = VARIABLE_VAR_PATTERN.sub('', monitoring_filter)
-        object.__setattr__(self, "monitoring_filter", monitoring_filter)
         object.__setattr__(self, "is_enabled",  kwargs.get("is_enabled", True))
         object.__setattr__(self, "extension_name",  kwargs.get("extension_name", "Unknown Extension"))
         object.__setattr__(self, "autodiscovery_enabled",  kwargs.get("autodiscovery_enabled", False))
 
     def __hash__(self):
-        return hash((self.name, self.technology_name, self.feature_set, self.monitoring_filter))
+        return hash((self.name, self.technology_name, self.feature_set))
 
 
 class AutodiscoveryGCPService(GCPService):

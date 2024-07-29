@@ -95,6 +95,7 @@ async def get_metric_context(
 
     return context
 
+
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
     logging_context = LoggingContext(execution_id)
 
