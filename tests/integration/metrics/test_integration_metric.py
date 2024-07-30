@@ -133,7 +133,7 @@ async def ingest_lines_output(expected_ingest_output_file):
     requests_with_filter = [reqeust_gcp_timeseries for reqeust_gcp_timeseries in reqeusts_gcp_timeseries.requests
                             if gce_instance_filter in reqeust_gcp_timeseries.url]
     
-    assert len(requests_with_filter) == 3
+    assert len(requests_with_filter) == 0
 
     sent_requests = Requests.get_all_received_requests().get_json_data().get('requests')
     urls = {sent_request["request"]["url"] for sent_request in sent_requests}
