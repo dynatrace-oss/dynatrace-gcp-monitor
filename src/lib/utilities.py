@@ -20,10 +20,6 @@ import yaml
 import json
 import re
 from itertools import chain
-import uuid
-
-# myuuid = uuid.uuid4()
-
 
 from lib.configuration import config
 from lib.context import LoggingContext
@@ -110,10 +106,11 @@ def create_default_monitoring_config(extension_name, version) -> List[Dict]:
             "featureSets": [
                 "default_metrics"
             ],
-            "vars": {},
+            "vars": {
+                "filter_conditions": "null"
+            },
             "gcp": {
                 "autodiscovery": False,
-                "blockList": [],
                 "gcpMonitorID": f"{config.read_gcp_monitor_uuid()}"
             }
         }
@@ -138,14 +135,15 @@ def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml
     return services_allow_list
 
 
-def get_autodiscovery_flag_per_service(activation_yaml) -> Dict[str, bool]:
+def get_autodiscovery_flag_per_service(activation_dict) -> Dict[str, bool]:
     enabled_autodiscovery = {}
-    for service in activation_yaml.get("services", []):
+    for service in activation_dict.get("services", []):
         service_name = service.get("service", "")
         autodiscovery_enabled_flag = service.get("autodiscovery", False)
-        if isinstance(autodiscovery_enabled_flag, bool) and autodiscovery_enabled_flag is True:
+        if isinstance(autodiscovery_enabled_flag, bool) and autodiscovery_enabled_flag:
             enabled_autodiscovery[service_name] = True
-            return enabled_autodiscovery
+        elif service_name in enabled_autodiscovery and enabled_autodiscovery[service_name]:
+            enabled_autodiscovery[service_name] = True
         else:
             enabled_autodiscovery[service_name] = False
 

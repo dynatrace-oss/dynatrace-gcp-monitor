@@ -130,7 +130,7 @@ def get_dynatrace_api_key_from_env():
     return os.environ.get("DYNATRACE_ACCESS_KEY", None)
 
 
-def read_gcp_monitor_uuid():
+def read_gcp_monitor_uuid():    # TODO delete, will be replaced by project id
     return os.environ.get("GCP_MONITOR_UUID", "")
 
 

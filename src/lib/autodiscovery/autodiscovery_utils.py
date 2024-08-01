@@ -113,7 +113,7 @@ def should_include_metric(
     if not include_alpha_metrics:
         should_include = should_include and metric_descriptor.launch_stage != "ALPHA"
 
-    return should_include 
+    return should_include
 
 
 async def run_fetch_metric_descriptors(

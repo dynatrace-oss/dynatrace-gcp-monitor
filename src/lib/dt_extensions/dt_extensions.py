@@ -14,8 +14,7 @@ logging_context = LoggingContext("EXTENSIONS")
 
 async def prepare_services_config_for_next_polling(current_services: List[GCPService],
                                                    current_extension_versions: Dict[str, str],
-                                                   current_not_configured_services: List[str],
-                                                   current_block_list: List[str]) -> ExtensionsFetchResult:
+                                                   current_not_configured_services: List[str]) -> ExtensionsFetchResult:
     try:
         async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
             token = await create_token(logging_context, gcp_session)
@@ -29,7 +28,7 @@ async def prepare_services_config_for_next_polling(current_services: List[GCPSer
             return extensions_fetch_result
     except Exception as e:
         logging_context.error(f'Failed to prepare new services configuration from extensions, will reuse previous configuration; {str(e)}')
-        return ExtensionsFetchResult(current_services, current_extension_versions, current_not_configured_services, current_block_list)
+        return ExtensionsFetchResult(current_services, current_extension_versions, current_not_configured_services)
 
 
 async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession, token: str) -> Optional[ExtensionsFetchResult]:

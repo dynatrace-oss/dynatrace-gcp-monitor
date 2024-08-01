@@ -17,10 +17,9 @@ def test_query_loop_correct_interval(
         mock_metrics_pre_launch_check,
         mock_async_dynatrace_gcp_extension: AsyncMock,
         mock_sfm_send_loop_timeouts: AsyncMock,
-    ):
+):
     mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(services=[], extension_versions={},
-                                                                                 not_configured_services=[],
-                                                                                 block_list=[])
+                                                                                 not_configured_services=[])
 
     run_docker.SFM_ENABLED = True
     run_docker.QUERY_INTERVAL_SEC = 3
@@ -41,10 +40,9 @@ def test_query_loop_correct_interval(
 def test_query_loop_timeout(
         mock_metrics_pre_launch_check,
         mock_sfm_send_loop_timeouts: AsyncMock,
-    ):
+):
     mock_metrics_pre_launch_check.return_value = run_docker.PreLaunchCheckResult(services=[], extension_versions={},
-                                                                                 not_configured_services=[],
-                                                                                 block_list=[])
+                                                                                 not_configured_services=[])
 
     run_docker.SFM_ENABLED = True
     run_docker.QUERY_INTERVAL_SEC = 1
@@ -58,7 +56,8 @@ def test_query_loop_timeout(
     async def async_dynatrace_gcp_extension_long_worker_mock(services):
         await asyncio.sleep(query_length_sec)
 
-    with mock.patch('run_docker.async_dynatrace_gcp_extension', wraps=async_dynatrace_gcp_extension_long_worker_mock) as mock_async_dynatrace_gcp_extension:
+    with mock.patch('run_docker.async_dynatrace_gcp_extension',
+                    wraps=async_dynatrace_gcp_extension_long_worker_mock) as mock_async_dynatrace_gcp_extension:
         try:
             asyncio_run_with_timeout(run_docker.run_metrics_fetcher_forever(), run_loop_for_sec)
         except TimeoutError:
@@ -67,4 +66,3 @@ def test_query_loop_timeout(
         assert mock_async_dynatrace_gcp_extension.call_count == 2
 
     mock_sfm_send_loop_timeouts.assert_called_with(False)
-

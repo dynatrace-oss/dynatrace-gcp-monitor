@@ -32,16 +32,16 @@ class AutodiscoveryContext:
     logging_context = LoggingContext("AUTODISCOVERY")
     autodiscovery_enabled: bool
 
-    def __init__(self, block_list):
+    def __init__(self):
         self.resource_to_disovery = {}
         self.resources_to_extensions_mapping = {}
         self.autodiscovery_metric_block_list = []
         self.last_autodiscovered_metric_list_names = {}
         self.autodiscovery_enabled = True
 
-        self._load_yamls(block_list)
+        self._load_yamls()
 
-    def _load_yamls(self, block_list):
+    def _load_yamls(self):
         try:
             resource_to_disovery = (
                 read_autodiscovery_config_yaml()
@@ -51,11 +51,15 @@ class AutodiscoveryContext:
             self.resource_to_disovery = (
                 resource_to_disovery if resource_to_disovery is not None else {}
             )
+
             self.resources_to_extensions_mapping = get_resources_mapping()
             self.services_to_resources_mapping = get_services_to_resources()
+            autodiscovery_metric_block_list = read_autodiscovery_block_list_yaml().get(
+                "block_list", []
+            )
             self.autodiscovery_metric_block_list = (
-                block_list
-                if block_list is not None
+                autodiscovery_metric_block_list
+                if autodiscovery_metric_block_list is not None
                 else []
             )
 
@@ -86,7 +90,6 @@ class AutodiscoveryContext:
 
             else:
                 prepared_resources[resource] = None
-
         return prepared_resources
 
     async def _check_resources_to_discover(
@@ -127,7 +130,6 @@ class AutodiscoveryContext:
                 resources[resource_name] = value
             else:
                 self.logging_context.error("Attempted to add a resource that is already registered")
-
         return resources
 
     async def get_autodiscovery_service(
@@ -210,7 +212,6 @@ class AutodiscoveryContext:
             autodiscovery_resources,
             self.autodiscovery_metric_block_list,
         )
-
         existing_resources_to_metrics = await get_existing_metrics(autodiscovery_resources)
 
         autodiscovery_resources_to_metrics = {}

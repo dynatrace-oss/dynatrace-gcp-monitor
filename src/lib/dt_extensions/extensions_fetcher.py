@@ -14,7 +14,7 @@
 import json
 import zipfile
 from io import BytesIO
-from typing import NamedTuple, List, Dict, Optional, Tuple, Any
+from typing import NamedTuple, List, Dict, Optional
 
 import yaml
 from aiohttp import ClientSession
@@ -30,7 +30,7 @@ ExtensionsFetchResult = NamedTuple("ExtensionsFetchResult",
                                    [("services", List[GCPService]),
                                     ("extension_versions", Dict[str, str]),
                                     ("not_configured_services", List[str]),
-                                    ("block_list", List[str])], )
+                                    ], )
 
 ExtensionCacheEntry = NamedTuple('ExtensionCacheEntry', [('version', str), ('definition', Dict)])
 EXTENSIONS_CACHE_BY_NAME: Dict[str, ExtensionCacheEntry] = {}
@@ -50,6 +50,7 @@ DEFAULT_GOOGLE_EXTENSIONS = [
     "com.dynatrace.extension.google-pubsub-lite",
     "com.dynatrace.extension.google-sql"
 ]
+
 
 class ExtensionsFetcher:
 
@@ -73,19 +74,17 @@ class ExtensionsFetcher:
             monitoring_configurations, status = await self._get_monitoring_configuration(extension_name)
             if status == int(200):
                 if not monitoring_configurations and extension_name in DEFAULT_GOOGLE_EXTENSIONS:
-                    monitoring_configurations = create_default_monitoring_config(extension_name, extension_active_version)
+                    monitoring_configurations = create_default_monitoring_config(extension_name,
+                                                                                 extension_active_version)
                     await self._post_monitoring_configuration(extension_name, monitoring_configurations)
 
-                activation_dict['services'].extend(get_service_activation_dict(services, monitoring_configurations, extension_active_version))
+                activation_dict['services'].extend(
+                    get_service_activation_dict(services, monitoring_configurations, extension_active_version))
 
-        # for item in activation_dict.get("services", []):
+        # for item in activation_dict.get("services", []): # TODO delete
         #     print(item)
 
-        autodiscovery_metric_block_list = []
-        for item in activation_dict.get("services", []):
-            block_list = item.get('blockList', [])
-            autodiscovery_metric_block_list.extend(block_list)
-        autodiscovery_metric_block_list = list(set(autodiscovery_metric_block_list))
+        activation_config_per_service = get_activation_config_per_service(activation_dict)  # TODO Vars
         autodiscovery_per_service = get_autodiscovery_flag_per_service(activation_dict)
         feature_sets_from_activation_config = load_activated_feature_sets(self.logging_context, activation_dict)
 
@@ -94,8 +93,12 @@ class ExtensionsFetcher:
 
         for extension_name, extension_version in extension_name_to_version_dict.items():
             services_for_extension, not_configured_services_for_extension = await self._get_service_configs_for_extension(
-                extension_name, extension_version, feature_sets_from_activation_config,
-                autodiscovery_per_service)
+                extension_name,
+                extension_version,
+                activation_config_per_service,  # TODO Vars
+                feature_sets_from_activation_config,
+                autodiscovery_per_service
+            )
 
             configured_services.extend(services_for_extension)
             not_configured_services.extend(not_configured_services_for_extension)
@@ -104,8 +107,7 @@ class ExtensionsFetcher:
                                      f" because not enabled in deployment config: {not_configured_services}")
         return ExtensionsFetchResult(services=configured_services,
                                      extension_versions=extension_name_to_version_dict,
-                                     not_configured_services=not_configured_services,
-                                     block_list=autodiscovery_metric_block_list)
+                                     not_configured_services=not_configured_services)
 
     async def _get_extensions_dict_from_dynatrace_cluster(self) -> Dict[str, str]:
         dynatrace_extensions = await self._get_extension_list_from_dynatrace_cluster()
@@ -180,6 +182,7 @@ class ExtensionsFetcher:
             self,
             extension_name: str,
             extension_version: str,
+            activation_config_per_service,  # TODO Vars
             feature_sets_from_activation_config,
             autodiscovery_per_service: Dict[str, bool],
     ) -> (List[GCPService], List):
@@ -198,10 +201,12 @@ class ExtensionsFetcher:
         for service in extension_configuration.get("gcp"):
             service_name = service.get("service")
             feature_set = f"{service_name}/{service.get('featureSet')}"
+            activation = activation_config_per_service.get(service_name, {})  # TODO Vars
             is_configured = feature_set in feature_sets_from_activation_config
             all_services.append(
                 GCPService(
                     **service,
+                    activation=activation,  # TODO Vars
                     is_enabled=is_configured,
                     extension_name=extension_name,
                     autodiscovery_enabled=autodiscovery_per_service.get(service_name, False)
