@@ -42,7 +42,7 @@ async def extensions_fetch(gcp_session: ClientSession, dt_session: ClientSession
     if extension_fetcher_result.services:
         feature_sets_names = [f"{service.name}/{service.feature_set}" for service in extension_fetcher_result.services]
         not_configured = [service for service in extension_fetcher_result.not_configured_services]
-        logging_context.log(f'Services config prepared from extensions & deployment configuration: {list(set(feature_sets_names) - set(not_configured))}')
+        logging_context.log(f'Services config prepared from extensions & deployment configuration: {sorted(list(set(feature_sets_names) - set(not_configured)))}')
         return extension_fetcher_result
     else:
         logging_context.log("Extensions fetch resulted in empty list of services. Check on the Dynatrace Hub and enable Google extensions to start monitoring the desired services.")

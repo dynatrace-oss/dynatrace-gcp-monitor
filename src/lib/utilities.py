@@ -73,7 +73,8 @@ def read_autodiscovery_resources_mapping():
 
 
 def get_service_activation_dict(services, monitoring_configurations, extension_active_version):
-    gcp_monitor_uuid = config.read_gcp_monitor_uuid()
+    # project_id = config.project_id()
+    gcp_monitor_uuid = config.read_gcp_monitor_uuid()   # TODO change for project ID
 
     def process_item(item):
         item_value = item.get("value")
@@ -107,11 +108,12 @@ def create_default_monitoring_config(extension_name, version) -> List[Dict]:
                 "default_metrics"
             ],
             "vars": {
-                "filter_conditions": "null"
+                "filter_conditions": None
             },
             "gcp": {
                 "autodiscovery": False,
-                "gcpMonitorID": f"{config.read_gcp_monitor_uuid()}"
+                # "projectID": f"{config.project_id()}",
+                "gcpMonitorID": f"{config.read_gcp_monitor_uuid()}" # TODO change for project ID
             }
         }
     }
@@ -140,7 +142,7 @@ def get_autodiscovery_flag_per_service(activation_dict) -> Dict[str, bool]:
     for service in activation_dict.get("services", []):
         service_name = service.get("service", "")
         autodiscovery_enabled_flag = service.get("autodiscovery", False)
-        if isinstance(autodiscovery_enabled_flag, bool) and autodiscovery_enabled_flag:
+        if isinstance(autodiscovery_enabled_flag, bool) and autodiscovery_enabled_flag is True:
             enabled_autodiscovery[service_name] = True
         elif service_name in enabled_autodiscovery and enabled_autodiscovery[service_name]:
             enabled_autodiscovery[service_name] = True
