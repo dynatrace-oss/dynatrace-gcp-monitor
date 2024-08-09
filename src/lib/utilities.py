@@ -73,19 +73,18 @@ def read_autodiscovery_resources_mapping():
 
 
 def get_service_activation_dict(services, monitoring_configurations, extension_active_version):
-    # project_id = config.project_id()
-    gcp_monitor_uuid = config.read_gcp_monitor_uuid()   # TODO change for project ID
+    project_id = config.project_id()
 
     def process_item(item):
         item_value = item.get("value")
         if not item_value:
             return []
 
-        uuids = item_value.get("gcp").get("gcpMonitorID")
+        ids = item_value.get("gcp").get("gcpMonitorID")
         enabled = item_value.get("enabled")
         version = item_value.get('version')
 
-        if enabled and (gcp_monitor_uuid in uuids or uuids == "") and version == extension_active_version:
+        if enabled and (project_id in ids or ids == "") and version == extension_active_version:
             value = item_value.copy()
             gcp = value.pop('gcp', {})
             value.update(gcp)
@@ -98,11 +97,12 @@ def get_service_activation_dict(services, monitoring_configurations, extension_a
 
 
 def create_default_monitoring_config(extension_name, version) -> List[Dict]:
+    project_id = config.project_id()
     monitoring_configuration = {
-        "scope": "ag_group-default",
+        "scope": "clouds",
         "value": {
             "enabled": True,
-            "description": f"default_{extension_name}",
+            "description": f"default-{extension_name.split('.')[-1]}-{project_id}",
             "version": f"{version}",
             "featureSets": [
                 "default_metrics"
@@ -112,8 +112,7 @@ def create_default_monitoring_config(extension_name, version) -> List[Dict]:
             },
             "gcp": {
                 "autodiscovery": False,
-                # "projectID": f"{config.project_id()}",
-                "gcpMonitorID": f"{config.read_gcp_monitor_uuid()}" # TODO change for project ID
+                "gcpMonitorID": f"{project_id}"
             }
         }
     }

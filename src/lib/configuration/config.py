@@ -27,7 +27,7 @@ def metric_autodiscovery():
 
 
 def scoping_project_support_enabled():
-    return os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE").upper() in ["TRUE", "YES"]
+    return os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "TRUE").upper() in ["TRUE", "YES"]
 
 
 def query_interval_min():
@@ -43,7 +43,7 @@ def excluded_projects_by_prefix():
 
 
 def project_id():
-    return os.environ.get("GCP_PROJECT","")
+    return os.environ.get("GCP_PROJECT", "")
 
 
 def credentials_path():
@@ -128,10 +128,6 @@ def max_dimension_value_length():
 
 def get_dynatrace_api_key_from_env():
     return os.environ.get("DYNATRACE_ACCESS_KEY", None)
-
-
-def read_gcp_monitor_uuid():    # TODO delete, will be replaced by project id
-    return os.environ.get("GCP_MONITOR_UUID", "")
 
 
 def get_dynatrace_url_from_env():

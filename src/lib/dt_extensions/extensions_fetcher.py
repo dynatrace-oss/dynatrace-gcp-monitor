@@ -64,6 +64,7 @@ class ExtensionsFetcher:
         extension_name_to_version_dict = await self._get_extensions_dict_from_dynatrace_cluster()
         configured_services = []
         not_configured_services = []
+        project_id = config.project_id()
         for extension_name, extension_version in extension_name_to_version_dict.items():
             activation_dict = {'services': []}
             extension_configuration = await self.get_extension_configuration_from_cache_or_download(
@@ -74,7 +75,8 @@ class ExtensionsFetcher:
                 services = [service.get("service") for service in extension_configuration_services]
                 services = list(set(services))
                 monitoring_configurations, status = await self._get_monitoring_configuration(extension_name)
-                if not monitoring_configurations and extension_name in DEFAULT_GOOGLE_EXTENSIONS and status == int(200):
+                project_ids = [monitoring_config.get("value").get("gcp").get("gcpMonitorID") for monitoring_config in monitoring_configurations]
+                if (not monitoring_configurations or project_id not in project_ids) and extension_name in DEFAULT_GOOGLE_EXTENSIONS and status == int(200):
                     monitoring_configurations = create_default_monitoring_config(extension_name, extension_version)
                     await self._post_monitoring_configuration(extension_name, monitoring_configurations)
 
