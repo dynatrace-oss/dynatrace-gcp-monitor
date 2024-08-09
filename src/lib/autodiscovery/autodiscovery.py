@@ -19,7 +19,7 @@ from lib.credentials import create_token
 from lib.metrics import AutodiscoveryGCPService, GCPService, Metric
 from lib.utilities import (
     read_autodiscovery_block_list_yaml,
-    read_autodiscovery_config_yaml,
+    read_autodiscovery_config_yaml
 )
 from main import get_metric_context
 
@@ -90,7 +90,6 @@ class AutodiscoveryContext:
 
             else:
                 prepared_resources[resource] = None
-
         return prepared_resources
 
     async def _check_resources_to_discover(
@@ -131,7 +130,6 @@ class AutodiscoveryContext:
                 resources[resource_name] = value
             else:
                 self.logging_context.error("Attempted to add a resource that is already registered")
-
         return resources
 
     async def get_autodiscovery_service(
@@ -214,7 +212,6 @@ class AutodiscoveryContext:
             autodiscovery_resources,
             self.autodiscovery_metric_block_list,
         )
-
         existing_resources_to_metrics = await get_existing_metrics(autodiscovery_resources)
 
         autodiscovery_resources_to_metrics = {}
