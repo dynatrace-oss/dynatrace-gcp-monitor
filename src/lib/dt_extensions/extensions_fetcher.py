@@ -76,7 +76,7 @@ class ExtensionsFetcher:
                 services = list(set(services))
                 monitoring_configurations, status = await self._get_monitoring_configuration(extension_name)
                 project_ids = [monitoring_config.get("value").get("gcp").get("gcpMonitorID") for monitoring_config in monitoring_configurations]
-                if (not monitoring_configurations or project_id not in project_ids) and extension_name in DEFAULT_GOOGLE_EXTENSIONS and status == int(200):
+                if (not monitoring_configurations or (project_id not in project_ids and '' not in project_ids)) and extension_name in DEFAULT_GOOGLE_EXTENSIONS and status == int(200):
                     monitoring_configurations = create_default_monitoring_config(extension_name, extension_version)
                     await self._post_monitoring_configuration(extension_name, monitoring_configurations)
 
