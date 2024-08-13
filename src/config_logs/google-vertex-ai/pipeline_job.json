@@ -1,0 +1,34 @@
+{
+  "name": "pipeline_job",
+  "displayName": "Google Vertex AI Pipeline Job",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('aiplatform.googleapis.com/PipelineJob')"
+        }
+      ],
+      "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('aiplatform.googleapis.com/PipelineJob')"
+          },
+          {
+            "key": "pipeline_job_id",
+            "pattern": "resource.labels.pipeline_job_id"
+          },
+          {
+            "key": "gcp.project.id",
+            "pattern": "logName | split('/', @)[1]"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+
+        ]
+    }
+  ]
+}
