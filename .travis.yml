@@ -88,5 +88,3 @@ jobs:
     script:
       - mkdir -p ./artefacts/ && gsutil cp gs://travis-e2e-dt-gcp-extension-k8s-test/commit-${TRAVIS_COMMIT}_build-${TRAVIS_BUILD_ID}/helm-deployment-package.tar ./artefacts/
       - travis_wait 120 ./tests/e2e/execute-tests.sh
-    after_script:
-      - ./tests/e2e/deployment-test-cleanup.sh
