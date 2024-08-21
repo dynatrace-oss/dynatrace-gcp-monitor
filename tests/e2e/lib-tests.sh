@@ -22,8 +22,8 @@ create_sample_app() {
   gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
   --runtime python312 \
   --trigger-http \
-  --verbosity debug \
-  --source ./tests/e2e/sample_app/
+  --no-allow-unauthenticated \
+  --source ./tests/e2e/sample_app/ > /dev/null 2>&1
 }
 
 check_container_state() {
