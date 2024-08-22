@@ -130,27 +130,33 @@ async def run_fetch_metric_descriptors(
     project_discovered_metrics = []
     include_alpha_metrics = config.gcp_autodiscovery_include_alpha_metrics()
 
-    while True:
-        response = await gcp_session.request("GET", url=url, headers=headers, params=params)
-        response.raise_for_status()
-        response_json = await response.json()
+    try:
+        while True:
+            response = await gcp_session.request("GET", url=url, headers=headers, params=params)
+            response.raise_for_status()
+            response_json = await response.json()
 
-        for descriptor in response_json.get("metricDescriptors", []):
-            try:
-                metric_descriptor = GCPMetricDescriptor.create(**descriptor, project_id=project_id)
-                if should_include_metric(
-                    metric_descriptor, resources_to_autodiscover, autodiscovery_metric_block_list, include_alpha_metrics
-                ):
-                    project_discovered_metrics.append(metric_descriptor)
-            except Exception as error:
-                logging_context.log(
-                    f"Failed to load autodiscovered metric for project: {project_id}. Details: {error}"
-                )
+            for descriptor in response_json.get("metricDescriptors", []):
+                try:
+                    metric_descriptor = GCPMetricDescriptor.create(**descriptor, project_id=project_id)
+                    if should_include_metric(
+                        metric_descriptor, resources_to_autodiscover, autodiscovery_metric_block_list, include_alpha_metrics
+                    ):
+                        project_discovered_metrics.append(metric_descriptor)
+                except Exception as error:
+                    logging_context.log(
+                        f"Failed to load autodiscovered metric for project: {project_id}. Details: {error}"
+                    )
 
-        page_token = response_json.get("nextPageToken", "")
-        params["pageToken"] = page_token
-        if page_token == "":
-            break
+            page_token = response_json.get("nextPageToken", "")
+            params["pageToken"] = page_token
+            if page_token == "":
+                break
+    except Exception as error:
+        logging_context.error(
+            f"Failed to retrieve metric descriptors for project: {project_id}. Details: {error}"
+        )
+
     return [
         FetchMetricDescriptorsResult(project_id, metric_descriptor)
         for metric_descriptor in project_discovered_metrics
