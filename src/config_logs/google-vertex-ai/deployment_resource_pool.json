@@ -1,0 +1,34 @@
+{
+  "name": "deployment_resource_pool",
+  "displayName": "Google Vertex AI Deployment Resource Pool",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('aiplatform.googleapis.com/DeploymentResourcePool')"
+        }
+      ],
+      "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('vertex_ai_deployment_resource_pool')"
+          },
+          {
+            "key": "deployment_resource_pool_id",
+            "pattern": "resource.labels.deployment_resource_pool_id"
+          },
+          {
+            "key": "gcp.project.id",
+            "pattern": "logName | split('/', @)[1]"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+
+        ]
+    }
+  ]
+}
