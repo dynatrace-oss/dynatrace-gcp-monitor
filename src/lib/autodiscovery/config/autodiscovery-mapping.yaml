@@ -474,3 +474,49 @@ gcp_extension_mapping:
     feature_set: default_metrics
     monitored_resources:
     - value: gce_zone_network_health
+- extension_name: google-vertex-ai
+  services:
+  - service_name: vertex_ai_deployment_resource_pool
+    feature_set: default_metrics
+    monitored_resources:
+    - value: aiplatform.googleapis.com/DeploymentResourcePool
+  - service_name: vertex_ai_endpoint
+    feature_set: default_metrics
+    monitored_resources:
+    - value: aiplatform.googleapis.com/Endpoint
+  - service_name: vertex_ai_feature_online_store
+    feature_set: feature_store
+    monitored_resources:
+    - value: aiplatform.googleapis.com/FeatureOnlineStore
+  - service_name: vertex_ai_feature_store
+    feature_set: feature_store
+    monitored_resources:
+    - value: aiplatform.googleapis.com/Featurestore
+  - service_name: vertex_ai_location
+    feature_set: default_metrics
+    monitored_resources:
+    - value: aiplatform.googleapis.com/Location
+  - service_name: vertex_ai_pipeline_job
+    feature_set: pipelines
+    monitored_resources:
+    - value: aiplatform.googleapis.com/PipelineJob
+  - service_name: vertex_ai_index
+    feature_set: vector_search
+    monitored_resources:
+    - value: aiplatform.googleapis.com/Index
+  - service_name: vertex_ai_index_endpoint
+    feature_set: vector_search
+    monitored_resources:
+    - value: aiplatform.googleapis.com/IndexEndpoint
+  - service_name: vertex_ai_publisher_model
+    feature_set: default_metrics
+    monitored_resources:
+    - value: aiplatform.googleapis.com/PublisherModel
+  - service_name: vision_ai_instance
+    feature_set: vision_ai
+    monitored_resources:
+    - value: visionai.googleapis.com/Instance
+  - service_name: vision_ai_stream
+    feature_set: vision_ai
+    monitored_resources:
+    - value: visionai.googleapis.com/Stream
