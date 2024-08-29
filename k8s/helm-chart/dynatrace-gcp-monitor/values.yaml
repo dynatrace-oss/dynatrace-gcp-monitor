@@ -743,3 +743,70 @@ gcpServicesYaml: |
         - default_metrics
       vars:
         filter_conditions: ""
+    # Google Vertex AI
+    - service: vertex_ai_deployment_resource_pool
+      allowAutodiscovery: false
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: vertex_ai_endpoint
+      allowAutodiscovery: false
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: vertex_ai_feature_online_store
+      allowAutodiscovery: false
+      featureSets:
+        - feature_store
+      vars:
+        filter_conditions: ""
+    - service: vertex_ai_feature_store
+      allowAutodiscovery: false
+      featureSets:
+        - feature_store
+      vars:
+        filter_conditions: ""
+    - service: vertex_ai_location
+      allowAutodiscovery: false
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: vertex_ai_pipeline_job
+      allowAutodiscovery: false
+      featureSets:
+        - pipelines
+      vars:
+        filter_conditions: ""
+    - service: vertex_ai_index
+      allowAutodiscovery: false
+      featureSets:
+        - vector_search
+      vars:
+        filter_conditions: ""
+    - service: vertex_ai_index_endpoint
+      allowAutodiscovery: false
+      featureSets:
+        - vector_search
+      vars:
+        filter_conditions: ""
+    - service: vertex_ai_publisher_model
+      allowAutodiscovery: false
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    - service: vision_ai_instance
+      allowAutodiscovery: false
+      featureSets:
+        - vision_ai
+      vars:
+        filter_conditions: ""
+    - service: vision_ai_stream
+      allowAutodiscovery: false
+      featureSets:
+        - vision_ai
+      vars:
+        filter_conditions: ""

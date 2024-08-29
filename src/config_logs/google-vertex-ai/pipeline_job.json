@@ -13,7 +13,7 @@
       "attributes": [
           {
             "key": "gcp.resource.type",
-            "pattern": "to_string('aiplatform.googleapis.com/PipelineJob')"
+            "pattern": "to_string('vertex_ai_pipeline_job')"
           },
           {
             "key": "pipeline_job_id",
