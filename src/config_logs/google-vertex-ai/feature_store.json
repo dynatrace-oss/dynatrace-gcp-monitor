@@ -1,0 +1,34 @@
+{
+  "name": "feature_store",
+  "displayName": "Google Vertex AI Feature Store",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('aiplatform.googleapis.com/Featurestore')"
+        }
+      ],
+      "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('vertex_ai_feature_store')"
+          },
+          {
+            "key": "featurestore_id",
+            "pattern": "resource.labels.featurestore_id"
+          },
+          {
+            "key": "gcp.project.id",
+            "pattern": "logName | split('/', @)[1]"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+
+        ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "name": "index_endpoint",
+  "displayName": "Google Vertex AI Index Endpoint",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('aiplatform.googleapis.com/IndexEndpoint')"
+        }
+      ],
+      "attributes": [
+          {
+            "key": "gcp.resource.type",
+            "pattern": "to_string('vertex_ai_index_endpoint')"
+          },
+          {
+            "key": "index_endpoint_id",
+            "pattern": "resource.labels.index_endpoint_id"
+          },
+          {
+            "key": "gcp.project.id",
+            "pattern": "logName | split('/', @)[1]"
+          },
+          {
+            "key": "content",
+            "pattern": "@"
+          }
+
+        ]
+    }
+  ]
+}
