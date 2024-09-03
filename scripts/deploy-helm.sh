@@ -88,6 +88,7 @@ test_req_helm
 
 CMD_OUT_PIPE="/dev/stdout"
 AUTOPILOT_CLUSTER_NAME="dynatrace-gcp-monitor"
+MASTER_CIDR_FLAG=""
 
 while (( "$#" )); do
     case "$1" in
@@ -174,6 +175,13 @@ if [ -z "$VPC_NETWORK" ]; then
 fi
 readonly VPC_NETWORK
 
+CLUSTER_CIDR=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.clusterIpv4Cidr}")
+readonly CLUSTER_CIDR
+SERVICES_CIDR=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.servicesIpv4Cidr}")
+readonly SERVICES_CIDR
+MASTER_CIDR=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.masterIpv4Cidr}")
+readonly MASTER_CIDR
+
 # the below code is handling a situation when the user wants to use a custom VPC network with custom subnet
 # the below if statements ensure that subnet variable will be empty if the default VPC network is to be used and non empty if custom subnet
 # should be used
@@ -204,6 +212,17 @@ if [ "$USE_CUSTOM_SUBNET" = true ]; then
     exit 1
   fi
 
+fi
+
+USE_CUSTOM_MASTER_CIDR=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.useCustomMasterCidr}")
+if [ "$USE_CUSTOM_MASTER_CIDR" == true ]; then
+  if [ "$MASTER_CIDR" == "" ]; then
+    err "The 'useCustomMasterCidr' value was set to true, but 'masterIpv4Cidr' is empty."
+    err "please provide a 'masterIpv4Cidr' value in your values.yaml file."
+    exit 1
+  else
+    MASTER_CIDR_FLAG="--enable-private-nodes"
+  fi
 fi
 
 AUTODISCOVERY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.metricAutodiscovery}" | tr '[:lower:]' '[:upper:]' | cut -c 1)
@@ -370,7 +389,7 @@ if [[ $CREATE_AUTOPILOT_CLUSTER == "Y" ]]; then
   info ""
   info "- Create and connect GKE Autopilot k8s cluster ${AUTOPILOT_CLUSTER_NAME}."
   # if the VPC network is default then it's already ensured that $SUBNET is an empty string so we can always use the --subnetwork flag
-  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" --network "${VPC_NETWORK}" --subnetwork "$SUBNET" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
+  gcloud container clusters create-auto "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" --network "${VPC_NETWORK}" --subnetwork "$SUBNET" --cluster-ipv4-cidr "$CLUSTER_CIDR" --services-ipv4-cidr "$SERVICES_CIDR" $MASTER_CIDR_FLAG --master-ipv4-cidr "$MASTER_CIDR" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
   gcloud container clusters get-credentials "${AUTOPILOT_CLUSTER_NAME}" --project "${GCP_PROJECT}" --zone "" | tee -a "$FULL_LOG_FILE" >${CMD_OUT_PIPE}
 fi
 
