@@ -61,6 +61,8 @@ spec:
           {{- end }}
           - key: EXCLUDED_METRICS_AND_DIMENSIONS
             path: "metrics-filter-out.yaml"
+          - key: LABELS_GROUPING_BY_SERVICE
+            path: "labels-grouping-by-service.yaml"
       {{- end }}
       {{- if (.Values.imagePullSecrets) }}      
       imagePullSecrets:
