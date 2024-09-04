@@ -189,6 +189,20 @@ excludedMetricsAndDimensions: |
 #   - metric: metric_2
 #     dimensions:
 #       - dimension_A
+#
+# labelsGroupingByService: map structure of groups by which metrics will be queried per service. Groups are based on user metadata labels on the resources.
+# Ref: https://cloud.google.com/resource-manager/docs/labels-overview
+# Metrics queries will be sent per grouping, according to the GroupBy behavior of Google Metric Explorer.
+# NOTE: Be careful while defining mutually exclusive groupings not to query metrics more than once.
+labelsGroupingByService: |
+  services:
+#   - service: service_A
+#     groupings:
+#       - user_label_1
+#       - user_label_2,user_label_3,user_label_4
+#   - service: service_B
+#     groupings:
+#       - user_label_5,user_label_6
 metricResources:
   requests:
     memory: "1536Mi"

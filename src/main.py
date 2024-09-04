@@ -29,12 +29,12 @@ from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
-from lib.metrics import GCPService, MetadataIngestLine, Metric, IngestLine
+from lib.metrics import GCPService, Metric, IngestLine
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.topology.topology import fetch_topology, build_entity_id_map
 from lib.sfm.api_call_latency import ApiCallLatency
-from lib.utilities import read_filter_out_list_yaml
+from lib.utilities import read_filter_out_list_yaml, read_labels_grouping_by_service_yaml, NO_GROUPING_CATEGORY
 
 
 async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = None):
@@ -95,6 +95,7 @@ async def get_metric_context(
 
     return context
 
+
 async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
     logging_context = LoggingContext(execution_id)
 
@@ -137,7 +138,6 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         if disabled_projects:
             projects_ids = [x for x in projects_ids if x not in disabled_projects]
             context.log("Disabled projects: " + ", ".join(disabled_projects))
-            
 
         setup_time = (time.time() - setup_start_time)
         for project_id in projects_ids:
@@ -196,6 +196,17 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
         return found_excluded_metric and not found_excluded_metric.get("dimensions")
 
+    def set_groupings(service_name: str):
+        groupings = []
+        for configured_service_to_group in configured_services_to_group:
+            if configured_service_to_group.get("service") == service_name:
+                for configured_grouping in configured_service_to_group.get("groupings"):
+                    groupings.append(configured_grouping)
+        if not groupings:
+            groupings.append(NO_GROUPING_CATEGORY)
+
+        return groupings
+
     fetch_metric_coros = []
     metrics_metadata = []
     topology: Dict[GCPService, Iterable[Entity]] = {}
@@ -212,29 +223,37 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     skipped_disabled_apis = set()
     skipped_excluded_metrics = []
 
+    # Grouping by user_labels: per service, users can define groupings (based on user_labels)
+    # by which metrics will be queried. In this way, included labels will be added to metrics as dimensions.
+    # Default behavior: all metrics are collected with no added labels as dimensions.
+    configured_services_to_group = read_labels_grouping_by_service_yaml()
+
     for service in services:
         if not service.is_enabled:
             continue  # skip disabled services
         if service in topology and not topology[service]:
             skipped_services_with_no_instances.append(f"{service.name}/{service.feature_set}")
             continue  # skip fetching the metrics because there are no instances
-        for metric in service.metrics:
-            if should_exclude_metric(metric):
-                context.log(f"Skiping fetching all the data for the metric {metric.google_metric}")
-                continue
 
-            # Fetch metric only if it's metric from extensions or is autodiscovered in project_id
-            if not metric.autodiscovered_metric or project_id in metric.project_ids:
-                gcp_api_last_index = metric.google_metric.find("/")
-                api = metric.google_metric[:gcp_api_last_index]
-                if api in disabled_apis:
-                    skipped_disabled_apis.add(api)
-                    continue  # skip fetching the metrics because service API is disabled
-                fetch_metric_coro = run_fetch_metric(
-                    context=context, project_id=project_id, service=service, metric=metric,
-                    excluded_metrics_and_dimensions=excluded_metrics_and_dimensions
-                )
-                fetch_metric_coros.append(fetch_metric_coro)
+        labels_groupings = set_groupings(service.name)
+        for grouping in labels_groupings:
+            for metric in service.metrics:
+                if should_exclude_metric(metric):
+                    context.log(f"Skipping fetching all the data for the metric {metric.google_metric}")
+                    continue
+
+                # Fetch metric only if it's metric from extensions or is autodiscovered in project_id
+                if not metric.autodiscovered_metric or project_id in metric.project_ids:
+                    gcp_api_last_index = metric.google_metric.find("/")
+                    api = metric.google_metric[:gcp_api_last_index]
+                    if api in disabled_apis:
+                        skipped_disabled_apis.add(api)
+                        continue  # skip fetching the metrics because service API is disabled
+                    fetch_metric_coro = run_fetch_metric(
+                        context=context, project_id=project_id, service=service, metric=metric,
+                        excluded_metrics_and_dimensions=excluded_metrics_and_dimensions, grouping=grouping
+                    )
+                    fetch_metric_coros.append(fetch_metric_coro)
 
     context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")
 
@@ -261,10 +280,11 @@ async def run_fetch_metric(
         project_id: str,
         service: GCPService,
         metric: Metric,
-        excluded_metrics_and_dimensions: list
+        excluded_metrics_and_dimensions: list,
+        grouping: str
 ):
     try:
-        return await fetch_metric(context, project_id, service, metric, excluded_metrics_and_dimensions)
+        return await fetch_metric(context, project_id, service, metric, excluded_metrics_and_dimensions, grouping)
     except Exception as e:
         context.log(project_id, f"Failed to finish task for [{metric.google_metric}], reason is {type(e).__name__} {e}")
         return []

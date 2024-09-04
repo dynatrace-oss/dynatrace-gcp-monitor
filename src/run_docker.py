@@ -135,9 +135,6 @@ async def run_metrics_fetcher_forever():
     extension_versions = pre_launch_check_result.extension_versions
     new_services_from_extensions_task = None
 
-
-
-
     if config.metric_autodiscovery():
         autodiscovery_manager = AutodiscoveryContext()
         autodiscovery_task = await AutodiscoveryTaskExecutor.create(services, autodiscovery_manager, extension_versions)
@@ -161,7 +158,6 @@ async def run_metrics_fetcher_forever():
 
         polling_duration = end_time_s - start_time_s
         logging_context.log('MAIN_LOOP', f"Polling finished after {round(polling_duration, 2)}s")
-
 
         await sleep_until_next_polling(polling_duration)
 
