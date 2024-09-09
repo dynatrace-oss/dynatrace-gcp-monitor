@@ -30,7 +30,7 @@ export_labels_regex = re.compile(
 
 def _extract_label(gfun_name: Text, group_index: int) -> Text:
     """Attempt to extract part of Cloud Function name.
-    
+
     0 -> Full name
     1 -> project_id
     2 -> region
@@ -61,7 +61,7 @@ def _get_properties(rsp: Dict[Text, Any]) -> Iterable[CdProperty]:
         CdProperty("Entry point", rsp.get("buildConfig", {}).get("entryPoint", "N/A")),
         CdProperty("Available memory", rsp.get("serviceConfig", {}).get("availableMemory", "N/A")),
         CdProperty("Runtime", rsp.get("buildConfig", {}).get("runtime", "")),
-        CdProperty("Ingress settings", rsp.get("serviceConfig",{}).get("ingressSettings", "")),
+        CdProperty("Ingress settings", rsp.get("serviceConfig", {}).get("ingressSettings", "")),
     ]
 
 

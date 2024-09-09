@@ -204,8 +204,11 @@ class GCPService:
         monitoring_filter = kwargs.get("gcpMonitoringFilter", "")
         if self.activation:
             for var_key, var_value in (self.activation.get("vars", {}) or {}).items():
-                monitoring_filter = monitoring_filter.replace(f'{{{var_key}}}', var_value)\
-                    .replace(f'var:{var_key}', var_value)
+                try:
+                    monitoring_filter = monitoring_filter.replace(f'{{{var_key}}}', var_value).replace(f'var:{var_key}', var_value)
+                except:
+                    continue
+
         # remove not matched variables
         monitoring_filter = VARIABLE_BRACKETS_PATTERN.sub('', monitoring_filter)
         monitoring_filter = VARIABLE_VAR_PATTERN.sub('', monitoring_filter)

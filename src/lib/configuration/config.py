@@ -27,7 +27,7 @@ def metric_autodiscovery():
 
 
 def scoping_project_support_enabled():
-    return os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "FALSE").upper() in ["TRUE", "YES"]
+    return os.environ.get("SCOPING_PROJECT_SUPPORT_ENABLED", "TRUE").upper() in ["TRUE", "YES"]
 
 
 def query_interval_min():
@@ -43,7 +43,7 @@ def excluded_projects_by_prefix():
 
 
 def project_id():
-    return os.environ.get("GCP_PROJECT","")
+    return os.environ.get("GCP_PROJECT", "")
 
 
 def credentials_path():
@@ -85,6 +85,7 @@ def gcp_service_usage_url():
 def gcp_monitoring_url():
     return os.environ.get("GCP_MONITORING_URL", "https://monitoring.googleapis.com/v3")
 
+
 def gcp_allowed_metric_dimension_value_length():
     return get_int_environment_value("ALLOWED_METRIC_DIMENSION_VALUE_LENGTH", 250)
 
@@ -112,8 +113,10 @@ def gcp_allowed_metric_unit_name():
 def get_autodiscovery_querry_interval():
     return get_int_environment_value("AUTODISCOVERY_QUERY_INTERVAL", 60)
 
+
 def gcp_autodiscovery_include_alpha_metrics():
     return os.environ.get("AUTODISCOVERY_INCLUDE_ALPHA_METRICS", "TRUE").upper() in ["TRUE", "YES","Y"]
+
 
 def max_dimension_name_length():
     return get_int_environment_value("MAX_DIMENSION_NAME_LENGTH", 100)
@@ -126,8 +129,10 @@ def max_dimension_value_length():
 def get_dynatrace_api_key_from_env():
     return os.environ.get("DYNATRACE_ACCESS_KEY", None)
 
+
 def get_dynatrace_url_from_env():
     return os.environ.get("DYNATRACE_URL", None)
+
 
 def get_dynatrace_log_ingest_url_from_env():
     return os.environ.get("DYNATRACE_LOG_INGEST_URL", None)

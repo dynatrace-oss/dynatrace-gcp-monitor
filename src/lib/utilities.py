@@ -17,6 +17,9 @@ from os.path import isfile
 from typing import List, Dict
 
 import yaml
+import json
+import re
+from itertools import chain
 
 from lib.configuration import config
 from lib.context import LoggingContext
@@ -43,15 +46,16 @@ def safe_read_yaml(filepath: str, alternative_environ_name: str):
 
 
 def read_activation_yaml():
-    return safe_read_yaml('/code/config/activation/gcp_services.yaml', "ACTIVATION_CONFIG" )
+    return safe_read_yaml('/code/config/activation/gcp_services.yaml', "ACTIVATION_CONFIG")
 
 
 def read_autodiscovery_config_yaml():
-    return safe_read_yaml('/code/config/activation/autodiscovery-config.yaml', "AUTODISCOVERY_RESOURCES_YAML" )
+    return safe_read_yaml('/code/config/activation/autodiscovery-config.yaml', "AUTODISCOVERY_RESOURCES_YAML")
 
 
 def read_filter_out_list_yaml() -> list:
-    loaded_yaml = safe_read_yaml("/code/config/activation/metrics-filter-out.yaml", "EXCLUDED_METRICS_AND_DIMENSIONS") or {}
+    loaded_yaml = safe_read_yaml("/code/config/activation/metrics-filter-out.yaml",
+                                 "EXCLUDED_METRICS_AND_DIMENSIONS") or {}
     excluded_metrics = loaded_yaml.get("filter_out") or []
 
     for metric in excluded_metrics:
@@ -61,11 +65,58 @@ def read_filter_out_list_yaml() -> list:
 
 
 def read_autodiscovery_block_list_yaml():
-    return safe_read_yaml('/code/config/activation/autodiscovery-block-list.yaml', "AUTODISCOVERY_BLOCK_LIST_YAML" )
+    return safe_read_yaml('/code/config/activation/autodiscovery-block-list.yaml', "AUTODISCOVERY_BLOCK_LIST_YAML")
 
 
 def read_autodiscovery_resources_mapping():
     return safe_read_yaml('./lib/autodiscovery/config/autodiscovery-mapping.yaml', "AUTODISCOVERY_RESOURCES_MAPPING")
+
+
+def get_service_activation_dict(services, monitoring_configurations, extension_active_version):
+    project_id = config.project_id()
+
+    def process_item(item):
+        item_value = item.get("value")
+        if not item_value:
+            return []
+
+        ids = item_value.get("gcp").get("gcpMonitorID")
+        enabled = item_value.get("enabled")
+        version = item_value.get('version')
+
+        if enabled and (project_id in ids or ids == "") and version == extension_active_version:
+            value = item_value.copy()
+            gcp = value.pop('gcp', {})
+            value.update(gcp)
+            return [dict(value, service=service) for service in services]
+        return []
+
+    processed_items = chain.from_iterable(map(process_item, monitoring_configurations))
+
+    return processed_items
+
+
+def create_default_monitoring_config(extension_name, version) -> List[Dict]:
+    project_id = config.project_id()
+    monitoring_configuration = {
+        "scope": "clouds",
+        "value": {
+            "enabled": True,
+            "description": f"default-{extension_name.split('.')[-1]}-{project_id}",
+            "version": f"{version}",
+            "featureSets": [
+                "default_metrics"
+            ],
+            "vars": {
+                "filter_conditions": None
+            },
+            "gcp": {
+                "autodiscovery": False,
+                "gcpMonitorID": f"{project_id}"
+            }
+        }
+    }
+    return [monitoring_configuration]
 
 
 def get_activation_config_per_service(activation_yaml):
@@ -85,12 +136,14 @@ def load_activated_feature_sets(logging_context: LoggingContext, activation_yaml
     return services_allow_list
 
 
-def get_autodiscovery_flag_per_service(activation_yaml) -> Dict[str, bool]:
+def get_autodiscovery_flag_per_service(activation_dict) -> Dict[str, bool]:
     enabled_autodiscovery = {}
-    for service in activation_yaml.get("services", []):
+    for service in activation_dict.get("services", []):
         service_name = service.get("service", "")
-        autodiscovery_enabled_flag = service.get("allowAutodiscovery", False)
+        autodiscovery_enabled_flag = service.get("autodiscovery", False)
         if isinstance(autodiscovery_enabled_flag, bool) and autodiscovery_enabled_flag is True:
+            enabled_autodiscovery[service_name] = True
+        elif service_name in enabled_autodiscovery and enabled_autodiscovery[service_name]:
             enabled_autodiscovery[service_name] = True
         else:
             enabled_autodiscovery[service_name] = False
@@ -107,6 +160,7 @@ def extract_technology_name(config_yaml):
     if isinstance(technology_name, Dict):
         technology_name = technology_name.get("name", "N/A")
     return technology_name
+
 
 # For test_integration_metric.py
 def load_supported_services() -> List[GCPService]:
