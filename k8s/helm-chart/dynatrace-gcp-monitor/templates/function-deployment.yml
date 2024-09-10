@@ -202,6 +202,11 @@ spec:
             privileged: false
             runAsNonRoot: true
             runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
       {{- end }}
       {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
       - image: {{ .Values.dockerImage | quote }}
@@ -358,5 +363,10 @@ spec:
             allowPrivilegeEscalation: false
             privileged: false
             runAsNonRoot: true
-            runAsUser: 1001          
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
       {{- end }}
