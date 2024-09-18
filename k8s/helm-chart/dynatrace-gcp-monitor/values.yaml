@@ -47,6 +47,7 @@ dynatraceAccessKeySecretName: ""
 dynatraceUrl: ""
 dynatraceUrlSecretName: ""
 
+dtSecurityContext: "DT_SEC_OK"
 
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
 

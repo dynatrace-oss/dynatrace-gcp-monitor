@@ -282,6 +282,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: CLOUD_LOG_FORWARDER
+        - name: DT_SECURITY_CONTEXT
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: DT_SECURITY_CONTEXT
         - name: REQUIRE_VALID_CERTIFICATE
           valueFrom:
             configMapKeyRef:

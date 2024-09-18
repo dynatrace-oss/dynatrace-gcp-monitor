@@ -143,3 +143,7 @@ def require_valid_certificate():
 
 def hostname():
     return os.environ.get("HOSTNAME", "")
+
+
+def dt_security_context():
+    return os.environ.get("DT_SECURITY_CONTEXT", "DEFAULT")
