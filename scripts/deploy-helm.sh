@@ -158,10 +158,6 @@ fi
 DYNATRACE_LOG_INGEST_URL=$(echo "$DYNATRACE_LOG_INGEST_URL" | sed 's/[\r\n\t ]//g' | sed 's:/*$::')
 readonly DYNATRACE_LOG_INGEST_URL
 
-
-DT_SECURITY_CONTEXT=$(get_helm_value .dtSecurityContext)
-readonly DT_SECURITY_CONTEXT
-
 LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.logsSubscriptionId}")
 readonly LOGS_SUBSCRIPTION_ID
 USE_PROXY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.useProxy}")
