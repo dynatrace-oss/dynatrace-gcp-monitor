@@ -104,6 +104,19 @@ httpsProxy: ""
 # keepRefreshingExtensionsConfig: if true, will fetch enabled extensions from DT on each polling, otherwise will only fetch once during startup
 keepRefreshingExtensionsConfig: "true"
 
+# CIDR VALUES - DEFAULTS
+# clusterIpv4Cidr: Set CIDR range for a cluster.
+# Change it if you want to use a custom (non-default) CIDR range for the cluster.
+clusterIpv4Cidr: ""
+# servicesIpv4Cidr: Set CIDR range for cluster services.
+# Change it if you want to use a custom (non-default) CIDR range for services.
+servicesIpv4Cidr: ""
+# useCustomMasterCidr: Sets --enable-private-nodes flag required to use custom CIDR range for the master network.
+# When true, masterIpv4Cidr is required
+useCustomMasterCidr: false
+# masterIpv4Cidr: IPv4 CIDR range to use for the master network (for example 172.16.0.0/28)
+# Ref: https://cloud.google.com/sdk/gcloud/reference/container/clusters/create-auto#--master-ipv4-cidr
+masterIpv4Cidr: ""
 
 # LOGS VALUES - DEFAULTS
 
