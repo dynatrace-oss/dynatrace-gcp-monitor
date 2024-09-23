@@ -146,4 +146,4 @@ def hostname():
 
 
 def dt_security_context():
-    return os.environ.get("DT_SECURITY_CONTEXT", "DEFAULT")
+    return os.environ.get("DT_SECURITY_CONTEXT", "")

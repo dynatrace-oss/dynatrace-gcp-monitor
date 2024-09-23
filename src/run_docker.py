@@ -43,8 +43,6 @@ OPERATION_MODE = OperationMode.from_environment_string(config.operation_mode()) 
 QUERY_INTERVAL_SEC = get_query_interval_minutes() * 60
 QUERY_TIMEOUT_SEC = (get_query_interval_minutes() + 2) * 60
 SFM_ENABLED = config.self_monitoring_enabled()
-DT_SECURITY_CONTEXT = config.dt_security_context()
-print("-----RUN_DOCKER.PY: ", DT_SECURITY_CONTEXT, "-------\n\n")
 
 # USED TO TEST ON WINDOWS MACHINE
 if platform.system() == 'Windows':
