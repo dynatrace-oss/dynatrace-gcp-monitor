@@ -22,7 +22,7 @@ create_sample_app() {
   gcloud functions deploy "${CLOUD_FUNCTION_NAME}" \
   --runtime python312 \
   --trigger-http \
-  --source ./tests/e2e/sample_app/
+  --source ./tests/e2e/sample_app/ > /dev/null 2>&1
 }
 
 check_container_state() {
