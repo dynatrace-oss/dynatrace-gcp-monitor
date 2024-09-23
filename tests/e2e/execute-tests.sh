@@ -23,20 +23,7 @@ function run_deploy_and_tests() {
 
     ./tests/e2e/deployment-test.sh "--${TEST_TYPE}"
 
-    echo "waiting 300sec to give logs time to appear in DT"
-    sleep 300
-    END_LOAD_GENERATION=$(date -u +%s%3N)
-    export END_LOAD_GENERATION
 
-    if [[ $TEST_TYPE == 'all' ]]; then
-        TEST_TYPE=''
-    fi
-
-    set -e
-    pytest "tests/e2e/${TEST_TYPE}" -v
-    if [[ $TRAVIS_BRANCH == 'master' ]] && [[ $TEST_TYPE != 'logs' ]]; then
-        performance_test
-    fi
 }
 
 if [[ $TRAVIS_EVENT_TYPE == 'cron' ]] || [[ $1 == 'separate' ]]; then

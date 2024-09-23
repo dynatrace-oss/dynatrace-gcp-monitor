@@ -23,7 +23,7 @@ create_sample_app() {
   --runtime python312 \
   --trigger-http \
   --no-allow-unauthenticated \
-  --source ./tests/e2e/sample_app/ > /dev/null 2>&1
+  --source ./tests/e2e/sample_app/
 }
 
 check_container_state() {
