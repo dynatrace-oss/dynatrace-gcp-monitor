@@ -45,6 +45,4 @@ gcloud config set project "${GCP_PROJECT_ID}"
 
 create_sample_app
 
-gcloud functions add-invoker-policy-binding e2e_test_sample_app --region="us-central1" --member="e2e-test-dynatrace-gcp-monitor@dt-gcp-extension-k8s-test.iam.gserviceaccount.com"
-
 generate_load_on_sample_app
