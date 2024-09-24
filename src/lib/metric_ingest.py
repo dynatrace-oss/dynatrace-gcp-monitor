@@ -43,7 +43,7 @@ if config.dt_security_context() == "":
     DT_SECURITY_CONTEXT = config.project_id()
 else:
     DT_SECURITY_CONTEXT = config.dt_security_context()
-print("--------TEST:", config.dt_security_context(), config.project_id(), "---------")
+
 
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
     if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
