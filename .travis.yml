@@ -162,7 +162,7 @@ jobs:
       - K8S_CLUSTER="e2e-test-master"
       - K8S_CLUSTER_REGION="europe-central2"
       - E2E=true
-      - CLOUD_FUNCTION_NAME="e2e-test-sample-app"
+      - CLOUD_FUNCTION_NAME="e2e_test_sample_app"
       - GCP_PROJECT_2_ID="dynatrace-gcp-extension-2"
       - CLOUD_RUN_REVISION_NAME="e2e-test-sample-service-00002-bif"
       - DYNATRACE_URL=${DYNATRACE_URL_E2E}

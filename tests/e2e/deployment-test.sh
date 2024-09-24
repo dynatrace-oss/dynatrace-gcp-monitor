@@ -58,8 +58,9 @@ fi
 if [[ $(gcloud logging sinks  list --filter=name:"${LOG_ROUTER}" --format="value(name)") ]]; then
     echo "Log Router [${LOG_ROUTER}] already exists, skipping"
 else
+  # Replace '_' with '-' in resource.labels.service_name because Google transforms the label name
   gcloud logging sinks create "${LOG_ROUTER}" "pubsub.googleapis.com/projects/${GCP_PROJECT_ID}/topics/${PUBSUB_TOPIC}" \
-    --log-filter="resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${CLOUD_FUNCTION_NAME}\"" --description="Simple Sink for E2E tests" > /dev/null 2>&1
+    --log-filter="resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${CLOUD_FUNCTION_NAME//_/-}\"" --description="Simple Sink for E2E tests" > /dev/null 2>&1
 fi
 
 writerIdentity=$(gcloud logging sinks describe "${LOG_ROUTER}" --format json | "$TEST_JQ" -r '.writerIdentity')
