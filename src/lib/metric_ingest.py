@@ -31,7 +31,7 @@ from lib.metrics import (
     Metric,
 )
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
-
+from lib.utilities import NO_GROUPING_CATEGORY
 
 UNIT_10TO2PERCENT = "10^2.%"
 MAX_DIMENSION_NAME_LENGTH = config.max_dimension_name_length()
@@ -162,7 +162,8 @@ async def fetch_metric(
         project_id: str,
         service: GCPService,
         metric: Metric,
-        excluded_metrics_and_dimensions: list
+        excluded_metrics_and_dimensions: list,
+        grouping: str
 ) -> List[IngestLine]:
     def should_exclude_dimension(dimension: Dimension):
         found_excluded_metric = None
@@ -209,13 +210,18 @@ async def fetch_metric(
     for dimension in all_dimensions:
         if should_exclude_dimension(dimension):
             context.log(
-                f"Skiping fetching dimension {dimension.key_for_create_entity_id} for metric {metric.google_metric}")
+                f"Skipping fetching dimension {dimension.key_for_create_entity_id} for metric {metric.google_metric}")
             continue
 
         if dimension.key_for_send_to_dynatrace:
             dt_dimensions_mapping.add_label_mapping(dimension.key_for_fetch_metric, dimension.key_for_send_to_dynatrace)
 
         params.append(('aggregation.groupByFields', dimension.key_for_fetch_metric))
+
+    for label in grouping.split(","):
+        if label == NO_GROUPING_CATEGORY:
+            break
+        params.append(('aggregation.groupByFields', 'metadata.user_labels.' + label))
 
     headers = context.create_gcp_request_headers(project_id)
 
@@ -335,6 +341,10 @@ def create_dimensions(context: MetricsContext, service_name: str, time_series: D
         mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metadata.systemLabels.{short_source_label}", short_source_label)
         for dt_dim_label in mapped_dt_dim_labels:
             dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
+
+    user_labels = time_series.get('metadata', {}).get('userLabels', {})
+    for dim_label, dim_value in user_labels.items():
+        dt_dimensions.append(create_dimension(dim_label, dim_value, context))
 
     return dt_dimensions
 

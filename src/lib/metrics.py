@@ -266,7 +266,6 @@ class AutodiscoveryGCPService(GCPService):
 
         return []
 
-
     def get_name(self, metric) -> str:
         linking = self.metrics_to_linking[metric.google_metric]
         if linking:

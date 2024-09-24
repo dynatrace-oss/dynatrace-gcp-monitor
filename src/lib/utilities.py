@@ -18,9 +18,11 @@ from typing import List, Dict
 
 import yaml
 
-from lib.configuration import config
 from lib.context import LoggingContext
 from lib.metrics import GCPService
+
+
+NO_GROUPING_CATEGORY = "NO_GROUPING"
 
 
 def chunks(full_list: List, chunk_size: int) -> List[List]:
@@ -43,11 +45,19 @@ def safe_read_yaml(filepath: str, alternative_environ_name: str):
 
 
 def read_activation_yaml():
-    return safe_read_yaml('/code/config/activation/gcp_services.yaml', "ACTIVATION_CONFIG" )
+    return safe_read_yaml('/code/config/activation/gcp_services.yaml', "ACTIVATION_CONFIG")
 
 
 def read_autodiscovery_config_yaml():
-    return safe_read_yaml('/code/config/activation/autodiscovery-config.yaml', "AUTODISCOVERY_RESOURCES_YAML" )
+    return safe_read_yaml('/code/config/activation/autodiscovery-config.yaml', "AUTODISCOVERY_RESOURCES_YAML")
+
+
+def read_autodiscovery_block_list_yaml():
+    return safe_read_yaml('/code/config/activation/autodiscovery-block-list.yaml', "AUTODISCOVERY_BLOCK_LIST_YAML")
+
+
+def read_autodiscovery_resources_mapping():
+    return safe_read_yaml('./lib/autodiscovery/config/autodiscovery-mapping.yaml', "AUTODISCOVERY_RESOURCES_MAPPING")
 
 
 def read_filter_out_list_yaml() -> list:
@@ -60,12 +70,14 @@ def read_filter_out_list_yaml() -> list:
     return excluded_metrics
 
 
-def read_autodiscovery_block_list_yaml():
-    return safe_read_yaml('/code/config/activation/autodiscovery-block-list.yaml', "AUTODISCOVERY_BLOCK_LIST_YAML" )
+def read_labels_grouping_by_service_yaml() -> list:
+    loaded_yaml = safe_read_yaml("/code/config/activation/labels-grouping-by-service.yaml", "LABELS_GROUPING_BY_SERVICE") or {}
+    services = loaded_yaml.get("services") or []
 
+    for service in services:
+        service["groupings"] = set(service.get("groupings") or [])
 
-def read_autodiscovery_resources_mapping():
-    return safe_read_yaml('./lib/autodiscovery/config/autodiscovery-mapping.yaml', "AUTODISCOVERY_RESOURCES_MAPPING")
+    return services
 
 
 def get_activation_config_per_service(activation_yaml):
@@ -107,6 +119,7 @@ def extract_technology_name(config_yaml):
     if isinstance(technology_name, Dict):
         technology_name = technology_name.get("name", "N/A")
     return technology_name
+
 
 # For test_integration_metric.py
 def load_supported_services() -> List[GCPService]:
