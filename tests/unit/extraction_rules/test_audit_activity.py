@@ -358,7 +358,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_ACTION: 'google.longrunning.Operations.GetOperation',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
         ATTRIBUTE_SEVERITY: "NOTICE",
-        'dt.security_context' : 'dynatrace-gcp-extension'
+        'dt.security_context' : ''
     }
 ]
 
