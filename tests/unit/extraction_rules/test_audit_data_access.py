@@ -242,7 +242,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_ACTION: 'v1.compute.instanceGroupManagers.list',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
         ATTRIBUTE_SEVERITY: "INFO",
-        DT_SECURITY_CONTEXT : 'dynatrace-gcp-extension'
+        DT_SECURITY_CONTEXT : ''
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -255,7 +255,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_ACTION: 'cloudsql.instances.list',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
         ATTRIBUTE_SEVERITY: "INFO",
-        DT_SECURITY_CONTEXT : 'dynatrace-gcp-extension'
+        DT_SECURITY_CONTEXT : ''
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -270,7 +270,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_ACTION: 'storage.buckets.list',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
         ATTRIBUTE_SEVERITY: "INFO",
-        DT_SECURITY_CONTEXT : 'dynatrace-gcp-extension'
+        DT_SECURITY_CONTEXT : ''
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -285,7 +285,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_ACTION: 'storage.objects.list',
         ATTRIBUTE_AUDIT_RESULT: 'Failed.PermissionDenied',
         ATTRIBUTE_SEVERITY: "ERROR",
-        DT_SECURITY_CONTEXT : 'dynatrace-gcp-extension'
+        DT_SECURITY_CONTEXT : ''
     },
 ]
 

@@ -79,7 +79,7 @@ AUDIT_LOGS_RULE = "audit_logs"
 
 SPECIAL_RULE_NAMES = (DEFAULT_RULE_NAME, COMMON_RULE_NAME)
 
-DT_SECURITY_CONTEXT = ""
+#DT_SECURITY_CONTEXT = ""
 
 if config.dt_security_context() == "":
     DT_SECURITY_CONTEXT = config.project_id()
