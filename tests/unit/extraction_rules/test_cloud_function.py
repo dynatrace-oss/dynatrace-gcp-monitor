@@ -100,7 +100,8 @@ notice_json_record_expected_output = {
     ATTRIBUTE_CONTENT: json.dumps(notice_json_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/clouderrorreporting.googleapis.com%2Finsights',
     ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-monitor',
-    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor'
+    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor',
+    'dt.security_context': ''
 }
 
 error_proto_record = {
