@@ -56,7 +56,8 @@ debug_text_record_expected_output = {
     ATTRIBUTE_CONTENT: json.dumps(debug_text_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudfunctions.googleapis.com%2Fcloud-functions',
     ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/us-central1/functions/dynatrace-gcp-monitor',
-    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor'
+    ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor',
+    'dt.security_context': ''
 }
 
 notice_json_record = {
