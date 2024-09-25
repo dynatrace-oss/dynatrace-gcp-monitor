@@ -200,7 +200,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
         ATTRIBUTE_SEVERITY: "INFO",
         'gcp.instance.id': '783056456320399836',
-        'dt.security_context' : 'dynatrace-gcp-extension'
+        'dt.security_context' : ''
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -213,7 +213,7 @@ expected_output_list = [
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fsystem_event',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
         ATTRIBUTE_SEVERITY: "INFO",
-        'dt.security_context' : 'dynatrace-gcp-extension'
+        'dt.security_context' : ''
     },
 ]
 

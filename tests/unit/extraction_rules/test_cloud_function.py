@@ -153,7 +153,7 @@ error_proto_record_expected_output = {
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Factivity',
     ATTRIBUTE_CLOUD_FUNCTION_ID: '//cloudfunctions.googleapis.com/projects/dynatrace-gcp-extension/locations/europe-central2/functions/dynatrace-gcp-monitor',
     ATTRIBUTE_CLOUD_FUNCTION_NAME: 'dynatrace-gcp-monitor',
-    'dt.security_context' : 'dynatrace-gcp-extension'
+    'dt.security_context' : ''
 }
 
 

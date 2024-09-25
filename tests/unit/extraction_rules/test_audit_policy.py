@@ -90,7 +90,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_ACTION: 'google.storage.NoBillingOk',
         ATTRIBUTE_AUDIT_RESULT: 'Failed.PermissionDenied',
         ATTRIBUTE_SEVERITY: 'ERROR',
-        'dt.security_context' : 'dynatrace-gcp-extension'
+        'dt.security_context' : ''
     }
 ]
 

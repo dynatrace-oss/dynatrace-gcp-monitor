@@ -48,7 +48,7 @@ expected_output = {
     ATTRIBUTE_CONTENT: json.dumps(log_record),
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudsql.googleapis.com%2Fmysql-slow.log',
     ATTRIBUTE_SEVERITY: "INFO",
-    'dt.security_context' : 'dynatrace-gcp-extension'
+    'dt.security_context' : ''
 }
 
 

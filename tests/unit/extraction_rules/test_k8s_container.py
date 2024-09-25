@@ -64,7 +64,7 @@ expected_output = {
     'k8s.container.name': 'test-app-api',
     'k8s.namespace.name': 'dynatrace',
     'k8s.pod.name': 'testpod',
-    'dt.security_context' : 'dynatrace-gcp-extension'
+    'dt.security_context' : ''
 }
 
 
