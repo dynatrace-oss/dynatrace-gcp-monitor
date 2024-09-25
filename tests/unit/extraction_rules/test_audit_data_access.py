@@ -241,7 +241,8 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_IDENTITY: 'service-125992521190@container-engine-robot.iam.gserviceaccount.com',
         ATTRIBUTE_AUDIT_ACTION: 'v1.compute.instanceGroupManagers.list',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
-        ATTRIBUTE_SEVERITY: "INFO"
+        ATTRIBUTE_SEVERITY: "INFO",
+        'dt.security_context' : 'dynatrace-gcp-extension'
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -253,7 +254,8 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_IDENTITY: 'dynatrace-gcp-service@dynatrace-gcp-extension.iam.gserviceaccount.com',
         ATTRIBUTE_AUDIT_ACTION: 'cloudsql.instances.list',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
-        ATTRIBUTE_SEVERITY: "INFO"
+        ATTRIBUTE_SEVERITY: "INFO",
+        'dt.security_context' : 'dynatrace-gcp-extension'
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -267,7 +269,8 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_IDENTITY: 'maria.swiatkowska@dynatrace.com',
         ATTRIBUTE_AUDIT_ACTION: 'storage.buckets.list',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
-        ATTRIBUTE_SEVERITY: "INFO"
+        ATTRIBUTE_SEVERITY: "INFO",
+        'dt.security_context' : 'dynatrace-gcp-extension'
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -281,7 +284,8 @@ expected_output_list = [
         ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/cloudaudit.googleapis.com%2Fdata_access',
         ATTRIBUTE_AUDIT_ACTION: 'storage.objects.list',
         ATTRIBUTE_AUDIT_RESULT: 'Failed.PermissionDenied',
-        ATTRIBUTE_SEVERITY: "ERROR"
+        ATTRIBUTE_SEVERITY: "ERROR",
+        'dt.security_context' : 'dynatrace-gcp-extension'
     },
 ]
 

@@ -315,7 +315,8 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_IDENTITY: 'system:vpa-recommender',
         ATTRIBUTE_AUDIT_ACTION: 'io.k8s.core.v1.endpoints.update',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
-        ATTRIBUTE_SEVERITY: "INFO"
+        ATTRIBUTE_SEVERITY: "INFO",
+        'dt.security_context' : 'dynatrace-gcp-extension'
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -327,7 +328,8 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_IDENTITY: 'svc-gke-dynatrace-npd@mgmt-ple-prd-83f7.iam.gserviceaccount.com',
         ATTRIBUTE_AUDIT_ACTION: 'google.monitoring.v3.MetricService.CreateMetricDescriptor',
         ATTRIBUTE_AUDIT_RESULT: 'Failed.PermissionDenied',
-        ATTRIBUTE_SEVERITY: "ERROR"
+        ATTRIBUTE_SEVERITY: "ERROR",
+        'dt.security_context' : 'dynatrace-gcp-extension'
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -342,7 +344,8 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_IDENTITY: 'dynatrace-gcp-extension@appspot.gserviceaccount.com',
         ATTRIBUTE_AUDIT_ACTION: 'cloudsql.instances.connect',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
-        ATTRIBUTE_SEVERITY: "NOTICE"
+        ATTRIBUTE_SEVERITY: "NOTICE",
+        'dt.security_context' : 'dynatrace-gcp-extension'
     },
     {
         ATTRIBUTE_CLOUD_PROVIDER: 'gcp',
@@ -354,7 +357,8 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_IDENTITY: 'user@dynatrace.com',
         ATTRIBUTE_AUDIT_ACTION: 'google.longrunning.Operations.GetOperation',
         ATTRIBUTE_AUDIT_RESULT: 'Succeeded',
-        ATTRIBUTE_SEVERITY: "NOTICE"
+        ATTRIBUTE_SEVERITY: "NOTICE",
+        'dt.security_context' : 'dynatrace-gcp-extension'
     }
 ]
 

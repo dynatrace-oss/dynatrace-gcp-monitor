@@ -59,7 +59,8 @@ expected_output = {
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: record_string,
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/run.googleapis.com%2Fstdout',
-    ATTRIBUTE_SEVERITY: "INFO"
+    ATTRIBUTE_SEVERITY: "INFO",
+    'dt.security_context' : 'dynatrace-gcp-extension'
 }
 
 expected_output_attribute_values_trimmed = {
@@ -73,7 +74,8 @@ expected_output_attribute_values_trimmed = {
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: record_string,
     ATTRIBUTE_DT_LOGPATH: 'proj',
-    ATTRIBUTE_SEVERITY: "INFO"
+    ATTRIBUTE_SEVERITY: "INFO",
+    'dt.security_context' : 'dynatrace-gcp-extension'
 }
 
 
