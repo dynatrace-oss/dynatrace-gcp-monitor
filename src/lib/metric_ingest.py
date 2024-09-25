@@ -38,12 +38,8 @@ MAX_DIMENSION_NAME_LENGTH = config.max_dimension_name_length()
 MAX_DIMENSION_VALUE_LENGTH = config.max_dimension_value_length()
 
 GCP_MONITORING_URL = config.gcp_monitoring_url()
-DT_SECURITY_CONTEXT = ""
-if config.dt_security_context() == "":
-    DT_SECURITY_CONTEXT = config.project_id()
-else:
-    DT_SECURITY_CONTEXT = config.dt_security_context()
-
+DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
+print("\n\n---------TEST:", DT_SECURITY_CONTEXT_VALUE, "----------\n\n")
 
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
     if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
@@ -328,7 +324,7 @@ def create_dimensions(context: MetricsContext, service_name: str, time_series: D
     dt_dimensions = [create_dimension("gcp.resource.type", service_name, context)]
 
     dt_dimensions.append(create_dimension("metadata.origin", "autodiscovery" if metric.autodiscovered_metric else "extension"))
-    dt_dimensions.append(create_dimension("dt.security_context", DT_SECURITY_CONTEXT))
+    dt_dimensions.append(create_dimension("dt.security_context", DT_SECURITY_CONTEXT_VALUE))
 
     metric_labels = time_series.get('metric', {}).get('labels', {})
     for short_source_label, dim_value in metric_labels.items():
