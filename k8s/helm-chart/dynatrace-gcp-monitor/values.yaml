@@ -46,7 +46,7 @@ dynatraceAccessKeySecretName: ""
 # Precedence is given to `dynatraceUrl` if both are provided.
 dynatraceUrl: ""
 dynatraceUrlSecretName: ""
-
+#
 # dtSecurityContext: Allows to specify the dtSecurityContext used for data segmentation, analysis, and permission mapping within the Dynatrace platform.
 # When empty, the value is equal to the gcpProjectId value.
 # Change it only when you want to use a security context different from the value of the gcpMonitorId parameter.
