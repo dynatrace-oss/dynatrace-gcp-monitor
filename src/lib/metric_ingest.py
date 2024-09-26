@@ -39,7 +39,6 @@ MAX_DIMENSION_VALUE_LENGTH = config.max_dimension_value_length()
 
 GCP_MONITORING_URL = config.gcp_monitoring_url()
 DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
-print("\n\n---------TEST:", DT_SECURITY_CONTEXT_VALUE, "----------\n\n")
 
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
     if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
