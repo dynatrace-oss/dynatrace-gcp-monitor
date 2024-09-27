@@ -17,7 +17,7 @@ from datetime import datetime
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_GCP_INSTANCE_NAME, \
-    ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH
+    ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_DT_SECURITY_CONTEXT
 from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 timestamp = datetime.utcnow().isoformat() + "Z"
@@ -63,7 +63,8 @@ expected_output = {
     'k8s.cluster.name': 'test-cluster',
     'k8s.container.name': 'test-app-api',
     'k8s.namespace.name': 'dynatrace',
-    'k8s.pod.name': 'testpod'
+    'k8s.pod.name': 'testpod',
+    ATTRIBUTE_DT_SECURITY_CONTEXT: ''
 }
 
 

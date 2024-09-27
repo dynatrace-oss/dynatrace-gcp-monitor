@@ -18,7 +18,7 @@ from typing import NewType, Any
 from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
     ATTRIBUTE_CLOUD_PROVIDER, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
-    ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_IDENTITY, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_RESULT
+    ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_AUDIT_IDENTITY, ATTRIBUTE_AUDIT_ACTION, ATTRIBUTE_AUDIT_RESULT, ATTRIBUTE_DT_SECURITY_CONTEXT
 from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
@@ -90,6 +90,7 @@ expected_output_list = [
         ATTRIBUTE_AUDIT_ACTION: 'google.storage.NoBillingOk',
         ATTRIBUTE_AUDIT_RESULT: 'Failed.PermissionDenied',
         ATTRIBUTE_SEVERITY: 'ERROR',
+        ATTRIBUTE_DT_SECURITY_CONTEXT : ''
     }
 ]
 

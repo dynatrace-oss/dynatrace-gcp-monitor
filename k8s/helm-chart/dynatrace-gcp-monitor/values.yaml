@@ -46,6 +46,11 @@ dynatraceAccessKeySecretName: ""
 # Precedence is given to `dynatraceUrl` if both are provided.
 dynatraceUrl: ""
 dynatraceUrlSecretName: ""
+#
+# dtSecurityContext: Allows to specify the dtSecurityContext used for data segmentation, analysis, and permission mapping within the Dynatrace platform.
+# When empty, the value is equal to the gcpProjectId value.
+# Change it only when you want to use a security context different from the value of the gcpMonitorId parameter.
+dtSecurityContext: ""
 
 
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
@@ -118,6 +123,7 @@ useCustomMasterCidr: false
 # Ref: https://cloud.google.com/sdk/gcloud/reference/container/clusters/create-auto#--master-ipv4-cidr
 masterIpv4Cidr: ""
 
+
 # LOGS VALUES - DEFAULTS
 
 # max content length of log event. Should be the same or lower than on cluster
@@ -148,6 +154,7 @@ logResources:
     cpu: "1.25"
     ephemeral-storage: "1Gi"
 
+
 # METRICS VALUES - DEFAULTS
 
 # printMetricIngestInput: if true function will output lines of metrics into stdout
@@ -168,12 +175,12 @@ scopingProjectSupportEnabled: "false"
 excludedProjects: ""
 # excludedProjectsByPrefix: comma separated list of projects substring that will be excluded from monitoring (e.g. "project-a,proj,pro").
 excludedProjectsByPrefix: ""
-# excludedMetricsAndDimensions: map structure of metrics and dimensions that will be excluded from monitoring.
+# excludedMetricsAndDimensions: structure containing the metrics and dimensions that will be excluded from monitoring.
 # If you want to exclude a metric, add a "metric" entry. Any global metric matching its prefix will not be ingested.
 # If you want to exclude dimensions from a specific metric, add the "metric" entry and specify the dimensions. Selected dimensions will be cut off and the metric will be ingested without them.
 # Example:
 # this WILL NOT ingest any metric starting with "bigquery.googleapis.com/query/"
-# and WILL ingest "compute.googleapis.com/instance/disk/max_read_bytes_count" but WITHOUT the "storage_type" and "device_type" dimensions
+# and WILL ingest "compute.googleapis.com/instance/disk/max_read_bytes_count" but WITHOUT the "storage_type" and "device_type" dimensions.
 #
 # excludedMetricsAndDimensions: |
 #   filter_out:
@@ -190,19 +197,29 @@ excludedMetricsAndDimensions: |
 #     dimensions:
 #       - dimension_A
 #
-# labelsGroupingByService: map structure of groups by which metrics will be queried per service. Groups are based on user metadata labels on the resources.
+# (PREVIEW FEATURE) labelsGroupingByService: structure of groups by which metrics will be queried per service. Groups are based on user metadata labels on the resources.
 # Ref: https://cloud.google.com/resource-manager/docs/labels-overview
 # Metrics queries will be sent per grouping, according to the GroupBy behavior of Google Metric Explorer.
 # NOTE: Be careful while defining mutually exclusive groupings not to query metrics more than once.
+# Example:
+# This applies only to SQL DB resources (the rest maintain default behavior, no changes). Instances with both labels will be monitored (metrics will be decorated with dimensions from both labels).
+# Metrics from instances which do NOT have these 2 labels will be dropped (since they do not belong to the defined grouping).
+#
+# labelsGroupingByService: |
+#   services:
+#   - service: cloudsql_database
+#     groupings:
+#       - stage,owner
+#
 labelsGroupingByService: |
   services:
 #   - service: service_A
 #     groupings:
-#       - user_label_1
-#       - user_label_2,user_label_3,user_label_4
+#       - user_label_1,user_label_2,user_label_3
 #   - service: service_B
 #     groupings:
-#       - user_label_5,user_label_6
+#       - user_label_4,user_label_5
+#       - user_label_6
 metricResources:
   requests:
     memory: "1536Mi"

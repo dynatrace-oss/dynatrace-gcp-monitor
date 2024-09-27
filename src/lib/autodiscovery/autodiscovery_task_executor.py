@@ -63,7 +63,7 @@ class AutodiscoveryTaskExecutor:
             tuple(sorted(current_extension_versions.items()))
         )
 
-        autodiscovery_query_interval = config.get_autodiscovery_querry_interval()
+        autodiscovery_query_interval = config.get_autodiscovery_query_interval()
         self.query_interval = timedelta(minutes=max(autodiscovery_query_interval, 60))
 
         self.cached_services = services[:]

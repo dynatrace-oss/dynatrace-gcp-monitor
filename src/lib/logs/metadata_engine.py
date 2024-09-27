@@ -24,6 +24,7 @@ import jmespath
 
 from lib.context import LoggingContext
 from lib.logs.jmespath import JMESPATH_OPTIONS
+from lib.configuration import config
 
 _CONDITION_COMPARATOR_MAP = {
     "$eq".casefold(): lambda x, y: str(x).casefold() == str(y).casefold(),
@@ -77,6 +78,10 @@ COMMON_RULE_NAME = "common"
 AUDIT_LOGS_RULE = "audit_logs"
 
 SPECIAL_RULE_NAMES = (DEFAULT_RULE_NAME, COMMON_RULE_NAME)
+
+ATTRIBUTE_DT_SECURITY_CONTEXT = "dt.security_context"
+
+DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
 
 
 @dataclass(frozen=True)
@@ -238,7 +243,7 @@ class MetadataEngine:
             #    _apply_rule(context, self.common_rule, record, parsed_record)
             #Apply common rules
             apply_common_rules(record, parsed_record)
-
+            parsed_record[ATTRIBUTE_DT_SECURITY_CONTEXT] = DT_SECURITY_CONTEXT_VALUE
             any_rule_applied = self._apply_rules(context, self.rules, record, parsed_record)
             any_audit_rule_applied = self._apply_rules(context, self.audit_logs_rules, record, parsed_record)
             # No matching rule has been found, applying the default rule

@@ -18,6 +18,7 @@ metadata:
   name: dynatrace-gcp-monitor-config
   namespace: {{ .Release.Namespace }}
 data:
+  DT_SECURITY_CONTEXT: {{ .Values.dtSecurityContext | quote }}
   GCP_PROJECT: {{ .Values.gcpProjectId | quote }}
   REQUIRE_VALID_CERTIFICATE: {{ .Values.requireValidCertificate | quote }}
   SELF_MONITORING_ENABLED: {{ .Values.selfMonitoringEnabled | quote }}

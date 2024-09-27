@@ -18,7 +18,7 @@ from typing import NewType, Any
 from lib.logs import logs_processor
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_CLOUD_PROVIDER, \
     ATTRIBUTE_CLOUD_REGION, ATTRIBUTE_GCP_REGION, ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, \
-    ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_SEVERITY, ATTRIBUTE_GCP_INSTANCE_NAME, ATTRIBUTE_GCP_CLOUD_FUNCTION_NAME
+    ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_SEVERITY, ATTRIBUTE_GCP_INSTANCE_NAME, ATTRIBUTE_GCP_CLOUD_FUNCTION_NAME, ATTRIBUTE_DT_SECURITY_CONTEXT
 from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
@@ -59,7 +59,8 @@ expected_output = {
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: record_string,
     ATTRIBUTE_DT_LOGPATH: 'projects/dynatrace-gcp-extension/logs/run.googleapis.com%2Fstdout',
-    ATTRIBUTE_SEVERITY: "INFO"
+    ATTRIBUTE_SEVERITY: "INFO",
+    ATTRIBUTE_DT_SECURITY_CONTEXT: ''
 }
 
 expected_output_attribute_values_trimmed = {
@@ -73,7 +74,8 @@ expected_output_attribute_values_trimmed = {
     ATTRIBUTE_TIMESTAMP: timestamp,
     ATTRIBUTE_CONTENT: record_string,
     ATTRIBUTE_DT_LOGPATH: 'proj',
-    ATTRIBUTE_SEVERITY: "INFO"
+    ATTRIBUTE_SEVERITY: "INFO",
+    ATTRIBUTE_DT_SECURITY_CONTEXT: ''
 }
 
 
