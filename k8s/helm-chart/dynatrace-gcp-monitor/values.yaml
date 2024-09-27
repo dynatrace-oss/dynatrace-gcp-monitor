@@ -52,6 +52,7 @@ dynatraceUrlSecretName: ""
 # Change it only when you want to use a security context different from the value of the gcpMonitorId parameter.
 dtSecurityContext: ""
 
+
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
 
 # subscription id of log sink pubsub subscription
@@ -122,6 +123,7 @@ useCustomMasterCidr: false
 # Ref: https://cloud.google.com/sdk/gcloud/reference/container/clusters/create-auto#--master-ipv4-cidr
 masterIpv4Cidr: ""
 
+
 # LOGS VALUES - DEFAULTS
 
 # max content length of log event. Should be the same or lower than on cluster
@@ -151,6 +153,7 @@ logResources:
     memory: "1Gi"
     cpu: "1.25"
     ephemeral-storage: "1Gi"
+
 
 # METRICS VALUES - DEFAULTS
 
