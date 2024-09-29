@@ -1,6 +1,6 @@
 setuptools==70.0.0
 # metrics
-aiohttp==3.9.4
+aiohttp==3.10.2
 aiodns==2.0.0
 mmh3==2.5.1
 PyJWT==2.4.0
