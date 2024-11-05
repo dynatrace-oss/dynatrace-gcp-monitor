@@ -443,8 +443,13 @@ def _convert_point_to_ingest_line(
     return line
 
 
-def _gauge_line(min, max, count, sum) -> str:
-    return f"min={min},max={max},count={count},sum={sum}"
+def _gauge_line(dist_min, dist_max, dist_count, dist_sum, dist_unit) -> str:
+    if dist_unit == UNIT_10TO2PERCENT:
+        dist_min = 100 * dist_min
+        dist_max = 100 * dist_max
+        dist_sum = 100 * dist_sum
+
+    return f"min={dist_min},max={dist_max},count={dist_count},sum={dist_sum}"
 
 
 def extract_value(point, typed_value_key: str, metric: Metric):
@@ -466,7 +471,7 @@ def extract_value(point, typed_value_key: str, metric: Metric):
 
         # No point in calculating min and max from distribution here
         if count == 1 or count == 2:
-            return _gauge_line(min, max, count, sum)
+            return _gauge_line(min, max, count, sum, metric.unit)
 
         bucket_options = value['bucketOptions']
         bucket_counts = [int(bucket_count) for bucket_count in value['bucketCounts']]
@@ -506,12 +511,7 @@ def extract_value(point, typed_value_key: str, metric: Metric):
                 min = bounds[min_bucket]
                 max = bounds[max_bucket]
 
-        if metric.unit == UNIT_10TO2PERCENT:
-            min = 100 * min
-            max = 100 * max
-            sum = 100 * sum
-
-        return _gauge_line(min, max, count, sum)
+        return _gauge_line(min, max, count, sum, metric.unit)
     else:
         if metric.unit == UNIT_10TO2PERCENT:
             value = 100 * value
