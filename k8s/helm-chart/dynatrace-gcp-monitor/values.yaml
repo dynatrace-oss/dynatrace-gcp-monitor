@@ -328,7 +328,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
-      #   - postgresqlinsights
+      # - postgresqlinsights
       vars:
         filter_conditions: ""
     # Google Cloud Trace
