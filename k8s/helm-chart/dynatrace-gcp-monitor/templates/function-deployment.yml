@@ -177,6 +177,16 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: EXCLUDED_PROJECTS_BY_PREFIX
+        - name: INCLUDED_PROJECTS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: INCLUDED_PROJECTS
+        - name: INCLUDED_PROJECTS_BY_PREFIX
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: INCLUDED_PROJECTS_BY_PREFIX
         - name:   KEEP_REFRESHING_EXTENSIONS_CONFIG
           valueFrom:
             configMapKeyRef:

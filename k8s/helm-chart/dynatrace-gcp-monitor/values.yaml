@@ -175,6 +175,10 @@ scopingProjectSupportEnabled: "false"
 excludedProjects: ""
 # excludedProjectsByPrefix: comma separated list of projects substring that will be excluded from monitoring (e.g. "project-a,proj,pro").
 excludedProjectsByPrefix: ""
+# includedProjects: comma separated list of projects that will be included from monitoring (e.g. "project-a,project-b,project-c").
+includedProjects: ""
+# includedProjectsByPrefix: comma separated list of projects substring that will be included from monitoring (e.g. "project-a,proj,pro").
+includedProjectsByPrefix: ""
 # excludedMetricsAndDimensions: structure containing the metrics and dimensions that will be excluded from monitoring.
 # If you want to exclude a metric, add a "metric" entry. Any global metric matching its prefix will not be ingested.
 # If you want to exclude dimensions from a specific metric, add the "metric" entry and specify the dimensions. Selected dimensions will be cut off and the metric will be ingested without them.
