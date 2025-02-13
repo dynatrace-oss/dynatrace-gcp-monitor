@@ -95,7 +95,7 @@ test_req_yq() {
     err 'yq (4.9.x+) is required to install Dynatrace function. Please refer to following links for installation instructions:
       YQ: https://github.com/mikefarah/yq
       Example command to install yq:
-      sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_linux_amd64 -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
+      sudo wget https://github.com/mikefarah/yq/releases/download/v4.9.8/yq_<arch> -O /usr/bin/yq && sudo chmod +x /usr/bin/yq'
     exit 1
   fi
 }
@@ -103,9 +103,9 @@ test_req_yq() {
 test_req_jq() {
   if ! command -v "$JQ" &>/dev/null; then
     err 'jq is required to install Dynatrace function. Please refer to following links for installation instructions:
-    JQ: https://stedolan.github.io/jq/download/"
+    JQ: https://stedolan.github.io/jq/download/
     Example command to install jq:
-    sudo wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -O /usr/bin/jq && sudo chmod +x /usr/bin/jq'
+    sudo wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-<arch> -O /usr/bin/jq && sudo chmod +x /usr/bin/jq'
     exit 1
   fi
 }
