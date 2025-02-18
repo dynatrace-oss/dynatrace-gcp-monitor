@@ -49,6 +49,14 @@ def excluded_projects_by_prefix():
     return os.environ.get("EXCLUDED_PROJECTS_BY_PREFIX", "")
 
 
+def included_projects():
+    return os.environ.get("INCLUDED_PROJECTS", "")
+
+
+def included_projects_by_prefix():
+    return os.environ.get("INCLUDED_PROJECTS_BY_PREFIX", "")
+
+
 def project_id():
     return os.environ.get("GCP_PROJECT","")
 

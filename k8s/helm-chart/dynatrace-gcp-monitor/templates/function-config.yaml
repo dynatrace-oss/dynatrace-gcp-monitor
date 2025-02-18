@@ -30,6 +30,8 @@ data:
   SCOPING_PROJECT_SUPPORT_ENABLED: {{ .Values.scopingProjectSupportEnabled | quote }}
   EXCLUDED_PROJECTS: {{ .Values.excludedProjects | quote }}
   EXCLUDED_PROJECTS_BY_PREFIX: {{ .Values.excludedProjectsByPrefix | quote }}
+  INCLUDED_PROJECTS: { { .Values.includedProjects | quote } }
+  INCLUDED_PROJECTS_BY_PREFIX: { { .Values.includedProjectsByPrefix | quote } }
   EXCLUDED_METRICS_AND_DIMENSIONS: {{ .Values.excludedMetricsAndDimensions | quote }}
   LABELS_GROUPING_BY_SERVICE: {{ .Values.labelsGroupingByService | quote }}
   KEEP_REFRESHING_EXTENSIONS_CONFIG: {{ .Values.keepRefreshingExtensionsConfig | quote }}
