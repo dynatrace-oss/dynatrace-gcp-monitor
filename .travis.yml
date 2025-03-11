@@ -134,10 +134,10 @@ jobs:
       - ./build/helm-package.sh
     deploy:
       provider: releases
+      edge: true
       file_glob: true
       api_key: $GITHUB_RELEASE_API_KEY
       file: "./artefacts/*"
-      skip_cleanup: true
       on:
         tags: true
   - stage: e2e-helm-deployment-test
