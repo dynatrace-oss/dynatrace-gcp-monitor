@@ -20,11 +20,11 @@ from lib.sfm.api_call_latency import ApiCallLatency
 
 
 async def on_request_start(session, trace_config_ctx, params):
-    trace_config_ctx.start = asyncio.get_event_loop().time()
+    trace_config_ctx.start = asyncio.get_running_loop().time()
 
 
 async def on_request_end(session, trace_config_ctx, params):
-    elapsed = asyncio.get_event_loop().time() - trace_config_ctx.start
+    elapsed = asyncio.get_running_loop().time() - trace_config_ctx.start
     ApiCallLatency.update(f"{params.url.scheme}://{params.url.raw_host}/", elapsed)
 
 
