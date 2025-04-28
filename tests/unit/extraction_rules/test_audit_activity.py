@@ -152,7 +152,7 @@ record2 = {
         },
         "requestMetadata": {
             "callerIp": "gce-internal-ip",
-            "callerSuppliedUserAgent": "Python/3.8 aiohttp/3.7.4,gzip(gfe)",
+            "callerSuppliedUserAgent": "Python/3.9 aiohttp/3.10.2,gzip(gfe)",
             "requestAttributes": {
                 "time": "2021-06-01T13:46:13.799387360Z",
                 "auth": {}

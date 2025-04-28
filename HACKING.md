@@ -7,7 +7,7 @@ Please note that the following instructions are supported by the community only.
 Feel free to share your ideas back with us, allowing everyone to benefit from the open-source approach.
 
 ## Development environment setup
-To run the worker function locally you have to have the Python dev environment installed: `Python 3.8` with `pip` tool.
+To run the worker function locally you have to have the Python dev environment installed: `Python 3.9` with `pip` tool.
 
 to install all the dependencies run 
 ```shell script
