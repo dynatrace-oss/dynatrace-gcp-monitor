@@ -1,5 +1,5 @@
-flake8==3.8.3
-functions-framework==2.0.0
-mypy==0.782
-pycodestyle==2.6.0
-pylint==2.9.3
+flake8==7.2.0
+functions-framework==3.8.2
+mypy==1.15.0
+pycodestyle==2.13.0
+pylint==3.3.6
