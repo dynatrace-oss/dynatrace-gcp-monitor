@@ -1,11 +1,11 @@
-setuptools==70.0.0
+setuptools==80.0.0
 # metrics
-aiohttp==3.9.4
+aiohttp==3.10.2
 aiodns==2.0.0
 mmh3==2.5.1
 PyJWT==2.4.0
 cryptography==42.0.4
-PyYAML==5.4
+PyYAML==6.0.2
 # logs
 python-dateutil==2.8.1
 jmespath~=0.10.0
