@@ -62,7 +62,7 @@ jobs:
     name: Tests
     language: python
     python:
-      - "3.8"
+      - "3.12"
     env:
       - PYTHONPATH="$TRAVIS_BUILD_DIR/src:$TRAVIS_BUILD_DIR/tests"
     addons:
@@ -88,7 +88,7 @@ jobs:
     name: Build
     language: python
     python:
-      - "3.8"
+      - "3.12"
     cache:
       directories:
         - "$HOME/.cache/pip"
@@ -146,7 +146,7 @@ jobs:
     if: (tag =~ /^release-.*/) OR (branch = master) OR (type = pull_request)
     language: python
     python:
-      - "3.8"
+      - "3.12"
     cache:
       directories:
         - "$HOME/.wgetcache"
