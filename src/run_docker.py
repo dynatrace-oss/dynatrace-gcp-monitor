@@ -49,8 +49,6 @@ if platform.system() == 'Windows':
     policy = asyncio.WindowsSelectorEventLoopPolicy()
     asyncio.set_event_loop_policy(policy)
 
-loop = asyncio.get_event_loop()
-
 PreLaunchCheckResult = NamedTuple('PreLaunchCheckResult', [('services', List[GCPService]), ('extension_versions', Dict[str,str])])
 
 logging_context = LoggingContext(None)
