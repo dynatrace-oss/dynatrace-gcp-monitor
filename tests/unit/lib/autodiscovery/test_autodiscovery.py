@@ -7,6 +7,7 @@ from lib.autodiscovery.autodiscovery_task_executor import AutodiscoveryTaskExecu
 
 from lib.autodiscovery.autodiscovery_utils import (
     get_metric_descriptors,
+    run_fetch_metric_descriptors,
 )
 from lib.autodiscovery.models import AutodiscoveryResourceLinking, ServiceStub
 from lib.metrics import AutodiscoveryGCPService, GCPService
@@ -52,9 +53,80 @@ response_json = {
             "launchStage": "GA",
             "monitoredResourceTypes": ["cloudiot_device_registry"],
         },
+        {
+            "name": "projects/test_project/metricDescriptors/composer.googleapis.com/environment/api/request_count",
+            "labels": [{"key": "key3", "description": "description2"}],
+            "metricKind": "DELTA",
+            "valueType": "INT64",
+            "unit": "1",
+            "description": "Description Metric 4",
+            "displayName": "Metric 4",
+            "type": "composer.googleapis.com/environment/api/request_count",
+            "metadata": {"launchStage": "BETA", "samplePeriod": "60s", "ingestDelay": "240s"},
+            "launchStage": "BETA",
+            "monitoredResourceTypes": ["cloud_composer_environment"],
+        },
+        {
+            "name": "projects/test_project/metricDescriptors/composer.googleapis.com/environment/dag_processing/last_duration",
+            "labels": [{"key": "key3", "description": "description2"}],
+            "metricKind": "GAUGE",
+            "valueType": "DOUBLE",
+            "displayName": "Metric 5",
+            "unit": "1",
+            "description": "Description Metric 4",
+            "type": "composer.googleapis.com/environment/dag_processing/last_duration",
+            "metadata": {"launchStage": "BETA", "samplePeriod": "60s", "ingestDelay": "240s"},
+            "launchStage": "BETA",
+            "monitoredResourceTypes": ["internal_composer_environment", "cloud_composer_environment"],
+        },
     ]
 }
 
+
+@pytest.mark.asyncio
+@patch("lib.autodiscovery.autodiscovery_utils.config")
+async def test_run_fetch_metric_descriptors(config_mock):
+    token_mock = "test_token"
+    config_mock.project_id.return_value = "test_project_id"
+    config_mock.gcp_autodiscovery_include_alpha_metrics.return_value = True
+    get_project_ids_mock = ["test_project_id", "other_project_id"]
+
+    response_mock = AsyncMock()
+    response_mock.json.return_value = response_json
+
+    gcp_session_mock = AsyncMock()
+    gcp_session_mock.request.return_value = response_mock
+
+    result = await run_fetch_metric_descriptors(
+        gcp_session_mock,
+        token_mock,
+        get_project_ids_mock,
+        resources_to_autodiscover  = ["internal_composer_environment"],
+        autodiscovery_metric_block_list = [],
+    )
+    assert len(result) == 1
+    assert result[0].metric_descriptor.value == "composer.googleapis.com/environment/dag_processing/last_duration"
+
+    result = await run_fetch_metric_descriptors(
+        gcp_session_mock,
+        token_mock,
+        get_project_ids_mock,
+        resources_to_autodiscover  = ["cloud_composer_environment"],
+        autodiscovery_metric_block_list = [],
+    )
+    assert len(result) == 2
+    assert result[0].metric_descriptor.value == "composer.googleapis.com/environment/api/request_count"
+    assert result[1].metric_descriptor.value == "composer.googleapis.com/environment/dag_processing/last_duration"
+
+    result = await run_fetch_metric_descriptors(
+        gcp_session_mock,
+        token_mock,
+        get_project_ids_mock,
+        resources_to_autodiscover  = ["cloud_composer_environment"],
+        autodiscovery_metric_block_list = ["composer.googleapis.com/environment/dag_processing"],
+    )
+    assert len(result) == 1
+    assert result[0].metric_descriptor.value == "composer.googleapis.com/environment/api/request_count"
 
 @pytest.mark.asyncio
 @patch("lib.autodiscovery.autodiscovery_utils.fetch_resource_descriptors")
