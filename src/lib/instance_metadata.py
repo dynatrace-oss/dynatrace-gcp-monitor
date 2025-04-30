@@ -40,7 +40,7 @@ InstanceMetadata = namedtuple('InstanceMetadata', [
 
 class InstanceMetadataCheck:
 
-    def __init__(self, gcp_session: ClientSession(), token: [str], logging_context: LoggingContext):
+    def __init__(self, gcp_session: ClientSession, token: [str], logging_context: LoggingContext):
         self.gcp_session = gcp_session
         self.token = token
         self.logging_context = logging_context
