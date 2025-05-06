@@ -130,6 +130,9 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         
         disabled_projects.update(filter(None, config.excluded_projects().split(',')))
         disabled_projects_by_prefix.update(filter(None, config.excluded_projects_by_prefix().split(',')))
+        
+        enabled_projects.update(filter(None, config.included_projects().split(',')))
+        enabled_projects_by_prefix.update(filter(None, config.included_projects_by_prefix().split(',')))
 
         enabled_projects.update(filter(None, config.included_projects().split(',')))
         enabled_projects_by_prefix.update(filter(None, config.included_projects_by_prefix().split(',')))
@@ -143,6 +146,17 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         if disabled_projects:
             projects_ids = [x for x in projects_ids if x not in disabled_projects]
             context.log("Disabled projects: " + ", ".join(disabled_projects))
+        
+        if enabled_projects:
+            projects_ids = [x for x in projects_ids if x in enabled_projects]
+            context.log("Enabled projects: " + ", ".join(enabled_projects))
+        
+        if enabled_projects_by_prefix:
+            for p in enabled_projects_by_prefix:
+                matching = [s for s in projects_ids if p in s]
+                projects_ids = matching
+            context.log("Enabled projects: " + ", ".join(enabled_projects_by_prefix))
+        
 
         if enabled_projects:
             projects_ids = [x for x in projects_ids if x in enabled_projects]
