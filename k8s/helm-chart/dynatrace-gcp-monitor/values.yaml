@@ -172,12 +172,16 @@ clusterName: ""
 # scopingProjectSupportEnabled: set to true when metrics scope is configured, so metrics will be collected from all monitored projects.
 scopingProjectSupportEnabled: "false"
 # excludedProjects: comma separated list of projects that will be excluded from monitoring (e.g. "project-a,project-b,project-c").
+# This parameter is only applicable to Standard deployments (with other projects metrics scope disabled)
 excludedProjects: ""
 # excludedProjectsByPrefix: comma separated list of projects substring that will be excluded from monitoring (e.g. "project-a,proj,pro").
+# This parameter is only applicable to Standard deployments (with other projects metrics scope disabled)
 excludedProjectsByPrefix: ""
-# includedProjects: comma separated list of projects that will be included from monitoring (e.g. "project-a,project-b,project-c").
+# includedProjects: comma separated list of projects that will be included in monitoring (e.g. "project-a,project-b,project-c").
+# This parameter is only applicable to Standard deployments (with other projects metrics scope disabled)
 includedProjects: ""
-# includedProjectsByPrefix: comma separated list of projects substring that will be included from monitoring (e.g. "project-a,proj,pro").
+# includedProjectsByPrefix: comma separated list of projects substring that will be included in monitoring (e.g. "project-a,proj,pro").
+# This parameter is only applicable to Standard deployments (with other projects metrics scope disabled)
 includedProjectsByPrefix: ""
 # excludedMetricsAndDimensions: structure containing the metrics and dimensions that will be excluded from monitoring.
 # If you want to exclude a metric, add a "metric" entry. Any global metric matching its prefix will not be ingested.
