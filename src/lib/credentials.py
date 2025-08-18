@@ -12,6 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+import asyncio
 import base64
 import json
 import os
@@ -36,6 +37,17 @@ _CLOUD_RESOURCE_MANAGER_ROOT = config.gcp_cloud_resource_manager_url()
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = config.dynatrace_access_key_secret_name() or "DYNATRACE_ACCESS_KEY"
 _DYNATRACE_URL_SECRET_NAME = config.dynatrace_url_secret_name() or "DYNATRACE_URL"
 _DYNATRACE_LOG_INGEST_URL_SECRET_NAME = config.dynatrace_log_ingest_url_secret_name()
+
+
+async def _read_json_file_async(file_path: str) -> dict:
+    """Asynchronously read and parse a JSON file."""
+    loop = asyncio.get_event_loop()
+    
+    def read_file():
+        with open(file_path) as f:
+            return json.load(f)
+    
+    return await loop.run_in_executor(None, read_file)
 
 
 async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str) -> str:
@@ -163,8 +175,7 @@ async def create_token(context: LoggingContext, session: ClientSession, validate
 
     if credentials_path:
         context.log(f"Using credentials from {credentials_path}")
-        with open(credentials_path) as key_file:
-            credentials_data = json.load(key_file)
+        credentials_data = await _read_json_file_async(credentials_path)
 
         gcp_token = await get_token(
             key=credentials_data['private_key'],
@@ -192,8 +203,7 @@ async def create_token_with_expiry(context: LoggingContext, session: ClientSessi
 
     if credentials_path:
         context.log(f"Using credentials from {credentials_path}")
-        with open(credentials_path) as key_file:
-            credentials_data = json.load(key_file)
+        credentials_data = await _read_json_file_async(credentials_path)
 
         # Service account tokens from files typically last 1 hour
         token = await get_token(

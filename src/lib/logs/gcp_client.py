@@ -19,9 +19,7 @@ from typing import Any, Dict, List, Callable
 
 from aiohttp import ClientSession
 
-from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext
-from lib.credentials import create_token_with_expiry
 from lib.logs.log_forwarder_variables import (
     LOGS_SUBSCRIPTION_ID,
     LOGS_SUBSCRIPTION_PROJECT,
