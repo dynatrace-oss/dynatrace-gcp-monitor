@@ -12,6 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 
+import asyncio
 import base64
 import json
 import os
@@ -36,6 +37,17 @@ _CLOUD_RESOURCE_MANAGER_ROOT = config.gcp_cloud_resource_manager_url()
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = config.dynatrace_access_key_secret_name() or "DYNATRACE_ACCESS_KEY"
 _DYNATRACE_URL_SECRET_NAME = config.dynatrace_url_secret_name() or "DYNATRACE_URL"
 _DYNATRACE_LOG_INGEST_URL_SECRET_NAME = config.dynatrace_log_ingest_url_secret_name()
+
+
+async def _read_json_file_async(file_path: str) -> dict:
+    """Asynchronously read and parse a JSON file."""
+    loop = asyncio.get_event_loop()
+    
+    def read_file():
+        with open(file_path) as f:
+            return json.load(f)
+    
+    return await loop.run_in_executor(None, read_file)
 
 
 async def fetch_dynatrace_api_key(gcp_session: ClientSession, project_id: str, token: str) -> str:
@@ -100,7 +112,7 @@ async def create_default_service_account_token(context: LoggingContext, session:
     """
     For reference check out https://github.com/googleapis/google-auth-library-python/tree/master/google/auth/compute_engine
     :param session:
-    :return:
+    :return: access_token string, or None if failed
     """
     url = _METADATA_ROOT + "/instance/service-accounts/{0}/token".format("default")
     try:
@@ -117,13 +129,53 @@ async def create_default_service_account_token(context: LoggingContext, session:
         return None
 
 
+async def create_default_service_account_token_with_expiry(context: LoggingContext, session: ClientSession):
+    """
+    Enhanced version that returns token with expiration information for proactive refresh
+    :param session:
+    :return: dictionary with access_token and expires_at timestamp, or None if failed
+    """
+    url = _METADATA_ROOT + "/instance/service-accounts/{0}/token".format("default")
+    try:
+        response = await session.get(url, headers=_METADATA_HEADERS)
+        if response.status >= 300:
+            body = await response.text()
+            context.log(f"Failed to authorize with Service Account from Metadata Service, "
+                        f"response is {response.status} => {body}")
+            return None
+        response_json = await response.json()
+        
+        # Validate response structure
+        if "access_token" not in response_json:
+            context.log("Invalid response from Metadata Service: missing access_token")
+            return None
+            
+        # Calculate expiration time with robust fallback
+        expires_in = response_json.get("expires_in", 3600)
+        if not isinstance(expires_in, (int, float)) or expires_in <= 0:
+            context.log(f"Invalid expires_in value: {expires_in}, using default 3600 seconds")
+            expires_in = 3600
+            
+        # Use 10 minutes buffer for safety, but ensure we don't set negative expiration
+        buffer = min(600, expires_in // 2)  # Max 10 min buffer, but no more than half the token lifetime
+        expires_at = time.time() + expires_in - buffer
+
+        context.log(f"Using service account token with expiry info: {response_json['access_token']}, {expires_at}")
+        return {
+            "access_token": response_json["access_token"],
+            "expires_at": expires_at
+        }
+    except Exception as e:
+        context.log(f"Failed to authorize with Service Account from Metadata Service due to '{e}'")
+        return None
+
+
 async def create_token(context: LoggingContext, session: ClientSession, validate: bool = False):
     credentials_path = config.credentials_path()
 
     if credentials_path:
         context.log(f"Using credentials from {credentials_path}")
-        with open(credentials_path) as key_file:
-            credentials_data = json.load(key_file)
+        credentials_data = await _read_json_file_async(credentials_path)
 
         gcp_token = await get_token(
             key=credentials_data['private_key'],
@@ -142,6 +194,42 @@ async def create_token(context: LoggingContext, session: ClientSession, validate
             raise Exception(f"Failed to fetch access token. Got non string value: {gcp_token}")
 
     return gcp_token
+
+
+async def create_token_with_expiry(context: LoggingContext, session: ClientSession, validate: bool = False):
+    # Enhanced version that returns token with expiration information for proactive refresh.
+    # Only used by components that need proactive token refresh.
+    credentials_path = config.credentials_path()
+
+    if credentials_path:
+        context.log(f"Using credentials from {credentials_path}")
+        credentials_data = await _read_json_file_async(credentials_path)
+
+        # Service account tokens from files typically last 1 hour
+        token = await get_token(
+            key=credentials_data['private_key'],
+            service=credentials_data['client_email'],
+            uri=credentials_data['token_uri'],
+            session=session
+        )
+        expires_at = time.time() + 3000  # 50 minutes for safety
+        context.log(f"Using service account token with expiry info: {token}, expires:{expires_at}")
+        return {
+            "access_token": token,
+            "expires_at": expires_at
+        }
+
+    else:
+        context.log("Trying to use default service account")
+        token_info = await create_default_service_account_token_with_expiry(context, session)
+        
+        if validate:
+            if token_info is None:
+                raise Exception("Failed to fetch access token. No value")
+            if not isinstance(token_info, dict) or 'access_token' not in token_info:
+                raise Exception(f"Failed to fetch access token. Got invalid token info: {token_info}")
+        
+        return token_info
 
 
 async def get_token(key: str, service: str, uri: str, session: ClientSession):
