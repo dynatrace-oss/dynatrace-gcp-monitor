@@ -201,7 +201,7 @@ class GCPService:
             if x.get("gcpOptions", {}).get("valueType", "").upper() != "STRING"
         ])
         object.__setattr__(self, "activation", kwargs.get("activation", {}))
-        monitoring_filter = kwargs.get("gcpMonitoringFilter", "")
+        monitoring_filter = kwargs.get("gcpMonitoringFilter", "var:filter_conditions")
         if self.activation:
             for var_key, var_value in (self.activation.get("vars", {}) or {}).items():
                 monitoring_filter = monitoring_filter.replace(f'{{{var_key}}}', var_value)\
