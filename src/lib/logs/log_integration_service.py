@@ -6,7 +6,7 @@ from aiohttp import ClientSession
 from lib.clientsession_provider import init_gcp_client_session, init_dt_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, LogsContext, LogsProcessingContext, create_logs_context
-from lib.credentials import create_token, fetch_dynatrace_api_key, fetch_dynatrace_log_ingest_url, fetch_dynatrace_url
+from lib.credentials import create_token, create_token_with_expiry, fetch_dynatrace_api_key, fetch_dynatrace_log_ingest_url, fetch_dynatrace_url
 from lib.logs.dynatrace_client import DynatraceClient
 from lib.logs.gcp_client import GCPClient
 from lib.logs.log_self_monitoring import put_sfm_into_queue
@@ -36,40 +36,60 @@ class LogIntegrationService:
         self.sfm_queue = sfm_queue
         self.log_push_semaphore = asyncio.Semaphore(NUMBER_OF_CONCURRENT_PUSH_COROUTINES)
 
-        async with init_gcp_client_session() as gcp_session:
-            gcp_token = (
-                gcp_client.api_token
-                if gcp_client
-                else await create_token(
-                    session=gcp_session, context=logging_context, validate=True
+        if gcp_client:
+            # Reuse existing client - only need session for Dynatrace config calls
+            token_for_api_calls = gcp_client.api_token
+            token_info = None  # Will reuse existing client
+        else:
+            # Create new token with expiry info for proactive refresh
+            async with init_gcp_client_session() as gcp_session:
+                token_info = await create_token_with_expiry(
+                    context=logging_context, session=gcp_session, validate=True
                 )
-            )
+            token_for_api_calls = token_info["access_token"]
+
+        # Fetch Dynatrace configuration (always needs a GCP session)
+        async with init_gcp_client_session() as gcp_session:
             dynatrace_log_ingest_url = await fetch_dynatrace_log_ingest_url(
                 gcp_session=gcp_session,
                 project_id=config.project_id(),
-                token=gcp_token,
+                token=token_for_api_calls,
             )
             dynatrace_api_key = await fetch_dynatrace_api_key(
                 gcp_session=gcp_session,
                 project_id=config.project_id(),
-                token=gcp_token,
+                token=token_for_api_calls,
             )
 
-        self.gcp_client = gcp_client or GCPClient(gcp_token)
+        self.gcp_client = gcp_client or GCPClient(token_info, context=logging_context)
         self.dynatrace_client = DynatraceClient(url=dynatrace_log_ingest_url, api_key=dynatrace_api_key)
 
         return self
 
     async def update_gcp_client(self, gcp_session: ClientSession, logging_context: LoggingContext):
-        gcp_token = await create_token(session=gcp_session, context=logging_context, validate=True)
-        self.gcp_client = GCPClient(gcp_token)
+        # Use class-level lock to prevent concurrent token refreshes (thundering herd)
+        async with self.gcp_client._refresh_lock:
+            # Double-check token expiration - another worker may have refreshed it
+            if not self.gcp_client.is_token_expired():
+                self.gcp_client.update_gcp_client_in_the_next_loop = False
+                return
+            
+            # Use enhanced token function to get expiry information for proactive refresh
+            token_info = await create_token_with_expiry(context=logging_context, session=gcp_session, validate=True)
+            self.gcp_client.update_token(token_info)  # Synchronous call with rollback
 
     async def perform_pull(
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
         async with init_gcp_client_session() as gcp_session:
             if self.gcp_client.update_gcp_client_in_the_next_loop:
-                await self.update_gcp_client(gcp_session=gcp_session, logging_context=logging_context)
+                try:
+                    await self.update_gcp_client(gcp_session=gcp_session, logging_context=logging_context)
+                except Exception as e:
+                    # Reset flag even on failure to prevent infinite retry loop
+                    self.gcp_client.update_gcp_client_in_the_next_loop = False
+                    logging_context.log(f"Token refresh failed, continuing with existing token: {e}")
+                    # Continue with existing token - might still work
 
             context = LogsProcessingContext(None, None, self.sfm_queue)
             context.self_monitoring.pulling_time_start = time.perf_counter()
@@ -107,7 +127,6 @@ class LogIntegrationService:
         context = create_logs_context(self.sfm_queue)
         batch_length = len(log_batches)
         if batch_length == 0:
-            logging_context.log(f"Skipping pushing logs - no logs to push")
             return []
 
         logging_context.log(f"Number of log batches to push to Dynatrace: {batch_length}")
@@ -137,5 +156,3 @@ class LogIntegrationService:
                 for chunk in chunks(ack_ids, chunk_size)
             ]
             exceptions = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
-        if ack_ids:
-            logging_context.log("Log ingest payload has been pushed successfully")
