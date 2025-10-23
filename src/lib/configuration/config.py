@@ -141,6 +141,12 @@ def max_dimension_value_length():
     return get_int_environment_value("MAX_DIMENSION_VALUE_LENGTH", 250)
 
 
+def labels_grouping_include_unlabeled():
+    # When true, for services with labelsGroupingByService configured, perform a fallback
+    # query without user label groupByFields and merge results, so unlabeled resources are included.
+    return os.environ.get("LABELS_GROUPING_INCLUDE_UNLABELED", "FALSE").upper() in ["TRUE", "YES"]
+
+
 def get_dynatrace_api_key_from_env():
     return os.environ.get("DYNATRACE_ACCESS_KEY", None)
 

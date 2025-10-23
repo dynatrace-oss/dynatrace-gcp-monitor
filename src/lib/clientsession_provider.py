@@ -12,6 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import asyncio
+from typing import Optional
 
 import aiohttp
 
@@ -33,9 +34,72 @@ trace_config.on_request_start.append(on_request_start)
 trace_config.on_request_end.append(on_request_end)
 
 
-def init_dt_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trace_configs=[trace_config], trust_env=(config.use_proxy() in ["ALL", "DT_ONLY"]))
+# Reuse sessions across the whole process to avoid repeatedly creating
+# connectors, DNS lookups and socket pools on every request.
+_gcp_session: Optional[aiohttp.ClientSession] = None
+_dt_session: Optional[aiohttp.ClientSession] = None
 
 
-def init_gcp_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trace_configs=[trace_config], trust_env=(config.use_proxy() in ["ALL", "GCP_ONLY"]))
+def _make_connector() -> aiohttp.TCPConnector:
+    # ttl_dns_cache reduces expensive getaddrinfo calls; keep-alive reduces
+    # connection churn. Defaults keep SSL verification behavior to the caller.
+    # NOTE: We keep limits default (100) and rely on existing semaphores in code
+    # to limit concurrency.
+    return aiohttp.TCPConnector(ttl_dns_cache=300)
+
+
+class _SharedSessionContext:
+    """Async context wrapper that returns a shared session and does not close it.
+
+    Using this preserves the existing `async with init_*_client_session()` API
+    while ensuring the underlying session is long-lived and reused.
+    """
+
+    def __init__(self, session: aiohttp.ClientSession):
+        self._session = session
+
+    async def __aenter__(self) -> aiohttp.ClientSession:
+        return self._session
+
+    async def __aexit__(self, exc_type, exc, tb) -> bool:
+        # Do not close the shared session on scope exit
+        return False
+
+
+def _ensure_gcp_session() -> aiohttp.ClientSession:
+    global _gcp_session
+    if _gcp_session is None or _gcp_session.closed:
+        _gcp_session = aiohttp.ClientSession(
+            trace_configs=[trace_config],
+            trust_env=(config.use_proxy() in ["ALL", "GCP_ONLY"]),
+            connector=_make_connector(),
+        )
+    return _gcp_session
+
+
+def _ensure_dt_session() -> aiohttp.ClientSession:
+    global _dt_session
+    if _dt_session is None or _dt_session.closed:
+        _dt_session = aiohttp.ClientSession(
+            trace_configs=[trace_config],
+            trust_env=(config.use_proxy() in ["ALL", "DT_ONLY"]),
+            connector=_make_connector(),
+        )
+    return _dt_session
+
+
+def init_dt_client_session() -> _SharedSessionContext:
+    return _SharedSessionContext(_ensure_dt_session())
+
+
+def init_gcp_client_session() -> _SharedSessionContext:
+    return _SharedSessionContext(_ensure_gcp_session())
+
+
+async def close_shared_sessions():
+    """Optional cleanup helper if the process performs a graceful shutdown."""
+    global _gcp_session, _dt_session
+    if _gcp_session and not _gcp_session.closed:
+        await _gcp_session.close()
+    if _dt_session and not _dt_session.closed:
+        await _dt_session.close()

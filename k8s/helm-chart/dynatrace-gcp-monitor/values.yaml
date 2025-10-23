@@ -228,6 +228,11 @@ labelsGroupingByService: |
 #     groupings:
 #       - user_label_4,user_label_5
 #       - user_label_6
+
+# labelsGroupingIncludeUnlabeled: when true, include unlabeled resources while labelsGroupingByService is enabled
+# by issuing a fallback query without user label groupByFields and merging results.
+# Default false to preserve preview behavior for existing users.
+labelsGroupingIncludeUnlabeled: "false"
 metricResources:
   requests:
     memory: "1536Mi"

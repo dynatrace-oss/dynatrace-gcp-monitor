@@ -225,14 +225,26 @@ async def fetch_metric(
 
     headers = context.create_gcp_request_headers(project_id)
 
-    should_fetch = True
+    # Helper to build a de-duplication key for a single time series point
+    def _series_point_key(ts: Dict, point: Dict):
+        metric_type = ts.get('metric', {}).get('type')
+        metric_labels = tuple(sorted((k, str(v)) for k, v in ts.get('metric', {}).get('labels', {}).items()))
+        resource_type = ts.get('resource', {}).get('type')
+        resource_labels = tuple(sorted((k, str(v)) for k, v in ts.get('resource', {}).get('labels', {}).items()))
+        end_time = point.get('interval', {}).get('endTime')
+        return (metric_type, metric_labels, resource_type, resource_labels, end_time)
 
-    lines = []
+    # First pass: fetch with user label groupings (if any specified)
+    lines: List[IngestLine] = []
+    seen_keys = set()
+
+    should_fetch = True
+    params_with_labels = list(params)
     while should_fetch:
         context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
         url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
-        resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
+        resp = await context.gcp_session.request('GET', url=url, params=params_with_labels, headers=headers)
         page = await resp.json()
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
         if 'error' in page:
@@ -246,15 +258,57 @@ async def fetch_metric(
             entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
 
             for point in single_time_series['points']:
+                key = _series_point_key(single_time_series, point)
                 line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
                 if line:
                     lines.append(line)
+                    seen_keys.add(key)
 
         next_page_token = page.get('nextPageToken', None)
         if next_page_token:
-            _update_params(next_page_token, params)
+            _update_params(next_page_token, params_with_labels)
         else:
             should_fetch = False
+
+    # If grouping is enabled for this service and fallback is allowed, perform a second pass
+    # without user label groupings to include unlabeled resources.
+    if grouping and grouping != NO_GROUPING_CATEGORY and config.labels_grouping_include_unlabeled():
+        # Remove user label groupings from params for the fallback query
+        params_without_user_labels = [
+            p for p in params if not (p[0] == 'aggregation.groupByFields' and isinstance(p[1], str) and p[1].startswith('metadata.user_labels.'))
+        ]
+
+        should_fetch_fallback = True
+        while should_fetch_fallback:
+            context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
+
+            url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
+            resp = await context.gcp_session.request('GET', url=url, params=params_without_user_labels, headers=headers)
+            page = await resp.json()
+            if 'error' in page:
+                raise Exception(str(page))
+            if 'timeSeries' not in page:
+                break
+
+            for single_time_series in page['timeSeries']:
+                typed_value_key = _extract_typed_value_key(single_time_series)
+                dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric)
+                entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
+
+                for point in single_time_series['points']:
+                    key = _series_point_key(single_time_series, point)
+                    if key in seen_keys:
+                        continue  # Prefer enriched result from first pass
+                    line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
+                    if line:
+                        lines.append(line)
+                        seen_keys.add(key)
+
+            next_page_token = page.get('nextPageToken', None)
+            if next_page_token:
+                _update_params(next_page_token, params_without_user_labels)
+            else:
+                should_fetch_fallback = False
 
     return lines
 
