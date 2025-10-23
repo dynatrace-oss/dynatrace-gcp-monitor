@@ -37,13 +37,16 @@ async def run_logs(
 ):
     if not LOGS_SUBSCRIPTION_PROJECT or not LOGS_SUBSCRIPTION_ID:
         raise Exception(
-            "Cannot start pubsub pulling - GCP_PROJECT or LOGS_SUBSCRIPTION_ID are not defined"
+            "Cannot start pubsub pulling - LOGS_SUBSCRIPTION_PROJECT or LOGS_SUBSCRIPTION_ID are not defined"
         )
 
     # Each process starts later than the previous one
     await asyncio.sleep(process_number * LOG_PROCESS_STARTUP_DELAY_SECONDS)
 
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
+    logging_context.log(
+        f"Using Pub/Sub subscription: projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_SUBSCRIPTION_ID}"
+    )
     log_integration_service = await LogIntegrationService.create(sfm_queue=sfm_queue, logging_context=logging_context)
 
     tasks = []

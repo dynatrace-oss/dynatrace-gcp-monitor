@@ -26,8 +26,6 @@ from lib.logs.log_forwarder_variables import (
     PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES,
 )
 
-SUBSCRIPTION_PATH = f"projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_SUBSCRIPTION_ID}"
-
 
 class GCPClient:
     subscription_path: str
@@ -62,8 +60,9 @@ class GCPClient:
         self.subscription_path = (
             f"projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_SUBSCRIPTION_ID}"
         )
-        self.pull_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:pull"
-        self.acknowledge_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:acknowledge"
+        # Build URLs from instance path to avoid mismatches with module-level constants
+        self.pull_url = f"https://pubsub.googleapis.com/v1/{self.subscription_path}:pull"
+        self.acknowledge_url = f"https://pubsub.googleapis.com/v1/{self.subscription_path}:acknowledge"
         self._update_headers()
         json_body = {"maxMessages": PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES}
         json_data = json.dumps(json_body)

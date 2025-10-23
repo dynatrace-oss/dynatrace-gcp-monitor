@@ -57,6 +57,8 @@ dtSecurityContext: ""
 
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
+# project id that owns the Pub/Sub subscription used for logs (defaults to gcpProjectId if empty)
+logsSubscriptionProject: ""
 # dynatraceLogIngestUrl OPTIONAL endpoint used to ingest logs to Dynatrace, if it's not wanted to ingest them through dynatraceUrl:
 # - for direct ingest through the Cluster API: https://<environment_id>.live.dynatrace.com
 # - for Environment ActiveGate: https://<active_gate_address>:9999/e/<environment_id> (e.g. https://22.111.98.222:9999/e/abc12345)

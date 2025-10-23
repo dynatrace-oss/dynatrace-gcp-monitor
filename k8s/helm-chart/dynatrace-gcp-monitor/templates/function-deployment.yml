@@ -237,6 +237,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: LOGS_SUBSCRIPTION_ID
+        - name: LOGS_SUBSCRIPTION_PROJECT
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: LOGS_SUBSCRIPTION_PROJECT
         - name: DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH
           valueFrom:
             configMapKeyRef:

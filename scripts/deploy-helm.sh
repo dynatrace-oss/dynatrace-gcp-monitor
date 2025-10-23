@@ -160,6 +160,11 @@ readonly DYNATRACE_LOG_INGEST_URL
 
 LOGS_SUBSCRIPTION_ID=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.logsSubscriptionId}")
 readonly LOGS_SUBSCRIPTION_ID
+LOGS_SUBSCRIPTION_PROJECT=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.logsSubscriptionProject}")
+if [ -z "$LOGS_SUBSCRIPTION_PROJECT" ]; then
+  LOGS_SUBSCRIPTION_PROJECT="$GCP_PROJECT"
+fi
+readonly LOGS_SUBSCRIPTION_PROJECT
 USE_PROXY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.useProxy}")
 readonly USE_PROXY
 HTTP_PROXY=$(helm show values ./dynatrace-gcp-monitor --jsonpath "{.httpProxy}")
@@ -312,7 +317,7 @@ if [[ $DEPLOYMENT_TYPE == all ]] || [[ $DEPLOYMENT_TYPE == logs ]]; then
 
   check_if_parameter_is_empty "$LOGS_SUBSCRIPTION_ID" "LOGS_SUBSCRIPTION_ID"
 
-  readonly LOGS_SUBSCRIPTION_FULL_ID="projects/$GCP_PROJECT/subscriptions/$LOGS_SUBSCRIPTION_ID"
+  readonly LOGS_SUBSCRIPTION_FULL_ID="projects/$LOGS_SUBSCRIPTION_PROJECT/subscriptions/$LOGS_SUBSCRIPTION_ID"
 
   debug "Check PubSub subscription"
   if ! [[ $(gcloud pubsub subscriptions describe "$LOGS_SUBSCRIPTION_FULL_ID" --format="value(name)") ]]; then
