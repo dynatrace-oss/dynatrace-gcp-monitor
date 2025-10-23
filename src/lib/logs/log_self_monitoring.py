@@ -81,21 +81,34 @@ async def _loop_single_period(self_monitoring: LogSelfMonitoring,
     try:
         sfm_list = await _pull_sfm(sfm_queue)
         if sfm_list:
-            async with init_gcp_client_session() as gcp_session:
-                context = await _create_sfm_logs_context(sfm_queue, context, gcp_session, instance_metadata)
-                self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
-                _log_self_monitoring_data(self_monitoring, context)
-                if context.self_monitoring_enabled:
-                    if context.token is None:
-                        context.log("Cannot proceed without authorization token, failed to send log self monitoring")
-                        return
-                    if not isinstance(context.token, str):
-                        context.log(f"Failed to fetch access token, got non string value: {context.token}")
-                        return
+            # Aggregate first
+            self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
 
-                    await sfm_create_descriptors_if_missing(context)
-                    time_series = create_self_monitoring_time_series(self_monitoring, context)
-                    await push_self_monitoring_time_series(context, time_series)
+            # If SFM disabled, skip network calls; just log and drain
+            if not config.self_monitoring_enabled():
+                _log_self_monitoring_data(self_monitoring, context)
+                for _ in sfm_list:
+                    sfm_queue.task_done()
+                return
+
+            async with init_gcp_client_session() as gcp_session:
+                sfm_context = await _create_sfm_logs_context(sfm_queue, context, gcp_session, instance_metadata)
+                _log_self_monitoring_data(self_monitoring, sfm_context)
+
+                if sfm_context.token is None:
+                    sfm_context.log("Cannot proceed without authorization token, failed to send log self monitoring")
+                    for _ in sfm_list:
+                        sfm_queue.task_done()
+                    return
+                if not isinstance(sfm_context.token, str):
+                    sfm_context.log(f"Failed to fetch access token, got non string value: {sfm_context.token}")
+                    for _ in sfm_list:
+                        sfm_queue.task_done()
+                    return
+
+                await sfm_create_descriptors_if_missing(sfm_context)
+                time_series = create_self_monitoring_time_series(self_monitoring, sfm_context)
+                await push_self_monitoring_time_series(sfm_context, time_series)
                 for _ in sfm_list:
                     sfm_queue.task_done()
     except Exception:
