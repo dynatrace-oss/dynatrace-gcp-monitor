@@ -24,6 +24,13 @@ COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3
 COPY src/ .
 COPY LICENSE.md /licenses/
 
+# Remove pip from the final image to reduce attack surface (not needed at runtime)
+RUN rm -rf \
+    /usr/local/lib/python3.12/site-packages/pip* \
+    /usr/local/bin/pip \
+    /usr/local/bin/pip3 \
+    /usr/local/bin/pip3.12 || true
+
 RUN adduser --disabled-password gcp-monitor && chown -R gcp-monitor /code
 USER gcp-monitor
 
