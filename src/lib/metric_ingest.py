@@ -362,10 +362,19 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
     string_value = str(value)
 
     if len(name) > MAX_DIMENSION_NAME_LENGTH:
-        context.log(f'MINT rejects dimension names longer that {MAX_DIMENSION_NAME_LENGTH} chars. Dimension name \"{name}\" "has been truncated')
+        # Avoid logging full dimension name; report lengths only
+        context.log(
+            f'MINT rejects dimension names longer than {MAX_DIMENSION_NAME_LENGTH} chars. '
+            f'Name length={len(name)}; value will be truncated.'
+        )
         name = name[:MAX_DIMENSION_NAME_LENGTH]
     if len(string_value) > MAX_DIMENSION_VALUE_LENGTH:
-        context.log(f'MINT rejects dimension values longer that {MAX_DIMENSION_VALUE_LENGTH} chars. Dimension value \"{string_value}\" has been truncated')
+        # Avoid logging full dimension value; provide minimal masked preview
+        masked_preview = f"{string_value[:8]}…[REDACTED]" if string_value else "[REDACTED]"
+        context.log(
+            f'MINT rejects dimension values longer than {MAX_DIMENSION_VALUE_LENGTH} chars. '
+            f'Value length={len(string_value)}; preview="{masked_preview}"; value will be truncated.'
+        )
         string_value = string_value[:MAX_DIMENSION_VALUE_LENGTH]
 
     return DimensionValue(name, string_value)

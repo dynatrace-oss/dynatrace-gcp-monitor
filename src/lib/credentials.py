@@ -160,7 +160,7 @@ async def create_default_service_account_token_with_expiry(context: LoggingConte
         buffer = min(600, expires_in // 2)  # Max 10 min buffer, but no more than half the token lifetime
         expires_at = time.time() + expires_in - buffer
 
-        context.log(f"Using service account token with expiry info: {response_json['access_token']}, {expires_at}")
+        context.log(f"Using service account token with expiry info, expires at: {expires_at}")
         return {
             "access_token": response_json["access_token"],
             "expires_at": expires_at
@@ -213,7 +213,7 @@ async def create_token_with_expiry(context: LoggingContext, session: ClientSessi
             session=session
         )
         expires_at = time.time() + 3000  # 50 minutes for safety
-        context.log(f"Using service account token with expiry info: {token}, expires:{expires_at}")
+        context.log(f"Using service account token with expiry info, expires at: {expires_at}")
         return {
             "access_token": token,
             "expires_at": expires_at
