@@ -99,8 +99,10 @@ def should_include_metric(
     should_include = (
         metric_descriptor.gcpOptions.valueType.upper() != "STRING"
         and metric_descriptor.launch_stage != "DEPRECATED"
-        and len(metric_descriptor.monitored_resources_types) == 1
-        and metric_descriptor.monitored_resources_types[0] in resources_to_autodiscover
+        and any(
+            monitored_resources_type in metric_descriptor.monitored_resources_types
+            for monitored_resources_type in resources_to_autodiscover
+        )
         and not any(
             {
                 metric_descriptor.value.startswith(prefix)
