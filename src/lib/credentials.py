@@ -245,8 +245,25 @@ async def get_token(key: str, service: str, uri: str, session: ClientSession):
     assertion_signed = jwt.encode(assertion, key, 'RS256')
     request = {'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer', 'assertion': assertion_signed}
     async with session.post(uri, data=request) as resp:
-        response = await resp.json()
-        return response["access_token"]
+        if resp.status != 200:
+            # Provide clear error detail on non-200 responses
+            try:
+                body = await resp.json()
+            except Exception:
+                body = await resp.text()
+            raise Exception(f"Failed to obtain service account token: status={resp.status}, body={body}")
+
+        # Expect JSON body with access_token
+        try:
+            response = await resp.json()
+        except Exception:
+            text = await resp.text()
+            raise Exception(f"Token endpoint returned non-JSON response: {text}")
+
+        token = response.get("access_token")
+        if not token:
+            raise Exception(f"Token endpoint response missing 'access_token': {response}")
+        return token
 
 
 async def get_all_accessible_projects(context: LoggingContext, session: ClientSession, token: str):
