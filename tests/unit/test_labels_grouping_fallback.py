@@ -1,6 +1,6 @@
 import os
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -34,7 +34,7 @@ class FakeSession:
         includes_user_env = any(isinstance(g, str) and g.startswith('metadata.user_labels.env') for g in group_fields)
 
         # Common point
-        now = datetime.utcnow().replace(microsecond=0)
+        now = datetime.now(timezone.utc).replace(tzinfo=None).replace(microsecond=0)
         end = now
         start = now - timedelta(minutes=1)
         point = {
@@ -112,7 +112,7 @@ async def test_labels_grouping_fallback_includes_unlabeled(monkeypatch):
         dt_session=None,  # not used by fetch_metric
         project_id_owner='proj',
         token='t',
-        execution_time=datetime.utcnow(),
+        execution_time=datetime.now(timezone.utc).replace(tzinfo=None),
         execution_interval_seconds=60,
         dynatrace_api_key='',
         dynatrace_url='http://dthost',
@@ -192,7 +192,7 @@ async def test_labels_grouping_fallback_dedup_prefers_enriched(monkeypatch):
         dt_session=None,
         project_id_owner='proj',
         token='t',
-        execution_time=datetime.utcnow(),
+        execution_time=datetime.now(timezone.utc).replace(tzinfo=None),
         execution_interval_seconds=60,
         dynatrace_api_key='',
         dynatrace_url='http://dthost',
@@ -242,7 +242,7 @@ async def test_labels_grouping_flag_disabled_drops_unlabeled(monkeypatch):
         dt_session=None,
         project_id_owner='proj',
         token='t',
-        execution_time=datetime.utcnow(),
+        execution_time=datetime.now(timezone.utc).replace(tzinfo=None),
         execution_interval_seconds=60,
         dynatrace_api_key='',
         dynatrace_url='http://dthost',
@@ -290,7 +290,7 @@ async def test_no_grouping_no_fallback_single_pass(monkeypatch):
         dt_session=None,
         project_id_owner='proj',
         token='t',
-        execution_time=datetime.utcnow(),
+        execution_time=datetime.now(timezone.utc).replace(tzinfo=None),
         execution_interval_seconds=60,
         dynatrace_api_key='',
         dynatrace_url='http://dthost',

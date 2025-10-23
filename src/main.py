@@ -15,7 +15,7 @@
 import asyncio
 import hashlib
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Set, Iterable
 from aiohttp import ClientSession
 
@@ -41,7 +41,7 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
     """
     Starting point for metrics monitoring main loop.
     """
-    timestamp_utc = datetime.utcnow()
+    timestamp_utc = datetime.now(timezone.utc).replace(tzinfo=None)
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
     logging_context = LoggingContext(execution_identifier)
@@ -84,7 +84,7 @@ async def get_metric_context(
         dt_session=dt_session,
         project_id_owner=project_id_owner,
         token=token,
-        execution_time=datetime.utcnow(),
+        execution_time=datetime.now(timezone.utc).replace(tzinfo=None),
         execution_interval_seconds=60 * query_interval_min,
         dynatrace_api_key=dynatrace_api_key,
         dynatrace_url=dynatrace_url,

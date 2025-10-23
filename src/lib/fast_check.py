@@ -16,7 +16,7 @@ import asyncio
 import json
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from queue import Queue
 from typing import NamedTuple, List, Optional
 
@@ -163,7 +163,7 @@ class LogsFastCheck:
         self.logging_context.log("Sending the startup message")
         container_name = self.instance_metadata.hostname if self.instance_metadata else "local deployment"
         fast_check_event = {
-            'timestamp': datetime.utcnow().isoformat(" "),
+            'timestamp': datetime.now(timezone.utc).replace(tzinfo=None).isoformat(" "),
             'cloud.provider': 'gcp',
             'content': f'GCP Log Forwarder has started at {container_name}',
             'severity': 'INFO'

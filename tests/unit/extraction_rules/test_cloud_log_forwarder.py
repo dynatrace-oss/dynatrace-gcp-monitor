@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import NewType, Any
 
 from lib.logs import logs_processor
@@ -21,7 +21,7 @@ from lib.logs.metadata_engine import ATTRIBUTE_CONTENT
 from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
 MonkeyPatchFixture = NewType("MonkeyPatchFixture", Any)
-timestamp = datetime.utcnow().isoformat() + "Z"
+timestamp = datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + "Z"
 log_message = "WALTHAM, Mass.--(BUSINESS WIRE)-- Software intelligence company Dynatrace (NYSE: DT)"
 
 test_record = {

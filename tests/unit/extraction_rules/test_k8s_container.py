@@ -12,7 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from lib.logs.logs_processor import _create_dt_log_payload
 from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RESOURCE_TYPE, ATTRIBUTE_SEVERITY, \
@@ -20,7 +20,7 @@ from lib.logs.metadata_engine import ATTRIBUTE_GCP_PROJECT_ID, ATTRIBUTE_GCP_RES
     ATTRIBUTE_CONTENT, ATTRIBUTE_TIMESTAMP, ATTRIBUTE_DT_LOGPATH, ATTRIBUTE_DT_SECURITY_CONTEXT
 from unit.extraction_rules.common import TEST_LOGS_PROCESSING_CONTEXT
 
-timestamp = datetime.utcnow().isoformat() + "Z"
+timestamp = datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + "Z"
 
 log_record = {
   "insertId": "1a2b3c4d",

@@ -15,7 +15,7 @@
 import os
 import time
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from asyncio import Queue
 from typing import Optional, Dict
 
@@ -114,7 +114,7 @@ class LoggingContext:
 
         message = args[-1]
 
-        timestamp_utc = datetime.utcnow()
+        timestamp_utc = datetime.now(timezone.utc).replace(tzinfo=None)
         timestamp_utc_iso = timestamp_utc.isoformat(sep=" ")
 
         context_strings = []
@@ -267,7 +267,7 @@ class LogsSfmContext(SfmContext):
         )
         self.sfm_queue = sfm_queue
         self.logs_subscription_id = logs_subscription_id
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(timezone.utc).replace(tzinfo=None)
         self.container_name = container_name
         self.zone = zone
         self.worker_pid = worker_pid

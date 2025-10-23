@@ -16,7 +16,7 @@ import multiprocessing
 import platform
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List, NamedTuple, Dict
 
 from lib import credentials
@@ -107,7 +107,7 @@ async def sfm_send_loop_timeouts(finished_before_timeout: bool):
         )
         timeouts_metric = SFMMetricLoopTimeouts()
         timeouts_metric.update(finished_before_timeout)
-        await sfm_push_metrics([timeouts_metric], context, datetime.utcnow())
+        await sfm_push_metrics([timeouts_metric], context, datetime.now(timezone.utc).replace(tzinfo=None))
 
 
 async def run_metrics_fetcher_forever():

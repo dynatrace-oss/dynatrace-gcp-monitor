@@ -358,7 +358,7 @@ async def run_worker_with_messages(
 
 def load_json_with_fresh_timestamp() -> Dict:
     message_data_json = json.loads(LOG_MESSAGE_DATA)
-    message_data_json["timestamp"] = datetime.utcnow().isoformat() + "Z"
+    message_data_json["timestamp"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat() + "Z"
     return message_data_json
 
 
