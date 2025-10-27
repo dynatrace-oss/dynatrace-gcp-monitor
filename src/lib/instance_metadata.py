@@ -64,7 +64,7 @@ class InstanceMetadataCheck:
             return None
 
     async def project_id(self):
-        await self._get_metadata('/project/project-id')
+        return await self._get_metadata('/project/project-id')
 
     async def running_container(self):
         return await self._get_metadata('/instance/hostname')

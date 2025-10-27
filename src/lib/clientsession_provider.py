@@ -79,12 +79,28 @@ def _ensure_gcp_session() -> aiohttp.ClientSession:
         or _gcp_session_loop is None
         or _gcp_session_loop is not current_loop
     ):
+        # Attempt to gracefully close the previous session if it exists and
+        # we are switching event loops. Do this best‑effort to avoid noisy
+        # "Unclosed client session/connector" warnings.
+        old_session = _gcp_session
+        old_loop = _gcp_session_loop
         _gcp_session = aiohttp.ClientSession(
             trace_configs=[trace_config],
             trust_env=(config.use_proxy() in ["ALL", "GCP_ONLY"]),
             connector=_make_connector(),
         )
         _gcp_session_loop = current_loop
+        if old_session is not None and not getattr(old_session, "closed", True):
+            try:
+                if old_loop is not None and old_loop.is_running():
+                    # Close on the loop that created the session to satisfy aiohttp
+                    asyncio.run_coroutine_threadsafe(old_session.close(), old_loop)
+                else:
+                    # Fall back to closing in the current loop
+                    current_loop.create_task(old_session.close())
+            except Exception:
+                # Best effort: ignore cleanup errors
+                pass
     return _gcp_session
 
 
@@ -97,12 +113,22 @@ def _ensure_dt_session() -> aiohttp.ClientSession:
         or _dt_session_loop is None
         or _dt_session_loop is not current_loop
     ):
+        old_session = _dt_session
+        old_loop = _dt_session_loop
         _dt_session = aiohttp.ClientSession(
             trace_configs=[trace_config],
             trust_env=(config.use_proxy() in ["ALL", "DT_ONLY"]),
             connector=_make_connector(),
         )
         _dt_session_loop = current_loop
+        if old_session is not None and not getattr(old_session, "closed", True):
+            try:
+                if old_loop is not None and old_loop.is_running():
+                    asyncio.run_coroutine_threadsafe(old_session.close(), old_loop)
+                else:
+                    current_loop.create_task(old_session.close())
+            except Exception:
+                pass
     return _dt_session
 
 
