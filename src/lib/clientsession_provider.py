@@ -36,8 +36,11 @@ trace_config.on_request_end.append(on_request_end)
 
 # Reuse sessions across the whole process to avoid repeatedly creating
 # connectors, DNS lookups and socket pools on every request.
+# Cached sessions bound to the event loop they were created on.
 _gcp_session: Optional[aiohttp.ClientSession] = None
 _dt_session: Optional[aiohttp.ClientSession] = None
+_gcp_session_loop: Optional[asyncio.AbstractEventLoop] = None
+_dt_session_loop: Optional[asyncio.AbstractEventLoop] = None
 
 
 def _make_connector() -> aiohttp.TCPConnector:
@@ -67,24 +70,39 @@ class _SharedSessionContext:
 
 
 def _ensure_gcp_session() -> aiohttp.ClientSession:
-    global _gcp_session
-    if _gcp_session is None or _gcp_session.closed:
+    global _gcp_session, _gcp_session_loop
+    current_loop = asyncio.get_event_loop()
+    # Recreate session if none, closed, or bound to a different loop
+    if (
+        _gcp_session is None
+        or _gcp_session.closed
+        or _gcp_session_loop is None
+        or _gcp_session_loop is not current_loop
+    ):
         _gcp_session = aiohttp.ClientSession(
             trace_configs=[trace_config],
             trust_env=(config.use_proxy() in ["ALL", "GCP_ONLY"]),
             connector=_make_connector(),
         )
+        _gcp_session_loop = current_loop
     return _gcp_session
 
 
 def _ensure_dt_session() -> aiohttp.ClientSession:
-    global _dt_session
-    if _dt_session is None or _dt_session.closed:
+    global _dt_session, _dt_session_loop
+    current_loop = asyncio.get_event_loop()
+    if (
+        _dt_session is None
+        or _dt_session.closed
+        or _dt_session_loop is None
+        or _dt_session_loop is not current_loop
+    ):
         _dt_session = aiohttp.ClientSession(
             trace_configs=[trace_config],
             trust_env=(config.use_proxy() in ["ALL", "DT_ONLY"]),
             connector=_make_connector(),
         )
+        _dt_session_loop = current_loop
     return _dt_session
 
 
@@ -98,8 +116,12 @@ def init_gcp_client_session() -> _SharedSessionContext:
 
 async def close_shared_sessions():
     """Optional cleanup helper if the process performs a graceful shutdown."""
-    global _gcp_session, _dt_session
+    global _gcp_session, _dt_session, _gcp_session_loop, _dt_session_loop
     if _gcp_session and not _gcp_session.closed:
         await _gcp_session.close()
     if _dt_session and not _dt_session.closed:
         await _dt_session.close()
+    _gcp_session = None
+    _dt_session = None
+    _gcp_session_loop = None
+    _dt_session_loop = None
