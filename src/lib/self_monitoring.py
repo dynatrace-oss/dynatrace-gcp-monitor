@@ -160,8 +160,11 @@ async def replace_metric_descriptor_if_required(
 ):
     existing_label_keys = extract_label_keys(existing_metric_descriptor)
     descriptor_label_keys = extract_label_keys(metric_descriptor)
+    # Compare both label keys and the display name; if either differs, replace the descriptor.
+    # Bug fix: previously compared existing displayName to a non-existent key 'metric_descriptor',
+    # which always triggered a replace on every SFM cycle.
     if existing_label_keys != descriptor_label_keys or existing_metric_descriptor.get(
-        "displayName", "" ) != metric_descriptor.get("metric_descriptor", ""):
+        "displayName", "") != metric_descriptor.get("displayName", ""):
         await delete_metric_descriptor(context, metric_type)
         await create_metric_descriptor(context, metric_descriptor, metric_type)
 

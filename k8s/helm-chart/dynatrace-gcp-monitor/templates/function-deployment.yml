@@ -167,6 +167,12 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: SCOPING_PROJECT_SUPPORT_ENABLED
+        # Enable unlabeled fallback for labels grouping feature if configured
+        - name: LABELS_GROUPING_INCLUDE_UNLABELED
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: LABELS_GROUPING_INCLUDE_UNLABELED
         - name: EXCLUDED_PROJECTS
           valueFrom:
             configMapKeyRef:
