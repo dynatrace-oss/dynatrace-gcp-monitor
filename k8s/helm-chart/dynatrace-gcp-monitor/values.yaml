@@ -258,7 +258,7 @@ gcpServicesYaml: |
     - service: apigee_googleapis_com_Proxy
       allowAutodiscovery: false
       featureSets:
-        - default_metrics
+        - apigee_classic_metrics
       vars:
         filter_conditions: ""
     # Google Apigee Proxy (v2)
@@ -266,6 +266,41 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      vars:
+        filter_conditions: ""
+    # Google Apigee Target
+    - service: apigee_googleapis_com_Target
+      allowAutodiscovery: false
+      featureSets:
+        - apigee_classic_metrics
+      vars:
+        filter_conditions: ""
+    # Google Apigee Target (v2)
+    - service: apigee_googleapis_com_TargetV2
+      allowAutodiscovery: false
+      featureSets:
+        - default_metrics
+      vars:
+        filter_conditions: ""
+    # Google Security Detection Rule
+    - service: apigee_googleapis_com_SecurityDetectionRule
+      allowAutodiscovery: false
+      featureSets:
+        - apigee_security_alerts
+      vars:
+        filter_conditions: ""
+     # Google Security Incident
+    - service: apigee_googleapis_com_SecurityIncident
+      allowAutodiscovery: false
+      featureSets:
+        - apigee_security_alerts
+      vars:
+        filter_conditions: ""
+    # Google Security Profile Environment Association
+    - service: apigee_googleapis_com_SecurityProfileEnvironmentAssociation
+      allowAutodiscovery: false
+      featureSets:
+        - apigee_security_alerts
       vars:
         filter_conditions: ""
     # Google Assistant Action Project
