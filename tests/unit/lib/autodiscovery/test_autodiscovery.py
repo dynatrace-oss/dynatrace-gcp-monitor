@@ -9,6 +9,7 @@ from lib.autodiscovery.autodiscovery_utils import (
     get_metric_descriptors,
 )
 from lib.autodiscovery.models import AutodiscoveryResourceLinking, ServiceStub
+from lib.autodiscovery.models import GCPMetricDescriptor
 from lib.metrics import AutodiscoveryGCPService, GCPService
 
 response_json = {
@@ -54,6 +55,25 @@ response_json = {
         },
     ]
 }
+
+
+def test_gcp_metric_descriptor_cumulative_distribution_maps_to_gauge():
+    descriptor = GCPMetricDescriptor.create(
+        name="projects/test_project/metricDescriptors/kubernetes.io/gcsfusecsi/fs_ops_latencies",
+        labels=[{"key": "fs_op", "description": "Filesystem operation type."}],
+        metricKind="CUMULATIVE",
+        valueType="DISTRIBUTION",
+        displayName="File system operation latencies",
+        unit="us",
+        description="The cumulative distribution of filesystem operation latencies.",
+        type="kubernetes.io/gcsfusecsi/fs_ops_latencies",
+        metadata={"launchStage": "BETA", "samplePeriod": "10s", "ingestDelay": "0s"},
+        launchStage="BETA",
+        monitoredResourceTypes=["k8s_pod"],
+    )
+
+    assert descriptor.type == "gauge"
+    assert descriptor.key == "cloud.gcp.kubernetes_io.gcsfusecsi.fs_ops_latencies"
 
 
 @pytest.mark.asyncio

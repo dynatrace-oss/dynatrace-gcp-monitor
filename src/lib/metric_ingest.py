@@ -304,15 +304,43 @@ def _extract_typed_value_key(time_series):
     return typed_value_key
 
 
+def _sanitize_dimension_value(raw_value: str) -> str:
+    # Keep the MINT line protocol single-line and escape embedded quotes inside dimension values.
+    # The value is still sent as a quoted string (see `IngestLine.dimensions_string()`).
+    sanitized = raw_value.replace("\r", " ").replace("\n", " ").replace("\t", " ")
+    return sanitized.replace('"', '\\"')
+
+
+def _truncate_escaped_dimension_value(escaped_value: str, max_length: int) -> str:
+    if len(escaped_value) <= max_length:
+        return escaped_value
+
+    truncated = escaped_value[:max_length]
+    # Avoid leaving an odd number of trailing backslashes, which could escape the closing quote
+    # and break the metric ingest line.
+    trailing_backslashes = len(truncated) - len(truncated.rstrip("\\"))
+    if trailing_backslashes % 2 == 1:
+        truncated = truncated[:-1]
+    return truncated
+
+
 def create_dimension(name: str, value: Any, context: LoggingContext = LoggingContext(None)) -> DimensionValue:
     string_value = str(value)
+    effective_max_value_length = min(
+        MAX_DIMENSION_VALUE_LENGTH, config.gcp_allowed_metric_dimension_value_length()
+    )
 
     if len(name) > MAX_DIMENSION_NAME_LENGTH:
         context.log(f'MINT rejects dimension names longer that {MAX_DIMENSION_NAME_LENGTH} chars. Dimension name \"{name}\" "has been truncated')
         name = name[:MAX_DIMENSION_NAME_LENGTH]
-    if len(string_value) > MAX_DIMENSION_VALUE_LENGTH:
-        context.log(f'MINT rejects dimension values longer that {MAX_DIMENSION_VALUE_LENGTH} chars. Dimension value \"{string_value}\" has been truncated')
-        string_value = string_value[:MAX_DIMENSION_VALUE_LENGTH]
+
+    string_value = _sanitize_dimension_value(string_value)
+    if len(string_value) > effective_max_value_length:
+        context.log(
+            f"MINT rejects dimension values longer that {effective_max_value_length} chars. "
+            f'Dimension value "{string_value}" has been truncated'
+        )
+        string_value = _truncate_escaped_dimension_value(string_value, effective_max_value_length)
 
     return DimensionValue(name, string_value)
 
