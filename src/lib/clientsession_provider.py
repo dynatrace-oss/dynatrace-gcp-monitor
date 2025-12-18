@@ -14,9 +14,14 @@
 import asyncio
 
 import aiohttp
+from aiohttp import ClientTimeout
 
 from lib.configuration import config
 from lib.sfm.api_call_latency import ApiCallLatency
+
+# Timeouts to prevent hung requests from exceeding Pub/Sub ACK deadlines
+DT_CLIENT_TIMEOUT = ClientTimeout(total=30, connect=10)
+GCP_CLIENT_TIMEOUT = ClientTimeout(total=60, connect=10)
 
 
 async def on_request_start(session, trace_config_ctx, params):
@@ -34,8 +39,8 @@ trace_config.on_request_end.append(on_request_end)
 
 
 def init_dt_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trace_configs=[trace_config], trust_env=(config.use_proxy() in ["ALL", "DT_ONLY"]))
+    return aiohttp.ClientSession(trace_configs=[trace_config], timeout=DT_CLIENT_TIMEOUT, trust_env=(config.use_proxy() in ["ALL", "DT_ONLY"]))
 
 
 def init_gcp_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trace_configs=[trace_config], trust_env=(config.use_proxy() in ["ALL", "GCP_ONLY"]))
+    return aiohttp.ClientSession(trace_configs=[trace_config], timeout=GCP_CLIENT_TIMEOUT, trust_env=(config.use_proxy() in ["ALL", "GCP_ONLY"]))
