@@ -137,9 +137,12 @@ class LogIntegrationService:
 
         context.self_monitoring.sending_time_start = time.perf_counter()
         async with init_dt_client_session() as dt_session:
-            exceptions = await asyncio.gather(
+            results = await asyncio.gather(
                 *[process_batch(batch) for batch in log_batches], return_exceptions=True
             )
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logging_context.error(f"Batch {i} send to Dynatrace failed: {result}")
         context.self_monitoring.calculate_sending_time()
         put_sfm_into_queue(context)
 
