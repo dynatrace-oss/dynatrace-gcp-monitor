@@ -105,9 +105,11 @@ class LogIntegrationService:
             ack_ids_of_erroneous_messages = []
 
             context.self_monitoring.processing_time_start = time.perf_counter()
-            for response in responses:
-                if not isinstance(response, Exception):
-                    for received_message in response.get("receivedMessages", []):  # type: ignore
+            for i, response in enumerate(responses):
+                if isinstance(response, Exception):
+                    logging_context.error(f"Pull request {i} failed: {response}")
+                    continue
+                for received_message in response.get("receivedMessages", []):  # type: ignore
                         message_job = prepare_context_and_process_message(
                             self.sfm_queue, received_message
                         )
