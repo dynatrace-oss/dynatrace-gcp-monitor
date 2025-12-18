@@ -64,6 +64,7 @@ class GCPClient:
         )
         self.pull_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:pull"
         self.acknowledge_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:acknowledge"
+        self.modify_ack_deadline_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:modifyAckDeadline"
         self._update_headers()
         json_body = {"maxMessages": PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES}
         json_data = json.dumps(json_body)
@@ -174,3 +175,27 @@ class GCPClient:
                     f'reason: {response.reason}, url: {self.acknowledge_url}, body: "{await response.json()}"'
                 )
                 response.raise_for_status()
+
+    async def modify_ack_deadline(
+        self,
+        ack_ids: List[str],
+        ack_deadline_seconds: int,
+        gcp_session: ClientSession,
+        logging_context: LoggingContext,
+    ):
+        """Extend ACK deadline to prevent redelivery during long processing."""
+        if not ack_ids:
+            return
+
+        auth_state = self._get_current_auth_state()
+        payload = {"ackIds": ack_ids, "ackDeadlineSeconds": ack_deadline_seconds}
+
+        async with gcp_session.request(
+            method="POST", url=self.modify_ack_deadline_url, json=payload, headers=auth_state['headers']
+        ) as response:
+            resp_status = response.status
+            if resp_status > 299:
+                logging_context.error(
+                    f"modifyAckDeadline error: {resp_status}, "
+                    f'reason: {response.reason}, body: "{await response.json()}"'
+                )
