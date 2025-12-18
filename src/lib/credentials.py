@@ -160,7 +160,7 @@ async def create_default_service_account_token_with_expiry(context: LoggingConte
         buffer = min(600, expires_in // 2)  # Max 10 min buffer, but no more than half the token lifetime
         expires_at = time.time() + expires_in - buffer
 
-        context.log(f"Using service account token with expiry info: {response_json['access_token']}, {expires_at}")
+        context.log(f"Using service account token with expiry info, expires_at={expires_at}")
         return {
             "access_token": response_json["access_token"],
             "expires_at": expires_at
@@ -191,7 +191,9 @@ async def create_token(context: LoggingContext, session: ClientSession, validate
         if gcp_token is None:
             raise Exception("Failed to fetch access token. No value")
         if not isinstance(gcp_token, str):
-            raise Exception(f"Failed to fetch access token. Got non string value: {gcp_token}")
+            raise Exception(
+                f"Failed to fetch access token. Got non string value: type={type(gcp_token).__name__}"
+            )
 
     return gcp_token
 
@@ -213,7 +215,7 @@ async def create_token_with_expiry(context: LoggingContext, session: ClientSessi
             session=session
         )
         expires_at = time.time() + 3000  # 50 minutes for safety
-        context.log(f"Using service account token with expiry info: {token}, expires:{expires_at}")
+        context.log(f"Using service account token with expiry info, expires_at={expires_at}")
         return {
             "access_token": token,
             "expires_at": expires_at
@@ -227,7 +229,13 @@ async def create_token_with_expiry(context: LoggingContext, session: ClientSessi
             if token_info is None:
                 raise Exception("Failed to fetch access token. No value")
             if not isinstance(token_info, dict) or 'access_token' not in token_info:
-                raise Exception(f"Failed to fetch access token. Got invalid token info: {token_info}")
+                token_info_description = f"type={type(token_info).__name__}"
+                if isinstance(token_info, dict):
+                    token_info_description += f", keys={list(token_info.keys())}"
+                raise Exception(
+                    "Failed to fetch access token. Got invalid token info structure: "
+                    + token_info_description
+                )
         
         return token_info
 

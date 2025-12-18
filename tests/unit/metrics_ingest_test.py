@@ -37,6 +37,18 @@ def test_create_dimension_too_long_dimension():
     assert len(dimension_value.value) == MAX_DIMENSION_VALUE_LENGTH
 
 
+def test_create_dimension_escapes_quotes_and_removes_control_chars():
+    name = "querystring"
+    value = '"C:\\Program Files\\Foo\\bar.exe" -flag\nnext'
+
+    dimension_value = create_dimension(name, value)
+
+    assert dimension_value.value == '\\"C:\\Program Files\\Foo\\bar.exe\\" -flag next'
+    assert "\n" not in dimension_value.value
+    assert "\r" not in dimension_value.value
+    assert "\t" not in dimension_value.value
+
+
 def test_flatten_and_enrich_metric_results_all_additional_dimensions():
     context_mock = MetricsContext(None, None, "", "", datetime.utcnow(), 0, "", "", False, False, None)
     metric_results = [[IngestLine("entity_id", "m1", "count", 1, 10000, [])]]

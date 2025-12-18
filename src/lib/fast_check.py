@@ -125,7 +125,7 @@ async def get_dynatrace_token_metadata(dt_session: ClientSession, context: Loggi
                                        dynatrace_api_key: str, timeout: Optional[int] = 2) -> dict:
     try:
         response = await dt_session.post(
-            url=f"{dynatrace_url.rstrip('/')}/api/v1/tokens/lookup",
+            url=f"{dynatrace_url.rstrip('/')}/api/v2/apiTokens/lookup",
             headers={
                 "Authorization": f"Api-Token {dynatrace_api_key}",
                 "Content-Type": "application/json; charset=utf-8"

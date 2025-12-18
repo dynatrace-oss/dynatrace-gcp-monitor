@@ -104,7 +104,10 @@ class GCPMetricDescriptor:
 
     @staticmethod
     def _cast_metric_kind_to_dt_format(metric_kind: str, value_type: str) -> str:
-        if metric_kind == "GAUGE" or (metric_kind == "DELTA" and value_type == "DISTRIBUTION"):
+        # DISTRIBUTION values are ingested as gauge summary statistics (min/max/sum/count) in MINT.
+        if value_type == "DISTRIBUTION":
+            return "gauge"
+        if metric_kind == "GAUGE":
             return "gauge"
         elif metric_kind == "DELTA" and value_type != "DISTRIBUTION":
             return "count,delta"

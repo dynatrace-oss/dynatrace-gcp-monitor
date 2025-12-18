@@ -62,14 +62,34 @@ gcp_extension_mapping:
     monitored_resources:
     - value: apigee.googleapis.com/Environment
   - service_name: apigee_googleapis_com_Proxy
-    feature_set: default_metrics
+    feature_set: apigee_classic_metrics
     monitored_resources:
     - value: apigee.googleapis.com/Proxy
   - service_name: apigee_googleapis_com_ProxyV2
     feature_set: default_metrics
     monitored_resources:
-    - value: apigee.googleapis.com/TargetV2
     - value: apigee.googleapis.com/ProxyV2
+  - service_name: apigee_googleapis_com_Target
+    feature_set: apigee_classic_metrics
+    monitored_resources:
+    - value: apigee.googleapis.com/Target
+  - service_name: apigee_googleapis_com_TargetV2
+    feature_set: default_metrics
+    monitored_resources:
+    - value: apigee.googleapis.com/ProxyV2
+    - value: apigee.googleapis.com/TargetV2
+  - service_name: apigee_googleapis_com_SecurityDetectionRule
+    feature_set: apigee_security_alerts
+    monitored_resources:
+    - value: apigee.googleapis.com/SecurityDetectionRule
+  - service_name: apigee_googleapis_com_SecurityIncident
+    feature_set: apigee_security_alerts
+    monitored_resources:
+    - value: apigee.googleapis.com/SecurityIncident
+  - service_name: apigee_googleapis_com_SecurityProfileEnvironmentAssociation
+    feature_set: apigee_security_alerts
+    monitored_resources:
+    - value: apigee.googleapis.com/SecurityProfileEnvironmentAssociation
 - extension_name: google-app-engine
   services:
   - service_name: gae_app
