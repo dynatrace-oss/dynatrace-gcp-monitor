@@ -155,4 +155,7 @@ class LogIntegrationService:
                 self.gcp_client.push_ack_ids(chunk, gcp_session, logging_context, self.update_gcp_client)
                 for chunk in chunks(ack_ids, chunk_size)
             ]
-            exceptions = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
+            results = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
+            for i, result in enumerate(results):
+                if isinstance(result, Exception):
+                    logging_context.error(f"ACK chunk {i} failed, messages will be redelivered: {result}")
