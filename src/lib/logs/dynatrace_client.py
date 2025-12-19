@@ -18,7 +18,7 @@ import random
 from typing import Union
 from urllib.parse import urlparse
 
-from aiohttp import ClientResponseError
+from aiohttp import ClientError
 
 from lib.configuration import config
 
@@ -90,15 +90,18 @@ class DynatraceClient:
                             context.self_monitoring.dynatrace_connectivity.append(
                                 error_code_description
                             )
+                        else:
+                            context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
 
-                        # Retry on transient errors
+                        # Retry only on transient errors
                         if resp_status in RETRYABLE_STATUS_CODES and attempt < MAX_RETRIES - 1:
                             backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt) + random.uniform(0, 0.5)
                             context.t_error(f"Retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
                             await asyncio.sleep(backoff)
                             continue
 
-                        response.raise_for_status()
+                        # Non-retryable HTTP error - don't retry, just return
+                        return
                     else:
                         ack_ids_to_send.extend(batch.ack_ids)
                         context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Ok)
@@ -106,10 +109,9 @@ class DynatraceClient:
                         context.self_monitoring.log_ingest_payload_size += compressed_size_kb
                         context.self_monitoring.log_ingest_raw_size += encoded_body_size_kb
                         return  # Success
-                except Exception as e:
-                    if not isinstance(e, ClientResponseError):
-                        context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
-                    # Retry on network errors
+                except ClientError as e:
+                    # aiohttp client errors (connection, timeout, etc.) - retry
+                    context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
                     if attempt < MAX_RETRIES - 1:
                         backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt) + random.uniform(0, 0.5)
                         context.t_error(f"Request failed: {e}, retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
@@ -118,5 +120,3 @@ class DynatraceClient:
                     raise e
         finally:
             await context.sfm_queue.put(batch.self_monitoring)
-
-         
