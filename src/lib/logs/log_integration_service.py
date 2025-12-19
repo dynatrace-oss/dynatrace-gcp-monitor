@@ -182,6 +182,9 @@ class LogIntegrationService:
             for chunk in chunks(ack_ids, chunk_size)
         ]
         results = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
+        context = create_logs_context(self.sfm_queue)
         for i, result in enumerate(results):
             if isinstance(result, Exception):
                 logging_context.error(f"ACK chunk {i} failed, messages will be redelivered: {result}")
+                context.self_monitoring.ack_failures += 1
+        put_sfm_into_queue(context)

@@ -34,7 +34,7 @@ from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNE
     LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE, LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE, LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE, LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE, \
-    LOG_SELF_MONITORING_RAW_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE
+    LOG_SELF_MONITORING_RAW_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, LOG_SELF_MONITORING_ACK_FAILURES_METRIC_TYPE
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 from lib.self_monitoring import push_self_monitoring_time_series, sfm_create_descriptors_if_missing
 
@@ -53,6 +53,7 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
         aggregated_sfm.log_ingest_payload_size += sfm.log_ingest_payload_size
         aggregated_sfm.log_ingest_raw_size += sfm.log_ingest_raw_size
         aggregated_sfm.sent_logs_entries += sfm.sent_logs_entries
+        aggregated_sfm.ack_failures += sfm.ack_failures
     return aggregated_sfm
 
 
@@ -152,6 +153,7 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Log ingest payload size [kB]: {self_monitoring.log_ingest_payload_size}") 
     logging_context.log("SFM", f"Raw log ingest payload size [kB]: {self_monitoring.log_ingest_raw_size}")
     logging_context.log("SFM", f"Number of sent logs entries: {self_monitoring.sent_logs_entries}")
+    logging_context.log("SFM", f"Number of ACK failures: {self_monitoring.ack_failures}")
 
 
 def create_time_series(
@@ -372,6 +374,22 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             [{
                 "interval": interval,
                 "value": {"int64Value": sfm.sent_logs_entries}
+            }]
+        ))
+
+    if sfm.ack_failures:
+        time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_ACK_FAILURES_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
+            },
+            [{
+                "interval": interval,
+                "value": {"int64Value": sfm.ack_failures}
             }]
         ))
 

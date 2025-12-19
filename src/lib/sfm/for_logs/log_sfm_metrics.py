@@ -32,6 +32,7 @@ class LogSelfMonitoring:
         self.log_ingest_payload_size: float = 0
         self.log_ingest_raw_size: float = 0
         self.sent_logs_entries: int = 0
+        self.ack_failures: int = 0
 
     def calculate_processing_time(self):
         self.processing_time = (time.perf_counter() - self.processing_time_start)
