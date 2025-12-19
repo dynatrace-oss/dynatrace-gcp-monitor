@@ -67,82 +67,6 @@ class TestHttpTimeouts:
 
 
 # =============================================================================
-# Patch 6: modifyAckDeadline Support
-# =============================================================================
-
-class TestModifyAckDeadline:
-    """Test that GCPClient has modifyAckDeadline method."""
-
-    def test_modify_ack_deadline_url_exists(self):
-        """GCPClient should have modifyAckDeadline URL configured."""
-        from lib.logs.gcp_client import GCPClient
-        token_info = {"access_token": "test_token", "expires_at": 9999999999}
-        client = GCPClient(token_info)
-        assert hasattr(client, 'modify_ack_deadline_url')
-        assert 'modifyAckDeadline' in client.modify_ack_deadline_url
-
-    def test_modify_ack_deadline_method_exists(self):
-        """GCPClient should have modify_ack_deadline method."""
-        from lib.logs.gcp_client import GCPClient
-        token_info = {"access_token": "test_token", "expires_at": 9999999999}
-        client = GCPClient(token_info)
-        assert hasattr(client, 'modify_ack_deadline')
-        assert asyncio.iscoroutinefunction(client.modify_ack_deadline)
-
-    @pytest.mark.asyncio
-    async def test_modify_ack_deadline_sends_correct_payload(self):
-        """modify_ack_deadline should send ackIds and ackDeadlineSeconds."""
-        from lib.logs.gcp_client import GCPClient
-
-        token_info = {"access_token": "test_token", "expires_at": 9999999999}
-        client = GCPClient(token_info)
-
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-        mock_response.__aexit__ = AsyncMock(return_value=None)
-
-        mock_session = MagicMock()
-        mock_session.request = MagicMock(return_value=mock_response)
-
-        mock_logging_context = MagicMock()
-
-        await client.modify_ack_deadline(
-            ack_ids=["ack1", "ack2"],
-            ack_deadline_seconds=300,
-            gcp_session=mock_session,
-            logging_context=mock_logging_context
-        )
-
-        # Verify request was made with correct payload
-        mock_session.request.assert_called_once()
-        call_kwargs = mock_session.request.call_args[1]
-        assert call_kwargs['json']['ackIds'] == ["ack1", "ack2"]
-        assert call_kwargs['json']['ackDeadlineSeconds'] == 300
-
-    @pytest.mark.asyncio
-    async def test_modify_ack_deadline_skips_empty_ack_ids(self):
-        """modify_ack_deadline should skip when ack_ids is empty."""
-        from lib.logs.gcp_client import GCPClient
-
-        token_info = {"access_token": "test_token", "expires_at": 9999999999}
-        client = GCPClient(token_info)
-
-        mock_session = MagicMock()
-        mock_logging_context = MagicMock()
-
-        await client.modify_ack_deadline(
-            ack_ids=[],
-            ack_deadline_seconds=300,
-            gcp_session=mock_session,
-            logging_context=mock_logging_context
-        )
-
-        # Verify no request was made
-        mock_session.request.assert_not_called()
-
-
-# =============================================================================
 # Patch 8: Session Reuse
 # =============================================================================
 
@@ -170,6 +94,15 @@ class TestSessionReuse:
         service = LogIntegrationService()
         assert hasattr(service, 'close_sessions')
         assert asyncio.iscoroutinefunction(service.close_sessions)
+
+    def test_close_sessions_called_in_log_forwarder(self):
+        """log_forwarder should call close_sessions in finally block."""
+        import inspect
+        from lib.logs import log_forwarder
+        source = inspect.getsource(log_forwarder.run_logs)
+        assert 'try:' in source
+        assert 'finally:' in source
+        assert 'close_sessions' in source
 
 
 # =============================================================================

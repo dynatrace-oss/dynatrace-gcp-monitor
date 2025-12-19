@@ -46,18 +46,21 @@ async def run_logs(
     sfm_queue = Queue(MAX_SFM_MESSAGES_PROCESSED)
     log_integration_service = await LogIntegrationService.create(sfm_queue=sfm_queue, logging_context=logging_context)
 
-    tasks = []
+    try:
+        tasks = []
 
-    for worker_number in range(0, NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS):
-        worker_task = asyncio.create_task(
-            pull_and_push_logs_forever(process_number, worker_number, log_integration_service)
-        )
-        tasks.append(worker_task)
+        for worker_number in range(0, NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS):
+            worker_task = asyncio.create_task(
+                pull_and_push_logs_forever(process_number, worker_number, log_integration_service)
+            )
+            tasks.append(worker_task)
 
-    sfm_task = asyncio.create_task(create_sfm_loop(sfm_queue, logging_context, instance_metadata))
-    tasks.append(sfm_task)
+        sfm_task = asyncio.create_task(create_sfm_loop(sfm_queue, logging_context, instance_metadata))
+        tasks.append(sfm_task)
 
-    await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks)
+    finally:
+        await log_integration_service.close_sessions()
 
 
 async def pull_and_push_logs_forever(
