@@ -38,9 +38,13 @@ trace_config.on_request_start.append(on_request_start)
 trace_config.on_request_end.append(on_request_end)
 
 
+def _make_connector() -> aiohttp.TCPConnector:
+    return aiohttp.TCPConnector(ttl_dns_cache=300)
+
+
 def init_dt_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trace_configs=[trace_config], timeout=DT_CLIENT_TIMEOUT, trust_env=(config.use_proxy() in ["ALL", "DT_ONLY"]))
+    return aiohttp.ClientSession(trace_configs=[trace_config], timeout=DT_CLIENT_TIMEOUT, connector=_make_connector(), trust_env=(config.use_proxy() in ["ALL", "DT_ONLY"]))
 
 
 def init_gcp_client_session() -> aiohttp.ClientSession:
-    return aiohttp.ClientSession(trace_configs=[trace_config], timeout=GCP_CLIENT_TIMEOUT, trust_env=(config.use_proxy() in ["ALL", "GCP_ONLY"]))
+    return aiohttp.ClientSession(trace_configs=[trace_config], timeout=GCP_CLIENT_TIMEOUT, connector=_make_connector(), trust_env=(config.use_proxy() in ["ALL", "GCP_ONLY"]))

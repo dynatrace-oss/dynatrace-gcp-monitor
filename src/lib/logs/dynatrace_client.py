@@ -14,6 +14,7 @@
 
 import asyncio
 import gzip
+import random
 from typing import Union
 from urllib.parse import urlparse
 
@@ -92,8 +93,8 @@ class DynatraceClient:
 
                         # Retry on transient errors
                         if resp_status in RETRYABLE_STATUS_CODES and attempt < MAX_RETRIES - 1:
-                            backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt)
-                            context.t_error(f"Retrying in {backoff}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                            backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt) + random.uniform(0, 0.5)
+                            context.t_error(f"Retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
                             await asyncio.sleep(backoff)
                             continue
 
@@ -110,8 +111,8 @@ class DynatraceClient:
                         context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
                     # Retry on network errors
                     if attempt < MAX_RETRIES - 1:
-                        backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt)
-                        context.t_error(f"Request failed: {e}, retrying in {backoff}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                        backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt) + random.uniform(0, 0.5)
+                        context.t_error(f"Request failed: {e}, retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
                         await asyncio.sleep(backoff)
                         continue
                     raise e
