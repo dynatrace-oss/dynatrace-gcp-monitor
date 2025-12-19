@@ -37,15 +37,15 @@ class TestHttpTimeouts:
         """DT client timeout constant should be defined."""
         from lib.clientsession_provider import DT_CLIENT_TIMEOUT
         assert isinstance(DT_CLIENT_TIMEOUT, ClientTimeout)
-        assert DT_CLIENT_TIMEOUT.total == 30
-        assert DT_CLIENT_TIMEOUT.connect == 10
+        assert DT_CLIENT_TIMEOUT.total == 60
+        assert DT_CLIENT_TIMEOUT.connect == 30
 
     def test_gcp_client_timeout_is_defined(self):
         """GCP client timeout constant should be defined."""
         from lib.clientsession_provider import GCP_CLIENT_TIMEOUT
         assert isinstance(GCP_CLIENT_TIMEOUT, ClientTimeout)
-        assert GCP_CLIENT_TIMEOUT.total == 60
-        assert GCP_CLIENT_TIMEOUT.connect == 10
+        assert GCP_CLIENT_TIMEOUT.total == 120
+        assert GCP_CLIENT_TIMEOUT.connect == 30
 
     def test_dt_session_uses_timeout_in_code(self):
         """DT client session creation should use timeout parameter."""
