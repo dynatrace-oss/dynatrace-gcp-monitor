@@ -308,7 +308,9 @@ def _sanitize_dimension_value(raw_value: str) -> str:
     # Keep the MINT line protocol single-line and escape embedded quotes inside dimension values.
     # The value is still sent as a quoted string (see `IngestLine.dimensions_string()`).
     sanitized = raw_value.replace("\r", " ").replace("\n", " ").replace("\t", " ")
-    return sanitized.replace('"', '\\"')
+
+    # Escape backslashes first (before quotes), so existing \ becomes \\ and " becomes \"
+    return sanitized.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def _truncate_escaped_dimension_value(escaped_value: str, max_length: int) -> str:
@@ -459,7 +461,7 @@ def _convert_point_to_ingest_line(
     except Exception as e:
         context.log(f"Failed to extract value from data point: {point}, due to {type(e).__name__} {e}")
 
-    if value:
+    if value is not None:
         line = IngestLine(
             entity_id=entity_id,
             metric_name=metric.dynatrace_name,

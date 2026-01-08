@@ -43,7 +43,7 @@ def test_create_dimension_escapes_quotes_and_removes_control_chars():
 
     dimension_value = create_dimension(name, value)
 
-    assert dimension_value.value == '\\"C:\\Program Files\\Foo\\bar.exe\\" -flag next'
+    assert dimension_value.value == '\\"C:\\\\Program Files\\\\Foo\\\\bar.exe\\" -flag next'
     assert "\n" not in dimension_value.value
     assert "\r" not in dimension_value.value
     assert "\t" not in dimension_value.value
