@@ -6,7 +6,7 @@ from aiohttp import ClientSession
 from lib.clientsession_provider import init_gcp_client_session, init_dt_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, LogsContext, LogsProcessingContext, create_logs_context
-from lib.credentials import create_token, create_token_with_expiry, fetch_dynatrace_api_key, fetch_dynatrace_log_ingest_url, fetch_dynatrace_url
+from lib.credentials import create_token_with_expiry, fetch_dynatrace_api_key, fetch_dynatrace_log_ingest_url
 from lib.logs.dynatrace_client import DynatraceClient
 from lib.logs.gcp_client import GCPClient
 from lib.logs.log_self_monitoring import put_sfm_into_queue
@@ -20,12 +20,19 @@ from lib.logs.log_forwarder_variables import (
     REQUEST_BODY_MAX_SIZE,
     NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES,
     NUMBER_OF_CONCURRENT_PUSH_COROUTINES,
+    NUMBER_OF_CONCURRENT_ACK_COROUTINES,
 )
+
+# High-watermark multiplier for ACK backlog. Backpressure kicks in when
+# len(_pending_ack_tasks) > NUMBER_OF_CONCURRENT_ACK_COROUTINES * ACK_BACKLOG_MULTIPLIER
+ACK_BACKLOG_MULTIPLIER = 3
 
 
 class LogIntegrationService:
     sfm_queue: asyncio.Queue
     log_push_semaphore: asyncio.Semaphore
+    ack_semaphore: asyncio.Semaphore
+    _pending_ack_tasks: set
     gcp_client: GCPClient
     logs_context: LogsContext
     dynatrace_client: DynatraceClient
@@ -37,6 +44,8 @@ class LogIntegrationService:
         self = cls()
         self.sfm_queue = sfm_queue
         self.log_push_semaphore = asyncio.Semaphore(NUMBER_OF_CONCURRENT_PUSH_COROUTINES)
+        self.ack_semaphore = asyncio.Semaphore(NUMBER_OF_CONCURRENT_ACK_COROUTINES)
+        self._pending_ack_tasks = set()
 
         if gcp_client:
             # Reuse existing client - only need session for Dynatrace config calls
@@ -144,20 +153,24 @@ class LogIntegrationService:
             ack_ids_of_erroneous_messages,
         )
 
-    async def push_logs(self, log_batches, logging_context: LoggingContext) -> List[str]:
-        ack_ids_to_send = []
+    async def push_logs(self, log_batches, logging_context: LoggingContext):
         context = create_logs_context(self.sfm_queue)
         batch_length = len(log_batches)
         if batch_length == 0:
-            return []
+            return
 
         logging_context.log(f"Number of log batches to push to Dynatrace: {batch_length}")
 
         dt_session = await self._get_dt_session()
 
         async def process_batch(batch: LogBatch):
+            local_ack_ids = []
             async with self.log_push_semaphore:
-                await self.dynatrace_client.send_logs(context, dt_session, batch, ack_ids_to_send)
+                await self.dynatrace_client.send_logs(context, dt_session, batch, local_ack_ids)
+            
+            # If logs were successfully sent (or skipped due to success), schedule ACK immediately
+            if local_ack_ids:
+                self._submit_background_ack(local_ack_ids, logging_context)
 
         context.self_monitoring.sending_time_start = time.perf_counter()
         results = await asyncio.gather(
@@ -169,7 +182,28 @@ class LogIntegrationService:
         context.self_monitoring.calculate_sending_time()
         put_sfm_into_queue(context)
 
-        return ack_ids_to_send
+    async def schedule_background_ack(self, ack_ids: List[str], logging_context: LoggingContext):
+        """
+        Schedules ACK in background using a semaphore to limit concurrency.
+        This ensures the main loop isn't blocked by slow ACKs.
+        """
+        try:
+            async with self.ack_semaphore:
+                await self.push_ack_ids(ack_ids, logging_context)
+        except Exception as e:
+            logging_context.error(f"Background ACK failed for {len(ack_ids)} messages: {e}")
+
+    def _submit_background_ack(self, ack_ids: List[str], logging_context: LoggingContext):
+        """Create a tracked background task for ACKing to observe backlog size."""
+        task = asyncio.create_task(self.schedule_background_ack(ack_ids, logging_context))
+        self._pending_ack_tasks.add(task)
+        task.add_done_callback(lambda t: self._pending_ack_tasks.discard(t))
+
+    async def maybe_apply_ack_backpressure(self):
+        """If ACK backlog grows beyond a high-watermark, wait for one ACK to finish."""
+        high_water = NUMBER_OF_CONCURRENT_ACK_COROUTINES * ACK_BACKLOG_MULTIPLIER
+        while self._pending_ack_tasks and len(self._pending_ack_tasks) > high_water:
+            await asyncio.wait(self._pending_ack_tasks, return_when=asyncio.FIRST_COMPLETED)
 
     async def push_ack_ids(self, ack_ids: List[str], logging_context: LoggingContext):
         # request size limit is 524288, but we are not able to easily control size of created protobuf
@@ -177,14 +211,18 @@ class LogIntegrationService:
         # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
         gcp_session = await self._get_gcp_session()
         chunk_size = 2048
+        ack_chunks = list(chunks(ack_ids, chunk_size))
         tasks_to_send_ack_ids = [
             self.gcp_client.push_ack_ids(chunk, gcp_session, logging_context, self.update_gcp_client)
-            for chunk in chunks(ack_ids, chunk_size)
+            for chunk in ack_chunks
         ]
         results = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
         context = create_logs_context(self.sfm_queue)
-        for i, result in enumerate(results):
+        for chunk, result in zip(ack_chunks, results):
             if isinstance(result, Exception):
-                logging_context.error(f"ACK chunk {i} failed, messages will be redelivered: {result}")
+                logging_context.error(f"ACK chunk failed, messages will be redelivered: {result}")
                 context.self_monitoring.ack_failures += 1
+            else:
+                context.self_monitoring.acks_succeeded += len(chunk)
+        context.self_monitoring.ack_backlog = len(self._pending_ack_tasks)
         put_sfm_into_queue(context)

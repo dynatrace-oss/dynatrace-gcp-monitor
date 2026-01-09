@@ -67,18 +67,20 @@ async def pull_and_push_logs_forever(
     process_number: int, worker_number: int, log_integration_service: LogIntegrationService
 ):
     logging_context = LoggingContext(f"Process-{process_number}", f"Worker-{worker_number}")
-    logging_context.log(f"Starting processing")
+    logging_context.log("Starting processing")
     while True:
         try:
             # Pull logs from pub/sub, process them and create batches out of them to send to Dynatrace
             log_batches, ack_ids_of_erroneous_messages = await log_integration_service.perform_pull(logging_context)
 
-            # Push logs batches to Dynatrace
-            ack_ids_to_send = await log_integration_service.push_logs(log_batches, logging_context)
+            # Push logs batches to Dynatrace (ACKs are now handled internally in background)
+            await log_integration_service.push_logs(log_batches, logging_context)
 
-            # Push ACK_IDs to pub/sub
-            ack_ids_to_send.extend(ack_ids_of_erroneous_messages)
-            await log_integration_service.push_ack_ids(ack_ids_to_send, logging_context)
+            # Push ACK_IDs for erroneous messages (skipped logs)
+            if ack_ids_of_erroneous_messages:
+                log_integration_service._submit_background_ack(ack_ids_of_erroneous_messages, logging_context)
+
+            await log_integration_service.maybe_apply_ack_backpressure()
         except Exception as e:
             logging_context.exception(f"Failed to pull or push messages: {e}")
             # Backoff for 1 minute to avoid spamming requests and logs

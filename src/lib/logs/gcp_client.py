@@ -17,7 +17,7 @@ import json
 import time
 from typing import Any, Dict, List, Callable
 
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientError
 
 from lib.context import LoggingContext
 from lib.logs.log_forwarder_variables import (
@@ -150,27 +150,47 @@ class GCPClient:
         logging_context: LoggingContext,
         update_gcp_client: Callable[[ClientSession, LoggingContext], None],
     ):
-        # Atomically capture token state to prevent races
-        auth_state = self._get_current_auth_state()
-        
-        if auth_state['expired']:
-            await update_gcp_client(gcp_session, logging_context)
-            # Refresh auth state after token update
-            auth_state = self._get_current_auth_state()
-
         payload = {"ackIds": ack_ids}
+        max_retries = 3
+        backoff = 1
 
-        async with gcp_session.request(
-            method="POST", url=self.acknowledge_url, json=payload, headers=auth_state['headers']
-        ) as response:
-            resp_status = response.status
+        for attempt in range(max_retries):
+            try:
+                # Atomically capture token state to prevent races
+                auth_state = self._get_current_auth_state()
 
-            if resp_status == 401:
-                await update_gcp_client(gcp_session, logging_context)
+                if auth_state['expired']:
+                    await update_gcp_client(gcp_session, logging_context)
+                    # Refresh auth state after token update
+                    auth_state = self._get_current_auth_state()
 
-            if resp_status > 299:
-                logging_context.log(
-                    f"Acknowledge error: {resp_status}, "
-                    f'reason: {response.reason}, url: {self.acknowledge_url}, body: "{await response.json()}"'
-                )
-                response.raise_for_status()
+                async with gcp_session.request(
+                    method="POST", url=self.acknowledge_url, json=payload, headers=auth_state['headers']
+                ) as response:
+                    resp_status = response.status
+
+                    if resp_status == 401:
+                        await update_gcp_client(gcp_session, logging_context)
+                    
+                    if resp_status > 299:
+                        # Retry on 5xx errors, 429 (Too Many Requests), or 401 (Unauthorized - token refreshed)
+                        if attempt < max_retries - 1 and (resp_status >= 500 or resp_status == 429 or resp_status == 401):
+                            logging_context.log(f"ACK failed with {resp_status}, retrying in {backoff}s...")
+                            await asyncio.sleep(backoff)
+                            continue
+
+                        logging_context.log(
+                            f"Acknowledge error: {resp_status}, "
+                            f'reason: {response.reason}, url: {self.acknowledge_url}, body: "{await response.text()}"'
+                        )
+                        response.raise_for_status()
+
+                    return
+
+            except (ClientError, asyncio.TimeoutError) as e:
+                # Retry on network errors
+                if attempt < max_retries - 1:
+                    logging_context.log(f"ACK request failed: {e}, retrying in {backoff}s...")
+                    await asyncio.sleep(backoff)
+                else:
+                    raise e
