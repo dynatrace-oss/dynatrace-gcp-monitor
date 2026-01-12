@@ -98,7 +98,7 @@ class LogIntegrationService:
     async def update_gcp_client(self, gcp_session: ClientSession, logging_context: LoggingContext):
         # Use class-level lock to prevent concurrent token refreshes (thundering herd)
         async with self.gcp_client._refresh_lock:
-            # Double-check token expiration - another worker may have refreshed it
+            # Double-check token expiration. Another worker may have refreshed it
             if not self.gcp_client.is_token_expired():
                 self.gcp_client.update_gcp_client_in_the_next_loop = False
                 return
