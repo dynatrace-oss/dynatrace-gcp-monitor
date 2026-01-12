@@ -157,19 +157,21 @@ class LogIntegrationService:
         context = create_logs_context(self.sfm_queue)
         batch_length = len(log_batches)
         if batch_length == 0:
-            return
+            return []
 
         logging_context.log(f"Number of log batches to push to Dynatrace: {batch_length}")
 
         dt_session = await self._get_dt_session()
+        ack_ids_to_send: List[str] = []
 
         async def process_batch(batch: LogBatch):
-            local_ack_ids = []
+            local_ack_ids: List[str] = []
             async with self.log_push_semaphore:
                 await self.dynatrace_client.send_logs(context, dt_session, batch, local_ack_ids)
-            
+
             # If logs were successfully sent (or skipped due to success), schedule ACK immediately
             if local_ack_ids:
+                ack_ids_to_send.extend(local_ack_ids)
                 self._submit_background_ack(local_ack_ids, logging_context)
 
         context.self_monitoring.sending_time_start = time.perf_counter()
@@ -181,6 +183,8 @@ class LogIntegrationService:
                 logging_context.error(f"Batch {i} send to Dynatrace failed: {result}")
         context.self_monitoring.calculate_sending_time()
         put_sfm_into_queue(context)
+
+        return ack_ids_to_send
 
     async def schedule_background_ack(self, ack_ids: List[str], logging_context: LoggingContext):
         """
@@ -216,6 +220,7 @@ class LogIntegrationService:
             self.gcp_client.push_ack_ids(chunk, gcp_session, logging_context, self.update_gcp_client)
             for chunk in ack_chunks
         ]
+
         results = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
         context = create_logs_context(self.sfm_queue)
         for chunk, result in zip(ack_chunks, results):
