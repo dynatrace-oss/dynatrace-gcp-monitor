@@ -169,7 +169,7 @@ class LogIntegrationService:
             async with self.log_push_semaphore:
                 await self.dynatrace_client.send_logs(context, dt_session, batch, local_ack_ids)
 
-            # If logs were successfully sent (or skipped due to success), schedule ACK immediately
+            # If logs were successfully sent (or skipped due to success) - schedule ACK immediately
             if local_ack_ids:
                 ack_ids_to_send.extend(local_ack_ids)
                 self._submit_background_ack(local_ack_ids, logging_context)
