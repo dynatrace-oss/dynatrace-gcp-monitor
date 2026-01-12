@@ -315,6 +315,9 @@ class MetricsContext(SfmContext):
         }
         self.dynatrace_connectivity = None
         self.dt_session = dt_session
+        # Round UP to the next second (ceiling) to prevent gaps caused by timing drift
+        if execution_time.microsecond > 0:
+            execution_time = execution_time.replace(microsecond=0) + timedelta(seconds=1)
         self.execution_time = execution_time.replace(microsecond=0)
         self.execution_interval = timedelta(seconds=execution_interval_seconds)
         self.print_metric_ingest_input = print_metric_ingest_input
