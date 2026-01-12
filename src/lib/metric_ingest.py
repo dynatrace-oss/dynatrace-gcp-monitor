@@ -459,7 +459,7 @@ def _convert_point_to_ingest_line(
     except Exception as e:
         context.log(f"Failed to extract value from data point: {point}, due to {type(e).__name__} {e}")
 
-    if value:
+    if value is not None:
         line = IngestLine(
             entity_id=entity_id,
             metric_name=metric.dynatrace_name,
@@ -540,6 +540,8 @@ def extract_value(point, typed_value_key: str, metric: Metric):
                 max = bounds[max_bucket]
 
         return _gauge_line(min, max, count, sum, metric.unit)
+    elif metric.dynatrace_metric_type == "count,delta" and value == 0:
+        return None
     else:
         if metric.unit == UNIT_10TO2PERCENT:
             value = 100 * value
