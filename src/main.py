@@ -128,11 +128,11 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
             disabled_projects, disabled_apis_by_project_id = \
                 await get_disabled_projects_and_disabled_apis_by_project_id(context, projects_ids)
         
-        disabled_projects.update(filter(None, config.excluded_projects().split(',')))
-        disabled_projects_by_prefix.update(filter(None, config.excluded_projects_by_prefix().split(',')))
+        disabled_projects.update(parse_config_list(config.excluded_projects()))
+        disabled_projects_by_prefix.update(parse_config_list(config.excluded_projects_by_prefix()))
 
-        enabled_projects.update(filter(None, config.included_projects().split(',')))
-        enabled_projects_by_prefix.update(filter(None, config.included_projects_by_prefix().split(',')))
+        enabled_projects.update(parse_config_list(config.included_projects()))
+        enabled_projects_by_prefix.update(parse_config_list(config.included_projects_by_prefix()))
 
         if disabled_projects_by_prefix:
             for p in disabled_projects_by_prefix:
@@ -184,6 +184,9 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
 
     # Noise on Windows at the end of the logs is caused by https://github.com/aio-libs/aiohttp/issues/4324
 
+def parse_config_list(config_string):
+    """Parse comma-separated config string into a list of stripped values."""
+    return filter(None, [s.strip() for s in config_string.split(',')])
 
 async def process_project_metrics(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str], excluded_metrics_and_dimensions: list):
