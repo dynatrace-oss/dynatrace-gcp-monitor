@@ -137,10 +137,14 @@ class LogIntegrationService:
 
         context.self_monitoring.sending_time_start = time.perf_counter()
         async with init_dt_client_session() as dt_session:
-            exceptions = await asyncio.gather(
+            results = await asyncio.gather(
                 *[process_batch(batch) for batch in log_batches], return_exceptions=True
             )
         context.self_monitoring.calculate_sending_time()
+        # Log any exceptions that occurred during batch processing
+        for result in results:
+            if isinstance(result, Exception):
+                logging_context.log(f"Failed to push log batch: {type(result).__name__}: {result}")
         put_sfm_into_queue(context)
 
         return ack_ids_to_send
@@ -155,4 +159,8 @@ class LogIntegrationService:
                 self.gcp_client.push_ack_ids(chunk, gcp_session, logging_context, self.update_gcp_client)
                 for chunk in chunks(ack_ids, chunk_size)
             ]
-            exceptions = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
+            results = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
+            # Log any exceptions that occurred during ack_id pushing
+            for result in results:
+                if isinstance(result, Exception):
+                    logging_context.log(f"Failed to push ack_ids: {type(result).__name__}: {result}")

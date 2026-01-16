@@ -30,6 +30,24 @@ def chunks(full_list: List, chunk_size: int) -> List[List]:
     return [full_list[i:i + chunk_size] for i in range(0, len(full_list), chunk_size)]
 
 
+def percentile(sorted_data: list, p: float) -> float:
+    """Calculate percentile from sorted data using linear interpolation.
+
+    Args:
+        sorted_data: Pre-sorted list of numeric values
+        p: Percentile to calculate (0-100)
+
+    Returns:
+        The percentile value, or 0.0 if data is empty
+    """
+    if not sorted_data:
+        return 0.0
+    k = (len(sorted_data) - 1) * p / 100
+    f = int(k)
+    c = f + 1 if f + 1 < len(sorted_data) else f
+    return sorted_data[f] + (k - f) * (sorted_data[c] - sorted_data[f])
+
+
 def safe_read_yaml(filepath: str, alternative_environ_name: str):
     logging_context = LoggingContext(None)
     try:

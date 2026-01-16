@@ -41,7 +41,7 @@ async def get_project_ids(
     disabled_projects = []
 
     if not config.scoping_project_support_enabled():
-        disabled_project, _ = await get_disabled_projects_and_disabled_apis_by_project_id(
+        disabled_projects, _ = await get_disabled_projects_and_disabled_apis_by_project_id(
             metric_context, projects_ids
         )
 
@@ -219,9 +219,16 @@ async def get_metric_descriptors(
     )
 
     fetch_metrics_descriptor_results = await asyncio.gather(
-        *metric_fetch_coroutines
+        *metric_fetch_coroutines, return_exceptions=True
     )
-    flattened_results = list(chain.from_iterable(fetch_metrics_descriptor_results))
+    # Filter out exceptions and log them
+    valid_results = []
+    for result in fetch_metrics_descriptor_results:
+        if isinstance(result, Exception):
+            logging_context.error(f"Failed to fetch metric descriptors: {type(result).__name__}: {result}")
+        else:
+            valid_results.append(result)
+    flattened_results = list(chain.from_iterable(valid_results))
 
     for fetch_reslut in flattened_results:
         metric_per_project.setdefault(fetch_reslut.metric_descriptor, []).append(

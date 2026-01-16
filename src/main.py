@@ -168,7 +168,11 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
             for project_id
             in projects_ids
         ]
-        await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
+        results = await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
+        # Log any exceptions from project processing (should be rare - process_project_metrics has its own try/except)
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                context.log(f"Project processing task {i} failed unexpectedly: {type(result).__name__}: {result}")
         context.log(f"Fetched and pushed GCP data in {time.time() - context.start_processing_timestamp} s")
 
         log_self_monitoring_metrics(context)
@@ -284,7 +288,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_coros, return_exceptions=True)
     entity_id_map = build_entity_id_map(list(topology.values()))
-    flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
+    flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map, project_id)
 
     flat_metric_results.extend(metrics_metadata)
     return flat_metric_results

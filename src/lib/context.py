@@ -305,6 +305,12 @@ class MetricsContext(SfmContext):
             # add metric it should work without it
             SfmKeys.dynatrace_connectivity: SFMMetricDynatraceConnectivity(),
             SfmKeys.gcp_metric_request_count: SFMMetricGCPMetricRequestCount(),
+            SfmKeys.gcp_metric_empty_response_count: SFMMetricGCPEmptyResponseCount(),
+            SfmKeys.gcp_api_latency: SFMMetricGCPApiLatency(),
+            SfmKeys.gcp_api_error_count: SFMMetricGCPApiErrorCount(),
+            SfmKeys.gcp_api_response_count: SFMMetricGCPApiResponseCount(),
+            SfmKeys.dimension_name_truncated_count: SFMMetricDimensionNameTruncatedCount(),
+            SfmKeys.dimension_value_truncated_count: SFMMetricDimensionValueTruncatedCount(),
             SfmKeys.dynatrace_ingest_lines_ok_count: SFMMetricDynatraceIngestLinesOkCount(),
             SfmKeys.dynatrace_ingest_lines_invalid_count: SFMMetricDynatraceIngestLinesInvalidCount(),
             SfmKeys.dynatrace_ingest_lines_dropped_count: SFMMetricDynatraceIngestLinesDroppedCount(),
@@ -315,9 +321,6 @@ class MetricsContext(SfmContext):
         }
         self.dynatrace_connectivity = None
         self.dt_session = dt_session
-        # Round UP to the next second (ceiling) to prevent gaps caused by timing drift
-        if execution_time.microsecond > 0:
-            execution_time = execution_time.replace(microsecond=0) + timedelta(seconds=1)
         self.execution_time = execution_time.replace(microsecond=0)
         self.execution_interval = timedelta(seconds=execution_interval_seconds)
         self.print_metric_ingest_input = print_metric_ingest_input
