@@ -31,7 +31,7 @@ def chunks(full_list: List, chunk_size: int) -> List[List]:
 
 
 def percentile(sorted_data: list, p: float) -> float:
-    """Calculate percentile from sorted data using linear interpolation.
+    """Calculate percentile from sorted data.
 
     Args:
         sorted_data: Pre-sorted list of numeric values
