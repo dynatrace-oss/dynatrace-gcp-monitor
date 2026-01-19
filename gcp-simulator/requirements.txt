@@ -1,4 +1,4 @@
-uvicorn
-jwt
-python-dateutil
-fastapi
+uvicorn==0.40.0
+jwt==1.4.0
+python-dateutil==2.9.0
+fastapi==0.128.0
