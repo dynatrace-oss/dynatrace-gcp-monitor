@@ -3,7 +3,12 @@ import asyncio
 from typing import List, Tuple
 
 from aiohttp import ClientSession
-from lib.clientsession_provider import init_gcp_client_session, init_dt_client_session
+from lib.clientsession_provider import (
+    init_gcp_client_session,
+    init_gcp_pull_session,
+    init_gcp_ack_session,
+    init_dt_client_session,
+)
 from lib.configuration import config
 from lib.context import LoggingContext, LogsContext, LogsProcessingContext, create_logs_context
 from lib.credentials import create_token_with_expiry, fetch_dynatrace_api_key, fetch_dynatrace_log_ingest_url
@@ -36,7 +41,8 @@ class LogIntegrationService:
     gcp_client: GCPClient
     logs_context: LogsContext
     dynatrace_client: DynatraceClient
-    _gcp_session: ClientSession = None
+    _pull_session: ClientSession = None
+    _ack_session: ClientSession = None
     _dt_session: ClientSession = None
 
     @classmethod
@@ -74,15 +80,23 @@ class LogIntegrationService:
 
         self.gcp_client = gcp_client or GCPClient(token_info, context=logging_context)
         self.dynatrace_client = DynatraceClient(url=dynatrace_log_ingest_url, api_key=dynatrace_api_key)
-        self._gcp_session = None
+        self._pull_session = None
+        self._ack_session = None
         self._dt_session = None
 
         return self
 
-    async def _get_gcp_session(self) -> ClientSession:
-        if self._gcp_session is None or self._gcp_session.closed:
-            self._gcp_session = init_gcp_client_session()
-        return self._gcp_session
+    async def _get_pull_session(self) -> ClientSession:
+        """Get or create the pull session (lazy initialization)."""
+        if self._pull_session is None or self._pull_session.closed:
+            self._pull_session = init_gcp_pull_session()
+        return self._pull_session
+
+    async def _get_ack_session(self) -> ClientSession:
+        """Get or create the ACK session (lazy initialization)."""
+        if self._ack_session is None or self._ack_session.closed:
+            self._ack_session = init_gcp_ack_session()
+        return self._ack_session
 
     async def _get_dt_session(self) -> ClientSession:
         if self._dt_session is None or self._dt_session.closed:
@@ -90,8 +104,32 @@ class LogIntegrationService:
         return self._dt_session
 
     async def close_sessions(self):
-        if self._gcp_session and not self._gcp_session.closed:
-            await self._gcp_session.close()
+        """
+        Close all sessions gracefully.
+        Waits for pending ACK tasks to complete before closing sessions.
+        """
+        # Wait for pending ACK tasks with timeout to prevent ACK loss
+        if self._pending_ack_tasks:
+            pending_count = len(self._pending_ack_tasks)
+            try:
+                # Give ACKs 30 seconds to complete (generous, ACKs typically <5s)
+                await asyncio.wait_for(
+                    asyncio.gather(*self._pending_ack_tasks, return_exceptions=True),
+                    timeout=30.0
+                )
+            except asyncio.TimeoutError:
+                # Log warning but don't fail - we're shutting down anyway
+                # Use print() since logging context may not be available during shutdown
+                print(
+                    f"[SHUTDOWN] Warning: {pending_count} ACK tasks did not complete "
+                    f"within 30s timeout. Messages may be redelivered on restart."
+                )
+
+        # Close all sessions
+        if self._pull_session and not self._pull_session.closed:
+            await self._pull_session.close()
+        if self._ack_session and not self._ack_session.closed:
+            await self._ack_session.close()
         if self._dt_session and not self._dt_session.closed:
             await self._dt_session.close()
 
@@ -110,10 +148,10 @@ class LogIntegrationService:
     async def perform_pull(
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
-        gcp_session = await self._get_gcp_session()
+        pull_session = await self._get_pull_session()
         if self.gcp_client.update_gcp_client_in_the_next_loop:
             try:
-                await self.update_gcp_client(gcp_session=gcp_session, logging_context=logging_context)
+                await self.update_gcp_client(gcp_session=pull_session, logging_context=logging_context)
             except Exception as e:
                 # Reset flag even on failure to prevent infinite retry loop
                 self.gcp_client.update_gcp_client_in_the_next_loop = False
@@ -124,7 +162,7 @@ class LogIntegrationService:
         context.self_monitoring.pulling_time_start = time.perf_counter()
 
         tasks_to_pull_messages = [
-            self.gcp_client.pull_messages(logging_context, gcp_session)
+            self.gcp_client.pull_messages(logging_context, pull_session)
             for _ in range(NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES)
         ]
         responses = await asyncio.gather(*tasks_to_pull_messages, return_exceptions=True)
@@ -138,7 +176,9 @@ class LogIntegrationService:
             if isinstance(response, Exception):
                 logging_context.error(f"Pull request {i} failed: {response}")
                 continue
-            for received_message in response.get("receivedMessages", []):  # type: ignore
+            received_messages = response.get("receivedMessages", [])  # type: ignore
+            context.self_monitoring.pulled_logs_entries += len(received_messages)
+            for received_message in received_messages:
                 message_job = prepare_context_and_process_message(
                     self.sfm_queue, received_message
                 )
@@ -167,7 +207,7 @@ class LogIntegrationService:
         async def process_batch(batch: LogBatch):
             local_ack_ids: List[str] = []
             async with self.log_push_semaphore:
-                await self.dynatrace_client.send_logs(context, dt_session, batch, local_ack_ids)
+                await self.dynatrace_client.send_logs(context, dt_session, batch, local_ack_ids, logging_context)
 
             # If logs were successfully sent (or skipped due to success) schedule ACK immediately
             if local_ack_ids:
@@ -213,11 +253,11 @@ class LogIntegrationService:
         # request size limit is 524288, but we are not able to easily control size of created protobuf
         # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer
         # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
-        gcp_session = await self._get_gcp_session()
+        ack_session = await self._get_ack_session()
         chunk_size = 2048
         ack_chunks = list(chunks(ack_ids, chunk_size))
         tasks_to_send_ack_ids = [
-            self.gcp_client.push_ack_ids(chunk, gcp_session, logging_context, self.update_gcp_client)
+            self.gcp_client.push_ack_ids(chunk, ack_session, logging_context, self.update_gcp_client)
             for chunk in ack_chunks
         ]
 

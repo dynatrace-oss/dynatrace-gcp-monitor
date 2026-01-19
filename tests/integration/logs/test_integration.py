@@ -29,6 +29,7 @@ from wiremock.resources.mappings.resource import Mappings
 from wiremock.resources.requests.resource import Requests
 from wiremock.server import WireMockServer
 
+from lib.clientsession_provider import init_gcp_client_session
 from lib.context import LoggingContext, DynatraceConnectivity
 from lib.instance_metadata import InstanceMetadata
 from lib.logs import log_self_monitoring, log_forwarder_variables, logs_processor, dynatrace_client
@@ -349,9 +350,10 @@ async def run_worker_with_messages(
     )
 
     self_monitoring = LogSelfMonitoring()
-    await log_self_monitoring._loop_single_period(
-        self_monitoring, sfm_queue, logging_context, metadata
-    )
+    async with init_gcp_client_session() as gcp_session:
+        await log_self_monitoring._loop_single_period(
+            self_monitoring, sfm_queue, logging_context, metadata, gcp_session
+        )
     await sfm_queue.join()
 
     assert ack_queue.qsize() == len(expected_ack_ids)

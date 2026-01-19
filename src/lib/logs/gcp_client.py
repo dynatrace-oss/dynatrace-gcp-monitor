@@ -14,6 +14,7 @@
 
 import asyncio
 import json
+import random
 import time
 from typing import Any, Dict, List, Callable
 
@@ -152,7 +153,7 @@ class GCPClient:
     ):
         payload = {"ackIds": ack_ids}
         max_retries = 3
-        backoff = 1
+        initial_backoff = 1.0
 
         for attempt in range(max_retries):
             try:
@@ -175,7 +176,8 @@ class GCPClient:
                     if resp_status > 299:
                         # Retry on 5xx errors, 429 (Too Many Requests), or 401 (Unauthorized - token refreshed)
                         if attempt < max_retries - 1 and (resp_status >= 500 or resp_status == 429 or resp_status == 401):
-                            logging_context.log(f"ACK failed with {resp_status}, retrying in {backoff}s...")
+                            backoff = initial_backoff * (2 ** attempt) + random.uniform(0, 0.5)
+                            logging_context.log(f"ACK failed with {resp_status}, retrying in {backoff:.1f}s (attempt {attempt + 1}/{max_retries})")
                             await asyncio.sleep(backoff)
                             continue
 
@@ -190,7 +192,8 @@ class GCPClient:
             except (ClientError, asyncio.TimeoutError) as e:
                 # Retry on network errors
                 if attempt < max_retries - 1:
-                    logging_context.log(f"ACK request failed: {e}, retrying in {backoff}s...")
+                    backoff = initial_backoff * (2 ** attempt) + random.uniform(0, 0.5)
+                    logging_context.log(f"ACK request failed: {e}, retrying in {backoff:.1f}s (attempt {attempt + 1}/{max_retries})")
                     await asyncio.sleep(backoff)
                 else:
                     raise e

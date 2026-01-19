@@ -55,7 +55,7 @@ class DynatraceClient:
         self.dynatrace_api_key = api_key
         self.verify_ssl = None if config.require_valid_certificate() else False
 
-    async def send_logs(self, context: LogsContext, dt_session, batch: LogBatch, ack_ids_to_send):
+    async def send_logs(self, context: LogsContext, dt_session, batch: LogBatch, ack_ids_to_send, logging_context=None):
         headers = {
             "Authorization": f"Api-Token {self.dynatrace_api_key}",
             "Content-Type": "application/json; charset=utf-8",
@@ -96,7 +96,8 @@ class DynatraceClient:
                         # Retry only on transient errors
                         if resp_status in RETRYABLE_STATUS_CODES and attempt < MAX_RETRIES - 1:
                             backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt) + random.uniform(0, 0.5)
-                            context.t_error(f"Retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                            log_ctx = logging_context if logging_context else context
+                            log_ctx.log(f"DT ingest failed with {resp_status}, retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
                             await asyncio.sleep(backoff)
                             continue
 
@@ -114,7 +115,8 @@ class DynatraceClient:
                     context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
                     if attempt < MAX_RETRIES - 1:
                         backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt) + random.uniform(0, 0.5)
-                        context.t_error(f"Request failed: {e}, retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                        log_ctx = logging_context if logging_context else context
+                        log_ctx.log(f"DT ingest failed: {e}, retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
                         await asyncio.sleep(backoff)
                         continue
                     raise e

@@ -47,6 +47,20 @@ class TestHttpTimeouts:
         assert GCP_CLIENT_TIMEOUT.total == 120
         assert GCP_CLIENT_TIMEOUT.connect == 30
 
+    def test_gcp_pull_timeout_is_defined(self):
+        """GCP pull timeout constant should be defined."""
+        from lib.clientsession_provider import GCP_PULL_TIMEOUT
+        assert isinstance(GCP_PULL_TIMEOUT, ClientTimeout)
+        assert GCP_PULL_TIMEOUT.total == 120
+        assert GCP_PULL_TIMEOUT.connect == 30
+
+    def test_gcp_ack_timeout_is_defined(self):
+        """GCP ACK timeout constant should be defined (fail fast)."""
+        from lib.clientsession_provider import GCP_ACK_TIMEOUT
+        assert isinstance(GCP_ACK_TIMEOUT, ClientTimeout)
+        assert GCP_ACK_TIMEOUT.total == 30  # Shorter timeout for fail-fast
+        assert GCP_ACK_TIMEOUT.connect == 10
+
     def test_dt_session_uses_timeout_in_code(self):
         """DT client session creation should use timeout parameter."""
         import inspect
@@ -65,6 +79,26 @@ class TestHttpTimeouts:
         assert 'timeout=' in source
         assert 'GCP_CLIENT_TIMEOUT' in source
 
+    def test_gcp_pull_session_factory_exists(self):
+        """GCP pull session factory should exist and use correct timeout."""
+        import inspect
+        from lib import clientsession_provider
+        assert hasattr(clientsession_provider, 'init_gcp_pull_session')
+        source = inspect.getsource(clientsession_provider.init_gcp_pull_session)
+        assert 'timeout=' in source
+        assert 'GCP_PULL_TIMEOUT' in source
+        assert '_make_pull_connector' in source
+
+    def test_gcp_ack_session_factory_exists(self):
+        """GCP ACK session factory should exist and use correct timeout."""
+        import inspect
+        from lib import clientsession_provider
+        assert hasattr(clientsession_provider, 'init_gcp_ack_session')
+        source = inspect.getsource(clientsession_provider.init_gcp_ack_session)
+        assert 'timeout=' in source
+        assert 'GCP_ACK_TIMEOUT' in source
+        assert '_make_ack_connector' in source
+
 
 # =============================================================================
 # Patch 8: Session Reuse
@@ -76,16 +110,19 @@ class TestSessionReuse:
     def test_session_attributes_exist(self):
         """LogIntegrationService should have session attributes."""
         from lib.logs.log_integration_service import LogIntegrationService
-        assert hasattr(LogIntegrationService, '_gcp_session')
+        assert hasattr(LogIntegrationService, '_pull_session')
+        assert hasattr(LogIntegrationService, '_ack_session')
         assert hasattr(LogIntegrationService, '_dt_session')
 
     def test_get_session_methods_exist(self):
         """LogIntegrationService should have session getter methods."""
         from lib.logs.log_integration_service import LogIntegrationService
         service = LogIntegrationService()
-        assert hasattr(service, '_get_gcp_session')
+        assert hasattr(service, '_get_pull_session')
+        assert hasattr(service, '_get_ack_session')
         assert hasattr(service, '_get_dt_session')
-        assert asyncio.iscoroutinefunction(service._get_gcp_session)
+        assert asyncio.iscoroutinefunction(service._get_pull_session)
+        assert asyncio.iscoroutinefunction(service._get_ack_session)
         assert asyncio.iscoroutinefunction(service._get_dt_session)
 
     def test_close_sessions_method_exists(self):
@@ -103,6 +140,18 @@ class TestSessionReuse:
         assert 'try:' in source
         assert 'finally:' in source
         assert 'close_sessions' in source
+
+    def test_close_sessions_awaits_pending_ack_tasks(self):
+        """close_sessions should wait for pending ACK tasks to complete."""
+        import inspect
+        from lib.logs.log_integration_service import LogIntegrationService
+        source = inspect.getsource(LogIntegrationService.close_sessions)
+        # Verify it checks _pending_ack_tasks
+        assert '_pending_ack_tasks' in source
+        # Verify it uses asyncio.wait_for with timeout
+        assert 'asyncio.wait_for' in source or 'wait_for' in source
+        # Verify it gathers tasks
+        assert 'asyncio.gather' in source or 'gather' in source
 
 
 # =============================================================================

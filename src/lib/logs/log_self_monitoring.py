@@ -33,7 +33,8 @@ from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNE
     LOG_SELF_MONITORING_TOO_OLD_RECORDS_METRIC_TYPE, LOG_SELF_MONITORING_PARSING_ERRORS_METRIC_TYPE, \
     LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE, LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE, \
     LOG_SELF_MONITORING_TOO_LONG_CONTENT_METRIC_TYPE, LOG_SELF_MONITORING_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, \
-    LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE, LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE, \
+    LOG_SELF_MONITORING_PULLED_LOGS_ENTRIES_METRIC_TYPE, LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE, \
+    LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE, \
     LOG_SELF_MONITORING_RAW_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, LOG_SELF_MONITORING_ACK_FAILURES_METRIC_TYPE, \
     LOG_SELF_MONITORING_ACK_SUCCEEDED_METRIC_TYPE, LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_TYPE
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
@@ -53,6 +54,7 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
         aggregated_sfm.sending_time += sfm.sending_time
         aggregated_sfm.log_ingest_payload_size += sfm.log_ingest_payload_size
         aggregated_sfm.log_ingest_raw_size += sfm.log_ingest_raw_size
+        aggregated_sfm.pulled_logs_entries += sfm.pulled_logs_entries
         aggregated_sfm.sent_logs_entries += sfm.sent_logs_entries
         aggregated_sfm.ack_failures += sfm.ack_failures
         aggregated_sfm.acks_succeeded += sfm.acks_succeeded
@@ -69,41 +71,43 @@ def put_sfm_into_queue(context: LogsContext):
 
 
 async def create_sfm_loop(sfm_queue: Queue, logging_context: LoggingContext, instance_metadata: InstanceMetadata):
-    while True:
-        try:
-            await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
-            self_monitoring = LogSelfMonitoring()
-            await _loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata)
-        except Exception:
-            logging_context.exception("Logs Self Monitoring Loop Exception:")
+    # Create a long-lived session instead of creating a new one every 60s
+    async with init_gcp_client_session() as gcp_session:
+        while True:
+            try:
+                await asyncio.sleep(SFM_WORKER_EXECUTION_PERIOD_SECONDS)
+                self_monitoring = LogSelfMonitoring()
+                await _loop_single_period(self_monitoring, sfm_queue, logging_context, instance_metadata, gcp_session)
+            except Exception:
+                logging_context.log("Logs Self Monitoring Loop Exception - will retry next cycle")
 
 
 async def _loop_single_period(self_monitoring: LogSelfMonitoring,
                               sfm_queue: Queue,
                               context: LoggingContext,
-                              instance_metadata: InstanceMetadata):
+                              instance_metadata: InstanceMetadata,
+                              gcp_session: aiohttp.ClientSession):
     try:
         sfm_list = await _pull_sfm(sfm_queue)
         if sfm_list:
-            async with init_gcp_client_session() as gcp_session:
-                context = await _create_sfm_logs_context(sfm_queue, context, gcp_session, instance_metadata)
-                self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
-                _log_self_monitoring_data(self_monitoring, context)
-                if context.self_monitoring_enabled:
-                    if context.token is None:
-                        context.log("Cannot proceed without authorization token, failed to send log self monitoring")
-                        return
-                    if not isinstance(context.token, str):
-                        context.log(f"Failed to fetch access token, got non string value: {context.token}")
-                        return
+            context = await _create_sfm_logs_context(sfm_queue, context, gcp_session, instance_metadata)
+            self_monitoring = aggregate_self_monitoring_metrics(self_monitoring, sfm_list)
+            _log_self_monitoring_data(self_monitoring, context)
+            if context.self_monitoring_enabled:
+                if context.token is None:
+                    context.log("Cannot proceed without authorization token, failed to send log self monitoring")
+                    return
+                if not isinstance(context.token, str):
+                    context.log(f"Failed to fetch access token, got non string value: {context.token}")
+                    return
 
-                    await sfm_create_descriptors_if_missing(context)
-                    time_series = create_self_monitoring_time_series(self_monitoring, context)
-                    await push_self_monitoring_time_series(context, time_series)
-                for _ in sfm_list:
-                    sfm_queue.task_done()
+                await sfm_create_descriptors_if_missing(context)
+                time_series = create_self_monitoring_time_series(self_monitoring, context)
+                await push_self_monitoring_time_series(context, time_series)
+            for _ in sfm_list:
+                sfm_queue.task_done()
     except Exception:
-        context.exception("Log SFM Loop Exception:")
+        context.log("Log SFM Loop Exception - will retry next cycle")
 
 
 async def _create_sfm_logs_context(sfm_queue, context: LoggingContext, gcp_session: aiohttp.ClientSession, instance_metadata: InstanceMetadata):
@@ -155,6 +159,7 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Total logs sending time [s]: {self_monitoring.sending_time}")
     logging_context.log("SFM", f"Log ingest payload size [kB]: {self_monitoring.log_ingest_payload_size}") 
     logging_context.log("SFM", f"Raw log ingest payload size [kB]: {self_monitoring.log_ingest_raw_size}")
+    logging_context.log("SFM", f"Number of pulled logs entries: {self_monitoring.pulled_logs_entries}")
     logging_context.log("SFM", f"Number of sent logs entries: {self_monitoring.sent_logs_entries}")
     logging_context.log("SFM", f"Number of ACK succeeded: {self_monitoring.acks_succeeded}")
     logging_context.log("SFM", f"Number of ACK failures: {self_monitoring.ack_failures}")
@@ -364,6 +369,22 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 "value": {"doubleValue": sfm.log_ingest_raw_size}
             }],
             "DOUBLE"
+        ))
+
+    if sfm.pulled_logs_entries:
+        time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_PULLED_LOGS_ENTRIES_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
+            },
+            [{
+                "interval": interval,
+                "value": {"int64Value": sfm.pulled_logs_entries}
+            }]
         ))
 
     if sfm.sent_logs_entries:

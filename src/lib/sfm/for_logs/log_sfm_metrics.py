@@ -31,6 +31,7 @@ class LogSelfMonitoring:
         self.sending_time: float = 0
         self.log_ingest_payload_size: float = 0
         self.log_ingest_raw_size: float = 0
+        self.pulled_logs_entries: int = 0
         self.sent_logs_entries: int = 0
         self.ack_failures: int = 0
         self.acks_succeeded: int = 0
