@@ -3,3 +3,4 @@ functions-framework==3.10.0
 mypy==1.19.1
 pycodestyle==2.14.0
 pylint==4.0.4
+werkzeug==3.1.5
