@@ -31,7 +31,7 @@ _METADATA_FLAVOR_HEADER = "metadata-flavor"
 _METADATA_FLAVOR_VALUE = "Google"
 _METADATA_HEADERS = {_METADATA_FLAVOR_HEADER: _METADATA_FLAVOR_VALUE}
 
-_SECRET_ROOT = 'https://secretmanager.googleapis.com/v1'
+_MANAGER_ROOT = 'https://secretmanager.googleapis.com/v1'
 _CLOUD_RESOURCE_MANAGER_ROOT = config.gcp_cloud_resource_manager_url()
 
 _DYNATRACE_ACCESS_KEY_SECRET_NAME = config.dynatrace_access_key_secret_name() or "DYNATRACE_ACCESS_KEY"
@@ -94,7 +94,7 @@ async def fetch_dynatrace_log_ingest_url(gcp_session: ClientSession, project_id:
     return urlparse(dynatrace_log_ingest_url.rstrip("/") + "/api/v2/logs/ingest").geturl()
 
 async def fetch_secret(secret_name: str, session: ClientSession, project_id: str, token: str) -> str:
-    url = _SECRET_ROOT + "/projects/{project_id}/secrets/{secret_name}/versions/latest:access" \
+    url = _MANAGER_ROOT + "/projects/{project_id}/secrets/{secret_name}/versions/latest:access" \
         .format(project_id=project_id, secret_name=secret_name)
 
     headers = {"Authorization": "Bearer {token}".format(token=token)}
