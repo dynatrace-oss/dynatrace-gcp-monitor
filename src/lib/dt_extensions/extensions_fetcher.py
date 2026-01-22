@@ -113,7 +113,7 @@ class ExtensionsFetcher:
             self.logging_context.log(
                 f"Incorrect extension fetched from Dynatrace cluster. {extension_name}-{extension_version} has no 'gcp' section and will be skipped"
             )
-            return []
+            return [], []
 
         all_services = []
         not_configured_services = []
