@@ -49,6 +49,7 @@ data:
   {{- end }}
   {{- end }}
   {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
+  LOGS_SUBSCRIPTION_PROJECT: {{ default .Values.gcpProjectId .Values.logsSubscriptionProject | quote }}
   LOGS_SUBSCRIPTION_ID: {{ .Values.logsSubscriptionId | quote }}
   DYNATRACE_LOG_INGEST_CONTENT_MAX_LENGTH: {{ .Values.logIngestContentMaxLength | quote }}
   DYNATRACE_LOG_INGEST_ATTRIBUTE_VALUE_MAX_LENGTH: {{ .Values.logIngestAttributeValueMaxLength | quote }}
