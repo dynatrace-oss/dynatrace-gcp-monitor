@@ -16,7 +16,6 @@ import asyncio
 import gzip
 import random
 from typing import Union
-from urllib.parse import urlparse
 
 from aiohttp import ClientError
 
