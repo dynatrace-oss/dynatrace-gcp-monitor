@@ -29,6 +29,10 @@ LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE = LOG_SELF_MONITORING_METRIC_P
 LOG_SELF_MONITORING_ACK_FAILURES_METRIC_TYPE = LOG_SELF_MONITORING_METRIC_PREFIX + "/ack_failures"
 LOG_SELF_MONITORING_ACK_SUCCEEDED_METRIC_TYPE = LOG_SELF_MONITORING_METRIC_PREFIX + "/ack_succeeded"
 LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_TYPE = LOG_SELF_MONITORING_METRIC_PREFIX + "/ack_backlog"
+LOG_SELF_MONITORING_PUSH_QUEUE_SIZE_METRIC_TYPE = LOG_SELF_MONITORING_METRIC_PREFIX + "/push_queue_size"
+LOG_SELF_MONITORING_PUSH_WAIT_TIME_METRIC_TYPE = LOG_SELF_MONITORING_METRIC_PREFIX + "/push_wait_time"
+LOG_SELF_MONITORING_MESSAGES_PER_SECOND_METRIC_TYPE = LOG_SELF_MONITORING_METRIC_PREFIX + "/messages_per_second"
+LOG_SELF_MONITORING_BATCH_LATENCY_METRIC_TYPE = LOG_SELF_MONITORING_METRIC_PREFIX + "/batch_latency"
 
 DYNATRACE_TENANT_URL_LABEL_DESCRIPTOR = {
     "key": "dynatrace_tenant_url",
@@ -160,8 +164,8 @@ LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_DESCRIPTOR = {
     "type": LOG_SELF_MONITORING_PROCESSING_TIME_METRIC_TYPE,
     "valueType": "DOUBLE",
     "metricKind": "GAUGE",
-    "description": "Total logs processing time",
-    "displayName": "Dynatrace Log Integration processing time",
+    "description": "Cumulative logs processing time across all coroutines (may exceed wall-clock time with parallelism)",
+    "displayName": "Dynatrace Log Integration processing time (cumulative)",
     "unit": "s",
     "monitoredResourceTypes": ["generic_task"],
     "labels": [
@@ -176,8 +180,8 @@ LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_DESCRIPTOR = {
     "type": LOG_SELF_MONITORING_SENDING_TIME_SIZE_METRIC_TYPE,
     "valueType": "DOUBLE",
     "metricKind": "GAUGE",
-    "description": "Total logs sending time",
-    "displayName": "Dynatrace Log Integration sending time",
+    "description": "Cumulative logs sending time across all coroutines (may exceed wall-clock time with parallelism)",
+    "displayName": "Dynatrace Log Integration sending time (cumulative)",
     "unit": "s",
     "monitoredResourceTypes": ["generic_task"],
     "labels": [
@@ -192,8 +196,8 @@ LOG_SELF_MONITORING_PULLING_TIME_SIZE_METRIC_DESCRIPTOR = {
     "type": LOG_SELF_MONITORING_PULLING_TIME_SIZE_METRIC_TYPE,
     "valueType": "DOUBLE",
     "metricKind": "GAUGE",
-    "description": "Total logs pulling time",
-    "displayName": "Dynatrace Log Integration pulling time",
+    "description": "Cumulative logs pulling time across all coroutines (may exceed wall-clock time with parallelism)",
+    "displayName": "Dynatrace Log Integration pulling time (cumulative)",
     "unit": "s",
     "monitoredResourceTypes": ["generic_task"],
     "labels": [
@@ -317,6 +321,70 @@ LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_DESCRIPTOR = {
     ]
 }
 
+LOG_SELF_MONITORING_PUSH_QUEUE_SIZE_METRIC_DESCRIPTOR = {
+    "type": LOG_SELF_MONITORING_PUSH_QUEUE_SIZE_METRIC_TYPE,
+    "valueType": "INT64",
+    "metricKind": "GAUGE",
+    "description": "Maximum number of batches waiting in push queue (indicates push bottleneck)",
+    "displayName": "Dynatrace Log Integration push queue size",
+    "unit": "1",
+    "monitoredResourceTypes": ["generic_task"],
+    "labels": [
+        DYNATRACE_TENANT_URL_LABEL_DESCRIPTOR,
+        LOGS_SUBSCRIPTION_ID_LABEL_DESCRIPTOR,
+        CONTAINER_NAME,
+        WORKER_PID
+    ]
+}
+
+LOG_SELF_MONITORING_PUSH_WAIT_TIME_METRIC_DESCRIPTOR = {
+    "type": LOG_SELF_MONITORING_PUSH_WAIT_TIME_METRIC_TYPE,
+    "valueType": "DOUBLE",
+    "metricKind": "GAUGE",
+    "description": "Total time batches spent waiting for push coroutine (indicates push bottleneck)",
+    "displayName": "Dynatrace Log Integration push wait time",
+    "unit": "s",
+    "monitoredResourceTypes": ["generic_task"],
+    "labels": [
+        DYNATRACE_TENANT_URL_LABEL_DESCRIPTOR,
+        LOGS_SUBSCRIPTION_ID_LABEL_DESCRIPTOR,
+        CONTAINER_NAME,
+        WORKER_PID
+    ]
+}
+
+LOG_SELF_MONITORING_MESSAGES_PER_SECOND_METRIC_DESCRIPTOR = {
+    "type": LOG_SELF_MONITORING_MESSAGES_PER_SECOND_METRIC_TYPE,
+    "valueType": "DOUBLE",
+    "metricKind": "GAUGE",
+    "description": "Throughput rate: sent_entries / wall_clock_seconds (60s default SFM interval)",
+    "displayName": "Dynatrace Log Integration messages per second",
+    "unit": "1/s",
+    "monitoredResourceTypes": ["generic_task"],
+    "labels": [
+        DYNATRACE_TENANT_URL_LABEL_DESCRIPTOR,
+        LOGS_SUBSCRIPTION_ID_LABEL_DESCRIPTOR,
+        CONTAINER_NAME,
+        WORKER_PID
+    ]
+}
+
+LOG_SELF_MONITORING_BATCH_LATENCY_METRIC_DESCRIPTOR = {
+    "type": LOG_SELF_MONITORING_BATCH_LATENCY_METRIC_TYPE,
+    "valueType": "DOUBLE",
+    "metricKind": "GAUGE",
+    "description": "Average end-to-end latency from pull to ACK complete (seconds)",
+    "displayName": "Dynatrace Log Integration batch latency",
+    "unit": "s",
+    "monitoredResourceTypes": ["generic_task"],
+    "labels": [
+        DYNATRACE_TENANT_URL_LABEL_DESCRIPTOR,
+        LOGS_SUBSCRIPTION_ID_LABEL_DESCRIPTOR,
+        CONTAINER_NAME,
+        WORKER_PID
+    ]
+}
+
 LOG_SELF_MONITORING_METRIC_MAP = {
     LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_TYPE: LOG_SELF_MONITORING_ALL_REQUESTS_METRIC_DESCRIPTOR,
     LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE: LOG_SELF_MONITORING_CONNECTIVITY_METRIC_DESCRIPTOR,
@@ -333,6 +401,10 @@ LOG_SELF_MONITORING_METRIC_MAP = {
     LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE: LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_DESCRIPTOR,
     LOG_SELF_MONITORING_ACK_FAILURES_METRIC_TYPE: LOG_SELF_MONITORING_ACK_FAILURES_METRIC_DESCRIPTOR,
     LOG_SELF_MONITORING_ACK_SUCCEEDED_METRIC_TYPE: LOG_SELF_MONITORING_ACK_SUCCEEDED_METRIC_DESCRIPTOR,
-    LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_TYPE: LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_DESCRIPTOR
+    LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_TYPE: LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_DESCRIPTOR,
+    LOG_SELF_MONITORING_PUSH_QUEUE_SIZE_METRIC_TYPE: LOG_SELF_MONITORING_PUSH_QUEUE_SIZE_METRIC_DESCRIPTOR,
+    LOG_SELF_MONITORING_PUSH_WAIT_TIME_METRIC_TYPE: LOG_SELF_MONITORING_PUSH_WAIT_TIME_METRIC_DESCRIPTOR,
+    LOG_SELF_MONITORING_MESSAGES_PER_SECOND_METRIC_TYPE: LOG_SELF_MONITORING_MESSAGES_PER_SECOND_METRIC_DESCRIPTOR,
+    LOG_SELF_MONITORING_BATCH_LATENCY_METRIC_TYPE: LOG_SELF_MONITORING_BATCH_LATENCY_METRIC_DESCRIPTOR,
 }
 

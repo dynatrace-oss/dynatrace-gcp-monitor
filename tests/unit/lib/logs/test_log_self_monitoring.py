@@ -1,6 +1,6 @@
 from queue import Queue
 
-from lib.context import DynatraceConnectivity, LogsSfmContext
+from lib.context import LogsSfmContext
 from lib.logs.log_self_monitoring import create_self_monitoring_time_series
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 
@@ -259,7 +259,7 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "connectivity_status": "Other",
+                    "connectivity_status": "500",
                     "container_name": "container_name",
                     "worker_pid": "12345"
                 }
@@ -293,7 +293,7 @@ expected_metric_data = {
                 "labels": {
                     "dynatrace_tenant_url": "http://localhost:9011",
                     "logs_subscription_id": "dynatrace-gcp-log-forwarder-sub",
-                    "connectivity_status": "TooManyRequests",
+                    "connectivity_status": "429",
                     "container_name": "container_name",
                     "worker_pid": "12345"
                 }
@@ -416,7 +416,7 @@ expected_metric_data = {
 
 def test_self_monitoring_metrics():
     self_monitoring = LogSelfMonitoring()
-    self_monitoring.dynatrace_connectivity = [DynatraceConnectivity.Other, DynatraceConnectivity.Other, DynatraceConnectivity.TooManyRequests]
+    self_monitoring.dt_connectivity = [500, 500, 429]  # 2x Other(500) + 1x TooManyRequests(429)
     self_monitoring.too_old_records = 6
     self_monitoring.parsing_errors = 3
     self_monitoring.all_requests = 3

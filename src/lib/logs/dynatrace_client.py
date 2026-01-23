@@ -22,24 +22,13 @@ from aiohttp import ClientError
 
 from lib.configuration import config
 
-from lib.context import DynatraceConnectivity, LogsContext
+from lib.context import LogsContext
 from lib.logs.logs_processor import LogBatch
 
 # Status codes that indicate transient failures worth retrying
 RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 MAX_RETRIES = 3
 INITIAL_BACKOFF_SECONDS = 1
-
-DYNATRACE_ERROR_CODE_DESC_DICT = {
-    400: DynatraceConnectivity.InvalidInput,
-    401: DynatraceConnectivity.ExpiredToken,
-    403: DynatraceConnectivity.WrongToken,
-    404: DynatraceConnectivity.WrongURL,
-    405: DynatraceConnectivity.WrongURL,
-    413: DynatraceConnectivity.TooManyRequests,
-    429: DynatraceConnectivity.TooManyRequests,
-    500: DynatraceConnectivity.Other
-}
 
 
 class DynatraceClient:
@@ -85,13 +74,8 @@ class DynatraceClient:
                         context.t_error(
                             f'Log ingest error: {resp_status}, reason: {response.reason}, url: {self.log_ingest_url}, body: "{response_text}"'
                         )
-                        error_code_description = DYNATRACE_ERROR_CODE_DESC_DICT.get(resp_status, 0)
-                        if error_code_description:
-                            context.self_monitoring.dynatrace_connectivity.append(
-                                error_code_description
-                            )
-                        else:
-                            context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
+                        # Track raw HTTP status code
+                        context.self_monitoring.dt_connectivity.append(resp_status)
 
                         # Retry only on transient errors
                         if resp_status in RETRYABLE_STATUS_CODES and attempt < MAX_RETRIES - 1:
@@ -105,14 +89,14 @@ class DynatraceClient:
                         return
                     else:
                         ack_ids_to_send.extend(batch.ack_ids)
-                        context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Ok)
+                        context.self_monitoring.dt_connectivity.append(200)  # Success
                         context.self_monitoring.sent_logs_entries += batch.number_of_logs_in_batch
                         context.self_monitoring.log_ingest_payload_size += compressed_size_kb
                         context.self_monitoring.log_ingest_raw_size += encoded_body_size_kb
                         return  # Success
                 except ClientError as e:
                     # aiohttp client errors (connection, timeout, etc.) - retry
-                    context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
+                    context.self_monitoring.dt_connectivity.append(0)  # Network error
                     if attempt < MAX_RETRIES - 1:
                         backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt) + random.uniform(0, 0.5)
                         log_ctx = logging_context if logging_context else context

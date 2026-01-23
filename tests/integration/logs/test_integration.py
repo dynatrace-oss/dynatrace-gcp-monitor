@@ -30,7 +30,7 @@ from wiremock.resources.requests.resource import Requests
 from wiremock.server import WireMockServer
 
 from lib.clientsession_provider import init_gcp_client_session
-from lib.context import LoggingContext, DynatraceConnectivity
+from lib.context import LoggingContext
 from lib.instance_metadata import InstanceMetadata
 from lib.logs import log_self_monitoring, log_forwarder_variables, logs_processor, dynatrace_client
 from lib.logs.log_integration_service import LogIntegrationService
@@ -130,7 +130,7 @@ async def test_execution_successful():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 3}
+    assert Counter(self_monitoring.dt_connectivity) == {200: 3}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
     assert self_monitoring.sent_logs_entries == 10
@@ -159,7 +159,7 @@ async def test_content_too_long():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 1
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 1}
+    assert Counter(self_monitoring.dt_connectivity) == {200: 1}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
     assert self_monitoring.sent_logs_entries == 1
@@ -184,7 +184,7 @@ async def test_too_old_message():
 
     assert self_monitoring.too_old_records == 1
     assert self_monitoring.records_with_too_long_content == 0
-    assert not self_monitoring.dynatrace_connectivity
+    assert not self_monitoring.dt_connectivity
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sent_logs_entries == 0
     assert self_monitoring.parsing_errors == 0
@@ -208,7 +208,7 @@ async def test_invalid_timestamp():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 1}
+    assert Counter(self_monitoring.dt_connectivity) == {200: 1}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
     assert self_monitoring.sent_logs_entries == 1
@@ -235,7 +235,7 @@ async def test_binary_data():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert not self_monitoring.dynatrace_connectivity
+    assert not self_monitoring.dt_connectivity
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sent_logs_entries == 0
     assert self_monitoring.parsing_errors == 1
@@ -259,7 +259,7 @@ async def test_plain_text_message():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 1}
+    assert Counter(self_monitoring.dt_connectivity) == {200: 1}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
     assert self_monitoring.sent_logs_entries == 1
@@ -289,9 +289,7 @@ async def test_execution_expired_token():
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.parsing_errors == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert Counter(self_monitoring.dynatrace_connectivity) == {
-        DynatraceConnectivity.ExpiredToken: 3
-    }
+    assert Counter(self_monitoring.dt_connectivity) == {401: 3}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
 

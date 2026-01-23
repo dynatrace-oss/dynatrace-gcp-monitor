@@ -23,7 +23,7 @@ import aiohttp
 
 from lib.clientsession_provider import init_gcp_client_session
 from lib.configuration import config
-from lib.context import LoggingContext, LogsSfmContext, DynatraceConnectivity, LogsContext
+from lib.context import LoggingContext, LogsSfmContext, LogsContext
 from lib.credentials import create_token, fetch_dynatrace_log_ingest_url
 from lib.instance_metadata import InstanceMetadata
 from lib.logs.log_forwarder_variables import LOGS_SUBSCRIPTION_PROJECT, LOGS_SUBSCRIPTION_ID, \
@@ -36,7 +36,9 @@ from lib.sfm.for_logs.log_sfm_metric_descriptor import LOG_SELF_MONITORING_CONNE
     LOG_SELF_MONITORING_PULLED_LOGS_ENTRIES_METRIC_TYPE, LOG_SELF_MONITORING_SENT_LOGS_ENTRIES_METRIC_TYPE, \
     LOG_SELF_MONITORING_PUBLISH_TIME_FALLBACK_METRIC_TYPE, \
     LOG_SELF_MONITORING_RAW_LOG_INGEST_PAYLOAD_SIZE_METRIC_TYPE, LOG_SELF_MONITORING_ACK_FAILURES_METRIC_TYPE, \
-    LOG_SELF_MONITORING_ACK_SUCCEEDED_METRIC_TYPE, LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_TYPE
+    LOG_SELF_MONITORING_ACK_SUCCEEDED_METRIC_TYPE, LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_TYPE, \
+    LOG_SELF_MONITORING_PUSH_QUEUE_SIZE_METRIC_TYPE, LOG_SELF_MONITORING_PUSH_WAIT_TIME_METRIC_TYPE, \
+    LOG_SELF_MONITORING_MESSAGES_PER_SECOND_METRIC_TYPE, LOG_SELF_MONITORING_BATCH_LATENCY_METRIC_TYPE
 from lib.sfm.for_logs.log_sfm_metrics import LogSelfMonitoring
 from lib.self_monitoring import push_self_monitoring_time_series, sfm_create_descriptors_if_missing
 
@@ -48,7 +50,9 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
         aggregated_sfm.publish_time_fallback_records += sfm.publish_time_fallback_records
         aggregated_sfm.parsing_errors += sfm.parsing_errors
         aggregated_sfm.records_with_too_long_content += sfm.records_with_too_long_content
-        aggregated_sfm.dynatrace_connectivity.extend(sfm.dynatrace_connectivity)
+        aggregated_sfm.dt_connectivity.extend(sfm.dt_connectivity)
+        aggregated_sfm.gcp_connectivity.extend(sfm.gcp_connectivity)
+        # Note: These times are CUMULATIVE across coroutines (may exceed wall-clock time)
         aggregated_sfm.processing_time += sfm.processing_time
         aggregated_sfm.pulling_time += sfm.pulling_time
         aggregated_sfm.sending_time += sfm.sending_time
@@ -59,6 +63,12 @@ def aggregate_self_monitoring_metrics(aggregated_sfm: LogSelfMonitoring, sfm_lis
         aggregated_sfm.ack_failures += sfm.ack_failures
         aggregated_sfm.acks_succeeded += sfm.acks_succeeded
         aggregated_sfm.ack_backlog = max(aggregated_sfm.ack_backlog, sfm.ack_backlog)
+        # Bottleneck detection metrics
+        aggregated_sfm.push_queue_size_max = max(aggregated_sfm.push_queue_size_max, sfm.push_queue_size_max)
+        aggregated_sfm.push_wait_time += sfm.push_wait_time
+        aggregated_sfm.messages_per_second += sfm.messages_per_second
+        aggregated_sfm.batch_latency_total += sfm.batch_latency_total
+        aggregated_sfm.batch_latency_count += sfm.batch_latency_count
     return aggregated_sfm
 
 
@@ -145,25 +155,51 @@ async def _pull_sfm(sfm_queue: Queue):
 
 
 def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_context: LoggingContext):
-    dynatrace_connectivity = Counter(self_monitoring.dynatrace_connectivity)
-    dynatrace_connectivity = [f"{connectivity.name}:{count}" for connectivity, count in dynatrace_connectivity.items()]
-    dynatrace_connectivity = ", ".join(dynatrace_connectivity)
-    logging_context.log("SFM", f"Number of all log ingest requests sent to Dynatrace: {self_monitoring.all_requests}")
-    logging_context.log("SFM", f"Dynatrace connectivity: {dynatrace_connectivity}")
-    logging_context.log("SFM", f"Number of log records with missing/invalid timestamp (used publish time): {self_monitoring.publish_time_fallback_records}")
-    logging_context.log("SFM", f"Number of invalid log records due to too old timestamp: {self_monitoring.too_old_records}")
-    logging_context.log("SFM", f"Number of errors occurred during parsing logs: {self_monitoring.parsing_errors}")
-    logging_context.log("SFM", f"Number of records with too long content: {self_monitoring.records_with_too_long_content}")
-    logging_context.log("SFM", f"Total logs pulling time [s]: {self_monitoring.pulling_time}")
-    logging_context.log("SFM", f"Total logs processing time [s]: {self_monitoring.processing_time}")
-    logging_context.log("SFM", f"Total logs sending time [s]: {self_monitoring.sending_time}")
-    logging_context.log("SFM", f"Log ingest payload size [kB]: {self_monitoring.log_ingest_payload_size}") 
-    logging_context.log("SFM", f"Raw log ingest payload size [kB]: {self_monitoring.log_ingest_raw_size}")
-    logging_context.log("SFM", f"Number of pulled logs entries: {self_monitoring.pulled_logs_entries}")
-    logging_context.log("SFM", f"Number of sent logs entries: {self_monitoring.sent_logs_entries}")
-    logging_context.log("SFM", f"Number of ACK succeeded: {self_monitoring.acks_succeeded}")
-    logging_context.log("SFM", f"Number of ACK failures: {self_monitoring.ack_failures}")
-    logging_context.log("SFM", f"ACK backlog (tasks): {self_monitoring.ack_backlog}")
+    # Format HTTP status codes as "code:count" pairs (0 = network error)
+    dt_connectivity = Counter(self_monitoring.dt_connectivity)
+    dt_status = ", ".join(f"{code}:{count}" for code, count in sorted(dt_connectivity.items())) or "-"
+    
+    gcp_connectivity = Counter(self_monitoring.gcp_connectivity)
+    gcp_status = ", ".join(f"{code}:{count}" for code, count in sorted(gcp_connectivity.items())) or "-"
+    
+    # Calculate derived metrics
+    pulled = self_monitoring.pulled_logs_entries
+    sent = self_monitoring.sent_logs_entries
+    dropped = pulled - sent if pulled > 0 else 0
+    
+    # Throughput (messages per second based on wall-clock time)
+    wall_clock_seconds = SFM_WORKER_EXECUTION_PERIOD_SECONDS
+    throughput = sent / wall_clock_seconds if sent > 0 else 0
+    self_monitoring.messages_per_second = throughput
+    
+    # === CORE METRICS (always logged) ===
+    logging_context.log("SFM", f"Pipeline: pulled={pulled}, sent={sent}, dropped={dropped}")
+    logging_context.log("SFM", f"Connectivity: DT={dt_status}, GCP={gcp_status}")
+    logging_context.log("SFM", f"Timing [s]: pull={self_monitoring.pulling_time:.2f}, process={self_monitoring.processing_time:.2f}, send={self_monitoring.sending_time:.2f}")
+    logging_context.log("SFM", f"ACKs: ok={self_monitoring.acks_succeeded}, failed={self_monitoring.ack_failures}, backlog={self_monitoring.ack_backlog}")
+    
+    # === CONDITIONAL METRICS (only when relevant) ===
+    
+    # Payload and throughput (only when data was sent)
+    if sent > 0:
+        logging_context.log("SFM", f"Payload [kB]: {self_monitoring.log_ingest_payload_size:.1f}, throughput: {throughput:.1f} msg/s")
+    
+    # Data quality issues (only when there are problems)
+    issues = []
+    if self_monitoring.too_old_records > 0:
+        issues.append(f"too_old={self_monitoring.too_old_records}")
+    if self_monitoring.publish_time_fallback_records > 0:
+        issues.append(f"missing_ts={self_monitoring.publish_time_fallback_records}")
+    if self_monitoring.parsing_errors > 0:
+        issues.append(f"parse_err={self_monitoring.parsing_errors}")
+    if self_monitoring.records_with_too_long_content > 0:
+        issues.append(f"too_long={self_monitoring.records_with_too_long_content}")
+    if issues:
+        logging_context.log("SFM", f"Data issues: {', '.join(issues)}")
+    
+    # Bottleneck indicators (only when there's potential backpressure)
+    if self_monitoring.push_queue_size_max > 0 or self_monitoring.push_wait_time > 0.1:
+        logging_context.log("SFM", f"Backpressure: queue_max={self_monitoring.push_queue_size_max}, wait={self_monitoring.push_wait_time:.3f}s")
 
 
 def create_time_series(
@@ -320,9 +356,10 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             }],
             "DOUBLE"))
 
-    connectivity_counter = Counter(sfm.dynatrace_connectivity)
-    for dynatrace_connectivity, counter in connectivity_counter.items():
-        if dynatrace_connectivity.name != DynatraceConnectivity.Ok.name:
+    connectivity_counter = Counter(sfm.dt_connectivity)
+    for http_status, counter in connectivity_counter.items():
+        # Report all non-200 status codes as connectivity issues (0 = network error)
+        if http_status != 200:
             time_series.append(create_time_series(
                     context,
                     LOG_SELF_MONITORING_CONNECTIVITY_METRIC_TYPE,
@@ -331,7 +368,7 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                         "logs_subscription_id": context.logs_subscription_id,
                         "container_name": context.container_name,
                         "worker_pid": context.worker_pid,
-                        "connectivity_status": dynatrace_connectivity.name
+                        "connectivity_status": str(http_status)  # HTTP status code as string
                     },
                     [{
                         "interval": interval,
@@ -422,23 +459,24 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
             ]
         ))
 
-        if sfm.ack_backlog:
-            time_series.append(create_time_series(
-                context,
-                LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_TYPE,
+    if sfm.ack_backlog:
+        time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_ACK_BACKLOG_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
+            },
+            [
                 {
-                    "dynatrace_tenant_url": context.dynatrace_url,
-                    "logs_subscription_id": context.logs_subscription_id,
-                    "container_name": context.container_name,
-                    "worker_pid": context.worker_pid
-                },
-                [
-                    {
-                        "interval": interval,
-                        "value": {"int64Value": sfm.ack_backlog}
-                    }
-                ]
-            ))
+                    "interval": interval,
+                    "value": {"int64Value": sfm.ack_backlog}
+                }
+            ]
+        ))
+
     if sfm.ack_failures:
         time_series.append(create_time_series(
             context,
@@ -453,6 +491,75 @@ def create_self_monitoring_time_series(sfm: LogSelfMonitoring, context: LogsSfmC
                 "interval": interval,
                 "value": {"int64Value": sfm.ack_failures}
             }]
+        ))
+
+    # Bottleneck detection metrics
+    if sfm.push_queue_size_max:
+        time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_PUSH_QUEUE_SIZE_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
+            },
+            [{
+                "interval": interval,
+                "value": {"int64Value": sfm.push_queue_size_max}
+            }]
+        ))
+
+    if sfm.push_wait_time:
+        time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_PUSH_WAIT_TIME_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
+            },
+            [{
+                "interval": interval,
+                "value": {"doubleValue": sfm.push_wait_time}
+            }],
+            "DOUBLE"
+        ))
+
+    if sfm.messages_per_second:
+        time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_MESSAGES_PER_SECOND_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
+            },
+            [{
+                "interval": interval,
+                "value": {"doubleValue": sfm.messages_per_second}
+            }],
+            "DOUBLE"
+        ))
+
+    if sfm.batch_latency_count > 0:
+        avg_batch_latency = sfm.batch_latency_total / sfm.batch_latency_count
+        time_series.append(create_time_series(
+            context,
+            LOG_SELF_MONITORING_BATCH_LATENCY_METRIC_TYPE,
+            {
+                "dynatrace_tenant_url": context.dynatrace_url,
+                "logs_subscription_id": context.logs_subscription_id,
+                "container_name": context.container_name,
+                "worker_pid": context.worker_pid
+            },
+            [{
+                "interval": interval,
+                "value": {"doubleValue": avg_batch_latency}
+            }],
+            "DOUBLE"
         ))
 
     return {"timeSeries": time_series}

@@ -175,7 +175,11 @@ class LogIntegrationService:
         for i, response in enumerate(responses):
             if isinstance(response, Exception):
                 logging_context.error(f"Pull request {i} failed: {response}")
+                # Track GCP connectivity error (0 = network error)
+                context.self_monitoring.gcp_connectivity.append(0)
                 continue
+            # Successful pull
+            context.self_monitoring.gcp_connectivity.append(200)
             received_messages = response.get("receivedMessages", [])  # type: ignore
             context.self_monitoring.pulled_logs_entries += len(received_messages)
             for received_message in received_messages:
@@ -203,15 +207,35 @@ class LogIntegrationService:
 
         dt_session = await self._get_dt_session()
         ack_ids_to_send: List[str] = []
+        
+        # Track push wait times for bottleneck detection
+        total_push_wait_time = 0.0
+        max_queue_size = 0
 
         async def process_batch(batch: LogBatch):
+            nonlocal total_push_wait_time, max_queue_size
             local_ack_ids: List[str] = []
+            batch_start_time = time.perf_counter()
+            
+            # Track queue size before acquiring semaphore (indicates backlog)
+            # Semaphore._value shows available slots; batch_length - available = waiting
+            current_queue_size = max(0, batch_length - self.log_push_semaphore._value)
+            max_queue_size = max(max_queue_size, current_queue_size)
+            
+            wait_start = time.perf_counter()
             async with self.log_push_semaphore:
+                wait_time = time.perf_counter() - wait_start
+                total_push_wait_time += wait_time
+                
                 await self.dynatrace_client.send_logs(context, dt_session, batch, local_ack_ids, logging_context)
 
             # If logs were successfully sent (or skipped due to success) schedule ACK immediately
             if local_ack_ids:
                 ack_ids_to_send.extend(local_ack_ids)
+                # Track batch latency (time from batch start to ACK submission)
+                batch_latency = time.perf_counter() - batch_start_time
+                context.self_monitoring.batch_latency_total += batch_latency
+                context.self_monitoring.batch_latency_count += 1
                 self._submit_background_ack(local_ack_ids, logging_context)
 
         context.self_monitoring.sending_time_start = time.perf_counter()
@@ -222,6 +246,11 @@ class LogIntegrationService:
             if isinstance(result, Exception):
                 logging_context.error(f"Batch {i} send to Dynatrace failed: {result}")
         context.self_monitoring.calculate_sending_time()
+        
+        # Record bottleneck detection metrics
+        context.self_monitoring.push_queue_size_max = max_queue_size
+        context.self_monitoring.push_wait_time = total_push_wait_time
+        
         put_sfm_into_queue(context)
 
         return ack_ids_to_send
@@ -267,7 +296,9 @@ class LogIntegrationService:
             if isinstance(result, Exception):
                 logging_context.error(f"ACK chunk failed, messages will be redelivered: {result}")
                 context.self_monitoring.ack_failures += 1
+                context.self_monitoring.gcp_connectivity.append(0)  # Network error
             else:
                 context.self_monitoring.acks_succeeded += len(chunk)
+                context.self_monitoring.gcp_connectivity.append(200)  # Success
         context.self_monitoring.ack_backlog = len(self._pending_ack_tasks)
         put_sfm_into_queue(context)

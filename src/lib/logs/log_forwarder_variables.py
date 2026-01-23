@@ -20,13 +20,16 @@ from lib.configuration.config import get_int_environment_value
 PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES = get_int_environment_value("PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES", 1000)
 PARALLEL_PROCESSES = get_int_environment_value("PARALLEL_PROCESSES", 1)
 NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS = get_int_environment_value("NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS", 5)
+# Default 10:10 ratio is safe for most deployments (1.25 vCPU / 1 Gi)
+# For high-throughput (4 vCPU / 4 Gi), set to 20:20
 NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES = get_int_environment_value("NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES", 10)
-NUMBER_OF_CONCURRENT_PUSH_COROUTINES = get_int_environment_value("NUMBER_OF_CONCURRENT_PUSH_COROUTINES", 5)
+NUMBER_OF_CONCURRENT_PUSH_COROUTINES = get_int_environment_value("NUMBER_OF_CONCURRENT_PUSH_COROUTINES", 10)
 
 # ACK coroutines: auto-calculate based on push load if not explicitly set
 # ACK is lightweight, so half of push coroutines is usually sufficient
-_ack_coroutines_env = os.environ.get("NUMBER_OF_CONCURRENT_ACK_COROUTINES")
-if _ack_coroutines_env is not None:
+# Empty string or missing → auto-calculate; positive integer → use that value
+_ack_coroutines_env = os.environ.get("NUMBER_OF_CONCURRENT_ACK_COROUTINES", "").strip()
+if _ack_coroutines_env and _ack_coroutines_env.isdigit() and int(_ack_coroutines_env) > 0:
     NUMBER_OF_CONCURRENT_ACK_COROUTINES = int(_ack_coroutines_env)
 else:
     # Auto-calculate: half of push coroutines, minimum 5
