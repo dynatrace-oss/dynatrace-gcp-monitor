@@ -181,7 +181,7 @@ def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) ->
 
     parsed_timestamp = parsed_record.get(ATTRIBUTE_TIMESTAMP, None)
     if _is_log_too_old(parsed_timestamp):
-        context.log(f"Skipping message due to too old timestamp: {parsed_timestamp}")
+        # Don't log per-message - already summarized in SFM as too_old_records
         context.self_monitoring.too_old_records += 1
         return None
 
