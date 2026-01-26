@@ -217,9 +217,9 @@ class LogIntegrationService:
             local_ack_ids: List[str] = []
             batch_start_time = time.perf_counter()
             
-            # Track queue size before acquiring semaphore (indicates backlog)
-            # Semaphore._value shows available slots; batch_length - available = waiting
-            current_queue_size = max(0, batch_length - self.log_push_semaphore._value)
+            # Track actual queue size: number of tasks waiting for the semaphore
+            waiters = self.log_push_semaphore._waiters
+            current_queue_size = len(waiters) if waiters else 0
             max_queue_size = max(max_queue_size, current_queue_size)
             
             wait_start = time.perf_counter()

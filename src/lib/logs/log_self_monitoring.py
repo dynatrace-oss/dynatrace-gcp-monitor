@@ -176,7 +176,7 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     logging_context.log("SFM", f"Pipeline: pulled={pulled}, sent={sent}, dropped={dropped}")
     logging_context.log("SFM", f"Connectivity: DT={dt_status}, GCP={gcp_status}")
     logging_context.log("SFM", f"Timing [s]: pull={self_monitoring.pulling_time:.2f}, process={self_monitoring.processing_time:.2f}, send={self_monitoring.sending_time:.2f}")
-    logging_context.log("SFM", f"ACKs: ok={self_monitoring.acks_succeeded}, failed={self_monitoring.ack_failures}, backlog={self_monitoring.ack_backlog}")
+    logging_context.log("SFM", f"ACKs: ok={self_monitoring.acks_succeeded}, failed={self_monitoring.ack_failures}, pending_tasks={self_monitoring.ack_backlog}")
     
     # === CONDITIONAL METRICS (only when relevant) ===
     
@@ -199,7 +199,7 @@ def _log_self_monitoring_data(self_monitoring: LogSelfMonitoring, logging_contex
     
     # Bottleneck indicators (only when there's potential backpressure)
     if self_monitoring.push_queue_size_max > 0 or self_monitoring.push_wait_time > 0.1:
-        logging_context.log("SFM", f"Backpressure: queue_max={self_monitoring.push_queue_size_max}, wait={self_monitoring.push_wait_time:.3f}s")
+        logging_context.log("SFM", f"Push throttle: waiting={self_monitoring.push_queue_size_max}, wait_time={self_monitoring.push_wait_time:.3f}s")
 
 
 def create_time_series(

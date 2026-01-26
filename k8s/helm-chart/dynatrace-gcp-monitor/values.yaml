@@ -143,9 +143,9 @@ masterIpv4Cidr: ""
 #
 # Best Practices:
 #   - Keep parallelProcesses=1 (higher values reduce performance)
-#   - Maintain 1:1 ratio between pull and push coroutines
+#   - Maintain 1:1:1 ratio between pull, push and ACK coroutines
 #   - Scale horizontally with replicas for higher throughput
-#   - Leave numberOfConcurrentAckCoroutines empty for auto-optimization
+#   - Leave numberOfConcurrentAckCoroutines empty for auto-optimization (defaults to push value)
 #
 # High Throughput Configuration (4 vCPU / 4 Gi per replica):
 #   numberOfConcurrentMessagePullCoroutines: 20
@@ -185,7 +185,8 @@ numberOfConcurrentMessagePullCoroutines: 10
 # Keep 1:1 ratio with pull coroutines!
 numberOfConcurrentPushCoroutines: 10
 
-# ACK coroutines: Leave empty! Auto-calculates to max(5, push/2) which is optimal.
+# ACK coroutines: Leave empty to auto-calculate to match push (1:1 ratio).
+# Keep 1:1 ratio with pull coroutines!
 numberOfConcurrentAckCoroutines: ""
 
 # Maximum messages per Pub/Sub pull. 1000 is the GCP maximum - don't change.

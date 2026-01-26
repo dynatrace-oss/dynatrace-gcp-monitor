@@ -25,15 +25,15 @@ NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS = get_int_environment_value("NUMBER_OF
 NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES = get_int_environment_value("NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES", 10)
 NUMBER_OF_CONCURRENT_PUSH_COROUTINES = get_int_environment_value("NUMBER_OF_CONCURRENT_PUSH_COROUTINES", 10)
 
-# ACK coroutines: auto-calculate based on push load if not explicitly set
-# ACK is lightweight, so half of push coroutines is usually sufficient
+# ACK coroutines: auto-calculate to match push coroutines if not explicitly set
+# Experiments show 1:1 push:ack ratio is optimal
 # Empty string or missing → auto-calculate; positive integer → use that value
 _ack_coroutines_env = os.environ.get("NUMBER_OF_CONCURRENT_ACK_COROUTINES", "").strip()
 if _ack_coroutines_env and _ack_coroutines_env.isdigit() and int(_ack_coroutines_env) > 0:
     NUMBER_OF_CONCURRENT_ACK_COROUTINES = int(_ack_coroutines_env)
 else:
-    # Auto-calculate: half of push coroutines, minimum 5
-    NUMBER_OF_CONCURRENT_ACK_COROUTINES = max(5, NUMBER_OF_CONCURRENT_PUSH_COROUTINES // 2)
+    # Auto-calculate: match push coroutines (1:1 ratio), minimum 5
+    NUMBER_OF_CONCURRENT_ACK_COROUTINES = max(5, NUMBER_OF_CONCURRENT_PUSH_COROUTINES)
 MAX_SFM_MESSAGES_PROCESSED = 10_000
 LOGS_SUBSCRIPTION_PROJECT = os.environ.get("GCP_PROJECT", os.environ.get("LOGS_SUBSCRIPTION_PROJECT", None))
 LOGS_SUBSCRIPTION_ID = os.environ.get('LOGS_SUBSCRIPTION_ID', None)
