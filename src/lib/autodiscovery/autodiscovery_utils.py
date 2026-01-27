@@ -126,6 +126,8 @@ async def run_fetch_metric_descriptors(
     headers = {"Accept": "application/json", "Authorization": f"Bearer {token}"}
     url = f"https://monitoring.googleapis.com/v3/projects/{project_id}/metricDescriptors"
     params = {}
+    if config.gcp_autodiscovery_fetch_active_metrics_only():
+        params["activeOnly"] = "true"
 
     project_discovered_metrics = []
     include_alpha_metrics = config.gcp_autodiscovery_include_alpha_metrics()

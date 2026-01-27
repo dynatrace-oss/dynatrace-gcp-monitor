@@ -46,6 +46,9 @@ data:
   AUTODISCOVERY_INCLUDE_ALPHA_METRICS: {{ .Values.autodiscoveryIncludeAlphaMetrics | quote }}
   AUTODISCOVERY_RESOURCES_YAML: {{ .Values.autodiscoveryResourcesYaml | quote }}
   AUTODISCOVERY_METRIC_BLOCK_LIST_YAML: {{ .Values.autodiscoveryBlockListYaml | quote }}
+  {{- if .Values.autodiscoveryFetchActiveMetricsOnly }}
+  AUTODISCOVERY_FETCH_ACTIVE_METRICS_ONLY: {{ .Values.autodiscoveryFetchActiveMetricsOnly | quote }}
+  {{- end }}
   {{- end }}
   {{- end }}
   {{- if or (eq .Values.deploymentType "logs") (eq .Values.deploymentType "all") }}
