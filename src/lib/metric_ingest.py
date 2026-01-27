@@ -241,6 +241,13 @@ async def fetch_metric(
             break
 
         for single_time_series in page['timeSeries']:
+
+            resource_labels = single_time_series.get('resource', {}).get('labels', {})
+            resource_project = resource_labels.get('project_id', '')
+            if resource_project and resource_project != project_id:
+                # Skip time series from different projects to avoid duplicates when multiple projects are included
+                continue
+
             typed_value_key = _extract_typed_value_key(single_time_series)
             dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric)
             entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
