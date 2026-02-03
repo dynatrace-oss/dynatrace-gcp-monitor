@@ -626,7 +626,7 @@ def _convert_point_to_ingest_line(
     except Exception as e:
         context.log(f"Failed to extract value from data point: {point}, due to {type(e).__name__} {e}")
 
-    if value:
+    if value is not None:
         line = IngestLine(
             entity_id=entity_id,
             metric_name=metric.dynatrace_name,

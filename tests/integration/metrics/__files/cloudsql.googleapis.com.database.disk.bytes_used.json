@@ -21,7 +21,7 @@
              "endTime": "2033-05-02T12:14:12Z"
           },
           "value": {
-            "int64Value": "1332211712"
+            "int64Value": 1332211712
           }
         }
       ]
@@ -47,7 +47,33 @@
              "endTime": "2033-05-02T12:14:12Z"
           },
           "value": {
-            "int64Value": "358653952"
+            "int64Value": 358653952
+          }
+        }
+      ]
+    },
+    {
+      "metric": {
+        "type": "cloudsql.googleapis.com/database/disk/bytes_used"
+      },
+      "resource": {
+        "type": "cloudsql_database",
+        "labels": {
+          "project_id": "dynatrace-gcp-extension",
+          "region": "europe-west3",
+          "database_id": "dynatrace-gcp-extension:pawel-001-pgsql"
+        }
+      },
+      "metricKind": "GAUGE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "startTime": "{{request.query.[interval.startTime]}}",
+            "endTime": "2033-05-02T12:19:12Z"
+          },
+          "value": {
+            "int64Value": 0
           }
         }
       ]
