@@ -49,7 +49,7 @@ async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = N
     logging_context.log("Starting execution")
 
     start_time = time.time()
-    await query_metrics(execution_identifier, services)
+    await query_metrics(execution_identifier, services, timestamp_utc)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}")
 
@@ -59,6 +59,7 @@ async def get_metric_context(
     dt_session: ClientSession,
     token: str,
     logging_context: LoggingContext,
+    timestamp_utc: Optional[datetime] = None,
 ) -> MetricsContext:
     project_id_owner = config.project_id()
 
@@ -84,7 +85,7 @@ async def get_metric_context(
         dt_session=dt_session,
         project_id_owner=project_id_owner,
         token=token,
-        execution_time=datetime.utcnow(),
+        execution_time=timestamp_utc or datetime.utcnow(),
         execution_interval_seconds=60 * query_interval_min,
         dynatrace_api_key=dynatrace_api_key,
         dynatrace_url=dynatrace_url,
@@ -96,7 +97,7 @@ async def get_metric_context(
     return context
 
 
-async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None):
+async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None, timestamp_utc: Optional[datetime] = None):
     logging_context = LoggingContext(execution_id)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -112,7 +113,7 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         logging_context.log("Successfully obtained access token")
 
         context = await get_metric_context(
-            gcp_session, dt_session, token, logging_context=logging_context
+            gcp_session, dt_session, token, logging_context, timestamp_utc=timestamp_utc
         )
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
@@ -168,7 +169,11 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
             for project_id
             in projects_ids
         ]
-        await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
+        results = await asyncio.gather(*process_project_metrics_tasks, return_exceptions=True)
+        # Log any exceptions from project processing (should be rare - process_project_metrics has its own try/except)
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                context.log(f"Project processing task {i} failed unexpectedly: {type(result).__name__}: {result}")
         context.log(f"Fetched and pushed GCP data in {time.time() - context.start_processing_timestamp} s")
 
         log_self_monitoring_metrics(context)
@@ -204,6 +209,16 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
 
 async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, services: List[GCPService],
                                   disabled_apis: Set[str], excluded_metrics_and_dimensions: list) -> List[IngestLine]:
+    # Log the polling time window for debugging
+    base_end_time = context.execution_time
+    base_start_time = base_end_time - context.execution_interval
+    context.log(project_id, 
+        f"=== METRIC POLLING CYCLE === "
+        f"execution_time={base_end_time.strftime('%Y-%m-%d %H:%M:%S')}Z | "
+        f"query_window=[<={base_start_time.strftime('%H:%M:%S')}Z -> <={base_end_time.strftime('%H:%M:%S')}Z] | "
+        f"interval={int(context.execution_interval.total_seconds())}s"
+    )
+
     def should_exclude_metric(metric: Metric):
         found_excluded_metric = None
 
@@ -287,7 +302,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_coros, return_exceptions=True)
     entity_id_map = build_entity_id_map(list(topology.values()))
-    flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
+    flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map, project_id)
 
     flat_metric_results.extend(metrics_metadata)
     return flat_metric_results
