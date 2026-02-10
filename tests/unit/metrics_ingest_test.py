@@ -65,3 +65,65 @@ def test_flatten_and_enrich_metric_results_all_additional_dimensions():
                            DimensionValue(name="entity.example_property", value="example_value")]
     assert set(expected_dimensions) == set(ingest_line.dimension_values)
 
+
+def test_extract_value_explicit_buckets_overflow():
+    """extract_value should not crash when the last non-empty bucket is the overflow bucket."""
+    from unittest.mock import MagicMock
+
+    metric = MagicMock()
+    metric.unit = ""
+
+    point = {
+        'interval': {'startTime': '2026-02-10T10:03:54Z', 'endTime': '2026-02-10T10:04:54Z'},
+        'value': {
+            'distributionValue': {
+                'count': '677',
+                'mean': 57386.23180962643,
+                'bucketOptions': {
+                    'explicitBuckets': {
+                        'bounds': [0, 0.01, 0.05, 0.1, 0.3, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 8,
+                                   10, 13, 16, 20, 25, 30, 40, 50, 65, 80, 100, 130, 160, 200,
+                                   250, 300, 400, 500, 650, 800, 1000, 2000, 5000, 10000, 20000,
+                                   50000, 100000]
+                    }
+                },
+                'bucketCounts': ['0'] * 36 + ['1', '10', '37', '203', '401', '25']
+            }
+        }
+    }
+
+    result = extract_value(point, DISTRIBUTION_VALUE_KEY, metric)
+    assert result is not None
+    # Should contain min, max, count, sum
+    assert "count=677" in result
+    # min should be bounds[35]=2000 (lower bound of first non-empty bucket 36)
+    assert result.startswith("min=2000")
+    # max should be bounds[40]=100000 (last finite bound, since max_bucket is overflow)
+    assert "max=100000" in result
+
+
+def test_extract_value_explicit_buckets_no_overflow():
+    """extract_value should work when the last non-empty bucket is within bounds."""
+    from unittest.mock import MagicMock
+
+    metric = MagicMock()
+    metric.unit = ""
+
+    # 5 bounds → 6 buckets; items in buckets 1-4 (no overflow)
+    point = {
+        'interval': {'startTime': '2026-02-10T10:00:00Z', 'endTime': '2026-02-10T10:01:00Z'},
+        'value': {
+            'distributionValue': {
+                'count': '10',
+                'mean': 50.0,
+                'bucketOptions': {
+                    'explicitBuckets': {'bounds': [10, 20, 50, 100, 200]}
+                },
+                'bucketCounts': ['0', '2', '3', '3', '2', '0']
+            }
+        }
+    }
+
+    result = extract_value(point, DISTRIBUTION_VALUE_KEY, metric)
+    assert result is not None
+    assert "count=10" in result

@@ -15,8 +15,8 @@
 import asyncio
 import hashlib
 import time
-from datetime import datetime
-from typing import Dict, List, Optional, Set, Iterable
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Set, Iterable, Tuple
 from aiohttp import ClientSession
 
 
@@ -37,19 +37,62 @@ from lib.sfm.api_call_latency import ApiCallLatency
 from lib.utilities import read_filter_out_list_yaml, read_labels_grouping_by_service_yaml, NO_GROUPING_CATEGORY
 
 
+# Module-level state for execution time snapping across polling cycles.
+# In Cloud Functions (single-shot), this stays None => falls back to wall clock.
+_last_execution_time: Optional[datetime] = None
+
+_CATCH_UP_THRESHOLD = timedelta(minutes=1)
+_HARD_RESET_THRESHOLD = timedelta(minutes=30)
+
+
+def _snap_execution_time(now: datetime, interval_seconds: int) -> Tuple[datetime, int, str]:
+    global _last_execution_time
+    truncated_now = now.replace(microsecond=0)
+    interval = timedelta(seconds=interval_seconds)
+
+    if _last_execution_time is None:
+        _last_execution_time = truncated_now
+        return truncated_now, interval_seconds, "init"
+
+    expected = _last_execution_time + interval
+    drift = now - expected
+    drift_s = drift.total_seconds()
+
+    if abs(drift) <= _CATCH_UP_THRESHOLD:
+        # Normal: drift is within 1 minute, use the expected time exactly
+        _last_execution_time = expected
+        return expected, interval_seconds, f"snapped (drift={drift_s:+.1f}s)"
+    elif timedelta(0) < drift <= _HARD_RESET_THRESHOLD:
+        # Behind by 1-30 min: use expected time but widen interval by 60s to catch up
+        _last_execution_time = expected
+        return expected, interval_seconds + 60, f"catch-up (drift={drift_s:+.1f}s, interval widened by 60s)"
+    else:
+        # Way too far behind (>30 min) or ahead: hard reset to wall clock
+        _last_execution_time = truncated_now
+        return truncated_now, interval_seconds, f"hard-reset (drift={drift_s:+.1f}s)"
+
+
 async def async_dynatrace_gcp_extension(services: Optional[List[GCPService]] = None):
     """
     Starting point for metrics monitoring main loop.
     """
-    timestamp_utc = datetime.utcnow()
+    now = datetime.utcnow()
+    interval_seconds = get_query_interval_minutes() * 60
+    timestamp_utc, effective_interval_seconds, snap_action = _snap_execution_time(now, interval_seconds)
+
     timestamp_utc_iso = timestamp_utc.isoformat()
     execution_identifier = hashlib.md5(timestamp_utc_iso.encode("UTF-8")).hexdigest()
     logging_context = LoggingContext(execution_identifier)
     logging_context.log(f"GCP Monitor - Release version: {config.release_tag()}")
-    logging_context.log("Starting execution")
+    logging_context.log(
+        f"Starting execution | "
+        f"wall_clock={now.strftime('%H:%M:%S.%f')[:-3]}Z | "
+        f"execution_time={timestamp_utc.strftime('%H:%M:%S')}Z | "
+        f"snap={snap_action}"
+    )
 
     start_time = time.time()
-    await query_metrics(execution_identifier, services, timestamp_utc)
+    await query_metrics(execution_identifier, services, timestamp_utc, effective_interval_seconds)
     elapsed_time = time.time() - start_time
     logging_context.log(f"Execution took {elapsed_time}")
 
@@ -60,6 +103,7 @@ async def get_metric_context(
     token: str,
     logging_context: LoggingContext,
     timestamp_utc: Optional[datetime] = None,
+    effective_interval_seconds: Optional[int] = None,
 ) -> MetricsContext:
     project_id_owner = config.project_id()
 
@@ -79,6 +123,7 @@ async def get_metric_context(
     )
 
     query_interval_min = get_query_interval_minutes()
+    interval_seconds = effective_interval_seconds if effective_interval_seconds is not None else 60 * query_interval_min
 
     context = MetricsContext(
         gcp_session=gcp_session,
@@ -86,7 +131,7 @@ async def get_metric_context(
         project_id_owner=project_id_owner,
         token=token,
         execution_time=timestamp_utc or datetime.utcnow(),
-        execution_interval_seconds=60 * query_interval_min,
+        execution_interval_seconds=interval_seconds,
         dynatrace_api_key=dynatrace_api_key,
         dynatrace_url=dynatrace_url,
         print_metric_ingest_input=config.print_metric_ingest_input(),
@@ -97,7 +142,7 @@ async def get_metric_context(
     return context
 
 
-async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None, timestamp_utc: Optional[datetime] = None):
+async def query_metrics(execution_id: Optional[str], services: Optional[List[GCPService]] = None, timestamp_utc: Optional[datetime] = None, effective_interval_seconds: Optional[int] = None):
     logging_context = LoggingContext(execution_id)
 
     async with init_gcp_client_session() as gcp_session, init_dt_client_session() as dt_session:
@@ -113,7 +158,8 @@ async def query_metrics(execution_id: Optional[str], services: Optional[List[GCP
         logging_context.log("Successfully obtained access token")
 
         context = await get_metric_context(
-            gcp_session, dt_session, token, logging_context, timestamp_utc=timestamp_utc
+            gcp_session, dt_session, token, logging_context,
+            timestamp_utc=timestamp_utc, effective_interval_seconds=effective_interval_seconds
         )
 
         projects_ids = await get_all_accessible_projects(context, gcp_session, token)
@@ -212,11 +258,14 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     # Log the polling time window for debugging
     base_end_time = context.execution_time
     base_start_time = base_end_time - context.execution_interval
+    interval_s = int(context.execution_interval.total_seconds())
+    default_interval_s = get_query_interval_minutes() * 60
+    interval_info = f"{interval_s}s" if interval_s == default_interval_s else f"{interval_s}s (catch-up from {default_interval_s}s)"
     context.log(project_id, 
         f"=== METRIC POLLING CYCLE === "
         f"execution_time={base_end_time.strftime('%Y-%m-%d %H:%M:%S')}Z | "
         f"query_window=[<={base_start_time.strftime('%H:%M:%S')}Z -> <={base_end_time.strftime('%H:%M:%S')}Z] | "
-        f"interval={int(context.execution_interval.total_seconds())}s"
+        f"interval={interval_info}"
     )
 
     def should_exclude_metric(metric: Metric):
@@ -302,7 +351,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
     fetch_metric_results = await asyncio.gather(*fetch_metric_coros, return_exceptions=True)
     entity_id_map = build_entity_id_map(list(topology.values()))
-    flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map, project_id)
+    flat_metric_results = flatten_and_enrich_metric_results(context, fetch_metric_results, entity_id_map)
 
     flat_metric_results.extend(metrics_metadata)
     return flat_metric_results

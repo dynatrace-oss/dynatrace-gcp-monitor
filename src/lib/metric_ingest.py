@@ -543,9 +543,11 @@ def extract_value(point, typed_value_key: str, metric: Metric):
                 max = offset + (width * max_bucket)
         elif 'explicitBuckets' in bucket_options:
             bounds = bucket_options['explicitBuckets']['bounds']
-            if min_bucket != 0:
-                min = bounds[min_bucket]
-                max = bounds[max_bucket]
+            if min_bucket != 0 and bounds:
+                # lower bound of the first non-empty bucket
+                min = bounds[min_bucket - 1] if min_bucket - 1 < len(bounds) else bounds[-1]
+                # upper bound of the last bucket (overflow bucket has no finite upper bound)
+                max = bounds[max_bucket] if max_bucket < len(bounds) else bounds[-1]
 
         return _gauge_line(min, max, count, sum, metric.unit)
     else:
