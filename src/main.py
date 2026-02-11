@@ -37,7 +37,7 @@ from lib.sfm.api_call_latency import ApiCallLatency
 from lib.utilities import read_filter_out_list_yaml, read_labels_grouping_by_service_yaml, NO_GROUPING_CATEGORY
 
 
-# In Cloud Functions/Cloud Run, this is reset on cold start but may persist across warm invocations.
+# In Cloud Functions/Cloud Run this is reset on cold start but may persist across warm invocations.
 _last_execution_time: Optional[datetime] = None
 
 _CATCH_UP_THRESHOLD = timedelta(minutes=1)
