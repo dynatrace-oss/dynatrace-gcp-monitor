@@ -57,11 +57,14 @@ def test_metrics_from_different_project_on_dynatrace():
     # Cloud Run revision already existing in project dynatrace-gcp-extension-2,
     # with a scheduler job querying it every 5 minutes.
     # request_count metric should return at least 1
-    print(f"Try to receive request_count metric of Cloud Run revision from Dynatrace (start_time={os.environ['START_LOAD_GENERATION']} ,end_time={os.environ['END_LOAD_GENERATION']})")
+    # Cross-project metrics need extra time for scoping discovery and ingestion into Dynatrace
+    print(f"Try to receive request_count metric of Cloud Run revision from Dynatrace in 5 min (start_time={os.environ['START_LOAD_GENERATION']} ,end_time={os.environ['END_LOAD_GENERATION']})")
+    time.sleep(5*60)
 
+    end_time = int(time.time() * 1000)
     url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/metrics/query"
     params = {'from': os.environ['START_LOAD_GENERATION'],
-              'to': os.environ['END_LOAD_GENERATION'],
+              'to': str(end_time),
               'metricSelector': f"cloud.gcp.run_googleapis_com.request_count:filter(eq(gcp.instance.name, {os.environ['CLOUD_RUN_REVISION_NAME']}),eq(gcp.project.id, {os.environ['GCP_PROJECT_2_ID']}))",
               'resolution': 'Inf'
               }
