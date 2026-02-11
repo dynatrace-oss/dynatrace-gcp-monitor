@@ -244,8 +244,9 @@ async def fetch_metric(
 
             resource_labels = single_time_series.get('resource', {}).get('labels', {})
             resource_project = resource_labels.get('project_id', '')
-            if resource_project and resource_project != project_id:
+            if not config.scoping_project_support_enabled() and resource_project and resource_project != project_id:
                 # Skip time series from different projects to avoid duplicates when multiple projects are included
+                # When scoping is enabled, cross-project data from the scoping project API is the intended mechanism
                 continue
 
             typed_value_key = _extract_typed_value_key(single_time_series)
