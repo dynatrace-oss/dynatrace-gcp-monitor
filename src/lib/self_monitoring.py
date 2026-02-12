@@ -62,7 +62,7 @@ async def push_single_self_monitoring_time_series(context: SfmContext, is_retry:
     status = self_monitoring_response.status
     if status == 500 and not is_retry:
         context.log(
-            "GCP Monitor responded with 500 Internal Error, it may occur when metric descriptor is updated. Retrying after 5 seconds")
+            f"SFM push failed with 500, retrying in 5.0s (attempt 1/2)")
         await asyncio.sleep(5)
         await push_single_self_monitoring_time_series(context, True, time_series)
     elif status != 200:
@@ -103,7 +103,7 @@ async def replace_metric_descriptor_if_required(
     existing_label_keys = extract_label_keys(existing_metric_descriptor)
     descriptor_label_keys = extract_label_keys(metric_descriptor)
     if existing_label_keys != descriptor_label_keys or existing_metric_descriptor.get(
-        "displayName", "" ) != metric_descriptor.get("metric_descriptor", ""):
+        "displayName", "" ) != metric_descriptor.get("displayName", ""):
         await delete_metric_descriptor(context, metric_type)
         await create_metric_descriptor(context, metric_descriptor, metric_type)
 

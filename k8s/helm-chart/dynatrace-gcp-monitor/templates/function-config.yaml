@@ -64,6 +64,9 @@ data:
   NUMBER_OF_CONCURRENT_LOG_FORWARDING_LOOPS: {{ .Values.numberOfConcurrentLogForwardingLoops | quote }}
   NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES: {{ .Values.numberOfConcurrentMessagePullCoroutines | quote }}
   NUMBER_OF_CONCURRENT_PUSH_COROUTINES: {{ .Values.numberOfConcurrentPushCoroutines | quote }}
+  {{- if .Values.numberOfConcurrentAckCoroutines }}
+  NUMBER_OF_CONCURRENT_ACK_COROUTINES: {{ .Values.numberOfConcurrentAckCoroutines | quote }}
+  {{- end }}
   PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES: {{ .Values.processingWorkerPullRequestMaxMessages | quote }}
   CLOUD_LOG_FORWARDER: projects/{{ .Values.gcpProjectId }}/clusters/{{ .Values.clusterName }}/namespaces/{{ .Release.Namespace }}
   {{- end }}

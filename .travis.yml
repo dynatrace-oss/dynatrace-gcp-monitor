@@ -22,6 +22,8 @@ stages:
   - tests
   - build
   - e2e-helm-deployment-test
+  - github-preview-deploy
+  - preview-docker-deploy
   - github-deploy
   - docker-deploy
 env:
@@ -110,6 +112,16 @@ jobs:
       - ./build/version.sh
       - ./build/docker-deploy.sh
     env: PUSH=true
+  - stage: preview-docker-deploy
+    name: Docker Hub preview deploy
+    if: tag =~ /^preview-.*
+    language: generic
+    script:
+      - ./build/version.sh
+      - ./build/docker-deploy.sh
+    env:
+      - PUSH=true
+      - SKIP_LATEST=true
   - stage: github-deploy
     name: GitHub deploy
     sudo: required
@@ -130,10 +142,30 @@ jobs:
       file: "./artefacts/*"
       on:
         tags: true
+  - stage: github-preview-deploy
+    name: GitHub preview deploy (prerelease)
+    if: tag =~ /^preview-.*
+    language: generic
+    cache:
+      directories:
+        - "$HOME/.wgetcache"
+    before_deploy:
+      - ./build/version.sh
+      - ./build/get_ext_tools.sh
+      - ./build/helm-package.sh
+    deploy:
+      provider: releases
+      edge: true
+      prerelease: true
+      file_glob: true
+      api_key: $GITHUB_RELEASE_API_KEY
+      file: "./artefacts/*"
+      on:
+        tags: true
   - stage: e2e-helm-deployment-test
     name: E2E GCP helm deployment test
     sudo: required
-    if: (tag =~ /^release-.*/) OR (branch = master) OR (type = pull_request)
+    if: (tag =~ /^release-.*/) OR (tag =~ /^preview-.*/) OR (branch = master) OR (type = pull_request)
     language: python
     python:
       - "3.12"
