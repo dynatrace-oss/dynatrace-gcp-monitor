@@ -2,6 +2,9 @@
 autodiscoveryQueryInterval: 60
 # Enable automatic discovery of experimental alpha GCP metrics if set to true.
 autodiscoveryIncludeAlphaMetrics: true
+# If true, only fetch metric descriptors that have recent data (within ~25 hours).
+# Reduces API response size and avoids discovering stale/unused metrics.
+# autodiscoveryFetchActiveMetricsOnly: false
 # This list comprises resources that will be scanned within GCP 
 # projects for the purpose of metrics autodiscovery.
 autodiscoveryResourcesYaml: |

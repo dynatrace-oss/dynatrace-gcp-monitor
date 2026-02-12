@@ -232,6 +232,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: GCP_PROJECT
+        - name: LOGS_SUBSCRIPTION_PROJECT
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: LOGS_SUBSCRIPTION_PROJECT
         - name: LOGS_SUBSCRIPTION_ID
           valueFrom:
             configMapKeyRef:

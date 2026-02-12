@@ -58,6 +58,7 @@ def test_metrics_from_different_project_on_dynatrace():
     # with a scheduler job querying it every 5 minutes.
     # request_count metric should return at least 1
     print(f"Try to receive request_count metric of Cloud Run revision from Dynatrace (start_time={os.environ['START_LOAD_GENERATION']} ,end_time={os.environ['END_LOAD_GENERATION']})")
+    time.sleep(5*60)
 
     url = f"{os.environ['DYNATRACE_URL'].rstrip('/')}/api/v2/metrics/query"
     params = {'from': os.environ['START_LOAD_GENERATION'],

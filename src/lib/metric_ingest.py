@@ -308,7 +308,8 @@ def _sanitize_dimension_value(raw_value: str) -> str:
     # Keep the MINT line protocol single-line and escape embedded quotes inside dimension values.
     # The value is still sent as a quoted string (see `IngestLine.dimensions_string()`).
     sanitized = raw_value.replace("\r", " ").replace("\n", " ").replace("\t", " ")
-    return sanitized.replace('"', '\\"')
+    # Escape backslashes first (before quotes), so existing \ becomes \\ and " becomes \"
+    return sanitized.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def _truncate_escaped_dimension_value(escaped_value: str, max_length: int) -> str:
@@ -535,9 +536,11 @@ def extract_value(point, typed_value_key: str, metric: Metric):
                 max = offset + (width * max_bucket)
         elif 'explicitBuckets' in bucket_options:
             bounds = bucket_options['explicitBuckets']['bounds']
-            if min_bucket != 0:
-                min = bounds[min_bucket]
-                max = bounds[max_bucket]
+            if min_bucket != 0 and bounds:
+                # lower bound of the first non-empty bucket
+                min = bounds[min_bucket - 1] if min_bucket - 1 < len(bounds) else bounds[-1]
+                # upper bound of the last bucket (overflow bucket has no finite upper bound)
+                max = bounds[max_bucket] if max_bucket < len(bounds) else bounds[-1]
 
         return _gauge_line(min, max, count, sum, metric.unit)
     else:

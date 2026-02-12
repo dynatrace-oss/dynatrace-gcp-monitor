@@ -55,6 +55,9 @@ dtSecurityContext: ""
 
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
 
+# project id of log sink pubsub subscription
+# defaults to gcpProjectId if not set
+logsSubscriptionProject: ""
 # subscription id of log sink pubsub subscription
 logsSubscriptionId: ""
 # dynatraceLogIngestUrl OPTIONAL endpoint used to ingest logs to Dynatrace, if it's not wanted to ingest them through dynatraceUrl:

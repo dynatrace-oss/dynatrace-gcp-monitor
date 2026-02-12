@@ -142,3 +142,33 @@ async def test_extensions_cache():
     assert fetching_call.call_args_list[0].args == (ext_1_name, ext_1_ver1)
     assert fetching_call.call_args_list[1].args == (ext_1_name, ext_1_ver2)
     assert fetching_call.call_args_list[2].args == (ext_2_name, ext_1_ver1)
+
+
+@pytest.mark.asyncio
+async def test_extension_without_gcp_section_is_skipped(monkeypatch: MonkeyPatchFixture):
+    """Test that extensions without a 'gcp' section are skipped without crashing."""
+    monkeypatch.setenv("ACTIVATION_CONFIG", ACTIVATION_CONFIG)
+
+    logging_context = LoggingContext("TEST")
+    extensions_fetcher = ExtensionsFetcher(None, None, None, logging_context)
+
+    # Mock to return extension configuration without 'gcp' section
+    extensions_fetcher.get_extension_configuration_from_cache_or_download = unittest.mock.AsyncMock(
+        return_value={"name": "com.dynatrace.extension.google-big-query", "version": "1.0.0"}
+    )
+
+    # Mock log method to verify warning is emitted
+    logging_context.log = unittest.mock.MagicMock()
+
+    services, not_configured = await extensions_fetcher._get_service_configs_for_extension(
+        "com.dynatrace.extension.google-big-query",
+        "1.0.0",
+        {},
+        set(),
+        {}
+    )
+
+    assert services == []
+    assert not_configured == []
+    logging_context.log.assert_called_once()
+    assert "has no 'gcp' section" in logging_context.log.call_args[0][0]
