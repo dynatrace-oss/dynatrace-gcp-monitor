@@ -56,7 +56,7 @@ def test_flatten_and_enrich_metric_results_all_additional_dimensions():
                                          favicon_url="", dtype="", properties=[CdProperty("Example property", "example_value")],
                                          tags=[], dns_names=["other.dns.name", "dns.name"])]])
 
-    lines = flatten_and_enrich_metric_results(context=context_mock, fetch_metric_results=metric_results, entity_id_map=entity_id_map)
+    lines = flatten_and_enrich_metric_results(context=context_mock, fetch_metric_results=metric_results, entity_id_map=entity_id_map, project_id="test-project")
 
     assert len(lines) == 1
     ingest_line = lines[0]

@@ -68,8 +68,12 @@ async def get_disabled_projects_and_disabled_apis_by_project_id(context, project
     for project_id in projects_ids:
         tasks_to_check_if_project_is_disabled.append(
             _check_if_project_is_disabled_and_get_disabled_api_set(context, project_id))
-    results = await asyncio.gather(*tasks_to_check_if_project_is_disabled)
-    for project_id, is_project_disabled, disabled_api_set in results:
+    results = await asyncio.gather(*tasks_to_check_if_project_is_disabled, return_exceptions=True)
+    for result in results:
+        if isinstance(result, Exception):
+            context.log(f"Failed to check project status: {type(result).__name__}: {result}")
+            continue
+        project_id, is_project_disabled, disabled_api_set = result
         if is_project_disabled:
             disabled_projects.add(project_id)
         else:

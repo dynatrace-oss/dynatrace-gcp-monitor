@@ -18,15 +18,97 @@ from typing import Dict, List
 
 from lib.context import SfmContext, MetricsContext
 from lib.sfm.for_metrics.metric_descriptor import SELF_MONITORING_METRIC_PREFIX
-from lib.sfm.for_metrics.metrics_definitions import SfmMetric
-from lib.utilities import chunks
+from lib.sfm.for_metrics.metrics_definitions import SfmMetric, SfmKeys
+from lib.utilities import chunks, percentile
+
+
+def _format_percentiles(values: dict) -> str:
+    """Format dict values as p50/p90/p99/max string."""
+    if not values:
+        return "N/A"
+    sorted_vals = sorted(values.values())
+    p50 = percentile(sorted_vals, 50)
+    p90 = percentile(sorted_vals, 90)
+    p99 = percentile(sorted_vals, 99)
+    max_val = max(sorted_vals)
+    return f"p50={p50:.2f}s, p90={p90:.2f}s, p99={p99:.2f}s, max={max_val:.2f}s"
 
 
 def log_self_monitoring_metrics(context: MetricsContext):
-    sfm_entries: List[str] = []
-    for key, sfm_metric in context.sfm.items():
-        sfm_entries.append(f"[{sfm_metric.description}: {sfm_metric.value}]")
-    context.log("SFM", "Metrics SFM: " + ", ".join(sfm_entries))
+    """Log SFM metrics in a readable format, one metric per line."""
+    sfm = context.sfm
+
+    # Dynatrace connectivity
+    context.log("SFM", f"Dynatrace connectivity: {sfm[SfmKeys.dynatrace_connectivity].value.name}")
+
+    # GCP API stats
+    gcp_requests = sfm[SfmKeys.gcp_metric_request_count].value
+    total_requests = sum(gcp_requests.values()) if gcp_requests else 0
+    context.log("SFM", f"GCP Monitoring API requests: {total_requests}")
+
+    empty_responses = sfm[SfmKeys.gcp_metric_empty_response_count].value
+    total_empty = sum(empty_responses.values()) if empty_responses else 0
+    context.log("SFM", f"GCP Monitoring API empty responses: {total_empty}")
+
+    # GCP API response codes (separate connection failures from HTTP responses)
+    gcp_responses = sfm[SfmKeys.gcp_api_response_count].value
+    if gcp_responses:
+        # -1 means connection/transport failure (DNS, timeout, etc.)
+        connection_failures = gcp_responses.get(-1, 0)
+        http_responses = {code: count for code, count in gcp_responses.items() if code != -1}
+
+        if http_responses:
+            http_summary = ", ".join(f"{code}:{count}" for code, count in sorted(http_responses.items()))
+            context.log("SFM", f"GCP Monitoring API responses: {http_summary}")
+
+        if connection_failures > 0:
+            context.log("SFM", f"GCP Monitoring API connection failures: {connection_failures}")
+
+    # Dynatrace ingest stats
+    lines_ok = sfm[SfmKeys.dynatrace_ingest_lines_ok_count].value
+    total_ok = sum(lines_ok.values()) if lines_ok else 0
+    context.log("SFM", f"Dynatrace MINT lines accepted: {total_ok}")
+
+    lines_invalid = sfm[SfmKeys.dynatrace_ingest_lines_invalid_count].value
+    total_invalid = sum(lines_invalid.values()) if lines_invalid else 0
+    if total_invalid > 0:
+        context.log("SFM", f"Dynatrace MINT lines invalid: {total_invalid}")
+
+    lines_dropped = sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].value
+    total_dropped = sum(lines_dropped.values()) if lines_dropped else 0
+    if total_dropped > 0:
+        context.log("SFM", f"Dynatrace MINT lines dropped (429): {total_dropped}")
+
+    # Dimension truncation visibility
+    name_trunc = sfm[SfmKeys.dimension_name_truncated_count].value
+    value_trunc = sfm[SfmKeys.dimension_value_truncated_count].value
+    total_name_trunc = sum(name_trunc.values()) if name_trunc else 0
+    total_value_trunc = sum(value_trunc.values()) if value_trunc else 0
+    if total_name_trunc or total_value_trunc:
+        context.log("SFM", f"Truncated dimensions: names={total_name_trunc}, values={total_value_trunc}")
+
+    # Timing stats with percentiles
+    fetch_times = sfm[SfmKeys.fetch_gcp_data_execution_time].value
+    if fetch_times:
+        context.log("SFM", f"Fetch GCP data time: {_format_percentiles(fetch_times)}")
+
+    push_times = sfm[SfmKeys.push_to_dynatrace_execution_time].value
+    if push_times:
+        context.log("SFM", f"Push to Dynatrace time: {_format_percentiles(push_times)}")
+
+    # Dynatrace API stats (separate connection failures from HTTP responses)
+    dt_requests = sfm[SfmKeys.dynatrace_request_count].value
+    if dt_requests:
+        # -1 means connection/transport failure
+        dt_conn_failures = dt_requests.get(-1, 0)
+        dt_http_responses = {code: count for code, count in dt_requests.items() if code != -1}
+
+        if dt_http_responses:
+            dt_summary = ", ".join(f"{code}:{count}" for code, count in sorted(dt_http_responses.items()))
+            context.log("SFM", f"Dynatrace API responses: {dt_summary}")
+
+        if dt_conn_failures > 0:
+            context.log("SFM", f"Dynatrace API connection failures: {dt_conn_failures}")
 
 
 async def sfm_push_metrics(sfm_metrics: List[SfmMetric], context: SfmContext, metrics_endtime: datetime):

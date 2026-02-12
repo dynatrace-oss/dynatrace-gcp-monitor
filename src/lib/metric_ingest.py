@@ -11,6 +11,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import asyncio
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
@@ -41,15 +42,15 @@ GCP_MONITORING_URL = config.gcp_monitoring_url()
 DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
 
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
-    if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
-        context.log(project_id, f"Skipping push due to detected connectivity error")
-        return
-
-    if not fetch_metric_results:
-        context.log(project_id, "Skipping push due to no data to push")
-
     start_time = time.time()
     try:
+        if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
+            context.log(project_id, f"Skipping push due to detected connectivity error")
+            return
+
+        if not fetch_metric_results:
+            context.log(project_id, "Skipping push due to no data to push")
+
         lines_batch = []
         for result in fetch_metric_results:
             lines_batch.append(result)
@@ -74,34 +75,108 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
         context.log("Ingest input is: ")
         context.log(ingest_input)
     dt_url = f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
-    ingest_response = await context.dt_session.post(
-        url=dt_url,
-        headers={
-            "Authorization": f"Api-Token {context.dynatrace_api_key}",
-            "Content-Type": "text/plain; charset=utf-8"
-        },
-        data=ingest_input,
-        verify_ssl=context.require_valid_certificate
-    )
 
-    if ingest_response.status == 401:
-        context.update_dt_connectivity_status(DynatraceConnectivity.ExpiredToken)
-        raise Exception("Expired token")
-    elif ingest_response.status == 403:
-        context.update_dt_connectivity_status(DynatraceConnectivity.WrongToken)
-        raise Exception("Wrong token - missing 'Ingest metrics using API V2' permission")
-    elif ingest_response.status == 404 or ingest_response.status == 405:
-        context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)
-        raise Exception(f"Wrong URL {dt_url}")
-    elif ingest_response.status == 429:
+    # Retry config for transient errors
+    max_retries = 2
+    retryable_status_codes = {429, 500, 502, 503, 504}
+    retry_delay = 1.0
+    ingest_response = None
+    final_status = -1
+
+    for attempt in range(max_retries + 1):
+        try:
+            ingest_response = await context.dt_session.post(
+                url=dt_url,
+                headers={
+                    "Authorization": f"Api-Token {context.dynatrace_api_key}",
+                    "Content-Type": "text/plain; charset=utf-8"
+                },
+                data=ingest_input,
+                verify_ssl=context.require_valid_certificate
+            )
+        except Exception as e:
+            if attempt < max_retries:
+                context.log(project_id, f"Dynatrace connection error ({type(e).__name__}), retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})")
+                await asyncio.sleep(retry_delay)
+                retry_delay *= 2
+                continue
+            else:
+                # Final failure after all retries
+                final_status = -1  # transport/connection failure
+                context.sfm[SfmKeys.dynatrace_request_count].increment(final_status)
+                context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+                context.log(project_id, f"Dynatrace connection error ({type(e).__name__}): {e} - {len(lines_batch)} lines dropped")
+                raise
+
+        final_status = ingest_response.status
+
+        # Non-retryable errors - fail immediately
+        if ingest_response.status == 401:
+            context.sfm[SfmKeys.dynatrace_request_count].increment(final_status)
+            context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+            context.update_dt_connectivity_status(DynatraceConnectivity.ExpiredToken)
+            raise Exception("Expired token")
+        elif ingest_response.status == 403:
+            context.sfm[SfmKeys.dynatrace_request_count].increment(final_status)
+            context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+            context.update_dt_connectivity_status(DynatraceConnectivity.WrongToken)
+            raise Exception("Wrong token - missing 'Ingest metrics using API V2' permission")
+        elif ingest_response.status == 404 or ingest_response.status == 405:
+            context.sfm[SfmKeys.dynatrace_request_count].increment(final_status)
+            context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+            context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)
+            raise Exception(f"Wrong URL {dt_url}")
+
+        # Success - break out of retry loop
+        if ingest_response.status == 202:
+            break
+
+        # Retryable errors - retry if attempts remaining
+        if ingest_response.status in retryable_status_codes and attempt < max_retries:
+            context.log(project_id, f"Dynatrace returned {ingest_response.status}, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})")
+            await asyncio.sleep(retry_delay)
+            retry_delay *= 2
+            continue
+
+        # Final failure for retryable errors after all retries
+        break
+
+    # Track final response status after all retries
+    context.sfm[SfmKeys.dynatrace_request_count].increment(final_status)
+
+    if final_status == 429:
         context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+        context.log(project_id, f"Dynatrace rate limit (429) - {len(lines_batch)} lines dropped after {max_retries} retries")
+        # Consume body to release connection back to pool before returning
+        if ingest_response:
+            try:
+                await ingest_response.read()
+            except Exception:
+                pass
+        return
+    elif final_status >= 500:
+        context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+        context.log(project_id, f"Dynatrace server error ({final_status}) - {len(lines_batch)} lines dropped after {max_retries} retries")
+        if ingest_response:
+            try:
+                await ingest_response.read()
+            except Exception:
+                pass
+        return
 
-    ingest_response_json = await ingest_response.json()
+    try:
+        ingest_response_json = await ingest_response.json()
+    except Exception as e:
+        context.log(project_id, f"Failed to parse Dynatrace response (status {final_status}): {type(e).__name__}: {e}")
+        ingest_response_json = None
+
+    if not ingest_response_json:
+        context.log(project_id, f"Dynatrace returned empty/invalid response (status {final_status})")
+        return
 
     lines_ok = ingest_response_json.get("linesOk", 0)
     lines_invalid = ingest_response_json.get("linesInvalid", 0)
 
-    context.sfm[SfmKeys.dynatrace_request_count].increment(ingest_response.status)
     context.sfm[SfmKeys.dynatrace_ingest_lines_ok_count].update(project_id, lines_ok)
     context.sfm[SfmKeys.dynatrace_ingest_lines_invalid_count].update(project_id, lines_invalid)
 
@@ -120,7 +195,13 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
         ]
         ingest_response_json["warnings"]["warningLines"] = filtered_warnings
 
-    context.log(project_id, f"Ingest response: {ingest_response_json}")
+    # Only log ingest response when there are issues (invalid lines, errors, or warnings)
+    has_invalid = lines_invalid > 0
+    has_error = ingest_response_json.get("error") is not None
+    warnings_obj = ingest_response_json.get("warnings")
+    has_warnings = bool(warnings_obj.get("warningLines", []) if warnings_obj else False)
+    if has_invalid or has_error or has_warnings:
+        context.log(project_id, f"Ingest response: {ingest_response_json}")
     await log_invalid_lines(context, ingest_response_json, lines_batch)
 
 
@@ -226,23 +307,97 @@ async def fetch_metric(
     headers = context.create_gcp_request_headers(project_id)
 
     should_fetch = True
+    page_count = 0
+
+    # Retry config for transient GCP errors
+    max_retries = 2
+    retryable_status_codes = {429, 500, 502, 503, 504}
 
     lines = []
     while should_fetch:
         context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
         url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
-        resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
+        retry_delay = 1.0
+        resp = None
+        connection_failed = False
+        final_status = -1  # Track final status after all retries (-1 for transport errors)
+
+        for attempt in range(max_retries + 1):
+            api_start = time.time()
+            try:
+                resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
+            except Exception as e:
+                api_latency = time.time() - api_start
+                context.sfm[SfmKeys.gcp_api_latency].record(project_id, api_latency)
+                if attempt < max_retries:
+                    context.log(project_id, f"GCP API connection error for {metric.google_metric}: {type(e).__name__}, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})")
+                    await asyncio.sleep(retry_delay)
+                    retry_delay *= 2
+                    continue
+                else:
+                    # Final failure after all retries - now track as status -1 (transport/connection)
+                    context.sfm[SfmKeys.gcp_api_response_count].increment(-1)
+                    context.sfm[SfmKeys.gcp_api_error_count].increment(project_id, -1)
+                    context.log(project_id, f"GCP API connection error for {metric.google_metric}: {type(e).__name__} - {e}")
+                    connection_failed = True
+                    break
+
+            api_latency = time.time() - api_start
+            context.sfm[SfmKeys.gcp_api_latency].record(project_id, api_latency)
+            final_status = resp.status
+
+            if resp.status == 200:
+                break
+
+            # Check if retryable and attempts remaining
+            if resp.status in retryable_status_codes and attempt < max_retries:
+                context.log(project_id, f"GCP API returned {resp.status} for {metric.google_metric}, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries})")
+                # Consume and release connection before retry
+                try:
+                    await resp.read()
+                except Exception:
+                    pass
+                await asyncio.sleep(retry_delay)
+                retry_delay *= 2  # exponential backoff
+                continue
+
+            # Final failure - log error
+            if resp.status == 429:
+                context.log(project_id, f"GCP API rate limit (429) hit for {metric.google_metric} - request throttled after {max_retries} retries")
+            else:
+                context.log(project_id, f"GCP API returned status {resp.status} for {metric.google_metric}")
+            # Consume and release connection on final failure
+            try:
+                await resp.read()
+            except Exception:
+                pass
+            break
+
+        if connection_failed:
+            break
+
+        # Track final response status after all retries (success or final failure)
+        context.sfm[SfmKeys.gcp_api_response_count].increment(final_status)
+        if final_status != 200:
+            context.sfm[SfmKeys.gcp_api_error_count].increment(project_id, final_status)
+            # Don't try to parse response for error status codes - just return what we have
+            break
+
         page = await resp.json()
         # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
         if 'error' in page:
             raise Exception(str(page))
         if 'timeSeries' not in page:
+            # GCP returned no data for this query window - track via SFM metric
+            if page_count == 0:
+                context.sfm[SfmKeys.gcp_metric_empty_response_count].increment(project_id)
             break
 
+        page_count += 1
         for single_time_series in page['timeSeries']:
             typed_value_key = _extract_typed_value_key(single_time_series)
-            dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric)
+            dimensions = create_dimensions(context, project_id, service_name, single_time_series, dt_dimensions_mapping, metric)
             entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
 
             for point in single_time_series['points']:
@@ -324,56 +479,55 @@ def _truncate_escaped_dimension_value(escaped_value: str, max_length: int) -> st
     return truncated
 
 
-def create_dimension(name: str, value: Any, context: LoggingContext = LoggingContext(None)) -> DimensionValue:
+def create_dimension(name: str, value: Any, context: LoggingContext = LoggingContext(None), project_id: str = None) -> DimensionValue:
     string_value = str(value)
     effective_max_value_length = min(
         MAX_DIMENSION_VALUE_LENGTH, config.gcp_allowed_metric_dimension_value_length()
     )
 
     if len(name) > MAX_DIMENSION_NAME_LENGTH:
-        context.log(f'MINT rejects dimension names longer that {MAX_DIMENSION_NAME_LENGTH} chars. Dimension name \"{name}\" "has been truncated')
+        if project_id and hasattr(context, "sfm"):
+            context.sfm[SfmKeys.dimension_name_truncated_count].increment(project_id)
         name = name[:MAX_DIMENSION_NAME_LENGTH]
 
     string_value = _sanitize_dimension_value(string_value)
     if len(string_value) > effective_max_value_length:
-        context.log(
-            f"MINT rejects dimension values longer that {effective_max_value_length} chars. "
-            f'Dimension value "{string_value}" has been truncated'
-        )
+        if project_id and hasattr(context, "sfm"):
+            context.sfm[SfmKeys.dimension_value_truncated_count].increment(project_id)
         string_value = _truncate_escaped_dimension_value(string_value, effective_max_value_length)
 
     return DimensionValue(name, string_value)
 
 
     # "gcp.resource.type" is required to easily differentiate services with the same metric set
-def create_dimensions(context: MetricsContext, service_name: str, time_series: Dict, dt_dimensions_mapping: DtDimensionsMap, metric: Metric) -> List[DimensionValue]:
+def create_dimensions(context: MetricsContext, project_id: str, service_name: str, time_series: Dict, dt_dimensions_mapping: DtDimensionsMap, metric: Metric) -> List[DimensionValue]:
     # e.g. internal_tcp_lb_rule and internal_udp_lb_rule
-    dt_dimensions = [create_dimension("gcp.resource.type", service_name, context)]
+    dt_dimensions = [create_dimension("gcp.resource.type", service_name, context, project_id)]
 
-    dt_dimensions.append(create_dimension("metadata.origin", "autodiscovery" if metric.autodiscovered_metric else "extension"))
-    dt_dimensions.append(create_dimension("dt.security_context", DT_SECURITY_CONTEXT_VALUE))
+    dt_dimensions.append(create_dimension("metadata.origin", "autodiscovery" if metric.autodiscovered_metric else "extension", context, project_id))
+    dt_dimensions.append(create_dimension("dt.security_context", DT_SECURITY_CONTEXT_VALUE, context, project_id))
 
     metric_labels = time_series.get('metric', {}).get('labels', {})
     for short_source_label, dim_value in metric_labels.items():
         mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metric.labels.{short_source_label}", short_source_label)
         for dt_dim_label in mapped_dt_dim_labels:
-            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context, project_id) )
 
     resource_labels = time_series.get('resource', {}).get('labels', {})
     for short_source_label, dim_value in resource_labels.items():
         mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"resource.labels.{short_source_label}", short_source_label)
         for dt_dim_label in mapped_dt_dim_labels:
-            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context, project_id) )
 
     system_labels = time_series.get('metadata', {}).get('systemLabels', {})
     for short_source_label, dim_value in system_labels.items():
         mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metadata.systemLabels.{short_source_label}", short_source_label)
         for dt_dim_label in mapped_dt_dim_labels:
-            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
+            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context, project_id) )
 
     user_labels = time_series.get('metadata', {}).get('userLabels', {})
     for dim_label, dim_value in user_labels.items():
-        dt_dimensions.append(create_dimension(dim_label, dim_value, context))
+        dt_dimensions.append(create_dimension(dim_label, dim_value, context, project_id))
 
     return dt_dimensions
 
@@ -381,12 +535,19 @@ def create_dimensions(context: MetricsContext, service_name: str, time_series: D
 def flatten_and_enrich_metric_results(
         context: MetricsContext,
         fetch_metric_results: List[List[IngestLine]],
-        entity_id_map: Dict[str, Entity]
+        entity_id_map: Dict[str, Entity],
+        project_id: str
 ) -> List[IngestLine]:
     results = []
+    error_count = 0
 
     entity_dimension_prefix = "entity."
     for ingest_lines in fetch_metric_results:
+        # Skip exceptions returned by asyncio.gather(return_exceptions=True)
+        if isinstance(ingest_lines, Exception):
+            error_count += 1
+            context.log(f"Metric fetch failed with {type(ingest_lines).__name__}: {ingest_lines}")
+            continue
         for ingest_line in ingest_lines:
             entity = entity_id_map.get(ingest_line.entity_id, None)
             if entity:
@@ -394,7 +555,8 @@ def flatten_and_enrich_metric_results(
                     dimension_value = create_dimension(
                         name=entity_dimension_prefix + "dns_name",
                         value=entity.dns_names[0],
-                        context=context
+                        context=context,
+                        project_id=project_id
                     )
                     ingest_line.dimension_values.append(dimension_value)
 
@@ -402,7 +564,8 @@ def flatten_and_enrich_metric_results(
                     dimension_value = create_dimension(
                         name=entity_dimension_prefix + "ip_address",
                         value=entity.ip_addresses[0],
-                        context=context
+                        context=context,
+                        project_id=project_id
                     )
                     ingest_line.dimension_values.append(dimension_value)
 
@@ -410,11 +573,15 @@ def flatten_and_enrich_metric_results(
                     dimension_value = create_dimension(
                         name=entity_dimension_prefix + cd_property.key.replace(" ", "_").lower(),
                         value=cd_property.value,
-                        context=context
+                        context=context,
+                        project_id=project_id
                     )
                     ingest_line.dimension_values.append(dimension_value)
 
             results.append(ingest_line)
+
+    if error_count > 0:
+        context.log(f"Skipped {error_count} failed metric fetch tasks (see errors above)")
 
     return results
 
@@ -535,9 +702,13 @@ def extract_value(point, typed_value_key: str, metric: Metric):
                 max = offset + (width * max_bucket)
         elif 'explicitBuckets' in bucket_options:
             bounds = bucket_options['explicitBuckets']['bounds']
+            # Bucket structure: bucket 0 is underflow (-inf, bounds[0]),
+            # bucket i is [bounds[i-1], bounds[i]) for 1 <= i < len(bounds),
+            # bucket len(bounds) is overflow [bounds[-1], +inf)
             if min_bucket != 0:
-                min = bounds[min_bucket]
-                max = bounds[max_bucket]
+                # Handle overflow bucket (index >= len(bounds))
+                min = bounds[min_bucket] if min_bucket < len(bounds) else bounds[-1]
+                max = bounds[max_bucket] if max_bucket < len(bounds) else bounds[-1]
 
         return _gauge_line(min, max, count, sum, metric.unit)
     else:

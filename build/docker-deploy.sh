@@ -20,12 +20,19 @@ docker build -t dynatrace/dynatrace-gcp-monitor:v1-latest --build-arg RELEASE_TA
 
 #tag container
 if [[ "${PUSH:-}" == "true" ]]; then
+    # For preview tags, enforce that v1-latest is NOT pushed
+    if [[ "${TAG:-}" =~ ^preview- ]]; then
+        export SKIP_LATEST=true
+    fi
+
     mkdir -p ~/.docker && chmod 0700 ~/.docker
     touch ~/.docker/config.json && chmod 0600 ~/.docker/config.json
     base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
 
     docker tag dynatrace/dynatrace-gcp-monitor:v1-latest "dynatrace/dynatrace-gcp-monitor:${TAG}"
-    docker push dynatrace/dynatrace-gcp-monitor:v1-latest
+    if [[ "${SKIP_LATEST:-}" != "true" ]]; then
+        docker push dynatrace/dynatrace-gcp-monitor:v1-latest
+    fi
     docker push "dynatrace/dynatrace-gcp-monitor:${TAG}"
 elif [[ "${PUSH:-}" != "true" && "${E2E:-}" == "true" ]]; then
     docker tag dynatrace/dynatrace-gcp-monitor:v1-latest "${ARTIFACT_REGISTRY_NAME}:e2e-travis-test-${TRAVIS_BUILD_ID}"

@@ -265,6 +265,14 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
 
     while True:
         response = await session.get(url, headers=headers, params=params)
+        if response.status != 200:
+            # Consume body to release connection back to the pool
+            try:
+                await response.read()
+            except Exception:
+                pass
+            context.log(f"Failed to fetch projects: HTTP {response.status}, reason: {response.reason}")
+            break
         response_json = await response.json()
         all_projects.extend([project["projectId"] for project in response_json.get("projects", [])])
         page_token = response_json.get("nextPageToken", "")
@@ -275,6 +283,5 @@ async def get_all_accessible_projects(context: LoggingContext, session: ClientSe
     if all_projects:
         context.log("Access to following projects: " + ", ".join(all_projects))
     else:
-        context.log(f"There is no access to any projects. Check service account configuration. "
-                    f"Response from server: {response_json}.")
+        context.log(f"There is no access to any projects. Check service account configuration.")
     return all_projects
