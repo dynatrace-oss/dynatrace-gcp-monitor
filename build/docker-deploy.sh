@@ -14,16 +14,17 @@
 #     limitations under the License.
 set -eu
 
+# Set up Docker auth for both Docker Hub (push) and dhi.io (hardened base image pull)
+mkdir -p ~/.docker && chmod 0700 ~/.docker
+touch ~/.docker/config.json && chmod 0600 ~/.docker/config.json
+base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
+
 #build container
 ./build/version.sh
 docker build -t dynatrace/dynatrace-gcp-monitor:v1-latest --build-arg RELEASE_TAG_ARG="${TAG}" .
 
 #tag container
 if [[ "${PUSH:-}" == "true" ]]; then
-    mkdir -p ~/.docker && chmod 0700 ~/.docker
-    touch ~/.docker/config.json && chmod 0600 ~/.docker/config.json
-    base64 -d >~/.docker/config.json <<<"$OAO_DOCKER_AUTH"
-
     docker tag dynatrace/dynatrace-gcp-monitor:v1-latest "dynatrace/dynatrace-gcp-monitor:${TAG}"
     docker push dynatrace/dynatrace-gcp-monitor:v1-latest
     docker push "dynatrace/dynatrace-gcp-monitor:${TAG}"
