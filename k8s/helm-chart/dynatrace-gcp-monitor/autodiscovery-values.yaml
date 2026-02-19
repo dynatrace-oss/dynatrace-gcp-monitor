@@ -9,7 +9,7 @@ autodiscoveryIncludeAlphaMetrics: true
 # projects for the purpose of metrics autodiscovery.
 autodiscoveryResourcesYaml: |
   # resources from: https://cloud.google.com/monitoring/api/metrics_gcp
-  autodicovery_config:
+  autodiscovery_config:
     searched_resources:
     # - resource_name
 

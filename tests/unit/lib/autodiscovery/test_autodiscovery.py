@@ -246,7 +246,7 @@ async def test_autodiscovery_check_resources_to_discover(
     }
 
     mock_read_autodiscovery_config_yaml.return_value = {
-        "autodicovery_config": {"searched_resources": ["resource_1_1", "resource_3"]}
+        "autodiscovery_config": {"searched_resources": ["resource_1_1", "resource_3"]}
     }
 
     mock_read_autodiscovery_block_list_yaml.return_value = {"block_list": []}
@@ -279,3 +279,26 @@ async def test_autodiscovery_check_resources_to_discover(
     assert len(resources) == 4
     assert "resource1_2" in resources
     assert len(resources["resource1_2"].possible_service_linking) == 2
+
+
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_block_list_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_resources_mapping")
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_config_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_services_to_resources")
+def test_autodiscovery_load_yamls_supports_legacy_typo_key(
+    mock_get_services_to_resources,
+    mock_read_autodiscovery_config_yaml,
+    mock_get_resources_mapping,
+    mock_read_autodiscovery_block_list_yaml,
+):
+    mock_get_services_to_resources.return_value = {}
+    mock_get_resources_mapping.return_value = {}
+    mock_read_autodiscovery_config_yaml.return_value = {
+        "autodicovery_config": {"searched_resources": ["resource_legacy_1"]}
+    }
+    mock_read_autodiscovery_block_list_yaml.return_value = {"block_list": []}
+
+    autodiscovery_context = AutodiscoveryContext()
+
+    assert autodiscovery_context.autodiscovery_enabled is True
+    assert autodiscovery_context.resource_to_disovery == ["resource_legacy_1"]
