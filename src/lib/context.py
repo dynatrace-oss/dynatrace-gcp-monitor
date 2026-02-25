@@ -61,7 +61,7 @@ def get_query_interval_minutes() -> int:
     else:
         # keep old query frequency for logs ingest
         query_interval_min = 1
-    if query_interval_min not in range(1, 7):
+    if query_interval_min not in range(1, 11):
         query_interval_min = default_query_interval
     return query_interval_min
 
