@@ -84,7 +84,7 @@ class TestSnapExecutionTime:
         assert snap_action == "snapped (drift=+60.0s)"
 
     def test_catch_up_when_behind_more_than_1_minute(self):
-        """When >1 min behind (e.g. slow cycle), use expected time but widen interval by 60s."""
+        """When >1 min behind (e.g. slow cycle), advance execution_time by interval+60s and widen interval by 60s."""
         first_now = datetime(2026, 2, 5, 12, 0, 0)
         main._snap_execution_time(first_now, INTERVAL_4MIN)
 
@@ -92,10 +92,11 @@ class TestSnapExecutionTime:
         second_now = datetime(2026, 2, 5, 12, 5, 30)
         snapped, effective_interval, snap_action = main._snap_execution_time(second_now, INTERVAL_4MIN)
 
-        # Should use expected time (12:04:00) but widen interval
-        assert snapped == datetime(2026, 2, 5, 12, 4, 0)
+        # Should advance to expected + 60s (12:05:00) and widen interval
+        assert snapped == datetime(2026, 2, 5, 12, 5, 0)
         assert effective_interval == INTERVAL_4MIN + 60
-        assert snap_action == "catch-up (drift=+90.0s, interval widened by 60s)"
+        assert snap_action == "catch-up (drift=+90.0s, +60s catch-up)"
+        assert main._last_execution_time == datetime(2026, 2, 5, 12, 5, 0)
 
     def test_catch_up_self_corrects_next_cycle(self):
         """After a catch-up, the next normal cycle should return to normal interval."""
@@ -106,13 +107,13 @@ class TestSnapExecutionTime:
         second_now = datetime(2026, 2, 5, 12, 5, 30)
         _, _, catch_up_action = main._snap_execution_time(second_now, INTERVAL_4MIN)
         assert "catch-up" in catch_up_action
-        # _last_execution_time is now 12:04:00
+        # _last_execution_time is now 12:05:00 (expected 12:04:00 + 60s catch-up)
 
-        # Third run: arrives roughly on time relative to last snap (12:04:00 + 4min = 12:08:00)
-        third_now = datetime(2026, 2, 5, 12, 8, 1)
+        # Third run: arrives roughly on time relative to last snap (12:05:00 + 4min = 12:09:00)
+        third_now = datetime(2026, 2, 5, 12, 9, 1)
         snapped, effective_interval, snap_action = main._snap_execution_time(third_now, INTERVAL_4MIN)
 
-        assert snapped == datetime(2026, 2, 5, 12, 8, 0)
+        assert snapped == datetime(2026, 2, 5, 12, 9, 0)
         assert effective_interval == INTERVAL_4MIN  # Back to normal
         assert snap_action.startswith("snapped")
 
@@ -176,9 +177,42 @@ class TestSnapExecutionTime:
         second_now = datetime(2026, 2, 5, 12, 34, 0)
         snapped, effective_interval, snap_action = main._snap_execution_time(second_now, INTERVAL_4MIN)
 
-        assert snapped == datetime(2026, 2, 5, 12, 4, 0)
+        assert snapped == datetime(2026, 2, 5, 12, 5, 0)  # expected + 60s catch-up
         assert effective_interval == INTERVAL_4MIN + 60
         assert "catch-up" in snap_action
+
+    def test_catch_up_produces_tiling_windows(self):
+        """Catch-up cycles should produce perfectly adjacent query windows (no overlap, no gap).
+
+        This is the key regression test for the overlap bug:
+        end[n] = exec[n] - ingest_delay
+        start[n] = end[n] - interval[n]
+        Invariant: start[n] == end[n-1] for all n.
+        """
+        INGEST_DELAY = 60  # seconds
+        interval = INTERVAL_4MIN
+
+        # Simulate sustained slow polling (300s per cycle with 240s interval)
+        poll_duration = 300  # each cycle takes 5 minutes for a 4-min interval
+        base = datetime(2026, 2, 5, 12, 0, 0)
+
+        prev_end = None
+        wall = base
+
+        for cycle in range(8):
+            snapped, eff_interval, action = main._snap_execution_time(wall, interval)
+
+            end_time = snapped - timedelta(seconds=INGEST_DELAY)
+            start_time = end_time - timedelta(seconds=eff_interval)
+
+            if prev_end is not None:
+                assert start_time == prev_end, (
+                    f"Cycle {cycle}: expected start={prev_end}, got start={start_time} "
+                    f"(gap/overlap={start_time - prev_end}). action={action}"
+                )
+
+            prev_end = end_time
+            wall += timedelta(seconds=poll_duration)
 
     def test_works_with_different_intervals(self):
         """Should work correctly with 1-min, 3-min, and 6-min intervals."""
