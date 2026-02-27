@@ -176,7 +176,7 @@ metricIngestBatchSize: 5000
 # if set to destination: monitoring API calls are booked towards project which is monitored
 # REQUIRES serviceusage.services.use Permission granted for Service Account!
 serviceUsageBooking: "source"
-# Metrics polling interval in minutes. Allowed values: 1 - 6
+# Metrics polling interval in minutes. Allowed values: 1 - 10
 queryInterval: 3
 #clusterName Cluster Name, should be empty as it's filed by deploy-helm.sh
 clusterName: ""
