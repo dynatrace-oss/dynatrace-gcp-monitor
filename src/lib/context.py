@@ -320,6 +320,7 @@ class MetricsContext(SfmContext):
         self.print_metric_ingest_input = print_metric_ingest_input
         self.self_monitoring_enabled = self_monitoring_enabled
         self.metric_ingest_batch_size = config.get_int_environment_value("METRIC_INGEST_BATCH_SIZE", 1000)
+        self.metric_ingest_concurrent_pushes = config.get_int_environment_value("METRIC_INGEST_CONCURRENT_PUSHES", 1)
         self.use_x_goog_user_project_header = {project_id_owner: False}
 
         self.update_dt_connectivity_status(DynatraceConnectivity.Ok)

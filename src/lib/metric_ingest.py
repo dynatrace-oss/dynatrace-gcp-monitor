@@ -11,6 +11,7 @@
 #     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
+import asyncio
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
@@ -42,6 +43,12 @@ DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
 METRIC_SOURCE_DIMENSION_KEY = "source"
 METRIC_SOURCE_DIMENSION_VALUE = "com.dynatrace.gcp"
 
+# Retry configuration for Dynatrace ingest API
+_RETRYABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+_MAX_PUSH_RETRIES = 3
+_INITIAL_RETRY_DELAY_S = 1.0
+_MAX_RETRY_AFTER_S = 10.0
+
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
     if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
         context.log(project_id, f"Skipping push due to detected connectivity error")
@@ -49,17 +56,63 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
 
     if not fetch_metric_results:
         context.log(project_id, "Skipping push due to no data to push")
+        return
 
     start_time = time.time()
     try:
-        lines_batch = []
+        # Build all batches upfront
+        batches = []
+        batch = []
         for result in fetch_metric_results:
-            lines_batch.append(result)
-            if len(lines_batch) >= context.metric_ingest_batch_size:
-                await _push_to_dynatrace(context, project_id, lines_batch)
-                lines_batch = []
-        if lines_batch:
-            await _push_to_dynatrace(context, project_id, lines_batch)
+            batch.append(result)
+            if len(batch) >= context.metric_ingest_batch_size:
+                batches.append(batch)
+                batch = []
+        if batch:
+            batches.append(batch)
+
+        concurrency = context.metric_ingest_concurrent_pushes
+        context.log(project_id,
+            f"Pushing {len(batches)} batches ({len(fetch_metric_results)} lines, concurrency={concurrency})")
+
+        if concurrency <= 1:
+            # Sequential push — original behavior
+            for b in batches:
+                await _push_to_dynatrace(context, project_id, b)
+        else:
+            # Concurrent push with bounded concurrency
+            semaphore = asyncio.Semaphore(concurrency)
+            abort = False
+
+            async def _bounded_push(b):
+                nonlocal abort
+                if abort:
+                    return
+                async with semaphore:
+                    if abort:
+                        return
+                    try:
+                        await _push_to_dynatrace(context, project_id, b)
+                    except Exception:
+                        abort = True
+                        raise
+
+            results = await asyncio.gather(
+                *[_bounded_push(b) for b in batches],
+                return_exceptions=True
+            )
+
+            # Check for fatal errors (auth/URL problems that raised exceptions)
+            errors = [r for r in results if isinstance(r, Exception)]
+            if errors:
+                error_types = {}
+                for e in errors:
+                    key = type(e).__name__
+                    error_types[key] = error_types.get(key, 0) + 1
+                error_summary = ", ".join(f"{k}({v})" for k, v in error_types.items())
+                context.log(project_id, f"{len(errors)}/{len(batches)} push batches failed: {error_summary}")
+                # Re-raise the first fatal error so the outer handler can log it
+                raise errors[0]
     except Exception as e:
         if isinstance(e, InvalidURL):
             context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)
@@ -76,34 +129,89 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
         context.log("Ingest input is: ")
         context.log(ingest_input)
     dt_url = f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
-    ingest_response = await context.dt_session.post(
-        url=dt_url,
-        headers={
-            "Authorization": f"Api-Token {context.dynatrace_api_key}",
-            "Content-Type": "text/plain; charset=utf-8"
-        },
-        data=ingest_input,
-        verify_ssl=context.require_valid_certificate
-    )
+    headers = {
+        "Authorization": f"Api-Token {context.dynatrace_api_key}",
+        "Content-Type": "text/plain; charset=utf-8"
+    }
 
-    if ingest_response.status == 401:
-        context.update_dt_connectivity_status(DynatraceConnectivity.ExpiredToken)
-        raise Exception("Expired token")
-    elif ingest_response.status == 403:
-        context.update_dt_connectivity_status(DynatraceConnectivity.WrongToken)
-        raise Exception("Wrong token - missing 'Ingest metrics using API V2' permission")
-    elif ingest_response.status == 404 or ingest_response.status == 405:
-        context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)
-        raise Exception(f"Wrong URL {dt_url}")
-    elif ingest_response.status == 429:
+    ingest_response = None
+    for attempt in range(_MAX_PUSH_RETRIES + 1):
+        try:
+            ingest_response = await context.dt_session.post(
+                url=dt_url,
+                headers=headers,
+                data=ingest_input,
+                verify_ssl=context.require_valid_certificate
+            )
+        except Exception as e:
+            # Network-level error (connection refused, timeout, DNS failure, etc.)
+            if attempt < _MAX_PUSH_RETRIES:
+                delay = _INITIAL_RETRY_DELAY_S * (2 ** attempt)
+                context.log(project_id,
+                    f"Push attempt {attempt + 1}/{_MAX_PUSH_RETRIES + 1} network error: "
+                    f"{type(e).__name__}: {e}, retrying in {delay}s")
+                await asyncio.sleep(delay)
+                continue
+            # Exhausted retries on network errors — count as dropped, don't raise
+            context.log(project_id,
+                f"Push failed after {_MAX_PUSH_RETRIES + 1} attempts, network error: "
+                f"{type(e).__name__}: {e}, {len(lines_batch)} lines dropped")
+            context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+            return
+
+        status = ingest_response.status
+
+        # Fatal errors — raise immediately, no retry
+        if status == 401:
+            context.sfm[SfmKeys.dynatrace_request_count].increment(status)
+            context.update_dt_connectivity_status(DynatraceConnectivity.ExpiredToken)
+            raise Exception("Expired token")
+        elif status == 403:
+            context.sfm[SfmKeys.dynatrace_request_count].increment(status)
+            context.update_dt_connectivity_status(DynatraceConnectivity.WrongToken)
+            raise Exception("Wrong token - missing 'Ingest metrics using API V2' permission")
+        elif status in (404, 405):
+            context.sfm[SfmKeys.dynatrace_request_count].increment(status)
+            context.update_dt_connectivity_status(DynatraceConnectivity.WrongURL)
+            raise Exception(f"Wrong URL {dt_url}")
+
+        # Retryable errors — retry with backoff
+        if status in _RETRYABLE_STATUS_CODES and attempt < _MAX_PUSH_RETRIES:
+            context.sfm[SfmKeys.dynatrace_request_count].increment(status)
+            retry_after_header = ingest_response.headers.get("Retry-After")
+            try:
+                delay = min(float(retry_after_header), _MAX_RETRY_AFTER_S) if retry_after_header \
+                    else _INITIAL_RETRY_DELAY_S * (2 ** attempt)
+            except (ValueError, TypeError):
+                delay = _INITIAL_RETRY_DELAY_S * (2 ** attempt)
+            context.log(project_id,
+                f"Push attempt {attempt + 1}/{_MAX_PUSH_RETRIES + 1} got HTTP {status}, "
+                f"retrying in {delay}s")
+            await asyncio.sleep(delay)
+            continue
+
+        # Success or non-retryable status — exit retry loop
+        break
+
+    # After retry loop: process the final response
+    status = ingest_response.status
+
+    # Retryable error on final attempt — count as dropped
+    if status in _RETRYABLE_STATUS_CODES:
+        context.sfm[SfmKeys.dynatrace_request_count].increment(status)
         context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+        context.log(project_id,
+            f"Push failed after {_MAX_PUSH_RETRIES + 1} attempts with HTTP {status}, "
+            f"{len(lines_batch)} lines dropped")
+        return
 
+    # Success path — process response
     ingest_response_json = await ingest_response.json()
 
     lines_ok = ingest_response_json.get("linesOk", 0)
     lines_invalid = ingest_response_json.get("linesInvalid", 0)
 
-    context.sfm[SfmKeys.dynatrace_request_count].increment(ingest_response.status)
+    context.sfm[SfmKeys.dynatrace_request_count].increment(status)
     context.sfm[SfmKeys.dynatrace_ingest_lines_ok_count].update(project_id, lines_ok)
     context.sfm[SfmKeys.dynatrace_ingest_lines_invalid_count].update(project_id, lines_invalid)
 
