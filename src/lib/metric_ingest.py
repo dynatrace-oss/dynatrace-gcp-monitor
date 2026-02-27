@@ -209,8 +209,25 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
             f"{len(lines_batch)} lines dropped")
         return
 
+    # Payload too large — log and drop, don't crash
+    if status == 413:
+        context.sfm[SfmKeys.dynatrace_request_count].increment(status)
+        context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+        context.log(project_id,
+            f"Push rejected with HTTP 413 Payload Too Large "
+            f"({len(lines_batch)} lines, {len(ingest_payload)} bytes compressed). "
+            f"Reduce METRIC_INGEST_BATCH_SIZE. Lines dropped.")
+        return
+
     # Success path — process response
-    ingest_response_json = await ingest_response.json()
+    try:
+        ingest_response_json = await ingest_response.json()
+    except Exception:
+        context.sfm[SfmKeys.dynatrace_request_count].increment(status)
+        context.sfm[SfmKeys.dynatrace_ingest_lines_dropped_count].update(project_id, len(lines_batch))
+        context.log(project_id,
+            f"Push got HTTP {status} with non-JSON response body, {len(lines_batch)} lines dropped")
+        return
 
     lines_ok = ingest_response_json.get("linesOk", 0)
     lines_invalid = ingest_response_json.get("linesInvalid", 0)

@@ -169,8 +169,9 @@ printMetricIngestInput: "false"
 metricIngestConcurrentPushes: 1
 # metricIngestBatchSize: number of ingest lines per HTTP POST to Dynatrace.
 # Larger batches reduce HTTP overhead. Payloads are gzip-compressed automatically.
-# Default 5000.
-metricIngestBatchSize: 5000
+# DT API limit is 1MB uncompressed; 3000 lines ≈ 600KB, safe margin.
+# Default 3000.
+metricIngestBatchSize: 3000
 # serviceUsageBooking determines a caller-specified project for quota and billing purposes
 # if set to source: monitoring API calls are booked towards project where K8S container is running
 # if set to destination: monitoring API calls are booked towards project which is monitored
