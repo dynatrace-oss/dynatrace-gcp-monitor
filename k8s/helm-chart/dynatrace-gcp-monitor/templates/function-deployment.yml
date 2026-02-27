@@ -86,6 +86,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: METRIC_INGEST_CONCURRENT_PUSHES
+        - name: METRIC_INGEST_BATCH_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: METRIC_INGEST_BATCH_SIZE
         - name: METRIC_AUTODISCOVERY
           valueFrom:
             configMapKeyRef:

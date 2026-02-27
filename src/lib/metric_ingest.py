@@ -12,6 +12,7 @@
 #     See the License for the specific language governing permissions and
 #     limitations under the License.
 import asyncio
+import gzip
 import time
 from datetime import timezone, datetime
 from http.client import InvalidURL
@@ -73,7 +74,8 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
 
         concurrency = context.metric_ingest_concurrent_pushes
         context.log(project_id,
-            f"Pushing {len(batches)} batches ({len(fetch_metric_results)} lines, concurrency={concurrency})")
+            f"Pushing {len(batches)} batches ({len(fetch_metric_results)} lines, "
+            f"batch_size={context.metric_ingest_batch_size}, concurrency={concurrency})")
 
         if concurrency <= 1:
             # Sequential push — original behavior
@@ -120,7 +122,7 @@ async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metr
     finally:
         push_data_time = time.time() - start_time
         context.sfm[SfmKeys.push_to_dynatrace_execution_time].update(project_id, push_data_time)
-        context.log(project_id, f"Finished uploading metric ingest lines to Dynatrace in {push_data_time} s")
+        context.log(project_id, f"Finished uploading metric ingest lines to Dynatrace in {push_data_time:.2f}s")
 
 
 async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_batch: List[IngestLine]):
@@ -129,9 +131,11 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
         context.log("Ingest input is: ")
         context.log(ingest_input)
     dt_url = f"{context.dynatrace_url.rstrip('/')}/api/v2/metrics/ingest"
+    ingest_payload = gzip.compress(ingest_input.encode("utf-8"))
     headers = {
         "Authorization": f"Api-Token {context.dynatrace_api_key}",
-        "Content-Type": "text/plain; charset=utf-8"
+        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Encoding": "gzip"
     }
 
     ingest_response = None
@@ -140,7 +144,7 @@ async def _push_to_dynatrace(context: MetricsContext, project_id: str, lines_bat
             ingest_response = await context.dt_session.post(
                 url=dt_url,
                 headers=headers,
-                data=ingest_input,
+                data=ingest_payload,
                 verify_ssl=context.require_valid_certificate
             )
         except Exception as e:

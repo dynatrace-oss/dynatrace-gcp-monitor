@@ -20,9 +20,11 @@ Covers:
 - _push_to_dynatrace: retry on 429/5xx, no retry on 401/403/404, network errors
 - Abort flag: concurrent push stops remaining batches on fatal error
 - SFM counters: correct accounting across retries
+- Gzip compression: payload is gzip-compressed with Content-Encoding header
 """
 
 import asyncio
+import gzip
 from datetime import datetime
 from typing import List
 from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
@@ -463,3 +465,62 @@ class TestSfmCounters:
         # push_to_dynatrace_execution_time should have been set for "proj"
         assert "proj" in ctx.sfm[SfmKeys.push_to_dynatrace_execution_time].value
         assert ctx.sfm[SfmKeys.push_to_dynatrace_execution_time].value["proj"] >= 0
+
+
+# ---------------------------------------------------------------------------
+# Gzip compression
+# ---------------------------------------------------------------------------
+
+class TestGzipCompression:
+    """Verify that push payloads are gzip-compressed with correct headers."""
+
+    @pytest.mark.asyncio
+    async def test_payload_is_gzip_compressed(self):
+        """The data= kwarg sent to dt_session.post is valid gzip bytes."""
+        ctx = _make_context(batch_size=100)
+        ctx.dt_session.post = AsyncMock(return_value=_ok_response(lines_ok=3))
+
+        lines = _make_lines(3)
+        await _push_to_dynatrace(ctx, "proj", lines)
+
+        _, kwargs = ctx.dt_session.post.call_args
+        payload = kwargs["data"]
+
+        # Payload must be bytes (compressed)
+        assert isinstance(payload, bytes)
+
+        # Must decompress successfully
+        decompressed = gzip.decompress(payload).decode("utf-8")
+
+        # Decompressed content must match the expected ingest input
+        expected = "\n".join([line.to_string() for line in lines])
+        assert decompressed == expected
+
+    @pytest.mark.asyncio
+    async def test_content_encoding_header_set(self):
+        """Content-Encoding: gzip header is sent with the request."""
+        ctx = _make_context(batch_size=100)
+        ctx.dt_session.post = AsyncMock(return_value=_ok_response(lines_ok=3))
+
+        await _push_to_dynatrace(ctx, "proj", _make_lines(3))
+
+        _, kwargs = ctx.dt_session.post.call_args
+        headers = kwargs["headers"]
+        assert headers["Content-Encoding"] == "gzip"
+        assert headers["Content-Type"] == "text/plain; charset=utf-8"
+
+    @pytest.mark.asyncio
+    async def test_gzip_reduces_payload_size(self):
+        """Gzip-compressed payload is smaller than the raw text for non-trivial data."""
+        ctx = _make_context(batch_size=1000)
+        ctx.dt_session.post = AsyncMock(return_value=_ok_response(lines_ok=100))
+
+        lines = _make_lines(100)
+        await _push_to_dynatrace(ctx, "proj", lines)
+
+        _, kwargs = ctx.dt_session.post.call_args
+        compressed_size = len(kwargs["data"])
+        raw_size = len("\n".join([line.to_string() for line in lines]).encode("utf-8"))
+
+        # Compressed should be meaningfully smaller for 100 repetitive lines
+        assert compressed_size < raw_size

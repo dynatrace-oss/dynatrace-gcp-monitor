@@ -167,6 +167,10 @@ printMetricIngestInput: "false"
 # Higher values reduce push time for large metric volumes. Retries with exponential backoff on 429/5xx.
 # Default 1 (sequential) for backward compatibility. Recommended: 10 for high-volume deployments.
 metricIngestConcurrentPushes: 1
+# metricIngestBatchSize: number of ingest lines per HTTP POST to Dynatrace.
+# Larger batches reduce HTTP overhead. Payloads are gzip-compressed automatically.
+# Default 5000.
+metricIngestBatchSize: 5000
 # serviceUsageBooking determines a caller-specified project for quota and billing purposes
 # if set to source: monitoring API calls are booked towards project where K8S container is running
 # if set to destination: monitoring API calls are booked towards project which is monitored
