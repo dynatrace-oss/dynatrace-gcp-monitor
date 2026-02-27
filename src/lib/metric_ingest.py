@@ -41,7 +41,7 @@ MAX_DIMENSION_VALUE_LENGTH = config.max_dimension_value_length()
 
 GCP_MONITORING_URL = config.gcp_monitoring_url()
 DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
-METRIC_SOURCE_DIMENSION_KEY = "source"
+METRIC_SOURCE_DIMENSION_KEY = "dt.source"
 METRIC_SOURCE_DIMENSION_VALUE = "com.dynatrace.gcp"
 
 # Retry configuration for Dynatrace ingest API

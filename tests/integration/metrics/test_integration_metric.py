@@ -155,7 +155,7 @@ async def ingest_lines_output(expected_ingest_output_file):
         metric_and_dims, values = line.split(" ", 1)
         parts = metric_and_dims.split(",")
         normalized_metric_and_dims = ",".join(
-            [part for part in parts if part != 'source="com.dynatrace.gcp"']
+            [part for part in parts if part != 'dt.source="com.dynatrace.gcp"']
         )
         return f"{normalized_metric_and_dims} {values}"
 
@@ -165,7 +165,7 @@ async def ingest_lines_output(expected_ingest_output_file):
 
         for line in actual_ingest_lines:
             if line and not line.startswith("#"):
-                assert 'source="com.dynatrace.gcp"' in line
+                assert 'dt.source="com.dynatrace.gcp"' in line
 
         assert len(actual_ingest_lines) == len(expected_ingest_lines)
         assert sorted([normalize_source_dimension(line) for line in actual_ingest_lines]) == sorted(
