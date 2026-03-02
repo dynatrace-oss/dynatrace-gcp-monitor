@@ -43,11 +43,12 @@ class AutodiscoveryContext:
 
     def _load_yamls(self):
         try:
-            resource_to_disovery = (
-                read_autodiscovery_config_yaml()
-                .get("autodicovery_config", {})
-                .get("searched_resources", {})
+            autodiscovery_config = read_autodiscovery_config_yaml()
+            config_section = autodiscovery_config.get(
+                "autodiscovery_config",
+                autodiscovery_config.get("autodicovery_config", {}),
             )
+            resource_to_disovery = config_section.get("searched_resources", {})
             self.resource_to_disovery = (
                 resource_to_disovery if resource_to_disovery is not None else {}
             )

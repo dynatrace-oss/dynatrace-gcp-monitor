@@ -163,6 +163,15 @@ logResources:
 # printMetricIngestInput: if true function will output lines of metrics into stdout
 # Allowed values: "true"/"yes", "false"/"no"
 printMetricIngestInput: "false"
+# metricIngestConcurrentPushes: number of concurrent HTTP requests for pushing metrics to Dynatrace.
+# Higher values reduce push time for large metric volumes. Retries with exponential backoff on 429/5xx.
+# Default 1 (sequential) for backward compatibility. Recommended: 10 for high-volume deployments.
+metricIngestConcurrentPushes: 1
+# metricIngestBatchSize: number of ingest lines per HTTP POST to Dynatrace.
+# Larger batches reduce HTTP overhead. Payloads are gzip-compressed automatically.
+# DT API limit is 1MB uncompressed; 3000 lines ≈ 600KB, safe margin.
+# Default 3000.
+metricIngestBatchSize: 3000
 # serviceUsageBooking determines a caller-specified project for quota and billing purposes
 # if set to source: monitoring API calls are booked towards project where K8S container is running
 # if set to destination: monitoring API calls are booked towards project which is monitored

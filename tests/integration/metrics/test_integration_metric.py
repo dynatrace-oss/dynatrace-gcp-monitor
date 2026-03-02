@@ -149,9 +149,25 @@ async def ingest_lines_output(expected_ingest_output_file):
 
     body = result.body
 
+    def normalize_source_dimension(line: str) -> str:
+        if not line or line.startswith("#"):
+            return line
+        metric_and_dims, values = line.split(" ", 1)
+        parts = metric_and_dims.split(",")
+        normalized_metric_and_dims = ",".join(
+            [part for part in parts if part != 'dt.source="com.dynatrace.gcp"']
+        )
+        return f"{normalized_metric_and_dims} {values}"
+
     with open(expected_ingest_output_file) as ingest:
         expected_ingest_lines = ingest.read().split("\n")
         actual_ingest_lines = body.split("\n")
 
+        for line in actual_ingest_lines:
+            if line and not line.startswith("#"):
+                assert 'dt.source="com.dynatrace.gcp"' in line
+
         assert len(actual_ingest_lines) == len(expected_ingest_lines)
-        assert sorted(actual_ingest_lines) == sorted(expected_ingest_lines)
+        assert sorted([normalize_source_dimension(line) for line in actual_ingest_lines]) == sorted(
+            [normalize_source_dimension(line) for line in expected_ingest_lines]
+        )

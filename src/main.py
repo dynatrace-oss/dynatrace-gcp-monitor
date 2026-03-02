@@ -62,9 +62,11 @@ def _snap_execution_time(now: datetime, interval_seconds: int) -> Tuple[datetime
         _last_execution_time = expected
         return expected, interval_seconds, f"snapped (drift={drift_s:+.1f}s)"
     elif timedelta(0) < drift <= _HARD_RESET_THRESHOLD:
-        # Behind by 1-30 min: use expected time but widen interval by 60s to catch up
-        _last_execution_time = expected
-        return expected, interval_seconds + 60, f"catch-up (drift={drift_s:+.1f}s, interval widened by 60s)"
+        # Behind by 1-30 min: advance execution_time by interval + 60s to catch up,
+        # and widen the query interval by the same 60s so start[n] == end[n-1] (no overlap, no gap).
+        catch_up_execution_time = expected + timedelta(seconds=60)
+        _last_execution_time = catch_up_execution_time
+        return catch_up_execution_time, interval_seconds + 60, f"catch-up (drift={drift_s:+.1f}s, +60s catch-up)"
     else:
         # Way too far behind (>30 min) or ahead: hard reset to wall clock
         _last_execution_time = truncated_now
