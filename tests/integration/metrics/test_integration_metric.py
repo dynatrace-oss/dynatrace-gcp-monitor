@@ -88,7 +88,9 @@ def setup_wiremock():
 
     Config.base_url = 'http://localhost:{}/__admin'.format(MOCKED_API_PORT)
 
-    wiremock = WireMockServer(port=MOCKED_API_PORT)
+    rootdir = os.path.dirname(os.path.abspath(__file__))
+    print(f"WireMock root_dir: {rootdir}")
+    wiremock = WireMockServer(port=MOCKED_API_PORT, root_dir=rootdir)
     wiremock.start()
 
     print("wiremock running")

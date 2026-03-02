@@ -29,7 +29,8 @@ from wiremock.resources.mappings.resource import Mappings
 from wiremock.resources.requests.resource import Requests
 from wiremock.server import WireMockServer
 
-from lib.context import LoggingContext, DynatraceConnectivity
+from lib.clientsession_provider import init_gcp_client_session
+from lib.context import LoggingContext
 from lib.instance_metadata import InstanceMetadata
 from lib.logs import log_self_monitoring, log_forwarder_variables, logs_processor, dynatrace_client
 from lib.logs.log_integration_service import LogIntegrationService
@@ -129,7 +130,7 @@ async def test_execution_successful():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 3}
+    assert Counter(self_monitoring.dt_connectivity) == {200: 3}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
     assert self_monitoring.sent_logs_entries == 10
@@ -158,7 +159,7 @@ async def test_content_too_long():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 1
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 1}
+    assert Counter(self_monitoring.dt_connectivity) == {200: 1}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
     assert self_monitoring.sent_logs_entries == 1
@@ -183,7 +184,7 @@ async def test_too_old_message():
 
     assert self_monitoring.too_old_records == 1
     assert self_monitoring.records_with_too_long_content == 0
-    assert not self_monitoring.dynatrace_connectivity
+    assert not self_monitoring.dt_connectivity
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sent_logs_entries == 0
     assert self_monitoring.parsing_errors == 0
@@ -207,7 +208,7 @@ async def test_invalid_timestamp():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 1}
+    assert Counter(self_monitoring.dt_connectivity) == {200: 1}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
     assert self_monitoring.sent_logs_entries == 1
@@ -234,7 +235,7 @@ async def test_binary_data():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert not self_monitoring.dynatrace_connectivity
+    assert not self_monitoring.dt_connectivity
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sent_logs_entries == 0
     assert self_monitoring.parsing_errors == 1
@@ -258,7 +259,7 @@ async def test_plain_text_message():
 
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert Counter(self_monitoring.dynatrace_connectivity) == {DynatraceConnectivity.Ok: 1}
+    assert Counter(self_monitoring.dt_connectivity) == {200: 1}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
     assert self_monitoring.sent_logs_entries == 1
@@ -288,9 +289,7 @@ async def test_execution_expired_token():
     assert self_monitoring.too_old_records == 0
     assert self_monitoring.parsing_errors == 0
     assert self_monitoring.records_with_too_long_content == 0
-    assert Counter(self_monitoring.dynatrace_connectivity) == {
-        DynatraceConnectivity.ExpiredToken: 3
-    }
+    assert Counter(self_monitoring.dt_connectivity) == {401: 3}
     assert self_monitoring.processing_time > 0
     assert self_monitoring.sending_time > 0
 
@@ -306,7 +305,7 @@ async def run_worker_with_messages(
         else:
             return {"receivedMessages": []}
 
-    async def push_ack_ids(ack_ids: List[str], gcp_session, logging_context: LoggingContext):
+    async def push_ack_ids(ack_ids: List[str], gcp_session, logging_context: LoggingContext, update_gcp_client=None):
         for ack in ack_ids:
             await ack_queue.put(ack)
 
@@ -324,10 +323,19 @@ async def run_worker_with_messages(
     log_integration_service = await LogIntegrationService.create(sfm_queue=sfm_queue, gcp_client=mock_gcp_client, logging_context=logging_context)
     log_integration_service.log_push_semaphore = asyncio.Semaphore(1)
 
-    log_batches, ack_ids_of_erroneous_messages = await log_integration_service.perform_pull(logging_context)
-    ack_ids_to_send = await log_integration_service.push_logs(log_batches, logging_context)
+    try:
+        log_batches, ack_ids_of_erroneous_messages = await log_integration_service.perform_pull(logging_context)
+        await log_integration_service.push_logs(log_batches, logging_context)
 
-    await push_ack_ids(ack_ids_to_send + ack_ids_of_erroneous_messages, mock_gcp_client, logging_context)
+        # ACK erroneous messages (skipped logs) - production does this via background task
+        if ack_ids_of_erroneous_messages:
+            log_integration_service._submit_background_ack(ack_ids_of_erroneous_messages, logging_context)
+
+        # Wait for all background ACK tasks to complete before asserting
+        if log_integration_service._pending_ack_tasks:
+            await asyncio.gather(*log_integration_service._pending_ack_tasks, return_exceptions=True)
+    finally:
+        await log_integration_service.close_sessions()
 
     metadata = InstanceMetadata(
         project_id="",
@@ -340,9 +348,10 @@ async def run_worker_with_messages(
     )
 
     self_monitoring = LogSelfMonitoring()
-    await log_self_monitoring._loop_single_period(
-        self_monitoring, sfm_queue, logging_context, metadata
-    )
+    async with init_gcp_client_session() as gcp_session:
+        await log_self_monitoring._loop_single_period(
+            self_monitoring, sfm_queue, logging_context, metadata, gcp_session
+        )
     await sfm_queue.join()
 
     assert ack_queue.qsize() == len(expected_ack_ids)
