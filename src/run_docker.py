@@ -129,28 +129,30 @@ async def run_metrics_fetcher_forever():
         logging_context.log('MAIN_LOOP', 'Pre_launch_check failed, monitoring loop will not start')
         return
 
-    services = pre_launch_check_result.services
+    base_services = pre_launch_check_result.services
     extension_versions = pre_launch_check_result.extension_versions
     new_services_from_extensions_task = None
 
     if config.metric_autodiscovery():
         autodiscovery_manager = AutodiscoveryContext()
-        autodiscovery_task = await AutodiscoveryTaskExecutor.create(services, autodiscovery_manager, extension_versions)
+        autodiscovery_task = await AutodiscoveryTaskExecutor.create(base_services, autodiscovery_manager, extension_versions)
     
     while True:
         start_time_s = time.time()
 
         if config.keep_refreshing_extensions_config():
-            new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(services, extension_versions))
+            new_services_from_extensions_task = asyncio.create_task(prepare_services_config_for_next_polling(base_services, extension_versions))
 
         if config.metric_autodiscovery():
-            services = await autodiscovery_task.process_autodiscovery_result(services, extension_versions)
+            services = await autodiscovery_task.process_autodiscovery_result(base_services, extension_versions)
+        else:
+            services = list(base_services)
             
         await run_single_polling_with_timeout(services)
 
         if config.keep_refreshing_extensions_config():
             logging_context.log('MAIN_LOOP', 'Refreshing services config')
-            services, extension_versions = await new_services_from_extensions_task
+            base_services, extension_versions = await new_services_from_extensions_task
 
         end_time_s = time.time()
 
