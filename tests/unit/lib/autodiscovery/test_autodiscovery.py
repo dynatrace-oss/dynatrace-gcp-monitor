@@ -219,6 +219,36 @@ async def test_process_autodiscovery_result_with_none(mock_autodiscovery_context
 
 
 @pytest.mark.asyncio
+@patch("lib.autodiscovery.autodiscovery.AutodiscoveryContext")
+async def test_process_autodiscovery_result_does_not_mutate_input(mock_autodiscovery_context):
+    mock_autodiscovery_context.get_autodiscovery_service = AsyncMock(
+        return_value=Mock(spec=AutodiscoveryGCPService)
+    )
+
+    services = [Mock(spec=GCPService), Mock(spec=GCPService)]
+
+    task_executor = await AutodiscoveryTaskExecutor.create(
+        services=services,
+        autodiscovery_manager=mock_autodiscovery_context,
+        current_extension_versions={},
+    )
+
+    await asyncio.sleep(2)
+
+    new_extension_versions = {}
+
+    # Call twice, simulating two consecutive loop iterations
+    result1 = await task_executor.process_autodiscovery_result(services, new_extension_versions)
+    result2 = await task_executor.process_autodiscovery_result(services, new_extension_versions)
+
+    # The original input must not have been mutated
+    assert len(services) == 2
+    # Each result must have exactly 3 items (2 base + 1 autodiscovery), never growing
+    assert len(result1) == 3
+    assert len(result2) == 3
+
+
+@pytest.mark.asyncio
 @patch("lib.autodiscovery.autodiscovery.read_autodiscovery_block_list_yaml")
 @patch("lib.autodiscovery.autodiscovery.get_resources_mapping")
 @patch("lib.autodiscovery.autodiscovery.read_autodiscovery_config_yaml")
