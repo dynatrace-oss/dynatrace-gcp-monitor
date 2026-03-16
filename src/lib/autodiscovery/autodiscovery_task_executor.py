@@ -134,6 +134,7 @@ class AutodiscoveryTaskExecutor:
 
             async with self.lock:
                 if self.autodiscovered_cached_service:
+                    services = list(services)
                     services.append(self.autodiscovered_cached_service)
                 else:
                     logging_context.error(
