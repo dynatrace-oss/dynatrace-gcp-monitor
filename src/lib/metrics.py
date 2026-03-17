@@ -137,6 +137,7 @@ class Metric:
     dimensions: List[Dimension]
     ingest_delay: timedelta
     sample_period_seconds: timedelta
+    sample_period_overridden: bool
     value_type: str
     metric_type: str
     autodiscovered_metric: bool
