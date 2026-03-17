@@ -204,7 +204,11 @@ class GCPService:
         object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 
         activation = kwargs.get("activation", {})
-        min_sp_override = int(activation.get("minSamplePeriodOverride", 0) or 0)
+        try:
+            min_sp_override = int(activation.get("minSamplePeriodOverride", 0) or 0)
+        except (ValueError, TypeError):
+            min_sp_override = 0
+        min_sp_override = max(min_sp_override, 0)
 
         object.__setattr__(self, "metrics", [
             Metric(**x, min_sample_period_override=min_sp_override)
