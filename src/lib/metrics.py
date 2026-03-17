@@ -174,6 +174,9 @@ class Metric:
         min_sample_period_override = kwargs.get("min_sample_period_override", 0)
         if min_sample_period_override and self.sample_period_seconds.total_seconds() < min_sample_period_override:
             object.__setattr__(self, "sample_period_seconds", timedelta(seconds=min_sample_period_override))
+            object.__setattr__(self, "sample_period_overridden", True)
+        else:
+            object.__setattr__(self, "sample_period_overridden", False)
 
 
 class GCPService:

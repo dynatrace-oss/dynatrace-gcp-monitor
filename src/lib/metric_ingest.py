@@ -486,8 +486,9 @@ def create_dimensions(context: MetricsContext, service_name: str, time_series: D
     dt_dimensions.append(create_dimension("dt.security_context", DT_SECURITY_CONTEXT_VALUE))
     dt_dimensions.append(create_dimension(METRIC_SOURCE_DIMENSION_KEY, METRIC_SOURCE_DIMENSION_VALUE))
 
-    effective_sp = int(metric.sample_period_seconds.total_seconds())
-    dt_dimensions.append(create_dimension("dt.min_sample_period_override", str(effective_sp), context))
+    if getattr(metric, "sample_period_overridden", False):
+        effective_sp = int(metric.sample_period_seconds.total_seconds())
+        dt_dimensions.append(create_dimension("dt.min_sample_period_override", str(effective_sp), context))
 
     metric_labels = time_series.get('metric', {}).get('labels', {})
     for short_source_label, dim_value in metric_labels.items():
