@@ -249,7 +249,7 @@ async def process_project_metrics(context: MetricsContext, project_id: str, serv
         fetch_data_time = time.time() - context.start_processing_timestamp
         context.sfm[SfmKeys.fetch_gcp_data_execution_time].update(project_id, fetch_data_time)
         context.log(project_id, f"Finished fetching data in {fetch_data_time}")
-        context.log(project_id, f"Data points count: {len(ingest_lines)} ingest lines to push")
+        context.log(project_id, f"Ingest lines count: {len(ingest_lines)} lines to push")
         await push_ingest_lines(context, project_id, ingest_lines)
     except Exception as e:
         context.t_exception(f"Failed to finish processing due to {e}")

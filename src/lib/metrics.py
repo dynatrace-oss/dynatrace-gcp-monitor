@@ -15,6 +15,7 @@
 #     limitations under the License.
 
 from __future__ import annotations
+import logging
 import re
 from dataclasses import dataclass
 from datetime import timedelta
@@ -142,6 +143,7 @@ class Metric:
     autodiscovered_metric: bool
     description: str
     project_ids: List[str]
+    sample_period_overridden: bool
 
     def __init__(self, **kwargs):
         gcp_options = kwargs.get("gcpOptions", {})
@@ -171,8 +173,16 @@ class Metric:
         else:
             object.__setattr__(self, "sample_period_seconds", timedelta(seconds=60))
 
-        min_sample_period_override = kwargs.get("min_sample_period_override", 0)
-        if min_sample_period_override and self.sample_period_seconds.total_seconds() < min_sample_period_override:
+        raw_override = kwargs.get("min_sample_period_override", None)
+        try:
+            min_sample_period_override = int(raw_override) if raw_override is not None else 0
+        except (TypeError, ValueError):
+            min_sample_period_override = 0
+
+        if (
+            min_sample_period_override > 0
+            and self.sample_period_seconds.total_seconds() < min_sample_period_override
+        ):
             object.__setattr__(self, "sample_period_seconds", timedelta(seconds=min_sample_period_override))
             object.__setattr__(self, "sample_period_overridden", True)
         else:
@@ -203,7 +213,19 @@ class GCPService:
         object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 
         activation = kwargs.get("activation", {})
-        min_sp_override = int(activation.get("minSamplePeriodOverride", 0) or 0)
+        raw_min_sp_override = activation.get("minSamplePeriodOverride")
+        min_sp_override = 0
+        if raw_min_sp_override is not None:
+            try:
+                parsed = int(raw_min_sp_override)
+                if parsed > 0:
+                    min_sp_override = parsed
+            except (TypeError, ValueError):
+                logging.warning(
+                    "Invalid minSamplePeriodOverride value %r for service %s; using default of 0",
+                    raw_min_sp_override,
+                    kwargs.get("service", ""),
+                )
 
         object.__setattr__(self, "metrics", [
             Metric(**x, min_sample_period_override=min_sp_override)
