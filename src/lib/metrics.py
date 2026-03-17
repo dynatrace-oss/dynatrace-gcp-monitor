@@ -171,6 +171,10 @@ class Metric:
         else:
             object.__setattr__(self, "sample_period_seconds", timedelta(seconds=60))
 
+        min_sample_period_override = kwargs.get("min_sample_period_override", 0)
+        if min_sample_period_override and self.sample_period_seconds.total_seconds() < min_sample_period_override:
+            object.__setattr__(self, "sample_period_seconds", timedelta(seconds=min_sample_period_override))
+
 
 class GCPService:
     """Describes singular GCP service to ingest data from."""
@@ -184,6 +188,7 @@ class GCPService:
     metrics:  List[Metric]
     monitoring_filter: Text
     activation: Dict[Text, Any]
+    min_sample_period_override: int
     is_enabled: bool
     extension_name: str
     autodiscovery_enabled: bool
@@ -194,13 +199,17 @@ class GCPService:
         object.__setattr__(self, "technology_name", kwargs.get("tech_name", "N/A"))
         object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 
+        activation = kwargs.get("activation", {})
+        min_sp_override = int(activation.get("minSamplePeriodOverride", 0) or 0)
+
         object.__setattr__(self, "metrics", [
-            Metric(**x)
+            Metric(**x, min_sample_period_override=min_sp_override)
             for x
             in kwargs.get("metrics", {})
             if x.get("gcpOptions", {}).get("valueType", "").upper() != "STRING"
         ])
-        object.__setattr__(self, "activation", kwargs.get("activation", {}))
+        object.__setattr__(self, "activation", activation)
+        object.__setattr__(self, "min_sample_period_override", min_sp_override)
 
         # Apply default activation variables to monitoring filter
         monitoring_filter = kwargs.get("gcpMonitoringFilter", "var:filter_conditions")

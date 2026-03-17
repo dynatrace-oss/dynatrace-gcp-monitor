@@ -250,6 +250,14 @@ metricAutodiscovery: "false"
 # configuration file for GCP services
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax
+  #
+  # minSamplePeriodOverride (optional, per-service):
+  #   Overrides the minimum sample period (alignmentPeriod) for all metrics of this service.
+  #   When set, any metric whose extension-defined samplePeriod is lower than this value
+  #   will use this value instead. This reduces the number of data points fetched from
+  #   GCP Monitoring API and ingested into Dynatrace.
+  #   Example: minSamplePeriodOverride: 300  # align all metrics to at least 5 minutes
+  #
   services:
     # Google Cloud APIs
     - service: api
@@ -257,6 +265,7 @@ gcpServicesYaml: |
       featureSets:
         - default_metrics
     #     - limited_response_codes
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Apigee Environment
@@ -264,6 +273,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Apigee Proxy
@@ -271,6 +281,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - apigee_classic_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Apigee Proxy (v2)
@@ -278,6 +289,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Apigee Target
@@ -285,6 +297,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - apigee_classic_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Apigee Target (v2)
@@ -292,6 +305,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Security Detection Rule
@@ -299,6 +313,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - apigee_security_alerts
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
      # Google Security Incident
@@ -306,6 +321,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - apigee_security_alerts
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Security Profile Environment Association
@@ -313,6 +329,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - apigee_security_alerts
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Assistant Action Project
@@ -320,6 +337,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Autoscaler
@@ -327,6 +345,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud BigQuery BI Engine Model
@@ -334,6 +353,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud BigQuery Project
@@ -341,6 +361,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Bigtable Cluster
@@ -348,6 +369,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Bigtable Table
@@ -355,6 +377,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud IoT Registry
@@ -362,6 +385,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud ML Job
@@ -369,6 +393,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud ML Model Version
@@ -376,6 +401,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Cloud SQL Database
@@ -384,6 +410,7 @@ gcpServicesYaml: |
       featureSets:
         - default_metrics
       #   - postgresqlinsights
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Trace
@@ -391,6 +418,7 @@ gcpServicesYaml: |
     - service: cloudtrace_googleapis_com_CloudtraceProject
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google NetApp Volumes
@@ -398,6 +426,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Composer Environment
@@ -405,6 +434,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Dataproc Cluster
@@ -412,6 +442,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Data Loss Prevention Project
@@ -419,6 +450,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Function
@@ -426,6 +458,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Run Revision
@@ -433,6 +466,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Tasks queues
@@ -440,6 +474,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Consumed API
@@ -448,6 +483,7 @@ gcpServicesYaml: |
       featureSets:
         - default_metrics    
         - limited_response_codes
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Consumer Quota
@@ -455,6 +491,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Dataflow Job
@@ -462,6 +499,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Datastore
@@ -469,6 +507,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud DNS Query
@@ -476,6 +515,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Filestore Instance
@@ -483,6 +523,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Firebase Hosting Site Domain
@@ -490,6 +531,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Firebase Realtime Database
@@ -497,6 +539,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Firestore Instance
@@ -504,6 +547,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Firestore Database
@@ -511,6 +555,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google App Engine Application
@@ -518,6 +563,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google App Engine Application - Uptime Checks
@@ -525,6 +571,7 @@ gcpServicesYaml: |
     - service: gae_app_uptime_check
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google App Engine Instance
@@ -532,6 +579,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google VM Instance
@@ -543,6 +591,7 @@ gcpServicesYaml: |
       #  - firewallinsights
       #  - istio
       #  - uptime_check
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google VM Instance VM Flow
@@ -550,6 +599,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Router
@@ -557,6 +607,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Zone Network Health
@@ -564,6 +615,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Storage bucket
@@ -571,6 +623,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud HTTP/S Load Balancing Rule
@@ -578,6 +631,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Instance Group
@@ -585,6 +639,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Interconnect
@@ -592,6 +647,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Interconnect Attachment
@@ -599,6 +655,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Internal HTTP/S Load Balancing Rule
@@ -606,6 +663,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Internal TCP Load Balancer Rule
@@ -613,6 +671,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Internal UDP Load Balancer Rule
@@ -620,6 +679,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Network TCP Load Balancer Rule
@@ -627,6 +687,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Network UDP Load Balancer Rule
@@ -634,6 +695,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Kubernetes Cluster
@@ -641,6 +703,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Kubernetes Container
@@ -653,6 +716,7 @@ gcpServicesYaml: |
       #  - apigee
       #  - istio
       #  - nginx
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
       #  filter_conditions: resource.labels.location = "us-central1-c" AND resource.labels.namespace_name != "jenkins"
@@ -662,6 +726,7 @@ gcpServicesYaml: |
       featureSets:
         # We recommend to monitor k8s_node/default_metrics together with k8s_pod/default_metrics, k8s_container/default_metrics
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Kubernetes Pod
@@ -671,6 +736,7 @@ gcpServicesYaml: |
        # We recommend to monitor k8s_pod/default_metrics together with k8s_node/default_metrics, k8s_container/default_metrics
        - default_metrics
       #  - istio
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Logging export sink
@@ -678,6 +744,7 @@ gcpServicesYaml: |
     - service: logging_sink
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Microsoft Active Directory Domain
@@ -685,6 +752,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud NAT Gateway
@@ -692,6 +760,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google NetApp Cloud Volume Replication
@@ -699,6 +768,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google NetApp Cloud Volume Storage Pool
@@ -706,6 +776,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Network Security Policy
@@ -713,6 +784,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Producer Quota
@@ -720,6 +792,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Pub/Sub Lite Subscription Partition
@@ -727,6 +800,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Pub/Sub Lite Topic Partition
@@ -734,6 +808,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Snapshot
@@ -741,6 +816,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Subscription
@@ -749,6 +825,7 @@ gcpServicesYaml: |
       featureSets:
         # We recommend to monitor pubsub_subscription/default_metrics together with pubsub_topic/default_metrics
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Pub/Sub Topic
@@ -757,6 +834,7 @@ gcpServicesYaml: |
       featureSets:
         # We recommend to monitor pubsub_topic/default_metrics together with pubsub_subscription/default_metrics
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google reCAPTCHA Key
@@ -764,6 +842,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Memorystore
@@ -771,6 +850,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud Spanner Instance
@@ -778,6 +858,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud TCP/SSL Proxy Rule
@@ -785,6 +866,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud TPU Worker
@@ -792,6 +874,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Transfer Service Agent
@@ -799,6 +882,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Storage Transfer Job
@@ -806,6 +890,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Uptime Check URL
@@ -813,6 +898,7 @@ gcpServicesYaml: |
     - service: uptime_url
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google VPC Access Connector
@@ -820,6 +906,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Cloud VPN Tunnel
@@ -827,6 +914,7 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google AlloyDB for PostgreSQL
@@ -834,12 +922,14 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - insights_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: alloydb_instance
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     # Google Vertex AI
@@ -847,65 +937,76 @@ gcpServicesYaml: |
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vertex_ai_endpoint
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vertex_ai_feature_online_store
       allowAutodiscovery: false
       featureSets:
         - feature_store
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vertex_ai_feature_store
       allowAutodiscovery: false
       featureSets:
         - feature_store
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vertex_ai_location
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vertex_ai_pipeline_job
       allowAutodiscovery: false
       featureSets:
         - pipelines
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vertex_ai_index
       allowAutodiscovery: false
       featureSets:
         - vector_search
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vertex_ai_index_endpoint
       allowAutodiscovery: false
       featureSets:
         - vector_search
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vertex_ai_publisher_model
       allowAutodiscovery: false
       featureSets:
         - default_metrics
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vision_ai_instance
       allowAutodiscovery: false
       featureSets:
         - vision_ai
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
     - service: vision_ai_stream
       allowAutodiscovery: false
       featureSets:
         - vision_ai
+      # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
