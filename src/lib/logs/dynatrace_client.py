@@ -12,27 +12,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import asyncio
 import gzip
+import random
 from typing import Union
-from urllib.parse import urlparse
 
-from aiohttp import ClientResponseError
+from aiohttp import ClientError
 
 from lib.configuration import config
-from lib.context import DynatraceConnectivity, LogsContext
 
+from lib.context import LogsContext
 from lib.logs.logs_processor import LogBatch
 
-DYNATRACE_ERROR_CODE_DESC_DICT = {
-    400: DynatraceConnectivity.InvalidInput,
-    401: DynatraceConnectivity.ExpiredToken,
-    403: DynatraceConnectivity.WrongToken,
-    404: DynatraceConnectivity.WrongURL,
-    405: DynatraceConnectivity.WrongURL,
-    413: DynatraceConnectivity.TooManyRequests,
-    429: DynatraceConnectivity.TooManyRequests,
-    500: DynatraceConnectivity.Other
-}
+# Status codes that indicate transient failures worth retrying
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+MAX_RETRIES = 3
+INITIAL_BACKOFF_SECONDS = 1
 
 
 class DynatraceClient:
@@ -48,7 +43,7 @@ class DynatraceClient:
         self.dynatrace_api_key = api_key
         self.verify_ssl = None if config.require_valid_certificate() else False
 
-    async def send_logs(self, context: LogsContext, dt_session, batch: LogBatch, ack_ids_to_send):
+    async def send_logs(self, context: LogsContext, dt_session, batch: LogBatch, ack_ids_to_send, logging_context=None):
         headers = {
             "Authorization": f"Api-Token {self.dynatrace_api_key}",
             "Content-Type": "application/json; charset=utf-8",
@@ -59,40 +54,54 @@ class DynatraceClient:
 
         compressed_body_bytes = gzip.compress(encoded_body_bytes, compresslevel=6)
         compressed_size_kb = round(len(compressed_body_bytes) / 1024.0, 3)
+
         try:
-            context.self_monitoring.all_requests += 1
-            async with dt_session.request(
-                method="POST",
-                url=self.log_ingest_url,
-                data=compressed_body_bytes,
-                headers=headers,
-                ssl=self.verify_ssl,
-            ) as response:
-                response_text = await response.text()
-                resp_status = response.status
+            for attempt in range(MAX_RETRIES):
+                try:
+                    context.self_monitoring.all_requests += 1
+                    async with dt_session.request(
+                        method="POST",
+                        url=self.log_ingest_url,
+                        data=compressed_body_bytes,
+                        headers=headers,
+                        ssl=self.verify_ssl,
+                    ) as response:
+                        response_text = await response.text()
+                        resp_status = response.status
 
-            if resp_status > 299:
-                context.t_error(
-                    f'Log ingest error: {resp_status}, reason: {response.reason}, url: {self.log_ingest_url}, body: "{response_text}"'
-                )
-                error_code_description = DYNATRACE_ERROR_CODE_DESC_DICT.get(resp_status, 0)
-                if error_code_description:
-                    context.self_monitoring.dynatrace_connectivity.append(
-                        error_code_description
-                    )
+                    if resp_status > 299:
+                        context.t_error(
+                            f'Log ingest error: {resp_status}, reason: {response.reason}, url: {self.log_ingest_url}, body: "{response_text}"'
+                        )
+                        # Track raw HTTP status code
+                        context.self_monitoring.dt_connectivity.append(resp_status)
 
-                response.raise_for_status()
-            else:
-                ack_ids_to_send.extend(batch.ack_ids)
-                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Ok)
-                context.self_monitoring.sent_logs_entries += batch.number_of_logs_in_batch
-                context.self_monitoring.log_ingest_payload_size += compressed_size_kb
-                context.self_monitoring.log_ingest_raw_size += encoded_body_size_kb
-        except Exception as e:
-            if not isinstance(e, ClientResponseError):
-                context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
-            raise e
+                        # Retry only on transient errors
+                        if resp_status in RETRYABLE_STATUS_CODES and attempt < MAX_RETRIES - 1:
+                            backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt) + random.uniform(0, 0.5)
+                            log_ctx = logging_context if logging_context else context
+                            log_ctx.log(f"DT ingest failed with {resp_status}, retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                            await asyncio.sleep(backoff)
+                            continue
+
+                        # Non-retryable HTTP error - don't retry, just return
+                        return
+                    else:
+                        ack_ids_to_send.extend(batch.ack_ids)
+                        context.self_monitoring.dt_connectivity.append(200)  # Success
+                        context.self_monitoring.sent_logs_entries += batch.number_of_logs_in_batch
+                        context.self_monitoring.log_ingest_payload_size += compressed_size_kb
+                        context.self_monitoring.log_ingest_raw_size += encoded_body_size_kb
+                        return  # Success
+                except ClientError as e:
+                    # aiohttp client errors (connection, timeout, etc.) - retry
+                    context.self_monitoring.dt_connectivity.append(0)  # Network error
+                    if attempt < MAX_RETRIES - 1:
+                        backoff = INITIAL_BACKOFF_SECONDS * (2 ** attempt) + random.uniform(0, 0.5)
+                        log_ctx = logging_context if logging_context else context
+                        log_ctx.log(f"DT ingest failed: {e}, retrying in {backoff:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                        await asyncio.sleep(backoff)
+                        continue
+                    raise e
         finally:
             await context.sfm_queue.put(batch.self_monitoring)
-
-         

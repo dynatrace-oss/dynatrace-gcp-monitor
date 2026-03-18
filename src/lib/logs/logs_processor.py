@@ -133,7 +133,8 @@ def prepare_context_and_process_message(
             message_publish_time=message.get("message").get("publishTime"),
             sfm_queue=sfm_queue,
         )
-        return _process_message(context, message.get("message"), message.get("ackId"))
+        pubsub_message = message.get("message")
+        return _process_message(context, pubsub_message, message.get("ackId"), pubsub_message.get("messageId"))
     except Exception as exception:
         if not context:
             context = LogsProcessingContext(None, None, sfm_queue)
@@ -153,7 +154,7 @@ def prepare_context_and_process_message(
 
 
 def _process_message(
-    context: LogsProcessingContext, message: Dict[str, Any], ack_id
+    context: LogsProcessingContext, message: Dict[str, Any], ack_id, message_id: Optional[str] = None
 ) -> Optional[LogProcessingJob]:
     data = base64.b64decode(message.get("data"))
     data = data.decode("UTF-8")
@@ -164,6 +165,9 @@ def _process_message(
         put_sfm_into_queue(context)
         return None
     else:
+        # Include Pub/Sub messageId for deduplication tracking
+        if message_id:
+            payload["gcp.pubsub.message_id"] = message_id
         job = LogProcessingJob(json.dumps(payload), context.self_monitoring, ack_id)
         return job
 
@@ -177,7 +181,7 @@ def _create_dt_log_payload(context: LogsProcessingContext, message_data: str) ->
 
     parsed_timestamp = parsed_record.get(ATTRIBUTE_TIMESTAMP, None)
     if _is_log_too_old(parsed_timestamp):
-        context.log(f"Skipping message due to too old timestamp: {parsed_timestamp}")
+        # Don't log per-message - already summarized in SFM as too_old_records
         context.self_monitoring.too_old_records += 1
         return None
 
