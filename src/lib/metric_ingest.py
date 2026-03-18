@@ -315,11 +315,12 @@ async def fetch_metric(
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
 
-    filter_str = f'metric.type = "{metric.google_metric}"'
-    filter_conditions = service.vars.get("filter_conditions", "") if hasattr(service, "vars") else ""
-
-    if filter_conditions:
-        filter_str = f'{filter_str} AND {filter_conditions}'
+    # For autodiscovered metrics, retrieve the filter from the linked base service
+    if metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
+        linked = service.metrics_to_linking.get(metric.google_metric)
+        monitoring_filter = linked.possible_service_linking[0].monitoring_filter if linked and linked.possible_service_linking else ""
+    else:
+        monitoring_filter = service.monitoring_filter
 
     # Ref: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors
     # Combinations: https://cloud.google.com/monitoring/api/v3/kinds-and-types#kind-type-combos
@@ -327,7 +328,7 @@ async def fetch_metric(
     reducer = _set_reducer(metric.google_metric_kind, metric.value_type)
 
     params = [
-        ('filter', filter_str),
+        ('filter', f'metric.type = "{metric.google_metric}" {monitoring_filter}'.strip()),
         ('interval.startTime', start_time.isoformat() + "Z"),
         ('interval.endTime', end_time.isoformat() + "Z"),
         ('aggregation.alignmentPeriod', f"{metric.sample_period_seconds.total_seconds()}s"),
