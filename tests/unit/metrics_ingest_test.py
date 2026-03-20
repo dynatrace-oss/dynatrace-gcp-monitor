@@ -92,6 +92,30 @@ def test_create_dimensions_omits_min_sample_period_override_when_not_overridden(
     assert all(d.name != "dt.min_sample_period_override" for d in dimensions)
 
 
+def test_create_dimensions_includes_override_for_autodiscovered_metric_via_effective_sample_period():
+    context = LoggingContext(None)
+    service_name = "test.autodiscovered"
+    time_series = {
+        "metric": {"labels": {}},
+        "resource": {"labels": {}},
+        "metadata": {"systemLabels": {}, "userLabels": {}},
+    }
+
+    metric = type("MetricStub", (), {})()
+    metric.autodiscovered_metric = True
+    metric.sample_period_overridden = False  # not overridden at Metric construction time
+    metric.sample_period_seconds = timedelta(seconds=60)
+
+    dt_dimensions_mapping = DtDimensionsMap()
+    # Simulate fetch_metric passing an effective_sample_period derived from the linked service override
+    effective_sp = timedelta(seconds=300)
+    dimensions = create_dimensions(context, service_name, time_series, dt_dimensions_mapping, metric, effective_sp)
+
+    override_dims = [d for d in dimensions if d.name == "dt.min_sample_period_override"]
+    assert len(override_dims) == 1
+    assert override_dims[0].value == "300"
+
+
 def test_flatten_and_enrich_metric_results_all_additional_dimensions():
     context_mock = MetricsContext(None, None, "", "", datetime.utcnow(), 0, "", "", False, False, None)
     metric_results = [[IngestLine("entity_id", "m1", "count", 1, 10000, [])]]
