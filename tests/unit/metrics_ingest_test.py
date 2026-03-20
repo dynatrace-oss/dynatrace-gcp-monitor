@@ -12,6 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from datetime import timedelta
+
 from lib.entities.model import CdProperty
 from lib.metric_ingest import *
 from lib.topology.topology import build_entity_id_map
@@ -47,6 +49,47 @@ def test_create_dimension_escapes_quotes_and_removes_control_chars():
     assert "\n" not in dimension_value.value
     assert "\r" not in dimension_value.value
     assert "\t" not in dimension_value.value
+
+
+def test_create_dimensions_includes_min_sample_period_override_when_overridden():
+    context = LoggingContext(None)
+    service_name = "test.service"
+    time_series = {
+        "metric": {"labels": {}},
+        "resource": {"labels": {}},
+        "metadata": {"systemLabels": {}, "userLabels": {}},
+    }
+
+    metric = type("MetricStub", (), {})()
+    metric.autodiscovered_metric = False
+    metric.sample_period_overridden = True
+    metric.sample_period_seconds = timedelta(seconds=120)
+
+    dt_dimensions_mapping = DtDimensionsMap()
+    dimensions = create_dimensions(context, service_name, time_series, dt_dimensions_mapping, metric)
+
+    override_dims = [d for d in dimensions if d.name == "dt.min_sample_period_override"]
+    assert len(override_dims) == 1
+    assert override_dims[0].value == "120"
+
+
+def test_create_dimensions_omits_min_sample_period_override_when_not_overridden():
+    context = LoggingContext(None)
+    service_name = "test.service"
+    time_series = {
+        "metric": {"labels": {}},
+        "resource": {"labels": {}},
+        "metadata": {"systemLabels": {}, "userLabels": {}},
+    }
+
+    metric = type("MetricStub", (), {})()
+    metric.autodiscovered_metric = False
+    metric.sample_period_overridden = False
+    metric.sample_period_seconds = timedelta(seconds=60)
+
+    dt_dimensions_mapping = DtDimensionsMap()
+    dimensions = create_dimensions(context, service_name, time_series, dt_dimensions_mapping, metric)
+    assert all(d.name != "dt.min_sample_period_override" for d in dimensions)
 
 
 def test_flatten_and_enrich_metric_results_all_additional_dimensions():

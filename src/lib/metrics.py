@@ -15,13 +15,13 @@
 #     limitations under the License.
 
 from __future__ import annotations
-import logging
 import re
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import TYPE_CHECKING, List, Optional, Text, Any, Dict
 
 from lib.configuration import config
+from lib.context import LoggingContext
 
 if TYPE_CHECKING:
     from lib.autodiscovery.models import AutodiscoveryResourceLinking
@@ -144,7 +144,6 @@ class Metric:
     autodiscovered_metric: bool
     description: str
     project_ids: List[str]
-    sample_period_overridden: bool
 
     def __init__(self, **kwargs):
         gcp_options = kwargs.get("gcpOptions", {})
@@ -222,10 +221,9 @@ class GCPService:
                 if parsed > 0:
                     min_sp_override = parsed
             except (TypeError, ValueError):
-                logging.warning(
-                    "Invalid minSamplePeriodOverride value %r for service %s; using default of 0",
-                    raw_min_sp_override,
-                    kwargs.get("service", ""),
+                service_name = kwargs.get("service", "")
+                LoggingContext(None).log(
+                    f"Invalid minSamplePeriodOverride value {raw_min_sp_override!r} for service {service_name}; using default of 0"
                 )
 
         object.__setattr__(self, "metrics", [
