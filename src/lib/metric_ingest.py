@@ -14,9 +14,9 @@
 import asyncio
 import gzip
 import time
-from datetime import timezone, datetime
+from datetime import timezone, datetime, timedelta
 from http.client import InvalidURL
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 from lib.configuration import config
 from lib.context import MetricsContext, LoggingContext, DynatraceConnectivity
@@ -316,11 +316,20 @@ async def fetch_metric(
     start_time = (end_time - context.execution_interval)
 
     # For autodiscovered metrics, retrieve the filter from the linked base service
+    linked = None
     if metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
         linked = service.metrics_to_linking.get(metric.google_metric)
         monitoring_filter = linked.possible_service_linking[0].monitoring_filter if linked and linked.possible_service_linking else ""
     else:
         monitoring_filter = service.monitoring_filter
+
+    # For autodiscovered metrics, honour min_sample_period_override from the linked base service
+    effective_sample_period: Optional[timedelta] = None
+    if linked and linked.possible_service_linking:
+        linked_override = linked.possible_service_linking[0].min_sample_period_override
+        if linked_override > 0 and metric.sample_period_seconds.total_seconds() < linked_override:
+            effective_sample_period = timedelta(seconds=linked_override)
+    alignment_period = effective_sample_period if effective_sample_period is not None else metric.sample_period_seconds
 
     # Ref: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors
     # Combinations: https://cloud.google.com/monitoring/api/v3/kinds-and-types#kind-type-combos
@@ -331,7 +340,7 @@ async def fetch_metric(
         ('filter', f'metric.type = "{metric.google_metric}" {monitoring_filter}'.strip()),
         ('interval.startTime', start_time.isoformat() + "Z"),
         ('interval.endTime', end_time.isoformat() + "Z"),
-        ('aggregation.alignmentPeriod', f"{metric.sample_period_seconds.total_seconds()}s"),
+        ('aggregation.alignmentPeriod', f"{alignment_period.total_seconds()}s"),
         ('aggregation.perSeriesAligner', aligner),
         ('aggregation.crossSeriesReducer', reducer)
     ]
@@ -380,7 +389,7 @@ async def fetch_metric(
 
         for single_time_series in page['timeSeries']:
             typed_value_key = _extract_typed_value_key(single_time_series)
-            dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric)
+            dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric, effective_sample_period)
             entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
 
             for point in single_time_series['points']:
@@ -485,13 +494,18 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
 
 
     # "gcp.resource.type" is required to easily differentiate services with the same metric set
-def create_dimensions(context: MetricsContext, service_name: str, time_series: Dict, dt_dimensions_mapping: DtDimensionsMap, metric: Metric) -> List[DimensionValue]:
+def create_dimensions(context: MetricsContext, service_name: str, time_series: Dict, dt_dimensions_mapping: DtDimensionsMap, metric: Metric, effective_sample_period: Optional[timedelta] = None) -> List[DimensionValue]:
     # e.g. internal_tcp_lb_rule and internal_udp_lb_rule
     dt_dimensions = [create_dimension("gcp.resource.type", service_name, context)]
 
     dt_dimensions.append(create_dimension("metadata.origin", "autodiscovery" if metric.autodiscovered_metric else "extension"))
     dt_dimensions.append(create_dimension("dt.security_context", DT_SECURITY_CONTEXT_VALUE))
     dt_dimensions.append(create_dimension(METRIC_SOURCE_DIMENSION_KEY, METRIC_SOURCE_DIMENSION_VALUE))
+
+    if effective_sample_period is not None:
+        dt_dimensions.append(create_dimension("dt.min_sample_period_override", str(int(effective_sample_period.total_seconds())), context))
+    elif getattr(metric, "sample_period_overridden", False):
+        dt_dimensions.append(create_dimension("dt.min_sample_period_override", str(int(metric.sample_period_seconds.total_seconds())), context))
 
     metric_labels = time_series.get('metric', {}).get('labels', {})
     for short_source_label, dim_value in metric_labels.items():

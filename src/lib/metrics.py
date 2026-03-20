@@ -21,6 +21,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, List, Optional, Text, Any, Dict
 
 from lib.configuration import config
+from lib.context import LoggingContext
 
 if TYPE_CHECKING:
     from lib.autodiscovery.models import AutodiscoveryResourceLinking
@@ -137,6 +138,7 @@ class Metric:
     dimensions: List[Dimension]
     ingest_delay: timedelta
     sample_period_seconds: timedelta
+    sample_period_overridden: bool
     value_type: str
     metric_type: str
     autodiscovered_metric: bool
@@ -171,6 +173,21 @@ class Metric:
         else:
             object.__setattr__(self, "sample_period_seconds", timedelta(seconds=60))
 
+        raw_override = kwargs.get("min_sample_period_override", None)
+        try:
+            min_sample_period_override = int(raw_override) if raw_override is not None else 0
+        except (TypeError, ValueError):
+            min_sample_period_override = 0
+
+        if (
+            min_sample_period_override > 0
+            and self.sample_period_seconds.total_seconds() < min_sample_period_override
+        ):
+            object.__setattr__(self, "sample_period_seconds", timedelta(seconds=min_sample_period_override))
+            object.__setattr__(self, "sample_period_overridden", True)
+        else:
+            object.__setattr__(self, "sample_period_overridden", False)
+
 
 class GCPService:
     """Describes singular GCP service to ingest data from."""
@@ -184,6 +201,7 @@ class GCPService:
     metrics:  List[Metric]
     monitoring_filter: Text
     activation: Dict[Text, Any]
+    min_sample_period_override: int
     is_enabled: bool
     extension_name: str
     autodiscovery_enabled: bool
@@ -194,13 +212,28 @@ class GCPService:
         object.__setattr__(self, "technology_name", kwargs.get("tech_name", "N/A"))
         object.__setattr__(self, "dimensions", [Dimension(**x) for x in kwargs.get("dimensions", {})])
 
+        activation = kwargs.get("activation", {})
+        raw_min_sp_override = activation.get("minSamplePeriodOverride")
+        min_sp_override = 0
+        if raw_min_sp_override is not None:
+            try:
+                parsed = int(raw_min_sp_override)
+                if parsed > 0:
+                    min_sp_override = parsed
+            except (TypeError, ValueError):
+                service_name = kwargs.get("service", "")
+                LoggingContext(None).log(
+                    f"Invalid minSamplePeriodOverride value {raw_min_sp_override!r} for service {service_name}; using default of 0"
+                )
+
         object.__setattr__(self, "metrics", [
-            Metric(**x)
+            Metric(**x, min_sample_period_override=min_sp_override)
             for x
             in kwargs.get("metrics", {})
             if x.get("gcpOptions", {}).get("valueType", "").upper() != "STRING"
         ])
-        object.__setattr__(self, "activation", kwargs.get("activation", {}))
+        object.__setattr__(self, "activation", activation)
+        object.__setattr__(self, "min_sample_period_override", min_sp_override)
 
         # Apply default activation variables to monitoring filter
         monitoring_filter = kwargs.get("gcpMonitoringFilter", "var:filter_conditions")

@@ -83,6 +83,58 @@ Worker function execution can be tweaked with environment variables. In Google F
 | PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES | Maximum number of messages to be retrieved per pull request. 1000 is the maximum allowed by GCP                  | 1000                     |
 
 
+## Reducing data point volume with `minSamplePeriodOverride` [EXPERIMENTAL]
+
+### Problem
+Each GCP metric has a `samplePeriod` defined in the extension (typically 60 seconds). The monitor uses this as the `alignmentPeriod` when querying the GCP Monitoring API. For large environments with many services and instances, the resulting data volume can be significant.
+
+### Solution
+`minSamplePeriodOverride` is an **optional per-service** setting in `values.yaml` (or `ACTIVATION_CONFIG` JSON) that overrides the minimum `alignmentPeriod` for all metrics of a given service. When set, any metric whose extension-defined `samplePeriod` is lower than this value will use the override instead.
+
+This effectively reduces the number of data points fetched from GCP and ingested into Dynatrace, lowering both API usage and DDU consumption.
+
+### How it works
+- The override applies **only** when the configured value is **greater than** the metric's original `samplePeriod`
+- Metrics with a `samplePeriod` already equal to or higher than the override are unaffected
+- A `dt.min_sample_period_override` dimension is added to ingest lines **only** when the override is active, allowing you to filter/identify overridden metrics in DQL
+
+### Configuration (Helm / `values.yaml`)
+
+In `gcpServicesYaml`, add `minSamplePeriodOverride` (in seconds) to any service:
+
+```yaml
+gcpServicesYaml: |
+  services:
+    - service: gce_instance
+      featureSets:
+        - default_metrics
+      minSamplePeriodOverride: 300   # align all metrics to at least 5 minutes
+      vars:
+        filter_conditions: ""
+    - service: cloudsql_database
+      featureSets:
+        - default_metrics
+      minSamplePeriodOverride: 600   # align all metrics to at least 10 minutes
+      vars:
+        filter_conditions: ""
+```
+
+### Validation
+You can verify the override is working by checking the container logs for:
+```
+Ingest lines count: <N> lines to push
+```
+With a higher `minSamplePeriodOverride`, you should see fewer ingest lines per polling cycle.
+
+Additionally, in Dynatrace DQL, you can query for overridden metrics:
+```
+timeseries avg(cloud.gcp.compute_googleapis_com.instance.cpu.utilization), filter: dt.min_sample_period_override == "300"
+```
+
+### Impact
+In our testing, setting `minSamplePeriodOverride: 600` (10 minutes) on all services reduced ingest lines by ~81% and polling time by ~62% compared to the default 60-second alignment.
+
+
 ## Building custom extension for Google Cloud service
 ### Introduction
 Building a custom extension for GCP service allows customizing metrics/dimensions that are ingested to Dynatrace AND/OR to ingest metrics for services not officially supported by Dynatrace extensions. 
