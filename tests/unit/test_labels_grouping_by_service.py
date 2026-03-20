@@ -36,11 +36,10 @@ def _set_groupings(service, configured_services_to_group, metric=None):
         and isinstance(service, AutodiscoveryGCPService)
     ):
         linked = service.metrics_to_linking.get(metric.google_metric)
-        service_name = (
-            linked.possible_service_linking[0].name
-            if linked and linked.possible_service_linking
-            else None
-        )
+        if linked and linked.possible_service_linking:
+            service_name = linked.possible_service_linking[0].name
+        else:
+            service_name = service.metrics_to_resources.get(metric.google_metric)
 
     groupings = []
     for configured_service_to_group in configured_services_to_group:
@@ -104,6 +103,26 @@ def test_unlinked_autodiscovery_metric_falls_back_to_no_grouping():
     assert _set_groupings(
         autodiscovery_service, configured_services_to_group, metric
     ) == [NO_GROUPING_CATEGORY]
+
+
+def test_standalone_autodiscovery_metric_uses_resource_name():
+    metric = _create_metric(
+        "redis.googleapis.com/cluster/memory/average_utilization",
+        autodiscovered_metric=True,
+    )
+    autodiscovery_service = AutodiscoveryGCPService()
+    autodiscovery_service.set_metrics(
+        {"redis_cluster": [metric]},
+        {"redis_cluster": None},
+        {},
+    )
+    configured_services_to_group = [
+        {"service": "redis_cluster", "groupings": {"env,team"}}
+    ]
+
+    assert _set_groupings(
+        autodiscovery_service, configured_services_to_group, metric
+    ) == ["env,team"]
 
 
 def test_multiple_groupings_are_preserved_for_linked_service():

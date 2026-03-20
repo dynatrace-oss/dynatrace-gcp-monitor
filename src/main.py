@@ -283,7 +283,10 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         service_name = service.name
         if metric and metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
             linked = service.metrics_to_linking.get(metric.google_metric)
-            service_name = linked.possible_service_linking[0].name if linked and linked.possible_service_linking else None
+            if linked and linked.possible_service_linking:
+                service_name = linked.possible_service_linking[0].name
+            else:
+                service_name = service.metrics_to_resources.get(metric.google_metric)
 
         groupings = []
         for configured_service_to_group in configured_services_to_group:
