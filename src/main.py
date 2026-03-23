@@ -29,7 +29,7 @@ from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
 from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
-from lib.metrics import GCPService, Metric, IngestLine
+from lib.metrics import GCPService, Metric, IngestLine, AutodiscoveryGCPService
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
 from lib.topology.topology import fetch_topology, build_entity_id_map
@@ -279,7 +279,15 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
         return found_excluded_metric and not found_excluded_metric.get("dimensions")
 
-    def set_groupings(service_name: str):
+    def set_groupings(service: GCPService, metric: Optional[Metric] = None):
+        service_name = service.name
+        if metric and metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
+            linked = service.metrics_to_linking.get(metric.google_metric)
+            if linked and linked.possible_service_linking:
+                service_name = linked.possible_service_linking[0].name
+            else:
+                service_name = service.metrics_to_resources.get(metric.google_metric)
+
         groupings = []
         for configured_service_to_group in configured_services_to_group:
             if configured_service_to_group.get("service") == service_name:
@@ -318,9 +326,9 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             skipped_services_with_no_instances.append(f"{service.name}/{service.feature_set}")
             continue  # skip fetching the metrics because there are no instances
 
-        labels_groupings = set_groupings(service.name)
-        for grouping in labels_groupings:
-            for metric in service.metrics:
+        for metric in service.metrics:
+            labels_groupings = set_groupings(service, metric)
+            for grouping in labels_groupings:
                 if should_exclude_metric(metric):
                     context.log(f"Skipping fetching all the data for the metric {metric.google_metric}")
                     continue
