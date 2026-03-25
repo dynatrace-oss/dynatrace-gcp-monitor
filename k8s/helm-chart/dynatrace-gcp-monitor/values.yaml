@@ -222,14 +222,19 @@ excludedMetricsAndDimensions: |
 # Metrics queries will be sent per grouping, according to the GroupBy behavior of Google Metric Explorer.
 # NOTE: Be careful while defining mutually exclusive groupings not to query metrics more than once.
 # Example:
-# This applies only to SQL DB resources (the rest maintain default behavior, no changes). Instances with both labels will be monitored (metrics will be decorated with dimensions from both labels).
-# Metrics from instances which do NOT have these 2 labels will be dropped (since they do not belong to the defined grouping).
+# Use the extension service name for regular metrics (for example cloudsql_database).
+# For standalone autodiscovery resources from autodiscoveryResourcesYaml, use the GCP monitored resource type (for example redis.googleapis.com/Cluster).
+# Instances with both labels will be monitored and metrics will be decorated with dimensions from both labels.
+# Metrics from instances which do NOT have these labels will be dropped because they do not belong to the defined grouping.
 #
 # labelsGroupingByService: |
 #   services:
 #   - service: cloudsql_database
 #     groupings:
 #       - stage,owner
+#   - service: redis.googleapis.com/Cluster
+#     groupings:
+#       - env,team
 #
 labelsGroupingByService: |
   services:

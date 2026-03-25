@@ -65,7 +65,11 @@ async def fetch_resource_descriptors(
             response = await gcp_session.request("GET", url=url, headers=headers, params=params)
 
             if response.status != 200:
-                break
+                logging_context.error(
+                    f"Failed to fetch resource descriptor for '{resource}' "
+                    f"in project '{project_id}': HTTP {response.status}"
+                )
+                continue
             descriptor = await response.json()
 
             type_key = descriptor["type"]

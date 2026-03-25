@@ -29,6 +29,8 @@ if TYPE_CHECKING:
 VARIABLE_BRACKETS_PATTERN=re.compile("{{.*?}}")
 VARIABLE_VAR_PATTERN=re.compile("var:\\S+")
 
+_autodiscovery_logging_context = LoggingContext("AUTODISCOVERY")
+
 ALLOWED_METRIC_DIMENSION_VALUE_LENGTH = config.gcp_allowed_metric_dimension_value_length()
 ALLOWED_METRIC_KEY_LENGTH = config.gcp_allowed_metric_key_length()
 ALLOWED_METRIC_DIMENSION_KEY_LENGTH = config.gcp_allowed_metric_dimension_key_length()
@@ -299,6 +301,11 @@ class AutodiscoveryGCPService(GCPService):
         if metric_resource in self.resource_dimensions:
             return self.resource_dimensions[metric_resource]
 
+        _autodiscovery_logging_context.error(
+            f"No dimensions found for autodiscovered metric '{metric.google_metric}' "
+            f"(resource='{metric_resource}'). Metric will be queried without groupByFields, "
+            f"which may cause missing resource labels."
+        )
         return []
 
     def get_name(self, metric) -> str:
