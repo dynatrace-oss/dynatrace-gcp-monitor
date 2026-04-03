@@ -86,7 +86,7 @@ def test_batch_self_monitoring():
     log_sfm.parsing_errors = 1
     log_sfm.records_with_too_long_content = 1
     log_sfm.all_requests = 1
-    log_sfm.dynatrace_connectivity = ['None']
+    log_sfm.dt_connectivity = [200]
     log_sfm.processing_time = 1
     log_sfm.pulling_time = 1
     log_sfm.sending_time = 1
@@ -109,7 +109,7 @@ def test_batch_self_monitoring():
         assert batches[0].self_monitoring.parsing_errors == 100
         assert batches[0].self_monitoring.records_with_too_long_content == 100
         assert batches[0].self_monitoring.all_requests == 100
-        assert len(batches[0].self_monitoring.dynatrace_connectivity) == 100
+        assert len(batches[0].self_monitoring.dt_connectivity) == 100
         assert batches[0].self_monitoring.processing_time == 100
         assert batches[0].self_monitoring.pulling_time == 100
         assert batches[0].self_monitoring.sending_time == 100
