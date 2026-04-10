@@ -38,6 +38,7 @@ class AutodiscoveryContext:
         self.autodiscovery_metric_block_list = []
         self.last_autodiscovered_metric_list_names = {}
         self.autodiscovery_enabled = True
+        self._loaded_successfully = False
 
         self._load_yamls()
 
@@ -49,26 +50,38 @@ class AutodiscoveryContext:
                 autodiscovery_config.get("autodicovery_config", {}),
             )
             resource_to_disovery = config_section.get("searched_resources", {})
-            self.resource_to_disovery = (
+            new_resource_to_disovery = (
                 resource_to_disovery if resource_to_disovery is not None else {}
             )
 
-            self.resources_to_extensions_mapping = get_resources_mapping()
-            self.services_to_resources_mapping = get_services_to_resources()
+            new_resources_to_extensions_mapping = get_resources_mapping()
+            new_services_to_resources_mapping = get_services_to_resources()
             autodiscovery_metric_block_list = read_autodiscovery_block_list_yaml().get(
                 "block_list", []
             )
-            self.autodiscovery_metric_block_list = (
+            new_autodiscovery_metric_block_list = (
                 autodiscovery_metric_block_list
                 if autodiscovery_metric_block_list is not None
                 else []
             )
 
+            self.resource_to_disovery = new_resource_to_disovery
+            self.resources_to_extensions_mapping = new_resources_to_extensions_mapping
+            self.services_to_resources_mapping = new_services_to_resources_mapping
+            self.autodiscovery_metric_block_list = new_autodiscovery_metric_block_list
+            self._loaded_successfully = True
+            self.autodiscovery_enabled = True
+
         except Exception as e:
-            self.logging_context.log(
-                f"Error during init autodiscovery config. Autodiscovery is now disabled; {type(e).__name__} : {e}\n  {traceback.format_exc()}"
-            )
-            self.autodiscovery_enabled = False
+            if not self._loaded_successfully:
+                self.logging_context.log(
+                    f"Error during init autodiscovery config. Autodiscovery is now disabled; {type(e).__name__} : {e}\n  {traceback.format_exc()}"
+                )
+                self.autodiscovery_enabled = False
+            else:
+                self.logging_context.log(
+                    f"Error reloading autodiscovery config, keeping previous configuration; {type(e).__name__} : {e}"
+                )
 
     async def _get_resources_from_config(self) -> Dict[str, AutodiscoveryResourceLinking]:
         """
@@ -120,7 +133,7 @@ class AutodiscoveryContext:
                         autodiscovery.disabled_services_for_resource.append(service)
 
                     resources[resource] = autodiscovery
-        
+
         # Filter if there are any resouce linking for all resources
         resources = {resource: linking for resource, linking in resources.items() if len(linking.possible_service_linking) > 0}
 
@@ -145,6 +158,8 @@ class AutodiscoveryContext:
         resources for monitoring. If resources are discovered, it returns AutodiscoveryGCPService
         containing the discovered metrics and resource dimensions.
         """
+        self._load_yamls()
+
         if not self.autodiscovery_enabled:
             return None
 
