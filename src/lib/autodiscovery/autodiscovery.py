@@ -38,6 +38,7 @@ class AutodiscoveryContext:
         self.autodiscovery_metric_block_list = []
         self.last_autodiscovered_metric_list_names = {}
         self.autodiscovery_enabled = True
+        self._loaded_successfully = False
 
         self._load_yamls()
 
@@ -68,9 +69,11 @@ class AutodiscoveryContext:
             self.resources_to_extensions_mapping = new_resources_to_extensions_mapping
             self.services_to_resources_mapping = new_services_to_resources_mapping
             self.autodiscovery_metric_block_list = new_autodiscovery_metric_block_list
+            self._loaded_successfully = True
+            self.autodiscovery_enabled = True
 
         except Exception as e:
-            if not self.resource_to_disovery and not self.autodiscovery_metric_block_list:
+            if not self._loaded_successfully:
                 self.logging_context.log(
                     f"Error during init autodiscovery config. Autodiscovery is now disabled; {type(e).__name__} : {e}\n  {traceback.format_exc()}"
                 )
@@ -155,10 +158,10 @@ class AutodiscoveryContext:
         resources for monitoring. If resources are discovered, it returns AutodiscoveryGCPService
         containing the discovered metrics and resource dimensions.
         """
+        self._load_yamls()
+
         if not self.autodiscovery_enabled:
             return None
-
-        self._load_yamls()
 
         resources_to_discovery = await self._check_resources_to_discover(services)
 
