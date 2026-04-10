@@ -332,3 +332,136 @@ def test_autodiscovery_load_yamls_supports_legacy_typo_key(
 
     assert autodiscovery_context.autodiscovery_enabled is True
     assert autodiscovery_context.resource_to_disovery == ["resource_legacy_1"]
+
+
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_block_list_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_resources_mapping")
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_config_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_services_to_resources")
+def test_load_yamls_reload_success(
+    mock_get_services_to_resources,
+    mock_read_autodiscovery_config_yaml,
+    mock_get_resources_mapping,
+    mock_read_autodiscovery_block_list_yaml,
+):
+    """Calling _load_yamls() a second time with different data updates state."""
+    mock_get_services_to_resources.return_value = {}
+    mock_get_resources_mapping.return_value = {}
+    mock_read_autodiscovery_config_yaml.return_value = {
+        "autodiscovery_config": {"searched_resources": ["resource_v1"]}
+    }
+    mock_read_autodiscovery_block_list_yaml.return_value = {"block_list": ["blocked_v1"]}
+
+    ctx = AutodiscoveryContext()
+    assert ctx.resource_to_disovery == ["resource_v1"]
+    assert ctx.autodiscovery_metric_block_list == ["blocked_v1"]
+
+    # Simulate config change on disk
+    mock_read_autodiscovery_config_yaml.return_value = {
+        "autodiscovery_config": {"searched_resources": ["resource_v2", "resource_v3"]}
+    }
+    mock_read_autodiscovery_block_list_yaml.return_value = {"block_list": ["blocked_v2"]}
+
+    ctx._load_yamls()
+
+    assert ctx.resource_to_disovery == ["resource_v2", "resource_v3"]
+    assert ctx.autodiscovery_metric_block_list == ["blocked_v2"]
+    assert ctx.autodiscovery_enabled is True
+
+
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_block_list_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_resources_mapping")
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_config_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_services_to_resources")
+def test_load_yamls_reload_failure_keeps_previous(
+    mock_get_services_to_resources,
+    mock_read_autodiscovery_config_yaml,
+    mock_get_resources_mapping,
+    mock_read_autodiscovery_block_list_yaml,
+):
+    """When reload fails, the previous configuration is retained."""
+    mock_get_services_to_resources.return_value = {}
+    mock_get_resources_mapping.return_value = {}
+    mock_read_autodiscovery_config_yaml.return_value = {
+        "autodiscovery_config": {"searched_resources": ["resource_v1"]}
+    }
+    mock_read_autodiscovery_block_list_yaml.return_value = {"block_list": ["blocked_v1"]}
+
+    ctx = AutodiscoveryContext()
+    assert ctx.resource_to_disovery == ["resource_v1"]
+
+    # Simulate broken config file
+    mock_read_autodiscovery_config_yaml.side_effect = Exception("YAML parse error")
+
+    ctx._load_yamls()
+
+    assert ctx.resource_to_disovery == ["resource_v1"]
+    assert ctx.autodiscovery_metric_block_list == ["blocked_v1"]
+    assert ctx.autodiscovery_enabled is True
+
+
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_block_list_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_resources_mapping")
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_config_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_services_to_resources")
+def test_load_yamls_reload_recovery(
+    mock_get_services_to_resources,
+    mock_read_autodiscovery_config_yaml,
+    mock_get_resources_mapping,
+    mock_read_autodiscovery_block_list_yaml,
+):
+    """After a failed reload, a subsequent successful reload updates state."""
+    mock_get_services_to_resources.return_value = {}
+    mock_get_resources_mapping.return_value = {}
+    mock_read_autodiscovery_config_yaml.return_value = {
+        "autodiscovery_config": {"searched_resources": ["resource_v1"]}
+    }
+    mock_read_autodiscovery_block_list_yaml.return_value = {"block_list": []}
+
+    ctx = AutodiscoveryContext()
+    assert ctx.resource_to_disovery == ["resource_v1"]
+
+    # Simulate broken reload
+    mock_read_autodiscovery_config_yaml.side_effect = Exception("broken")
+    ctx._load_yamls()
+    assert ctx.resource_to_disovery == ["resource_v1"]
+
+    # Simulate recovery
+    mock_read_autodiscovery_config_yaml.side_effect = None
+    mock_read_autodiscovery_config_yaml.return_value = {
+        "autodiscovery_config": {"searched_resources": ["resource_v3"]}
+    }
+    mock_read_autodiscovery_block_list_yaml.return_value = {"block_list": ["blocked_v3"]}
+
+    ctx._load_yamls()
+
+    assert ctx.resource_to_disovery == ["resource_v3"]
+    assert ctx.autodiscovery_metric_block_list == ["blocked_v3"]
+    assert ctx.autodiscovery_enabled is True
+
+
+@pytest.mark.asyncio
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_block_list_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_resources_mapping")
+@patch("lib.autodiscovery.autodiscovery.read_autodiscovery_config_yaml")
+@patch("lib.autodiscovery.autodiscovery.get_services_to_resources")
+async def test_get_autodiscovery_service_reloads_yamls(
+    mock_get_services_to_resources,
+    mock_read_autodiscovery_config_yaml,
+    mock_get_resources_mapping,
+    mock_read_autodiscovery_block_list_yaml,
+):
+    """get_autodiscovery_service() calls _load_yamls() to pick up config changes."""
+    mock_get_services_to_resources.return_value = {}
+    mock_get_resources_mapping.return_value = {}
+    mock_read_autodiscovery_config_yaml.return_value = {
+        "autodiscovery_config": {"searched_resources": []}
+    }
+    mock_read_autodiscovery_block_list_yaml.return_value = {"block_list": []}
+
+    ctx = AutodiscoveryContext()
+    assert mock_read_autodiscovery_config_yaml.call_count == 1
+
+    await ctx.get_autodiscovery_service([])
+
+    assert mock_read_autodiscovery_config_yaml.call_count == 2
