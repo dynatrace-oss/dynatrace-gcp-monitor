@@ -468,6 +468,7 @@ async def test_get_autodiscovery_service_reloads_yamls(
 
 
 @pytest.mark.asyncio
+@patch("lib.autodiscovery.autodiscovery.AutodiscoveryContext._check_resources_to_discover", return_value={})
 @patch("lib.autodiscovery.autodiscovery.read_autodiscovery_block_list_yaml")
 @patch("lib.autodiscovery.autodiscovery.get_resources_mapping")
 @patch("lib.autodiscovery.autodiscovery.read_autodiscovery_config_yaml")
@@ -477,6 +478,7 @@ async def test_get_autodiscovery_service_recovers_after_init_failure(
     mock_read_autodiscovery_config_yaml,
     mock_get_resources_mapping,
     mock_read_autodiscovery_block_list_yaml,
+    mock_check_resources,
 ):
     """If init fails and disables autodiscovery, a fixed config re-enables it on next cycle."""
     mock_get_services_to_resources.return_value = {}
