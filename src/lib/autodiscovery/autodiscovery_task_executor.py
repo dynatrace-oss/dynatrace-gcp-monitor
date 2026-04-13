@@ -68,11 +68,8 @@ class AutodiscoveryTaskExecutor:
 
         self.cached_services = services[:]
         
-        if autodiscovery_manager.autodiscovery_enabled:
-            self.is_task_running = True
-            self.autodiscovery_task = asyncio.create_task(self._init_autodiscovery_task())
-        else:
-            self.is_task_running = False
+        self.is_task_running = True
+        self.autodiscovery_task = asyncio.create_task(self._init_autodiscovery_task())
         self.time_since_last_autodiscovery = datetime.now()
         self.lock = asyncio.Lock()
         self.notify_event = asyncio.Event()
