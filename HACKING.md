@@ -83,6 +83,38 @@ Worker function execution can be tweaked with environment variables. In Google F
 | PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES | Maximum number of messages to be retrieved per pull request. 1000 is the maximum allowed by GCP                  | 1000                     |
 
 
+## Hot-reloadable configuration (no pod restart)
+
+The Helm chart uses two ConfigMaps to separate values that require a pod restart from those that can be picked up at runtime:
+
+| ConfigMap | Purpose |
+| --- | --- |
+| `dynatrace-gcp-monitor-config` (static) | Secrets references, proxy/certs, image, resources, queryInterval, deploymentType, log settings. Changes trigger a pod rollout via the `checksum/config` annotation. |
+| `dynatrace-gcp-monitor-config-dynamic` (dynamic) | Monitoring-scope configuration mounted as files. The running pod re-reads these on every polling cycle — no restart needed. |
+
+### Hot-reloadable values
+
+The following Helm values are hot-reloadable. After `helm upgrade`, changes propagate to the pod within **1–2 polling cycles** (~60–90 s for Kubernetes ConfigMap propagation + the polling/autodiscovery interval):
+
+| Helm value | Notes |
+| --- | --- |
+| `gcpServicesYaml` | Requires `keepRefreshingExtensionsConfig: "true"` (the default) |
+| `excludedMetricsAndDimensions` | |
+| `labelsGroupingByService` | |
+| `autodiscoveryResourcesYaml` | Re-read each autodiscovery cycle |
+| `autodiscoveryBlockListYaml` | Re-read each autodiscovery cycle |
+
+All other values remain in the static ConfigMap and continue to require a pod restart.
+
+### Upgrade from a single-ConfigMap chart
+
+The first `helm upgrade` from a chart version that had a single ConfigMap to the new dual-ConfigMap chart **will** trigger a one-time pod restart because the static ConfigMap's content (and therefore its checksum) changes. Subsequent upgrades that modify only hot-reloadable values will not cause a restart.
+
+### Failure handling
+
+If a hot-reloadable config file contains invalid YAML at runtime, the pod **does not crash**. The previous valid configuration is retained and an error is logged.
+
+
 ## Reducing data point volume with `minSamplePeriodOverride` [EXPERIMENTAL]
 
 ### Problem
