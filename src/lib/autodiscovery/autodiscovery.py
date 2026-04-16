@@ -34,7 +34,8 @@ class AutodiscoveryContext:
 
     def __init__(self):
         self.resource_to_disovery = {}
-        self.resources_to_extensions_mapping = {}
+        self.resources_to_extensions_mapping = get_resources_mapping()
+        self.services_to_resources_mapping = get_services_to_resources()
         self.autodiscovery_metric_block_list = []
         self.last_autodiscovered_metric_list_names = {}
         self.autodiscovery_enabled = True
@@ -54,8 +55,6 @@ class AutodiscoveryContext:
                 resource_to_disovery if resource_to_disovery is not None else {}
             )
 
-            new_resources_to_extensions_mapping = get_resources_mapping()
-            new_services_to_resources_mapping = get_services_to_resources()
             autodiscovery_metric_block_list = read_autodiscovery_block_list_yaml().get(
                 "block_list", []
             )
@@ -66,8 +65,6 @@ class AutodiscoveryContext:
             )
 
             self.resource_to_disovery = new_resource_to_disovery
-            self.resources_to_extensions_mapping = new_resources_to_extensions_mapping
-            self.services_to_resources_mapping = new_services_to_resources_mapping
             self.autodiscovery_metric_block_list = new_autodiscovery_metric_block_list
             self._loaded_successfully = True
             self.autodiscovery_enabled = True
@@ -80,7 +77,7 @@ class AutodiscoveryContext:
                 self.autodiscovery_enabled = False
             else:
                 self.logging_context.log(
-                    f"Error reloading autodiscovery config, keeping previous configuration; {type(e).__name__} : {e}"
+                    f"Error reloading autodiscovery config, keeping previous configuration; {type(e).__name__} : {e}\n  {traceback.format_exc()}"
                 )
 
     async def _get_resources_from_config(self) -> Dict[str, AutodiscoveryResourceLinking]:
