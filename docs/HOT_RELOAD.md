@@ -18,18 +18,6 @@ After `helm upgrade`:
 
 The dynamic ConfigMap is mounted as a volume at `/code/config/activation/` inside the container. Kubernetes automatically updates mounted ConfigMap files when the ConfigMap changes — the application simply re-reads them from disk on each cycle.
 
-### Where the re-read happens in code
-
-| Value | Read function | Called from |
-|---|---|---|
-| `gcpServicesYaml` | `read_activation_yaml()` → `safe_read_yaml()` | `prepare_services_config_for_next_polling()` — runs every polling cycle when `KEEP_REFRESHING_EXTENSIONS_CONFIG=true` (default) |
-| `excludedMetricsAndDimensions` | `read_filter_out_list_yaml()` → `safe_read_yaml()` | `async_dynatrace_gcp_extension()` — beginning of each polling cycle |
-| `labelsGroupingByService` | `read_labels_grouping_by_service_yaml()` → `safe_read_yaml()` | `fetch_ingest_lines_task()` — beginning of each polling cycle |
-| `autodiscoveryResourcesYaml` | `read_autodiscovery_config_yaml()` → `safe_read_yaml()` | `AutodiscoveryContext._load_yamls()` — beginning of each autodiscovery cycle |
-| `autodiscoveryBlockListYaml` | `read_autodiscovery_block_list_yaml()` → `safe_read_yaml()` | `AutodiscoveryContext._load_yamls()` — beginning of each autodiscovery cycle |
-
-All reads go through `safe_read_yaml()` in `src/lib/utilities.py`, which opens the file fresh from disk every time it is called.
-
 ## What Can Be Hot-Reloaded
 
 | Helm value | File in container | Notes |
@@ -61,7 +49,7 @@ After running `helm upgrade`:
 
 In practice, expect changes to be active within **1–2 polling cycles** after `helm upgrade`, i.e. roughly **60–120 seconds** with default settings.
 
-For autodiscovery values, the cadence is controlled by `AUTODISCOVERY_QUERY_INTERVAL` (default: 60 seconds).
+For autodiscovery values, the cadence is controlled by `AUTODISCOVERY_QUERY_INTERVAL` (default: 60 minutes).
 
 ## Failure Handling
 
