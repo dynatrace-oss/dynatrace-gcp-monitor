@@ -38,6 +38,10 @@ def safe_read_yaml(filepath: str, alternative_environ_name: str):
     except Exception as e:
         if isinstance(e, yaml.YAMLError):
             logging_context.t_error(str(e))
+        else:
+            logging_context.log(
+                f"Could not read config file '{filepath}', falling back to env var '{alternative_environ_name}'"
+            )
         yaml_dict = yaml.safe_load(os.environ.get(alternative_environ_name, ""))
     if not yaml_dict:
         yaml_dict = {}

@@ -196,6 +196,7 @@ includedProjects: ""
 # This parameter is only applicable to Standard deployments (with other projects metrics scope disabled)
 includedProjectsByPrefix: ""
 # excludedMetricsAndDimensions: structure containing the metrics and dimensions that will be excluded from monitoring.
+# HOT-RELOADABLE: Changes to this value take effect without pod restart (within 1-2 polling cycles, ~60-90s ConfigMap propagation + polling interval).
 # If you want to exclude a metric, add a "metric" entry. Any global metric matching its prefix will not be ingested.
 # If you want to exclude dimensions from a specific metric, add the "metric" entry and specify the dimensions. Selected dimensions will be cut off and the metric will be ingested without them.
 # Example:
@@ -218,6 +219,7 @@ excludedMetricsAndDimensions: |
 #       - dimension_A
 #
 # (PREVIEW FEATURE) labelsGroupingByService: structure of groups by which metrics will be queried per service. Groups are based on user metadata labels on the resources.
+# HOT-RELOADABLE: Changes to this value take effect without pod restart (within 1-2 polling cycles, ~60-90s ConfigMap propagation + polling interval).
 # Ref: https://cloud.google.com/resource-manager/docs/labels-overview
 # Metrics queries will be sent per grouping, according to the GroupBy behavior of Google Metric Explorer.
 # NOTE: Be careful while defining mutually exclusive groupings not to query metrics more than once.
@@ -253,6 +255,8 @@ metricResources:
 # metricAutodiscovery: If true additional metrics not listed in extensions will be automatically detected and monitored
 metricAutodiscovery: "false"
 # configuration file for GCP services
+# HOT-RELOADABLE: Changes to this value take effect without pod restart (within 1-2 polling cycles,
+#   ~60-90s ConfigMap propagation + polling interval). Requires keepRefreshingExtensionsConfig: "true".
 gcpServicesYaml: |
   # filter_conditions with https://cloud.google.com/monitoring/api/v3/filters?hl=en_US syntax
   #
