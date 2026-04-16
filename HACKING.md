@@ -85,6 +85,8 @@ Worker function execution can be tweaked with environment variables. In Google F
 
 ## Hot-reloadable configuration (no pod restart)
 
+> For the full guide — code-level details, failure handling, and usage examples — see [docs/HOT_RELOAD.md](docs/HOT_RELOAD.md).
+
 The Helm chart uses two ConfigMaps to separate values that require a pod restart from those that can be picked up at runtime:
 
 | ConfigMap | Purpose |
