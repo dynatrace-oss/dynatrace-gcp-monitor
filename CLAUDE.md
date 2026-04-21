@@ -1,1 +1,1 @@
-See AGENTS.MD for all project guidelines, architecture, and conventions.
+@AGENTS.md

@@ -15,7 +15,7 @@
 | Document | Description |
 |---|---|
 | [README.md](../README.md) | Project overview, deployment links, pricing, support |
-| [AGENTS.md](../AGENTS.md) | AI agent reference — build commands, module map, workflow rules |
+| [AGENTS.md](../AGENTS.md) | AI agent reference — module map, workflow rules, key commands |
 | [HACKING.md](../HACKING.md) | Environment variables, local run modes, experimental features |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | How to add dashboards and GCP service support |
 | [MIGRATION-V1.md](../MIGRATION-V1.md) | Migration guide from 0.1.x to 1.0.x |
@@ -24,4 +24,4 @@
 
 | File | Scope |
 |---|---|
-| [AGENTS.md](../AGENTS.md) | All AI agents — project overview, build commands, structure, workflow rules |
+| [AGENTS.md](../AGENTS.md) | All AI agents — project overview, structure, workflow rules, key commands |

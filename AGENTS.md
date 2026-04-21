@@ -13,18 +13,14 @@ Dynatrace GCP Monitor pulls metrics and logs from Google Cloud Platform and inge
 |---|---|
 | Install deps | `pip install -r src/requirements.txt -r tests/requirements.txt -r requirements-dev.txt` |
 | Set PYTHONPATH | `export PYTHONPATH="src:tests"` |
-| Unit tests | `pytest tests/unit -v` |
-| Single test file | `pytest tests/unit/test_utilities.py -v` |
-| Single test | `pytest tests/unit/test_utilities.py::test_safe_read_yaml_reads_file_successfully -v` |
-| Integration (logs) | `pytest tests/integration/logs -v` |
 | Integration (metrics) | `cd tests/integration/metrics && pytest -v` |
-| Lint | `flake8 src/` |
-| Docker build | `docker build -t dynatrace-gcp-monitor .` |
 
 **Python version**: 3.12
-**Line length**: 100 (configured in `setup.cfg`)
+**Line length**: 100 (non-default, configured in `setup.cfg`)
 
 > ⚠️ Metrics integration tests **must** run from `tests/integration/metrics/` — WireMock loads relative `mappings/` and `__files/` directories.
+
+Full commands (unit tests, lint, Docker): [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 
 ## Source Structure
 
