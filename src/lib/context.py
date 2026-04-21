@@ -31,6 +31,7 @@ from operation_mode import OperationMode
 LOG_THROTTLING_LIMIT_PER_MESSAGE = 10
 
 
+# DynatraceConnectivity enum is used by METRICS ingestion (metric_ingest.py)
 class DynatraceConnectivity(enum.Enum):
     Ok = 0
     ExpiredToken = 1
@@ -39,6 +40,11 @@ class DynatraceConnectivity(enum.Enum):
     InvalidInput = 4
     TooManyRequests = 5
     Other = 6
+
+
+# For LOGS ingestion: HTTP status codes tracked directly for simplicity
+# - dt_connectivity: list of HTTP status codes from Dynatrace API calls (0 = network error)
+# - gcp_connectivity: list of HTTP status codes from GCP Pub/Sub API calls (0 = network error)
 
 
 def create_logs_context(sfm_queue: Queue):
