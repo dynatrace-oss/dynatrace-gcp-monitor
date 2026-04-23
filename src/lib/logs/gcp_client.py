@@ -148,13 +148,13 @@ class GCPClient:
         ack_ids: List[str],
         gcp_session: ClientSession,
         logging_context: LoggingContext,
-        update_gcp_client: Callable[[ClientSession, LoggingContext], None],
+        update_gcp_client: Callable[[LoggingContext], None],
     ):
         # Atomically capture token state to prevent races
         auth_state = self._get_current_auth_state()
         
         if auth_state['expired']:
-            await update_gcp_client(gcp_session, logging_context)
+            await update_gcp_client(logging_context)
             # Refresh auth state after token update
             auth_state = self._get_current_auth_state()
 
@@ -166,7 +166,7 @@ class GCPClient:
             resp_status = response.status
 
             if resp_status == 401:
-                await update_gcp_client(gcp_session, logging_context)
+                await update_gcp_client(logging_context)
 
             if resp_status > 299:
                 logging_context.log(
