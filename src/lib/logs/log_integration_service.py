@@ -1,4 +1,3 @@
-import logging
 import time
 import asyncio
 from typing import List, Optional, Tuple
@@ -23,7 +22,7 @@ from lib.logs.log_forwarder_variables import (
     NUMBER_OF_CONCURRENT_PUSH_COROUTINES,
 )
 
-logger = logging.getLogger(__name__)
+_service_logging_context = LoggingContext("LogIntegrationService")
 
 
 class LogIntegrationService:
@@ -79,18 +78,18 @@ class LogIntegrationService:
             await self.close()
             raise
 
-    def _ensure_sessions(self):
+    def _ensure_sessions(self, logging_context: LoggingContext):
         """Recreate sessions that are None or closed. Provides resilience
         against transient session failures without requiring a full restart."""
         if self._closed:
             raise RuntimeError("LogIntegrationService is closed, cannot ensure sessions")
 
         if self.gcp_session is None or self.gcp_session.closed:
-            logger.warning("GCP session was closed or missing, recreating")
+            logging_context.log("GCP session was closed or missing, recreating")
             self.gcp_session = init_gcp_client_session()
 
         if self.dt_session is None or self.dt_session.closed:
-            logger.warning("Dynatrace session was closed or missing, recreating")
+            logging_context.log("Dynatrace session was closed or missing, recreating")
             self.dt_session = init_dt_client_session()
 
     async def close(self):
@@ -106,24 +105,25 @@ class LogIntegrationService:
             results = await asyncio.gather(*sessions_to_close, return_exceptions=True)
             for result in results:
                 if isinstance(result, Exception):
-                    logger.warning("Error closing session: %s", result)
+                    _service_logging_context.log(f"Error closing session: {result}")
 
     async def update_gcp_client(self, logging_context: LoggingContext):
         # Use lock to prevent concurrent token refreshes (thundering herd)
         async with self.gcp_client.refresh_lock():
-            # Double-check token expiration - another worker may have refreshed it
-            if not self.gcp_client.is_token_expired():
-                self.gcp_client.update_gcp_client_in_the_next_loop = False
+            # Another worker may have already refreshed while we waited for the lock.
+            # Check both expiry AND the flag: a 401 sets the flag even when the token
+            # hasn't reached its local expiry time (e.g. server-side revocation, clock skew).
+            if not self.gcp_client.is_token_expired() and not self.gcp_client.update_gcp_client_in_the_next_loop:
                 return
 
-            # Use enhanced token function to get expiry information for proactive refresh
+            # Refresh token and get expiry information for proactive refresh
             token_info = await create_token_with_expiry(context=logging_context, session=self.gcp_session, validate=True)
             self.gcp_client.update_token(token_info)
 
     async def perform_pull(
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
-        self._ensure_sessions()
+        self._ensure_sessions(logging_context)
 
         if self.gcp_client.update_gcp_client_in_the_next_loop:
             try:
@@ -166,7 +166,7 @@ class LogIntegrationService:
         )
 
     async def push_logs(self, log_batches, logging_context: LoggingContext) -> List[str]:
-        self._ensure_sessions()
+        self._ensure_sessions(logging_context)
 
         ack_ids_to_send = []
         context = create_logs_context(self.sfm_queue)
@@ -193,7 +193,7 @@ class LogIntegrationService:
         return ack_ids_to_send
 
     async def push_ack_ids(self, ack_ids: List[str], logging_context: LoggingContext):
-        self._ensure_sessions()
+        self._ensure_sessions(logging_context)
 
         # request size limit is 524288, but we are not able to easily control size of created protobuf
         # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer
