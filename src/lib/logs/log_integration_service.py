@@ -27,10 +27,10 @@ class LogIntegrationService:
     sfm_queue: asyncio.Queue
     log_push_semaphore: asyncio.Semaphore
     gcp_client: GCPClient
-    gcp_session: Optional[ClientSession]
+    gcp_session: ClientSession
     logs_context: LogsContext
     dynatrace_client: DynatraceClient
-    dt_session: Optional[ClientSession]
+    dt_session: ClientSession
 
     @classmethod
     async def create(cls, sfm_queue: asyncio.Queue, gcp_client: GCPClient = None, logging_context: LoggingContext = None):

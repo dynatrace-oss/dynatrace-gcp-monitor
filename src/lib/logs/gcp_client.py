@@ -15,7 +15,7 @@
 import asyncio
 import json
 import time
-from typing import Any, Dict, List, Callable
+from typing import Any, Awaitable, Dict, List, Callable
 
 from aiohttp import ClientSession
 
@@ -148,7 +148,7 @@ class GCPClient:
         ack_ids: List[str],
         gcp_session: ClientSession,
         logging_context: LoggingContext,
-        update_gcp_client: Callable[[LoggingContext], None],
+        update_gcp_client: Callable[[LoggingContext], Awaitable[None]],
     ):
         # Atomically capture token state to prevent races
         auth_state = self._get_current_auth_state()
