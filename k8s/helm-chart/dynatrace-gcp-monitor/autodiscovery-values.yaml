@@ -7,6 +7,7 @@ autodiscoveryIncludeAlphaMetrics: true
 # autodiscoveryFetchActiveMetricsOnly: false
 # This list comprises resources that will be scanned within GCP 
 # projects for the purpose of metrics autodiscovery.
+# HOT-RELOADABLE: Changes to this value take effect without pod restart (within 1-2 polling cycles, ~60-90s ConfigMap propagation + autodiscovery query interval).
 autodiscoveryResourcesYaml: |
   # resources from: https://cloud.google.com/monitoring/api/metrics_gcp
   autodiscovery_config:
@@ -15,6 +16,7 @@ autodiscoveryResourcesYaml: |
 
 # Metrics containing the following names will not be included
 # in autodiscovery process
+# HOT-RELOADABLE: Changes to this value take effect without pod restart (within 1-2 polling cycles, ~60-90s ConfigMap propagation + autodiscovery query interval).
 autodiscoveryBlockListYaml: |
   block_list:
   - alloydb.googleapis.com/database/postgresql/insights/perquery/
