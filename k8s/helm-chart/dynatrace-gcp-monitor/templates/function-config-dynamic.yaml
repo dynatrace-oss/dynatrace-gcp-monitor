@@ -1,0 +1,31 @@
+#     Copyright 2020 Dynatrace LLC
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
+# Dynamic ConfigMap: values that can be updated via helm upgrade without restarting the pod.
+# The running monitor picks up changes from this ConfigMap on the next polling cycle.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dynatrace-gcp-monitor-config-dynamic
+  namespace: {{ .Release.Namespace }}
+data:
+  {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
+  GCP_SERVICES_YAML: {{ .Values.gcpServicesYaml | quote }}
+  EXCLUDED_METRICS_AND_DIMENSIONS: {{ .Values.excludedMetricsAndDimensions | quote }}
+  LABELS_GROUPING_BY_SERVICE: {{ .Values.labelsGroupingByService | quote }}
+  {{- if eq (lower .Values.metricAutodiscovery) "true" }}
+  AUTODISCOVERY_RESOURCES_YAML: {{ .Values.autodiscoveryResourcesYaml | quote }}
+  AUTODISCOVERY_METRIC_BLOCK_LIST_YAML: {{ .Values.autodiscoveryBlockListYaml | quote }}
+  {{- end }}
+  {{- end }}

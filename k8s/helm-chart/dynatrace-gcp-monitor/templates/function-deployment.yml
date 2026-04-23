@@ -49,7 +49,7 @@ spec:
       volumes:
       - name: gcp-config
         configMap:
-          name: dynatrace-gcp-monitor-config
+          name: dynatrace-gcp-monitor-config-dynamic
           items:
           - key: GCP_SERVICES_YAML
             path: "gcp_services.yaml"

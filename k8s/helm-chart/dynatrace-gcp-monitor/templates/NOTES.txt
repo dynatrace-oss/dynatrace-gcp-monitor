@@ -6,3 +6,8 @@ To learn more about the release, try:
 
   $ helm -n {{ .Release.Namespace }} status {{ .Release.Name }}
   $ helm -n {{ .Release.Namespace }} get all {{ .Release.Name }}
+
+Hot-reloadable values (gcpServicesYaml, excludedMetricsAndDimensions,
+labelsGroupingByService, autodiscoveryResourcesYaml, autodiscoveryBlockListYaml)
+can be updated via `helm upgrade` without restarting the pod.
+Changes take effect within 1-2 polling cycles.
