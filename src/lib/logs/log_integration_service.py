@@ -1,3 +1,4 @@
+import logging
 import time
 import asyncio
 from typing import List, Optional, Tuple
@@ -22,15 +23,18 @@ from lib.logs.log_forwarder_variables import (
     NUMBER_OF_CONCURRENT_PUSH_COROUTINES,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class LogIntegrationService:
     sfm_queue: asyncio.Queue
     log_push_semaphore: asyncio.Semaphore
     gcp_client: GCPClient
-    gcp_session: ClientSession
+    gcp_session: Optional[ClientSession]
     logs_context: LogsContext
     dynatrace_client: DynatraceClient
-    dt_session: ClientSession
+    dt_session: Optional[ClientSession]
+    _closed: bool
 
     @classmethod
     async def create(cls, sfm_queue: asyncio.Queue, gcp_client: GCPClient = None, logging_context: LoggingContext = None):
@@ -39,6 +43,7 @@ class LogIntegrationService:
         self.log_push_semaphore = asyncio.Semaphore(NUMBER_OF_CONCURRENT_PUSH_COROUTINES)
         self.gcp_session = None
         self.dt_session = None
+        self._closed = False
 
         try:
             self.gcp_session = init_gcp_client_session()
@@ -74,7 +79,22 @@ class LogIntegrationService:
             await self.close()
             raise
 
+    def _ensure_sessions(self):
+        """Recreate sessions that are None or closed. Provides resilience
+        against transient session failures without requiring a full restart."""
+        if self._closed:
+            raise RuntimeError("LogIntegrationService is closed, cannot ensure sessions")
+
+        if self.gcp_session is None or self.gcp_session.closed:
+            logger.warning("GCP session was closed or missing, recreating")
+            self.gcp_session = init_gcp_client_session()
+
+        if self.dt_session is None or self.dt_session.closed:
+            logger.warning("Dynatrace session was closed or missing, recreating")
+            self.dt_session = init_dt_client_session()
+
     async def close(self):
+        self._closed = True
         sessions_to_close = []
         for attr in ("gcp_session", "dt_session"):
             session = getattr(self, attr, None)
@@ -83,23 +103,28 @@ class LogIntegrationService:
             setattr(self, attr, None)
 
         if sessions_to_close:
-            await asyncio.gather(*sessions_to_close, return_exceptions=True)
+            results = await asyncio.gather(*sessions_to_close, return_exceptions=True)
+            for result in results:
+                if isinstance(result, Exception):
+                    logger.warning("Error closing session: %s", result)
 
     async def update_gcp_client(self, logging_context: LoggingContext):
-        # Use class-level lock to prevent concurrent token refreshes (thundering herd)
-        async with self.gcp_client._refresh_lock:
+        # Use lock to prevent concurrent token refreshes (thundering herd)
+        async with self.gcp_client.refresh_lock():
             # Double-check token expiration - another worker may have refreshed it
             if not self.gcp_client.is_token_expired():
                 self.gcp_client.update_gcp_client_in_the_next_loop = False
                 return
-            
+
             # Use enhanced token function to get expiry information for proactive refresh
             token_info = await create_token_with_expiry(context=logging_context, session=self.gcp_session, validate=True)
-            self.gcp_client.update_token(token_info)  # Synchronous call with rollback
+            self.gcp_client.update_token(token_info)
 
     async def perform_pull(
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
+        self._ensure_sessions()
+
         if self.gcp_client.update_gcp_client_in_the_next_loop:
             try:
                 await self.update_gcp_client(logging_context=logging_context)
@@ -141,6 +166,8 @@ class LogIntegrationService:
         )
 
     async def push_logs(self, log_batches, logging_context: LoggingContext) -> List[str]:
+        self._ensure_sessions()
+
         ack_ids_to_send = []
         context = create_logs_context(self.sfm_queue)
         batch_length = len(log_batches)
@@ -154,15 +181,20 @@ class LogIntegrationService:
                 await self.dynatrace_client.send_logs(context, self.dt_session, batch, ack_ids_to_send)
 
         context.self_monitoring.sending_time_start = time.perf_counter()
-        exceptions = await asyncio.gather(
+        results = await asyncio.gather(
             *[process_batch(batch) for batch in log_batches], return_exceptions=True
         )
+        for result in results:
+            if isinstance(result, Exception):
+                logging_context.log(f"Error pushing log batch to Dynatrace: {result}")
         context.self_monitoring.calculate_sending_time()
         put_sfm_into_queue(context)
 
         return ack_ids_to_send
 
     async def push_ack_ids(self, ack_ids: List[str], logging_context: LoggingContext):
+        self._ensure_sessions()
+
         # request size limit is 524288, but we are not able to easily control size of created protobuf
         # empiric test indicates that ack_ids have around 200-220 chars. We can safely assume that ack id is never longer
         # than 256 chars, we split ack ids into chunks with no more than 2048 ack_id's
@@ -171,4 +203,7 @@ class LogIntegrationService:
             self.gcp_client.push_ack_ids(chunk, self.gcp_session, logging_context, self.update_gcp_client)
             for chunk in chunks(ack_ids, chunk_size)
         ]
-        exceptions = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
+        results = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
+        for result in results:
+            if isinstance(result, Exception):
+                logging_context.log(f"Error acknowledging messages: {result}")
