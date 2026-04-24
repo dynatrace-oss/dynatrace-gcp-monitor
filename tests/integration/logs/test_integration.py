@@ -323,37 +323,39 @@ async def run_worker_with_messages(
 
     log_integration_service = await LogIntegrationService.create(sfm_queue=sfm_queue, gcp_client=mock_gcp_client, logging_context=logging_context)
     log_integration_service.log_push_semaphore = asyncio.Semaphore(1)
+    try:
+        log_batches, ack_ids_of_erroneous_messages = await log_integration_service.perform_pull(logging_context)
+        ack_ids_to_send = await log_integration_service.push_logs(log_batches, logging_context)
 
-    log_batches, ack_ids_of_erroneous_messages = await log_integration_service.perform_pull(logging_context)
-    ack_ids_to_send = await log_integration_service.push_logs(log_batches, logging_context)
+        await push_ack_ids(ack_ids_to_send + ack_ids_of_erroneous_messages, mock_gcp_client, logging_context)
 
-    await push_ack_ids(ack_ids_to_send + ack_ids_of_erroneous_messages, mock_gcp_client, logging_context)
+        metadata = InstanceMetadata(
+            project_id="",
+            container_name="",
+            token_scopes="",
+            service_account="",
+            audience="",
+            hostname="local deployment 1",
+            zone="us-east1",
+        )
 
-    metadata = InstanceMetadata(
-        project_id="",
-        container_name="",
-        token_scopes="",
-        service_account="",
-        audience="",
-        hostname="local deployment 1",
-        zone="us-east1",
-    )
+        self_monitoring = LogSelfMonitoring()
+        await log_self_monitoring._loop_single_period(
+            self_monitoring, sfm_queue, logging_context, metadata
+        )
+        await sfm_queue.join()
 
-    self_monitoring = LogSelfMonitoring()
-    await log_self_monitoring._loop_single_period(
-        self_monitoring, sfm_queue, logging_context, metadata
-    )
-    await sfm_queue.join()
+        assert ack_queue.qsize() == len(expected_ack_ids)
+        while ack_queue.qsize() > 0:
+            ack_id = ack_queue.get_nowait()
+            assert ack_id in expected_ack_ids
+            expected_ack_ids.remove(ack_id)
 
-    assert ack_queue.qsize() == len(expected_ack_ids)
-    while ack_queue.qsize() > 0:
-        ack_id = ack_queue.get_nowait()
-        assert ack_id in expected_ack_ids
-        expected_ack_ids.remove(ack_id)
+        assert len(expected_ack_ids) == 0
 
-    assert len(expected_ack_ids) == 0
-
-    return self_monitoring
+        return self_monitoring
+    finally:
+        await log_integration_service.close()
 
 
 def load_json_with_fresh_timestamp() -> Dict:

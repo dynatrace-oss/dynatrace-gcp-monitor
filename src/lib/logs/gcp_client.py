@@ -15,7 +15,7 @@
 import asyncio
 import json
 import time
-from typing import Any, Dict, List, Callable
+from typing import Any, Awaitable, Dict, List, Callable
 
 from aiohttp import ClientSession
 
@@ -39,8 +39,9 @@ class GCPClient:
     token_expires_at: float
     context: LoggingContext
     
-    # Class-level lock for token refresh operations to prevent thundering herd
-    _refresh_lock = asyncio.Lock()
+    def refresh_lock(self):
+        """Return the lock used to serialize token refresh operations (thundering herd prevention)."""
+        return self._refresh_lock
 
     def __init__(
         self,
@@ -48,7 +49,7 @@ class GCPClient:
         context: LoggingContext = None
     ):
         self.context = context
-        # Note: Lock removed based on system reminder - keeping simpler version
+        self._refresh_lock = asyncio.Lock()
         
         # token_info is expected to be dict with access_token and expires_at
         if isinstance(token_info, str):
@@ -148,13 +149,13 @@ class GCPClient:
         ack_ids: List[str],
         gcp_session: ClientSession,
         logging_context: LoggingContext,
-        update_gcp_client: Callable[[ClientSession, LoggingContext], None],
+        update_gcp_client: Callable[[LoggingContext], Awaitable[None]],
     ):
         # Atomically capture token state to prevent races
         auth_state = self._get_current_auth_state()
         
         if auth_state['expired']:
-            await update_gcp_client(gcp_session, logging_context)
+            await update_gcp_client(logging_context)
             # Refresh auth state after token update
             auth_state = self._get_current_auth_state()
 
@@ -166,7 +167,7 @@ class GCPClient:
             resp_status = response.status
 
             if resp_status == 401:
-                await update_gcp_client(gcp_session, logging_context)
+                self.update_gcp_client_in_the_next_loop = True
 
             if resp_status > 299:
                 logging_context.log(
