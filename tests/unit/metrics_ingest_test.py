@@ -92,6 +92,26 @@ def test_create_dimensions_omits_min_sample_period_override_when_not_overridden(
     assert all(d.name != "dt.min_sample_period_override" for d in dimensions)
 
 
+def test_create_dimensions_adds_gcp_project_id_alias_for_returned_resource_project_id():
+    context = LoggingContext(None)
+    service_name = "test.autodiscovered"
+    time_series = {
+        "metric": {"labels": {}},
+        "resource": {"labels": {"project_id": "test-project"}},
+        "metadata": {"systemLabels": {}, "userLabels": {}},
+    }
+
+    metric = type("MetricStub", (), {})()
+    metric.autodiscovered_metric = True
+    metric.sample_period_overridden = False
+
+    dimensions = create_dimensions(context, service_name, time_series, DtDimensionsMap(), metric)
+    dimensions_by_name = {dimension.name: dimension.value for dimension in dimensions}
+
+    assert dimensions_by_name["project_id"] == "test-project"
+    assert dimensions_by_name["gcp.project.id"] == "test-project"
+
+
 def test_create_dimensions_includes_override_for_autodiscovered_metric_via_effective_sample_period():
     context = LoggingContext(None)
     service_name = "test.autodiscovered"
