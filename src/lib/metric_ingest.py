@@ -43,6 +43,7 @@ GCP_MONITORING_URL = config.gcp_monitoring_url()
 DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
 METRIC_SOURCE_DIMENSION_KEY = "dt.source"
 METRIC_SOURCE_DIMENSION_VALUE = "com.dynatrace.gcp"
+RESOURCE_LABEL_ALIASES = {"project_id": "gcp.project.id"}
 
 # Retry configuration for Dynatrace ingest API
 _RETRYABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
@@ -516,6 +517,9 @@ def create_dimensions(context: MetricsContext, service_name: str, time_series: D
     resource_labels = time_series.get('resource', {}).get('labels', {})
     for short_source_label, dim_value in resource_labels.items():
         mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"resource.labels.{short_source_label}", short_source_label)
+        alias = RESOURCE_LABEL_ALIASES.get(short_source_label)
+        if alias:
+            mapped_dt_dim_labels = sorted({*mapped_dt_dim_labels, alias})
         for dt_dim_label in mapped_dt_dim_labels:
             dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
