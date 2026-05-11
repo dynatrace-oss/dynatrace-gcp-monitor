@@ -5,4 +5,4 @@ pytest-resource-path==1.4.1
 pytest-mock==3.15.1
 cryptography==46.0.7
 pytz==2026.1.post1
-urllib3==2.6.3
+urllib3==2.7.0
