@@ -33,7 +33,7 @@ trace_config.on_request_start.append(on_request_start)
 trace_config.on_request_end.append(on_request_end)
 
 
-_default_timeout = aiohttp.ClientTimeout(total=120, connect=10)
+_default_timeout = aiohttp.ClientTimeout(total=120, connect=120)
 
 
 def init_dt_client_session() -> aiohttp.ClientSession:
