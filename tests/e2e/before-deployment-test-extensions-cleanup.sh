@@ -15,16 +15,22 @@
 
 source ./tests/e2e/lib-tests.sh
 
-# testing message
-INSTALLED_EXTENSIONS=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '.extensions[].extensionName' 2>/dev/null)
+# Get installed extensions with their versions directly from the listing
+EXTENSIONS_JSON=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions?pageSize=100" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}")
+INSTALLED_EXTENSIONS=$(echo "$EXTENSIONS_JSON" | "$TEST_JQ" -r '.extensions[] | "\(.extensionName)|\(.version)"' 2>/dev/null)
 
-for extension in ${INSTALLED_EXTENSIONS}; do
-    VERSION=$(curl -s -k -X GET "${DYNATRACE_URL}api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '.version')
+for entry in ${INSTALLED_EXTENSIONS}; do
+    extension=$(echo "$entry" | cut -d'|' -f1)
+    VERSION=$(echo "$entry" | cut -d'|' -f2)
     echo "${extension}"
-    echo "Deactivated configuration version:"
-    curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '.version'
-    echo "Extension deleted:"
-    curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/${VERSION}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '"\(.extensionName):\(.version)"'
+    echo "Deactivating configuration:"
+    curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/environmentConfiguration" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '.version // "none"'
+    if [ -n "$VERSION" ] && [ "$VERSION" != "null" ]; then
+        echo "Deleting extension version ${VERSION}:"
+        curl -s -k -X DELETE "${DYNATRACE_URL}api/v2/extensions/${extension}/${VERSION}" -H "accept: application/json; charset=utf-8" -H "Authorization: Api-Token ${DYNATRACE_ACCESS_KEY}" | "$TEST_JQ" -r '"\(.extensionName // "unknown"):\(.version // "unknown")"'
+    else
+        echo "WARNING: No version found for ${extension}, skipping delete"
+    fi
     echo
 done
 
