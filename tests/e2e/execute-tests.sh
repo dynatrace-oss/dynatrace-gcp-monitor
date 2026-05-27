@@ -14,8 +14,6 @@
 #     limitations under the License.
 source ./tests/e2e/lib-tests.sh
 
-echo "E2E target DT tenant:" && echo "${DYNATRACE_URL}" | rev
-
 function run_deploy_and_tests() {
     TEST_TYPE=$1
 
