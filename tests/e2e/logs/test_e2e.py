@@ -15,6 +15,7 @@
 import os
 import time
 from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 import requests
 
@@ -50,12 +51,41 @@ def get_oauth_token():
     return resp.json()['access_token']
 
 
+def get_platform_url():
+    """Derive the Dynatrace Platform (apps) URL from the environment URL.
+
+    The Grail Query API lives on the Platform/apps domain, not the classic
+    environment domain.  For example:
+      - Environment URL: https://abc12345.dev.dynatracelabs.com
+      - Platform  URL:  https://abc12345.dev.apps.dynatracelabs.com
+
+    The env var DYNATRACE_PLATFORM_URL can override the derivation.
+
+    The OAuth client used for authentication must have the following scopes
+    granted via IAM policies:
+      - storage:logs:read
+      - storage:buckets:read
+    """
+    override = os.environ.get('DYNATRACE_PLATFORM_URL')
+    if override:
+        return override.rstrip('/')
+
+    env_url = os.environ.get('DYNATRACE_URL').rstrip('/')
+    parsed = urlparse(env_url)
+    parts = parsed.hostname.split('.')
+    # Insert 'apps' before the base domain (e.g. before 'dynatracelabs.com')
+    parts.insert(-2, 'apps')
+    platform_host = '.'.join(parts)
+    return f"{parsed.scheme}://{platform_host}"
+
+
 def test_logs_on_dynatrace():
     # The classic /api/v2/logs/search endpoint is deprecated and returns HTTP 500
     # on Grail-enabled tenants. Use the Grail Query API with DQL instead.
+    # The Platform API lives on the apps domain, not the environment domain.
     # More info: https://developer.dynatrace.com/develop/platform-services/services/grail-service/
-    base_url = os.environ.get('DYNATRACE_URL').rstrip('/')
-    url = f"{base_url}/platform/storage/query/v1/query:execute"
+    platform_url = get_platform_url()
+    url = f"{platform_url}/platform/storage/query/v1/query:execute"
 
     start_ms = os.environ.get('START_LOAD_GENERATION')
     end_ms = os.environ.get('END_LOAD_GENERATION')
@@ -88,19 +118,23 @@ def test_logs_on_dynatrace():
     }
 
     resp = requests.post(url, json=body, headers=headers)
-    assert resp.status_code == 200, f"Grail query failed with {resp.status_code}: {resp.text}"
+    assert resp.status_code == 200, (
+        f"Grail query failed with {resp.status_code}: {resp.text}. "
+        f"URL: {url}. "
+        f"Ensure the OAuth client has scopes: storage:logs:read, storage:buckets:read"
+    )
 
     result = resp.json()
 
     # Poll if query is still running (async execution)
     if result.get('state') == 'RUNNING':
-        poll_url = f"{base_url}/platform/storage/query/v1/query:poll"
+        poll_url = f"{platform_url}/platform/storage/query/v1/query:poll"
         request_token = result['requestToken']
         for _ in range(30):
             time.sleep(2)
-            poll_resp = requests.get(
+            poll_resp = requests.post(
                 poll_url,
-                params={'request-token': request_token},
+                json={'requestToken': request_token, 'requestTimeoutMilliseconds': 5000},
                 headers=headers
             )
             assert poll_resp.status_code == 200, f"Poll failed: {poll_resp.status_code}: {poll_resp.text}"
