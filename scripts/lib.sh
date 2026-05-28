@@ -332,46 +332,57 @@ get_extensions_from_dynatrace() {
 get_and_install_extensions() {
   debug "Getting and Installing Dynatrace GCP Extensions List"
 
+  DEFAULT_GOOGLE_EXTENSIONS=(
+    "com.dynatrace.extension.google-api"
+    "com.dynatrace.extension.google-app-engine"
+    "com.dynatrace.extension.google-bigquery"
+    "com.dynatrace.extension.google-cloud-functions"
+    "com.dynatrace.extension.google-cloud-run"
+    "com.dynatrace.extension.google-cloud-storage"
+    "com.dynatrace.extension.google-compute-engine"
+    "com.dynatrace.extension.google-datastore"
+    "com.dynatrace.extension.google-filestore"
+    "com.dynatrace.extension.google-kubernetes-engine"
+    "com.dynatrace.extension.google-load-balancing"
+    "com.dynatrace.extension.google-pubsub"
+    "com.dynatrace.extension.google-pubsub-lite"
+    "com.dynatrace.extension.google-sql")
+
   info ""
   info "- Getting list of google extensions available on environment"
   LIST_OF_GOOGLE_EXTENSIONS=$(dt_api "/api/v2/extensions?name=google")
 
-  GOOGLE_EXTENSIONS_ON_TENANT=$(echo "$LIST_OF_GOOGLE_EXTENSIONS" | jq -r '.totalCount')
+  # Extract installed extension names for individual checks
+  INSTALLED_NAMES=$(echo "$LIST_OF_GOOGLE_EXTENSIONS" | jq -r '.extensions[].extensionName // empty' 2>/dev/null)
 
-  if [ "$GOOGLE_EXTENSIONS_ON_TENANT" -gt 0 ]; then
-      info ""
-      info "- There are some google extensions already enabled on the tenant."
-  else
-    info "- Activating default google extensions..."
-    DEFAULT_GOOGLE_EXTENSIONS=(
-      "com.dynatrace.extension.google-api"
-      "com.dynatrace.extension.google-app-engine"
-      "com.dynatrace.extension.google-bigquery"
-      "com.dynatrace.extension.google-cloud-functions"
-      "com.dynatrace.extension.google-cloud-run"
-      "com.dynatrace.extension.google-cloud-storage"
-      "com.dynatrace.extension.google-compute-engine"
-      "com.dynatrace.extension.google-datastore"
-      "com.dynatrace.extension.google-filestore"
-      "com.dynatrace.extension.google-kubernetes-engine"
-      "com.dynatrace.extension.google-load-balancing"
-      "com.dynatrace.extension.google-pubsub"
-      "com.dynatrace.extension.google-pubsub-lite"
-      "com.dynatrace.extension.google-sql")
+  MISSING_COUNT=0
+  INSTALLED_COUNT=0
 
-    for GOOGLE_EXT in "${DEFAULT_GOOGLE_EXTENSIONS[@]}"
-      do
-        extensionName=$(echo "$GOOGLE_EXT" | tr -d '"')
-        info "Activating ${extensionName}..."
-        EXTENSION_DATA=$(dt_api "/api/v2/hub/extensions2/${extensionName}")
-        version=$(echo "$EXTENSION_DATA" | jq '.extension2Details.recommendedCatalogVersion' | tr -d '"')
+  for GOOGLE_EXT in "${DEFAULT_GOOGLE_EXTENSIONS[@]}"; do
+    extensionName=$(echo "$GOOGLE_EXT" | tr -d '"')
+    if echo "$INSTALLED_NAMES" | grep -qx "${extensionName}"; then
+      debug "Extension ${extensionName} already installed, skipping."
+      ((INSTALLED_COUNT+=1))
+    else
+      info "Activating ${extensionName}..."
+      EXTENSION_DATA=$(dt_api "/api/v2/hub/extensions2/${extensionName}")
+      version=$(echo "$EXTENSION_DATA" | jq -r '.extension2Details.recommendedCatalogVersion // empty')
+      if [ -n "$version" ]; then
         dt_api "/api/v2/hub/extensions2/${extensionName}/actions/addToEnvironment?extensionVersion=${version}" "POST" ""
-      done
+        ((MISSING_COUNT+=1))
+      else
+        warn "Could not determine version for ${extensionName}, skipping."
+      fi
+    fi
+  done
 
+  if [ "$MISSING_COUNT" -gt 0 ]; then
     info ""
-    info "- Default set of extensions have been activated on the tenant."
+    info "- Activated ${MISSING_COUNT} missing extensions (${INSTALLED_COUNT} already present)."
     info "- To manage all available extensions, please go to the hub in your tenant."
-
+  else
+    info ""
+    info "- All ${INSTALLED_COUNT} default google extensions are already active."
   fi
 }
 
