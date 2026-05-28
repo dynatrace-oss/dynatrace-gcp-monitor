@@ -156,6 +156,9 @@ gcp_extension_mapping:
     feature_set: default_metrics
     monitored_resources:
     - value: cloud_run_revision
+  - service_name: cloud_run_job
+    feature_set: default_metrics
+    monitored_resources:
     - value: cloud_run_job
 - extension_name: google-cloud-storage
   services:
