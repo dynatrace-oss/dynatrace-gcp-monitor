@@ -478,6 +478,14 @@ gcpServicesYaml: |
       # minSamplePeriodOverride: 300
       vars:
         filter_conditions: ""
+    # Google Cloud Run Job
+    - service: cloud_run_job
+      allowAutodiscovery: false
+      featureSets:
+        - default_metrics
+      # minSamplePeriodOverride: 300
+      vars:
+        filter_conditions: ""
     # Google Cloud Tasks queues
     - service: cloud_tasks_queue
       allowAutodiscovery: false
