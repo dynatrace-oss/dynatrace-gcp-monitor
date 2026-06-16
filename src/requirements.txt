@@ -2,7 +2,7 @@
 aiohttp==3.13.5
 aiodns==3.6.1
 mmh3==5.2.1
-PyJWT==2.12.1
+PyJWT==2.13.0
 cryptography==46.0.7
 PyYAML==6.0.3
 # logs
