@@ -504,7 +504,7 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
     return DimensionValue(name, string_value)
 
 
-    # "gcp.resource.type" is required to easily differentiate services with the same metric set
+# "gcp.resource.type" is required to easily differentiate services with the same metric set
 def create_dimensions(
         context: MetricsContext,
         service_name: str,
