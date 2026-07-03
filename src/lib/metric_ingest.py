@@ -16,7 +16,7 @@ import gzip
 import time
 from datetime import timezone, datetime, timedelta
 from http.client import InvalidURL
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Set
 
 from lib.configuration import config
 from lib.context import MetricsContext, LoggingContext, DynatraceConnectivity
@@ -332,20 +332,6 @@ async def fetch_metric(
             effective_sample_period = timedelta(seconds=linked_override)
     alignment_period = effective_sample_period if effective_sample_period is not None else metric.sample_period_seconds
 
-    # Ref: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors
-    # Combinations: https://cloud.google.com/monitoring/api/v3/kinds-and-types#kind-type-combos
-    aligner = _set_aligner(metric.google_metric_kind, metric.value_type)
-    reducer = _set_reducer(metric.google_metric_kind, metric.value_type)
-
-    params = [
-        ('filter', f'metric.type = "{metric.google_metric}" {monitoring_filter}'.strip()),
-        ('interval.startTime', start_time.isoformat() + "Z"),
-        ('interval.endTime', end_time.isoformat() + "Z"),
-        ('aggregation.alignmentPeriod', f"{alignment_period.total_seconds()}s"),
-        ('aggregation.perSeriesAligner', aligner),
-        ('aggregation.crossSeriesReducer', reducer)
-    ]
-
     if metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
         service_dimensions = service.get_dimensions(metric)
         service_name = service.get_name(metric)
@@ -355,16 +341,34 @@ async def fetch_metric(
 
     all_dimensions = (service_dimensions + metric.dimensions)
     dt_dimensions_mapping = DtDimensionsMap()
+    group_by_params = []
+    excluded_source_dimensions = set()
     for dimension in all_dimensions:
         if should_exclude_dimension(dimension):
             context.log(
                 f"Skipping fetching dimension {dimension.key_for_create_entity_id} for metric {metric.google_metric}")
+            excluded_source_dimensions.add(dimension.key_for_fetch_metric)
             continue
 
         if dimension.key_for_send_to_dynatrace:
             dt_dimensions_mapping.add_label_mapping(dimension.key_for_fetch_metric, dimension.key_for_send_to_dynatrace)
 
-        params.append(('aggregation.groupByFields', dimension.key_for_fetch_metric))
+        group_by_params.append(('aggregation.groupByFields', dimension.key_for_fetch_metric))
+
+    # Ref: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors
+    # Combinations: https://cloud.google.com/monitoring/api/v3/kinds-and-types#kind-type-combos
+    aligner = _set_aligner(metric.google_metric_kind, metric.value_type)
+    reducer = _set_reducer(metric.google_metric_kind, metric.value_type, bool(excluded_source_dimensions))
+
+    params = [
+        ('filter', f'metric.type = "{metric.google_metric}" {monitoring_filter}'.strip()),
+        ('interval.startTime', start_time.isoformat() + "Z"),
+        ('interval.endTime', end_time.isoformat() + "Z"),
+        ('aggregation.alignmentPeriod', f"{alignment_period.total_seconds()}s"),
+        ('aggregation.perSeriesAligner', aligner),
+        ('aggregation.crossSeriesReducer', reducer)
+    ]
+    params.extend(group_by_params)
 
     for label in grouping.split(","):
         if label == NO_GROUPING_CATEGORY:
@@ -390,7 +394,10 @@ async def fetch_metric(
 
         for single_time_series in page['timeSeries']:
             typed_value_key = _extract_typed_value_key(single_time_series)
-            dimensions = create_dimensions(context, service_name, single_time_series, dt_dimensions_mapping, metric, effective_sample_period)
+            dimensions = create_dimensions(
+                context, service_name, single_time_series, dt_dimensions_mapping, metric,
+                effective_sample_period, excluded_source_dimensions
+            )
             entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
 
             for point in single_time_series['points']:
@@ -420,11 +427,14 @@ def _set_aligner(metric_kind, value_type):
     return aligner
 
 
-def _set_reducer(metric_kind, value_type):
+def _set_reducer(metric_kind, value_type, aggregate_excluded_dimensions=False):
     reducer = 'REDUCE_SUM'
 
     if metric_kind.lower().startswith('cumulative'):
-        reducer = 'REDUCE_NONE'
+        if aggregate_excluded_dimensions and value_type.lower() in ('int64', 'double', 'distribution'):
+            reducer = 'REDUCE_SUM'
+        else:
+            reducer = 'REDUCE_NONE'
     elif metric_kind.lower().startswith('gauge') and (value_type.lower() == 'int64' or value_type.lower() == 'double'):
         reducer = 'REDUCE_MEAN'
 
@@ -495,7 +505,16 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
 
 
     # "gcp.resource.type" is required to easily differentiate services with the same metric set
-def create_dimensions(context: MetricsContext, service_name: str, time_series: Dict, dt_dimensions_mapping: DtDimensionsMap, metric: Metric, effective_sample_period: Optional[timedelta] = None) -> List[DimensionValue]:
+def create_dimensions(
+        context: MetricsContext,
+        service_name: str,
+        time_series: Dict,
+        dt_dimensions_mapping: DtDimensionsMap,
+        metric: Metric,
+        effective_sample_period: Optional[timedelta] = None,
+        excluded_source_dimensions: Optional[Set[str]] = None
+) -> List[DimensionValue]:
+    excluded_source_dimensions = excluded_source_dimensions or set()
     # e.g. internal_tcp_lb_rule and internal_udp_lb_rule
     dt_dimensions = [create_dimension("gcp.resource.type", service_name, context)]
 
@@ -510,13 +529,19 @@ def create_dimensions(context: MetricsContext, service_name: str, time_series: D
 
     metric_labels = time_series.get('metric', {}).get('labels', {})
     for short_source_label, dim_value in metric_labels.items():
-        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metric.labels.{short_source_label}", short_source_label)
+        source_dimension = f"metric.labels.{short_source_label}"
+        if source_dimension in excluded_source_dimensions:
+            continue
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(source_dimension, short_source_label)
         for dt_dim_label in mapped_dt_dim_labels:
             dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
     resource_labels = time_series.get('resource', {}).get('labels', {})
     for short_source_label, dim_value in resource_labels.items():
-        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"resource.labels.{short_source_label}", short_source_label)
+        source_dimension = f"resource.labels.{short_source_label}"
+        if source_dimension in excluded_source_dimensions:
+            continue
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(source_dimension, short_source_label)
         alias = RESOURCE_LABEL_ALIASES.get(short_source_label)
         if alias:
             mapped_dt_dim_labels = sorted({*mapped_dt_dim_labels, alias})
@@ -525,12 +550,17 @@ def create_dimensions(context: MetricsContext, service_name: str, time_series: D
 
     system_labels = time_series.get('metadata', {}).get('systemLabels', {})
     for short_source_label, dim_value in system_labels.items():
-        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(f"metadata.systemLabels.{short_source_label}", short_source_label)
+        source_dimension = f"metadata.systemLabels.{short_source_label}"
+        if source_dimension in excluded_source_dimensions:
+            continue
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(source_dimension, short_source_label)
         for dt_dim_label in mapped_dt_dim_labels:
             dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
 
     user_labels = time_series.get('metadata', {}).get('userLabels', {})
     for dim_label, dim_value in user_labels.items():
+        if f"metadata.userLabels.{dim_label}" in excluded_source_dimensions:
+            continue
         dt_dimensions.append(create_dimension(dim_label, dim_value, context))
 
     return dt_dimensions
