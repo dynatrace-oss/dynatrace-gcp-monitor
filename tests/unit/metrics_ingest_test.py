@@ -12,7 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from datetime import datetime, timedelta
+import asyncio
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -204,6 +205,7 @@ def test_cumulative_reducer_uses_sum_only_when_dimensions_are_excluded():
 
 class _FakeGcpResponse:
     async def json(self):
+        await asyncio.sleep(0)
         return {}
 
 
@@ -211,7 +213,8 @@ class _FakeGcpSession:
     def __init__(self):
         self.params = None
 
-    async def request(self, method, url, params, headers):
+    async def request(self, _method, _url, params, _headers):
+        await asyncio.sleep(0)
         self.params = list(params)
         return _FakeGcpResponse()
 
@@ -219,7 +222,7 @@ class _FakeGcpSession:
 @pytest.mark.asyncio
 async def test_fetch_metric_aggregates_cumulative_metric_when_dimension_excluded():
     gcp_session = _FakeGcpSession()
-    context = MetricsContext(gcp_session, None, "owner", "token", datetime.utcnow(), 60, "", "", False, False, None)
+    context = MetricsContext(gcp_session, None, "owner", "token", datetime.now(timezone.utc), 60, "", "", False, False, None)
     service = GCPService(service="cloudsql_database", dimensions=[], metrics=[])
     metric = Metric(
         name="Per query execution time",
@@ -249,7 +252,7 @@ async def test_fetch_metric_aggregates_cumulative_metric_when_dimension_excluded
 
 
 def test_flatten_and_enrich_metric_results_all_additional_dimensions():
-    context_mock = MetricsContext(None, None, "", "", datetime.utcnow(), 0, "", "", False, False, None)
+    context_mock = MetricsContext(None, None, "", "", datetime.now(timezone.utc), 0, "", "", False, False, None)
     metric_results = [[IngestLine("entity_id", "m1", "count", 1, 10000, [])]]
     entity_id_map = build_entity_id_map([[Entity("entity_id", "", "", ip_addresses=["1.1.1.1", "0.0.0.0"], listen_ports=[],
                                          favicon_url="", dtype="", properties=[CdProperty("Example property", "example_value")],

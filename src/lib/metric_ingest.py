@@ -504,6 +504,41 @@ def create_dimension(name: str, value: Any, context: LoggingContext = LoggingCon
     return DimensionValue(name, string_value)
 
 
+def _append_mapped_label_dimensions(
+        context: MetricsContext,
+        dt_dimensions: List[DimensionValue],
+        labels: Dict,
+        source_prefix: str,
+        dt_dimensions_mapping: DtDimensionsMap,
+        excluded_source_dimensions: Set[str],
+        aliases: Optional[Dict[str, str]] = None,
+):
+    for short_source_label, dim_value in labels.items():
+        source_dimension = f"{source_prefix}.{short_source_label}"
+        if source_dimension in excluded_source_dimensions:
+            continue
+
+        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(source_dimension, short_source_label)
+        alias = aliases.get(short_source_label) if aliases else None
+        if alias:
+            mapped_dt_dim_labels = sorted({*mapped_dt_dim_labels, alias})
+
+        for dt_dim_label in mapped_dt_dim_labels:
+            dt_dimensions.append(create_dimension(dt_dim_label, dim_value, context))
+
+
+def _append_user_label_dimensions(
+        context: MetricsContext,
+        dt_dimensions: List[DimensionValue],
+        labels: Dict,
+        excluded_source_dimensions: Set[str],
+):
+    for dim_label, dim_value in labels.items():
+        if f"metadata.user_labels.{dim_label}" in excluded_source_dimensions:
+            continue
+        dt_dimensions.append(create_dimension(dim_label, dim_value, context))
+
+
 # "gcp.resource.type" is required to easily differentiate services with the same metric set
 def create_dimensions(
         context: MetricsContext,
@@ -527,41 +562,21 @@ def create_dimensions(
     elif getattr(metric, "sample_period_overridden", False):
         dt_dimensions.append(create_dimension("dt.min_sample_period_override", str(int(metric.sample_period_seconds.total_seconds())), context))
 
-    metric_labels = time_series.get('metric', {}).get('labels', {})
-    for short_source_label, dim_value in metric_labels.items():
-        source_dimension = f"metric.labels.{short_source_label}"
-        if source_dimension in excluded_source_dimensions:
-            continue
-        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(source_dimension, short_source_label)
-        for dt_dim_label in mapped_dt_dim_labels:
-            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
-
-    resource_labels = time_series.get('resource', {}).get('labels', {})
-    for short_source_label, dim_value in resource_labels.items():
-        source_dimension = f"resource.labels.{short_source_label}"
-        if source_dimension in excluded_source_dimensions:
-            continue
-        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(source_dimension, short_source_label)
-        alias = RESOURCE_LABEL_ALIASES.get(short_source_label)
-        if alias:
-            mapped_dt_dim_labels = sorted({*mapped_dt_dim_labels, alias})
-        for dt_dim_label in mapped_dt_dim_labels:
-            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
-
-    system_labels = time_series.get('metadata', {}).get('systemLabels', {})
-    for short_source_label, dim_value in system_labels.items():
-        source_dimension = f"metadata.system_labels.{short_source_label}"
-        if source_dimension in excluded_source_dimensions:
-            continue
-        mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(source_dimension, short_source_label)
-        for dt_dim_label in mapped_dt_dim_labels:
-            dt_dimensions.append( create_dimension(dt_dim_label, dim_value, context) )
-
-    user_labels = time_series.get('metadata', {}).get('userLabels', {})
-    for dim_label, dim_value in user_labels.items():
-        if f"metadata.user_labels.{dim_label}" in excluded_source_dimensions:
-            continue
-        dt_dimensions.append(create_dimension(dim_label, dim_value, context))
+    _append_mapped_label_dimensions(
+        context, dt_dimensions, time_series.get('metric', {}).get('labels', {}),
+        "metric.labels", dt_dimensions_mapping, excluded_source_dimensions
+    )
+    _append_mapped_label_dimensions(
+        context, dt_dimensions, time_series.get('resource', {}).get('labels', {}),
+        "resource.labels", dt_dimensions_mapping, excluded_source_dimensions, RESOURCE_LABEL_ALIASES
+    )
+    _append_mapped_label_dimensions(
+        context, dt_dimensions, time_series.get('metadata', {}).get('systemLabels', {}),
+        "metadata.system_labels", dt_dimensions_mapping, excluded_source_dimensions
+    )
+    _append_user_label_dimensions(
+        context, dt_dimensions, time_series.get('metadata', {}).get('userLabels', {}), excluded_source_dimensions
+    )
 
     return dt_dimensions
 
