@@ -213,8 +213,9 @@ class _FakeGcpSession:
     def __init__(self):
         self.params = None
 
-    async def request(self, _method, _url, params, _headers):
+    async def request(self, _method, url, params, headers):
         await asyncio.sleep(0)
+        _ = (url, headers)
         self.params = list(params)
         return _FakeGcpResponse()
 
