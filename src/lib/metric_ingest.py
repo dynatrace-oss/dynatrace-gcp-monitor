@@ -550,7 +550,7 @@ def create_dimensions(
 
     system_labels = time_series.get('metadata', {}).get('systemLabels', {})
     for short_source_label, dim_value in system_labels.items():
-        source_dimension = f"metadata.systemLabels.{short_source_label}"
+        source_dimension = f"metadata.system_labels.{short_source_label}"
         if source_dimension in excluded_source_dimensions:
             continue
         mapped_dt_dim_labels = dt_dimensions_mapping.get_dt_dimensions(source_dimension, short_source_label)
@@ -559,7 +559,7 @@ def create_dimensions(
 
     user_labels = time_series.get('metadata', {}).get('userLabels', {})
     for dim_label, dim_value in user_labels.items():
-        if f"metadata.userLabels.{dim_label}" in excluded_source_dimensions:
+        if f"metadata.user_labels.{dim_label}" in excluded_source_dimensions:
             continue
         dt_dimensions.append(create_dimension(dim_label, dim_value, context))
 

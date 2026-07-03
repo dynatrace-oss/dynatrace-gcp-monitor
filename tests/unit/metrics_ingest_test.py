@@ -165,6 +165,37 @@ def test_create_dimensions_omits_excluded_returned_metric_label():
     assert dimensions_by_name["query_hash"] == "abc"
 
 
+def test_create_dimensions_omits_excluded_metadata_labels():
+    context = LoggingContext(None)
+    metric = type("MetricStub", (), {})()
+    metric.autodiscovered_metric = False
+    metric.sample_period_overridden = False
+
+    time_series = {
+        "metric": {"labels": {}},
+        "resource": {"labels": {}},
+        "metadata": {
+            "systemLabels": {"machine_type": "n2-standard-4", "location": "us-east1"},
+            "userLabels": {"team": "payments", "env": "prod"},
+        },
+    }
+
+    dimensions = create_dimensions(
+        context,
+        "gce_instance",
+        time_series,
+        DtDimensionsMap(),
+        metric,
+        excluded_source_dimensions={"metadata.system_labels.machine_type", "metadata.user_labels.team"},
+    )
+
+    dimensions_by_name = {dimension.name: dimension.value for dimension in dimensions}
+    assert "machine_type" not in dimensions_by_name
+    assert "team" not in dimensions_by_name
+    assert dimensions_by_name["location"] == "us-east1"
+    assert dimensions_by_name["env"] == "prod"
+
+
 def test_cumulative_reducer_uses_sum_only_when_dimensions_are_excluded():
     assert _set_reducer("CUMULATIVE", "INT64") == "REDUCE_NONE"
     assert _set_reducer("CUMULATIVE", "INT64", aggregate_excluded_dimensions=True) == "REDUCE_SUM"
