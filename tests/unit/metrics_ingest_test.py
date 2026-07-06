@@ -12,10 +12,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from datetime import timedelta
+import asyncio
+from datetime import datetime, timedelta, timezone
+
+import pytest
 
 from lib.entities.model import CdProperty
 from lib.metric_ingest import *
+from lib.metric_ingest import _set_reducer
 from lib.topology.topology import build_entity_id_map
 
 
@@ -136,8 +140,120 @@ def test_create_dimensions_includes_override_for_autodiscovered_metric_via_effec
     assert override_dims[0].value == "300"
 
 
+def test_create_dimensions_omits_excluded_returned_metric_label():
+    context = LoggingContext(None)
+    metric = type("MetricStub", (), {})()
+    metric.autodiscovered_metric = False
+    metric.sample_period_overridden = False
+
+    time_series = {
+        "metric": {"labels": {"querystring": "SELECT 1", "query_hash": "abc"}},
+        "resource": {"labels": {"project_id": "test-project"}},
+        "metadata": {"systemLabels": {}, "userLabels": {}},
+    }
+
+    dimensions = create_dimensions(
+        context,
+        "cloudsql_database",
+        time_series,
+        DtDimensionsMap(),
+        metric,
+        excluded_source_dimensions={"metric.labels.querystring"},
+    )
+
+    dimensions_by_name = {dimension.name: dimension.value for dimension in dimensions}
+    assert "querystring" not in dimensions_by_name
+    assert dimensions_by_name["query_hash"] == "abc"
+
+
+def test_create_dimensions_omits_excluded_metadata_labels():
+    context = LoggingContext(None)
+    metric = type("MetricStub", (), {})()
+    metric.autodiscovered_metric = False
+    metric.sample_period_overridden = False
+
+    time_series = {
+        "metric": {"labels": {}},
+        "resource": {"labels": {}},
+        "metadata": {
+            "systemLabels": {"machine_type": "n2-standard-4", "location": "us-east1"},
+            "userLabels": {"team": "payments", "env": "prod"},
+        },
+    }
+
+    dimensions = create_dimensions(
+        context,
+        "gce_instance",
+        time_series,
+        DtDimensionsMap(),
+        metric,
+        excluded_source_dimensions={"metadata.system_labels.machine_type", "metadata.user_labels.team"},
+    )
+
+    dimensions_by_name = {dimension.name: dimension.value for dimension in dimensions}
+    assert "machine_type" not in dimensions_by_name
+    assert "team" not in dimensions_by_name
+    assert dimensions_by_name["location"] == "us-east1"
+    assert dimensions_by_name["env"] == "prod"
+
+
+def test_cumulative_reducer_uses_sum_only_when_dimensions_are_excluded():
+    assert _set_reducer("CUMULATIVE", "INT64") == "REDUCE_NONE"
+    assert _set_reducer("CUMULATIVE", "INT64", aggregate_excluded_dimensions=True) == "REDUCE_SUM"
+    assert _set_reducer("CUMULATIVE", "DISTRIBUTION", aggregate_excluded_dimensions=True) == "REDUCE_SUM"
+
+
+class _FakeGcpResponse:
+    async def json(self):
+        await asyncio.sleep(0)
+        return {}
+
+
+class _FakeGcpSession:
+    def __init__(self):
+        self.params = None
+
+    async def request(self, _method, url, params, headers):
+        await asyncio.sleep(0)
+        _ = (url, headers)
+        self.params = list(params)
+        return _FakeGcpResponse()
+
+
+@pytest.mark.asyncio
+async def test_fetch_metric_aggregates_cumulative_metric_when_dimension_excluded():
+    gcp_session = _FakeGcpSession()
+    context = MetricsContext(gcp_session, None, "owner", "token", datetime.now(timezone.utc), 60, "", "", False, False, None)
+    service = GCPService(service="cloudsql_database", dimensions=[], metrics=[])
+    metric = Metric(
+        name="Per query execution time",
+        value="metric:cloudsql.googleapis.com/database/postgresql/insights/perquery/execution_time",
+        key="cloud.gcp.cloudsql_googleapis_com.database.postgresql.insights.perquery.execution_time.count",
+        type="count",
+        gcpOptions={"ingestDelay": 0, "samplePeriod": 60, "valueType": "INT64", "metricKind": "CUMULATIVE"},
+        dimensions=[
+            {"key": "querystring", "value": "label:metric.labels.querystring"},
+            {"key": "query_hash", "value": "label:metric.labels.query_hash"},
+        ],
+    )
+
+    await fetch_metric(
+        context,
+        "test-project",
+        service,
+        metric,
+        [{"metric": metric.google_metric, "dimensions": {"querystring"}}],
+        NO_GROUPING_CATEGORY,
+    )
+
+    assert ("aggregation.perSeriesAligner", "ALIGN_DELTA") in gcp_session.params
+    assert ("aggregation.crossSeriesReducer", "REDUCE_SUM") in gcp_session.params
+    assert ("aggregation.groupByFields", "metric.labels.querystring") not in gcp_session.params
+    assert ("aggregation.groupByFields", "metric.labels.query_hash") in gcp_session.params
+
+
 def test_flatten_and_enrich_metric_results_all_additional_dimensions():
-    context_mock = MetricsContext(None, None, "", "", datetime.utcnow(), 0, "", "", False, False, None)
+    context_mock = MetricsContext(None, None, "", "", datetime.now(timezone.utc), 0, "", "", False, False, None)
     metric_results = [[IngestLine("entity_id", "m1", "count", 1, 10000, [])]]
     entity_id_map = build_entity_id_map([[Entity("entity_id", "", "", ip_addresses=["1.1.1.1", "0.0.0.0"], listen_ports=[],
                                          favicon_url="", dtype="", properties=[CdProperty("Example property", "example_value")],
