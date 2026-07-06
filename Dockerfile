@@ -1,14 +1,23 @@
-FROM python:3.12-slim AS build
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential libffi-dev
-RUN pip install --upgrade pip
+# -- Build stage: install Python dependencies --
+FROM dhi.io/python:3.12-alpine3.23 AS build
+
+RUN apk add --no-cache \
+    build-base \
+    libffi-dev \
+    openssl-dev
+
+RUN pip install --no-cache-dir --upgrade pip
 COPY src/requirements.txt .
-RUN pip install -r ./requirements.txt
+RUN pip install --no-cache-dir -r ./requirements.txt
 
 
-FROM python:3.12-slim
+# -- Runtime stage: hardened base image with zero known CVEs --
+FROM dhi.io/python:3.12-alpine3.23
 
 ARG RELEASE_TAG_ARG
-ENV RELEASE_TAG=$RELEASE_TAG_ARG
+ENV RELEASE_TAG=$RELEASE_TAG_ARG \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 LABEL name="dynatrace-gcp-monitor" \
       vendor="Dynatrace LLC" \
@@ -24,7 +33,7 @@ COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3
 COPY src/ .
 COPY LICENSE.md /licenses/
 
-RUN adduser --disabled-password gcp-monitor && chown -R gcp-monitor /code
+RUN adduser -D -h /code gcp-monitor && chown -R gcp-monitor /code
 USER gcp-monitor
 
 CMD [ "python", "-u", "./run_docker.py" ]
