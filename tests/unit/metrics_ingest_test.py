@@ -19,7 +19,7 @@ import pytest
 
 from lib.entities.model import CdProperty
 from lib.metric_ingest import *
-from lib.metric_ingest import _set_reducer
+from lib.metric_ingest import _set_reducer, should_exclude_dimension, should_exclude_metric
 from lib.topology.topology import build_entity_id_map
 
 
@@ -201,6 +201,27 @@ def test_cumulative_reducer_uses_sum_only_when_dimensions_are_excluded():
     assert _set_reducer("CUMULATIVE", "INT64") == "REDUCE_NONE"
     assert _set_reducer("CUMULATIVE", "INT64", aggregate_excluded_dimensions=True) == "REDUCE_SUM"
     assert _set_reducer("CUMULATIVE", "DISTRIBUTION", aggregate_excluded_dimensions=True) == "REDUCE_SUM"
+
+
+def test_exclusion_uses_most_specific_metric_match_for_full_metric_skip():
+    metric_name = "cloudsql.googleapis.com/database/postgresql/insights/perquery/execution_time"
+    excluded_metrics = [
+        {"metric": "cloudsql.googleapis.com/database/postgresql/insights/perquery/"},
+        {"metric": metric_name, "dimensions": {"querystring"}},
+    ]
+
+    assert should_exclude_metric(metric_name, excluded_metrics) is False
+
+
+def test_exclusion_uses_most_specific_metric_match_for_dimension_skip():
+    metric_name = "cloudsql.googleapis.com/database/postgresql/insights/perquery/execution_time"
+    dimension = Dimension(key="querystring", value="label:metric.labels.querystring")
+    excluded_metrics = [
+        {"metric": "cloudsql.googleapis.com/database/postgresql/insights/perquery/"},
+        {"metric": metric_name, "dimensions": {"querystring"}},
+    ]
+
+    assert should_exclude_dimension(metric_name, dimension, excluded_metrics) is True
 
 
 class _FakeGcpResponse:

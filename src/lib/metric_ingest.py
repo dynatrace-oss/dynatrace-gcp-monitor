@@ -51,6 +51,31 @@ _MAX_PUSH_RETRIES = 3
 _INITIAL_RETRY_DELAY_S = 1.0
 _MAX_RETRY_AFTER_S = 10.0
 
+
+def find_excluded_metric(metric_name: str, excluded_metrics_and_dimensions: list):
+    matching_metrics = [
+        excluded_metric
+        for excluded_metric in excluded_metrics_and_dimensions
+        if metric_name.startswith(excluded_metric.get("metric", ""))
+    ]
+    return max(matching_metrics, key=lambda excluded_metric: len(excluded_metric.get("metric", "")), default=None)
+
+
+def should_exclude_metric(metric_name: str, excluded_metrics_and_dimensions: list):
+    found_excluded_metric = find_excluded_metric(metric_name, excluded_metrics_and_dimensions)
+    return bool(found_excluded_metric and not found_excluded_metric.get("dimensions"))
+
+
+def should_exclude_dimension(metric_name: str, dimension: Dimension, excluded_metrics_and_dimensions: list):
+    found_excluded_metric = find_excluded_metric(metric_name, excluded_metrics_and_dimensions)
+
+    if not found_excluded_metric:
+        return False
+
+    dimension_key = dimension.key_for_fetch_metric
+    return dimension_key[dimension_key.rfind(".") + 1:] in found_excluded_metric.get("dimensions", [])
+
+
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
     if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
         context.log(project_id, f"Skipping push due to detected connectivity error")
@@ -297,22 +322,6 @@ async def fetch_metric(
         excluded_metrics_and_dimensions: list,
         grouping: str
 ) -> List[IngestLine]:
-    def should_exclude_dimension(dimension: Dimension):
-        found_excluded_metric = None
-
-        for excluded_metric in excluded_metrics_and_dimensions:
-            if metric.google_metric.startswith(excluded_metric.get("metric")):
-                found_excluded_metric = excluded_metric
-                break
-
-        if not found_excluded_metric:
-            return False
-
-        dimension_key = dimension.key_for_fetch_metric
-        has_dimension_key = dimension_key[dimension_key.rfind(".") + 1:] in found_excluded_metric.get("dimensions", [])
-
-        return has_dimension_key
-
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
 
@@ -344,7 +353,7 @@ async def fetch_metric(
     group_by_params = []
     excluded_source_dimensions = set()
     for dimension in all_dimensions:
-        if should_exclude_dimension(dimension):
+        if should_exclude_dimension(metric.google_metric, dimension, excluded_metrics_and_dimensions):
             context.log(
                 f"Skipping fetching dimension {dimension.key_for_create_entity_id} for metric {metric.google_metric}")
             excluded_source_dimensions.add(dimension.key_for_fetch_metric)
