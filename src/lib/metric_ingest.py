@@ -73,8 +73,14 @@ def should_exclude_metric(metric_name: str, excluded_metrics_and_dimensions: lis
     return bool(found_excluded_metric and not found_excluded_metric.get("dimensions"))
 
 
-def should_exclude_dimension(metric_name: str, dimension: Dimension, excluded_metrics_and_dimensions: list):
-    found_excluded_metric = find_excluded_metric(metric_name, excluded_metrics_and_dimensions)
+def should_exclude_dimension(
+        metric_name: str,
+        dimension: Dimension,
+        excluded_metrics_and_dimensions: list,
+        found_excluded_metric: Optional[dict] = None,
+):
+    if found_excluded_metric is None:
+        found_excluded_metric = find_excluded_metric(metric_name, excluded_metrics_and_dimensions)
 
     if not found_excluded_metric:
         return False
@@ -359,8 +365,11 @@ async def fetch_metric(
     dt_dimensions_mapping = DtDimensionsMap()
     group_by_params = []
     excluded_source_dimensions = set()
+    found_excluded_metric = find_excluded_metric(metric.google_metric, excluded_metrics_and_dimensions)
     for dimension in all_dimensions:
-        if should_exclude_dimension(metric.google_metric, dimension, excluded_metrics_and_dimensions):
+        if should_exclude_dimension(
+                metric.google_metric, dimension, excluded_metrics_and_dimensions, found_excluded_metric
+        ):
             context.log(
                 f"Skipping fetching dimension {dimension.key_for_create_entity_id} for metric {metric.google_metric}")
             excluded_source_dimensions.add(dimension.key_for_fetch_metric)
