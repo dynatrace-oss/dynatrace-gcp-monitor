@@ -19,7 +19,7 @@ import pytest
 
 from lib.entities.model import CdProperty
 from lib.metric_ingest import *
-from lib.metric_ingest import _set_reducer, should_exclude_dimension, should_exclude_metric
+from lib.metric_ingest import _set_reducer
 from lib.topology.topology import build_entity_id_map
 
 
