@@ -74,10 +74,10 @@ def should_exclude_metric(metric_name: str, excluded_metrics_and_dimensions: lis
 
 
 def should_exclude_dimension(
-        metric_name: str,
-        dimension: Dimension,
-        excluded_metrics_and_dimensions: list,
-        found_excluded_metric: Optional[dict] = None,
+    metric_name: str,
+    dimension: Dimension,
+    excluded_metrics_and_dimensions: list,
+    found_excluded_metric: Optional[dict] = None,
 ):
     if found_excluded_metric is None:
         found_excluded_metric = find_excluded_metric(metric_name, excluded_metrics_and_dimensions)
