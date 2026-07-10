@@ -53,12 +53,19 @@ _MAX_RETRY_AFTER_S = 10.0
 
 
 def find_excluded_metric(metric_name: str, excluded_metrics_and_dimensions: list):
+    def metric_prefix(excluded_metric):
+        if not isinstance(excluded_metric, dict):
+            return None
+
+        prefix = excluded_metric.get("metric")
+        return prefix if isinstance(prefix, str) and prefix else None
+
     matching_metrics = [
         excluded_metric
         for excluded_metric in excluded_metrics_and_dimensions
-        if metric_name.startswith(excluded_metric.get("metric", ""))
+        if (prefix := metric_prefix(excluded_metric)) and metric_name.startswith(prefix)
     ]
-    return max(matching_metrics, key=lambda excluded_metric: len(excluded_metric.get("metric", "")), default=None)
+    return max(matching_metrics, key=lambda excluded_metric: len(metric_prefix(excluded_metric)), default=None)
 
 
 def should_exclude_metric(metric_name: str, excluded_metrics_and_dimensions: list):

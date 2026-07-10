@@ -234,6 +234,18 @@ def test_exclusion_uses_most_specific_metric_match_for_dimension_skip():
     assert should_exclude_dimension(PERQUERY_EXECUTION_TIME_METRIC, dimension, excluded_metrics) is True
 
 
+def test_exclusion_ignores_entries_without_metric_prefix():
+    dimension = Dimension(key=QUERYSTRING_DIMENSION, value=QUERYSTRING_LABEL_VALUE)
+    excluded_metrics = [
+        None,
+        {"dimensions": {QUERYSTRING_DIMENSION}},
+        {"metric": "", "dimensions": {QUERYSTRING_DIMENSION}},
+    ]
+
+    assert should_exclude_metric(PERQUERY_EXECUTION_TIME_METRIC, excluded_metrics) is False
+    assert should_exclude_dimension(PERQUERY_EXECUTION_TIME_METRIC, dimension, excluded_metrics) is False
+
+
 class _FakeGcpResponse:
     def __init__(self, body=None):
         self.body = body or {}
