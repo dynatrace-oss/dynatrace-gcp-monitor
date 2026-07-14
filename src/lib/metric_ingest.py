@@ -61,11 +61,12 @@ def find_excluded_metric(metric_name: str, excluded_metrics_and_dimensions: list
         return prefix if isinstance(prefix, str) and prefix else None
 
     matching_metrics = [
-        excluded_metric
+        (prefix, excluded_metric)
         for excluded_metric in excluded_metrics_and_dimensions
         if (prefix := metric_prefix(excluded_metric)) and metric_name.startswith(prefix)
     ]
-    return max(matching_metrics, key=lambda excluded_metric: len(metric_prefix(excluded_metric)), default=None)
+    result = max(matching_metrics, key=lambda item: len(item[0]), default=None)
+    return result[1] if result is not None else None
 
 
 def should_exclude_metric(metric_name: str, excluded_metrics_and_dimensions: list):
