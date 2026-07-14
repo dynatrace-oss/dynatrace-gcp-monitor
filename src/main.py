@@ -28,7 +28,7 @@ from lib.credentials import create_token, fetch_dynatrace_api_key, fetch_dynatra
 from lib.entities.model import Entity
 from lib.fast_check import check_dynatrace, check_version
 from lib.gcp_apis import get_disabled_projects_and_disabled_apis_by_project_id
-from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results
+from lib.metric_ingest import fetch_metric, push_ingest_lines, flatten_and_enrich_metric_results, should_exclude_metric
 from lib.metrics import GCPService, Metric, IngestLine, AutodiscoveryGCPService
 from lib.self_monitoring import log_self_monitoring_metrics, sfm_push_metrics, sfm_create_descriptors_if_missing
 from lib.sfm.for_metrics.metrics_definitions import SfmKeys
@@ -270,16 +270,6 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         f"interval={interval_info}"
     )
 
-    def should_exclude_metric(metric: Metric):
-        found_excluded_metric = None
-
-        for excluded_metric in excluded_metrics_and_dimensions:
-            if metric.google_metric.startswith(excluded_metric.get("metric")):
-                found_excluded_metric = excluded_metric
-                break
-
-        return found_excluded_metric and not found_excluded_metric.get("dimensions")
-
     def set_groupings(service: GCPService, metric: Optional[Metric] = None):
         service_name = service.name
         if metric and metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
@@ -330,7 +320,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
         for metric in service.metrics:
             labels_groupings = set_groupings(service, metric)
             for grouping in labels_groupings:
-                if should_exclude_metric(metric):
+                if should_exclude_metric(metric.google_metric, excluded_metrics_and_dimensions):
                     context.log(f"Skipping fetching all the data for the metric {metric.google_metric}")
                     continue
 

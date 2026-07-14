@@ -23,6 +23,18 @@ from lib.metric_ingest import _set_reducer
 from lib.topology.topology import build_entity_id_map
 
 
+QUERYSTRING_DIMENSION = "querystring"
+QUERYSTRING_FETCH_KEY = "metric.labels.querystring"
+QUERYSTRING_LABEL_VALUE = f"label:{QUERYSTRING_FETCH_KEY}"
+QUERY_HASH_DIMENSION = "query_hash"
+QUERY_HASH_FETCH_KEY = "metric.labels.query_hash"
+QUERY_HASH_LABEL_VALUE = f"label:{QUERY_HASH_FETCH_KEY}"
+PERQUERY_EXECUTION_TIME_METRIC = "cloudsql.googleapis.com/database/postgresql/insights/perquery/execution_time"
+PERQUERY_METRIC_PREFIX = "cloudsql.googleapis.com/database/postgresql/insights/perquery/"
+PERQUERY_EXECUTION_TIME_DT_METRIC = "cloud.gcp.cloudsql_googleapis_com.database.postgresql.insights.perquery.execution_time.count"
+GROUP_BY_FIELDS_PARAM = "aggregation.groupByFields"
+
+
 def test_create_dimension_correct_values():
     name = "n" * (MAX_DIMENSION_NAME_LENGTH - 1)
     value = "v" * (MAX_DIMENSION_VALUE_LENGTH - 1)
@@ -44,7 +56,7 @@ def test_create_dimension_too_long_dimension():
 
 
 def test_create_dimension_escapes_quotes_and_removes_control_chars():
-    name = "querystring"
+    name = QUERYSTRING_DIMENSION
     value = '"C:\\Program Files\\Foo\\bar.exe" -flag\nnext'
 
     dimension_value = create_dimension(name, value)
@@ -147,7 +159,7 @@ def test_create_dimensions_omits_excluded_returned_metric_label():
     metric.sample_period_overridden = False
 
     time_series = {
-        "metric": {"labels": {"querystring": "SELECT 1", "query_hash": "abc"}},
+        "metric": {"labels": {QUERYSTRING_DIMENSION: "SELECT 1", QUERY_HASH_DIMENSION: "abc"}},
         "resource": {"labels": {"project_id": "test-project"}},
         "metadata": {"systemLabels": {}, "userLabels": {}},
     }
@@ -158,12 +170,12 @@ def test_create_dimensions_omits_excluded_returned_metric_label():
         time_series,
         DtDimensionsMap(),
         metric,
-        excluded_source_dimensions={"metric.labels.querystring"},
+        excluded_source_dimensions={QUERYSTRING_FETCH_KEY},
     )
 
     dimensions_by_name = {dimension.name: dimension.value for dimension in dimensions}
-    assert "querystring" not in dimensions_by_name
-    assert dimensions_by_name["query_hash"] == "abc"
+    assert QUERYSTRING_DIMENSION not in dimensions_by_name
+    assert dimensions_by_name[QUERY_HASH_DIMENSION] == "abc"
 
 
 def test_create_dimensions_omits_excluded_metadata_labels():
@@ -203,21 +215,56 @@ def test_cumulative_reducer_uses_sum_only_when_dimensions_are_excluded():
     assert _set_reducer("CUMULATIVE", "DISTRIBUTION", aggregate_excluded_dimensions=True) == "REDUCE_SUM"
 
 
+def test_exclusion_uses_most_specific_metric_match_for_full_metric_skip():
+    excluded_metrics = [
+        {"metric": PERQUERY_METRIC_PREFIX},
+        {"metric": PERQUERY_EXECUTION_TIME_METRIC, "dimensions": {QUERYSTRING_DIMENSION}},
+    ]
+
+    assert should_exclude_metric(PERQUERY_EXECUTION_TIME_METRIC, excluded_metrics) is False
+
+
+def test_exclusion_uses_most_specific_metric_match_for_dimension_skip():
+    dimension = Dimension(key=QUERYSTRING_DIMENSION, value=QUERYSTRING_LABEL_VALUE)
+    excluded_metrics = [
+        {"metric": PERQUERY_METRIC_PREFIX},
+        {"metric": PERQUERY_EXECUTION_TIME_METRIC, "dimensions": {QUERYSTRING_DIMENSION}},
+    ]
+
+    assert should_exclude_dimension(PERQUERY_EXECUTION_TIME_METRIC, dimension, excluded_metrics) is True
+
+
+def test_exclusion_ignores_entries_without_metric_prefix():
+    dimension = Dimension(key=QUERYSTRING_DIMENSION, value=QUERYSTRING_LABEL_VALUE)
+    excluded_metrics = [
+        None,
+        {"dimensions": {QUERYSTRING_DIMENSION}},
+        {"metric": "", "dimensions": {QUERYSTRING_DIMENSION}},
+    ]
+
+    assert should_exclude_metric(PERQUERY_EXECUTION_TIME_METRIC, excluded_metrics) is False
+    assert should_exclude_dimension(PERQUERY_EXECUTION_TIME_METRIC, dimension, excluded_metrics) is False
+
+
 class _FakeGcpResponse:
+    def __init__(self, body=None):
+        self.body = body or {}
+
     async def json(self):
         await asyncio.sleep(0)
-        return {}
+        return self.body
 
 
 class _FakeGcpSession:
-    def __init__(self):
+    def __init__(self, response_body=None):
         self.params = None
+        self.response_body = response_body
 
     async def request(self, _method, url, params, headers):
         await asyncio.sleep(0)
         _ = (url, headers)
         self.params = list(params)
-        return _FakeGcpResponse()
+        return _FakeGcpResponse(self.response_body)
 
 
 @pytest.mark.asyncio
@@ -227,13 +274,13 @@ async def test_fetch_metric_aggregates_cumulative_metric_when_dimension_excluded
     service = GCPService(service="cloudsql_database", dimensions=[], metrics=[])
     metric = Metric(
         name="Per query execution time",
-        value="metric:cloudsql.googleapis.com/database/postgresql/insights/perquery/execution_time",
-        key="cloud.gcp.cloudsql_googleapis_com.database.postgresql.insights.perquery.execution_time.count",
+        value=f"metric:{PERQUERY_EXECUTION_TIME_METRIC}",
+        key=PERQUERY_EXECUTION_TIME_DT_METRIC,
         type="count",
         gcpOptions={"ingestDelay": 0, "samplePeriod": 60, "valueType": "INT64", "metricKind": "CUMULATIVE"},
         dimensions=[
-            {"key": "querystring", "value": "label:metric.labels.querystring"},
-            {"key": "query_hash", "value": "label:metric.labels.query_hash"},
+            {"key": QUERYSTRING_DIMENSION, "value": QUERYSTRING_LABEL_VALUE},
+            {"key": QUERY_HASH_DIMENSION, "value": QUERY_HASH_LABEL_VALUE},
         ],
     )
 
@@ -242,14 +289,76 @@ async def test_fetch_metric_aggregates_cumulative_metric_when_dimension_excluded
         "test-project",
         service,
         metric,
-        [{"metric": metric.google_metric, "dimensions": {"querystring"}}],
+        [{"metric": metric.google_metric, "dimensions": {QUERYSTRING_DIMENSION}}],
         NO_GROUPING_CATEGORY,
     )
 
     assert ("aggregation.perSeriesAligner", "ALIGN_DELTA") in gcp_session.params
     assert ("aggregation.crossSeriesReducer", "REDUCE_SUM") in gcp_session.params
-    assert ("aggregation.groupByFields", "metric.labels.querystring") not in gcp_session.params
-    assert ("aggregation.groupByFields", "metric.labels.query_hash") in gcp_session.params
+    assert (GROUP_BY_FIELDS_PARAM, QUERYSTRING_FETCH_KEY) not in gcp_session.params
+    assert (GROUP_BY_FIELDS_PARAM, QUERY_HASH_FETCH_KEY) in gcp_session.params
+
+
+@pytest.mark.asyncio
+async def test_fetch_metric_keeps_metric_when_specific_dimension_exclusion_overlaps_broad_exclusion():
+    gcp_session = _FakeGcpSession(
+        {
+            "timeSeries": [
+                {
+                    "valueType": "INT64",
+                    "metric": {
+                        "labels": {
+                            QUERYSTRING_DIMENSION: "SELECT 1",
+                            QUERY_HASH_DIMENSION: "abc123",
+                        }
+                    },
+                    "resource": {"labels": {}},
+                    "metadata": {"systemLabels": {}, "userLabels": {}},
+                    "points": [
+                        {
+                            "interval": {"endTime": "2026-07-08T17:54:00Z"},
+                            "value": {"int64Value": 42},
+                        }
+                    ],
+                }
+            ]
+        }
+    )
+    context = MetricsContext(gcp_session, None, "owner", "token", datetime.now(timezone.utc), 60, "", "", False, False, None)
+    service = GCPService(service="cloudsql_database", dimensions=[], metrics=[])
+    metric = Metric(
+        name="Per query execution time",
+        value=f"metric:{PERQUERY_EXECUTION_TIME_METRIC}",
+        key=PERQUERY_EXECUTION_TIME_DT_METRIC,
+        type="count",
+        gcpOptions={"ingestDelay": 0, "samplePeriod": 60, "valueType": "INT64", "metricKind": "CUMULATIVE"},
+        dimensions=[
+            {"key": QUERYSTRING_DIMENSION, "value": QUERYSTRING_LABEL_VALUE},
+            {"key": QUERY_HASH_DIMENSION, "value": QUERY_HASH_LABEL_VALUE},
+        ],
+    )
+
+    lines = await fetch_metric(
+        context,
+        "test-project",
+        service,
+        metric,
+        [
+            {"metric": PERQUERY_METRIC_PREFIX},
+            {"metric": PERQUERY_EXECUTION_TIME_METRIC, "dimensions": {QUERYSTRING_DIMENSION}},
+        ],
+        NO_GROUPING_CATEGORY,
+    )
+
+    assert len(lines) == 1
+    assert lines[0].metric_name == PERQUERY_EXECUTION_TIME_DT_METRIC
+    assert lines[0].value == 42
+
+    dimensions_by_name = {dimension.name: dimension.value for dimension in lines[0].dimension_values}
+    assert QUERYSTRING_DIMENSION not in dimensions_by_name
+    assert dimensions_by_name[QUERY_HASH_DIMENSION] == "abc123"
+    assert (GROUP_BY_FIELDS_PARAM, QUERYSTRING_FETCH_KEY) not in gcp_session.params
+    assert (GROUP_BY_FIELDS_PARAM, QUERY_HASH_FETCH_KEY) in gcp_session.params
 
 
 def test_flatten_and_enrich_metric_results_all_additional_dimensions():
