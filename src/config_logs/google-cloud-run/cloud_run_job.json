@@ -1,0 +1,25 @@
+{
+  "name": "cloud_run_job",
+  "displayName": "Cloud Run Job",
+  "rules": [
+    {
+      "sources": [
+        {
+          "sourceType": "logs",
+          "source": "resourceType",
+          "condition": "$eq('cloud_run_job')"
+        }
+      ],
+      "attributes": [
+        {
+          "key": "gcp.instance.name",
+          "pattern": "resource.labels.job_name"
+        },
+        {
+          "key": "content",
+          "pattern": "@"
+        }
+      ]
+    }
+  ]
+}
