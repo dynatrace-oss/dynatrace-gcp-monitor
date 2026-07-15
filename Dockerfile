@@ -24,7 +24,7 @@ COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3
 COPY src/ .
 COPY LICENSE.md /licenses/
 
-RUN adduser --disabled-password gcp-monitor && chown -R gcp-monitor /code
+RUN addgroup gcp-monitor && adduser --disabled-password gcp-monitor -g gcp-monitor && chown -R gcp-monitor.gcp-monitor /code
 USER gcp-monitor
 
 CMD [ "python", "-u", "./run_docker.py" ]
