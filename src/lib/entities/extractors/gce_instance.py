@@ -124,6 +124,9 @@ async def get_gce_instance_entity(ctx: MetricsContext, project_id: str, svc_def:
 
     all_results = []
     for result in results:
+        if isinstance(result, Exception):
+            ctx.log(f"gce_instance zone task failed, reason is {type(result).__name__} {result}")
+            continue
         all_results.extend(result)
 
     return all_results
