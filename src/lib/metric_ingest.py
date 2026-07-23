@@ -384,7 +384,7 @@ async def fetch_metric(
     # Ref: https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors
     # Combinations: https://cloud.google.com/monitoring/api/v3/kinds-and-types#kind-type-combos
     aligner = _set_aligner(metric.google_metric_kind, metric.value_type)
-    reducer = _set_reducer(metric.google_metric_kind, metric.value_type, bool(excluded_source_dimensions))
+    reducer = _set_reducer(metric.google_metric_kind, metric.value_type)
 
     params = [
         ('filter', f'metric.type = "{metric.google_metric}" {monitoring_filter}'.strip()),
@@ -406,6 +406,12 @@ async def fetch_metric(
     should_fetch = True
 
     lines = []
+    aggregate_locally = (
+        bool(excluded_source_dimensions)
+        and metric.google_metric_kind.lower().startswith('cumulative')
+        and metric.value_type.lower() in ('int64', 'double', 'distribution')
+    )
+    aggregated_lines = {} if aggregate_locally else None
     while should_fetch:
         context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
@@ -429,7 +435,10 @@ async def fetch_metric(
             for point in single_time_series['points']:
                 line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
                 if line:
-                    lines.append(line)
+                    if aggregate_locally:
+                        _add_aggregated_line(aggregated_lines, line, metric.value_type)
+                    else:
+                        lines.append(line)
 
         next_page_token = page.get('nextPageToken', None)
         if next_page_token:
@@ -437,7 +446,7 @@ async def fetch_metric(
         else:
             should_fetch = False
 
-    return lines
+    return list(aggregated_lines.values()) if aggregate_locally else lines
 
 
 def _set_aligner(metric_kind, value_type):
@@ -453,18 +462,67 @@ def _set_aligner(metric_kind, value_type):
     return aligner
 
 
-def _set_reducer(metric_kind, value_type, aggregate_excluded_dimensions=False):
+def _set_reducer(metric_kind, value_type):
     reducer = 'REDUCE_SUM'
 
     if metric_kind.lower().startswith('cumulative'):
-        if aggregate_excluded_dimensions and value_type.lower() in ('int64', 'double', 'distribution'):
-            reducer = 'REDUCE_SUM'
-        else:
-            reducer = 'REDUCE_NONE'
+        reducer = 'REDUCE_NONE'
     elif metric_kind.lower().startswith('gauge') and (value_type.lower() == 'int64' or value_type.lower() == 'double'):
         reducer = 'REDUCE_MEAN'
 
     return reducer
+
+
+def _add_aggregated_line(aggregated: Dict, line: IngestLine, value_type: str):
+    key = (
+        line.entity_id,
+        line.metric_name,
+        line.metric_type,
+        line.timestamp,
+        tuple(sorted(line.dimension_values, key=lambda dimension: (dimension.name, dimension.value))),
+    )
+    existing = aggregated.get(key)
+    if existing is None:
+        aggregated[key] = line
+        return
+
+    if value_type.lower() == 'distribution':
+        value = _merge_distribution_values(existing.value, line.value)
+    elif value_type.lower() == 'int64':
+        value = int(existing.value) + int(line.value)
+    elif value_type.lower() == 'double':
+        value = float(existing.value) + float(line.value)
+    else:
+        raise ValueError(f"Cannot aggregate metric value type {value_type}")
+
+    aggregated[key] = IngestLine(
+        entity_id=line.entity_id,
+        metric_name=line.metric_name,
+        metric_type=line.metric_type,
+        value=value,
+        timestamp=line.timestamp,
+        dimension_values=line.dimension_values,
+    )
+
+
+def _merge_distribution_values(first: str, second: str) -> str:
+    first_values = _parse_distribution_value(first)
+    second_values = _parse_distribution_value(second)
+    return _gauge_line(
+        min(float(first_values['min']), float(second_values['min'])),
+        max(float(first_values['max']), float(second_values['max'])),
+        int(first_values['count']) + int(second_values['count']),
+        float(first_values['sum']) + float(second_values['sum']),
+        None,
+    )
+
+
+def _parse_distribution_value(value: str) -> Dict[str, str]:
+    result = {}
+    for item in value.split(','):
+        key, item_value = item.split('=', 1)
+        result[key] = item_value
+    return result
 
 
 def _update_params(next_page_token, params):
