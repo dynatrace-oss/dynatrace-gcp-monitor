@@ -506,8 +506,12 @@ def _add_aggregated_line(aggregated: Dict, line: IngestLine, value_type: str):
 
 
 def _merge_distribution_values(first: str, second: str) -> str:
-    first_values = dict(item.split('=', 1) for item in first.split(','))
-    second_values = dict(item.split('=', 1) for item in second.split(','))
+    first_values = {
+        key: value for key, value in (item.split('=', 1) for item in first.split(','))
+    }
+    second_values = {
+        key: value for key, value in (item.split('=', 1) for item in second.split(','))
+    }
     return _gauge_line(
         min(float(first_values['min']), float(second_values['min'])),
         max(float(first_values['max']), float(second_values['max'])),
