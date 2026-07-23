@@ -506,12 +506,8 @@ def _add_aggregated_line(aggregated: Dict, line: IngestLine, value_type: str):
 
 
 def _merge_distribution_values(first: str, second: str) -> str:
-    first_values = {
-        key: value for key, value in (item.split('=', 1) for item in first.split(','))
-    }
-    second_values = {
-        key: value for key, value in (item.split('=', 1) for item in second.split(','))
-    }
+    first_values = _parse_distribution_value(first)
+    second_values = _parse_distribution_value(second)
     return _gauge_line(
         min(float(first_values['min']), float(second_values['min'])),
         max(float(first_values['max']), float(second_values['max'])),
@@ -519,6 +515,14 @@ def _merge_distribution_values(first: str, second: str) -> str:
         float(first_values['sum']) + float(second_values['sum']),
         None,
     )
+
+
+def _parse_distribution_value(value: str) -> Dict[str, str]:
+    result = {}
+    for item in value.split(','):
+        key, item_value = item.split('=', 1)
+        result[key] = item_value
+    return result
 
 
 def _update_params(next_page_token, params):
