@@ -19,7 +19,7 @@ import pytest
 
 from lib.entities.model import CdProperty
 from lib.metric_ingest import *
-from lib.metric_ingest import _set_reducer
+from lib.metric_ingest import _add_aggregated_line, _set_reducer
 from lib.topology.topology import build_entity_id_map
 
 
@@ -209,10 +209,37 @@ def test_create_dimensions_omits_excluded_metadata_labels():
     assert dimensions_by_name["env"] == "prod"
 
 
-def test_cumulative_reducer_uses_sum_only_when_dimensions_are_excluded():
+def test_cumulative_reducer_does_not_aggregate_in_gcp():
     assert _set_reducer("CUMULATIVE", "INT64") == "REDUCE_NONE"
-    assert _set_reducer("CUMULATIVE", "INT64", aggregate_excluded_dimensions=True) == "REDUCE_SUM"
-    assert _set_reducer("CUMULATIVE", "DISTRIBUTION", aggregate_excluded_dimensions=True) == "REDUCE_SUM"
+
+
+def test_local_aggregation_ignores_dimension_order():
+    first = IngestLine(
+        "entity", "metric", "count", 20, 1000,
+        [DimensionValue("first", "1"), DimensionValue("second", "2")],
+    )
+    second = IngestLine(
+        "entity", "metric", "count", 22, 1000,
+        [DimensionValue("second", "2"), DimensionValue("first", "1")],
+    )
+    aggregated = {}
+
+    _add_aggregated_line(aggregated, first, "INT64")
+    _add_aggregated_line(aggregated, second, "INT64")
+
+    assert len(aggregated) == 1
+    assert next(iter(aggregated.values())).value == 42
+
+
+def test_local_aggregation_sums_double_values():
+    aggregated = {}
+    first = IngestLine("entity", "metric", "count", 1.25, 1000, [])
+    second = IngestLine("entity", "metric", "count", 2.75, 1000, [])
+
+    _add_aggregated_line(aggregated, first, "DOUBLE")
+    _add_aggregated_line(aggregated, second, "DOUBLE")
+
+    assert next(iter(aggregated.values())).value == 4.0
 
 
 def test_exclusion_uses_most_specific_metric_match_for_full_metric_skip():
@@ -268,7 +295,7 @@ class _FakeGcpSession:
 
 
 @pytest.mark.asyncio
-async def test_fetch_metric_aggregates_cumulative_metric_when_dimension_excluded():
+async def test_fetch_metric_fetches_cumulative_source_series_when_dimension_excluded():
     gcp_session = _FakeGcpSession()
     context = MetricsContext(gcp_session, None, "owner", "token", datetime.now(timezone.utc), 60, "", "", False, False, None)
     service = GCPService(service="cloudsql_database", dimensions=[], metrics=[])
@@ -294,9 +321,117 @@ async def test_fetch_metric_aggregates_cumulative_metric_when_dimension_excluded
     )
 
     assert ("aggregation.perSeriesAligner", "ALIGN_DELTA") in gcp_session.params
-    assert ("aggregation.crossSeriesReducer", "REDUCE_SUM") in gcp_session.params
+    assert ("aggregation.crossSeriesReducer", "REDUCE_NONE") in gcp_session.params
     assert (GROUP_BY_FIELDS_PARAM, QUERYSTRING_FETCH_KEY) not in gcp_session.params
     assert (GROUP_BY_FIELDS_PARAM, QUERY_HASH_FETCH_KEY) in gcp_session.params
+
+
+@pytest.mark.asyncio
+async def test_fetch_metric_aggregates_cumulative_values_after_excluding_dimension():
+    gcp_session = _FakeGcpSession(
+        {
+            "timeSeries": [
+                {
+                    "valueType": "INT64",
+                    "metric": {
+                        "labels": {
+                            QUERYSTRING_DIMENSION: querystring,
+                            QUERY_HASH_DIMENSION: "abc123",
+                        }
+                    },
+                    "resource": {"labels": {}},
+                    "metadata": {"systemLabels": {}, "userLabels": {}},
+                    "points": [
+                        {
+                            "interval": {"endTime": "2026-07-08T17:54:00Z"},
+                            "value": {"int64Value": value},
+                        }
+                    ],
+                }
+                for querystring, value in (("SELECT 1", "20"), ("SELECT 2", "22"))
+            ]
+        }
+    )
+    context = MetricsContext(gcp_session, None, "owner", "token", datetime.now(timezone.utc), 60, "", "", False, False, None)
+    service = GCPService(service="cloudsql_database", dimensions=[], metrics=[])
+    metric = Metric(
+        name="Per query execution time",
+        value=f"metric:{PERQUERY_EXECUTION_TIME_METRIC}",
+        key=PERQUERY_EXECUTION_TIME_DT_METRIC,
+        type="count",
+        gcpOptions={"ingestDelay": 0, "samplePeriod": 60, "valueType": "INT64", "metricKind": "CUMULATIVE"},
+        dimensions=[
+            {"key": QUERYSTRING_DIMENSION, "value": QUERYSTRING_LABEL_VALUE},
+            {"key": QUERY_HASH_DIMENSION, "value": QUERY_HASH_LABEL_VALUE},
+        ],
+    )
+
+    lines = await fetch_metric(
+        context,
+        "test-project",
+        service,
+        metric,
+        [{"metric": metric.google_metric, "dimensions": {QUERYSTRING_DIMENSION}}],
+        NO_GROUPING_CATEGORY,
+    )
+
+    assert len(lines) == 1
+    assert lines[0].value == 42
+    assert QUERYSTRING_DIMENSION not in {dimension.name for dimension in lines[0].dimension_values}
+
+
+@pytest.mark.asyncio
+async def test_fetch_metric_aggregates_distributions_after_excluding_dimension():
+    gcp_session = _FakeGcpSession(
+        {
+            "timeSeries": [
+                {
+                    "valueType": "DISTRIBUTION",
+                    "metric": {
+                        "labels": {
+                            QUERYSTRING_DIMENSION: querystring,
+                            QUERY_HASH_DIMENSION: "abc123",
+                        }
+                    },
+                    "resource": {"labels": {}},
+                    "metadata": {"systemLabels": {}, "userLabels": {}},
+                    "points": [
+                        {
+                            "interval": {"endTime": "2026-07-08T17:54:00Z"},
+                            "value": {"distributionValue": {"count": count, "mean": mean}},
+                        }
+                    ],
+                }
+                for querystring, count, mean in (("SELECT 1", "1", 10), ("SELECT 2", "2", 20))
+            ]
+        }
+    )
+    context = MetricsContext(gcp_session, None, "owner", "token", datetime.now(timezone.utc), 60, "", "", False, False, None)
+    service = GCPService(service="cloudsql_database", dimensions=[], metrics=[])
+    metric = Metric(
+        name="Per query latency",
+        value="metric:cloudsql.googleapis.com/database/postgresql/insights/perquery/latencies",
+        key="cloud.gcp.cloudsql_googleapis_com.database.postgresql.insights.perquery.latencies",
+        type="gauge",
+        gcpOptions={"ingestDelay": 0, "samplePeriod": 60, "valueType": "DISTRIBUTION", "metricKind": "CUMULATIVE", "unit": "us"},
+        dimensions=[
+            {"key": QUERYSTRING_DIMENSION, "value": QUERYSTRING_LABEL_VALUE},
+            {"key": QUERY_HASH_DIMENSION, "value": QUERY_HASH_LABEL_VALUE},
+        ],
+    )
+
+    lines = await fetch_metric(
+        context,
+        "test-project",
+        service,
+        metric,
+        [{"metric": metric.google_metric, "dimensions": {QUERYSTRING_DIMENSION}}],
+        NO_GROUPING_CATEGORY,
+    )
+
+    assert len(lines) == 1
+    assert lines[0].value == "min=10.0,max=20.0,count=3,sum=50.0"
+    assert QUERYSTRING_DIMENSION not in {dimension.name for dimension in lines[0].dimension_values}
 
 
 @pytest.mark.asyncio
