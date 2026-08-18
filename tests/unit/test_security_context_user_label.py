@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 import pytest
 
 from lib import metric_ingest
+from lib.configuration import config
 from lib.metric_ingest import fetch_metric
 from lib.metrics import GCPService, Metric
 from lib.context import MetricsContext
@@ -231,3 +232,20 @@ async def test_resources_in_one_project_map_to_their_own_security_context(monkey
     assert len(lines) == 3
     gamma = next(l for l in lines if any(d.value == "db-gamma" for d in l.dimension_values))
     assert not any(d.name == GROUPING_LABEL for d in gamma.dimension_values)
+
+
+# --- The default is the unchanged pre-existing constant ---
+
+def test_blank_security_context_still_falls_back_to_the_project_id(monkeypatch):
+    """The fallback chain is untouched: DT_SECURITY_CONTEXT, else the project id."""
+    monkeypatch.delenv("DT_SECURITY_CONTEXT", raising=False)
+    monkeypatch.setenv("GCP_PROJECT", "example-project")
+
+    assert config.get_dt_security_context_value() == "example-project"
+
+
+def test_configured_security_context_takes_precedence_over_the_project_id(monkeypatch):
+    monkeypatch.setenv("DT_SECURITY_CONTEXT", "1000000")
+    monkeypatch.setenv("GCP_PROJECT", "example-project")
+
+    assert config.get_dt_security_context_value() == "1000000"
