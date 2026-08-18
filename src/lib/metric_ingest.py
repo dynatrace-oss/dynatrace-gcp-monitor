@@ -41,6 +41,7 @@ MAX_DIMENSION_VALUE_LENGTH = config.max_dimension_value_length()
 
 GCP_MONITORING_URL = config.gcp_monitoring_url()
 DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
+DT_SECURITY_CONTEXT_USER_LABEL = config.dt_security_context_user_label()
 METRIC_SOURCE_DIMENSION_KEY = "dt.source"
 METRIC_SOURCE_DIMENSION_VALUE = "com.dynatrace.gcp"
 RESOURCE_LABEL_ALIASES = {"project_id": "gcp.project.id"}
@@ -664,7 +665,14 @@ def create_dimensions(
     dt_dimensions = [create_dimension("gcp.resource.type", service_name, context)]
 
     dt_dimensions.append(create_dimension("metadata.origin", "autodiscovery" if metric.autodiscovered_metric else "extension"))
-    dt_dimensions.append(create_dimension("dt.security_context", DT_SECURITY_CONTEXT_VALUE))
+    # Prefer the resource's own user label, so a metric carries the security context of the
+    # RESOURCE rather than of the release. Absent label -> today's flat constant.
+    resource_security_context = None
+    if DT_SECURITY_CONTEXT_USER_LABEL:
+        resource_security_context = time_series.get('metadata', {}).get('userLabels', {}) \
+            .get(DT_SECURITY_CONTEXT_USER_LABEL)
+    dt_dimensions.append(create_dimension(
+        "dt.security_context", resource_security_context or DT_SECURITY_CONTEXT_VALUE))
     dt_dimensions.append(create_dimension(METRIC_SOURCE_DIMENSION_KEY, METRIC_SOURCE_DIMENSION_VALUE))
 
     if effective_sample_period is not None:
