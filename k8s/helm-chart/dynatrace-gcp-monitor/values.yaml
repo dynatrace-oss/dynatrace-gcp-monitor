@@ -51,6 +51,20 @@ dynatraceUrlSecretName: ""
 # When empty, the value is equal to the gcpProjectId value.
 # Change it only when you want to use a security context different from the value of the gcpProjectId parameter.
 dtSecurityContext: ""
+#
+# dtSecurityContextUserLabel: GCP user label whose value is used as the dt.security_context of a
+# metric, attributing it to the owner of the RESOURCE rather than of this deployment.
+# Resources without the label fall back to dtSecurityContext. Empty disables the feature.
+# NOTE: dt.security_context drives record-level permissions in Grail and is part of series
+# identity, so enabling this changes who can see the data and re-keys affected series.
+dtSecurityContextUserLabel: ""
+#
+# groupAllServicesByUserLabel: group EVERY service by this user label, instead of listing each
+# service individually in labelsGroupingByService. Services listed there keep their own grouping.
+# Empty disables the feature.
+# NOTE: this makes every service use the two-pass fetch, so timeSeries.list call volume roughly
+# doubles. Enable and measure it as a step separate from deploying the image.
+groupAllServicesByUserLabel: ""
 
 
 # LOGS VALUES - REQUIRED for 'logs' and 'all' deployment
