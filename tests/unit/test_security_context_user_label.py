@@ -190,3 +190,44 @@ async def test_security_context_unchanged_when_label_not_configured(monkeypatch)
     lines = await _fetch(session, NO_GROUPING_CATEGORY)
 
     assert _security_contexts(lines) == [DEFAULT_SECURITY_CONTEXT]
+
+
+# --- Mixed ownership: several teams and an unlabelled resource in one project ---
+
+@pytest.mark.asyncio
+async def test_resources_in_one_project_map_to_their_own_security_context(monkeypatch):
+    """Two teams own same-typed resources in one project, and a third resource is unlabelled.
+
+    Each labelled resource must carry its own security context; the unlabelled one must still
+    be ingested, under the deployment-wide default.
+    """
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", GROUPING_LABEL)
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_VALUE", DEFAULT_SECURITY_CONTEXT)
+
+    grouped = {"timeSeries": [
+        _time_series("db-alpha", {GROUPING_LABEL: "12345"}),
+        _time_series("db-beta", {GROUPING_LABEL: "7801234"}),
+    ]}
+    ungrouped = {"timeSeries": [
+        _time_series("db-alpha"),
+        _time_series("db-beta"),
+        _time_series("db-gamma"),
+    ]}
+    session = _RecordingGcpSession([grouped, ungrouped])
+
+    lines = await _fetch(session, GROUPING)
+
+    by_database = {
+        next(d.value for d in line.dimension_values if d.name == "database_id"):
+            next(d.value for d in line.dimension_values if d.name == "dt.security_context")
+        for line in lines
+    }
+    assert by_database == {
+        "db-alpha": "12345",
+        "db-beta": "7801234",
+        "db-gamma": DEFAULT_SECURITY_CONTEXT,
+    }
+    # The unlabelled resource is ingested exactly once and carries no label dimension.
+    assert len(lines) == 3
+    gamma = next(l for l in lines if any(d.value == "db-gamma" for d in l.dimension_values))
+    assert not any(d.name == GROUPING_LABEL for d in gamma.dimension_values)
