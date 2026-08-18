@@ -75,13 +75,41 @@ def read_filter_out_list_yaml() -> list:
 
 
 def read_labels_grouping_by_service_yaml() -> list:
+    logging_context = LoggingContext(None)
     loaded_yaml = safe_read_yaml("/code/config/activation/labels-grouping-by-service.yaml", "LABELS_GROUPING_BY_SERVICE") or {}
     services = loaded_yaml.get("services") or []
 
     for service in services:
-        service["groupings"] = set(service.get("groupings") or [])
+        service["groupings"] = _collapse_groupings(
+            service.get("groupings") or [], service.get("service"), logging_context
+        )
 
     return services
+
+
+def _collapse_groupings(configured_groupings, service_name, logging_context: LoggingContext) -> set:
+    """Collapse a service's groupings into a single comma-separated grouping.
+
+    Every grouping is queried separately, so declaring more than one makes the same resource
+    be fetched -- and ingested -- once per grouping. Merging them keeps every requested label
+    while issuing one query per metric.
+    """
+    labels: List[str] = []
+    for configured_grouping in configured_groupings:
+        for label in str(configured_grouping).split(","):
+            label = label.strip()
+            if label and label not in labels:
+                labels.append(label)
+
+    if len(configured_groupings) > 1:
+        logging_context.log(
+            f"Service '{service_name}' declares {len(configured_groupings)} groupings. Each one is "
+            f"queried separately, which ingests every matching resource once per grouping, so they "
+            f"have been merged into a single grouping: '{','.join(labels)}'. Declare one "
+            f"comma-separated grouping per service to avoid this."
+        )
+
+    return {",".join(labels)} if labels else set()
 
 
 def get_activation_config_per_service(activation_yaml):

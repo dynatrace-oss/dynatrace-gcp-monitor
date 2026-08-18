@@ -1,6 +1,6 @@
 from lib.autodiscovery.models import AutodiscoveryResourceLinking
 from lib.metrics import AutodiscoveryGCPService, GCPService, Metric
-from lib.utilities import NO_GROUPING_CATEGORY
+from lib.utilities import NO_GROUPING_CATEGORY, read_labels_grouping_by_service_yaml
 
 
 def _create_metric(google_metric: str, autodiscovered_metric: bool = False) -> Metric:
@@ -184,3 +184,67 @@ def test_no_global_label_falls_back_to_no_grouping():
     metric = _create_metric("pubsub.googleapis.com/subscription/num_undelivered_messages")
 
     assert _set_groupings(service, [], metric) == [NO_GROUPING_CATEGORY]
+
+
+# --- One query per service: several groupings are collapsed into one ---
+
+def _read_groupings(monkeypatch, yaml_text):
+    monkeypatch.setenv("LABELS_GROUPING_BY_SERVICE", yaml_text)
+    return {s["service"]: s["groupings"] for s in read_labels_grouping_by_service_yaml()}
+
+
+def test_single_comma_separated_grouping_is_left_alone(monkeypatch):
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings:
+    - stage,owner
+""")
+
+    assert groupings["cloudsql_database"] == {"stage,owner"}
+
+
+def test_several_groupings_are_merged_into_one(monkeypatch):
+    # Two groupings would be two queries, ingesting every matching resource twice.
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings:
+    - stage,owner
+    - example_label
+""")
+
+    assert groupings["cloudsql_database"] == {"stage,owner,example_label"}
+
+
+def test_labels_repeated_across_groupings_are_deduplicated(monkeypatch):
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings:
+    - stage,owner
+    - owner,example_label
+""")
+
+    assert groupings["cloudsql_database"] == {"stage,owner,example_label"}
+
+
+def test_whitespace_around_labels_is_stripped(monkeypatch):
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings:
+    - " stage , owner "
+""")
+
+    assert groupings["cloudsql_database"] == {"stage,owner"}
+
+
+def test_service_without_groupings_yields_none(monkeypatch):
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings: []
+""")
+
+    assert groupings["cloudsql_database"] == set()
