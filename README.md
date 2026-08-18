@@ -1,5 +1,29 @@
 # Dynatrace integration for Google Cloud Platform monitoring
 
+> ## Fork notice
+>
+> This is a fork of [`dynatrace-oss/dynatrace-gcp-monitor`](https://github.com/dynatrace-oss/dynatrace-gcp-monitor),
+> diverged from upstream commit [`12f0fef`](https://github.com/dynatrace-oss/dynatrace-gcp-monitor/commit/12f0fef3769d274e5f57355c2efc87005f28b28c)
+> (2026-07-28). Keep the `upstream` remote so rebasing onto new upstream releases stays mechanical:
+>
+> ```
+> git remote add upstream https://github.com/dynatrace-oss/dynatrace-gcp-monitor.git
+> ```
+>
+> ### What this fork adds
+>
+> | Setting | Default | Effect |
+> | --- | --- | --- |
+> | *(none)* | — | Fixes a preview-feature bug where a service listed in `LABELS_GROUPING_BY_SERVICE` silently stopped ingesting any resource that lacked the grouped label. A second, ungrouped pass now backfills those resources. Costs one extra `timeSeries.list` call per listed service. |
+> | `DT_SECURITY_CONTEXT_USER_LABEL` | `""` (off) | GCP user label whose value becomes a metric's `dt.security_context`, attributing it to the owner of the resource rather than of the deployment. Falls back to `DT_SECURITY_CONTEXT`. |
+> | `GROUP_ALL_SERVICES_BY_USER_LABEL` | `""` (off) | Group every service by this user label instead of listing each one in `LABELS_GROUPING_BY_SERVICE`. Per-service entries still win. Makes every service take the two-pass path, so `timeSeries.list` volume roughly doubles. |
+>
+> With both variables unset the fork behaves exactly like upstream, apart from the backfill fix.
+>
+> `dt.security_context` drives record-level permissions in Grail and is part of series identity.
+> Enabling `DT_SECURITY_CONTEXT_USER_LABEL` therefore changes who can see the data and re-keys
+> affected series. Roll it out to a non-production environment first.
+
 This is the home of `dynatrace-gcp-monitor` which provides the mechanism to pull all [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) and  [Cloud logs](https://cloud.google.com/logging/docs)  into Dynatrace. 
 
 This integration consists of K8s container and few auxiliary components. This setup will be running in your GCP project and will be pushing data to Dynatrace. We provide bash script that will deploy all necessary elements.
