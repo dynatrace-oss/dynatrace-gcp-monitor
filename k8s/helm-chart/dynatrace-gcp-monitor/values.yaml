@@ -236,12 +236,15 @@ excludedMetricsAndDimensions: |
 # HOT-RELOADABLE: Changes to this value take effect without pod restart (within 1-2 polling cycles, ~60-90s ConfigMap propagation + polling interval).
 # Ref: https://cloud.google.com/resource-manager/docs/labels-overview
 # Metrics queries will be sent per grouping, according to the GroupBy behavior of Google Metric Explorer.
-# NOTE: Be careful while defining mutually exclusive groupings not to query metrics more than once.
+# NOTE: Declare ONE comma-separated grouping per service. Each grouping is queried separately, so
+# several of them would ingest every matching resource once per grouping. Extra groupings are
+# merged into a single comma-separated one, and the merge is logged.
 # Example:
 # Use the extension service name for regular metrics (for example cloudsql_database).
 # For standalone autodiscovery resources from autodiscoveryResourcesYaml, use the GCP monitored resource type (for example redis.googleapis.com/Cluster).
 # Instances with both labels will be monitored and metrics will be decorated with dimensions from both labels.
-# Metrics from instances which do NOT have these labels will be dropped because they do not belong to the defined grouping.
+# Instances which do NOT have these labels are still monitored: a second, ungrouped pass backfills
+# them. They carry no label dimension and fall back to the default dtSecurityContext.
 #
 # labelsGroupingByService: |
 #   services:
@@ -260,7 +263,6 @@ labelsGroupingByService: |
 #   - service: service_B
 #     groupings:
 #       - user_label_4,user_label_5
-#       - user_label_6
 metricResources:
   requests:
     memory: "1536Mi"
