@@ -34,6 +34,8 @@ data:
   INCLUDED_PROJECTS_BY_PREFIX: {{ .Values.includedProjectsByPrefix | quote }}
   KEEP_REFRESHING_EXTENSIONS_CONFIG: {{ .Values.keepRefreshingExtensionsConfig | quote }}
   {{- if or (eq .Values.deploymentType "metrics") (eq .Values.deploymentType "all") }}
+  DT_SECURITY_CONTEXT_USER_LABEL: {{ .Values.dtSecurityContextUserLabel | quote }}
+  GROUP_ALL_SERVICES_BY_USER_LABEL: {{ .Values.groupAllServicesByUserLabel | quote }}
   PRINT_METRIC_INGEST_INPUT: {{ .Values.printMetricIngestInput | quote }}
   METRIC_INGEST_CONCURRENT_PUSHES: {{ .Values.metricIngestConcurrentPushes | quote }}
   METRIC_INGEST_BATCH_SIZE: {{ .Values.metricIngestBatchSize | quote }}

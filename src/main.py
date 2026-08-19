@@ -284,6 +284,10 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
             if configured_service_to_group.get("service") == service_name:
                 for configured_grouping in configured_service_to_group.get("groupings"):
                     groupings.append(configured_grouping)
+        if not groupings and group_all_services_by_user_label:
+            # Global default: group every service by this label. A service with its own
+            # entry in LABELS_GROUPING_BY_SERVICE keeps that grouping instead.
+            groupings.append(group_all_services_by_user_label)
         if not groupings:
             groupings.append(NO_GROUPING_CATEGORY)
 
@@ -309,6 +313,7 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
     # by which metrics will be queried. In this way, included labels will be added to metrics as dimensions.
     # Default behavior: all metrics are collected with no added labels as dimensions.
     configured_services_to_group = read_labels_grouping_by_service_yaml()
+    group_all_services_by_user_label = config.group_all_services_by_user_label()
 
     for service in services:
         if not service.is_enabled:

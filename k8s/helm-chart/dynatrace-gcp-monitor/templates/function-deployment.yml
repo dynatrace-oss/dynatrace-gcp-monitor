@@ -207,6 +207,16 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: DT_SECURITY_CONTEXT
+        - name: DT_SECURITY_CONTEXT_USER_LABEL
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: DT_SECURITY_CONTEXT_USER_LABEL
+        - name: GROUP_ALL_SERVICES_BY_USER_LABEL
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: GROUP_ALL_SERVICES_BY_USER_LABEL
         volumeMounts:
         - mountPath: /code/config/activation
           readOnly: true
