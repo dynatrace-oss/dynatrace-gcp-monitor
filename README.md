@@ -1,6 +1,10 @@
 # Dynatrace integration for Google Cloud Platform monitoring
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/dynatrace-oss/dynatrace-ai-agent-instrumentation-examples/badge)](https://scorecard.dev/viewer/?uri=github.com/dynatrace-oss/dynatrace-gcp-monitor)
+> [!IMPORTANT]
+> This integration is in maintenance mode. A new GCP poller is under active development.
+
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/dynatrace-oss/dynatrace-gcp-monitor/badge)](https://scorecard.dev/viewer/?uri=github.com/dynatrace-oss/dynatrace-gcp-monitor)
 
 This is the home of `dynatrace-gcp-monitor` which provides the mechanism to pull all [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) and  [Cloud logs](https://cloud.google.com/logging/docs)  into Dynatrace. 
 
