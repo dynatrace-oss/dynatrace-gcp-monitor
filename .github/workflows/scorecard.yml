@@ -1,46 +1,38 @@
 name: OpenSSF Scorecard
-
 on:
   branch_protection_rule:
   schedule:
     - cron: "17 3 * * 1"
   push:
     branches:
-      - main
-
+      - master
 permissions:
   contents: read
-
 jobs:
   analysis:
     name: Scorecard analysis
     runs-on: ubuntu-latest
-
     permissions:
       security-events: write
       id-token: write
       contents: read
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-
       - name: Run OpenSSF Scorecard
-        uses: ossf/scorecard-action@v2.4.3
+        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
         with:
           results_file: results.sarif
           results_format: sarif
           publish_results: true
-
       - name: Upload SARIF results to code scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@42947a340483f03ba47bb1a039b2c519aab3df85 # v3
         with:
           sarif_file: results.sarif
-
       - name: Upload Scorecard artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: OpenSSF Scorecard results
           path: results.sarif
