@@ -1,6 +1,6 @@
 from lib.autodiscovery.models import AutodiscoveryResourceLinking
 from lib.metrics import AutodiscoveryGCPService, GCPService, Metric
-from lib.utilities import NO_GROUPING_CATEGORY
+from lib.utilities import NO_GROUPING_CATEGORY, read_labels_grouping_by_service_yaml
 
 
 def _create_metric(google_metric: str, autodiscovered_metric: bool = False) -> Metric:
@@ -28,7 +28,8 @@ def _create_service(name: str, autodiscovery_enabled: bool = False) -> GCPServic
     )
 
 
-def _set_groupings(service, configured_services_to_group, metric=None):
+def _set_groupings(service, configured_services_to_group, metric=None,
+                   group_all_services_by_user_label=""):
     service_name = service.name
     if (
         metric
@@ -46,6 +47,8 @@ def _set_groupings(service, configured_services_to_group, metric=None):
         if configured_service_to_group.get("service") == service_name:
             for configured_grouping in configured_service_to_group.get("groupings"):
                 groupings.append(configured_grouping)
+    if not groupings and group_all_services_by_user_label:
+        groupings.append(group_all_services_by_user_label)
     if not groupings:
         groupings.append(NO_GROUPING_CATEGORY)
 
@@ -150,3 +153,98 @@ def test_unknown_service_falls_back_to_no_grouping():
     groupings = _set_groupings(service, configured_services_to_group, metric)
 
     assert groupings == [NO_GROUPING_CATEGORY]
+
+
+# --- GROUP_ALL_SERVICES_BY_USER_LABEL ---
+
+def test_global_label_groups_a_service_with_no_explicit_grouping():
+    service = _create_service("pubsub_subscription")
+    metric = _create_metric("pubsub.googleapis.com/subscription/num_undelivered_messages")
+
+    assert _set_groupings(
+        service, [], metric, group_all_services_by_user_label="example_label"
+    ) == ["example_label"]
+
+
+def test_explicit_grouping_wins_over_the_global_label():
+    service = _create_service("cloudsql_database")
+    metric = _create_metric("cloudsql.googleapis.com/database/cpu/utilization")
+    configured_services_to_group = [
+        {"service": "cloudsql_database", "groupings": {"user_label_1,user_label_2"}}
+    ]
+
+    assert _set_groupings(
+        service, configured_services_to_group, metric,
+        group_all_services_by_user_label="example_label",
+    ) == ["user_label_1,user_label_2"]
+
+
+def test_no_global_label_falls_back_to_no_grouping():
+    service = _create_service("pubsub_subscription")
+    metric = _create_metric("pubsub.googleapis.com/subscription/num_undelivered_messages")
+
+    assert _set_groupings(service, [], metric) == [NO_GROUPING_CATEGORY]
+
+
+# --- One query per service: several groupings are collapsed into one ---
+
+def _read_groupings(monkeypatch, yaml_text):
+    monkeypatch.setenv("LABELS_GROUPING_BY_SERVICE", yaml_text)
+    return {s["service"]: s["groupings"] for s in read_labels_grouping_by_service_yaml()}
+
+
+def test_single_comma_separated_grouping_is_left_alone(monkeypatch):
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings:
+    - stage,owner
+""")
+
+    assert groupings["cloudsql_database"] == {"stage,owner"}
+
+
+def test_several_groupings_are_merged_into_one(monkeypatch):
+    # Two groupings would be two queries, ingesting every matching resource twice.
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings:
+    - stage,owner
+    - example_label
+""")
+
+    assert groupings["cloudsql_database"] == {"stage,owner,example_label"}
+
+
+def test_labels_repeated_across_groupings_are_deduplicated(monkeypatch):
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings:
+    - stage,owner
+    - owner,example_label
+""")
+
+    assert groupings["cloudsql_database"] == {"stage,owner,example_label"}
+
+
+def test_whitespace_around_labels_is_stripped(monkeypatch):
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings:
+    - " stage , owner "
+""")
+
+    assert groupings["cloudsql_database"] == {"stage,owner"}
+
+
+def test_service_without_groupings_yields_none(monkeypatch):
+    groupings = _read_groupings(monkeypatch, """
+services:
+- service: cloudsql_database
+  groupings: []
+""")
+
+    assert groupings["cloudsql_database"] == set()
