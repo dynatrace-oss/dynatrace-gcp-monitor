@@ -41,6 +41,7 @@ MAX_DIMENSION_VALUE_LENGTH = config.max_dimension_value_length()
 
 GCP_MONITORING_URL = config.gcp_monitoring_url()
 DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
+DT_SECURITY_CONTEXT_USER_LABEL = config.dt_security_context_user_label()
 METRIC_SOURCE_DIMENSION_KEY = "dt.source"
 METRIC_SOURCE_DIMENSION_VALUE = "com.dynatrace.gcp"
 RESOURCE_LABEL_ALIASES = {"project_id": "gcp.project.id"}
@@ -396,14 +397,15 @@ async def fetch_metric(
     ]
     params.extend(group_by_params)
 
+    # `params` stays the ungrouped variant; `grouped_params` adds the metadata group-by.
+    grouped_params = list(params)
     for label in grouping.split(","):
         if label == NO_GROUPING_CATEGORY:
             break
-        params.append(('aggregation.groupByFields', 'metadata.user_labels.' + label))
+        grouped_params.append(('aggregation.groupByFields', 'metadata.user_labels.' + label))
+    is_grouped = len(grouped_params) > len(params)
 
     headers = context.create_gcp_request_headers(project_id)
-
-    should_fetch = True
 
     lines = []
     aggregate_locally = (
@@ -412,39 +414,64 @@ async def fetch_metric(
         and metric.value_type.lower() in ('int64', 'double', 'distribution')
     )
     aggregated_lines = {} if aggregate_locally else None
-    while should_fetch:
-        context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
-        url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
-        resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
-        page = await resp.json()
-        # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
-        if 'error' in page:
-            raise Exception(str(page))
-        if 'timeSeries' not in page:
-            break
+    def _resource_key(single_time_series):
+        resource = single_time_series.get('resource', {})
+        return (resource.get('type'), tuple(sorted(resource.get('labels', {}).items())))
 
-        for single_time_series in page['timeSeries']:
-            typed_value_key = _extract_typed_value_key(single_time_series)
-            dimensions = create_dimensions(
-                context, service_name, single_time_series, dt_dimensions_mapping, metric,
-                effective_sample_period, excluded_source_dimensions
-            )
-            entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
+    async def _fetch_pages(page_params, collect_keys=None, skip_keys=None):
+        # _update_params mutates the list to page, so each pass owns its own copy.
+        page_params = list(page_params)
+        should_fetch = True
+        while should_fetch:
+            context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
-            for point in single_time_series['points']:
-                line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
-                if line:
-                    if aggregate_locally:
-                        _add_aggregated_line(aggregated_lines, line, metric.value_type)
-                    else:
-                        lines.append(line)
+            url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
+            resp = await context.gcp_session.request('GET', url=url, params=page_params, headers=headers)
+            page = await resp.json()
+            # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
+            if 'error' in page:
+                raise Exception(str(page))
+            if 'timeSeries' not in page:
+                break
 
-        next_page_token = page.get('nextPageToken', None)
-        if next_page_token:
-            _update_params(next_page_token, params)
-        else:
-            should_fetch = False
+            for single_time_series in page['timeSeries']:
+                resource_key = _resource_key(single_time_series)
+                if skip_keys is not None and resource_key in skip_keys:
+                    continue
+                if collect_keys is not None:
+                    collect_keys.add(resource_key)
+
+                typed_value_key = _extract_typed_value_key(single_time_series)
+                dimensions = create_dimensions(
+                    context, service_name, single_time_series, dt_dimensions_mapping, metric,
+                    effective_sample_period, excluded_source_dimensions
+                )
+                entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
+
+                for point in single_time_series['points']:
+                    line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
+                    if line:
+                        if aggregate_locally:
+                            _add_aggregated_line(aggregated_lines, line, metric.value_type)
+                        else:
+                            lines.append(line)
+
+            next_page_token = page.get('nextPageToken', None)
+            if next_page_token:
+                _update_params(next_page_token, page_params)
+            else:
+                should_fetch = False
+
+    seen_resource_keys = set()
+    await _fetch_pages(grouped_params, collect_keys=seen_resource_keys if is_grouped else None)
+    if is_grouped:
+        # GCP omits any series whose resource has no value for the grouped metadata label
+        # (TimeSeries.metadata is only populated for labels named in the reduction). Re-run
+        # ungrouped and emit only the resources the grouped pass never returned, so an
+        # unlabelled resource keeps being ingested -- it just carries no user-label dimension
+        # and falls back to the default security context.
+        await _fetch_pages(params, skip_keys=seen_resource_keys)
 
     return list(aggregated_lines.values()) if aggregate_locally else lines
 
@@ -638,7 +665,14 @@ def create_dimensions(
     dt_dimensions = [create_dimension("gcp.resource.type", service_name, context)]
 
     dt_dimensions.append(create_dimension("metadata.origin", "autodiscovery" if metric.autodiscovered_metric else "extension"))
-    dt_dimensions.append(create_dimension("dt.security_context", DT_SECURITY_CONTEXT_VALUE))
+    # Prefer the resource's own user label, so a metric carries the security context of the
+    # RESOURCE rather than of the release. Absent label -> today's flat constant.
+    resource_security_context = None
+    if DT_SECURITY_CONTEXT_USER_LABEL:
+        resource_security_context = time_series.get('metadata', {}).get('userLabels', {}) \
+            .get(DT_SECURITY_CONTEXT_USER_LABEL)
+    dt_dimensions.append(create_dimension(
+        "dt.security_context", resource_security_context or DT_SECURITY_CONTEXT_VALUE))
     dt_dimensions.append(create_dimension(METRIC_SOURCE_DIMENSION_KEY, METRIC_SOURCE_DIMENSION_VALUE))
 
     if effective_sample_period is not None:

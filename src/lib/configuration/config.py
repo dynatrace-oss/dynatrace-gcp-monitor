@@ -171,3 +171,14 @@ def hostname():
 
 def dt_security_context():
     return os.environ.get("DT_SECURITY_CONTEXT", "")
+
+
+def dt_security_context_user_label():
+    """GCP user label whose value overrides DT_SECURITY_CONTEXT per resource. Empty = disabled."""
+    return os.environ.get("DT_SECURITY_CONTEXT_USER_LABEL", "")
+
+
+def group_all_services_by_user_label():
+    """User label to group every service by, unless the service has its own explicit
+    grouping in LABELS_GROUPING_BY_SERVICE. Empty = disabled."""
+    return os.environ.get("GROUP_ALL_SERVICES_BY_USER_LABEL", "")
