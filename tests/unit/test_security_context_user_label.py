@@ -187,6 +187,31 @@ async def test_backfill_is_skipped_for_cumulative_metrics(monkeypatch):
     assert len(lines) == 1
 
 
+@pytest.mark.asyncio
+async def test_unmatched_grouping_label_is_reported_once_per_project(monkeypatch, capsys):
+    # Grouped pass matches nothing (for example a misspelled label), backfill returns everything.
+    monkeypatch.setattr(metric_ingest, "INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS", True)
+    monkeypatch.setattr(metric_ingest, "_REPORTED_UNMATCHED_GROUPINGS", set())
+    bodies = [{"timeSeries": []}, {"timeSeries": [_time_series("some-db")]}]
+
+    lines = await _fetch(_RecordingGcpSession(bodies), GROUPING)
+    await _fetch(_RecordingGcpSession(bodies), GROUPING)
+
+    assert _security_contexts(lines) == [DEFAULT_SECURITY_CONTEXT]
+    assert capsys.readouterr().out.count(f"No resource carries the user label(s) '{GROUPING_LABEL}'") == 1
+
+
+@pytest.mark.asyncio
+async def test_metric_without_any_data_is_not_reported(monkeypatch, capsys):
+    monkeypatch.setattr(metric_ingest, "INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS", True)
+    monkeypatch.setattr(metric_ingest, "_REPORTED_UNMATCHED_GROUPINGS", set())
+
+    lines = await _fetch(_RecordingGcpSession([{"timeSeries": []}, {"timeSeries": []}]), GROUPING)
+
+    assert lines == []
+    assert "No resource carries" not in capsys.readouterr().out
+
+
 # --- DT_SECURITY_CONTEXT_USER_LABEL: dt.security_context from the resource's user label ---
 
 @pytest.mark.asyncio
