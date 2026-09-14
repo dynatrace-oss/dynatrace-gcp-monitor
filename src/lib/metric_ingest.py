@@ -53,6 +53,9 @@ _MAX_PUSH_RETRIES = 3
 _INITIAL_RETRY_DELAY_S = 1.0
 _MAX_RETRY_AFTER_S = 10.0
 
+# (project_id, grouping labels) already reported by _warn_once_about_unmatched_grouping
+_REPORTED_UNMATCHED_GROUPINGS = set()
+
 
 def find_excluded_metric(metric_name: str, excluded_metrics_and_dimensions: list):
     def metric_prefix(excluded_metric):
@@ -536,9 +539,29 @@ async def fetch_metric(
         # Re-run ungrouped and emit only the resources the grouped pass never returned, so an
         # unlabelled resource keeps being ingested -- it just carries no user-label dimension
         # and falls back to the default security context.
+        collected = aggregated_lines if aggregate_locally else lines
+        count_before_backfill = len(collected)
         await _fetch_pages(params, skip_keys=seen_resource_keys)
+        if not seen_resource_keys and len(collected) > count_before_backfill:
+            _warn_once_about_unmatched_grouping(context, project_id, grouping_labels)
 
     return list(aggregated_lines.values()) if aggregate_locally else lines
+
+
+def _warn_once_about_unmatched_grouping(context: MetricsContext, project_id: str, grouping_labels: List[str]):
+    # The grouped pass matched nothing while the ungrouped one did: no resource carries the label.
+    # Legitimate for an unlabelled project, but also the only symptom of a misspelled label name,
+    # so say it once per project and label set.
+    key = (project_id, tuple(grouping_labels))
+    if key in _REPORTED_UNMATCHED_GROUPINGS:
+        return
+    _REPORTED_UNMATCHED_GROUPINGS.add(key)
+    context.log(
+        project_id,
+        f"No resource carries the user label(s) '{','.join(grouping_labels)}'; all resources were ingested "
+        f"without label dimensions and with the default dt.security_context. "
+        f"Check the label name if this is unexpected."
+    )
 
 
 def _set_aligner(metric_kind, value_type):
