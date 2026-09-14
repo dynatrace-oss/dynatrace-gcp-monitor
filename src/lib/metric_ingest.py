@@ -41,6 +41,8 @@ MAX_DIMENSION_VALUE_LENGTH = config.max_dimension_value_length()
 
 GCP_MONITORING_URL = config.gcp_monitoring_url()
 DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
+DT_SECURITY_CONTEXT_USER_LABEL = config.dt_security_context_user_label()
+INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS = config.include_resources_without_grouping_labels()
 METRIC_SOURCE_DIMENSION_KEY = "dt.source"
 METRIC_SOURCE_DIMENSION_VALUE = "com.dynatrace.gcp"
 RESOURCE_LABEL_ALIASES = {"project_id": "gcp.project.id"}
@@ -50,6 +52,9 @@ _RETRYABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
 _MAX_PUSH_RETRIES = 3
 _INITIAL_RETRY_DELAY_S = 1.0
 _MAX_RETRY_AFTER_S = 10.0
+
+# (project_id, grouping labels) already reported by _warn_once_about_unmatched_grouping
+_REPORTED_UNMATCHED_GROUPINGS = set()
 
 
 def find_excluded_metric(metric_name: str, excluded_metrics_and_dimensions: list):
@@ -396,14 +401,32 @@ async def fetch_metric(
     ]
     params.extend(group_by_params)
 
-    for label in grouping.split(","):
-        if label == NO_GROUPING_CATEGORY:
-            break
-        params.append(('aggregation.groupByFields', 'metadata.user_labels.' + label))
+    # `params` stays the ungrouped variant; `grouped_params` adds the metadata group-by.
+    grouped_params = list(params)
+    grouping_labels = [label for label in grouping.split(",") if label and label != NO_GROUPING_CATEGORY]
+    # GCP returns metadata.userLabels only for labels named in the reduction, so the security
+    # context label has to be part of the group-by. It is skipped for REDUCE_NONE, where GCP
+    # ignores groupByFields altogether.
+    if (
+        DT_SECURITY_CONTEXT_USER_LABEL
+        and DT_SECURITY_CONTEXT_USER_LABEL not in grouping_labels
+        and reducer != 'REDUCE_NONE'
+    ):
+        grouping_labels.append(DT_SECURITY_CONTEXT_USER_LABEL)
+    for label in grouping_labels:
+        grouped_params.append(('aggregation.groupByFields', 'metadata.user_labels.' + label))
+    is_grouped = len(grouped_params) > len(params)
+    # Grouping by a user label drops every resource that does not carry it. Backfilling them costs
+    # a second timeSeries.list call, so for plain LABELS_GROUPING_BY_SERVICE it stays opt-in to keep
+    # the previous behaviour. With DT_SECURITY_CONTEXT_USER_LABEL the grouping is implicit and the
+    # backfill is what keeps unlabelled resources monitored, so it is always on.
+    should_backfill = (
+        is_grouped
+        and reducer != 'REDUCE_NONE'
+        and (bool(DT_SECURITY_CONTEXT_USER_LABEL) or INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS)
+    )
 
     headers = context.create_gcp_request_headers(project_id)
-
-    should_fetch = True
 
     lines = []
     aggregate_locally = (
@@ -412,41 +435,84 @@ async def fetch_metric(
         and metric.value_type.lower() in ('int64', 'double', 'distribution')
     )
     aggregated_lines = {} if aggregate_locally else None
-    while should_fetch:
-        context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
-        url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
-        resp = await context.gcp_session.request('GET', url=url, params=params, headers=headers)
-        page = await resp.json()
-        # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
-        if 'error' in page:
-            raise Exception(str(page))
-        if 'timeSeries' not in page:
-            break
+    def _resource_key(single_time_series):
+        resource = single_time_series.get('resource', {})
+        return (resource.get('type'), tuple(sorted(resource.get('labels', {}).items())))
 
-        for single_time_series in page['timeSeries']:
-            typed_value_key = _extract_typed_value_key(single_time_series)
-            dimensions = create_dimensions(
-                context, service_name, single_time_series, dt_dimensions_mapping, metric,
-                effective_sample_period, excluded_source_dimensions
-            )
-            entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
+    async def _fetch_pages(page_params, collect_keys=None, skip_keys=None):
+        # _update_params mutates the list to page, so each pass owns its own copy.
+        page_params = list(page_params)
+        should_fetch = True
+        while should_fetch:
+            context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
 
-            for point in single_time_series['points']:
-                line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
-                if line:
-                    if aggregate_locally:
-                        _add_aggregated_line(aggregated_lines, line, metric.value_type)
-                    else:
-                        lines.append(line)
+            url = f"{GCP_MONITORING_URL}/projects/{project_id}/timeSeries"
+            resp = await context.gcp_session.request('GET', url=url, params=page_params, headers=headers)
+            page = await resp.json()
+            # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
+            if 'error' in page:
+                raise Exception(str(page))
+            if 'timeSeries' not in page:
+                break
 
-        next_page_token = page.get('nextPageToken', None)
-        if next_page_token:
-            _update_params(next_page_token, params)
-        else:
-            should_fetch = False
+            for single_time_series in page['timeSeries']:
+                resource_key = _resource_key(single_time_series)
+                if skip_keys is not None and resource_key in skip_keys:
+                    continue
+                if collect_keys is not None:
+                    collect_keys.add(resource_key)
+
+                typed_value_key = _extract_typed_value_key(single_time_series)
+                dimensions = create_dimensions(
+                    context, service_name, single_time_series, dt_dimensions_mapping, metric,
+                    effective_sample_period, excluded_source_dimensions
+                )
+                entity_id = create_entity_id(service_name, service_dimensions, single_time_series)
+
+                for point in single_time_series['points']:
+                    line = _convert_point_to_ingest_line(context, dimensions, metric, point, typed_value_key, entity_id)
+                    if line:
+                        if aggregate_locally:
+                            _add_aggregated_line(aggregated_lines, line, metric.value_type)
+                        else:
+                            lines.append(line)
+
+            next_page_token = page.get('nextPageToken', None)
+            if next_page_token:
+                _update_params(next_page_token, page_params)
+            else:
+                should_fetch = False
+
+    seen_resource_keys = set()
+    await _fetch_pages(grouped_params, collect_keys=seen_resource_keys if should_backfill else None)
+    if should_backfill:
+        # Re-run ungrouped and emit only the resources the grouped pass never returned, so an
+        # unlabelled resource keeps being ingested -- it just carries no user-label dimension
+        # and falls back to the default security context.
+        collected = aggregated_lines if aggregate_locally else lines
+        count_before_backfill = len(collected)
+        await _fetch_pages(params, skip_keys=seen_resource_keys)
+        if not seen_resource_keys and len(collected) > count_before_backfill:
+            _warn_once_about_unmatched_grouping(context, project_id, grouping_labels)
 
     return list(aggregated_lines.values()) if aggregate_locally else lines
+
+
+def _warn_once_about_unmatched_grouping(context: MetricsContext, project_id: str, grouping_labels: List[str]):
+    # The grouped pass matched nothing while the ungrouped one did: no resource carries the label.
+    # Legitimate for an unlabelled project, but also the only symptom of a misspelled label name,
+    # so say it once per project and label set.
+    key = (project_id, tuple(grouping_labels))
+    if key in _REPORTED_UNMATCHED_GROUPINGS:
+        return
+    _REPORTED_UNMATCHED_GROUPINGS.add(key)
+    context.log(
+        project_id,
+        f"No resource carries the user label(s) '{','.join(grouping_labels)}'; all resources were ingested "
+        f"without label dimensions and with the default dt.security_context. "
+        f"Check the label name if this is unexpected."
+    )
 
 
 def _set_aligner(metric_kind, value_type):
@@ -638,7 +704,14 @@ def create_dimensions(
     dt_dimensions = [create_dimension("gcp.resource.type", service_name, context)]
 
     dt_dimensions.append(create_dimension("metadata.origin", "autodiscovery" if metric.autodiscovered_metric else "extension"))
-    dt_dimensions.append(create_dimension("dt.security_context", DT_SECURITY_CONTEXT_VALUE))
+    # Prefer the resource's own user label, so a metric carries the security context of the
+    # RESOURCE rather than of the release. Absent label -> today's flat constant.
+    resource_security_context = None
+    if DT_SECURITY_CONTEXT_USER_LABEL:
+        resource_security_context = time_series.get('metadata', {}).get('userLabels', {}) \
+            .get(DT_SECURITY_CONTEXT_USER_LABEL)
+    dt_dimensions.append(create_dimension(
+        "dt.security_context", resource_security_context or DT_SECURITY_CONTEXT_VALUE))
     dt_dimensions.append(create_dimension(METRIC_SOURCE_DIMENSION_KEY, METRIC_SOURCE_DIMENSION_VALUE))
 
     if effective_sample_period is not None:
