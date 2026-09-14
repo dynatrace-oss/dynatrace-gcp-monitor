@@ -52,19 +52,35 @@ dynatraceUrlSecretName: ""
 # Change it only when you want to use a security context different from the value of the gcpProjectId parameter.
 dtSecurityContext: ""
 #
-# dtSecurityContextUserLabel: GCP user label whose value is used as the dt.security_context of a
-# metric, attributing it to the owner of the RESOURCE rather than of this deployment.
-# Resources without the label fall back to dtSecurityContext. Empty disables the feature.
-# The label is added to the group-by of every metric query and resources without it are
-# backfilled with a second query, so timeSeries.list call volume roughly doubles.
-# NOTE: dt.security_context drives record-level permissions in Grail and is part of series
-# identity, so enabling this changes who can see the data and re-keys affected series.
+# dtSecurityContextUserLabel: OPTIONAL. Name of a GCP label that holds the security context of each resource.
+# Leave empty (default) to use dtSecurityContext for everything, exactly as before.
+#
+# Use it when several teams share one GCP project and each team should see only its own metrics in Dynatrace.
+# Example: your instances have the GCP label "owner" with values like "team-a", "team-b".
+#   dtSecurityContextUserLabel: "owner"
+#   -> metrics of an instance labelled owner=team-a get dt.security_context=team-a
+#   -> metrics of an instance labelled owner=team-b get dt.security_context=team-b
+#   -> metrics of an instance WITHOUT the "owner" label get dt.security_context=<dtSecurityContext> (the default)
+#
+# READ BEFORE ENABLING:
+#   1. dt.security_context controls who can see the data in Dynatrace. Users who see the metrics today
+#      (through the default context) will STOP seeing metrics of labelled resources, unless they also have
+#      access to the label value (e.g. "team-a"). Set up the Dynatrace permissions first.
+#   2. dt.security_context is part of the metric identity. Metrics of labelled resources start as NEW series;
+#      dashboards and alerts filtering on the old context will not show them. The same happens later whenever
+#      the label of a resource is added, removed or changed.
+#   3. Anyone allowed to set labels on GCP resources decides which security context those metrics end up in.
+#   4. Cumulative metrics (counters) cannot get the context from the label, they always use dtSecurityContext.
+#   5. The monitor sends about twice as many requests to the GCP Monitoring API. Check your quota.
+#   6. If no resource in a project has the label (for example the name is misspelled), everything is sent with
+#      the default context and a single message is logged per project. Check the logs after enabling.
+# Test on one project first.
 dtSecurityContextUserLabel: ""
 #
-# includeResourcesWithoutGroupingLabels: when using labelsGroupingByService, also monitor the
-# instances that do NOT carry the grouping labels. They are fetched with a second, ungrouped query
-# per metric (roughly doubling timeSeries.list call volume) and carry no label dimension.
-# Default false keeps the previous behaviour, where such instances are dropped.
+# includeResourcesWithoutGroupingLabels: OPTIONAL. Only relevant if you use labelsGroupingByService (below).
+# Default false: as before, instances that do NOT have the grouping labels are not monitored at all.
+# Set to true to monitor them too. They are sent without the label dimensions and with the default
+# dt.security_context. Costs about twice as many requests to the GCP Monitoring API for the grouped services.
 includeResourcesWithoutGroupingLabels: false
 
 
