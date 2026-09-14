@@ -42,6 +42,7 @@ MAX_DIMENSION_VALUE_LENGTH = config.max_dimension_value_length()
 GCP_MONITORING_URL = config.gcp_monitoring_url()
 DT_SECURITY_CONTEXT_VALUE = config.get_dt_security_context_value()
 DT_SECURITY_CONTEXT_USER_LABEL = config.dt_security_context_user_label()
+INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS = config.include_resources_without_grouping_labels()
 METRIC_SOURCE_DIMENSION_KEY = "dt.source"
 METRIC_SOURCE_DIMENSION_VALUE = "com.dynatrace.gcp"
 RESOURCE_LABEL_ALIASES = {"project_id": "gcp.project.id"}
@@ -399,11 +400,28 @@ async def fetch_metric(
 
     # `params` stays the ungrouped variant; `grouped_params` adds the metadata group-by.
     grouped_params = list(params)
-    for label in grouping.split(","):
-        if label == NO_GROUPING_CATEGORY:
-            break
+    grouping_labels = [label for label in grouping.split(",") if label and label != NO_GROUPING_CATEGORY]
+    # GCP returns metadata.userLabels only for labels named in the reduction, so the security
+    # context label has to be part of the group-by. It is skipped for REDUCE_NONE, where GCP
+    # ignores groupByFields altogether.
+    if (
+        DT_SECURITY_CONTEXT_USER_LABEL
+        and DT_SECURITY_CONTEXT_USER_LABEL not in grouping_labels
+        and reducer != 'REDUCE_NONE'
+    ):
+        grouping_labels.append(DT_SECURITY_CONTEXT_USER_LABEL)
+    for label in grouping_labels:
         grouped_params.append(('aggregation.groupByFields', 'metadata.user_labels.' + label))
     is_grouped = len(grouped_params) > len(params)
+    # Grouping by a user label drops every resource that does not carry it. Backfilling them costs
+    # a second timeSeries.list call, so for plain LABELS_GROUPING_BY_SERVICE it stays opt-in to keep
+    # the previous behaviour. With DT_SECURITY_CONTEXT_USER_LABEL the grouping is implicit and the
+    # backfill is what keeps unlabelled resources monitored, so it is always on.
+    should_backfill = (
+        is_grouped
+        and reducer != 'REDUCE_NONE'
+        and (bool(DT_SECURITY_CONTEXT_USER_LABEL) or INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS)
+    )
 
     headers = context.create_gcp_request_headers(project_id)
 
@@ -464,11 +482,9 @@ async def fetch_metric(
                 should_fetch = False
 
     seen_resource_keys = set()
-    await _fetch_pages(grouped_params, collect_keys=seen_resource_keys if is_grouped else None)
-    if is_grouped:
-        # GCP omits any series whose resource has no value for the grouped metadata label
-        # (TimeSeries.metadata is only populated for labels named in the reduction). Re-run
-        # ungrouped and emit only the resources the grouped pass never returned, so an
+    await _fetch_pages(grouped_params, collect_keys=seen_resource_keys if should_backfill else None)
+    if should_backfill:
+        # Re-run ungrouped and emit only the resources the grouped pass never returned, so an
         # unlabelled resource keeps being ingested -- it just carries no user-label dimension
         # and falls back to the default security context.
         await _fetch_pages(params, skip_keys=seen_resource_keys)

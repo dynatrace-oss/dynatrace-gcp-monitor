@@ -212,11 +212,11 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: DT_SECURITY_CONTEXT_USER_LABEL
-        - name: GROUP_ALL_SERVICES_BY_USER_LABEL
+        - name: INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS
           valueFrom:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
-              key: GROUP_ALL_SERVICES_BY_USER_LABEL
+              key: INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS
         volumeMounts:
         - mountPath: /code/config/activation
           readOnly: true

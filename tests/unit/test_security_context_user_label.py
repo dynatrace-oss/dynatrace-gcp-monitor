@@ -27,7 +27,16 @@ from lib.utilities import NO_GROUPING_CATEGORY
 TEST_METRIC = "cloudsql.googleapis.com/database/cpu/utilization"
 GROUPING_LABEL = "example_label"
 GROUPING = GROUPING_LABEL
+SECURITY_CONTEXT_LABEL = "owner"
 DEFAULT_SECURITY_CONTEXT = "default-context"
+
+
+@pytest.fixture(autouse=True)
+def _defaults(monkeypatch):
+    # Module-level constants are read from the environment at import time; pin them per test.
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_VALUE", DEFAULT_SECURITY_CONTEXT)
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", "")
+    monkeypatch.setattr(metric_ingest, "INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS", False)
 
 
 def _time_series(database_id, user_labels=None):
@@ -74,23 +83,23 @@ def _context(session):
     )
 
 
-def _metric():
+def _metric(metric_kind="GAUGE"):
     return Metric(
         name="CPU utilization",
         value=f"metric:{TEST_METRIC}",
         key="cloud.gcp.cloudsql_googleapis_com.database.cpu.utilization",
         type="gauge",
-        gcpOptions={"ingestDelay": 0, "samplePeriod": 60, "valueType": "INT64", "metricKind": "GAUGE"},
+        gcpOptions={"ingestDelay": 0, "samplePeriod": 60, "valueType": "INT64", "metricKind": metric_kind},
         dimensions=[],
     )
 
 
-async def _fetch(session, grouping):
+async def _fetch(session, grouping, metric_kind="GAUGE"):
     return await fetch_metric(
         _context(session),
         "test-project",
         GCPService(service="cloudsql_database", dimensions=[], metrics=[]),
-        _metric(),
+        _metric(metric_kind),
         [],
         grouping,
     )
@@ -109,10 +118,36 @@ def _security_contexts(lines):
     ]
 
 
-# --- Commit 1: backfill ---
+# --- Backward compatibility: nothing configured behaves as before ---
 
 @pytest.mark.asyncio
-async def test_grouped_fetch_backfills_resource_missing_the_label():
+async def test_ungrouped_service_makes_a_single_request():
+    session = _RecordingGcpSession([{"timeSeries": [_time_series("some-db")]}])
+
+    lines = await _fetch(session, NO_GROUPING_CATEGORY)
+
+    assert len(session.calls) == 1
+    assert _group_by_labels(session.calls[0]) == []
+    assert _security_contexts(lines) == [DEFAULT_SECURITY_CONTEXT]
+
+
+@pytest.mark.asyncio
+async def test_grouped_service_without_backfill_makes_a_single_request():
+    # LABELS_GROUPING_BY_SERVICE alone keeps the previous single-pass behaviour.
+    session = _RecordingGcpSession([{"timeSeries": [_time_series("labelled-db", {GROUPING_LABEL: "x"})]}])
+
+    lines = await _fetch(session, GROUPING)
+
+    assert len(session.calls) == 1
+    assert _group_by_labels(session.calls[0]) == [f"metadata.user_labels.{GROUPING_LABEL}"]
+    assert len(lines) == 1
+
+
+# --- INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS: backfill for explicit groupings ---
+
+@pytest.mark.asyncio
+async def test_backfill_ingests_resource_missing_the_grouping_label(monkeypatch):
+    monkeypatch.setattr(metric_ingest, "INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS", True)
     # Grouped pass returns only the labelled resource; GCP omits the unlabelled one.
     grouped = {"timeSeries": [_time_series("labelled-db", {GROUPING_LABEL: "1234567"})]}
     ungrouped = {"timeSeries": [_time_series("labelled-db"), _time_series("unlabelled-db")]}
@@ -123,13 +158,13 @@ async def test_grouped_fetch_backfills_resource_missing_the_label():
     assert len(session.calls) == 2
     assert _group_by_labels(session.calls[0]) == [f"metadata.user_labels.{GROUPING_LABEL}"]
     assert _group_by_labels(session.calls[1]) == []
-    # Both resources ingested, the unlabelled one exactly once.
+    # Both resources ingested, the labelled one exactly once.
     assert len(lines) == 2
 
 
 @pytest.mark.asyncio
-async def test_grouped_fetch_does_not_duplicate_labelled_resources():
-    # Every resource is labelled, so the backfill pass returns nothing new.
+async def test_backfill_does_not_duplicate_labelled_resources(monkeypatch):
+    monkeypatch.setattr(metric_ingest, "INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS", True)
     series = _time_series("labelled-db", {GROUPING_LABEL: "1234567"})
     session = _RecordingGcpSession([{"timeSeries": [series]}, {"timeSeries": [_time_series("labelled-db")]}])
 
@@ -140,60 +175,60 @@ async def test_grouped_fetch_does_not_duplicate_labelled_resources():
 
 
 @pytest.mark.asyncio
-async def test_ungrouped_service_makes_a_single_request():
+async def test_backfill_is_skipped_for_cumulative_metrics(monkeypatch):
+    # REDUCE_NONE ignores groupByFields, so the second pass would return the very same series.
+    monkeypatch.setattr(metric_ingest, "INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS", True)
     session = _RecordingGcpSession([{"timeSeries": [_time_series("some-db")]}])
 
-    lines = await _fetch(session, NO_GROUPING_CATEGORY)
+    lines = await _fetch(session, GROUPING, metric_kind="CUMULATIVE")
 
     assert len(session.calls) == 1
-    assert _group_by_labels(session.calls[0]) == []
+    assert ("aggregation.crossSeriesReducer", "REDUCE_NONE") in session.calls[0]
     assert len(lines) == 1
 
 
-# --- Commit 2: dt.security_context from the user label ---
+# --- DT_SECURITY_CONTEXT_USER_LABEL: dt.security_context from the resource's user label ---
 
 @pytest.mark.asyncio
-async def test_security_context_taken_from_user_label(monkeypatch):
-    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", GROUPING_LABEL)
-    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_VALUE", DEFAULT_SECURITY_CONTEXT)
-    session = _RecordingGcpSession([
-        {"timeSeries": [_time_series("labelled-db", {GROUPING_LABEL: "1234567"})]},
-        {"timeSeries": []},
-    ])
-
-    lines = await _fetch(session, GROUPING)
-
-    assert _security_contexts(lines) == ["1234567"]
-
-
-@pytest.mark.asyncio
-async def test_backfilled_resource_falls_back_to_default_security_context(monkeypatch):
-    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", GROUPING_LABEL)
-    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_VALUE", DEFAULT_SECURITY_CONTEXT)
-    session = _RecordingGcpSession([
-        {"timeSeries": []},
-        {"timeSeries": [_time_series("unlabelled-db")]},
-    ])
-
-    lines = await _fetch(session, GROUPING)
-
-    assert _security_contexts(lines) == [DEFAULT_SECURITY_CONTEXT]
-
-
-@pytest.mark.asyncio
-async def test_security_context_unchanged_when_label_not_configured(monkeypatch):
-    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", "")
-    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_VALUE", DEFAULT_SECURITY_CONTEXT)
-    session = _RecordingGcpSession([
-        {"timeSeries": [_time_series("labelled-db", {GROUPING_LABEL: "1234567"})]},
-    ])
+async def test_security_context_label_is_added_to_group_by_and_backfilled(monkeypatch):
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", SECURITY_CONTEXT_LABEL)
+    grouped = {"timeSeries": [_time_series("labelled-db", {SECURITY_CONTEXT_LABEL: "team-a"})]}
+    ungrouped = {"timeSeries": [_time_series("labelled-db"), _time_series("unlabelled-db")]}
+    session = _RecordingGcpSession([grouped, ungrouped])
 
     lines = await _fetch(session, NO_GROUPING_CATEGORY)
 
+    assert len(session.calls) == 2
+    assert _group_by_labels(session.calls[0]) == [f"metadata.user_labels.{SECURITY_CONTEXT_LABEL}"]
+    assert _group_by_labels(session.calls[1]) == []
+    assert sorted(_security_contexts(lines)) == sorted(["team-a", DEFAULT_SECURITY_CONTEXT])
+
+
+@pytest.mark.asyncio
+async def test_security_context_label_is_not_added_twice_when_already_grouped(monkeypatch):
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", SECURITY_CONTEXT_LABEL)
+    session = _RecordingGcpSession([{"timeSeries": []}, {"timeSeries": []}])
+
+    await _fetch(session, f"{GROUPING_LABEL},{SECURITY_CONTEXT_LABEL}")
+
+    assert _group_by_labels(session.calls[0]) == [
+        f"metadata.user_labels.{GROUPING_LABEL}",
+        f"metadata.user_labels.{SECURITY_CONTEXT_LABEL}",
+    ]
+
+
+@pytest.mark.asyncio
+async def test_security_context_label_is_ignored_for_cumulative_metrics(monkeypatch):
+    # GCP does not return metadata for REDUCE_NONE, so there is nothing to derive it from.
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", SECURITY_CONTEXT_LABEL)
+    session = _RecordingGcpSession([{"timeSeries": [_time_series("some-db")]}])
+
+    lines = await _fetch(session, NO_GROUPING_CATEGORY, metric_kind="CUMULATIVE")
+
+    assert len(session.calls) == 1
+    assert _group_by_labels(session.calls[0]) == []
     assert _security_contexts(lines) == [DEFAULT_SECURITY_CONTEXT]
 
-
-# --- Mixed ownership: several teams and an unlabelled resource in one project ---
 
 @pytest.mark.asyncio
 async def test_resources_in_one_project_map_to_their_own_security_context(monkeypatch):
@@ -202,12 +237,10 @@ async def test_resources_in_one_project_map_to_their_own_security_context(monkey
     Each labelled resource must carry its own security context; the unlabelled one must still
     be ingested, under the deployment-wide default.
     """
-    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", GROUPING_LABEL)
-    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_VALUE", DEFAULT_SECURITY_CONTEXT)
-
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", SECURITY_CONTEXT_LABEL)
     grouped = {"timeSeries": [
-        _time_series("db-alpha", {GROUPING_LABEL: "12345"}),
-        _time_series("db-beta", {GROUPING_LABEL: "7801234"}),
+        _time_series("db-alpha", {SECURITY_CONTEXT_LABEL: "12345"}),
+        _time_series("db-beta", {SECURITY_CONTEXT_LABEL: "7801234"}),
     ]}
     ungrouped = {"timeSeries": [
         _time_series("db-alpha"),
@@ -216,7 +249,7 @@ async def test_resources_in_one_project_map_to_their_own_security_context(monkey
     ]}
     session = _RecordingGcpSession([grouped, ungrouped])
 
-    lines = await _fetch(session, GROUPING)
+    lines = await _fetch(session, NO_GROUPING_CATEGORY)
 
     by_database = {
         next(d.value for d in line.dimension_values if d.name == "database_id"):
@@ -228,10 +261,9 @@ async def test_resources_in_one_project_map_to_their_own_security_context(monkey
         "db-beta": "7801234",
         "db-gamma": DEFAULT_SECURITY_CONTEXT,
     }
-    # The unlabelled resource is ingested exactly once and carries no label dimension.
     assert len(lines) == 3
     gamma = next(l for l in lines if any(d.value == "db-gamma" for d in l.dimension_values))
-    assert not any(d.name == GROUPING_LABEL for d in gamma.dimension_values)
+    assert not any(d.name == SECURITY_CONTEXT_LABEL for d in gamma.dimension_values)
 
 
 # --- The default is the unchanged pre-existing constant ---
@@ -249,3 +281,11 @@ def test_configured_security_context_takes_precedence_over_the_project_id(monkey
     monkeypatch.setenv("GCP_PROJECT", "example-project")
 
     assert config.get_dt_security_context_value() == "1000000"
+
+
+def test_new_settings_default_to_disabled(monkeypatch):
+    monkeypatch.delenv("DT_SECURITY_CONTEXT_USER_LABEL", raising=False)
+    monkeypatch.delenv("INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS", raising=False)
+
+    assert config.dt_security_context_user_label() == ""
+    assert config.include_resources_without_grouping_labels() is False
