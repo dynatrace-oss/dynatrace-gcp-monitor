@@ -217,6 +217,28 @@ async def test_zero_time_series_warning_emitted_when_filter_active():
 
 
 @pytest.mark.asyncio
+async def test_zero_time_series_warning_emitted_when_native_filter_active():
+    filter_conditions = '(resource.labels.env="staging")'
+    service = GCPService(
+        service="apigee_googleapis_com_Environment",
+        featureSet="default",
+        extension_name="dynatrace.test",
+        gcpMonitoringFilter=filter_conditions,
+        metrics=[],
+    )
+    metric = _create_metric("apigee.googleapis.com/environment/request_count", autodiscovered_metric=False)
+
+    gcp_session = _FakeGcpSession(response_body={})
+    log_calls = []
+    context = _make_context(gcp_session, log_calls)
+
+    await fetch_metric(context, "test-project", service, metric, [], NO_GROUPING_CATEGORY)
+
+    matching = [call for call in log_calls if metric.google_metric in call[-1] and filter_conditions in call[-1] and "WARNING" in call[-1]]
+    assert len(matching) == 1
+
+
+@pytest.mark.asyncio
 async def test_zero_time_series_warning_not_emitted_when_no_filter_active():
     metric = _create_metric("logging.googleapis.com/user/Apigee-request-log")
     linked_service = _create_linked_service(

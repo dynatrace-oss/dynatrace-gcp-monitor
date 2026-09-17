@@ -97,7 +97,6 @@ def _gcp_api_prefix(google_metric: str) -> str:
 def _resolve_autodiscovered_metric_filter(
         context: MetricsContext,
         project_id: str,
-        service: AutodiscoveryGCPService,
         metric: Metric,
         linked
 ) -> str:
@@ -380,7 +379,7 @@ async def fetch_metric(
     linked = None
     if metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
         linked = service.metrics_to_linking.get(metric.google_metric)
-        monitoring_filter = _resolve_autodiscovered_metric_filter(context, project_id, service, metric, linked)
+        monitoring_filter = _resolve_autodiscovered_metric_filter(context, project_id, metric, linked)
     else:
         monitoring_filter = service.monitoring_filter
 
