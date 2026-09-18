@@ -239,6 +239,48 @@ async def test_zero_time_series_warning_emitted_when_native_filter_active():
 
 
 @pytest.mark.asyncio
+async def test_filter_inherited_for_metric_in_sibling_feature_set_regardless_of_order():
+    """
+    A resource with two feature sets (gce_instance/default_metrics → compute.googleapis.com/*,
+    gce_instance/agent → agent.googleapis.com/*) must inherit the matching sibling's filter for an
+    autodiscovered agent.googleapis.com/* metric regardless of which feature set is listed first
+    in possible_service_linking, and must pick the CORRECT sibling's filter when they differ.
+    """
+    zone_filter = 'resource.labels.zone = "us-east1-b"'
+    device_filter = 'metric.labels.device = "sda1"'
+    default_metrics_service = _create_linked_service(
+        "gce_instance_default_metrics",
+        own_metrics=["compute.googleapis.com/instance/cpu/usage_time"],
+        filter_conditions=zone_filter,
+    )
+    agent_service = _create_linked_service(
+        "gce_instance_agent",
+        own_metrics=["agent.googleapis.com/disk/bytes_used"],
+        filter_conditions=device_filter,
+    )
+    metric = _create_metric("agent.googleapis.com/memory/bytes_used")
+
+    for ordered_services in (
+        [default_metrics_service, agent_service],
+        [agent_service, default_metrics_service],
+    ):
+        service = AutodiscoveryGCPService()
+        linking = AutodiscoveryResourceLinking(ordered_services, [])
+        service.set_metrics({"gce_instance": [metric]}, {"gce_instance": linking}, {})
+
+        gcp_session = _FakeGcpSession()
+        context = _make_context(gcp_session)
+
+        await fetch_metric(context, "test-project", service, metric, [], NO_GROUPING_CATEGORY)
+
+        filter_param = _filter_param(gcp_session)
+        assert filter_param == f'metric.type = "{metric.google_metric}" {device_filter}', (
+            f"Wrong filter when services ordered as {[s.name for s in ordered_services]}: "
+            f"expected agent feature-set filter, got '{filter_param}'"
+        )
+
+
+@pytest.mark.asyncio
 async def test_zero_time_series_warning_not_emitted_when_no_filter_active():
     metric = _create_metric("logging.googleapis.com/user/Apigee-request-log")
     linked_service = _create_linked_service(

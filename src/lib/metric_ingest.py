@@ -110,17 +110,24 @@ def _resolve_autodiscovered_metric_filter(
     if not linked or not linked.possible_service_linking:
         return ""
 
-    linked_service = linked.possible_service_linking[0]
-    linked_service_prefixes = {_gcp_api_prefix(m.google_metric) for m in linked_service.metrics}
-    if _gcp_api_prefix(metric.google_metric) not in linked_service_prefixes:
+    metric_prefix = _gcp_api_prefix(metric.google_metric)
+    matching_service = next(
+        (
+            svc
+            for svc in linked.possible_service_linking
+            if any(_gcp_api_prefix(m.google_metric) == metric_prefix for m in svc.metrics)
+        ),
+        None,
+    )
+    if matching_service is None:
         return ""
 
-    monitoring_filter = linked_service.monitoring_filter
+    monitoring_filter = matching_service.monitoring_filter
     if monitoring_filter:
         context.log(
             project_id,
             f"Metric '{metric.google_metric}' inherits filter_conditions '{monitoring_filter}' "
-            f"from linked service '{linked_service.name}'"
+            f"from linked service '{matching_service.name}'"
         )
     return monitoring_filter
 
