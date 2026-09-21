@@ -90,6 +90,48 @@ def should_exclude_dimension(
     return dimension_key[dimension_key.rfind(".") + 1:] in found_excluded_metric.get("dimensions", [])
 
 
+def _gcp_api_prefix(google_metric: str) -> str:
+    return google_metric.split("/", 1)[0]
+
+
+def _resolve_autodiscovered_metric_filter(
+        context: MetricsContext,
+        project_id: str,
+        metric: Metric,
+        linked
+) -> str:
+    """
+    An extension service's filter_conditions belongs to the metrics that service itself defines.
+    Only inherit it for an autodiscovered metric whose GCP API (the google_metric prefix up to the
+    first '/') matches one of the linked service's own metrics - otherwise the filter was written
+    for a different metric family (e.g. a user-defined logging.googleapis.com/user/* metric linked
+    to an apigee.googleapis.com/* extension service) and querying with it silently drops all data.
+    """
+    if not linked or not linked.possible_service_linking:
+        return ""
+
+    metric_prefix = _gcp_api_prefix(metric.google_metric)
+    matching_service = next(
+        (
+            svc
+            for svc in linked.possible_service_linking
+            if any(_gcp_api_prefix(m.google_metric) == metric_prefix for m in svc.metrics)
+        ),
+        None,
+    )
+    if matching_service is None:
+        return ""
+
+    monitoring_filter = matching_service.monitoring_filter
+    if monitoring_filter:
+        context.log(
+            project_id,
+            f"Metric '{metric.google_metric}' inherits filter_conditions '{monitoring_filter}' "
+            f"from linked service '{matching_service.name}'"
+        )
+    return monitoring_filter
+
+
 async def push_ingest_lines(context: MetricsContext, project_id: str, fetch_metric_results: List[IngestLine]):
     if context.dynatrace_connectivity != DynatraceConnectivity.Ok:
         context.log(project_id, f"Skipping push due to detected connectivity error")
@@ -339,11 +381,12 @@ async def fetch_metric(
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
 
-    # For autodiscovered metrics, retrieve the filter from the linked base service
+    # For autodiscovered metrics, retrieve the filter from the linked base service - but only when
+    # the metric actually belongs to that service's own GCP API (see _resolve_autodiscovered_metric_filter)
     linked = None
     if metric.autodiscovered_metric and isinstance(service, AutodiscoveryGCPService):
         linked = service.metrics_to_linking.get(metric.google_metric)
-        monitoring_filter = linked.possible_service_linking[0].monitoring_filter if linked and linked.possible_service_linking else ""
+        monitoring_filter = _resolve_autodiscovered_metric_filter(context, project_id, metric, linked)
     else:
         monitoring_filter = service.monitoring_filter
 
@@ -422,6 +465,12 @@ async def fetch_metric(
         if 'error' in page:
             raise Exception(str(page))
         if 'timeSeries' not in page:
+            if monitoring_filter.strip():
+                context.log(
+                    project_id,
+                    f"WARNING: metric '{metric.google_metric}' returned no time series while "
+                    f"filter '{monitoring_filter.strip()}' was active"
+                )
             break
 
         for single_time_series in page['timeSeries']:
