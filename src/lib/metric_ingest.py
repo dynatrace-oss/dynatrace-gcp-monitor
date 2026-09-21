@@ -381,7 +381,7 @@ async def fetch_metric(
         service: GCPService,
         metric: Metric,
         excluded_metrics_and_dimensions: list,
-        grouping: str
+        groupings: List[str]
 ) -> List[IngestLine]:
     end_time = (context.execution_time - metric.ingest_delay)
     start_time = (end_time - context.execution_interval)
@@ -444,48 +444,48 @@ async def fetch_metric(
     ]
     params.extend(group_by_params)
 
-    # `params` stays the ungrouped variant; `grouped_params` adds the metadata group-by.
-    grouped_params = list(params)
-    grouping_labels = [label for label in grouping.split(",") if label and label != NO_GROUPING_CATEGORY]
-    # GCP returns metadata.userLabels only for labels named in the reduction, so the security
-    # context label has to be part of the group-by. It is skipped for REDUCE_NONE, where GCP
-    # ignores groupByFields altogether.
-    if (
-        DT_SECURITY_CONTEXT_USER_LABEL
-        and DT_SECURITY_CONTEXT_USER_LABEL not in grouping_labels
-        and reducer != 'REDUCE_NONE'
-    ):
-        grouping_labels.append(DT_SECURITY_CONTEXT_USER_LABEL)
-    for label in grouping_labels:
-        grouped_params.append(('aggregation.groupByFields', 'metadata.user_labels.' + label))
-    is_grouped = len(grouped_params) > len(params)
-    # Grouping by a user label drops every resource that does not carry it. Backfilling them costs
-    # a second timeSeries.list call, so for plain LABELS_GROUPING_BY_SERVICE it stays opt-in to keep
-    # the previous behaviour. With DT_SECURITY_CONTEXT_USER_LABEL the grouping is implicit and the
-    # backfill is what keeps unlabelled resources monitored, so it is always on.
+    # Keep each grouping separate; the base params are used for a single shared backfill.
+    grouped_queries = []
+    effective_groupings = []
+    for grouping in groupings:
+        grouping_labels = [label for label in grouping.split(",") if label and label != NO_GROUPING_CATEGORY]
+        # GCP only returns metadata labels named in a reduction; REDUCE_NONE ignores them.
+        if (
+            DT_SECURITY_CONTEXT_USER_LABEL
+            and DT_SECURITY_CONTEXT_USER_LABEL not in grouping_labels
+            and reducer != 'REDUCE_NONE'
+        ):
+            grouping_labels.append(DT_SECURITY_CONTEXT_USER_LABEL)
+        grouped_queries.append(params + [
+            ('aggregation.groupByFields', 'metadata.user_labels.' + label) for label in grouping_labels
+        ])
+        effective_groupings.append(','.join(grouping_labels))
+
+    # An explicit ungrouped query already covers missing resources, so needs no backfill.
     should_backfill = (
-        is_grouped
+        bool(effective_groupings) and all(effective_groupings)
         and reducer != 'REDUCE_NONE'
         and (bool(DT_SECURITY_CONTEXT_USER_LABEL) or INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS)
     )
 
     headers = context.create_gcp_request_headers(project_id)
 
-    lines = []
     aggregate_locally = (
         bool(excluded_source_dimensions)
         and metric.google_metric_kind.lower().startswith('cumulative')
         and metric.value_type.lower() in ('int64', 'double', 'distribution')
     )
-    aggregated_lines = {} if aggregate_locally else None
 
     def _resource_key(single_time_series):
         resource = single_time_series.get('resource', {})
         return (resource.get('type'), tuple(sorted(resource.get('labels', {}).items())))
 
-    async def _fetch_pages(page_params, collect_keys=None, skip_keys=None):
+    async def _fetch_pages(page_params, skip_keys=None):
         # _update_params mutates the list to page, so each pass owns its own copy.
         page_params = list(page_params)
+        lines = []
+        aggregated_lines = {} if aggregate_locally else None
+        resource_keys = set()
         should_fetch = True
         while should_fetch:
             context.sfm[SfmKeys.gcp_metric_request_count].increment(project_id)
@@ -496,21 +496,20 @@ async def fetch_metric(
             # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
             if 'error' in page:
                 raise Exception(str(page))
-            if 'timeSeries' not in page:
-                if monitoring_filter.strip():
-                    context.log(
-                        project_id,
-                        f"WARNING: metric '{metric.google_metric}' returned no time series while "
-                        f"filter '{monitoring_filter.strip()}' was active"
-                    )
-                break
+            if 'timeSeries' not in page and monitoring_filter.strip():
+                context.log(
+                    project_id,
+                    f"WARNING: metric '{metric.google_metric}' returned no time series while "
+                    f"filter '{monitoring_filter.strip()}' was active"
+                )
 
-            for single_time_series in page['timeSeries']:
-                resource_key = _resource_key(single_time_series)
-                if skip_keys is not None and resource_key in skip_keys:
-                    continue
-                if collect_keys is not None:
-                    collect_keys.add(resource_key)
+            for single_time_series in page.get('timeSeries', []):
+                if should_backfill:
+                    resource_key = _resource_key(single_time_series)
+                    if skip_keys is not None and resource_key in skip_keys:
+                        continue
+                    if skip_keys is None:
+                        resource_keys.add(resource_key)
 
                 typed_value_key = _extract_typed_value_key(single_time_series)
                 dimensions = create_dimensions(
@@ -532,34 +531,46 @@ async def fetch_metric(
                 _update_params(next_page_token, page_params)
             else:
                 should_fetch = False
+        return (list(aggregated_lines.values()) if aggregate_locally else lines), resource_keys
 
+    results = await asyncio.gather(*(_fetch_pages(query) for query in grouped_queries), return_exceptions=True)
+    lines = []
     seen_resource_keys = set()
-    await _fetch_pages(grouped_params, collect_keys=seen_resource_keys if should_backfill else None)
+    for grouping, result in zip(effective_groupings, results):
+        if isinstance(result, BaseException):
+            if not isinstance(result, Exception):
+                raise result
+            context.log(project_id, f"Failed to fetch [{metric.google_metric}] for grouping '{grouping}': {result}")
+            # A failed grouping is not evidence of missing labels. Keep successful results,
+            # but do not backfill from an incomplete resource set under the default context.
+            should_backfill = False
+            continue
+        grouped_lines, resource_keys = result
+        lines.extend(grouped_lines)
+        seen_resource_keys.update(resource_keys)
+
     if should_backfill:
-        # Re-run ungrouped and emit only the resources the grouped pass never returned, so an
-        # unlabelled resource keeps being ingested -- it just carries no user-label dimension
-        # and falls back to the default security context.
-        collected = aggregated_lines if aggregate_locally else lines
-        count_before_backfill = len(collected)
-        await _fetch_pages(params, skip_keys=seen_resource_keys)
-        if not seen_resource_keys and len(collected) > count_before_backfill:
-            _warn_once_about_unmatched_grouping(context, project_id, grouping_labels)
+        try:
+            backfilled_lines, _ = await _fetch_pages(params, skip_keys=seen_resource_keys)
+        except Exception as error:
+            context.log(project_id, f"Failed to backfill [{metric.google_metric}]: {error}")
+        else:
+            lines.extend(backfilled_lines)
+            if not seen_resource_keys and backfilled_lines:
+                _warn_once_about_unmatched_grouping(context, project_id, effective_groupings)
 
-    return list(aggregated_lines.values()) if aggregate_locally else lines
+    return lines
 
 
-def _warn_once_about_unmatched_grouping(context: MetricsContext, project_id: str, grouping_labels: List[str]):
-    # The grouped pass matched nothing while the ungrouped one did: no resource carries the label.
-    # Legitimate for an unlabelled project, but also the only symptom of a misspelled label name,
-    # so say it once per project and label set.
-    key = (project_id, tuple(grouping_labels))
+def _warn_once_about_unmatched_grouping(context: MetricsContext, project_id: str, groupings: List[str]):
+    key = (project_id, tuple(sorted(set(groupings))))
     if key in _REPORTED_UNMATCHED_GROUPINGS:
         return
     _REPORTED_UNMATCHED_GROUPINGS.add(key)
     context.log(
         project_id,
-        f"No resource carries the user label(s) '{','.join(grouping_labels)}'; all resources were ingested "
-        f"without label dimensions and with the default dt.security_context. "
+        f"No time series matched any user-label grouping in {sorted(set(groupings))}; backfilled metrics "
+        f"have no user-label dimensions and use the default dt.security_context. "
         f"Check the label name if this is unexpected."
     )
 

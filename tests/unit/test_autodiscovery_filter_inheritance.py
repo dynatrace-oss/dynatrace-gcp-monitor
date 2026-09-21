@@ -90,7 +90,7 @@ async def test_filter_inheritance_skips_metric_outside_linked_services_own_api()
     gcp_session = _FakeGcpSession()
     context = _make_context(gcp_session)
 
-    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], NO_GROUPING_CATEGORY)
+    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], [NO_GROUPING_CATEGORY])
 
     assert _filter_param(gcp_session) == f'metric.type = "{metric.google_metric}"'
 
@@ -108,7 +108,7 @@ async def test_log_based_metric_not_filtered_by_apigee_environment_filter():
     gcp_session = _FakeGcpSession()
     context = _make_context(gcp_session)
 
-    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], NO_GROUPING_CATEGORY)
+    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], [NO_GROUPING_CATEGORY])
 
     filter_param = _filter_param(gcp_session)
     assert 'resource.labels.env' not in filter_param
@@ -129,7 +129,7 @@ async def test_daq_21921_regression_same_api_autodiscovered_metric_still_inherit
     gcp_session = _FakeGcpSession()
     context = _make_context(gcp_session)
 
-    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], NO_GROUPING_CATEGORY)
+    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], [NO_GROUPING_CATEGORY])
 
     filter_param = _filter_param(gcp_session)
     assert filter_param == f'metric.type = "{metric.google_metric}" {filter_conditions}'
@@ -149,7 +149,7 @@ async def test_non_autodiscovered_metric_still_uses_own_service_filter():
     gcp_session = _FakeGcpSession()
     context = _make_context(gcp_session)
 
-    await fetch_metric(context, "test-project", service, metric, [], NO_GROUPING_CATEGORY)
+    await fetch_metric(context, "test-project", service, metric, [], [NO_GROUPING_CATEGORY])
 
     filter_param = _filter_param(gcp_session)
     assert filter_param == f'metric.type = "{metric.google_metric}" (resource.labels.env="staging")'
@@ -170,7 +170,7 @@ async def test_logs_inherited_filter_when_applied():
     log_calls = []
     context = _make_context(gcp_session, log_calls)
 
-    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], NO_GROUPING_CATEGORY)
+    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], [NO_GROUPING_CATEGORY])
 
     matching = [call for call in log_calls if metric.google_metric in call[-1] and linked_service.name in call[-1] and filter_conditions in call[-1]]
     assert len(matching) == 1
@@ -190,7 +190,7 @@ async def test_logs_nothing_when_filter_not_inherited():
     log_calls = []
     context = _make_context(gcp_session, log_calls)
 
-    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], NO_GROUPING_CATEGORY)
+    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], [NO_GROUPING_CATEGORY])
 
     assert not any("inherits filter_conditions" in call[-1] for call in log_calls)
 
@@ -210,7 +210,7 @@ async def test_zero_time_series_warning_emitted_when_filter_active():
     log_calls = []
     context = _make_context(gcp_session, log_calls)
 
-    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], NO_GROUPING_CATEGORY)
+    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], [NO_GROUPING_CATEGORY])
 
     matching = [call for call in log_calls if metric.google_metric in call[-1] and filter_conditions in call[-1] and "WARNING" in call[-1]]
     assert len(matching) == 1
@@ -232,7 +232,7 @@ async def test_zero_time_series_warning_emitted_when_native_filter_active():
     log_calls = []
     context = _make_context(gcp_session, log_calls)
 
-    await fetch_metric(context, "test-project", service, metric, [], NO_GROUPING_CATEGORY)
+    await fetch_metric(context, "test-project", service, metric, [], [NO_GROUPING_CATEGORY])
 
     matching = [call for call in log_calls if metric.google_metric in call[-1] and filter_conditions in call[-1] and "WARNING" in call[-1]]
     assert len(matching) == 1
@@ -271,7 +271,7 @@ async def test_filter_inherited_for_metric_in_sibling_feature_set_regardless_of_
         gcp_session = _FakeGcpSession()
         context = _make_context(gcp_session)
 
-        await fetch_metric(context, "test-project", service, metric, [], NO_GROUPING_CATEGORY)
+        await fetch_metric(context, "test-project", service, metric, [], [NO_GROUPING_CATEGORY])
 
         filter_param = _filter_param(gcp_session)
         assert filter_param == f'metric.type = "{metric.google_metric}" {device_filter}', (
@@ -294,6 +294,6 @@ async def test_zero_time_series_warning_not_emitted_when_no_filter_active():
     log_calls = []
     context = _make_context(gcp_session, log_calls)
 
-    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], NO_GROUPING_CATEGORY)
+    await fetch_metric(context, "test-project", autodiscovery_service, metric, [], [NO_GROUPING_CATEGORY])
 
     assert not any("WARNING" in call[-1] for call in log_calls)
