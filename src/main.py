@@ -319,23 +319,22 @@ async def fetch_ingest_lines_task(context: MetricsContext, project_id: str, serv
 
         for metric in service.metrics:
             labels_groupings = set_groupings(service, metric)
-            for grouping in labels_groupings:
-                if should_exclude_metric(metric.google_metric, excluded_metrics_and_dimensions):
-                    context.log(f"Skipping fetching all the data for the metric {metric.google_metric}")
-                    continue
+            if should_exclude_metric(metric.google_metric, excluded_metrics_and_dimensions):
+                context.log(f"Skipping fetching all the data for the metric {metric.google_metric}")
+                continue
 
-                # Fetch metric only if it's metric from extensions or is autodiscovered in project_id
-                if not metric.autodiscovered_metric or project_id in metric.project_ids:
-                    gcp_api_last_index = metric.google_metric.find("/")
-                    api = metric.google_metric[:gcp_api_last_index]
-                    if api in disabled_apis:
-                        skipped_disabled_apis.add(api)
-                        continue  # skip fetching the metrics because service API is disabled
-                    fetch_metric_coro = run_fetch_metric(
-                        context=context, project_id=project_id, service=service, metric=metric,
-                        excluded_metrics_and_dimensions=excluded_metrics_and_dimensions, grouping=grouping
-                    )
-                    fetch_metric_coros.append(fetch_metric_coro)
+            # Fetch metric only if it's metric from extensions or is autodiscovered in project_id
+            if not metric.autodiscovered_metric or project_id in metric.project_ids:
+                gcp_api_last_index = metric.google_metric.find("/")
+                api = metric.google_metric[:gcp_api_last_index]
+                if api in disabled_apis:
+                    skipped_disabled_apis.add(api)
+                    continue  # skip fetching the metrics because service API is disabled
+                fetch_metric_coro = run_fetch_metric(
+                    context=context, project_id=project_id, service=service, metric=metric,
+                    excluded_metrics_and_dimensions=excluded_metrics_and_dimensions, groupings=labels_groupings
+                )
+                fetch_metric_coros.append(fetch_metric_coro)
 
     context.log(f"Prepared {len(fetch_metric_coros)} fetch metric tasks")
 
@@ -363,10 +362,10 @@ async def run_fetch_metric(
         service: GCPService,
         metric: Metric,
         excluded_metrics_and_dimensions: list,
-        grouping: str
+        groupings: List[str]
 ):
     try:
-        return await fetch_metric(context, project_id, service, metric, excluded_metrics_and_dimensions, grouping)
+        return await fetch_metric(context, project_id, service, metric, excluded_metrics_and_dimensions, groupings)
     except Exception as e:
         context.log(project_id, f"Failed to finish task for [{metric.google_metric}], reason is {type(e).__name__} {e}")
         return []

@@ -207,6 +207,16 @@ spec:
             configMapKeyRef:
               name: dynatrace-gcp-monitor-config
               key: DT_SECURITY_CONTEXT
+        - name: DT_SECURITY_CONTEXT_USER_LABEL
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: DT_SECURITY_CONTEXT_USER_LABEL
+        - name: INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS
+          valueFrom:
+            configMapKeyRef:
+              name: dynatrace-gcp-monitor-config
+              key: INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS
         volumeMounts:
         - mountPath: /code/config/activation
           readOnly: true
