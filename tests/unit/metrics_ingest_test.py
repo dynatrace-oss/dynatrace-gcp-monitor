@@ -317,7 +317,7 @@ async def test_fetch_metric_fetches_cumulative_source_series_when_dimension_excl
         service,
         metric,
         [{"metric": metric.google_metric, "dimensions": {QUERYSTRING_DIMENSION}}],
-        NO_GROUPING_CATEGORY,
+        [NO_GROUPING_CATEGORY],
     )
 
     assert ("aggregation.perSeriesAligner", "ALIGN_DELTA") in gcp_session.params
@@ -327,7 +327,8 @@ async def test_fetch_metric_fetches_cumulative_source_series_when_dimension_excl
 
 
 @pytest.mark.asyncio
-async def test_fetch_metric_aggregates_cumulative_values_after_excluding_dimension():
+@pytest.mark.parametrize("groupings", [[NO_GROUPING_CATEGORY], ["team", "squad"]])
+async def test_fetch_metric_aggregates_cumulative_values_after_excluding_dimension(groupings):
     gcp_session = _FakeGcpSession(
         {
             "timeSeries": [
@@ -372,11 +373,11 @@ async def test_fetch_metric_aggregates_cumulative_values_after_excluding_dimensi
         service,
         metric,
         [{"metric": metric.google_metric, "dimensions": {QUERYSTRING_DIMENSION}}],
-        NO_GROUPING_CATEGORY,
+        groupings,
     )
 
-    assert len(lines) == 1
-    assert lines[0].value == 42
+    assert len(lines) == len(groupings)
+    assert all(line.value == 42 for line in lines)
     assert QUERYSTRING_DIMENSION not in {dimension.name for dimension in lines[0].dimension_values}
 
 
@@ -426,7 +427,7 @@ async def test_fetch_metric_aggregates_distributions_after_excluding_dimension()
         service,
         metric,
         [{"metric": metric.google_metric, "dimensions": {QUERYSTRING_DIMENSION}}],
-        NO_GROUPING_CATEGORY,
+        [NO_GROUPING_CATEGORY],
     )
 
     assert len(lines) == 1
@@ -482,7 +483,7 @@ async def test_fetch_metric_keeps_metric_when_specific_dimension_exclusion_overl
             {"metric": PERQUERY_METRIC_PREFIX},
             {"metric": PERQUERY_EXECUTION_TIME_METRIC, "dimensions": {QUERYSTRING_DIMENSION}},
         ],
-        NO_GROUPING_CATEGORY,
+        [NO_GROUPING_CATEGORY],
     )
 
     assert len(lines) == 1
