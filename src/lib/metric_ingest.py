@@ -55,6 +55,37 @@ _MAX_RETRY_AFTER_S = 10.0
 
 # (project_id, grouping labels) already reported by _warn_once_about_unmatched_grouping
 _REPORTED_UNMATCHED_GROUPINGS = set()
+# metrics already reported by _is_unsupported_user_label_grouping
+_REPORTED_NO_METADATA_METRICS = set()
+
+
+class GcpMonitoringApiError(Exception):
+    """Error returned by timeSeries.list."""
+
+    def __init__(self, page: dict):
+        super().__init__(str(page))
+        self.error = page.get('error') or {}
+
+
+def _is_unsupported_user_label_grouping(
+        context, project_id: str, metric, error: BaseException
+) -> bool:
+    """True when GCP rejects the user-label group-by because the metric's resource type
+    has no user labels (e.g. `global`). The ungrouped backfill then covers everything."""
+    if not isinstance(error, GcpMonitoringApiError):
+        return False
+    if error.error.get('code') != 400 or error.error.get('status') != 'INVALID_ARGUMENT':
+        return False
+    if 'valid combination of metric and monitored resource' not in error.error.get('message', ''):
+        return False
+    if metric.google_metric not in _REPORTED_NO_METADATA_METRICS:
+        _REPORTED_NO_METADATA_METRICS.add(metric.google_metric)
+        context.log(
+            project_id,
+            f"Metric [{metric.google_metric}] has no user-label metadata; "
+            f"ingesting it ungrouped with the default dt.security_context"
+        )
+    return True
 
 
 def find_excluded_metric(metric_name: str, excluded_metrics_and_dimensions: list):
@@ -495,7 +526,7 @@ async def fetch_metric(
             page = await resp.json()
             # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
             if 'error' in page:
-                raise Exception(str(page))
+                raise GcpMonitoringApiError(page)
             if 'timeSeries' not in page and monitoring_filter.strip():
                 context.log(
                     project_id,
@@ -540,6 +571,9 @@ async def fetch_metric(
         if isinstance(result, BaseException):
             if not isinstance(result, Exception):
                 raise result
+            if _is_unsupported_user_label_grouping(context, project_id, metric, result):
+                # No resource can carry the label, so the backfill is complete.
+                continue
             context.log(project_id, f"Failed to fetch [{metric.google_metric}] for grouping '{grouping}': {result}")
             # A failed grouping is not evidence of missing labels. Keep successful results,
             # but do not backfill from an incomplete resource set under the default context.
