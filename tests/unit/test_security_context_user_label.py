@@ -39,7 +39,7 @@ def _defaults(monkeypatch):
     monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", "")
     monkeypatch.setattr(metric_ingest, "INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS", False)
     monkeypatch.setattr(metric_ingest, "_REPORTED_UNMATCHED_GROUPINGS", set())
-    monkeypatch.setattr(metric_ingest, "_REPORTED_NO_METADATA_METRICS", set(), raising=False)
+    monkeypatch.setattr(metric_ingest, "_FILTERS_WITHOUT_USER_LABELS", set())
 
 
 def _time_series(database_id, user_labels=None):
@@ -433,18 +433,31 @@ NO_METADATA_ERROR = {"error": {
 
 @pytest.mark.asyncio
 async def test_metric_without_user_label_metadata_is_backfilled_under_the_default_context(monkeypatch, capsys):
-    """Metrics on a resource type without user labels are ingested with the default context."""
     monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", SECURITY_CONTEXT_LABEL)
-    monkeypatch.setattr(metric_ingest, "_REPORTED_NO_METADATA_METRICS", set())
-    bodies = [NO_METADATA_ERROR, {"timeSeries": [_time_series("project-level")]}]
+    project_level = {"timeSeries": [_time_series("project-level")]}
+    first = _RecordingGcpSession([NO_METADATA_ERROR, project_level])
+    second = _RecordingGcpSession([project_level])
 
-    lines = await _fetch(_RecordingGcpSession(bodies), [NO_GROUPING_CATEGORY])
-    await _fetch(_RecordingGcpSession(bodies), [NO_GROUPING_CATEGORY])
+    first_lines = await _fetch(first, [NO_GROUPING_CATEGORY])
+    second_lines = await _fetch(second, [NO_GROUPING_CATEGORY])
 
-    assert _security_contexts(lines) == [DEFAULT_SECURITY_CONTEXT]
+    assert _security_contexts(first_lines) == _security_contexts(second_lines) == [DEFAULT_SECURITY_CONTEXT]
+    # The rejection is remembered, so later cycles go straight to the ungrouped query.
+    assert [_group_by_labels(params) for params in second.calls] == [[]]
     out = capsys.readouterr().out
     assert "Failed to fetch" not in out
-    assert out.count("has no user-label metadata") == 1
+    assert "No time series matched" not in out
+
+
+@pytest.mark.asyncio
+async def test_metric_without_user_label_metadata_is_skipped_without_backfill(capsys):
+    # Like any unlabelled resource, it is only ingested when the backfill is enabled.
+    second = _RecordingGcpSession([])
+
+    assert await _fetch(_RecordingGcpSession([NO_METADATA_ERROR]), [GROUPING]) == []
+    assert await _fetch(second, [GROUPING]) == []
+    assert second.calls == []
+    assert "Failed to fetch" not in capsys.readouterr().out
 
 
 @pytest.mark.asyncio
