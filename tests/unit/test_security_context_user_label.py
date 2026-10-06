@@ -445,6 +445,7 @@ async def test_metric_without_user_label_metadata_is_backfilled_under_the_defaul
     # The rejection is remembered, so later cycles go straight to the ungrouped query.
     assert [_group_by_labels(params) for params in second.calls] == [[]]
     out = capsys.readouterr().out
+    assert out.count("rejected the user-label group-by") == 1
     assert "Failed to fetch" not in out
     assert "No time series matched" not in out
 
@@ -457,7 +458,8 @@ async def test_metric_without_user_label_metadata_is_skipped_without_backfill(ca
     assert await _fetch(_RecordingGcpSession([NO_METADATA_ERROR]), [GROUPING]) == []
     assert await _fetch(second, [GROUPING]) == []
     assert second.calls == []
-    assert "Failed to fetch" not in capsys.readouterr().out
+    # The only trace when the backfill is off, in case the filter itself is wrong.
+    assert capsys.readouterr().out.count("rejected the user-label group-by") == 1
 
 
 @pytest.mark.asyncio

@@ -484,6 +484,7 @@ async def fetch_metric(
         effective_groupings.append(','.join(grouping_labels))
 
     # An explicit ungrouped query already covers missing resources, so needs no backfill.
+    # Checks `groupings`: `effective_groupings` is empty when every grouping was skipped above.
     should_backfill = (
         bool(groupings) and all(effective_groupings)
         and reducer != 'REDUCE_NONE'
@@ -563,7 +564,14 @@ async def fetch_metric(
             if not isinstance(result, Exception):
                 raise result
             if grouping and _rejects_user_labels(result):
-                _FILTERS_WITHOUT_USER_LABELS.add(metric_filter)
+                # Logged once: the same 400 also comes from a filter that does not match the metric.
+                if metric_filter not in _FILTERS_WITHOUT_USER_LABELS:
+                    _FILTERS_WITHOUT_USER_LABELS.add(metric_filter)
+                    context.log(
+                        project_id,
+                        f"GCP rejected the user-label group-by for [{metric.google_metric}]; "
+                        f"its series are treated as unlabelled resources: {result}"
+                    )
                 continue
             context.log(project_id, f"Failed to fetch [{metric.google_metric}] for grouping '{grouping}': {result}")
             # A failed grouping is not evidence of missing labels. Keep successful results,
