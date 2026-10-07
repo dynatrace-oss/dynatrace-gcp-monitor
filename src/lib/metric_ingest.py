@@ -55,6 +55,24 @@ _MAX_RETRY_AFTER_S = 10.0
 
 # (project_id, grouping labels) already reported by _warn_once_about_unmatched_grouping
 _REPORTED_UNMATCHED_GROUPINGS = set()
+# metric filters whose resource type has no user labels (e.g. `global`), so GCP rejects any metadata group-by
+_FILTERS_WITHOUT_USER_LABELS = set()
+
+
+class GcpMonitoringApiError(Exception):
+    """Error returned by timeSeries.list."""
+
+    def __init__(self, page: dict):
+        super().__init__(str(page))
+        self.error = page.get('error') or {}
+
+
+def _rejects_user_labels(error: Exception) -> bool:
+    return (
+        isinstance(error, GcpMonitoringApiError)
+        and error.error.get('status') == 'INVALID_ARGUMENT'
+        and 'valid combination of metric and monitored resource' in error.error.get('message', '')
+    )
 
 
 def find_excluded_metric(metric_name: str, excluded_metrics_and_dimensions: list):
@@ -434,8 +452,9 @@ async def fetch_metric(
     aligner = _set_aligner(metric.google_metric_kind, metric.value_type)
     reducer = _set_reducer(metric.google_metric_kind, metric.value_type)
 
+    metric_filter = f'metric.type = "{metric.google_metric}" {monitoring_filter}'.strip()
     params = [
-        ('filter', f'metric.type = "{metric.google_metric}" {monitoring_filter}'.strip()),
+        ('filter', metric_filter),
         ('interval.startTime', start_time.isoformat() + "Z"),
         ('interval.endTime', end_time.isoformat() + "Z"),
         ('aggregation.alignmentPeriod', f"{alignment_period.total_seconds()}s"),
@@ -456,14 +475,18 @@ async def fetch_metric(
             and reducer != 'REDUCE_NONE'
         ):
             grouping_labels.append(DT_SECURITY_CONTEXT_USER_LABEL)
+        if grouping_labels and metric_filter in _FILTERS_WITHOUT_USER_LABELS:
+            # The resource type has no user labels, so its series count as unlabelled resources.
+            continue
         grouped_queries.append(params + [
             ('aggregation.groupByFields', 'metadata.user_labels.' + label) for label in grouping_labels
         ])
         effective_groupings.append(','.join(grouping_labels))
 
     # An explicit ungrouped query already covers missing resources, so needs no backfill.
+    # Checks `groupings`: `effective_groupings` is empty when every grouping was skipped above.
     should_backfill = (
-        bool(effective_groupings) and all(effective_groupings)
+        bool(groupings) and all(effective_groupings)
         and reducer != 'REDUCE_NONE'
         and (bool(DT_SECURITY_CONTEXT_USER_LABEL) or INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS)
     )
@@ -495,7 +518,7 @@ async def fetch_metric(
             page = await resp.json()
             # response body is https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list#response-body
             if 'error' in page:
-                raise Exception(str(page))
+                raise GcpMonitoringApiError(page)
             if 'timeSeries' not in page and monitoring_filter.strip():
                 context.log(
                     project_id,
@@ -540,6 +563,16 @@ async def fetch_metric(
         if isinstance(result, BaseException):
             if not isinstance(result, Exception):
                 raise result
+            if grouping and _rejects_user_labels(result):
+                # Logged once: the same 400 also comes from a filter that does not match the metric.
+                if metric_filter not in _FILTERS_WITHOUT_USER_LABELS:
+                    _FILTERS_WITHOUT_USER_LABELS.add(metric_filter)
+                    context.log(
+                        project_id,
+                        f"GCP rejected the user-label group-by for [{metric.google_metric}]; "
+                        f"its series are treated as unlabelled resources: {result}"
+                    )
+                continue
             context.log(project_id, f"Failed to fetch [{metric.google_metric}] for grouping '{grouping}': {result}")
             # A failed grouping is not evidence of missing labels. Keep successful results,
             # but do not backfill from an incomplete resource set under the default context.
@@ -556,7 +589,7 @@ async def fetch_metric(
             context.log(project_id, f"Failed to backfill [{metric.google_metric}]: {error}")
         else:
             lines.extend(backfilled_lines)
-            if not seen_resource_keys and backfilled_lines:
+            if not seen_resource_keys and backfilled_lines and metric_filter not in _FILTERS_WITHOUT_USER_LABELS:
                 _warn_once_about_unmatched_grouping(context, project_id, effective_groupings)
 
     return lines

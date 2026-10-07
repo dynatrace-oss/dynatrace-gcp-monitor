@@ -39,6 +39,7 @@ def _defaults(monkeypatch):
     monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", "")
     monkeypatch.setattr(metric_ingest, "INCLUDE_RESOURCES_WITHOUT_GROUPING_LABELS", False)
     monkeypatch.setattr(metric_ingest, "_REPORTED_UNMATCHED_GROUPINGS", set())
+    monkeypatch.setattr(metric_ingest, "_FILTERS_WITHOUT_USER_LABELS", set())
 
 
 def _time_series(database_id, user_labels=None):
@@ -418,6 +419,73 @@ async def test_failed_grouping_keeps_successful_results_but_prevents_backfill(mo
     assert len(lines) == 1
     assert _security_contexts(lines) == ["team-owner"]
     assert not any(d.value == failed_grouping for d in lines[0].dimension_values)
+    assert "Failed to fetch" in capsys.readouterr().out
+
+
+# GCP's response when the metric's resource type has no user labels.
+NO_METADATA_ERROR = {"error": {
+    "code": 400,
+    "message": "The supplied filter does not specify a valid combination of metric and monitored "
+               "resource descriptors. The query will not return any time series.",
+    "status": "INVALID_ARGUMENT",
+}}
+
+
+@pytest.mark.asyncio
+async def test_metric_without_user_label_metadata_is_backfilled_under_the_default_context(monkeypatch, capsys):
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", SECURITY_CONTEXT_LABEL)
+    project_level = {"timeSeries": [_time_series("project-level")]}
+    first = _RecordingGcpSession([NO_METADATA_ERROR, project_level])
+    second = _RecordingGcpSession([project_level])
+
+    first_lines = await _fetch(first, [NO_GROUPING_CATEGORY])
+    second_lines = await _fetch(second, [NO_GROUPING_CATEGORY])
+
+    assert _security_contexts(first_lines) == _security_contexts(second_lines) == [DEFAULT_SECURITY_CONTEXT]
+    # The rejection is remembered, so later cycles go straight to the ungrouped query.
+    assert [_group_by_labels(params) for params in second.calls] == [[]]
+    out = capsys.readouterr().out
+    assert out.count("rejected the user-label group-by") == 1
+    assert "Failed to fetch" not in out
+    assert "No time series matched" not in out
+
+
+@pytest.mark.asyncio
+async def test_metric_without_user_label_metadata_is_skipped_without_backfill(capsys):
+    # Like any unlabelled resource, it is only ingested when the backfill is enabled.
+    second = _RecordingGcpSession([])
+
+    assert await _fetch(_RecordingGcpSession([NO_METADATA_ERROR]), [GROUPING]) == []
+    assert await _fetch(second, [GROUPING]) == []
+    assert second.calls == []
+    # The only trace when the backfill is off, in case the filter itself is wrong.
+    assert capsys.readouterr().out.count("rejected the user-label group-by") == 1
+
+
+@pytest.mark.asyncio
+async def test_metric_without_user_label_metadata_does_not_hide_other_failures(monkeypatch, capsys):
+    # A real failure in another grouping still prevents the backfill.
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", SECURITY_CONTEXT_LABEL)
+    session = _RecordingGcpSession([NO_METADATA_ERROR, {"error": {"code": 503, "message": "unavailable"}}])
+
+    lines = await _fetch(session, ["team", "squad"])
+
+    assert len(session.calls) == 2
+    assert lines == []
+    assert "Failed to fetch" in capsys.readouterr().out
+
+
+@pytest.mark.asyncio
+async def test_other_invalid_argument_errors_still_prevent_backfill(monkeypatch, capsys):
+    monkeypatch.setattr(metric_ingest, "DT_SECURITY_CONTEXT_USER_LABEL", SECURITY_CONTEXT_LABEL)
+    session = _RecordingGcpSession([
+        {"error": {"code": 400, "message": "Field aggregation.alignmentPeriod is invalid", "status": "INVALID_ARGUMENT"}},
+    ])
+
+    lines = await _fetch(session, [NO_GROUPING_CATEGORY])
+
+    assert len(session.calls) == 1
+    assert lines == []
     assert "Failed to fetch" in capsys.readouterr().out
 
 
