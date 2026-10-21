@@ -16,7 +16,7 @@ set -eu
 
 #build container
 ./build/version.sh
-docker build -t dynatrace/dynatrace-gcp-monitor:v1-latest --build-arg RELEASE_TAG_ARG="${TAG}" .
+docker build --pull -t dynatrace/dynatrace-gcp-monitor:v1-latest --build-arg RELEASE_TAG_ARG="${TAG}" .
 
 #tag container
 if [[ "${PUSH:-}" == "true" ]]; then
