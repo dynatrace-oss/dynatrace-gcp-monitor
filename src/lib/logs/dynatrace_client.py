@@ -12,7 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import asyncio
 import gzip
+import queue
 from typing import Union
 from urllib.parse import urlparse
 
@@ -93,6 +95,10 @@ class DynatraceClient:
                 context.self_monitoring.dynatrace_connectivity.append(DynatraceConnectivity.Other)
             raise e
         finally:
-            await context.sfm_queue.put(batch.self_monitoring)
+            try:
+                context.sfm_queue.put_nowait(batch.self_monitoring)
+            except Exception as exception:
+                if isinstance(exception, (queue.Full, asyncio.QueueFull)):
+                    context.t_error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
          

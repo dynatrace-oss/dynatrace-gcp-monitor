@@ -60,7 +60,7 @@ def put_sfm_into_queue(context: LogsContext):
     try:
         context.sfm_queue.put_nowait(context.self_monitoring)
     except Exception as exception:
-        if isinstance(exception, queue.Full):
+        if isinstance(exception, (queue.Full, asyncio.QueueFull)):
             context.error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
 
