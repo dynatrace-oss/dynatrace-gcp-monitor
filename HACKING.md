@@ -17,6 +17,13 @@ pip install -r tests\requirements.txt
 pip install --only-binary :all: cryptography==3.4.7 #cryptography library in Windows env requires this special handling or rustup installed
 ```
 
+### Changing runtime dependencies
+`src/requirements.txt` is a hash-locked file generated from `src/requirements.in`, and the Docker build rejects anything not in it. Edit `src/requirements.in`, then regenerate the lock with Python 3.12 from the `src` directory:
+```shell script
+pip install pip-tools
+pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --output-file=requirements.txt --strip-extras requirements.in
+```
+
 ## Running single local run
 Run `local_test.py` with env_vars set according to the table below. To run the metrics ingest worker function run `local_test.py` script file. 
 This runs a single run and then returns. Some exceptions may appear in Win env, and self-monitoring metrics query can fail. 
