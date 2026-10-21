@@ -14,6 +14,7 @@
 
 import asyncio
 import json
+import os
 import time
 from typing import Any, Awaitable, Dict, List, Callable
 
@@ -26,6 +27,7 @@ from lib.logs.log_forwarder_variables import (
     PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES,
 )
 
+_PUBSUB_BASE_URL = os.environ.get("PUBSUB_BASE_URL", "https://pubsub.googleapis.com")
 SUBSCRIPTION_PATH = f"projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_SUBSCRIPTION_ID}"
 
 
@@ -63,8 +65,8 @@ class GCPClient:
         self.subscription_path = (
             f"projects/{LOGS_SUBSCRIPTION_PROJECT}/subscriptions/{LOGS_SUBSCRIPTION_ID}"
         )
-        self.pull_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:pull"
-        self.acknowledge_url = f"https://pubsub.googleapis.com/v1/{SUBSCRIPTION_PATH}:acknowledge"
+        self.pull_url = f"{_PUBSUB_BASE_URL}/v1/{SUBSCRIPTION_PATH}:pull"
+        self.acknowledge_url = f"{_PUBSUB_BASE_URL}/v1/{SUBSCRIPTION_PATH}:acknowledge"
         self._update_headers()
         json_body = {"maxMessages": PROCESSING_WORKER_PULL_REQUEST_MAX_MESSAGES}
         json_data = json.dumps(json_body)
@@ -172,6 +174,6 @@ class GCPClient:
             if resp_status > 299:
                 logging_context.log(
                     f"Acknowledge error: {resp_status}, "
-                    f'reason: {response.reason}, url: {self.acknowledge_url}, body: "{await response.json()}"'
+                    f'reason: {response.reason}, url: {self.acknowledge_url}, body: "{await response.text()}"'
                 )
                 response.raise_for_status()
