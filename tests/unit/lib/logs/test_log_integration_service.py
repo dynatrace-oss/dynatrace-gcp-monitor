@@ -76,9 +76,10 @@ def clock():
 async def test_perform_pull_all_connection_failures_recreate_session_and_raise(init_session, error):
     svc = _make_service(_make_gcp_client(pull_side_effect=error))
     old_session = svc.gcp_session
+    ctx = _make_logging_context()
 
     with pytest.raises(type(error)):
-        await svc.perform_pull(_make_logging_context())
+        await svc.perform_pull(ctx)
 
     init_session.assert_called_once()
     assert svc.gcp_session is not old_session
@@ -108,9 +109,10 @@ async def test_perform_pull_http_error_neither_recreates_nor_raises(init_session
 async def test_perform_pull_logs_failure_type_even_when_message_is_empty(init_session):
     logged = []
     svc = _make_service(_make_gcp_client(pull_side_effect=asyncio.TimeoutError()))
+    ctx = _make_logging_context(logged)
 
     with pytest.raises(asyncio.TimeoutError):
-        await svc.perform_pull(_make_logging_context(logged))
+        await svc.perform_pull(ctx)
 
     assert any("Pub/Sub pull failed" in m and "TimeoutError" in m for m in logged), logged
 

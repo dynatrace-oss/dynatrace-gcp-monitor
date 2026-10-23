@@ -142,6 +142,23 @@ class LogIntegrationService:
             token_info = await create_token_with_expiry(context=logging_context, session=self.gcp_session, validate=True)
             self.gcp_client.update_token(token_info)
 
+    async def _handle_pull_failures(self, responses: list, logging_context: LoggingContext):
+        failures = [r for r in responses if isinstance(r, Exception)]
+        if not failures:
+            return
+        logging_context.log(
+            f"Pub/Sub pull failed ({len(failures)}/{len(responses)}): "
+            f"{type(failures[0]).__name__}: {failures[0]}"
+        )
+        connection_failures = [f for f in failures if _is_connection_failure(f)]
+        if not connection_failures:
+            return
+        await self._recreate_gcp_session(logging_context)
+        if len(connection_failures) == len(responses):
+            # Nothing was pulled: hand over to the worker's backoff instead of spinning,
+            # since fast failures (DNS, refused) would otherwise loop and flood the logs.
+            raise connection_failures[0]
+
     async def perform_pull(
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
@@ -164,20 +181,7 @@ class LogIntegrationService:
             for _ in range(NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES)
         ]
         responses = await asyncio.gather(*tasks_to_pull_messages, return_exceptions=True)
-
-        failures = [r for r in responses if isinstance(r, Exception)]
-        if failures:
-            logging_context.log(
-                f"Pub/Sub pull failed ({len(failures)}/{len(responses)}): "
-                f"{type(failures[0]).__name__}: {failures[0]}"
-            )
-        connection_failures = [f for f in failures if _is_connection_failure(f)]
-        if connection_failures:
-            await self._recreate_gcp_session(logging_context)
-            if len(connection_failures) == len(responses):
-                # Nothing was pulled: hand over to the worker's backoff instead of spinning,
-                # since fast failures (DNS, refused) would otherwise loop and flood the logs.
-                raise connection_failures[0]
+        await self._handle_pull_failures(responses, logging_context)
 
         context.self_monitoring.calculate_pulling_time()
         processed_messages = []
