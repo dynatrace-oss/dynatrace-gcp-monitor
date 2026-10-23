@@ -2,7 +2,7 @@ import time
 import asyncio
 from typing import List, Optional, Tuple
 
-from aiohttp import ClientSession, ClientError, ClientResponseError
+from aiohttp import ClientSession, ClientConnectionError
 from lib.clientsession_provider import init_gcp_client_session, init_dt_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, LogsContext, LogsProcessingContext, create_logs_context
@@ -26,6 +26,12 @@ _service_logging_context = LoggingContext("LogIntegrationService")
 _SESSION_RECREATE_QUIET_PERIOD_SECONDS = 60
 
 
+def _is_connection_failure(error: BaseException) -> bool:
+    # A bare TimeoutError is aiohttp's total timeout, which also covers waiting for a pooled
+    # connection: a starved pool is the case only a new session recovers from.
+    return isinstance(error, (ClientConnectionError, asyncio.TimeoutError))
+
+
 class LogIntegrationService:
     sfm_queue: asyncio.Queue
     log_push_semaphore: asyncio.Semaphore
@@ -44,7 +50,7 @@ class LogIntegrationService:
         self.gcp_session = None
         self.dt_session = None
         self._closed = False
-        self._last_gcp_session_recreated_at: float = 0.0
+        self._last_gcp_session_recreated_at: float = float("-inf")
 
         try:
             self.gcp_session = init_gcp_client_session()
@@ -103,6 +109,8 @@ class LogIntegrationService:
         self.gcp_session = init_gcp_client_session()
         self._last_gcp_session_recreated_at = now
         logging_context.log("GCP session recreated due to connection error")
+        # Aborts other workers' in-flight requests; their messages are redelivered by Pub/Sub.
+        # Accepted at-least-once cost, bounded by the quiet period.
         if old_session is not None and not old_session.closed:
             await old_session.close()
 
@@ -157,13 +165,19 @@ class LogIntegrationService:
         ]
         responses = await asyncio.gather(*tasks_to_pull_messages, return_exceptions=True)
 
-        connection_errors = [r for r in responses if isinstance(r, ClientError) and not isinstance(r, ClientResponseError)]
-        if connection_errors:
+        failures = [r for r in responses if isinstance(r, Exception)]
+        if failures:
             logging_context.log(
-                f"Connection error during Pub/Sub pull ({len(connection_errors)}/{len(responses)}): "
-                f"{type(connection_errors[0]).__name__}: {connection_errors[0]}, recreating GCP session"
+                f"Pub/Sub pull failed ({len(failures)}/{len(responses)}): "
+                f"{type(failures[0]).__name__}: {failures[0]}"
             )
+        connection_failures = [f for f in failures if _is_connection_failure(f)]
+        if connection_failures:
             await self._recreate_gcp_session(logging_context)
+            if len(connection_failures) == len(responses):
+                # Nothing was pulled: hand over to the worker's backoff instead of spinning,
+                # since fast failures (DNS, refused) would otherwise loop and flood the logs.
+                raise connection_failures[0]
 
         context.self_monitoring.calculate_pulling_time()
         processed_messages = []
@@ -230,7 +244,7 @@ class LogIntegrationService:
         for result in results:
             if isinstance(result, Exception):
                 logging_context.log(f"Error acknowledging messages: {type(result).__name__}: {result}")
-                if isinstance(result, ClientError) and not isinstance(result, ClientResponseError):
+                if _is_connection_failure(result):
                     had_connection_error = True
         if had_connection_error:
             await self._recreate_gcp_session(logging_context)

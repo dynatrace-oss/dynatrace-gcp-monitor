@@ -40,11 +40,7 @@ def _make_session(status: int = 200) -> MagicMock:
 
 @pytest.mark.asyncio
 async def test_send_logs_does_not_block_on_full_sfm_queue():
-    """Regression: send_logs must not hang when sfm_queue is at capacity.
-
-    Before the fix, the finally block used `await sfm_queue.put()` which blocks
-    indefinitely on a full queue, freezing all worker coroutines.
-    """
+    """send_logs must drop the SFM item rather than wait for the SFM loop to drain a full queue."""
     sfm_queue = _make_full_queue()
     context = create_logs_context(sfm_queue)
     batch = _make_batch("ACK_ID_1")

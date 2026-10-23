@@ -14,7 +14,6 @@
 
 import asyncio
 import gzip
-import queue
 from typing import Union
 from urllib.parse import urlparse
 
@@ -97,8 +96,7 @@ class DynatraceClient:
         finally:
             try:
                 context.sfm_queue.put_nowait(batch.self_monitoring)
-            except Exception as exception:
-                if isinstance(exception, (queue.Full, asyncio.QueueFull)):
-                    context.t_error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
+            except asyncio.QueueFull:
+                context.t_error("Failed to add self-monitoring metric to queue due to full sfm queue, rejecting the sfm")
 
          
