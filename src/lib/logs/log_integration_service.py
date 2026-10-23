@@ -2,7 +2,7 @@ import time
 import asyncio
 from typing import List, Optional, Tuple
 
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientConnectionError
 from lib.clientsession_provider import init_gcp_client_session, init_dt_client_session
 from lib.configuration import config
 from lib.context import LoggingContext, LogsContext, LogsProcessingContext, create_logs_context
@@ -23,6 +23,13 @@ from lib.logs.log_forwarder_variables import (
 )
 
 _service_logging_context = LoggingContext("LogIntegrationService")
+_SESSION_RECREATE_QUIET_PERIOD_SECONDS = 60
+
+
+def _is_connection_failure(error: BaseException) -> bool:
+    # A bare TimeoutError is aiohttp's total timeout, which also covers waiting for a pooled
+    # connection: a starved pool is the case only a new session recovers from.
+    return isinstance(error, (ClientConnectionError, asyncio.TimeoutError))
 
 
 class LogIntegrationService:
@@ -43,6 +50,7 @@ class LogIntegrationService:
         self.gcp_session = None
         self.dt_session = None
         self._closed = False
+        self._last_gcp_session_recreated_at: float = float("-inf")
 
         try:
             self.gcp_session = init_gcp_client_session()
@@ -92,6 +100,22 @@ class LogIntegrationService:
             logging_context.log("Dynatrace session was closed or missing, recreating")
             self.dt_session = init_dt_client_session()
 
+    async def _recreate_gcp_session(self, logging_context: LoggingContext):
+        if self._closed:
+            return
+        now = time.monotonic()
+        if now - self._last_gcp_session_recreated_at < _SESSION_RECREATE_QUIET_PERIOD_SECONDS:
+            logging_context.log("GCP session recreation skipped (quiet period active)")
+            return
+        old_session = self.gcp_session
+        self.gcp_session = init_gcp_client_session()
+        self._last_gcp_session_recreated_at = now
+        logging_context.log("GCP session recreated due to connection error")
+        # Aborts other workers' in-flight requests; their messages are redelivered by Pub/Sub.
+        # Accepted at-least-once cost, bounded by the quiet period.
+        if old_session is not None and not old_session.closed:
+            await old_session.close()
+
     async def close(self):
         self._closed = True
         sessions_to_close = []
@@ -120,6 +144,24 @@ class LogIntegrationService:
             token_info = await create_token_with_expiry(context=logging_context, session=self.gcp_session, validate=True)
             self.gcp_client.update_token(token_info)
 
+    async def _handle_pull_failures(self, responses: list, logging_context: LoggingContext):
+        failures = [r for r in responses if isinstance(r, Exception)]
+        if not failures:
+            return
+        logging_context.log(
+            f"Pub/Sub pull failed ({len(failures)}/{len(responses)}): "
+            f"{type(failures[0]).__name__}: {failures[0]}"
+        )
+        connection_failures = [f for f in failures if _is_connection_failure(f)]
+        if not connection_failures:
+            return
+        await self._recreate_gcp_session(logging_context)
+        if len(failures) == len(responses):
+            # Nothing was pulled and the network is involved: hand over to the worker's backoff
+            # instead of spinning, since fast failures (DNS, refused) would flood the logs.
+            # HTTP-only failures (e.g. 401) skip this so token refresh stays immediate.
+            raise connection_failures[0]
+
     async def perform_pull(
         self, logging_context: LoggingContext
     ) -> Tuple[List[LogBatch], List[str]]:
@@ -142,6 +184,7 @@ class LogIntegrationService:
             for _ in range(NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES)
         ]
         responses = await asyncio.gather(*tasks_to_pull_messages, return_exceptions=True)
+        await self._handle_pull_failures(responses, logging_context)
 
         context.self_monitoring.calculate_pulling_time()
         processed_messages = []
@@ -204,6 +247,11 @@ class LogIntegrationService:
             for chunk in chunks(ack_ids, chunk_size)
         ]
         results = await asyncio.gather(*tasks_to_send_ack_ids, return_exceptions=True)
+        had_connection_error = False
         for result in results:
             if isinstance(result, Exception):
-                logging_context.log(f"Error acknowledging messages: {result}")
+                logging_context.log(f"Error acknowledging messages: {type(result).__name__}: {result}")
+                if _is_connection_failure(result):
+                    had_connection_error = True
+        if had_connection_error:
+            await self._recreate_gcp_session(logging_context)

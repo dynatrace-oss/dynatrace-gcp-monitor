@@ -172,6 +172,6 @@ class GCPClient:
             if resp_status > 299:
                 logging_context.log(
                     f"Acknowledge error: {resp_status}, "
-                    f'reason: {response.reason}, url: {self.acknowledge_url}, body: "{await response.json()}"'
+                    f'reason: {response.reason}, url: {self.acknowledge_url}, body: "{await response.text()}"'
                 )
                 response.raise_for_status()
