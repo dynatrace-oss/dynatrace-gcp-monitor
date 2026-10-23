@@ -95,6 +95,18 @@ async def test_perform_pull_partial_connection_failure_recreates_without_raising
 
 
 @pytest.mark.asyncio
+async def test_perform_pull_all_failed_mixed_with_http_errors_backs_off(init_session):
+    pulls = [ServerDisconnectedError()] + [_http_error(503)] * (NUMBER_OF_CONCURRENT_MESSAGE_PULL_COROUTINES - 1)
+    svc = _make_service(_make_gcp_client(pull_side_effect=pulls))
+    ctx = _make_logging_context()
+
+    with pytest.raises(ServerDisconnectedError):
+        await svc.perform_pull(ctx)
+
+    init_session.assert_called_once()
+
+
+@pytest.mark.asyncio
 async def test_perform_pull_http_error_neither_recreates_nor_raises(init_session):
     """401 must not back off: the next loop refreshes the token immediately."""
     svc = _make_service(_make_gcp_client(pull_side_effect=_http_error(401)))
@@ -151,6 +163,17 @@ async def test_recreate_gcp_session_first_time_ignores_host_uptime(init_session,
     await _make_service()._recreate_gcp_session(_make_logging_context())
 
     init_session.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_recreate_gcp_session_after_close_does_not_leak_a_session(init_session):
+    svc = _make_service()
+    await svc.close()
+
+    await svc._recreate_gcp_session(_make_logging_context())
+
+    init_session.assert_not_called()
+    assert svc.gcp_session is None
 
 
 @pytest.mark.asyncio

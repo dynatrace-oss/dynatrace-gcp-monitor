@@ -101,6 +101,8 @@ class LogIntegrationService:
             self.dt_session = init_dt_client_session()
 
     async def _recreate_gcp_session(self, logging_context: LoggingContext):
+        if self._closed:
+            return
         now = time.monotonic()
         if now - self._last_gcp_session_recreated_at < _SESSION_RECREATE_QUIET_PERIOD_SECONDS:
             logging_context.log("GCP session recreation skipped (quiet period active)")
@@ -154,9 +156,10 @@ class LogIntegrationService:
         if not connection_failures:
             return
         await self._recreate_gcp_session(logging_context)
-        if len(connection_failures) == len(responses):
-            # Nothing was pulled: hand over to the worker's backoff instead of spinning,
-            # since fast failures (DNS, refused) would otherwise loop and flood the logs.
+        if len(failures) == len(responses):
+            # Nothing was pulled and the network is involved: hand over to the worker's backoff
+            # instead of spinning, since fast failures (DNS, refused) would flood the logs.
+            # HTTP-only failures (e.g. 401) skip this so token refresh stays immediate.
             raise connection_failures[0]
 
     async def perform_pull(
