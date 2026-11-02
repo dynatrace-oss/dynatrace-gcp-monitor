@@ -9,15 +9,14 @@ RUN pip install --no-cache-dir --only-binary=:all: --require-hashes --prefix=/in
 
 
 FROM python:3.12-slim
-ARG PIP_VERSION
 
 # aiohttp verifies TLS against the system CA store, so take trust store fixes (such as CA distrusts)
-# at build time instead of waiting for the base image to be rebuilt. Upgrading pip in place removes
-# the base image's pip metadata, which scanners would otherwise report.
+# at build time instead of waiting for the base image to be rebuilt. The runtime never runs pip, and
+# its vendored libraries (urllib3, msgpack, setuptools) would otherwise carry their CVEs into the image.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --only-upgrade ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir --only-binary=:all: "pip==${PIP_VERSION}"
+    && pip uninstall -y pip
 
 ARG RELEASE_TAG_ARG
 ENV RELEASE_TAG=$RELEASE_TAG_ARG
