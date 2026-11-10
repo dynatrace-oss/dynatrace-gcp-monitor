@@ -1,35 +1,33 @@
 # Dynatrace integration for Google Cloud Platform monitoring
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/dynatrace-oss/dynatrace-ai-agent-instrumentation-examples/badge)](https://scorecard.dev/viewer/?uri=github.com/dynatrace-oss/dynatrace-gcp-monitor)
 > [!IMPORTANT]
 > This integration is in maintenance mode. A new GCP poller is under active development.
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/dynatrace-oss/dynatrace-gcp-monitor/badge)](https://scorecard.dev/viewer/?uri=github.com/dynatrace-oss/dynatrace-gcp-monitor)
 
-This is the home of `dynatrace-gcp-monitor` which provides the mechanism to pull all [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) and  [Cloud logs](https://cloud.google.com/logging/docs)  into Dynatrace. 
+This is the home of `dynatrace-gcp-monitor`, which pulls [Google Cloud metrics](https://cloud.google.com/monitoring/api/metrics_gcp) and [Cloud Logging logs](https://cloud.google.com/logging/docs) into Dynatrace.
 
-This integration consists of K8s container and few auxiliary components. This setup will be running in your GCP project and will be pushing data to Dynatrace. We provide bash script that will deploy all necessary elements.
+The integration consists of a Kubernetes container and a few auxiliary components. It runs in your GCP project and pushes data to Dynatrace. A deployment script sets up all required elements.
 
 **To deploy this integration**, see the docs on how to [run it on Google Kubernetes Engine](https://www.dynatrace.com/support/help/shortlink/deploy-k8).
 
 ## (legacy info) Integration renamed from GCP Function to GCP Monitor, starting from version 1.1.0
 The whole project was renamed, so all internal references and files are now named `dynatrace-gcp-monitor`. This includes created resources names and docker images.
-Previous versions will still be available (but not updated), under the name `dynatrace-gcp-function`.
+Previous versions are still available, but no longer updated, under the name `dynatrace-gcp-function`.
 
 ## (legacy info) Cloud Function deployment is deprecated
-Up until version 1.1.8, there was an option to deploy GCP integration as a Cloud Function (instead of a K8s container). It is now deprecated and has no support. If you are using this kind of deployment, please refer to this [migration guide](https://www.dynatrace.com/support/help/shortlink/migrate-gcp-function-1-to-k8s-1).
+Up until version 1.1.8, there was an option to deploy GCP integration as a Cloud Function (instead of a K8s container). It is deprecated and no longer supported. If you are using this kind of deployment, please refer to this [migration guide](https://www.dynatrace.com/support/help/shortlink/migrate-gcp-function-1-to-k8s-1).
 
 ## (legacy info) Migrating to 1.0.x from previous 0.1.x installations
 If you already have a previous version of `dynatrace-gcp-monitor` deployed, please refer to this [migration guide](./MIGRATION-V1.md) before installing the latest version.
 
 ## Pricing
-- Ingested metrics will consume DDUs. For more details [GCP service monitoring consumption](https://www.dynatrace.com/support/help/shortlink/metric-cost-calculation#which-built-in-metrics-consume-ddus)
-- Ingested logs will consume DDUs. For more details [Log monitoring consumption](https://www.dynatrace.com/support/help/shortlink/calculate-log-consumption)
+- Ingested metrics consume DDUs. For details, see [GCP service monitoring consumption](https://www.dynatrace.com/support/help/shortlink/metric-cost-calculation#which-built-in-metrics-consume-ddus)
+- Ingested logs consume DDUs. For details, see [Log monitoring consumption](https://www.dynatrace.com/support/help/shortlink/calculate-log-consumption)
 
 ## Support
-Before you create a ticket check [troubleshooting guides](https://www.dynatrace.com/support/help/shortlink/deploy-k8#troubleshoot) specific to your deployment.  
-If you didn't find a solution please [contact Dynatrace support](https://www.dynatrace.com/support/contact-support/). 
-
+Before you create a ticket, check the [troubleshooting guides](https://www.dynatrace.com/support/help/shortlink/deploy-k8#troubleshoot) specific to your deployment.  
+If you don't find a solution, [contact Dynatrace support](https://www.dynatrace.com/support/contact-support/).
 
 ## Additional resources
 - [Architecture overview of Kubernetes deployment](./docs/k8s.md)
@@ -46,4 +44,4 @@ See [CONTRIBUTING](CONTRIBUTING.md) for details on submitting changes.
 
 ## License
 
-`dynatrace-gcp-monitor` is under Apache 2.0 license. See [LICENSE](LICENSE.md) for details.
+`dynatrace-gcp-monitor` is licensed under Apache 2.0. See [LICENSE](LICENSE.md) for details.

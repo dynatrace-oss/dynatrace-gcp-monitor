@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # Keeps the digest-pinned base image in the Dockerfile current with upstream security rebuilds.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(deps)
+    ignore:
+      # Stay on the Python 3.12 line; moving to a newer Python is a deliberate change, not a digest refresh.
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+  # Workflow actions are pinned by commit SHA, so they need a bot to move them forward.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(deps)
