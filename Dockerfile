@@ -1,8 +1,4 @@
-ARG PIP_VERSION=26.2.2
-
 FROM python:3.12-slim AS build
-ARG PIP_VERSION
-RUN pip install --no-cache-dir --only-binary=:all: "pip==${PIP_VERSION}"
 COPY src/requirements.txt .
 # Hash-locked wheels only: no setup scripts run and no transitive dependency can drift between releases.
 RUN pip install --no-cache-dir --only-binary=:all: --require-hashes --prefix=/install -r ./requirements.txt
@@ -11,10 +7,12 @@ RUN pip install --no-cache-dir --only-binary=:all: --require-hashes --prefix=/in
 FROM python:3.12-slim
 
 # aiohttp verifies TLS against the system CA store, so take trust store fixes (such as CA distrusts)
-# at build time instead of waiting for the base image to be rebuilt. The runtime never runs pip, and
-# its vendored libraries (urllib3, msgpack, setuptools) would otherwise carry their CVEs into the image.
+# at build time instead of waiting for the base image to be rebuilt. zlib1g gets the same treatment:
+# Debian ships its security fixes in trixie-security well before the python image is rebuilt.
+# The runtime never runs pip, and its vendored libraries (urllib3, msgpack, setuptools) would
+# otherwise carry their CVEs into the image.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --only-upgrade ca-certificates \
+    && apt-get install -y --no-install-recommends --only-upgrade ca-certificates zlib1g \
     && rm -rf /var/lib/apt/lists/* \
     && pip uninstall -y pip
 
