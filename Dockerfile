@@ -1,8 +1,4 @@
-ARG PIP_VERSION=26.2.2
-
 FROM python:3.12-slim AS build
-ARG PIP_VERSION
-RUN pip install --no-cache-dir --only-binary=:all: "pip==${PIP_VERSION}"
 COPY src/requirements.txt .
 # Hash-locked wheels only: no setup scripts run and no transitive dependency can drift between releases.
 RUN pip install --no-cache-dir --only-binary=:all: --require-hashes --prefix=/install -r ./requirements.txt
