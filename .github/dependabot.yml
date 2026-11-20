@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # Workflow actions are pinned by commit SHA, so they need a bot to move them forward.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(deps)
